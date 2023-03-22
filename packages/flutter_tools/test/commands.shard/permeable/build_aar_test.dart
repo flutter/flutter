@@ -27,7 +27,11 @@ void main() {
   Cache.disableLocking();
 
   Future<BuildAarCommand> runCommandIn(String target, { List<String>? arguments }) async {
-    final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
+    final BuildAarCommand command = BuildAarCommand(
+      androidSdk: FakeAndroidSdk(),
+      fileSystem: globals.fs,
+      verboseHelp: false,
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'aar',
@@ -183,7 +187,6 @@ void main() {
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
-      expect(buildInfo.nullSafetyMode, NullSafetyMode.sound);
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => fakeAndroidBuilder,
     });
@@ -217,6 +220,7 @@ void main() {
         await expectLater(() async {
           await runBuildAarCommand(
             projectPath,
+            null,
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
@@ -224,9 +228,33 @@ void main() {
         ));
       },
       overrides: <Type, Generator>{
-        AndroidSdk: () => null,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => FakeProcessManager.any(),
+      });
+    });
+
+    group('throws ToolExit', () {
+      testUsingContext('main.dart not found', () async {
+        await expectLater(() async {
+          await runBuildAarCommand(
+            'missing_project',
+            mockAndroidSdk,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'main.dart does not exist',
+        ));
+      });
+
+      testUsingContext('flutter project not valid', () async {
+        await expectLater(() async {
+          await runCommandIn(
+            tempDir.path,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'is not a valid flutter project',
+        ));
       });
     });
 
@@ -254,7 +282,7 @@ void main() {
         exitCode: 1,
       ));
 
-      await expectLater(() => runBuildAarCommand(projectPath, arguments: <String>[
+      await expectLater(() => runBuildAarCommand(projectPath, mockAndroidSdk, arguments: <String>[
         '--no-debug',
         '--no-profile',
         '--extra-front-end-options=foo',
@@ -263,7 +291,6 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
@@ -273,10 +300,14 @@ void main() {
 }
 
 Future<BuildAarCommand> runBuildAarCommand(
-  String target, {
+  String target, AndroidSdk? androidSdk, {
   List<String>? arguments,
 }) async {
-  final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
+  final BuildAarCommand command = BuildAarCommand(
+    androidSdk: androidSdk,
+    fileSystem: globals.fs,
+    verboseHelp: false,
+  );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'aar',

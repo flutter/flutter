@@ -184,7 +184,7 @@ class FlutterDriverService extends DriverService {
         userIdentifier: userIdentifier,
         prebuiltApplication: prebuiltApplication,
       );
-      if (result != null && result.started) {
+      if (result.started) {
         break;
       }
       // On attempts past 1, assume the application is built correctly and re-use it.
@@ -196,7 +196,7 @@ class FlutterDriverService extends DriverService {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }
     return reuseApplication(
-      result.observatoryUri!,
+      result.vmServiceUri!,
       device,
       debuggingOptions,
       ipv6,
@@ -296,11 +296,12 @@ class FlutterDriverService extends DriverService {
       await sharedSkSlWriter(_device!, result, outputFile: writeSkslOnExit, logger: _logger);
     }
     // If the application package is available, stop and uninstall.
-    if (_applicationPackage != null) {
-      if (!await _device!.stopApp(_applicationPackage, userIdentifier: userIdentifier)) {
+    final ApplicationPackage? package = _applicationPackage;
+    if (package != null) {
+      if (!await _device!.stopApp(package, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to stop app');
       }
-      if (!await _device!.uninstallApp(_applicationPackage!, userIdentifier: userIdentifier)) {
+      if (!await _device!.uninstallApp(package, userIdentifier: userIdentifier)) {
         _logger.printError('Failed to uninstall app');
       }
     } else if (_device!.supportsFlutterExit) {

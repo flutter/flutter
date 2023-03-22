@@ -120,6 +120,11 @@ class SystemChannels {
   ///  * `SystemNavigator.pop`: Tells the operating system to close the
   ///    application, or the closest equivalent. See [SystemNavigator.pop].
   ///
+  ///  * `System.exitApplication`: Tells the engine to send a request back to
+  ///    the application to request an application exit (using
+  ///    `System.requestAppExit` below), and if it is not canceled, to terminate
+  ///    the application using the platform UI toolkit's termination API.
+  ///
   /// The following incoming methods are defined for this channel (registered
   /// using [MethodChannel.setMethodCallHandler]):
   ///
@@ -128,6 +133,9 @@ class SystemChannels {
   ///    through [SystemChrome.setEnabledSystemUIMode]. See
   ///    [SystemChrome.setSystemUIChangeCallback] to respond to this change in
   ///    application state.
+  ///
+  ///  * `System.requestAppExit`: The application has requested that it be
+  ///    terminated. See [ServicesBinding.exitApplication].
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
@@ -225,7 +233,7 @@ class SystemChannels {
   /// A [MethodChannel] for handling spell check for text input.
   ///
   /// This channel exposes the spell check framework for supported platforms.
-  /// Currently supported on Android only.
+  /// Currently supported on Android and iOS only.
   ///
   /// Spell check requests are initiated by `SpellCheck.initiateSpellCheck`.
   /// These requests may either be completed or canceled. If the request is
@@ -242,6 +250,12 @@ class SystemChannels {
   ///     and the [Locale] for the text to be spell checked with.
   static const MethodChannel spellCheck = OptionalMethodChannel(
       'flutter/spellcheck',
+  );
+
+  /// A JSON [MethodChannel] for handling undo events.
+  static const MethodChannel undoManager = OptionalMethodChannel(
+    'flutter/undomanager',
+    JSONMethodCodec(),
   );
 
   /// A JSON [BasicMessageChannel] for keyboard events.
@@ -465,4 +479,17 @@ class SystemChannels {
   ///
   ///  * [DefaultPlatformMenuDelegate], which uses this channel.
   static const MethodChannel menu = OptionalMethodChannel('flutter/menu');
+
+  /// A [MethodChannel] for configuring the browser's context menu on web.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `enableContextMenu`: enables the browser's context menu. When a Flutter
+  ///    app starts, the browser's context menu is already enabled.
+  ///  * `disableContextMenu`: disables the browser's context menu.
+  static const MethodChannel contextMenu = OptionalMethodChannel(
+    'flutter/contextmenu',
+    JSONMethodCodec(),
+  );
 }

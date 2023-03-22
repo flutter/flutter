@@ -85,9 +85,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode? value) {
-    if (widget.updater != null) {
-      widget.updater(widget.configuration.copyWith(stockMode: value));
-    }
+    widget.updater(widget.configuration.copyWith(stockMode: value));
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -347,8 +345,8 @@ class _CreateCompanySheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const <Widget>[
+    return const Column(
+      children: <Widget>[
         TextField(
           autofocus: true,
           decoration: InputDecoration(

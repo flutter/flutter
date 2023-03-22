@@ -46,7 +46,7 @@ Widget wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Material(child: child),
       ),
     ),
@@ -119,5 +119,17 @@ void main() {
 
     await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+  });
+
+  testWidgets('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
+    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
+    await tester.pumpWidget(wrapForChip(
+      child: const ChoiceChip(
+      label: Text('Test'),
+      selected: true,
+      iconTheme: iconTheme,
+    )));
+    final RawChip rawChip = tester.widget(find.byType(RawChip));
+    expect(rawChip.iconTheme, iconTheme);
   });
 }

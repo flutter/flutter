@@ -18,7 +18,7 @@ class XcodeProjectObjectVersionMigration extends ProjectMigrator {
   final File _xcodeProjectSchemeFile;
 
   @override
-  bool migrate() {
+  void migrate() {
     if (_xcodeProjectInfoFile.existsSync()) {
       processFileLines(_xcodeProjectInfoFile);
     } else {
@@ -29,8 +29,6 @@ class XcodeProjectObjectVersionMigration extends ProjectMigrator {
     } else {
       logger.printTrace('Runner scheme not found, skipping Xcode compatibility migration.');
     }
-
-    return true;
   }
 
   @override

@@ -1,0 +1,25 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() {
+  // Changes made in https://github.com/flutter/flutter/pull/86198
+  AppBar appBar = AppBar();
+  appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBar = AppBar(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBar = AppBar(error: '');
+  appBar.systemOverlayStyle;
+
+  TextTheme myTextTheme = TextTheme();
+  AppBar appBar = AppBar();
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  appBar = AppBar(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+
+  AppBar appBar = AppBar();
+  appBar = AppBar();
+  appBar = AppBar());
+  appBar.backwardsCompatibility; // Removing field reference not supported.
+}

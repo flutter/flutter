@@ -44,7 +44,16 @@ class PlatformViewsRegistry {
   ///
   /// Typically a platform view identifier is passed to a platform view widget
   /// which creates the platform view and manages its lifecycle.
-  int getNextPlatformViewId() => _nextPlatformViewId++;
+  int getNextPlatformViewId() {
+    // On the Android side, the interface exposed to users uses 32-bit integers.
+    // See https://github.com/flutter/engine/pull/39476 for more details.
+
+    // We can safely assume that a Flutter application will not require more
+    // than MAX_INT32 platform views during its lifetime.
+    const int MAX_INT32 = 0x7FFFFFFF;
+    assert(_nextPlatformViewId <= MAX_INT32);
+    return _nextPlatformViewId++;
+  }
 }
 
 /// Callback signature for when a platform view was created.
@@ -119,9 +128,6 @@ class PlatformViewsService {
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) {
-    assert(id != null);
-    assert(viewType != null);
-    assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
 
     final TextureAndroidViewController controller = TextureAndroidViewController._(
@@ -150,9 +156,6 @@ class PlatformViewsService {
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) {
-    assert(id != null);
-    assert(viewType != null);
-    assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
 
     final SurfaceAndroidViewController controller = SurfaceAndroidViewController._(
@@ -222,9 +225,6 @@ class PlatformViewsService {
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) async {
-    assert(id != null);
-    assert(viewType != null);
-    assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
@@ -258,8 +258,7 @@ class AndroidPointerProperties {
   const AndroidPointerProperties({
     required this.id,
     required this.toolType,
-  }) : assert(id != null),
-       assert(toolType != null);
+  });
 
   /// See Android's [MotionEvent.PointerProperties#id](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties.html#id).
   final int id;
@@ -308,15 +307,7 @@ class AndroidPointerCoords {
     required this.touchMinor,
     required this.x,
     required this.y,
-  }) : assert(orientation != null),
-       assert(pressure != null),
-       assert(size != null),
-       assert(toolMajor != null),
-       assert(toolMinor != null),
-       assert(touchMajor != null),
-       assert(touchMinor != null),
-       assert(x != null),
-       assert(y != null);
+  });
 
   /// The orientation of the touch area and tool area in radians clockwise from vertical.
   ///
@@ -404,21 +395,7 @@ class AndroidMotionEvent {
     required this.source,
     required this.flags,
     required this.motionEventId,
-  }) : assert(downTime != null),
-       assert(eventTime != null),
-       assert(action != null),
-       assert(pointerCount != null),
-       assert(pointerProperties != null),
-       assert(pointerCoords != null),
-       assert(metaState != null),
-       assert(buttonState != null),
-       assert(xPrecision != null),
-       assert(yPrecision != null),
-       assert(deviceId != null),
-       assert(edgeFlags != null),
-       assert(source != null),
-       assert(flags != null),
-       assert(pointerProperties.length == pointerCount),
+  }) : assert(pointerProperties.length == pointerCount),
        assert(pointerCoords.length == pointerCount);
 
   /// The time (in ms) when the user originally pressed down to start a stream of position events,
@@ -532,12 +509,7 @@ class _AndroidMotionEventConverter {
       <int, AndroidPointerProperties>{};
   final Set<int> usedAndroidPointerIds = <int>{};
 
-  PointTransformer get pointTransformer => _pointTransformer;
-  late PointTransformer _pointTransformer;
-  set pointTransformer(PointTransformer transformer) {
-    assert(transformer != null);
-    _pointTransformer = transformer;
-  }
+  late PointTransformer pointTransformer;
 
   int? downTimeMillis;
 
@@ -554,7 +526,7 @@ class _AndroidMotionEventConverter {
   }
 
   void updatePointerPositions(PointerEvent event) {
-    final Offset position = _pointTransformer(event.position);
+    final Offset position = pointTransformer(event.position);
     pointerPositions[event.pointer] = AndroidPointerCoords(
       orientation: event.orientation,
       pressure: event.pressure,
@@ -691,10 +663,7 @@ abstract class AndroidViewController extends PlatformViewController {
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
-  })  : assert(viewId != null),
-        assert(viewType != null),
-        assert(layoutDirection != null),
-        assert(creationParams == null || creationParamsCodec != null),
+  })  : assert(creationParams == null || creationParamsCodec != null),
         _viewType = viewType,
         _layoutDirection = layoutDirection,
         _creationParams = creationParams == null ? null : _CreationParams(creationParams, creationParamsCodec!);
@@ -755,7 +724,6 @@ abstract class AndroidViewController extends PlatformViewController {
       <PlatformViewCreatedCallback>[];
 
   static int _getAndroidDirection(TextDirection direction) {
-    assert(direction != null);
     switch (direction) {
       case TextDirection.ltr:
         return kAndroidLayoutDirectionLtr;
@@ -779,7 +747,7 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// If [_createRequiresSize] is true, `size` is non-nullable, and the call
   /// should instead be deferred until the size is available.
-  Future<void> _sendCreateMessage({required covariant Size? size});
+  Future<void> _sendCreateMessage({required covariant Size? size, Offset? position});
 
   /// Sends the message to resize the platform view to [size].
   Future<Size> _sendResizeMessage(Size size);
@@ -788,7 +756,7 @@ abstract class AndroidViewController extends PlatformViewController {
   bool get awaitingCreation => _state == _AndroidViewState.waitingForSize;
 
   @override
-  Future<void> create({Size? size}) async {
+  Future<void> create({Size? size, Offset? position}) async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
     assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
 
@@ -798,7 +766,7 @@ abstract class AndroidViewController extends PlatformViewController {
     }
 
     _state = _AndroidViewState.creating;
-    await _sendCreateMessage(size: size);
+    await _sendCreateMessage(size: size, position: position);
     _state = _AndroidViewState.created;
 
     for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
@@ -874,10 +842,9 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// This is required to convert a [PointerEvent] to an [AndroidMotionEvent].
   /// It is typically provided by using [RenderBox.globalToLocal].
-  PointTransformer get pointTransformer => _motionEventConverter._pointTransformer;
+  PointTransformer get pointTransformer => _motionEventConverter.pointTransformer;
   set pointTransformer(PointTransformer transformer) {
-    assert(transformer != null);
-    _motionEventConverter._pointTransformer = transformer;
+    _motionEventConverter.pointTransformer = transformer;
   }
 
   /// Whether the platform view has already been created.
@@ -886,14 +853,12 @@ abstract class AndroidViewController extends PlatformViewController {
   /// Adds a callback that will get invoke after the platform view has been
   /// created.
   void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    assert(listener != null);
     assert(_state != _AndroidViewState.disposed);
     _platformViewCreatedCallbacks.add(listener);
   }
 
   /// Removes a callback added with [addOnPlatformViewCreatedListener].
   void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
-    assert(listener != null);
     assert(_state != _AndroidViewState.disposed);
     _platformViewCreatedCallbacks.remove(listener);
   }
@@ -907,14 +872,13 @@ abstract class AndroidViewController extends PlatformViewController {
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
     assert(
       _state != _AndroidViewState.disposed,
-      'trying to set a layout direction for a disposed UIView. View id: $viewId',
+      'trying to set a layout direction for a disposed Android view. View id: $viewId',
     );
 
     if (layoutDirection == _layoutDirection) {
       return;
     }
 
-    assert(layoutDirection != null);
     _layoutDirection = layoutDirection;
 
     // If the view was not yet created we just update _layoutDirection and return, as the new
@@ -983,12 +947,13 @@ abstract class AndroidViewController extends PlatformViewController {
   /// disposed.
   @override
   Future<void> dispose() async {
-    if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created) {
+    final _AndroidViewState state = _state;
+    _state = _AndroidViewState.disposed;
+    _platformViewCreatedCallbacks.clear();
+    PlatformViewsService._instance._focusCallbacks.remove(viewId);
+    if (state == _AndroidViewState.creating || state == _AndroidViewState.created) {
       await _sendDisposeMessage();
     }
-    _platformViewCreatedCallbacks.clear();
-    _state = _AndroidViewState.disposed;
-    PlatformViewsService._instance._focusCallbacks.remove(viewId);
   }
 }
 
@@ -1011,7 +976,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => true;
 
   @override
-  Future<bool> _sendCreateMessage({required Size size}) async {
+  Future<bool> _sendCreateMessage({required Size size, Offset? position}) async {
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
@@ -1022,6 +987,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
       layoutDirection: _layoutDirection,
       creationParams: _creationParams,
       size: size,
+      position: position,
     );
     if (response is int) {
       (_internals as _TextureAndroidViewControllerInternals).textureId = response;
@@ -1076,13 +1042,14 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => false;
 
   @override
-  Future<void> _sendCreateMessage({required Size? size}) async {
+  Future<void> _sendCreateMessage({required Size? size, Offset? position}) async {
     await _AndroidViewControllerInternals.sendCreateMessage(
       viewId: viewId,
       viewType: _viewType,
       hybrid: true,
       layoutDirection: _layoutDirection,
       creationParams: _creationParams,
+      position: position,
     );
   }
 
@@ -1133,7 +1100,7 @@ class TextureAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => true;
 
   @override
-  Future<void> _sendCreateMessage({required Size size}) async {
+  Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     _internals.textureId = await _AndroidViewControllerInternals.sendCreateMessage(
@@ -1143,6 +1110,7 @@ class TextureAndroidViewController extends AndroidViewController {
       layoutDirection: _layoutDirection,
       creationParams: _creationParams,
       size: size,
+      position: position,
     ) as int;
   }
 
@@ -1190,7 +1158,8 @@ abstract class _AndroidViewControllerInternals {
       required bool hybrid,
       bool hybridFallback = false,
       _CreationParams? creationParams,
-      Size? size}) {
+      Size? size,
+      Offset? position}) {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': viewType,
@@ -1199,6 +1168,8 @@ abstract class _AndroidViewControllerInternals {
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
       if (hybridFallback == true) 'hybridFallback': hybridFallback,
+      if (position != null) 'left': position.dx,
+      if (position != null) 'top': position.dy,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;
@@ -1355,9 +1326,7 @@ class UiKitViewController {
   UiKitViewController._(
     this.id,
     TextDirection layoutDirection,
-  ) : assert(id != null),
-      assert(layoutDirection != null),
-      _layoutDirection = layoutDirection;
+  ) : _layoutDirection = layoutDirection;
 
 
   /// The unique identifier of the iOS view controlled by this controller.
@@ -1378,7 +1347,6 @@ class UiKitViewController {
       return;
     }
 
-    assert(layoutDirection != null);
     _layoutDirection = layoutDirection;
 
     // TODO(amirh): invoke the iOS platform views channel direction method once available.
@@ -1449,7 +1417,11 @@ abstract class PlatformViewController {
   /// [size] is the view's initial size in logical pixel.
   /// [size] can be omitted if the concrete implementation doesn't require an initial size
   /// to create the platform view.
-  Future<void> create({Size? size}) async {}
+  ///
+  /// [position] is the view's initial position in logical pixels.
+  /// [position] can be omitted if the concrete implementation doesn't require
+  /// an initial position.
+  Future<void> create({Size? size, Offset? position}) async {}
 
   /// Disposes the platform view.
   ///

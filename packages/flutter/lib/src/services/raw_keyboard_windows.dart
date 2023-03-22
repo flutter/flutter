@@ -35,10 +35,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     this.scanCode = 0,
     this.characterCodePoint = 0,
     this.modifiers = 0,
-  }) : assert(keyCode != null),
-       assert(scanCode != null),
-       assert(characterCodePoint != null),
-       assert(modifiers != null);
+  });
 
   /// The hardware key code corresponding to this key event.
   ///

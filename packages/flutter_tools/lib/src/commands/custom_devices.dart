@@ -88,16 +88,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required Logger logger,
     required FeatureFlags featureFlags,
     PrintFn usagePrintFn = print,
-  }) : assert(customDevicesConfig != null),
-       assert(operatingSystemUtils != null),
-       assert(terminal != null),
-       assert(platform != null),
-       assert(processManager != null),
-       assert(fileSystem != null),
-       assert(logger != null),
-       assert(featureFlags != null),
-       assert(usagePrintFn != null),
-       _customDevicesConfig = customDevicesConfig,
+  }) : _customDevicesConfig = customDevicesConfig,
        _featureFlags = featureFlags,
        _usagePrintFn = usagePrintFn
   {
@@ -290,9 +281,9 @@ If a file already exists at the backup location, it will be overwritten.
 
     logger.printStatus(
         wasBackedUp
-        ? 'Successfully resetted the custom devices config file and created a '
+        ? 'Successfully reset the custom devices config file and created a '
           'backup at "$configBackupPath".'
-        : 'Successfully resetted the custom devices config file.'
+        : 'Successfully reset the custom devices config file.'
     );
     return FlutterCommandResult.success();
   }
@@ -443,13 +434,13 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         // find a random port we can forward
         final int port = await _operatingSystemUtils.findFreePort();
 
-        final ForwardedPort forwardedPort = await (portForwarder.tryForward(port, port) as FutureOr<ForwardedPort>);
+        final ForwardedPort? forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {
           _printConfigCheckingError("Couldn't forward test port $port from device.",);
           result = false;
+        } else {
+          await portForwarder.unforward(forwardedPort);
         }
-
-        await portForwarder.unforward(forwardedPort);
       } on Exception catch (e) {
         _printConfigCheckingError(
           'While forwarding/unforwarding device port: $e',
@@ -470,8 +461,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   ///
   /// Only check if `--check` is explicitly specified. (Don't check by default)
   Future<FlutterCommandResult> runNonInteractively() async {
-    final String jsonStr = stringArgDeprecated(_kJson)!;
-    final bool shouldCheck = boolArgDeprecated(_kCheck);
+    final String jsonStr = stringArg(_kJson)!;
+    final bool shouldCheck = boolArg(_kCheck);
 
     dynamic json;
     try {
@@ -579,7 +570,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Run interactively (with user prompts), the target device should be
   /// connected to via ssh.
   Future<FlutterCommandResult> runInteractivelySsh() async {
-    final bool shouldCheck = boolArgDeprecated(_kCheck);
+    final bool shouldCheck = boolArg(_kCheck);
 
     // Listen to the keystrokes stream as late as possible, since it's a
     // single-subscription stream apparently.
@@ -659,7 +650,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       description: 'Should the device use port forwarding? '
         'Using port forwarding is the default because it works in all cases, however if your '
         'remote device has a static IP address and you have a way of '
-        'specifying the "--observatory-host=<ip>" engine option, you might prefer '
+        'specifying the "--vm-service-host=<ip>" engine option, you might prefer '
         'not using port forwarding.',
     );
 
@@ -790,10 +781,10 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    if (stringArgDeprecated(_kJson) != null) {
+    if (stringArg(_kJson) != null) {
       return runNonInteractively();
     }
-    if (boolArgDeprecated(_kSsh) == true) {
+    if (boolArg(_kSsh) == true) {
       return runInteractivelySsh();
     }
     throw UnsupportedError('Unknown run mode');

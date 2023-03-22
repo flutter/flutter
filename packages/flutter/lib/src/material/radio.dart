@@ -93,8 +93,7 @@ class Radio<T> extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
-  }) : assert(autofocus != null),
-       assert(toggleable != null);
+  });
 
   /// The value represented by this radio button.
   final T value;
@@ -265,10 +264,12 @@ class Radio<T> extends StatefulWidget {
   /// [ThemeData.focusColor] is used.
   final Color? focusColor;
 
+  /// {@template flutter.material.radio.hoverColor}
   /// The color for the radio's [Material] when a pointer is hovering over it.
   ///
   /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
   /// state, it will be used instead.
+  /// {@endtemplate}
   ///
   /// If null, then the value of [RadioThemeData.overlayColor] is used in the
   /// hovered state. If that is also null, then the value of
@@ -276,7 +277,7 @@ class Radio<T> extends StatefulWidget {
   final Color? hoverColor;
 
   /// {@template flutter.material.radio.overlayColor}
-  /// The color for the checkbox's [Material].
+  /// The color for the radio's [Material].
   ///
   /// Resolves in the following states:
   ///  * [MaterialState.pressed].
@@ -537,7 +538,7 @@ class _RadioDefaultsM2 extends RadioThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_132
+// Token database version: v0_162
 
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);

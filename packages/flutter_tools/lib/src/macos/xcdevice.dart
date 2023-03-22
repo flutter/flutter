@@ -14,6 +14,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
@@ -303,14 +304,6 @@ class XCDevice {
           }
         }
 
-        final IOSDeviceConnectionInterface interface = _interfaceType(device);
-
-        // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
-        // TODO(jmagman): Remove this check once wirelessly detected devices can be observed and attached, https://github.com/flutter/flutter/issues/15072.
-        if (interface != IOSDeviceConnectionInterface.usb) {
-          continue;
-        }
-
         String? sdkVersion = _sdkVersion(device);
 
         if (sdkVersion != null) {
@@ -324,7 +317,7 @@ class XCDevice {
           identifier,
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
-          interfaceType: interface,
+          connectionInterface: _interfaceType(device),
           sdkVersion: sdkVersion,
           iProxy: _iProxy,
           fileSystem: globals.fs,
@@ -362,19 +355,16 @@ class XCDevice {
     return code is int ? code : null;
   }
 
-  static IOSDeviceConnectionInterface _interfaceType(Map<String, Object?> deviceProperties) {
-    // Interface can be "usb", "network", or "none" for simulators
-    // and unknown future interfaces.
+  static DeviceConnectionInterface _interfaceType(Map<String, Object?> deviceProperties) {
+    // Interface can be "usb" or "network". It can also be missing
+    // (e.g. simulators do not have an interface property).
+    // If the interface is "network", use `DeviceConnectionInterface.wireless`,
+    // otherwise use `DeviceConnectionInterface.attached.
     final Object? interface = deviceProperties['interface'];
-    if (interface is String) {
-      if (interface.toLowerCase() == 'network') {
-        return IOSDeviceConnectionInterface.network;
-      } else {
-        return IOSDeviceConnectionInterface.usb;
-      }
+    if (interface is String && interface.toLowerCase() == 'network') {
+      return DeviceConnectionInterface.wireless;
     }
-
-    return IOSDeviceConnectionInterface.none;
+    return DeviceConnectionInterface.attached;
   }
 
   static String? _sdkVersion(Map<String, Object?> deviceProperties) {

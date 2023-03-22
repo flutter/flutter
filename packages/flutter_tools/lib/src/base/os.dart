@@ -90,7 +90,7 @@ abstract class OperatingSystemUtils {
   /// if `which` was not able to locate the binary.
   File? which(String execName) {
     final List<File> result = _which(execName);
-    if (result == null || result.isEmpty) {
+    if (result.isEmpty) {
       return null;
     }
     return result.first;
@@ -318,13 +318,13 @@ class _LinuxUtils extends _PosixUtils {
       try {
         // Split the operating system version which should be formatted as
         // "Linux kernelRelease build", by spaces.
-        final List<String> osVersionSplitted = _platform.operatingSystemVersion.split(' ');
-        if (osVersionSplitted.length < 3) {
+        final List<String> osVersionSplit = _platform.operatingSystemVersion.split(' ');
+        if (osVersionSplit.length < 3) {
           // The operating system version didn't have the expected format.
           // Initialize as an empty string.
           kernelRelease = '';
         } else {
-          kernelRelease = ' ${osVersionSplitted[1]}';
+          kernelRelease = ' ${osVersionSplit[1]}';
         }
       } on Exception catch (e) {
         _logger.printTrace('Failed obtaining kernel release for Linux: $e');
@@ -336,8 +336,8 @@ class _LinuxUtils extends _PosixUtils {
   }
 
   String _getOsReleaseValueForKey(String osRelease, String key) {
-    final List<String> osReleaseSplitted = osRelease.split('\n');
-    for (String entry in osReleaseSplitted) {
+    final List<String> osReleaseSplit = osRelease.split('\n');
+    for (String entry in osReleaseSplit) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
       if(entryKeyValuePair[0] == key) {
@@ -590,15 +590,15 @@ class _WindowsUtils extends OperatingSystemUtils {
 String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fileSystem.currentDirectory.path;
+  Directory currentDirectory = fileSystem.directory(directory).absolute;
   while (true) {
-    if (fileSystem.isFileSync(fileSystem.path.join(directory!, kProjectRootSentinel))) {
-      return directory;
+    if (currentDirectory.childFile(kProjectRootSentinel).existsSync()) {
+      return currentDirectory.path;
     }
-    final String parent = fileSystem.path.dirname(directory);
-    if (directory == parent) {
+    if (!currentDirectory.existsSync() || currentDirectory.parent.path == currentDirectory.path) {
       return null;
     }
-    directory = parent;
+    currentDirectory = currentDirectory.parent;
   }
 }
 

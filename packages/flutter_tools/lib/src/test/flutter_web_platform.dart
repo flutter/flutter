@@ -42,7 +42,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     FlutterProject? flutterProject,
     String? shellPath,
     this.updateGoldens,
-    this.nullAssertions,
     required this.buildInfo,
     required this.webMemoryFS,
     required FileSystem fileSystem,
@@ -51,14 +50,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     required Logger logger,
     required Artifacts? artifacts,
     required ProcessManager processManager,
-    required Cache cache,
     TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
       _flutterToolPackageConfig = flutterToolPackageConfig,
       _chromiumLauncher = chromiumLauncher,
       _logger = logger,
-      _artifacts = artifacts,
-      _cache = cache {
+      _artifacts = artifacts {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(createStaticHandler(
@@ -94,11 +91,9 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Logger _logger;
   final Artifacts? _artifacts;
   final bool? updateGoldens;
-  final bool? nullAssertions;
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
-  final Cache _cache;
 
   /// Allows only one test suite (typically one test file) to be loaded and run
   /// at any given point in time. Loading more than one file at a time is known
@@ -113,7 +108,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     String? shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
-    bool nullAssertions = false,
     required BuildInfo buildInfo,
     required WebMemoryFS webMemoryFS,
     required FileSystem fileSystem,
@@ -121,7 +115,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     required ChromiumLauncher chromiumLauncher,
     required Artifacts? artifacts,
     required ProcessManager processManager,
-    required Cache cache,
     TestTimeRecorder? testTimeRecorder,
   }) async {
     final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
@@ -149,9 +142,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       logger: logger,
-      nullAssertions: nullAssertions,
       processManager: processManager,
-      cache: cache,
       testTimeRecorder: testTimeRecorder,
     );
   }
@@ -165,12 +156,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     return buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')
       ? WebRendererMode.canvaskit
       : WebRendererMode.html;
-  }
-
-  NullSafetyMode get _nullSafetyMode {
-    return buildInfo.nullSafetyMode == NullSafetyMode.sound
-      ? NullSafetyMode.sound
-      : NullSafetyMode.unsound;
   }
 
   final Configuration _config;
@@ -188,17 +173,16 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The require js binary.
   File get _requireJs => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
-    'lib',
-    'dev_compiler',
-    'kernel',
-    'amd',
-    'require.js',
-  ));
+        _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
+        'lib',
+        'dev_compiler',
+        'amd',
+        'require.js',
+      ));
 
   /// The ddc to dart stack trace mapper.
   File get _stackTraceMapper => _fileSystem.file(_fileSystem.path.join(
-    _artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+    _artifacts!.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript),
     'lib',
     'dev_compiler',
     'web',
@@ -206,10 +190,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode]![_nullSafetyMode]!));
+    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode]!));
 
   File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode]![_nullSafetyMode]!));
+    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode]!));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
@@ -227,17 +211,12 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File _canvasKitFile(String relativePath) {
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/52588
-    //
-    // Update this when we start building CanvasKit from sources. In the
-    // meantime, get the Web SDK directory from cache rather than through
-    // Artifacts. The latter is sensitive to `--local-engine`, which changes
-    // the directory to point to ENGINE/src/out. However, CanvasKit is not yet
-    // built as part of the engine, but fetched from CIPD, and so it won't be
-    // found in ENGINE/src/out.
-    final Directory webSdkDirectory = _cache.getWebSdkDirectory();
+    final String canvasKitPath = _artifacts!.getArtifactPath(
+      Artifact.canvasKitPath,
+      platform: TargetPlatform.web_javascript,
+    );
     final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(
-      webSdkDirectory.path,
+      canvasKitPath,
       relativePath,
     ));
     return canvasKitFile;
@@ -255,7 +234,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       final String leadingPath = request.url.path.split('.dart.bootstrap.js')[0];
       final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
-        nullAssertions: nullAssertions!,
         nativeNullAssertions: true,
         bootstrapModule: '${_fileSystem.path.basename(leadingPath)}.dart.bootstrap',
         entrypoint: '/$generatedFile'
@@ -379,10 +357,6 @@ class FlutterWebPlatform extends PlatformPlugin {
         return shelf.Response.ok('Caught exception: $ex');
       }
 
-      if (bytes == null) {
-        return shelf.Response.ok('Unknown error, bytes is null');
-      }
-
       final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
       return shelf.Response.ok(errorMessage ?? 'true');
     } else {
@@ -393,12 +367,13 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// Serves a local build of CanvasKit, replacing the CDN build, which can
   /// cause test flakiness due to reliance on network.
   shelf.Response _localCanvasKitHandler(shelf.Request request) {
-    final String path = _fileSystem.path.fromUri(request.url);
-    if (!path.startsWith('canvaskit/')) {
+    final String fullPath = _fileSystem.path.fromUri(request.url);
+    if (!fullPath.startsWith('canvaskit/')) {
       return shelf.Response.notFound('Not a CanvasKit file request');
     }
 
-    final String extension = _fileSystem.path.extension(path);
+    final String relativePath = fullPath.replaceFirst('canvaskit/', '');
+    final String extension = _fileSystem.path.extension(relativePath);
     String contentType;
     switch (extension) {
       case '.js':
@@ -414,7 +389,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
 
     return shelf.Response.ok(
-      _canvasKitFile(path).openRead(),
+      _canvasKitFile(relativePath).openRead(),
       headers: <String, Object>{
         HttpHeaders.contentTypeHeader: contentType,
       },
@@ -685,28 +660,33 @@ class BrowserManager {
     );
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
-    unawaited(chrome.onExit.then((int? browserExitCode) {
-      throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
-    })
-    // TODO(srawlins): Fix this static issue,
-    // https://github.com/flutter/flutter/issues/105750.
-    // ignore: body_might_complete_normally_catch_error
-    .catchError((Object error, StackTrace stackTrace) {
-      if (!completer.isCompleted) {
-        completer.completeError(error, stackTrace);
-      }
-    }));
-    unawaited(future.then((WebSocketChannel webSocket) {
-      if (completer.isCompleted) {
-        return;
-      }
-      completer.complete(BrowserManager._(chrome, runtime, webSocket));
-    }).catchError((Object error, StackTrace stackTrace) {
-      chrome.close();
-      if (!completer.isCompleted) {
-        completer.completeError(error, stackTrace);
-      }
-    }));
+    unawaited(chrome.onExit.then<Object?>(
+      (int? browserExitCode) {
+        throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
+      },
+    ).then(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+        return null;
+      },
+    ));
+    unawaited(future.then(
+      (WebSocketChannel webSocket) {
+        if (completer.isCompleted) {
+          return;
+        }
+        completer.complete(BrowserManager._(chrome, runtime, webSocket));
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        chrome.close();
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      },
+    ));
 
     return completer.future;
   }

@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
+const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 // A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
 // for a given TextSelection.
@@ -147,7 +148,7 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'First ',
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
         children: <InlineSpan>[
           TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 5.0)),
           TextSpan(text: 'third fourth fifth'),
@@ -174,14 +175,14 @@ void main() {
     // The widths of the boxes should match the calculations above.
     // The heights should all be 10, except for the box for 'smallsecond ',
     // which should have height 5, and be alphabetic baseline-aligned with
-    // 'First '. The Ahem font specifies alphabetic baselines at 0.2em above the
-    // bottom extent, and 0.8em below the top, so the difference in top
-    // alignment becomes (10px * 0.8 - 5px * 0.8) = 4px.
+    // 'First '. The test font specifies alphabetic baselines at 0.25em above
+    // the bottom extent, and 0.75em below the top, so the difference in top
+    // alignment becomes (10px * 0.75 - 5px * 0.75) = 3.75px.
 
     // 'First ':
     expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
     // 'smallsecond ' in size 5:
-    expect(boxes[1], const TextBox.fromLTRBD(60.0, 4.0, 120.0, 9.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(60.0, 3.75, 120.0, 8.75, TextDirection.ltr));
     // 'third fourth ':
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
@@ -192,7 +193,7 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'First ',
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
         children: <InlineSpan>[
           TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 8.0)),
           TextSpan(text: 'third fourth fifth'),
@@ -252,7 +253,7 @@ void main() {
       const TextSpan(
         text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
               'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
       maxLines: 1,
@@ -332,7 +333,7 @@ void main() {
         text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
             // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
             // 0          1          2       3       4      5     6         7         8    9       10      11     12
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -733,7 +734,7 @@ void main() {
     });
   });
 
-    test('Supports gesture recognizer semantics', () {
+  test('Supports gesture recognizer semantics', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
         TextSpan(text: 'one', recognizer: TapGestureRecognizer()..onTap = () {}),
@@ -744,7 +745,18 @@ void main() {
     );
     layout(paragraph);
 
-    paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+    final SemanticsNode node = SemanticsNode();
+    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    final List<SemanticsNode> children = <SemanticsNode>[];
+    node.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    expect(children.length, 4);
+    expect(children[0].getSemanticsData().actions, 0);
+    expect(children[1].getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(children[2].getSemanticsData().hasAction(SemanticsAction.longPress), true);
+    expect(children[3].getSemanticsData().hasAction(SemanticsAction.tap), true);
   });
 
   test('Supports empty text span with spell out', () {
@@ -798,7 +810,7 @@ void main() {
   test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
     final TextSpan text = TextSpan(text: '', children: <InlineSpan>[
       TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
-      const WidgetSpan(child: SizedBox(width: 0, height: 0)),
+      const WidgetSpan(child: SizedBox.shrink()),
       TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
     ]);
     final List<RenderBox> renderBoxes = <RenderBox>[
@@ -821,12 +833,12 @@ void main() {
       for (final Selectable selectable in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
         selectable.dispatchSelectionEvent(
           SelectionEdgeUpdateEvent.forStart(
-            globalPosition: paragraph.getOffsetForCaret(start, Rect.zero),
+            globalPosition: paragraph.getOffsetForCaret(start, Rect.zero) + const Offset(0, 5),
           ),
         );
         selectable.dispatchSelectionEvent(
           SelectionEdgeUpdateEvent.forEnd(
-            globalPosition: paragraph.getOffsetForCaret(end, Rect.zero),
+            globalPosition: paragraph.getOffsetForCaret(end, Rect.zero) + const Offset(0, 5),
           ),
         );
       }
@@ -857,19 +869,19 @@ void main() {
       layout(paragraph);
       final MockPaintingContext paintingContext = MockPaintingContext();
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, isNull);
-      expect(paintingContext.canvas.drawedRectPaint, isNull);
+      expect(paintingContext.canvas.drawnRect, isNull);
+      expect(paintingContext.canvas.drawnRectPaint, isNull);
       selectionParagraph(paragraph, const TextPosition(offset: 1), const TextPosition(offset: 5));
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
-      expect(paintingContext.canvas.drawedRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawedRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
 
       selectionParagraph(paragraph, const TextPosition(offset: 2), const TextPosition(offset: 4));
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
-      expect(paintingContext.canvas.drawedRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawedRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
     });
 
     test('getPositionForOffset works', () async {
@@ -911,17 +923,447 @@ void main() {
       expect(geometry2.hasContent, true);
       expect(geometry2.status, SelectionStatus.uncollapsed);
     });
+
+    test('can granularly extend selection - character', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 4), const TextPosition(offset: 5));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [a]re you
+      expect(selection.end, 5);
+
+      // Equivalent to sending shift + arrow-right
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.character,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [ar]e you
+      expect(selection.end, 6);
+
+      // Equivalent to sending shift + arrow-left
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.character,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [a]re you
+      expect(selection.end, 5);
+    });
+
+    test('can granularly extend selection - word', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 4), const TextPosition(offset: 5));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [a]re you
+      expect(selection.end, 5);
+
+      // Equivalent to sending shift + alt + arrow-right.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [are] you
+      expect(selection.end, 7);
+
+      // Equivalent to sending shift + alt + arrow-left.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      expect(paragraph.selections.length, 0); // how []are you
+
+      // Equivalent to sending shift + alt + arrow-left.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      selection = paragraph.selections[0];
+      expect(selection.start, 0); // [how ]are you
+      expect(selection.end, 4);
+    });
+
+    test('can granularly extend selection - line', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 4), const TextPosition(offset: 5));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      expect(selection.start, 4); // how [a]re you
+      expect(selection.end, 5);
+
+      // Equivalent to sending shift + meta + arrow-right.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.line,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how [are you]
+      expect(selection, const TextRange(start: 4, end: 11));
+
+      // Equivalent to sending shift + meta + arrow-left.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.line,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // [how ]are you
+      expect(selection, const TextRange(start: 0, end: 4));
+    });
+
+    test('can granularly extend selection - document', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 14), const TextPosition(offset: 15));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      // how are you
+      // I [a]m fine
+      expect(selection.start, 14);
+      expect(selection.end, 15);
+
+      // Equivalent to sending shift + meta + arrow-down.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.document,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I [am fine
+      // Thank you]
+      expect(selection.start, 14);
+      expect(selection.end, 31);
+
+      // Equivalent to sending shift + meta + arrow-up.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.document,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // [how are you
+      // I ]am fine
+      // Thank you
+      expect(selection.start, 0);
+      expect(selection.end, 14);
+    });
+
+    test('can granularly extend selection when no active selection', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      expect(paragraph.selections.length, 0);
+
+      // Equivalent to sending shift + alt + right.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      TextSelection selection = paragraph.selections[0];
+      // [how] are you
+      // I am fine
+      // Thank you
+      expect(selection.start, 0);
+      expect(selection.end, 3);
+
+      // Remove selection
+      registrar.selectables[0].dispatchSelectionEvent(
+        const ClearSelectionEvent(),
+      );
+      expect(paragraph.selections.length, 0);
+
+      // Equivalent to sending shift + alt + left.
+      registrar.selectables[0].dispatchSelectionEvent(
+        const GranularlyExtendSelectionEvent(
+          forward: false,
+          isEnd: true,
+          granularity: TextGranularity.word,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I am fine
+      // Thank [you]
+      expect(selection.start, 28);
+      expect(selection.end, 31);
+    });
+
+    test('can directionally extend selection', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      selectionParagraph(paragraph, const TextPosition(offset: 14), const TextPosition(offset: 15));
+      expect(paragraph.selections.length, 1);
+      TextSelection selection = paragraph.selections[0];
+      // how are you
+      // I [a]m fine
+      expect(selection.start, 14);
+      expect(selection.end, 15);
+
+      final Matrix4 transform = registrar.selectables[0].getTransformTo(null);
+      final double baseline = MatrixUtils.transformPoint(
+        transform,
+        registrar.selectables[0].value.endSelectionPoint!.localPosition,
+      ).dx;
+
+      // Equivalent to sending shift + arrow-down.
+      registrar.selectables[0].dispatchSelectionEvent(
+        DirectionallyExtendSelectionEvent(
+          isEnd: true,
+          dx: baseline,
+          direction: SelectionExtendDirection.nextLine,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I [am fine
+      // Tha]nk you
+      expect(selection.start, 14);
+      expect(selection.end, 25);
+
+      // Equivalent to sending shift + arrow-up.
+      registrar.selectables[0].dispatchSelectionEvent(
+        DirectionallyExtendSelectionEvent(
+          isEnd: true,
+          dx: baseline,
+          direction: SelectionExtendDirection.previousLine,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I [a]m fine
+      // Thank you
+      expect(selection.start, 14);
+      expect(selection.end, 15);
+    });
+
+    test('can directionally extend selection when no selection', () async {
+      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+      final List<RenderBox> renderBoxes = <RenderBox>[];
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'how are you\nI am fine\nThank you'),
+            ]
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        children: renderBoxes,
+      );
+      layout(paragraph);
+
+      expect(registrar.selectables.length, 1);
+      expect(paragraph.selections.length, 0);
+
+      final Matrix4 transform = registrar.selectables[0].getTransformTo(null);
+      final double baseline = MatrixUtils.transformPoint(
+        transform,
+        Offset(registrar.selectables[0].size.width / 2, 0),
+      ).dx;
+
+      // Equivalent to sending shift + arrow-down.
+      registrar.selectables[0].dispatchSelectionEvent(
+        DirectionallyExtendSelectionEvent(
+          isEnd: true,
+          dx: baseline,
+          direction: SelectionExtendDirection.forward,
+        ),
+      );
+      TextSelection selection = paragraph.selections[0];
+      // [how ar]e you
+      // I am fine
+      // Thank you
+      expect(selection.start, 0);
+      expect(selection.end, 6);
+
+      registrar.selectables[0].dispatchSelectionEvent(
+        const ClearSelectionEvent(),
+      );
+      expect(paragraph.selections.length, 0);
+
+      // Equivalent to sending shift + arrow-up.
+      registrar.selectables[0].dispatchSelectionEvent(
+        DirectionallyExtendSelectionEvent(
+          isEnd: true,
+          dx: baseline,
+          direction: SelectionExtendDirection.backward,
+        ),
+      );
+      selection = paragraph.selections[0];
+      // how are you
+      // I am fine
+      // Thank [you]
+      expect(selection.start, 28);
+      expect(selection.end, 31);
+    });
+  });
+
+  test('can just update the gesture recognizer', () async {
+    final TapGestureRecognizer recognizerBefore = TapGestureRecognizer()..onTap = () {};
+    final RenderParagraph paragraph = RenderParagraph(
+      TextSpan(text: 'How are you \n', recognizer: recognizerBefore),
+      textDirection: TextDirection.ltr,
+    );
+
+    int semanticsUpdateCount = 0;
+    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
+      listener: () {
+        ++semanticsUpdateCount;
+      },
+    );
+
+    layout(paragraph);
+
+    expect((paragraph.text as TextSpan).recognizer, same(recognizerBefore));
+    final SemanticsNode nodeBefore = SemanticsNode();
+    paragraph.assembleSemanticsNode(nodeBefore, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(semanticsUpdateCount, 0);
+    List<SemanticsNode> children = <SemanticsNode>[];
+    nodeBefore.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    SemanticsData data = children.single.getSemanticsData();
+    expect(data.hasAction(SemanticsAction.longPress), false);
+    expect(data.hasAction(SemanticsAction.tap), true);
+
+    final LongPressGestureRecognizer recognizerAfter = LongPressGestureRecognizer()..onLongPress = () {};
+    paragraph.text = TextSpan(text: 'How are you \n', recognizer: recognizerAfter);
+
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    expect((paragraph.text as TextSpan).recognizer, same(recognizerAfter));
+    final SemanticsNode nodeAfter = SemanticsNode();
+    paragraph.assembleSemanticsNode(nodeAfter, SemanticsConfiguration(), <SemanticsNode>[]);
+    expect(semanticsUpdateCount, 1);
+    children = <SemanticsNode>[];
+    nodeAfter.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    data = children.single.getSemanticsData();
+    expect(data.hasAction(SemanticsAction.longPress), true);
+    expect(data.hasAction(SemanticsAction.tap), false);
   });
 }
 
 class MockCanvas extends Fake implements Canvas {
-  Rect? drawedRect;
-  Paint? drawedRectPaint;
+  Rect? drawnRect;
+  Paint? drawnRectPaint;
 
   @override
   void drawRect(Rect rect, Paint paint) {
-    drawedRect = rect;
-    drawedRectPaint = paint;
+    drawnRect = rect;
+    drawnRectPaint = paint;
   }
 
   @override

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../examples/layers/rendering/custom_coordinate_systems.dart';

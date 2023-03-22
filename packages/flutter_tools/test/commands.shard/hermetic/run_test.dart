@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -24,11 +25,13 @@ import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -44,11 +47,11 @@ void main() {
   });
 
   group('run', () {
-    late FakeDeviceManager mockDeviceManager;
+    late TestDeviceManager testDeviceManager;
     late FileSystem fileSystem;
 
     setUp(() {
-      mockDeviceManager = FakeDeviceManager();
+      testDeviceManager = TestDeviceManager(logger: BufferLogger.test());
       fileSystem = MemoryFileSystem.test();
     });
 
@@ -166,9 +169,7 @@ void main() {
 
       testUsingContext('exits with a user message when no supported devices attached', () async {
         final RunCommand command = RunCommand();
-        mockDeviceManager
-          ..devices = <Device>[]
-          ..targetDevices = <Device>[];
+        testDeviceManager.devices = <Device>[];
 
         await expectLater(
           () => createTestCommandRunner(command).run(<String>[
@@ -184,7 +185,7 @@ void main() {
           containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
         );
       }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -193,9 +194,9 @@ void main() {
       testUsingContext('exits and lists available devices when specified device not found', () async {
         final RunCommand command = RunCommand();
         final FakeDevice device = FakeDevice(isLocalEmulator: true);
-        mockDeviceManager
+        testDeviceManager
           ..devices = <Device>[device]
-          ..hasSpecifiedDeviceId = true;
+          ..specifiedDeviceId = 'invalid-device-id';
 
         await expectLater(
               () => createTestCommandRunner(command).run(<String>[
@@ -211,7 +212,7 @@ void main() {
         expect(testLogger.statusText, contains('The following devices were found:'));
         expect(testLogger.statusText, contains('FakeDevice (mobile) • fake_device • ios •  (simulator)'));
       }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -220,9 +221,7 @@ void main() {
       testUsingContext('fails when targeted device is not Android with --device-user', () async {
         final FakeDevice device = FakeDevice(isLocalEmulator: true);
 
-        mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+        testDeviceManager.devices = <Device>[device];
 
         final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
         await expectLater(createTestCommandRunner(command).run(<String>[
@@ -234,7 +233,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
@@ -242,9 +241,7 @@ void main() {
       testUsingContext('succeeds when targeted device is an Android device with --device-user', () async {
         final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
 
-        mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+        testDeviceManager.devices = <Device>[device];
 
         final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
         await createTestCommandRunner(command).run(<String>[
@@ -257,7 +254,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
@@ -285,9 +282,7 @@ void main() {
           processManager: FakeProcessManager.any(),
         );
 
-        mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+        testDeviceManager.devices = <Device>[device];
 
         final RunCommand command = RunCommand();
         await expectLater(createTestCommandRunner(command).run(<String>[
@@ -297,7 +292,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
@@ -327,9 +322,7 @@ void main() {
           processManager: FakeProcessManager.any(),
         );
 
-        mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+        testDeviceManager.devices = <Device>[device];
 
         final RunCommand command = RunCommand();
         await expectLater(createTestCommandRunner(command).run(<String>[
@@ -339,17 +332,20 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
         final RunCommand command = RunCommand();
-        final FakeDevice mockDevice = FakeDevice(targetPlatform: TargetPlatform.android_arm, isLocalEmulator: true, sdkNameAndVersion: 'api-14');
-        mockDeviceManager
-          ..devices = <Device>[mockDevice]
-          ..targetDevices = <Device>[];
+        final FakeDevice mockDevice = FakeDevice(
+          targetPlatform: TargetPlatform.android_arm,
+          isLocalEmulator: true,
+          sdkNameAndVersion: 'api-14',
+          isSupported: false,
+        );
+        testDeviceManager.devices = <Device>[mockDevice];
 
         await expectLater(
           () => createTestCommandRunner(command).run(<String>[
@@ -377,7 +373,7 @@ void main() {
           ),
         );
       }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -389,13 +385,7 @@ void main() {
           sdkNameAndVersion: 'iOS 13',
         )..startAppSuccess = false;
 
-        mockDeviceManager
-          ..devices = <Device>[
-            mockDevice,
-          ]
-          ..targetDevices = <Device>[
-            mockDevice,
-          ];
+        testDeviceManager.devices = <Device>[mockDevice];
 
         // Causes swift to be detected in the analytics.
         fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
@@ -412,7 +402,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Artifacts: () => artifacts,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Usage: () => usage,
@@ -423,13 +413,7 @@ void main() {
         final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
           ..startAppSuccess = false;
 
-        mockDeviceManager
-          ..devices = <Device>[
-            mockDevice,
-          ]
-          ..targetDevices = <Device>[
-            mockDevice,
-          ];
+        testDeviceManager.devices = <Device>[mockDevice];
 
         // Causes swift to be detected in the analytics.
         fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
@@ -444,14 +428,14 @@ void main() {
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd56': 'false',
+            'cd57': 'usb',
           })
         )));
       }, overrides: <Type, Generator>{
         AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-        DeviceManager: () => mockDeviceManager,
+        DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
@@ -462,9 +446,7 @@ void main() {
         testUsingContext('enables multidex by default', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice();
-          mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+          testDeviceManager.devices = <Device>[device];
 
           await expectLater(
                 () => createTestCommandRunner(command).run(<String>[
@@ -480,7 +462,7 @@ void main() {
         }, overrides: <Type, Generator>{
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => mockDeviceManager,
+          DeviceManager: () => testDeviceManager,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
@@ -491,9 +473,7 @@ void main() {
         testUsingContext('can disable multidex with --no-multidex', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice();
-          mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+          testDeviceManager.devices = <Device>[device];
 
           await expectLater(
                 () => createTestCommandRunner(command).run(<String>[
@@ -510,7 +490,7 @@ void main() {
         }, overrides: <Type, Generator>{
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => mockDeviceManager,
+          DeviceManager: () => testDeviceManager,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
@@ -521,9 +501,7 @@ void main() {
         testUsingContext('can pass --device-user', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice(platformType: PlatformType.android);
-          mockDeviceManager
-          ..devices = <Device>[device]
-          ..targetDevices = <Device>[device];
+          testDeviceManager.devices = <Device>[device];
 
           await expectLater(
                 () => createTestCommandRunner(command).run(<String>[
@@ -541,7 +519,35 @@ void main() {
         }, overrides: <Type, Generator>{
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => mockDeviceManager,
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Usage: () => usage,
+          Stdio: () => FakeStdio(),
+          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+        });
+
+        testUsingContext('can disable devtools with --no-devtools', () async {
+          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
+          final FakeDevice device = FakeDevice();
+          testDeviceManager.devices = <Device>[device];
+
+          await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--no-devtools',
+              '--machine',
+              '-d',
+              device.id,
+            ]),
+            throwsToolExit(),
+          );
+          expect(command.appDomain.enableDevTools, isFalse);
+        }, overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => testDeviceManager,
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
@@ -621,21 +627,21 @@ void main() {
     });
 
     testUsingContext('should only request artifacts corresponding to connected devices', () async {
-      mockDeviceManager.devices = <Device>[FakeDevice(targetPlatform: TargetPlatform.android_arm)];
+      testDeviceManager.devices = <Device>[FakeDevice(targetPlatform: TargetPlatform.android_arm)];
 
       expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
         DevelopmentArtifact.androidGenSnapshot,
       }));
 
-      mockDeviceManager.devices = <Device>[FakeDevice()];
+      testDeviceManager.devices = <Device>[FakeDevice()];
 
       expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
         DevelopmentArtifact.iOS,
       }));
 
-      mockDeviceManager.devices = <Device>[
+      testDeviceManager.devices = <Device>[
         FakeDevice(),
         FakeDevice(targetPlatform: TargetPlatform.android_arm),
       ];
@@ -646,7 +652,7 @@ void main() {
         DevelopmentArtifact.androidGenSnapshot,
       }));
 
-      mockDeviceManager.devices = <Device>[
+      testDeviceManager.devices = <Device>[
         FakeDevice(targetPlatform: TargetPlatform.web_javascript),
       ];
 
@@ -655,10 +661,177 @@ void main() {
         DevelopmentArtifact.web,
       }));
     }, overrides: <Type, Generator>{
-      DeviceManager: () => mockDeviceManager,
+      DeviceManager: () => testDeviceManager,
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    group('usageValues', () {
+      testUsingContext('with only non-iOS usb device', () async {
+        final List<Device> devices = <Device>[
+          FakeDevice(targetPlatform: TargetPlatform.android_arm, platformType: PlatformType.android),
+        ];
+        final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
+        final CustomDimensions dimensions = await command.usageValues;
+
+        expect(dimensions, const CustomDimensions(
+          commandRunIsEmulator: false,
+          commandRunTargetName: 'android-arm',
+          commandRunTargetOsVersion: '',
+          commandRunModeName: 'debug',
+          commandRunProjectModule: false,
+          commandRunProjectHostLanguage: '',
+        ));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('with only iOS usb device', () async {
+        final List<Device> devices = <Device>[
+          FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
+        ];
+        final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
+        final CustomDimensions dimensions = await command.usageValues;
+
+        expect(dimensions, const CustomDimensions(
+          commandRunIsEmulator: false,
+          commandRunTargetName: 'ios',
+          commandRunTargetOsVersion: 'iOS 16.2',
+          commandRunModeName: 'debug',
+          commandRunProjectModule: false,
+          commandRunProjectHostLanguage: '',
+          commandRunIOSInterfaceType: 'usb',
+        ));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('with only iOS network device', () async {
+        final List<Device> devices = <Device>[
+          FakeIOSDevice(
+            connectionInterface: DeviceConnectionInterface.wireless,
+            sdkNameAndVersion: 'iOS 16.2',
+          ),
+        ];
+        final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
+        final CustomDimensions dimensions = await command.usageValues;
+
+        expect(dimensions, const CustomDimensions(
+          commandRunIsEmulator: false,
+          commandRunTargetName: 'ios',
+          commandRunTargetOsVersion: 'iOS 16.2',
+          commandRunModeName: 'debug',
+          commandRunProjectModule: false,
+          commandRunProjectHostLanguage: '',
+          commandRunIOSInterfaceType: 'wireless',
+        ));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('with both iOS usb and network devices', () async {
+        final List<Device> devices = <Device>[
+          FakeIOSDevice(
+            connectionInterface: DeviceConnectionInterface.wireless,
+            sdkNameAndVersion: 'iOS 16.2',
+          ),
+          FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
+        ];
+        final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+        final CustomDimensions dimensions = await command.usageValues;
+
+        expect(dimensions, const CustomDimensions(
+          commandRunIsEmulator: false,
+          commandRunTargetName: 'multiple',
+          commandRunTargetOsVersion: 'multiple',
+          commandRunModeName: 'debug',
+          commandRunProjectModule: false,
+          commandRunProjectHostLanguage: '',
+          commandRunIOSInterfaceType: 'wireless',
+        ));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
     });
   });
 
@@ -670,35 +843,35 @@ void main() {
     });
 
     test('auto web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'auto');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
     test('canvaskit web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'canvaskit');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.canvaskit);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
     });
 
     test('html web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'html');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.html);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
     });
 
     test('auto web-renderer with existing dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'auto');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
     test('canvaskit web-renderer with no dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'canvaskit');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.canvaskit);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
     });
 
     test('html web-renderer with no dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=true'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, 'html');
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.html);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
     });
   });
@@ -828,12 +1001,12 @@ void main() {
       '--trace-skia',
       '--trace-systrace',
       '--verbose-system-logs',
-      '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
+      '--enable-embedder-api',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -844,10 +1017,9 @@ void main() {
     expect(options.traceSkia, true);
     expect(options.traceSystrace, true);
     expect(options.verboseSystemLogs, true);
-    expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
     expect(options.traceSystrace, true);
-    expect(options.enableImpeller, true);
+    expect(options.enableImpeller, ImpellerStatus.enabled);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{
@@ -881,28 +1053,11 @@ void main() {
   });
 }
 
-class FakeDeviceManager extends Fake implements DeviceManager {
+class TestDeviceManager extends DeviceManager {
+  TestDeviceManager({required this.logger}) : super(logger: logger);
   List<Device> devices = <Device>[];
-  List<Device> targetDevices = <Device>[];
 
-  @override
-  String? specifiedDeviceId;
-
-  @override
-  bool hasSpecifiedAllDevices = false;
-
-  @override
-  bool hasSpecifiedDeviceId = false;
-
-  @override
-  Future<List<Device>> getDevices() async {
-    return devices;
-  }
-
-  @override
-  Future<List<Device>> findTargetDevices(FlutterProject? flutterProject, {Duration? timeout}) async {
-    return targetDevices;
-  }
+  final Logger logger;
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
@@ -910,9 +1065,6 @@ class FakeDeviceManager extends Fake implements DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
-
-  @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
@@ -929,10 +1081,12 @@ class FakeDevice extends Fake implements Device {
     TargetPlatform targetPlatform = TargetPlatform.ios,
     String sdkNameAndVersion = '',
     PlatformType platformType = PlatformType.ios,
+    bool isSupported = true,
   }): _isLocalEmulator = isLocalEmulator,
       _targetPlatform = targetPlatform,
       _sdkNameAndVersion = sdkNameAndVersion,
-      _platformType = platformType;
+      _platformType = platformType,
+      _isSupported = isSupported;
 
   static const int kSuccess = 1;
   static const int kFailure = -1;
@@ -940,6 +1094,7 @@ class FakeDevice extends Fake implements Device {
   final bool _isLocalEmulator;
   final String _sdkNameAndVersion;
   final PlatformType _platformType;
+  final bool _isSupported;
 
   @override
   Category get category => Category.mobile;
@@ -967,10 +1122,17 @@ class FakeDevice extends Fake implements Device {
   @override
   bool get supportsFastStart => false;
 
+  @override
+  bool get isConnected => true;
+
+  @override
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
   bool supported = true;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 
   @override
   bool isSupported() => supported;
@@ -1003,7 +1165,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   DevFSWriter? createDevFSWriter(
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     String? userIdentifier,
   ) {
     return null;
@@ -1042,6 +1204,53 @@ class FakeDevice extends Fake implements Device {
       }
       _throwToolExit(kSuccess);
     }
+  }
+}
+
+// Unfortunately Device, despite not being immutable, has an `operator ==`.
+// Until we fix that, we have to also ignore related lints here.
+// ignore: avoid_implementing_value_types
+class FakeIOSDevice extends Fake implements IOSDevice {
+  FakeIOSDevice({
+    this.connectionInterface = DeviceConnectionInterface.attached,
+    bool isLocalEmulator = false,
+    String sdkNameAndVersion = '',
+  }): _isLocalEmulator = isLocalEmulator,
+      _sdkNameAndVersion = sdkNameAndVersion;
+
+  final bool _isLocalEmulator;
+  final String _sdkNameAndVersion;
+
+  @override
+  Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
+
+  @override
+  Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
+
+  @override
+  final DeviceConnectionInterface connectionInterface;
+
+  @override
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+}
+
+class TestRunCommandForUsageValues extends RunCommand {
+  TestRunCommandForUsageValues({
+   this.devices,
+  });
+
+  @override
+  // devices is not set within usageValues, so we override the field
+  // ignore: overridden_fields
+  List<Device>? devices;
+
+  @override
+  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
+    return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   }
 }
 
@@ -1108,6 +1317,7 @@ class CapturingAppDomain extends AppDomain {
 
   bool? multidexEnabled;
   String? userIdentifier;
+  bool? enableDevTools;
 
   @override
   Future<AppInstance> startApp(
@@ -1127,9 +1337,11 @@ class CapturingAppDomain extends AppDomain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
+    bool enableDevTools = true,
   }) async {
     this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;
+    this.enableDevTools = enableDevTools;
     throwToolExit('');
   }
 }

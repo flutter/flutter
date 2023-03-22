@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('OutlinedButtonThemeData lerp special cases', () {
+    expect(OutlinedButtonThemeData.lerp(null, null, 0), null);
+    const OutlinedButtonThemeData data = OutlinedButtonThemeData();
+    expect(identical(OutlinedButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no OutlinedButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(

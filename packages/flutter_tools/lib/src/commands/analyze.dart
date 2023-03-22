@@ -66,6 +66,12 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('suggestions',
         help: 'Show suggestions about the current flutter project.'
     );
+    argParser.addFlag('machine',
+        negatable: false,
+        help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
+              'and environment.',
+        hide: !verboseHelp,
+    );
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark',
@@ -119,7 +125,7 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   bool get shouldRunPub {
     // If they're not analyzing the current project.
-    if (!boolArgDeprecated('current-package')) {
+    if (!boolArg('current-package')) {
       return false;
     }
 
@@ -128,16 +134,19 @@ class AnalyzeCommand extends FlutterCommand {
       return false;
     }
 
+    // Don't run pub if asking for machine output.
+    if (boolArg('machine')) {
+      return false;
+    }
+
     return super.shouldRunPub;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool? suggestionFlag = boolArg('suggestions');
-    if (suggestionFlag != null && suggestionFlag == true) {
+    if (boolArg('suggestions')) {
       final String directoryPath;
-      final bool? watchFlag = boolArg('watch');
-      if (watchFlag != null && watchFlag) {
+      if (boolArg('watch')) {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {
@@ -159,8 +168,9 @@ class AnalyzeCommand extends FlutterCommand {
         allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
         processManager: _processManager,
+        machine: boolArg('machine'),
       ).run();
-    } else if (boolArgDeprecated('watch')) {
+    } else if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoRoots(),

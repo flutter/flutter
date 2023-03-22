@@ -198,7 +198,11 @@ class XcodeProjectInterpreter {
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
-      if (deviceId != null)
+      if (buildContext.isWatch == true && buildContext.environmentType == EnvironmentType.physical)
+        'generic/platform=watchOS'
+      else if (buildContext.isWatch == true)
+        'generic/platform=watchOS Simulator'
+      else if (deviceId != null)
         'id=$deviceId'
       else if (buildContext.environmentType == EnvironmentType.physical)
         'generic/platform=iOS'
@@ -376,12 +380,14 @@ class XcodeProjectBuildContext {
     this.configuration,
     this.environmentType = EnvironmentType.physical,
     this.deviceId,
+    this.isWatch = false,
   });
 
   final String? scheme;
   final String? configuration;
   final EnvironmentType environmentType;
   final String? deviceId;
+  final bool isWatch;
 
   @override
   int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
@@ -395,7 +401,8 @@ class XcodeProjectBuildContext {
         other.scheme == scheme &&
         other.configuration == configuration &&
         other.deviceId == deviceId &&
-        other.environmentType == environmentType;
+        other.environmentType == environmentType &&
+        other.isWatch == isWatch;
   }
 }
 

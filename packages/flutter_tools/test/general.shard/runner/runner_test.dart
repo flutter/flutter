@@ -27,6 +27,7 @@ const String kCustomBugInstructions = 'These are instructions to report with a c
 
 void main() {
   int? firstExitCode;
+  late MemoryFileSystem fileSystem;
 
   group('runner', () {
     setUp(() {
@@ -46,6 +47,7 @@ void main() {
       });
 
       Cache.disableLocking();
+      fileSystem = MemoryFileSystem.test();
     });
 
     tearDown(() {
@@ -93,7 +95,7 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
@@ -137,7 +139,7 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
         'FLUTTER_ROOT': '/',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
       Artifacts: () => Artifacts.test(),
@@ -207,12 +209,108 @@ void main() {
           'FLUTTER_ROOT': '/',
         }
       ),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       UserMessages: () => CustomBugInstructions(),
       Artifacts: () => Artifacts.test(),
       CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
       HttpClientFactory: () => () => FakeHttpClient.any(),
+    });
+
+    group('in directory without permission', () {
+      setUp(() {
+        bool inTestSetup = true;
+        fileSystem = MemoryFileSystem(opHandle: (String context, FileSystemOp operation) {
+          if (inTestSetup) {
+            // Allow all operations during test setup.
+            return;
+          }
+          const Set<FileSystemOp> disallowedOperations = <FileSystemOp>{
+            FileSystemOp.create,
+            FileSystemOp.delete,
+            FileSystemOp.copy,
+            FileSystemOp.write,
+          };
+          // Make current_directory not writable.
+          if (context.startsWith('/current_directory') && disallowedOperations.contains(operation)) {
+            throw FileSystemException('No permission, context = $context, operation = $operation');
+          }
+        });
+        final Directory currentDirectory = fileSystem.directory('/current_directory');
+        currentDirectory.createSync();
+        fileSystem.currentDirectory = currentDirectory;
+        inTestSetup = false;
+      });
+      testUsingContext('create local report in temporary directory', () async {
+        // Since crash reporting calls the doctor, which checks for the devtools
+        // version file in the cache, write a version file to the memory fs.
+        Cache.flutterRoot = '/path/to/flutter';
+        final Directory devtoolsDir = globals.fs.directory(
+          '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+        )..createSync(recursive: true);
+        devtoolsDir.childFile('version.json').writeAsStringSync(
+          '{"version": "1.2.3"}',
+        );
+
+        final Completer<void> completer = Completer<void>();
+        // runner.run() asynchronously calls the exit function set above, so we
+        // catch it in a zone.
+        unawaited(runZoned<Future<void>?>(
+          () {
+            unawaited(runner.run(
+              <String>['crash'],
+              () => <FlutterCommand>[
+                CrashingFlutterCommand(),
+              ],
+              // This flutterVersion disables crash reporting.
+              flutterVersion: '[user-branch]/',
+              reportCrashes: true,
+              shutdownHooks: ShutdownHooks(),
+            ));
+            return null;
+          },
+          onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+            expect(firstExitCode, isNotNull);
+            expect(firstExitCode, isNot(0));
+            expect(error.toString(), 'Exception: test exit');
+            completer.complete();
+          },
+        ));
+        await completer.future;
+
+        final String errorText = testLogger.errorText;
+        expect(
+          errorText,
+          containsIgnoringWhitespace('Oops; flutter has exited unexpectedly: "Exception: an exception % --".\n'),
+        );
+
+        final File log = globals.fs.systemTempDirectory.childFile('flutter_01.log');
+        final String logContents = log.readAsStringSync();
+        expect(logContents, contains(kCustomBugInstructions));
+        expect(logContents, contains('flutter crash'));
+        expect(logContents, contains('Exception: an exception % --'));
+        expect(logContents, contains('CrashingFlutterCommand.runCommand'));
+        expect(logContents, contains('[!] Flutter'));
+
+        final CrashDetails sentDetails = (globals.crashReporter! as WaitingCrashReporter)._details;
+        expect(sentDetails.command, 'flutter crash');
+        expect(sentDetails.error.toString(), 'Exception: an exception % --');
+        expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
+        expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
+      }, overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+            'FLUTTER_ROOT': '/',
+          }
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        UserMessages: () => CustomBugInstructions(),
+        Artifacts: () => Artifacts.test(),
+        CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
+        HttpClientFactory: () => () => FakeHttpClient.any(),
+      });
     });
   });
 }

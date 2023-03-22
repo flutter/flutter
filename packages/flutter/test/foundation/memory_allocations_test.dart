@@ -7,8 +7,28 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
+  @override
+  DebugPrintCallback get debugPrintOverride => _enablePrint ? debugPrint : _emptyPrint;
+
+  static void _emptyPrint(String? message, { int? wrapWidth }) {}
+
+  static bool _enablePrint = true;
+
+  static void runWithDebugPrintDisabled(void Function() f) {
+    try {
+      _enablePrint = false;
+      f();
+    } finally {
+      _enablePrint = true;
+    }
+  }
+}
+
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
+
+  PrintOverrideTestBinding();
 
   setUp(() {
     assert(!ma.hasListeners);
@@ -18,20 +38,20 @@ void main() {
   test('addListener and removeListener add and remove listeners.', () {
 
     final ObjectEvent event = ObjectDisposed(object: 'object');
-    ObjectEvent? recievedEvent;
-    void listener(ObjectEvent event) => recievedEvent = event;
+    ObjectEvent? receivedEvent;
+    void listener(ObjectEvent event) => receivedEvent = event;
     expect(ma.hasListeners, isFalse);
 
     ma.addListener(listener);
     _checkSdkHandlersSet();
     ma.dispatchObjectEvent(event);
-    expect(recievedEvent, equals(event));
+    expect(receivedEvent, equals(event));
     expect(ma.hasListeners, isTrue);
-    recievedEvent = null;
+    receivedEvent = null;
 
     ma.removeListener(listener);
     ma.dispatchObjectEvent(event);
-    expect(recievedEvent, isNull);
+    expect(receivedEvent, isNull);
     expect(ma.hasListeners, isFalse);
     _checkSdkHandlersNotSet();
   });
@@ -56,7 +76,9 @@ void main() {
     ma.addListener(badListener2);
     ma.addListener(listener2);
 
-    ma.dispatchObjectEvent(event);
+    PrintOverrideTestBinding.runWithDebugPrintDisabled(
+      () => ma.dispatchObjectEvent(event)
+    );
     expect(log, <String>['badListener1', 'listener1', 'badListener2','listener2']);
     expect(tester.takeException(), contains('Multiple exceptions (2)'));
 

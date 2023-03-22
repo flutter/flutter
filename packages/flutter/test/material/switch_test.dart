@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -378,10 +379,10 @@ void main() {
             color: const Color(0x52000000), // Black with 32% opacity
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.grey.shade50),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.grey.shade50),
       reason: 'Inactive enabled switch should match these colors',
     );
     await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
@@ -394,30 +395,26 @@ void main() {
             color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff2196f3)),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: const Color(0xff2196f3)),
       reason: 'Active enabled switch should match these colors',
     );
   });
 
   testWidgets('Switch has default colors when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return const Material(
-              child: Center(
-                child: Switch(
-                  value: false,
-                  onChanged: null,
-                ),
-              ),
-            );
-          },
-        ),
+        child: Material(
+          child: Center(
+            child: Switch(
+              value: false,
+              onChanged: null,
+            ),
+          ),
+        )
       ),
     );
 
@@ -428,27 +425,23 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.grey.shade400),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.grey.shade400),
       reason: 'Inactive disabled switch should match these colors',
     );
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return const Material(
-              child: Center(
-                child: Switch(
-                  value: true,
-                  onChanged: null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              value: true,
+              onChanged: null,
+            ),
+          ),
         ),
       ),
     );
@@ -460,10 +453,10 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.grey.shade400),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.grey.shade400),
       reason: 'Active disabled switch should match these colors',
     );
   });
@@ -504,10 +497,10 @@ void main() {
             color: Colors.blue[500],
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.yellow[500]),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.yellow[500]),
     );
     await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
     await tester.pump();
@@ -519,10 +512,10 @@ void main() {
             color: Colors.green[500],
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.red[500]),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.red[500]),
     );
   });
 
@@ -838,10 +831,10 @@ void main() {
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff2196f3)),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: const Color(0xff2196f3)),
     );
 
     // Check the false value.
@@ -857,10 +850,10 @@ void main() {
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xfffafafa)),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: const Color(0xfffafafa)),
     );
 
     // Check what happens when disabled.
@@ -875,10 +868,10 @@ void main() {
             color: const Color(0x1f000000),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xffbdbdbd)),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: const Color(0xffbdbdbd)),
     );
   });
 
@@ -890,15 +883,13 @@ void main() {
         theme: theme,
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Switch(
-                value: true,
-                onChanged: (bool newValue) {},
-                focusColor: Colors.orange[500],
-                autofocus: true,
-                splashRadius: splashRadius,
-              );
-            }),
+            child: Switch(
+              value: true,
+              onChanged: (bool newValue) {},
+              focusColor: Colors.orange[500],
+              autofocus: true,
+              splashRadius: splashRadius,
+            ),
           ),
         ),
       );
@@ -942,10 +933,10 @@ void main() {
             color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff2196f3)),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: const Color(0xff2196f3)),
     );
 
     // Start hovering
@@ -963,10 +954,10 @@ void main() {
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: Colors.orange[500])
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xff2196f3)),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: const Color(0xff2196f3)),
     );
 
     // Check what happens when disabled.
@@ -979,10 +970,10 @@ void main() {
             color: const Color(0x1f000000),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0xffbdbdbd)),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: const Color(0xffbdbdbd)),
     );
   });
 
@@ -1203,18 +1194,14 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  thumbColor: thumbColor,
-                  value: active,
-                  onChanged: enabled ? (_) { } : null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              thumbColor: thumbColor,
+              value: active,
+              onChanged: enabled ? (_) { } : null,
+            ),
+          ),
         ),
       );
     }
@@ -1228,10 +1215,10 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: inactiveDisabledThumbColor),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: inactiveDisabledThumbColor),
       reason: 'Inactive disabled switch should default track and custom thumb color',
     );
 
@@ -1245,10 +1232,10 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: activeDisabledThumbColor),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: activeDisabledThumbColor),
       reason: 'Active disabled switch should match these colors',
     );
 
@@ -1262,10 +1249,10 @@ void main() {
             color: const Color(0x52000000), // Black with 32% opacity,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: inactiveEnabledThumbColor),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: inactiveEnabledThumbColor),
       reason: 'Inactive enabled switch should match these colors',
     );
 
@@ -1279,10 +1266,10 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: inactiveDisabledThumbColor),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: inactiveDisabledThumbColor),
       reason: 'Inactive disabled switch should match these colors',
     );
   });
@@ -1309,20 +1296,16 @@ void main() {
     Widget buildSwitch() {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  focusNode: focusNode,
-                  autofocus: true,
-                  value: true,
-                  thumbColor: thumbColor,
-                  onChanged: (_) { },
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              focusNode: focusNode,
+              autofocus: true,
+              value: true,
+              thumbColor: thumbColor,
+              onChanged: (_) { },
+            ),
+          ),
         ),
       );
     }
@@ -1338,10 +1321,10 @@ void main() {
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: focusedThumbColor),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: focusedThumbColor),
       reason: 'Inactive disabled switch should default track and custom thumb color',
     );
 
@@ -1359,10 +1342,10 @@ void main() {
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: hoveredThumbColor),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: hoveredThumbColor),
       reason: 'Inactive disabled switch should default track and custom thumb color',
     );
   });
@@ -1392,18 +1375,14 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  trackColor: trackColor,
-                  value: active,
-                  onChanged: enabled ? (_) { } : null,
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              trackColor: trackColor,
+              value: active,
+              onChanged: enabled ? (_) { } : null,
+            ),
+          ),
         ),
       );
     }
@@ -1482,20 +1461,16 @@ void main() {
     Widget buildSwitch() {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: Switch(
-                  focusNode: focusNode,
-                  autofocus: true,
-                  value: true,
-                  trackColor: trackColor,
-                  onChanged: (_) { },
-                ),
-              ),
-            );
-          },
+        child: Material(
+          child: Center(
+            child: Switch(
+              focusNode: focusNode,
+              autofocus: true,
+              value: true,
+              trackColor: trackColor,
+              onChanged: (_) { },
+            ),
+          ),
         ),
       );
     }
@@ -1547,21 +1522,17 @@ void main() {
     Widget buildSwitch({required bool enabled, required bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Theme(
-              data: theme,
-              child: Material(
-                child: Center(
-                  child: Switch(
-                    thumbColor: thumbColor,
-                    value: active,
-                    onChanged: enabled ? (_) { } : null,
-                  ),
-                ),
+        child: Theme(
+          data: theme,
+          child: Material(
+            child: Center(
+              child: Switch(
+                thumbColor: thumbColor,
+                value: active,
+                onChanged: enabled ? (_) { } : null,
               ),
-            );
-          },
+            ),
+          ),
         ),
       );
     }
@@ -1577,10 +1548,10 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x33000000))
-        ..circle(color: const Color(0x24000000))
-        ..circle(color: const Color(0x1f000000))
-        ..circle(color: expectedThumbColor),
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: expectedThumbColor),
       reason: 'Active disabled thumb color should be blended on top of surface color',
     );
   });
@@ -1934,6 +1905,140 @@ void main() {
   });
 
   group('Switch M3 tests', () {
+    testWidgets('M3 Switch has a 300-millisecond animation in total', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: true);
+      bool value = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Material(
+                  child: Center(
+                    child: Switch(
+                      value: value,
+                      onChanged: (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      expect(value, isFalse);
+
+      final Rect switchRect = tester.getRect(find.byType(Switch));
+      final TestGesture gesture = await tester.startGesture(switchRect.centerLeft);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // M2 animation duration
+      expect(tester.hasRunningAnimations, true);
+      await tester.pump(const Duration(milliseconds: 101));
+      expect(tester.hasRunningAnimations, false);
+    });
+
+    testWidgets('M3 Switch has a stadium shape in the middle of the track', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: true, colorSchemeSeed: Colors.deepPurple);
+      bool value = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Material(
+                  child: Center(
+                    child: Switch(
+                      value: value,
+                      onChanged: (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      expect(value, isFalse);
+
+      final Rect switchRect = tester.getRect(find.byType(Switch));
+      final TestGesture gesture = await tester.startGesture(switchRect.centerLeft);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // After 33 milliseconds, the switch thumb moves to the middle
+      // and has a stadium shape with a size of (34x22).
+      await tester.pump(const Duration(milliseconds: 33));
+      expect(tester.hasRunningAnimations, true);
+
+      await expectLater(
+        find.byType(Switch),
+        matchesGoldenFile('switch_test.m3.transition.png'),
+      );
+    });
+
+    testWidgets('M3 Switch thumb bounces in the end of the animation', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: true);
+      bool value = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Material(
+                  child: Center(
+                    child: Switch(
+                      value: value,
+                      onChanged: (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      expect(value, isFalse);
+
+      final Rect switchRect = tester.getRect(find.byType(Switch));
+      final TestGesture gesture = await tester.startGesture(switchRect.centerLeft);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // The value on y axis is greater than 1 when t > 0.375
+      // 300 * 0.375 = 112.5
+      await tester.pump(const Duration(milliseconds: 113));
+      final ToggleableStateMixin state = tester.state<ToggleableStateMixin>(
+        find.descendant(
+          of: find.byType(Switch),
+          matching: find.byWidgetPredicate(
+                (Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch',
+          ),
+        ),
+      );
+      expect(tester.hasRunningAnimations, true);
+      expect(state.position.value, greaterThan(1));
+    });
+
     testWidgets('Switch has default colors when enabled - M3', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = theme.colorScheme;
@@ -1978,7 +2083,7 @@ void main() {
             color: colors.outline,
             rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
-          ..circle(color: colors.outline), // thumb color
+          ..rrect(color: colors.outline), // thumb color
         reason: 'Inactive enabled switch should match these colors',
       );
       await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
@@ -1993,7 +2098,8 @@ void main() {
             color: colors.primary,
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: colors.onPrimary), // thumb color
+          ..rrect()
+          ..rrect(color: colors.onPrimary), // thumb color
         reason: 'Active enabled switch should match these colors',
       );
     });
@@ -2004,19 +2110,15 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         theme: themeData,
-        home: Directionality(
+        home: const Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return const Material(
-                child: Center(
-                  child: Switch(
-                    value: false,
-                    onChanged: null,
-                  ),
-                ),
-              );
-            },
+          child: Material(
+            child: Center(
+              child: Switch(
+                value: false,
+                onChanged: null,
+              ),
+            ),
           ),
         ),
       ));
@@ -2035,7 +2137,7 @@ void main() {
             color: colors.onSurface.withOpacity(0.12),
             rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
-          ..circle(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)), // thumb color
+          ..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)), // thumb color
         reason: 'Inactive disabled switch should match these colors',
       );
     });
@@ -2047,19 +2149,15 @@ void main() {
       final ColorScheme colors = themeData.colorScheme;
       await tester.pumpWidget(MaterialApp(
         theme: themeData,
-        home: Directionality(
+        home: const Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return const Material(
-                child: Center(
-                  child: Switch(
-                    value: true,
-                    onChanged: null,
-                  ),
-                ),
-              );
-            },
+          child: Material(
+            child: Center(
+              child: Switch(
+                value: true,
+                onChanged: null,
+              ),
+            ),
           ),
         ),
       ));
@@ -2073,7 +2171,8 @@ void main() {
             color: colors.onSurface.withOpacity(0.12),
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: colors.surface), // thumb color
+          ..rrect()
+          ..rrect(color: colors.surface), // thumb color
         reason: 'Active disabled switch should match these colors',
       );
     });
@@ -2125,7 +2224,7 @@ void main() {
             style: PaintingStyle.stroke,
             color: colors.outline,
           )
-          ..circle(color: Colors.yellow[500]), // thumb color
+          ..rrect(color: Colors.yellow[500]), // thumb color
       );
       await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
       await tester.pump();
@@ -2138,7 +2237,8 @@ void main() {
             color: Colors.green[500],
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: Colors.red[500]), // thumb color
+          ..rrect()
+          ..rrect(color: Colors.red[500]), // thumb color
       );
     });
 
@@ -2225,7 +2325,7 @@ void main() {
             color: colors.onSurface.withOpacity(0.12),
             rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
-          ..circle(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
+          ..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
       );
     });
 
@@ -2265,7 +2365,8 @@ void main() {
             color: colors.primary,
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: colors.onPrimary),
+          ..rrect()
+          ..rrect(color: colors.onPrimary),
       );
 
       // Start hovering
@@ -2295,9 +2396,93 @@ void main() {
             color: colors.onSurface.withOpacity(0.12),
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: colors.surface.withOpacity(1.0)),
+          ..rrect()
+          ..rrect(color: colors.surface.withOpacity(1.0)),
       );
     });
+
+    testWidgets('Switch thumb shows correct pressed color - M3', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(useMaterial3: true);
+      final ColorScheme colors = themeData.colorScheme;
+      Widget buildApp({bool enabled = true, bool value = true}) {
+        return MaterialApp(
+          theme: themeData,
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Switch(
+                  value: value,
+                  onChanged: enabled ? (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  } : null,
+                );
+              }),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.primary, // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: Colors.transparent, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.primaryContainer, rrect: RRect.fromLTRBR(26.0, 10.0, 54.0, 38.0, const Radius.circular(14.0))),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(value: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.surfaceVariant, // track color
+          style: PaintingStyle.fill
+        )..rrect(
+          color: colors.outline, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.onSurfaceVariant),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(enabled: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.onSurface.withOpacity(0.12), // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: Colors.transparent, // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: colors.surface.withOpacity(1.0)),
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildApp(enabled: false, value: false));
+      await tester.press(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(
+          color: colors.surfaceVariant.withOpacity(0.12), // track color
+          style: PaintingStyle.fill,
+        )..rrect(
+          color: colors.onSurface.withOpacity(0.12), // track outline color
+          style: PaintingStyle.stroke,
+        )..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
+      );
+    }, variant: TargetPlatformVariant.mobile());
 
     testWidgets('Switch thumb color resolves in active/enabled states - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
@@ -2327,18 +2512,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      thumbColor: thumbColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbColor: thumbColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
             ),
           ),
         );
@@ -2359,7 +2540,7 @@ void main() {
             color: colors.onSurface.withOpacity(0.12),
             rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
           )
-          ..circle(color: inactiveDisabledThumbColor),
+          ..rrect(color: inactiveDisabledThumbColor),
         reason: 'Inactive disabled switch should default track and custom thumb color',
       );
 
@@ -2374,7 +2555,8 @@ void main() {
             color: colors.onSurface.withOpacity(0.12),
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: activeDisabledThumbColor),
+          ..rrect()
+          ..rrect(color: activeDisabledThumbColor),
         reason: 'Active disabled switch should match these colors',
       );
 
@@ -2389,7 +2571,8 @@ void main() {
             color: colors.surfaceVariant,
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: inactiveEnabledThumbColor),
+          ..rrect()
+          ..rrect(color: inactiveEnabledThumbColor),
         reason: 'Inactive enabled switch should match these colors',
       );
 
@@ -2404,7 +2587,8 @@ void main() {
             color: colors.primary,
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: activeEnabledThumbColor),
+          ..rrect()
+          ..rrect(color: activeEnabledThumbColor),
         reason: 'Active enabled switch should match these colors',
       );
     });
@@ -2434,20 +2618,16 @@ void main() {
           theme: themeData,
           home: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      focusNode: focusNode,
-                      autofocus: true,
-                      value: true,
-                      thumbColor: thumbColor,
-                      onChanged: (_) { },
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  value: true,
+                  thumbColor: thumbColor,
+                  onChanged: (_) { },
+                ),
+              ),
             ),
           ),
         );
@@ -2465,7 +2645,7 @@ void main() {
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
           ..circle(color: colors.primary.withOpacity(0.12))
-          ..circle(color: focusedThumbColor),
+          ..rrect(color: focusedThumbColor),
         reason: 'active enabled switch should default track and custom thumb color',
       );
 
@@ -2484,7 +2664,7 @@ void main() {
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
           ..circle(color: colors.primary.withOpacity(0.08))
-          ..circle(color: hoveredThumbColor),
+          ..rrect(color: hoveredThumbColor),
         reason: 'active enabled switch should default track and custom thumb color',
       );
     });
@@ -2517,18 +2697,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      trackColor: trackColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  trackColor: trackColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
+                ),
+              ),
             ),
           ),
         );
@@ -2611,20 +2787,16 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      focusNode: focusNode,
-                      autofocus: true,
-                      value: true,
-                      trackColor: trackColor,
-                      onChanged: (_) { },
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  focusNode: focusNode,
+                  autofocus: true,
+                  value: true,
+                  trackColor: trackColor,
+                  onChanged: (_) { },
+                ),
+              ),
             ),
           ),
         );
@@ -2660,6 +2832,141 @@ void main() {
       );
     });
 
+    testWidgets('Track outline color resolves in active/enabled states', (WidgetTester tester) async {
+      const Color activeEnabledTrackOutlineColor = Color(0xFF000001);
+      const Color activeDisabledTrackOutlineColor = Color(0xFF000002);
+      const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
+      const Color inactiveDisabledTrackOutlineColor = Color(0xFF000004);
+
+      Color getTrackOutlineColor(Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          if (states.contains(MaterialState.selected)) {
+            return activeDisabledTrackOutlineColor;
+          }
+          return inactiveDisabledTrackOutlineColor;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return activeEnabledTrackOutlineColor;
+        }
+        return inactiveEnabledTrackOutlineColor;
+      }
+
+      final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(getTrackOutlineColor);
+
+      Widget buildSwitch({required bool enabled, required bool active}) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: Switch(
+                trackOutlineColor: trackOutlineColor,
+                value: active,
+                onChanged: enabled ? (_) { } : null,
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: inactiveDisabledTrackOutlineColor, style: PaintingStyle.stroke),
+        reason: 'Inactive disabled switch track outline should use this value',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: false, active: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: activeDisabledTrackOutlineColor, style: PaintingStyle.stroke),
+        reason: 'Active disabled switch track outline should match these colors',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: true, active: false));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: inactiveEnabledTrackOutlineColor),
+        reason: 'Inactive enabled switch track outline should match these colors',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: true, active: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: activeEnabledTrackOutlineColor),
+        reason: 'Active enabled switch track outline should match these colors',
+      );
+    });
+
+    testWidgets('Switch track outline color resolves in hovered/focused states', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      const Color hoveredTrackOutlineColor = Color(0xFF000001);
+      const Color focusedTrackOutlineColor = Color(0xFF000002);
+
+      Color getTrackOutlineColor(Set<MaterialState> states) {
+        if (states.contains(MaterialState.hovered)) {
+          return hoveredTrackOutlineColor;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return focusedTrackOutlineColor;
+        }
+        return Colors.transparent;
+      }
+
+      final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(getTrackOutlineColor);
+
+      Widget buildSwitch() {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: Switch(
+                focusNode: focusNode,
+                autofocus: true,
+                value: true,
+                trackOutlineColor: trackOutlineColor,
+                onChanged: (_) { },
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSwitch());
+      await tester.pumpAndSettle();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: focusedTrackOutlineColor, style: PaintingStyle.stroke),
+        reason: 'Active enabled switch track outline should match this color',
+      );
+
+      // Start hovering
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(color: hoveredTrackOutlineColor, style: PaintingStyle.stroke),
+        reason: 'Active enabled switch track outline should match this color',
+      );
+    });
+
     testWidgets('Switch thumb color is blended against surface color - M3', (WidgetTester tester) async {
       final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
       final ThemeData theme = ThemeData.light(useMaterial3: true);
@@ -2678,21 +2985,17 @@ void main() {
       Widget buildSwitch({required bool enabled, required bool active}) {
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Theme(
-                data: theme,
-                child: Material(
-                  child: Center(
-                    child: Switch(
-                      thumbColor: thumbColor,
-                      value: active,
-                      onChanged: enabled ? (_) { } : null,
-                    ),
-                  ),
+          child: Theme(
+            data: theme,
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbColor: thumbColor,
+                  value: active,
+                  onChanged: enabled ? (_) { } : null,
                 ),
-              );
-            },
+              ),
+            ),
           ),
         );
       }
@@ -2708,7 +3011,8 @@ void main() {
             color: colors.onSurface.withOpacity(0.12),
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
-          ..circle(color: expectedThumbColor),
+          ..rrect()
+          ..rrect(color: expectedThumbColor),
         reason: 'Active disabled thumb color should be blended on top of surface color',
       );
     });
@@ -2732,18 +3036,14 @@ void main() {
           data: themeData,
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Material(
-                  child: Center(
-                    child: Switch(
-                      thumbIcon: thumbIcon(activeIcon, inactiveIcon),
-                      value: active,
-                      onChanged: enabled ? (_) {} : null,
-                    ),
-                  ),
-                );
-              },
+            child: Material(
+              child: Center(
+                child: Switch(
+                  thumbIcon: thumbIcon(activeIcon, inactiveIcon),
+                  value: active,
+                  onChanged: enabled ? (_) {} : null,
+                ),
+              ),
             ),
           ),
         );
@@ -2755,7 +3055,7 @@ void main() {
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints
-          ..rrect()..circle()
+          ..rrect()..rrect()
           ..paragraph(offset: const Offset(32.0, 16.0)),
       );
 
@@ -2766,7 +3066,7 @@ void main() {
         Material.of(tester.element(find.byType(Switch))),
         paints
           ..rrect()..rrect()
-          ..circle()
+          ..rrect()
           ..paragraph(offset: const Offset(12.0, 16.0)),
       );
 
@@ -2776,7 +3076,7 @@ void main() {
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints
-          ..rrect()..rrect()..circle()
+          ..rrect()..rrect()..rrect()
       );
 
       // inactive icon doesn't show when switch is on.
@@ -2785,7 +3085,7 @@ void main() {
       expect(
           Material.of(tester.element(find.byType(Switch))),
           paints
-            ..rrect()..circle()..restore(),
+            ..rrect()..rrect()..restore(),
       );
 
       // without icon
@@ -2793,7 +3093,7 @@ void main() {
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints
-          ..rrect()..rrect()..circle()..restore(),
+          ..rrect()..rrect()..rrect()..restore(),
       );
     });
   });

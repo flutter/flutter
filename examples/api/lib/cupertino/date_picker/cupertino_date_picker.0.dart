@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CupertinoDatePicker].
+// Flutter code sample for [CupertinoDatePicker].
 
 import 'package:flutter/cupertino.dart';
 
@@ -81,6 +81,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                         initialDateTime: date,
                         mode: CupertinoDatePickerMode.date,
                         use24hFormat: true,
+                        // This shows day of week alongside day of month
+                        showDayOfWeek: true,
                         // This is called when the user changes the date.
                         onDateTimeChanged: (DateTime newDate) {
                           setState(() => date = newDate);

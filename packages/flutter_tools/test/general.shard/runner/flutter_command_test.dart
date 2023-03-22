@@ -13,9 +13,11 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -25,6 +27,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
@@ -494,61 +497,6 @@ void main() {
       ));
     });
 
-    testUsingContext('reports null safety analytics when reportNullSafety is true', () async {
-      globals.fs.file('lib/main.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// @dart=2.12');
-      globals.fs.file('pubspec.yaml')
-        .writeAsStringSync('name: example\n');
-      globals.fs.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(r'''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "example",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ],
-  "generated": "2020-12-02T19:30:53.862346Z",
-  "generator": "pub",
-  "generatorVersion": "2.12.0-76.0.dev"
-}
-''');
-      final FakeReportingNullSafetyCommand command = FakeReportingNullSafetyCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>['test']);
-
-      expect(usage.events, containsAll(<TestUsageEvent>[
-        const TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'runtime-mode',
-          label: 'NullSafetyMode.sound',
-        ),
-        TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'stats',
-          parameters: CustomDimensions.fromMap(<String, String>{
-            'cd49': '1', 'cd50': '1',
-          }),
-        ),
-        const TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'language-version',
-          label: '2.12',
-        ),
-      ]));
-    }, overrides: <Type, Generator>{
-      Pub: () => FakePub(),
-      Usage: () => usage,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    });
-
     testUsingContext('use packagesPath to generate BuildInfo', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
@@ -669,6 +617,34 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+
+    group('findTargetDevice', () {
+      final FakeDevice device1 = FakeDevice('device1', 'device1');
+      final FakeDevice device2 = FakeDevice('device2', 'device2');
+
+      testUsingContext('no device found', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, isNull);
+      });
+
+      testUsingContext('finds single device', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, device1);
+      });
+
+      testUsingContext('finds multiple devices', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+        testDeviceManager.specifiedDeviceId = 'all';
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, isNull);
+        expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
+      });
+    });
   });
 }
 
@@ -724,9 +700,6 @@ class FakeReportingNullSafetyCommand extends FlutterCommand {
 
   @override
   bool get shouldRunPub => true;
-
-  @override
-  bool get reportNullSafety => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -814,12 +787,11 @@ class FakePub extends Fake implements Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
 }
