@@ -514,13 +514,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // If this value is null, [consecutiveTapCount] can grow infinitely large.
   int? get maxConsecutiveTap;
 
-  // The maximum distance in logical pixels the gesture is allowed to drift
-  // from the initial touch down position before the [consecutiveTapCount]
-  // and [keysPressedOnDown] are frozen and the remaining tracker state is
-  // reset. These values remain frozen until the next [PointerDownEvent] is
-  // tracked in [addAllowedPointer].
-  double? get slopTolerance;
-
   // Private tap state tracked.
   PointerDownEvent? _down;
   PointerUpEvent? _up;
@@ -560,7 +553,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
-      final bool isSlopPastTolerance = slopTolerance != null && _getGlobalDistance(event, _originPosition) > slopTolerance!;
+      final double computedSlop = computeHitSlop(event.kind, gestureSettings);
+      final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > computedSlop;
 
       if (isSlopPastTolerance) {
         _consecutiveTapTimerStop();
@@ -701,8 +695,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     super.supportedDevices,
     super.allowedButtonsFilter,
   }) : _deadline = kPressTimeout,
-      dragStartBehavior = DragStartBehavior.start,
-      slopTolerance = kTouchSlop;
+      dragStartBehavior = DragStartBehavior.start;
 
   /// Configure the behavior of offsets passed to [onDragStart].
   ///
@@ -738,23 +731,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// recognizer will be reset.
   @override
   int? maxConsecutiveTap;
-
-  // The maximum distance in logical pixels the gesture is allowed to drift
-  // to still be considered a tap.
-  //
-  // Drifting past the allowed slop amount causes the recognizer to reset
-  // the tap series it is currently tracking, stopping the consecutive tap
-  // count from increasing. The consecutive tap count and the set of hardware
-  // keys that were pressed on tap down will retain their pre-past slop
-  // tolerance values until the next [PointerDownEvent] is tracked.
-  //
-  // If the gesture exceeds this value, then it can only be accepted as a drag
-  // gesture.
-  //
-  // Can be null to indicate that the gesture can drift for any distance.
-  // Defaults to 18 logical pixels.
-  @override
-  final double? slopTolerance;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -1030,8 +1006,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // has been accepted and it has moved past the [slopTolerance] but has not moved
       // a sufficient global distance from the initial position to be considered a drag.
       // In this case since the gesture cannot be a tap, it defaults to a drag.
-
-      _pastSlopTolerance = _pastSlopTolerance || slopTolerance != null && _getGlobalDistance(event, _initialPosition) > slopTolerance!;
+      final double computedSlop = computeHitSlop(event.kind, gestureSettings);
+      _pastSlopTolerance = _pastSlopTolerance || _getGlobalDistance(event, _initialPosition) > computedSlop;
 
       if (_dragState == _DragState.accepted) {
         _checkDragUpdate(event);
