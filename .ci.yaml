@@ -3416,6 +3416,7 @@ targets:
       task_name: run_debug_test_android
 
   - name: Mac_android run_release_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/123220
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
