@@ -203,12 +203,17 @@ uint32_t EntityPass::GetTotalPassReads(ContentContext& renderer) const {
 
 bool EntityPass::Render(ContentContext& renderer,
                         const RenderTarget& render_target) const {
+  StencilCoverageStack stencil_coverage_stack = {StencilCoverageLayer{
+      .coverage = Rect::MakeSize(render_target.GetRenderTargetSize()),
+      .stencil_depth = 0}};
+
   if (GetTotalPassReads(renderer) > 0) {
     auto offscreen_target =
         CreateRenderTarget(renderer, render_target.GetRenderTargetSize(), true);
-    if (!OnRender(renderer,
-                  offscreen_target.GetRenderTarget().GetRenderTargetSize(),
-                  offscreen_target, Point(), Point(), 0)) {
+
+    if (!OnRender(
+            renderer, offscreen_target.GetRenderTarget().GetRenderTargetSize(),
+            offscreen_target, Point(), Point(), 0, stencil_coverage_stack)) {
       return false;
     }
 
@@ -263,7 +268,7 @@ bool EntityPass::Render(ContentContext& renderer,
       renderer.GetDeviceCapabilities().SupportsReadFromResolve());
 
   return OnRender(renderer, render_target.GetRenderTargetSize(), pass_target,
-                  Point(), Point(), 0);
+                  Point(), Point(), 0, stencil_coverage_stack);
 }
 
 EntityPass::EntityResult EntityPass::GetEntityForElement(
@@ -273,6 +278,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     ISize root_pass_size,
     Point position,
     uint32_t pass_depth,
+    StencilCoverageStack& stencil_coverage_stack,
     size_t stencil_depth_floor) const {
   Entity element_entity;
 
@@ -309,8 +315,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       // Directly render into the parent target and move on.
       if (!subpass->OnRender(renderer, root_pass_size,
                              pass_context.GetPassTarget(), position, position,
-                             pass_depth, stencil_depth_, nullptr,
-                             pass_context.GetRenderPass(pass_depth))) {
+                             pass_depth, stencil_coverage_stack, stencil_depth_,
+                             nullptr, pass_context.GetRenderPass(pass_depth))) {
         return EntityPass::EntityResult::Failure();
       }
       return EntityPass::EntityResult::Skip();
@@ -391,7 +397,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     // time they are transient).
     if (!subpass->OnRender(renderer, root_pass_size, subpass_target,
                            subpass_coverage->origin, position, ++pass_depth,
-                           subpass->stencil_depth_, backdrop_filter_contents)) {
+                           stencil_coverage_stack, subpass->stencil_depth_,
+                           backdrop_filter_contents)) {
       return EntityPass::EntityResult::Failure();
     }
 
@@ -407,17 +414,13 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
   return EntityPass::EntityResult::Success(element_entity);
 }
 
-struct StencilLayer {
-  std::optional<Rect> coverage;
-  size_t stencil_depth;
-};
-
 bool EntityPass::OnRender(ContentContext& renderer,
                           ISize root_pass_size,
                           EntityPassTarget& pass_target,
                           Point position,
                           Point parent_position,
                           uint32_t pass_depth,
+                          StencilCoverageStack& stencil_coverage_stack,
                           size_t stencil_depth_floor,
                           std::shared_ptr<Contents> backdrop_filter_contents,
                           std::optional<InlinePassContext::RenderPassResult>
@@ -432,13 +435,9 @@ bool EntityPass::OnRender(ContentContext& renderer,
     return false;
   }
 
-  std::vector<StencilLayer> stencil_stack = {StencilLayer{
-      .coverage =
-          Rect::MakeSize(pass_target.GetRenderTarget().GetRenderTargetSize()),
-      .stencil_depth = stencil_depth_floor}};
-
   auto render_element = [&stencil_depth_floor, &pass_context, &pass_depth,
-                         &renderer, &stencil_stack](Entity& element_entity) {
+                         &renderer, &stencil_coverage_stack,
+                         &position](Entity& element_entity) {
     auto result = pass_context.GetRenderPass(pass_depth);
 
     if (!result.pass) {
@@ -466,21 +465,33 @@ bool EntityPass::OnRender(ContentContext& renderer,
       }
     }
 
-    if (!element_entity.ShouldRender(stencil_stack.back().coverage)) {
+    auto current_stencil_coverage = stencil_coverage_stack.back().coverage;
+    if (current_stencil_coverage.has_value()) {
+      // Entity transforms are relative to the current pass position, so we need
+      // to check stencil coverage in the same space.
+      current_stencil_coverage->origin -= position;
+    }
+
+    if (!element_entity.ShouldRender(current_stencil_coverage)) {
       return true;  // Nothing to render.
     }
 
     auto stencil_coverage =
-        element_entity.GetStencilCoverage(stencil_stack.back().coverage);
+        element_entity.GetStencilCoverage(current_stencil_coverage);
+    if (stencil_coverage.coverage.has_value()) {
+      stencil_coverage.coverage->origin += position;
+    }
 
     switch (stencil_coverage.type) {
       case Contents::StencilCoverage::Type::kNoChange:
         break;
       case Contents::StencilCoverage::Type::kAppend: {
-        auto op = stencil_stack.back().coverage;
-        stencil_stack.push_back(StencilLayer{
+        auto op = stencil_coverage_stack.back().coverage;
+        stencil_coverage_stack.push_back(StencilCoverageLayer{
             .coverage = stencil_coverage.coverage,
             .stencil_depth = element_entity.GetStencilDepth() + 1});
+        FML_DCHECK(stencil_coverage_stack.back().stencil_depth ==
+                   stencil_coverage_stack.size() - 1);
 
         if (!op.has_value()) {
           // Running this append op won't impact the stencil because the whole
@@ -489,26 +500,28 @@ bool EntityPass::OnRender(ContentContext& renderer,
         }
       } break;
       case Contents::StencilCoverage::Type::kRestore: {
-        if (stencil_stack.back().stencil_depth <=
+        if (stencil_coverage_stack.back().stencil_depth <=
             element_entity.GetStencilDepth()) {
           // Drop stencil restores that will do nothing.
           return true;
         }
 
-        auto restoration_depth =
-            element_entity.GetStencilDepth() - stencil_depth_floor;
-        FML_DCHECK(restoration_depth < stencil_stack.size());
+        auto restoration_depth = element_entity.GetStencilDepth();
+        FML_DCHECK(restoration_depth < stencil_coverage_stack.size());
 
         // We only need to restore the area that covers the coverage of the
         // stencil rect at target depth + 1.
         std::optional<Rect> restore_coverage =
-            (restoration_depth + 1 < stencil_stack.size())
-                ? stencil_stack[restoration_depth + 1].coverage
+            (restoration_depth + 1 < stencil_coverage_stack.size())
+                ? stencil_coverage_stack[restoration_depth + 1].coverage
                 : std::nullopt;
+        if (restore_coverage.has_value()) {
+          // Make the coverage rectangle relative to the current pass.
+          restore_coverage->origin -= position;
+        }
+        stencil_coverage_stack.resize(restoration_depth + 1);
 
-        stencil_stack.resize(restoration_depth + 1);
-
-        if (!stencil_stack.back().coverage.has_value()) {
+        if (!stencil_coverage_stack.back().coverage.has_value()) {
           // Running this restore op won't make anything renderable, so skip it.
           return true;
         }
@@ -543,9 +556,9 @@ bool EntityPass::OnRender(ContentContext& renderer,
   }
 
   for (const auto& element : elements_) {
-    EntityResult result =
-        GetEntityForElement(element, renderer, pass_context, root_pass_size,
-                            position, pass_depth, stencil_depth_floor);
+    EntityResult result = GetEntityForElement(
+        element, renderer, pass_context, root_pass_size, position, pass_depth,
+        stencil_coverage_stack, stencil_depth_floor);
 
     switch (result.status) {
       case EntityResult::kSuccess:
