@@ -15,9 +15,9 @@ import 'dart:ui' as ui show
   TextHeightBehavior,
   TextStyle;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:characters/characters.dart';
 
 import 'basic_types.dart';
 import 'inline_span.dart';
@@ -1051,7 +1051,7 @@ class TextPainter {
     if (plainTextLength == 0 || offset > plainTextLength) {
       return null;
     }
-    int prevCodeUnitIdx = max(0, offset - 1);
+    final int prevCodeUnitIdx = max(0, offset - 1);
     final int prevCodeUnit = plainText.codeUnitAt(prevCodeUnitIdx);
 
     // If the upstream character is a newline, cursor is at start of next line
@@ -1096,13 +1096,13 @@ class TextPainter {
   // Then return characters' grapheme cluster length.
   int _getCharactersGraphemeClusterLengthAtIndex(String flattenedText,
       int index) {
-    CharacterRange characterRange = flattenedText.characters.iterator;
+    final CharacterRange characterRange = flattenedText.characters.iterator;
     while (characterRange.moveNext()) {
-      int graphemeClusterLength = characterRange.utf16CodeUnits.length;
-      int start = characterRange.stringBeforeLength;
-      int end = start + graphemeClusterLength;
+      final int graphemeClusterLength = characterRange.utf16CodeUnits.length;
+      final int start = characterRange.stringBeforeLength;
+      final int end = start + graphemeClusterLength;
       // if the index is between start and end that mean in character.
-      bool indexIsInCurrentCharacter = start <= index && index <= end;
+      final bool indexIsInCurrentCharacter = start <= index && index <= end;
       if (indexIsInCurrentCharacter) {
         return graphemeClusterLength;
       }
@@ -1118,7 +1118,7 @@ class TextPainter {
       return null;
     }
     // We cap the offset at the final index of plain text.
-    int nextCodeUnitIdx = min(offset, plainTextLength - 1);
+    final int nextCodeUnitIdx = min(offset, plainTextLength - 1);
     final int nextCodeUnit = plainText.codeUnitAt(nextCodeUnitIdx);
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
