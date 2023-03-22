@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -312,6 +313,37 @@ Review licenses that have not been accepted (y/N)?
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
   });
 
+  testWithoutContext('runLicenseManager handles broken pipe without ArgumentError', () async {
+    sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+    const String exceptionMessage = 'Write failed (OS Error: Broken pipe, errno = 32), port = 0';
+    const SocketException exception = SocketException(exceptionMessage);
+    // By using a `Socket` generic parameter, the stdin.addStream will return a `Future<Socket>`
+    // We are testing that our error handling properly handles futures of this type
+    final ThrowingStdin<Socket> fakeStdin = ThrowingStdin<Socket>(exception);
+    final FakeCommand licenseCommand = FakeCommand(
+      command: <String>[sdk.sdkManagerPath!, '--licenses'],
+      stdin: fakeStdin,
+    );
+    processManager.addCommand(licenseCommand);
+    final BufferLogger logger = BufferLogger.test();
+
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      androidSdk: sdk,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      stdio: stdio,
+      logger: logger,
+      userMessages: UserMessages(),
+      androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    await licenseValidator.runLicenseManager();
+    expect(logger.traceText, contains(exceptionMessage));
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('runLicenseManager errors when sdkmanager fails to run', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
@@ -329,6 +361,42 @@ Review licenses that have not been accepted (y/N)?
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
+  });
+
+  testWithoutContext('runLicenseManager errors when sdkmanager exits non-zero', () async {
+    const String sdkManagerPath = '/foo/bar/sdkmanager';
+    sdk.sdkManagerPath = sdkManagerPath;
+    final BufferLogger logger = BufferLogger.test();
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[sdkManagerPath, '--licenses'],
+        exitCode: 1,
+        stderr: 'sdkmanager crash',
+      ),
+    );
+
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      androidSdk: sdk,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      stdio: stdio,
+      logger: logger,
+      userMessages: UserMessages(),
+      androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    await expectLater(
+      licenseValidator.runLicenseManager(),
+      throwsToolExit(
+        message: 'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "exited code 1"',
+      ),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+    expect(logger.traceText, isEmpty);
+    expect(stdio.writtenToStdout, isEmpty);
+    expect(stdio.writtenToStderr, contains('sdkmanager crash'));
   });
 
   testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
@@ -588,4 +656,15 @@ class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtil
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'java';
+}
+
+class ThrowingStdin<T> extends Fake implements IOSink {
+  ThrowingStdin(this.exception);
+
+  final Exception exception;
+
+  @override
+  Future<dynamic> addStream(Stream<List<int>> stream) {
+    return Future<T>.error(exception);
+  }
 }
