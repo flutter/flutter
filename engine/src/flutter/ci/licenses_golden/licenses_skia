@@ -1,4 +1,4 @@
-Signature: 5e6e18831204a6df6060152d713e56a2
+Signature: 7d0a8a3ede16fa2e555c56783e631b68
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8963,7 +8963,6 @@ ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicQuadRoots.cpp + ../../.
 ORIGIN: ../../../third_party/skia/gm/graphite_replay.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/android/SkImageAndroid.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkTextureCompressionType.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/gpu/ganesh/SkImageGanesh.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/YUVABackendTextures.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkCPUTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkBezierCurves.h + ../../../third_party/skia/LICENSE
@@ -8989,8 +8988,6 @@ ORIGIN: ../../../third_party/skia/src/encode/SkEncoder.cpp + ../../../third_part
 ORIGIN: ../../../third_party/skia/src/gpu/DitherUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/DitherUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/dawn/DawnUtilsPriv.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrImageUtils.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrImageUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrPinnableImage.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h + ../../../third_party/skia/LICENSE
@@ -9007,10 +9004,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/DispatchGroup.h + ../
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/geom/EdgeAAQuad.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_AndroidFactories.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_Base.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/image/SkImage_GaneshFactories.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/image/SkImage_LazyFactories.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_Raster.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/image/SkImage_RasterFactories.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkSurface_Base.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkSurface_Null.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLGetLoopControlFlowInfo.cpp + ../../../third_party/skia/LICENSE
@@ -9023,7 +9017,6 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzCubicQuadRoots.cpp
 FILE: ../../../third_party/skia/gm/graphite_replay.cpp
 FILE: ../../../third_party/skia/include/android/SkImageAndroid.h
 FILE: ../../../third_party/skia/include/core/SkTextureCompressionType.h
-FILE: ../../../third_party/skia/include/gpu/ganesh/SkImageGanesh.h
 FILE: ../../../third_party/skia/include/gpu/graphite/YUVABackendTextures.h
 FILE: ../../../third_party/skia/include/private/base/SkCPUTypes.h
 FILE: ../../../third_party/skia/src/base/SkBezierCurves.h
@@ -9049,8 +9042,6 @@ FILE: ../../../third_party/skia/src/encode/SkEncoder.cpp
 FILE: ../../../third_party/skia/src/gpu/DitherUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/DitherUtils.h
 FILE: ../../../third_party/skia/src/gpu/dawn/DawnUtilsPriv.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrImageUtils.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/GrImageUtils.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrPinnableImage.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h
@@ -9067,10 +9058,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/compute/DispatchGroup.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/EdgeAAQuad.h
 FILE: ../../../third_party/skia/src/image/SkImage_AndroidFactories.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_Base.cpp
-FILE: ../../../third_party/skia/src/image/SkImage_GaneshFactories.cpp
-FILE: ../../../third_party/skia/src/image/SkImage_LazyFactories.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_Raster.h
-FILE: ../../../third_party/skia/src/image/SkImage_RasterFactories.cpp
 FILE: ../../../third_party/skia/src/image/SkSurface_Base.cpp
 FILE: ../../../third_party/skia/src/image/SkSurface_Null.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLGetLoopControlFlowInfo.cpp
