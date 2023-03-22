@@ -98,7 +98,7 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   return completer.future;
 }
 
-class _OutputBuffer extends ByteConversionSinkBase {
+class _OutputBuffer extends ByteConversionSink {
   List<List<int>>? _chunks = <List<int>>[];
   int _contentLength = 0;
   Uint8List? _bytes;
