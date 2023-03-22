@@ -30,7 +30,7 @@ void main() {
   });
 
   testWidgets('shadow effect is not doubled', (WidgetTester tester) async {
-  // Regression test for https://github.com/flutter/flutter/issues/123064
+    // Regression test for https://github.com/flutter/flutter/issues/123064
     debugDisableShadows = false;
 
     const double elevation = 1;
@@ -56,7 +56,7 @@ void main() {
   });
 
   testWidgets('only one layer with `color` is painted', (WidgetTester tester) async {
-  // Regression test for https://github.com/flutter/flutter/issues/122667
+    // Regression test for https://github.com/flutter/flutter/issues/122667
     const Color bottomAppBarColor = Colors.black45;
 
     await tester.pumpWidget(
