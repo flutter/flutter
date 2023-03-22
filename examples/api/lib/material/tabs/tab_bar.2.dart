@@ -6,27 +6,22 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const TabBarApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class TabBarApp extends StatelessWidget {
+  const TabBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: _title,
-      home: const MyStatelessWidget(),
       theme: ThemeData(useMaterial3: true),
-      darkTheme: ThemeData.dark(useMaterial3: true),
+      home: const TabBarExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class TabBarExample extends StatelessWidget {
+  const TabBarExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +70,7 @@ class NestedTabBar extends StatefulWidget {
   State<NestedTabBar> createState() => _NestedTabBarState();
 }
 
-class _NestedTabBarState extends State<NestedTabBar>
-    with TickerProviderStateMixin {
+class _NestedTabBarState extends State<NestedTabBar> with TickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -87,13 +81,12 @@ class _NestedTabBarState extends State<NestedTabBar>
 
   @override
   void dispose() {
-    super.dispose();
     _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: <Widget>[
         TabBar.secondary(
@@ -107,18 +100,12 @@ class _NestedTabBarState extends State<NestedTabBar>
           child: TabBarView(
             controller: _tabController,
             children: <Widget>[
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  color: colorScheme.surfaceVariant,
-                ),
+              Card(
+                margin: const EdgeInsets.all(16.0),
                 child: Center(child: Text('${widget.outerTab}: Overview tab')),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  color: colorScheme.surfaceVariant,
-                ),
+              Card(
+                margin: const EdgeInsets.all(16.0),
                 child: Center(child: Text('${widget.outerTab}: Specifications tab')),
               ),
             ],

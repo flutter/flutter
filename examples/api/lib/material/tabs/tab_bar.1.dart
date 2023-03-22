@@ -6,34 +6,31 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const TabBarApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class TabBarApp extends StatelessWidget {
+  const TabBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const TabBarExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class TabBarExample extends StatefulWidget {
+  const TabBarExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<TabBarExample> createState() => _TabBarExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with TickerProviderStateMixin {
-  late TabController _tabController;
+class _TabBarExampleState extends State<TabBarExample> with TickerProviderStateMixin {
+  late final TabController _tabController;
 
   @override
   void initState() {
@@ -42,10 +39,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TabBar Widget'),
+        title: const Text('TabBar Sample'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const <Widget>[

@@ -1145,7 +1145,7 @@ class _TabBarState extends State<TabBar> {
     }
 
     return UnderlineTabIndicator(
-      borderRadius: theme.useMaterial3
+      borderRadius: theme.useMaterial3 && widget._isPrimary
         // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
         // when `preferredSize`and `indicatorWeight` are updated to support Material 3
         // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
