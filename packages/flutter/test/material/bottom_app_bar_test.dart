@@ -14,8 +14,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  // Regression test for https://github.com/flutter/flutter/issues/123283
   testWidgets('throws if `shape` requested in Material 3', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123283
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true),
@@ -29,8 +29,8 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/123064
   testWidgets('shadow effect is not doubled', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/123064
     debugDisableShadows = false;
 
     const double elevation = 1;
@@ -55,8 +55,8 @@ void main() {
     debugDisableShadows = true;
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/122667.
   testWidgets('only one layer with `color` is painted', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/122667
     const Color bottomAppBarColor = Colors.black45;
 
     await tester.pumpWidget(
