@@ -189,7 +189,8 @@ class _BottomAppBarState extends State<BottomAppBar> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isMaterial3 = theme.useMaterial3;
-    assert(!isMaterial3 || widget.shape == null); // `shape` not accepted in Material 3
+    assert(!isMaterial3 || widget.shape == null,
+      'The [BottomAppBar.shape] field is not permitted in Material 3.');
 
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
     final BottomAppBarTheme defaults = isMaterial3 ? _BottomAppBarDefaultsM3(context) : _BottomAppBarDefaultsM2(context);
