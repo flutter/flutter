@@ -1635,7 +1635,6 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
     switch (_writers) {
       case 0:
         extra = ', orphan';
-        break;
       case 1:
         // normal case
         break;
@@ -1942,13 +1941,11 @@ class RenderSliverOverlapInjector extends RenderSliver {
             start = Offset(x, offset.dy);
             end = Offset(x, offset.dy + geometry!.paintExtent);
             delta = Offset(constraints.crossAxisExtent / 5.0, 0.0);
-            break;
           case Axis.horizontal:
             final double y = offset.dy + constraints.crossAxisExtent / 2.0;
             start = Offset(offset.dx, y);
             end = Offset(offset.dy + geometry!.paintExtent, y);
             delta = Offset(0.0, constraints.crossAxisExtent / 5.0);
-            break;
         }
         for (int index = -2; index <= 2; index += 1) {
           paintZigZag(
