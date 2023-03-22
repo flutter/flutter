@@ -464,6 +464,74 @@ void main() {
     );
   });
 
+  testWidgets('TabBar divider can use TabBarTheme.dividerColor & TabBarTheme.dividerHeight', (WidgetTester tester) async {
+    const Color dividerColor = Colors.yellow;
+    const double dividerHeight = 10.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          tabBarTheme: const TabBarTheme(
+            dividerColor: dividerColor,
+            dividerHeight: dividerHeight,
+          ),
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Divider divider = tester.widget<Divider>(find.byType(Divider));
+    expect(divider.color, equals(dividerColor));
+    expect(divider.thickness, dividerHeight);
+  });
+
+  testWidgets('dividerColor & dividerHeight overrides TabBarTheme.dividerColor', (WidgetTester tester) async {
+    const Color dividerColor = Colors.amber;
+    const double dividerHeight = 8.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          tabBarTheme: const TabBarTheme(
+            dividerColor: Colors.pink,
+            dividerHeight: 5.0,
+          ),
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              dividerColor: dividerColor,
+              dividerHeight: dividerHeight,
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Divider divider = tester.widget<Divider>(find.byType(Divider));
+    expect(divider.color, equals(dividerColor));
+    expect(divider.thickness, dividerHeight);
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.

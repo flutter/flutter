@@ -15,6 +15,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'divider.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -360,7 +361,6 @@ class _IndicatorPainter extends CustomPainter {
     required _IndicatorPainter? old,
     required this.indicatorPadding,
     required this.labelPaddings,
-    this.dividerColor,
   }) : super(repaint: controller.animation) {
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
@@ -372,7 +372,6 @@ class _IndicatorPainter extends CustomPainter {
   final TabBarIndicatorSize? indicatorSize;
   final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
-  final Color? dividerColor;
   final List<EdgeInsetsGeometry> labelPaddings;
 
   // _currentTabOffsets and _currentTextDirection are set each time TabBar
@@ -465,10 +464,6 @@ class _IndicatorPainter extends CustomPainter {
       size: _currentRect!.size,
       textDirection: _currentTextDirection,
     );
-    if (dividerColor != null) {
-      final Paint dividerPaint = Paint()..color = dividerColor!..strokeWidth = 1;
-      canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), dividerPaint);
-    }
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
@@ -682,6 +677,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.indicator,
     this.indicatorSize,
     this.dividerColor,
+    this.dividerHeight,
     this.labelColor,
     this.labelStyle,
     this.labelPadding,
@@ -848,6 +844,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// color is used. If that is null and [ThemeData.useMaterial3] is true,
   /// [ColorScheme.surfaceVariant] will be used, otherwise divider will not be drawn.
   final Color? dividerColor;
+
+  /// The height of the divider.
+  ///
+  /// If null and [ThemeData.useMaterial3] is true, [TabBarTheme.dividerHeight]
+  /// is used. If that is null and [ThemeData.useMaterial3] is true, 1.0 will be used.
+  /// Otherwise divider will not be drawn.
+  final double? dividerHeight;
 
   /// The color of selected tab labels.
   ///
@@ -1535,6 +1538,24 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
+    if (theme.useMaterial3) {
+      tabBar = Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          Container(
+            height: widget.preferredSize.height + widget.indicatorWeight,
+            alignment: Alignment.bottomCenter,
+            child: Divider(
+              height: 0,
+              thickness: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? defaults.dividerHeight,
+              color: widget.dividerColor ?? tabBarTheme.dividerColor ?? defaults.dividerColor,
+            ),
+          ),
+          tabBar,
+        ],
+      );
+    }
+
     return tabBar;
   }
 }
@@ -2067,6 +2088,9 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override
+  double? get dividerHeight => 1.0;
 
   @override
   Color? get dividerColor => _colors.surfaceVariant;
