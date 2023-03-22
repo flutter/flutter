@@ -173,6 +173,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
     addDdsOptions(verboseHelp: verboseHelp);
@@ -196,6 +197,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   ImpellerStatus get enableImpeller => ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+
+  @override
+  bool get reportNullSafety => true;
 
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
@@ -274,6 +278,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
           && !runningWithPrebuiltApplication,
+        nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         uninstallFirst: uninstallFirst,
