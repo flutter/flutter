@@ -105,14 +105,12 @@ class _ActionIcon extends StatelessWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         semanticsLabel = getAndroidSemanticsLabel(MaterialLocalizations.of(context));
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         semanticsLabel = null;
-        break;
     }
 
     return Icon(data, semanticLabel: semanticsLabel);

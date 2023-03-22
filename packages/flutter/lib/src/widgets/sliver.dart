@@ -1928,10 +1928,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       switch (renderObject.constraints.axis) {
         case Axis.horizontal:
           itemExtent = child.renderObject!.paintBounds.width;
-          break;
         case Axis.vertical:
           itemExtent = child.renderObject!.paintBounds.height;
-          break;
       }
 
       return parentData.layoutOffset != null &&
