@@ -308,36 +308,22 @@ class FlutterView {
   external static void _updateSemantics(SemanticsUpdate update);
 }
 
-/// Deprecated. Will be removed in a future version of Flutter.
+/// A [FlutterView] that includes access to setting callbacks and retrieving
+/// properties that reside on the [PlatformDispatcher].
 ///
-/// This class is deprecated to prepare for Flutter's upcoming support for
-/// multiple views and eventually multiple windows.
+/// It is the type of the global [window] singleton used by applications that
+/// only have a single main window.
 ///
-/// This class has been split into two classes: [FlutterView] and
-/// [PlatformDispatcher]. A [FlutterView] gives an application access to
-/// view-specific functionality while the [PlatformDispatcher] contains
-/// platform-specific functionality that applies to all views.
+/// In addition to the properties of [FlutterView], this class provides access
+/// to platform-specific properties. To modify or retrieve these properties,
+/// applications designed for more than one main window should prefer using
+/// `WidgetsBinding.instance.platformDispatcher` instead.
 ///
-/// This class backs the global [window] singleton, which is also deprecated.
-/// See the docs on [window] for migration options.
-///
-/// See also:
-///
-/// * [FlutterView], which gives an application access to view-specific
-///   functionality.
-/// * [PlatformDispatcher], which gives an application access to
-///   platform-specific functionality.
-@Deprecated(
-  'Use FlutterView or PlatformDispatcher instead. '
-  'Deprecated to prepare for the upcoming multi-window support. '
-  'This feature was deprecated after v3.7.0-32.0.pre.'
-)
+/// Prefer access through `WidgetsBinding.instance.window` or
+/// `WidgetsBinding.instance.platformDispatcher` over a static reference to
+/// [window], or [PlatformDispatcher.instance]. See the documentation for
+/// [PlatformDispatcher.instance] for more details about this recommendation.
 class SingletonFlutterWindow extends FlutterView {
-  @Deprecated(
-    'Use FlutterView or PlatformDispatcher instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.7.0-32.0.pre.'
-  )
   SingletonFlutterWindow._(super.windowId, super.platformDispatcher)
       : super._();
 
@@ -590,7 +576,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// {@macro dart.ui.window.accessorForwardWarning}
   ///
   /// It's preferred to use [SchedulerBinding.addTimingsCallback] than to use
-  /// [PlatformDispatcher.onReportTimings] directly because
+  /// [SingletonFlutterWindow.onReportTimings] directly because
   /// [SchedulerBinding.addTimingsCallback] allows multiple callbacks.
   ///
   /// This can be used to see if the window has missed frames (through
@@ -905,51 +891,36 @@ enum Brightness {
   light,
 }
 
-/// Deprecated. Will be removed in a future version of Flutter.
+/// The [SingletonFlutterWindow] representing the main window for applications
+/// where there is only one window, such as applications designed for
+/// single-display mobile devices.
 ///
-/// This global property is deprecated to prepare for Flutter's upcoming support
-/// for multiple views and  multiple windows.
+/// Applications that are designed to use more than one window should interact
+/// with the `WidgetsBinding.instance.platformDispatcher` instead.
 ///
-/// It represents the main view for applications where there is only one
-/// view, such as applications designed for single-display mobile devices.
-/// If the embedder supports multiple views, it points to the first view
-/// created which is assumed to be the main view. It throws if no view has
-/// been created yet or if the first view has been removed again.
+/// Consider avoiding static references to this singleton through
+/// [PlatformDispatcher.instance] and instead prefer using a binding for
+/// dependency resolution such as `WidgetsBinding.instance.window`.
 ///
-/// The following options exists to migrate code that relies on accessing
-/// this deprecated property:
+/// Static access of this `window` object means that Flutter has few, if any
+/// options to fake or mock the given object in tests. Even in cases where Dart
+/// offers special language constructs to forcefully shadow such properties,
+/// those mechanisms would only be reasonable for tests and they would not be
+/// reasonable for a future of Flutter where we legitimately want to select an
+/// appropriate implementation at runtime.
 ///
-/// If a [BuildContext] is available, consider looking up the current
-/// [FlutterView] associated with that context via [View.of]. It gives access
-/// to the same functionality as this deprecated property. However, the
-/// platform-specific functionality has moved to the [PlatformDispatcher],
-/// which may be accessed from the view returned by [View.of] via
-/// [FlutterView.platformDispatcher]. Using [View.of] with a [BuildContext] is
-/// the preferred option to migrate away from this deprecated [window]
-/// property.
-///
-/// If no context is available to look up a [FlutterView], the
-/// [PlatformDispatcher] can be used directly for platform-specific
-/// functionality. It also maintains a list of all available [FlutterView]s in
-/// [PlatformDispatcher.views] to access view-specific functionality without a
-/// context. If possible, consider accessing the [PlatformDispatcher] via the
-/// binding (e.g. `WidgetsBinding.instance.platformDispatcher`) instead of the
-/// static singleton [PlatformDispatcher.instance]. See
-/// [PlatformDispatcher.instance] for more information about why this is
-/// preferred.
+/// The only place that `WidgetsBinding.instance.window` is inappropriate is if
+/// access to these APIs is required before the binding is initialized by
+/// invoking `runApp()` or `WidgetsFlutterBinding.instance.ensureInitialized()`.
+/// In that case, it is necessary (though unfortunate) to use the
+/// [PlatformDispatcher.instance] object statically.
 ///
 /// See also:
 ///
-/// * [FlutterView], which gives an application access to view-specific
-///   functionality.
-/// * [PlatformDispatcher], which gives an application access to
-///   platform-specific functionality.
-/// * [PlatformDispatcher.views], for a list of all available views.
-@Deprecated(
-  'Look up the current FlutterView from the context via View.of(context) or consult the PlatformDispatcher directly instead. '
-  'Deprecated to prepare for the upcoming multi-window support. '
-  'This feature was deprecated after v3.7.0-32.0.pre.'
-)
+/// * [PlatformDispatcher.views], contains the current list of Flutter windows
+///   belonging to the application, including top level application windows like
+///   this one.
+/// * [PlatformDispatcher.implicitView], this window's view.
 final SingletonFlutterWindow window = SingletonFlutterWindow._(0, PlatformDispatcher.instance);
 
 /// Additional data available on each flutter frame.
