@@ -1983,8 +1983,7 @@ class RenderSelectionSpy extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  // TODO(goderbauer): Reevaluate the ignore when https://github.com/dart-lang/sdk/issues/51800 is fixed.
-  SelectionGeometry _value = SelectionGeometry( // ignore: prefer_const_constructors
+  SelectionGeometry _value = SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
     startSelectionPoint: const SelectionPoint(
@@ -2073,8 +2072,7 @@ class RenderSelectAll extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  // TODO(goderbauer): Reevaluate the ignore when https://github.com/dart-lang/sdk/issues/51800 is fixed.
-  SelectionGeometry _value = SelectionGeometry( // ignore: prefer_const_constructors
+  SelectionGeometry _value = SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
     startSelectionPoint: const SelectionPoint(
