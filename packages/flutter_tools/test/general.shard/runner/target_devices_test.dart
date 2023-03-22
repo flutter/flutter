@@ -22,7 +22,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  testUsingContext('Ensure factory returns MacOSTargetDevices on MacOS', () async {
+  testWithoutContext('Ensure factory returns TargetDevicesWithExtendedWirelessDeviceDiscovery on MacOS', () async {
     final BufferLogger logger = BufferLogger.test();
     final Platform platform = FakePlatform(operatingSystem: 'macos');
     final TestDeviceManager deviceManager = TestDeviceManager(
@@ -36,10 +36,10 @@ void main() {
       logger: logger,
     );
 
-    expect(targetDevices is MacOSTargetDevices, true);
+    expect(targetDevices is TargetDevicesWithExtendedWirelessDeviceDiscovery, true);
   });
 
-  testUsingContext('Ensure factory returns default when not on MacOS', () async {
+  testWithoutContext('Ensure factory returns default when not on MacOS', () async {
     final BufferLogger logger = BufferLogger.test();
     final Platform platform = FakePlatform();
     final TestDeviceManager deviceManager = TestDeviceManager(
@@ -53,7 +53,7 @@ void main() {
       logger: logger,
     );
 
-    expect(targetDevices is MacOSTargetDevices, false);
+    expect(targetDevices is TargetDevicesWithExtendedWirelessDeviceDiscovery, false);
   });
 
   group('findAllTargetDevices on non-MacOS platform', () {
@@ -903,7 +903,7 @@ target-device-6 (mobile) • xxx • android • Android 10
         );
         deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1];
 
-        final MacOSTargetDevices targetDevices = MacOSTargetDevices(
+        final TargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
           deviceManager: deviceManager,
           logger: logger,
         );
@@ -929,7 +929,7 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       deviceManager.iosDiscoverer.deviceList = <Device>[disconnectedWirelessIOSDevice1];
       deviceManager.iosDiscoverer.refreshDeviceList = <Device>[connectedWirelessIOSDevice1];
 
-      final MacOSTargetDevices targetDevices = MacOSTargetDevices(
+      final TargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
         logger: logger,
       );
@@ -952,7 +952,7 @@ Unable to locate a development device; please run 'flutter doctor' for informati
       );
       deviceManager.iosDiscoverer.deviceList = <Device>[attachedUnsupportedIOSDevice, attachedUnsupportedForProjectIOSDevice];
 
-      final MacOSTargetDevices targetDevices = MacOSTargetDevices(
+      final TargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
         logger: logger,
       );
@@ -1184,7 +1184,7 @@ If you would like your app to run on fuchsia or ios, consider running `flutter c
     group('finds single device', () {
       late TestBufferLogger logger;
       late TestDeviceManager deviceManager;
-      late MacOSTargetDevices targetDevices;
+      late TargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices;
 
       setUp(() {
         logger = TestBufferLogger.test();
@@ -1192,7 +1192,7 @@ If you would like your app to run on fuchsia or ios, consider running `flutter c
           logger: logger,
           platform: platform,
         );
-        targetDevices = MacOSTargetDevices(
+        targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
           deviceManager: deviceManager,
           logger: logger,
         );
@@ -1251,7 +1251,7 @@ No devices found yet. Checking for wireless devices...
           testUsingContext('when single non-ephemeral attached device', () async {
             deviceManager.iosDiscoverer.deviceList = <Device>[nonEphemeralDevice];
 
-            final TestMacOSTargetDevices targetDevices = TestMacOSTargetDevices(
+            final TestTargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
             );
@@ -1290,7 +1290,7 @@ Please choose one (or "q" to quit): '''));
 
           setUp(() {
             terminal = FakeTerminal(stdinHasTerminal: false);
-            targetDevices = MacOSTargetDevices(
+            targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
             );
@@ -1524,12 +1524,12 @@ Checking for wireless devices...
       group('with device not specified', () {
         group('with stdinHasTerminal', () {
           late FakeTerminal terminal;
-          late TestMacOSTargetDevices targetDevices;
+          late TestTargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices;
 
           setUp(() {
             terminal = FakeTerminal(supportsColor: true);
             logger = TestBufferLogger.test(terminal: terminal);
-            targetDevices = TestMacOSTargetDevices(
+            targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
             );
@@ -1660,7 +1660,7 @@ target-device-6 (mobile) • xxx • ios • iOS 16
             setUp(() {
               terminal = FakeTerminal();
               logger = TestBufferLogger.test(terminal: terminal);
-              targetDevices = TestMacOSTargetDevices(
+              targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
                 deviceManager: deviceManager,
                 logger: logger,
               );
@@ -1699,7 +1699,7 @@ target-device-5 (mobile) • xxx • ios • iOS 16
           group('with verbose logging', () {
             setUp(() {
               logger = TestBufferLogger.test(terminal: terminal, verbose: true);
-              targetDevices = TestMacOSTargetDevices(
+              targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
                 deviceManager: deviceManager,
                 logger: logger,
               );
@@ -1800,11 +1800,11 @@ Please choose one (or "q" to quit): '''));
 
         group('without stdinHasTerminal', () {
           late FakeTerminal terminal;
-          late MacOSTargetDevices targetDevices;
+          late TargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices;
 
           setUp(() {
             terminal = FakeTerminal(stdinHasTerminal: false);
-            targetDevices = MacOSTargetDevices(
+            targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
             );
@@ -1906,12 +1906,12 @@ target-device-6 (mobile) • xxx • ios • iOS 16
 
         group('with stdinHasTerminal', () {
           late FakeTerminal terminal;
-          late TestMacOSTargetDevices targetDevices;
+          late TestTargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices;
 
           setUp(() {
             terminal = FakeTerminal(supportsColor: true);
             logger = TestBufferLogger.test(terminal: terminal);
-            targetDevices = TestMacOSTargetDevices(
+            targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
             );
@@ -2039,11 +2039,11 @@ target-device-6 (mobile) • xxx • ios • iOS 16
 
         group('without stdinHasTerminal', () {
           late FakeTerminal terminal;
-          late MacOSTargetDevices targetDevices;
+          late TargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices;
 
           setUp(() {
             terminal = FakeTerminal(stdinHasTerminal: false);
-            targetDevices = MacOSTargetDevices(
+            targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
               deviceManager: deviceManager,
               logger: logger,
             );
@@ -2158,10 +2158,10 @@ target-device-6 (mobile) • xxx • ios • iOS 16
       });
 
       group('with hasSpecifiedAllDevices', () {
-        late MacOSTargetDevices targetDevices;
+        late TargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices;
         setUp(() {
           deviceManager.hasSpecifiedAllDevices = true;
-          targetDevices = MacOSTargetDevices(
+          targetDevices = TargetDevicesWithExtendedWirelessDeviceDiscovery(
             deviceManager: deviceManager,
             logger: logger,
           );
@@ -2230,8 +2230,8 @@ No devices found yet. Checking for wireless devices...
   });
 }
 
-class TestMacOSTargetDevices extends MacOSTargetDevices {
-  TestMacOSTargetDevices({
+class TestTargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevicesWithExtendedWirelessDeviceDiscovery {
+  TestTargetDevicesWithExtendedWirelessDeviceDiscovery({
     required super.deviceManager,
     required super.logger,
   })  : _deviceSelection = TestTargetDeviceSelection(logger);

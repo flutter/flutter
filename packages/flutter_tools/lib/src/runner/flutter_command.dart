@@ -206,6 +206,9 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get deprecated => false;
 
+  /// When the command runs and this is true, trigger an async process to
+  /// discover devices from discoverers that support wireless devices for an
+  /// extended amount of time and refresh the device cache with the results.
   bool get refreshWirelessDevices => false;
 
   @override
@@ -1385,7 +1388,7 @@ abstract class FlutterCommand extends Command<void> {
 
     if (refreshWirelessDevices) {
       // Loading wireless devices takes longer so start it early.
-      _targetDevices.startPollingWirelessDevices(
+      _targetDevices.startPollingWirelessDeviceDiscoverers(
         deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       );
     }

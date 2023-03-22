@@ -243,7 +243,7 @@ abstract class DeviceManager {
   /// connected will be used.
   ///
   /// Search for devices to populate the cache for no longer than [timeout].
-  Future<List<Device>> refreshWirelesslyConnectedDevices({
+  Future<List<Device>> refreshWirelessDeviceDiscoverers({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
   }) async {
@@ -251,7 +251,9 @@ abstract class DeviceManager {
     final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         if (discoverer.supportsWirelessDevices)
-          discoverer.discoverDevices(filter: filter, timeout: timeout),
+          discoverer.discoverDevices(filter: filter, timeout: timeout)
+        else
+          discoverer.devices(filter: filter)
     ]);
 
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
@@ -460,6 +462,7 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
+  /// Whether this device discovery is known to return wireless devices.
   bool get supportsWirelessDevices => false;
 
   /// Return all connected devices, cached on subsequent calls.

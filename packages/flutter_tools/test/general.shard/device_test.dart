@@ -198,7 +198,7 @@ void main() {
       expect(await deviceManager.refreshAllDevices(), <Device>[attachedDevice, newAttachedDevice, wirelessDevice, newWirelessDevice]);
     });
 
-    testWithoutContext('refreshWirelesslyConnectedDevices only refreshes discoverers that support wireless', () async {
+    testWithoutContext('refreshWirelessDeviceDiscoverers only refreshes discoverers that support wireless', () async {
       final FakePollingDeviceDiscovery notSupportedDiscoverer = FakePollingDeviceDiscovery();
       final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(supportsWirelessDevices: true);
 
@@ -216,7 +216,7 @@ void main() {
           supportedDiscoverer,
         ],
       );
-      expect(await deviceManager.refreshWirelesslyConnectedDevices(), <Device>[wirelessDevice]);
+      expect(await deviceManager.refreshWirelessDeviceDiscoverers(), <Device>[attachedDevice, wirelessDevice]);
 
       final FakeDevice newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
       notSupportedDiscoverer.addDevice(newAttachedDevice);
@@ -224,7 +224,7 @@ void main() {
       final FakeDevice newWirelessDevice = FakeDevice('New wireless device', 'new-wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
       supportedDiscoverer.addDevice(newWirelessDevice);
 
-      expect(await deviceManager.refreshWirelesslyConnectedDevices(), <Device>[wirelessDevice, newWirelessDevice]);
+      expect(await deviceManager.refreshWirelessDeviceDiscoverers(), <Device>[attachedDevice, wirelessDevice, newWirelessDevice]);
     });
   });
 

@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:test/fake.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -28,26 +29,33 @@ void main() {
     late Cache cache;
     late Platform platform;
 
-    testUsingContext('Ensure factory returns MacOSTargetDevices on MacOS', () async {
-      final Platform platform = FakePlatform(operatingSystem: 'macos');
-      final DevicesCommandOutput devicesCommandOutput = DevicesCommandOutput(
-        platform: platform,
-        deviceDiscoveryTimeout: null,
-      );
+    group('ensure factory', () {
+      late FakeBufferLogger fakeLogger;
 
-      expect(devicesCommandOutput is MacOSDevicesCommandOutput, true);
+      setUpAll(() {
+        fakeLogger = FakeBufferLogger();
+      });
+
+      testWithoutContext('returns DevicesCommandOutputWithExtendedWirelessDeviceDiscovery on MacOS', () async {
+        final Platform platform = FakePlatform(operatingSystem: 'macos');
+        final DevicesCommandOutput devicesCommandOutput = DevicesCommandOutput(
+          platform: platform,
+          logger: fakeLogger,
+        );
+
+        expect(devicesCommandOutput is DevicesCommandOutputWithExtendedWirelessDeviceDiscovery, true);
+      });
+
+      testWithoutContext('returns default when not on MacOS', () async {
+        final Platform platform = FakePlatform();
+        final DevicesCommandOutput devicesCommandOutput = DevicesCommandOutput(
+          platform: platform,
+          logger: fakeLogger,
+        );
+
+        expect(devicesCommandOutput is DevicesCommandOutputWithExtendedWirelessDeviceDiscovery, false);
+      });
     });
-
-    testUsingContext('Ensure factory returns default when not on MacOS', () async {
-      final Platform platform = FakePlatform();
-      final DevicesCommandOutput devicesCommandOutput = DevicesCommandOutput(
-        platform: platform,
-        deviceDiscoveryTimeout: null,
-      );
-
-      expect(devicesCommandOutput is MacOSDevicesCommandOutput, false);
-    });
-
 
     group('when Platform is not MacOS', () {
       setUp(() {
@@ -637,7 +645,7 @@ class _FakeDeviceManager extends DeviceManager {
   }) => getAllDevices(filter: filter);
 
   @override
-  Future<List<Device>> refreshWirelesslyConnectedDevices({
+  Future<List<Device>> refreshWirelessDeviceDiscoverers({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
   }) => getAllDevices(filter: filter);

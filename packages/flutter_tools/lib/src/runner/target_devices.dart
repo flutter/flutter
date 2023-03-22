@@ -33,7 +33,7 @@ class TargetDevices {
     required Logger logger,
   }) {
     if (platform.isMacOS) {
-      return MacOSTargetDevices(
+      return TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
         logger: logger,
       );
@@ -97,7 +97,7 @@ class TargetDevices {
     );
   }
 
-  void startPollingWirelessDevices({
+  void startPollingWirelessDeviceDiscoverers({
     Duration? deviceDiscoveryTimeout,
   }) {}
 
@@ -340,8 +340,8 @@ class TargetDevices {
 }
 
 @visibleForTesting
-class MacOSTargetDevices extends TargetDevices {
-  MacOSTargetDevices({
+class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
+  TargetDevicesWithExtendedWirelessDeviceDiscovery({
     required super.deviceManager,
     required super.logger,
   })  : super._private();
@@ -355,19 +355,21 @@ class MacOSTargetDevices extends TargetDevices {
   late final TargetDeviceSelection deviceSelection = TargetDeviceSelection(_logger);
 
   @override
-  void startPollingWirelessDevices({
+  void startPollingWirelessDeviceDiscoverers({
     Duration? deviceDiscoveryTimeout,
   }) {
-    _wirelessDevicesRefresh ??= _deviceManager.refreshWirelesslyConnectedDevices(
-      timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
-    );
+    if (deviceDiscoveryTimeout != null) {
+      _wirelessDevicesRefresh ??= _deviceManager.refreshWirelessDeviceDiscoverers(
+        timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
+      );
+    }
     return;
   }
 
   Future<List<Device>> _getRefreshedWirelessDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    startPollingWirelessDevices();
+    startPollingWirelessDeviceDiscoverers();
     return () async {
       await _wirelessDevicesRefresh;
       return _deviceManager.getDevices(

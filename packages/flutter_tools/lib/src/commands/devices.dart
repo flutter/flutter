@@ -5,6 +5,7 @@
 import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -65,8 +66,10 @@ class DevicesCommand extends FlutterCommand {
     }
 
     final DevicesCommandOutput output = DevicesCommandOutput(
-      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       platform: globals.platform,
+      logger: globals.logger,
+      deviceManager: globals.deviceManager,
+      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
     );
 
     await output.findAndOutputAllTargetDevices(
@@ -80,21 +83,33 @@ class DevicesCommand extends FlutterCommand {
 class DevicesCommandOutput {
   factory DevicesCommandOutput({
     required Platform platform,
-    required Duration? deviceDiscoveryTimeout,
+    required Logger logger,
+    DeviceManager? deviceManager,
+    Duration? deviceDiscoveryTimeout,
   }) {
     if (platform.isMacOS) {
-      return MacOSDevicesCommandOutput(
+      return DevicesCommandOutputWithExtendedWirelessDeviceDiscovery(
+        logger: logger,
+        deviceManager: deviceManager,
         deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       );
     }
     return DevicesCommandOutput._private(
+      logger: logger,
+      deviceManager: deviceManager,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
     );
   }
-  DevicesCommandOutput._private({
-    required this.deviceDiscoveryTimeout,
-  });
 
+  DevicesCommandOutput._private({
+    required Logger logger,
+    required DeviceManager? deviceManager,
+    required this.deviceDiscoveryTimeout,
+  })  : _deviceManager = deviceManager,
+        _logger = logger;
+
+  final DeviceManager? _deviceManager;
+  final Logger _logger;
   final Duration? deviceDiscoveryTimeout;
 
   Future<List<Device>> _getAttachedDevices(DeviceManager deviceManager) async {
@@ -116,7 +131,7 @@ class DevicesCommandOutput {
   Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
     List<Device> attachedDevices = <Device>[];
     List<Device> wirelessDevices = <Device>[];
-    final DeviceManager? deviceManager = globals.deviceManager;
+    final DeviceManager? deviceManager = _deviceManager;
     if (deviceManager != null) {
       // Refresh the cache and then get the attached and wireless devices from
       // the cache.
@@ -135,15 +150,15 @@ class DevicesCommandOutput {
       _printNoDevicesDetected();
     } else {
       if (attachedDevices.isNotEmpty) {
-        globals.printStatus('${attachedDevices.length} connected ${pluralize('device', attachedDevices.length)}:\n');
-        await Device.printDevices(attachedDevices, globals.logger);
+        _logger.printStatus('${attachedDevices.length} connected ${pluralize('device', attachedDevices.length)}:\n');
+        await Device.printDevices(attachedDevices, _logger);
       }
       if (wirelessDevices.isNotEmpty) {
         if (attachedDevices.isNotEmpty) {
-          globals.printStatus('');
+          _logger.printStatus('');
         }
-        globals.printStatus('${wirelessDevices.length} wirelessly connected ${pluralize('device', wirelessDevices.length)}:\n');
-        await Device.printDevices(wirelessDevices, globals.logger);
+        _logger.printStatus('${wirelessDevices.length} wirelessly connected ${pluralize('device', wirelessDevices.length)}:\n');
+        await Device.printDevices(wirelessDevices, _logger);
       }
     }
     await _printDiagnostics();
@@ -161,21 +176,21 @@ class DevicesCommandOutput {
     }
     status.write('Visit https://flutter.dev/setup/ for troubleshooting tips.');
 
-    globals.printStatus(status.toString());
+    _logger.printStatus(status.toString());
   }
 
   Future<void> _printDiagnostics() async {
-    final List<String> diagnostics = await globals.deviceManager?.getDeviceDiagnostics() ?? <String>[];
+    final List<String> diagnostics = await _deviceManager?.getDeviceDiagnostics() ?? <String>[];
     if (diagnostics.isNotEmpty) {
-      globals.printStatus('');
+      _logger.printStatus('');
       for (final String diagnostic in diagnostics) {
-        globals.printStatus('• $diagnostic', hangingIndent: 2);
+        _logger.printStatus('• $diagnostic', hangingIndent: 2);
       }
     }
   }
 
   Future<void> printDevicesAsJson(List<Device> devices) async {
-    globals.printStatus(
+    _logger.printStatus(
       const JsonEncoder.withIndent('  ').convert(
         await Future.wait(devices.map((Device d) => d.toJson()))
       )
@@ -187,9 +202,11 @@ const String _checkingForWirelessDevicesMessage = 'Checking for wireless devices
 const String _noAttachedCheckForWireless = 'No devices found yet. Checking for wireless devices...';
 const String _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
 
-class MacOSDevicesCommandOutput extends DevicesCommandOutput{
-  MacOSDevicesCommandOutput({
-    required super.deviceDiscoveryTimeout,
+class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCommandOutput {
+  DevicesCommandOutputWithExtendedWirelessDeviceDiscovery({
+    required super.logger,
+    super.deviceManager,
+    super.deviceDiscoveryTimeout,
   }) : super._private();
 
   @override
@@ -201,7 +218,7 @@ class MacOSDevicesCommandOutput extends DevicesCommandOutput{
     }
 
     if (machine) {
-      final List<Device> devices = await globals.deviceManager?.refreshAllDevices(
+      final List<Device> devices = await _deviceManager?.refreshAllDevices(
         filter: DeviceDiscoveryFilter(),
         timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
       ) ?? <Device>[];
@@ -209,7 +226,7 @@ class MacOSDevicesCommandOutput extends DevicesCommandOutput{
       return;
     }
 
-    final Future<List<Device>>? futureWirelessDevices = globals.deviceManager?.refreshWirelesslyConnectedDevices(
+    final Future<List<Device>>? futureWirelessDevices = _deviceManager?.refreshWirelessDeviceDiscoverers(
       filter: DeviceDiscoveryFilter(
         deviceConnectionInterface: DeviceConnectionInterface.wireless,
       ),
@@ -217,7 +234,7 @@ class MacOSDevicesCommandOutput extends DevicesCommandOutput{
     );
 
     List<Device> attachedDevices = <Device>[];
-    final DeviceManager? deviceManager = globals.deviceManager;
+    final DeviceManager? deviceManager = _deviceManager;
     if (deviceManager != null) {
       attachedDevices = await _getAttachedDevices(deviceManager);
     }
@@ -228,39 +245,40 @@ class MacOSDevicesCommandOutput extends DevicesCommandOutput{
 
     // Display list of attached devices.
     if (attachedDevices.isNotEmpty) {
-      globals.printStatus('${attachedDevices.length} connected ${pluralize('device', attachedDevices.length)}:\n');
-      await Device.printDevices(attachedDevices, globals.logger);
-      globals.printStatus('');
+      _logger.printStatus('${attachedDevices.length} connected ${pluralize('device', attachedDevices.length)}:\n');
+      await Device.printDevices(attachedDevices, _logger);
+      _logger.printStatus('');
       numLinesToClear += 1;
     }
 
     // Display waiting message.
     if (attachedDevices.isEmpty) {
-      globals.logger.printStatus(_noAttachedCheckForWireless);
+      _logger.printStatus(_noAttachedCheckForWireless);
     } else {
-      globals.logger.printStatus(_checkingForWirelessDevicesMessage);
+      _logger.printStatus(_checkingForWirelessDevicesMessage);
     }
     numLinesToClear += 1;
 
-    final Status waitingStatus = globals.logger.startSpinner();
+    final Status waitingStatus = _logger.startSpinner();
     final List<Device> wirelessDevices = await futureWirelessDevices ?? <Device>[];
     waitingStatus.stop();
 
-    if (globals.logger.isVerbose) {
+    final Terminal terminal = _logger.terminal;
+    if (_logger.isVerbose) {
       // Reprint the attach devices.
       if (attachedDevices.isNotEmpty) {
-        globals.printStatus('\n${attachedDevices.length} connected ${pluralize('device', attachedDevices.length)}:\n');
-        await Device.printDevices(attachedDevices, globals.logger);
+        _logger.printStatus('\n${attachedDevices.length} connected ${pluralize('device', attachedDevices.length)}:\n');
+        await Device.printDevices(attachedDevices, _logger);
       }
-    } else if (globals.terminal.supportsColor) {
-      globals.logger.printStatus(
-        globals.terminal.clearLines(numLinesToClear),
+    } else if (terminal.supportsColor && terminal is AnsiTerminal) {
+      _logger.printStatus(
+        terminal.clearLines(numLinesToClear),
         newline: false,
       );
     }
 
-    if (attachedDevices.isNotEmpty || !globals.terminal.supportsColor) {
-      globals.printStatus('');
+    if (attachedDevices.isNotEmpty || !_logger.terminal.supportsColor) {
+      _logger.printStatus('');
     }
 
     if (wirelessDevices.isEmpty) {
@@ -269,12 +287,12 @@ class MacOSDevicesCommandOutput extends DevicesCommandOutput{
         _printNoDevicesDetected();
       } else {
         // Attached devices found, wireless devices not found.
-        globals.logger.printStatus(_noWirelessDevicesFoundMessage);
+        _logger.printStatus(_noWirelessDevicesFoundMessage);
       }
     } else {
       // Display list of wireless devices.
-      globals.printStatus('${wirelessDevices.length} wirelessly connected ${pluralize('device', wirelessDevices.length)}:\n');
-      await Device.printDevices(wirelessDevices, globals.logger);
+      _logger.printStatus('${wirelessDevices.length} wirelessly connected ${pluralize('device', wirelessDevices.length)}:\n');
+      await Device.printDevices(wirelessDevices, _logger);
     }
     await _printDiagnostics();
   }
