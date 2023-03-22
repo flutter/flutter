@@ -170,8 +170,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
         case 0:
           return const TextStyle();
         case 1:
-          style = const TextStyle();
-// and mutate it below
+          style = const TextStyle(); // is mutated below
         default:
           return null;
       }
