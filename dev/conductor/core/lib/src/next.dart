@@ -160,20 +160,6 @@ class NextContext extends Context {
         }
         break;
       case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-        if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
-          stdio.printStatus(
-              'This release has no engine cherrypicks, and thus the engine.version file\n'
-              'in the framework does not need to be updated.',
-          );
-
-          if (state.framework.cherrypicks.isEmpty) {
-            stdio.printStatus(
-                'This release also has no framework cherrypicks. Therefore, a framework\n'
-                'pull request is not required.',
-            );
-            break;
-          }
-        }
         final Remote engineUpstreamRemote = Remote(
             name: RemoteName.upstream,
             url: state.engine.upstream.url,

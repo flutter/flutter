@@ -463,10 +463,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _handleScroll() {
-    // If an ancestor scrolls, and we're a top level or root anchor, then close
-    // the menus. Don't just close it on *any* scroll, since we want to be able
-    // to scroll menus themselves if they're too big for the view.
-    if (_isTopLevel || _isRoot) {
+    // If an ancestor scrolls, and we're a root anchor, then close the menus.
+    // Don't just close it on *any* scroll, since we want to be able to scroll
+    // menus themselves if they're too big for the view.
+    if (_isRoot) {
       _root._close();
     }
   }
@@ -3585,7 +3585,7 @@ bool _platformSupportsAccelerators() {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
@@ -3619,15 +3619,15 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return MaterialStatePropertyAll<EdgeInsetsGeometry>(
+    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(
-        horizontal: math.max(
-          _kTopLevelMenuHorizontalMinPadding,
-          2 + Theme.of(context).visualDensity.baseSizeAdjustment.dx,
-        ),
+        horizontal: _kTopLevelMenuHorizontalMinPadding
       ),
     );
   }
+
+  @override
+  VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
@@ -3756,7 +3756,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle {
-    return MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+    return MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.bodyLarge);
   }
 
   @override
@@ -3764,10 +3764,25 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   // The horizontal padding number comes from the spec.
   EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+    VisualDensity visualDensity = Theme.of(context).visualDensity;
+    // When horizontal VisualDensity is greater than zero, set it to zero
+    // because the [ButtonStyleButton] has already handle the padding based on the density.
+    // However, the [ButtonStyleButton] doesn't allow the [VisualDensity] adjustment
+    // to reduce the width of the left/right padding, so we need to handle it here if
+    // the density is less than zero, such as on desktop platforms.
+    if (visualDensity.horizontal > 0) {
+      visualDensity = VisualDensity(vertical: visualDensity.vertical);
+    }
     return ButtonStyleButton.scaledPadding(
-      const EdgeInsets.symmetric(horizontal: 12),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsets.symmetric(horizontal: 4),
+      EdgeInsets.symmetric(horizontal: math.max(
+        _kMenuViewPadding,
+        _kLabelItemDefaultSpacing + visualDensity.baseSizeAdjustment.dx,
+      )),
+      EdgeInsets.symmetric(horizontal: math.max(
+        _kMenuViewPadding,
+        8 + visualDensity.baseSizeAdjustment.dx,
+      )),
+      const EdgeInsets.symmetric(horizontal: _kMenuViewPadding),
       MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
@@ -3805,15 +3820,13 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return MaterialStatePropertyAll<EdgeInsetsGeometry>(
-      EdgeInsetsDirectional.symmetric(
-        vertical: math.max(
-          _kMenuVerticalMinPadding,
-          2 + Theme.of(context).visualDensity.baseSizeAdjustment.dy,
-        ),
-      ),
+    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
+      EdgeInsetsDirectional.symmetric(vertical: _kMenuVerticalMinPadding),
     );
   }
+
+  @override
+  VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
 
 // END GENERATED TOKEN PROPERTIES - Menu

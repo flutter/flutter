@@ -133,7 +133,6 @@ class WebAssetServer implements AssetReader {
     this.internetAddress,
     this._modules,
     this._digests,
-    this._nullSafetyMode,
   ) : basePath = _getIndexHtml().getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
@@ -188,8 +187,7 @@ class WebAssetServer implements AssetReader {
     bool enableDwds,
     bool enableDds,
     Uri entrypoint,
-    ExpressionCompiler? expressionCompiler,
-    NullSafetyMode nullSafetyMode, {
+    ExpressionCompiler? expressionCompiler, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
@@ -226,7 +224,6 @@ class WebAssetServer implements AssetReader {
       address,
       modules,
       digests,
-      nullSafetyMode,
     );
     if (testMode) {
       return server;
@@ -319,7 +316,6 @@ class WebAssetServer implements AssetReader {
     return server;
   }
 
-  final NullSafetyMode _nullSafetyMode;
   final HttpServer _httpServer;
   final WebMemoryFS _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -416,6 +412,18 @@ class WebAssetServer implements AssetReader {
 
     File file = _resolveDartFile(requestPath);
 
+    if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
+      final String canvasKitPath = globals.artifacts!.getArtifactPath(
+        Artifact.canvasKitPath,
+        platform: TargetPlatform.web_javascript,
+      );
+      final Uri potential = globals.fs
+          .directory(canvasKitPath)
+          .uri
+          .resolve(requestPath.replaceFirst('canvaskit/', ''));
+      file = globals.fs.file(potential);
+    }
+
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
@@ -437,7 +445,8 @@ class WebAssetServer implements AssetReader {
     if (!file.existsSync()) {
       // Paths starting with these prefixes should've been resolved above.
       if (requestPath.startsWith('assets/') ||
-          requestPath.startsWith('packages/')) {
+          requestPath.startsWith('packages/') ||
+          requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
       return _serveIndex();
@@ -563,12 +572,12 @@ class WebAssetServer implements AssetReader {
 
   File get _resolveDartSdkJsFile =>
       globals.fs.file(globals.artifacts!.getHostArtifact(
-          kDartSdkJsArtifactMap[webRenderer]![_nullSafetyMode]!
+          kDartSdkJsArtifactMap[webRenderer]!
       ));
 
   File get _resolveDartSdkJsMapFile =>
     globals.fs.file(globals.artifacts!.getHostArtifact(
-        kDartSdkJsMapArtifactMap[webRenderer]![_nullSafetyMode]!
+        kDartSdkJsMapArtifactMap[webRenderer]!
     ));
 
   @override
@@ -637,9 +646,7 @@ class WebDevFS implements DevFS {
     required this.entrypoint,
     required this.expressionCompiler,
     required this.chromiumLauncher,
-    required this.nullAssertions,
     required this.nativeNullAssertions,
-    required this.nullSafetyMode,
     this.testMode = false,
   }) : _port = port;
 
@@ -656,10 +663,8 @@ class WebDevFS implements DevFS {
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
-  final bool nullAssertions;
   final bool nativeNullAssertions;
   final int? _port;
-  final NullSafetyMode nullSafetyMode;
 
   late WebAssetServer webAssetServer;
 
@@ -755,7 +760,6 @@ class WebDevFS implements DevFS {
       enableDds,
       entrypoint,
       expressionCompiler,
-      nullSafetyMode,
       testMode: testMode,
     );
 
@@ -844,7 +848,6 @@ class WebDevFS implements DevFS {
         'main_module.bootstrap.js',
         generateMainModule(
           entrypoint: entrypoint,
-          nullAssertions: nullAssertions,
           nativeNullAssertions: nativeNullAssertions,
         ),
       );
