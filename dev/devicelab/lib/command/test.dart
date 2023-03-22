@@ -51,6 +51,10 @@ class TestCommand extends Command<void> {
       'silent',
       help: 'Suppresses standard output and only print standard error output.',
     );
+    argParser.addFlag(
+      'use-emulator',
+      help: 'Use an emulator instead of a device to run tests.'
+    );
   }
 
   @override
@@ -74,6 +78,7 @@ class TestCommand extends Command<void> {
       luciBuilder: argResults!['luci-builder'] as String?,
       resultsPath: argResults!['results-file'] as String?,
       silent: (argResults!['silent'] as bool?) ?? false,
+      useEmulator: (argResults!['use-emulator'] as bool?) ?? false,
       taskArgs: taskArgs,
     );
   }

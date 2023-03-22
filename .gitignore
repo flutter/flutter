@@ -20,7 +20,7 @@
 .classpath
 .project
 .settings/
-.vscode/
+.vscode/*
 
 # Flutter repo-specific
 /bin/cache/
@@ -51,7 +51,7 @@ analysis_benchmark.json
 .flutter-plugins-dependencies
 **/generated_plugin_registrant.dart
 .packages
-.pub-cache/
+.pub-preload-cache/
 .pub/
 build/
 flutter_*.png
@@ -110,10 +110,12 @@ unlinked_spec.ds
 # Windows
 **/windows/flutter/generated_plugin_registrant.cc
 **/windows/flutter/generated_plugin_registrant.h
+**/windows/flutter/generated_plugins.cmake
 
 # Linux
 **/linux/flutter/generated_plugin_registrant.cc
 **/linux/flutter/generated_plugin_registrant.h
+**/linux/flutter/generated_plugins.cmake
 
 # Coverage
 coverage/
@@ -128,3 +130,4 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+!.vscode/settings.json

@@ -1035,10 +1035,7 @@ class _Dial extends StatefulWidget {
     required this.hourDialType,
     required this.onChanged,
     required this.onHourSelected,
-  }) : assert(selectedTime != null),
-       assert(hourMinuteMode != null),
-       assert(hourMinuteMode != null),
-       assert(hourDialType != null);
+  });
 
   final TimeOfDay selectedTime;
   final _HourMinuteMode hourMinuteMode;
@@ -2053,12 +2050,9 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 
     final InputDecorationTheme inputDecorationTheme = timePickerTheme.inputDecorationTheme ?? defaultTheme.inputDecorationTheme;
     InputDecoration inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
-    // If screen reader is in use, make the hint text say hours/minutes.
-    // Otherwise, remove the hint text when focused because the centered cursor
+    // Remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
-    final String? hintText = MediaQuery.accessibleNavigationOf(context) || WidgetsBinding.instance.window.semanticsEnabled
-        ? widget.semanticHintText
-        : (focusNode.hasFocus ? null : _formattedValue);
+    final String? hintText = focusNode.hasFocus ? null : _formattedValue;
 
     // Because the fill color is specified in both the inputDecorationTheme and
     // the TimePickerTheme, if there's one in the user's input decoration theme,
@@ -2105,26 +2099,29 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
         child: UnmanagedRestorationScope(
           bucket: bucket,
-          child: TextFormField(
-            restorationId: 'hour_minute_text_form_field',
-            autofocus: widget.autofocus ?? false,
-            expands: true,
-            maxLines: null,
-            inputFormatters: <TextInputFormatter>[
-              LengthLimitingTextInputFormatter(2),
-            ],
-            focusNode: focusNode,
-            textAlign: TextAlign.center,
-            textInputAction: widget.inputAction,
-            keyboardType: TextInputType.number,
-            style: effectiveStyle,
-            controller: controller.value,
-            decoration: inputDecoration,
-            validator: widget.validator,
-            onEditingComplete: () => widget.onSavedSubmitted(controller.value.text),
-            onSaved: widget.onSavedSubmitted,
-            onFieldSubmitted: widget.onSavedSubmitted,
-            onChanged: widget.onChanged,
+          child: Semantics(
+            label: widget.semanticHintText,
+            child: TextFormField(
+              restorationId: 'hour_minute_text_form_field',
+              autofocus: widget.autofocus ?? false,
+              expands: true,
+              maxLines: null,
+              inputFormatters: <TextInputFormatter>[
+                LengthLimitingTextInputFormatter(2),
+              ],
+              focusNode: focusNode,
+              textAlign: TextAlign.center,
+              textInputAction: widget.inputAction,
+              keyboardType: TextInputType.number,
+              style: effectiveStyle,
+              controller: controller.value,
+              decoration: inputDecoration,
+              validator: widget.validator,
+              onEditingComplete: () => widget.onSavedSubmitted(controller.value.text),
+              onSaved: widget.onSavedSubmitted,
+              onFieldSubmitted: widget.onSavedSubmitted,
+              onChanged: widget.onChanged,
+            ),
           ),
         ),
       ),
@@ -2158,7 +2155,7 @@ class TimePickerDialog extends StatefulWidget {
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
-  }) : assert(initialTime != null);
+  });
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;
@@ -2341,7 +2338,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
             break;
           case TimeOfDayFormat.a_space_h_colon_mm:
           case TimeOfDayFormat.h_colon_mm_space_a:
-            timePickerWidth = _kTimePickerMinInputSize.width;
+            timePickerWidth = _kTimePickerMinInputSize.width - (useMaterial3 ? 32 : 0);
             break;
         }
         return Size(timePickerWidth, _kTimePickerMinInputSize.height);
@@ -2386,7 +2383,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
             break;
           case TimeOfDayFormat.a_space_h_colon_mm:
           case TimeOfDayFormat.h_colon_mm_space_a:
-            timePickerWidth = _kTimePickerInputSize.width;
+            timePickerWidth = _kTimePickerInputSize.width - (useMaterial3 ? 32 : 0);
             break;
         }
         timePickerSize = Size(timePickerWidth, _kTimePickerInputSize.height);
@@ -2460,7 +2457,6 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         tapTargetSizeOffset = const Offset(0, -12);
         break;
     }
-
     final Size dialogSize = _dialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     final Size minDialogSize = _minDialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     return Dialog(
@@ -3035,10 +3031,6 @@ Future<TimeOfDay?> showTimePicker({
   Offset? anchorPoint,
   Orientation? orientation,
 }) async {
-  assert(context != null);
-  assert(initialTime != null);
-  assert(useRootNavigator != null);
-  assert(initialEntryMode != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final Widget dialog = TimePickerDialog(
@@ -3392,9 +3384,8 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
-// Generated version v0_143
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context);
 
@@ -3509,7 +3500,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   Color get dialBackgroundColor {
-    return _colors.onSurfaceVariant.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
+    return _colors.surfaceVariant.withOpacity(_colors.brightness == Brightness.dark ? 0.12 : 0.08);
   }
 
   @override

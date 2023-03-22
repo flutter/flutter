@@ -30,9 +30,9 @@ import 'package:flutter/widgets.dart';
 /// ![The following code snippet would generate a row of icons consisting of a pink heart, a green bell, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_icon.png)
 ///
 /// ```dart
-/// Row(
+/// const Row(
 ///   mainAxisAlignment: MainAxisAlignment.spaceAround,
-///   children: const <Widget>[
+///   children: <Widget>[
 ///     Icon(
 ///       CupertinoIcons.heart_fill,
 ///       color: Colors.pink,

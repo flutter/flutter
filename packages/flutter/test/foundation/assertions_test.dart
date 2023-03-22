@@ -16,6 +16,13 @@ void main() {
     expect(log[1], contains('debugPrintStack'));
   });
 
+  test('should show message of ErrorDescription', () {
+    const String descriptionMessage = 'This is the message';
+    final ErrorDescription errorDescription = ErrorDescription(descriptionMessage);
+
+    expect(errorDescription.toString(), descriptionMessage);
+  });
+
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
       final FlutterErrorDetails details = FlutterErrorDetails(

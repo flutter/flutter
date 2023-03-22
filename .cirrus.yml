@@ -12,7 +12,7 @@ environment:
   # dependency on precisely how Cirrus is detected by our tools.
   BOT: "true"
 
-gcp_credentials: ENCRYPTED[!9e38557f08108136b3625b7e62c64cc9eccc50365ffeaaa55c6be52f1d8fd6225af5badc69983ca08484274f02f34424!]
+gcp_credentials: ENCRYPTED[!3a93d98d7c95a41f5033834ef30e50928fc5d81239dc632b153c2628200a8187f3811cb01ce338b1ab3b6505a7a65c37!]
 
 # LINUX SHARDS
 task:
@@ -115,10 +115,10 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; dart __deprecated_pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/main; dart __deprecated_pub get)
-        - (cd packages/flutter_tools/test/data/asset_test/font; dart __deprecated_pub get)
-        - (cd dev/bots; dart __deprecated_pub get)
+        - (cd packages/flutter_tools; dart pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/main; dart pub get)
+        - (cd packages/flutter_tools/test/data/asset_test/font; dart pub get)
+        - (cd dev/bots; dart pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-linux
@@ -131,8 +131,8 @@ task:
         MEMORY: 10G
         SHOULD_UPDATE_PACKAGES: "FALSE"
       script:
-        - (cd packages/flutter_tools; dart __deprecated_pub get)
-        - (cd dev/bots; dart __deprecated_pub get)
+        - (cd packages/flutter_tools; dart pub get)
+        - (cd dev/bots; dart pub get)
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: docs-linux # linux-only

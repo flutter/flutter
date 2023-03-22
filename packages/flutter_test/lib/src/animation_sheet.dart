@@ -89,8 +89,7 @@ class AnimationSheetBuilder {
   AnimationSheetBuilder({
     required this.frameSize,
     this.allLayers = false,
-  }) : assert(!kIsWeb), // Does not support Web. See [AnimationSheetBuilder].
-       assert(frameSize != null);
+  }) : assert(!kIsWeb);
 
   /// The size of the child to be recorded.
   ///
@@ -150,7 +149,6 @@ class AnimationSheetBuilder {
     Key? key,
     bool recording = true,
   }) {
-    assert(child != null);
     return _AnimationSheetRecorder(
       key: key,
       size: frameSize,
@@ -454,8 +452,7 @@ class _CellSheet extends StatelessWidget {
     super.key,
     required this.cellSize,
     required this.children,
-  }) : assert(cellSize != null),
-       assert(children != null && children.isNotEmpty);
+  }) : assert(children.isNotEmpty);
 
   final Size cellSize;
   final List<Widget> children;

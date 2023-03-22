@@ -96,8 +96,11 @@ void main() {
   });
 
   testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Builder(
+    // Cannot use tester.pumpWidget here because it wraps the widget in a View,
+    // which introduces a MediaQuery ancestor.
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: Builder(
         builder: (BuildContext context) {
           late FlutterError error;
           try {
@@ -308,10 +311,6 @@ void main() {
                   ).createShader(bounds),
                   child: const Placeholder(),
                 ),
-                RangeSlider(
-                  values: const RangeValues(0.3, 0.7),
-                  onChanged: (RangeValues newValues) {},
-                ),
                 CompositedTransformFollower(
                  link: LayerLink(),
                 ),
@@ -339,10 +338,13 @@ void main() {
     renderObject = tester.firstRenderObject(find.byType(ShaderMask));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
 
-    renderObject = tester.firstRenderObject(find.byType(RangeSlider));
-    expect(renderObject.debugLayer?.debugCreator, isNotNull);
-
     renderObject = tester.firstRenderObject(find.byType(CompositedTransformFollower));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
   });
+}
+
+Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
+  tester.binding.attachRootWidget(widget);
+  tester.binding.scheduleFrame();
+  return tester.binding.pump();
 }

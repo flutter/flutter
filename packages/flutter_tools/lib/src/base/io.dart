@@ -231,7 +231,7 @@ class PosixProcessSignal extends ProcessSignal {
 ///   * by throwing an exception asynchronously, and
 ///   * by completing the Future stdout.done with an error.
 ///
-/// This class enapsulates all three so that we don't have to worry about it
+/// This class encapsulates all three so that we don't have to worry about it
 /// anywhere else.
 class Stdio {
   Stdio();
@@ -399,7 +399,6 @@ class _DefaultProcessInfo implements ProcessInfo {
 
   @override
   File writePidFile(String pidFile) {
-    assert(pidFile != null);
     return _fileSystem.file(pidFile)
       ..writeAsStringSync(io.pid.toString());
   }
@@ -419,7 +418,6 @@ class _TestProcessInfo implements ProcessInfo {
 
   @override
   File writePidFile(String pidFile) {
-    assert(pidFile != null);
     return _fileSystem.file(pidFile)
       ..writeAsStringSync('12345');
   }

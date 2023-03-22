@@ -24,6 +24,12 @@ void main() {
     expect(copy, custom);
   });
 
+  test('DropdownMenuThemeData lerp special cases', () {
+    expect(DropdownMenuThemeData.lerp(null, null, 0), const DropdownMenuThemeData());
+    const DropdownMenuThemeData data = DropdownMenuThemeData();
+    expect(identical(DropdownMenuThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);

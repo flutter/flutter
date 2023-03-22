@@ -657,7 +657,6 @@ void main() {
     group('Semantics', () {
       testWidgets('day mode', (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
-        addTearDown(semantics.dispose);
 
         await tester.pumpWidget(calendarDatePicker());
 
@@ -672,7 +671,6 @@ void main() {
           tooltip: 'Previous month',
           isButton: true,
           hasTapAction: true,
-          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -681,7 +679,6 @@ void main() {
           tooltip: 'Next month',
           isButton: true,
           hasTapAction: true,
-          hasLongPressAction: true,
           isEnabled: true,
           hasEnabledState: true,
           isFocusable: true,
@@ -839,11 +836,11 @@ void main() {
           hasTapAction: true,
           isFocusable: true,
         ));
+        semantics.dispose();
       });
 
       testWidgets('calendar year mode', (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
-        addTearDown(semantics.dispose);
 
         await tester.pumpWidget(calendarDatePicker(
           initialCalendarMode: DatePickerMode.year,
@@ -865,8 +862,8 @@ void main() {
             isButton: true,
           ));
         }
+        semantics.dispose();
       });
-
     });
   });
 

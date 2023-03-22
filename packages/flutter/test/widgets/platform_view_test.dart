@@ -2494,7 +2494,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2591,7 +2591,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2599,6 +2599,8 @@ void main() {
     );
 
     testWidgets('PlatformViewLink includes offset in create call when using texture layer', (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
       late FakeAndroidViewController controller;
 
       final PlatformViewLink platformViewLink = PlatformViewLink(
@@ -2622,8 +2624,8 @@ void main() {
         },
       );
 
-      TestWidgetsFlutterBinding.instance.window.physicalSizeTestValue = const Size(400, 200);
-      TestWidgetsFlutterBinding.instance.window.devicePixelRatioTestValue = 1.0;
+      tester.view.physicalSize= const Size(400, 200);
+      tester.view.devicePixelRatio = 1.0;
 
       await tester.pumpWidget(
         Container(
@@ -2638,9 +2640,6 @@ void main() {
       );
 
       expect(controller.createPosition, const Offset(150, 75));
-
-      TestWidgetsFlutterBinding.instance.window.clearPhysicalSizeTestValue();
-      TestWidgetsFlutterBinding.instance.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets(
@@ -2686,7 +2685,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2716,6 +2715,32 @@ void main() {
       await tester.pumpWidget(Container());
 
       expect(disposedController.disposed, true);
+    });
+
+    testWidgets('PlatformViewLink handles onPlatformViewCreated when disposed', (WidgetTester tester) async {
+      late PlatformViewCreationParams creationParams;
+      late FakePlatformViewController controller;
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          creationParams = params;
+          return controller = FakePlatformViewController(params.id);
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+
+      await tester.pumpWidget(platformViewLink);
+
+      await tester.pumpWidget(Container());
+
+      expect(controller.disposed, true);
+      expect(() => creationParams.onPlatformViewCreated(creationParams.id), returnsNormally);
     });
 
     testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {

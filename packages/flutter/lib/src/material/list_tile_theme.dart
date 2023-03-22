@@ -63,6 +63,7 @@ class ListTileThemeData with Diagnosticable {
     this.enableFeedback,
     this.mouseCursor,
     this.visualDensity,
+    this.titleAlignment,
   });
 
   /// Overrides the default value of [ListTile.dense].
@@ -119,6 +120,9 @@ class ListTileThemeData with Diagnosticable {
   /// If specified, overrides the default value of [ListTile.visualDensity].
   final VisualDensity? visualDensity;
 
+  /// If specified, overrides the default value of [ListTile.titleAlignment].
+  final ListTileTitleAlignment? titleAlignment;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ListTileThemeData copyWith({
@@ -141,6 +145,7 @@ class ListTileThemeData with Diagnosticable {
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     bool? isThreeLine,
     VisualDensity? visualDensity,
+    ListTileTitleAlignment? titleAlignment,
   }) {
     return ListTileThemeData(
       dense: dense ?? this.dense,
@@ -150,8 +155,8 @@ class ListTileThemeData with Diagnosticable {
       iconColor: iconColor ?? this.iconColor,
       textColor: textColor ?? this.textColor,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
-      subtitleTextStyle: titleTextStyle ?? this.subtitleTextStyle,
-      leadingAndTrailingTextStyle: titleTextStyle ?? this.leadingAndTrailingTextStyle,
+      subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
+      leadingAndTrailingTextStyle: leadingAndTrailingTextStyle ?? this.leadingAndTrailingTextStyle,
       contentPadding: contentPadding ?? this.contentPadding,
       tileColor: tileColor ?? this.tileColor,
       selectedTileColor: selectedTileColor ?? this.selectedTileColor,
@@ -161,14 +166,14 @@ class ListTileThemeData with Diagnosticable {
       enableFeedback: enableFeedback ?? this.enableFeedback,
       mouseCursor: mouseCursor ?? this.mouseCursor,
       visualDensity: visualDensity ?? this.visualDensity,
+      titleAlignment: titleAlignment ?? this.titleAlignment,
     );
   }
 
   /// Linearly interpolate between ListTileThemeData objects.
   static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ListTileThemeData(
       dense: t < 0.5 ? a?.dense : b?.dense,
@@ -189,6 +194,7 @@ class ListTileThemeData with Diagnosticable {
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
+      titleAlignment: t < 0.5 ? a?.titleAlignment : b?.titleAlignment,
     );
   }
 
@@ -212,6 +218,7 @@ class ListTileThemeData with Diagnosticable {
     enableFeedback,
     mouseCursor,
     visualDensity,
+    titleAlignment,
   );
 
   @override
@@ -240,7 +247,8 @@ class ListTileThemeData with Diagnosticable {
       && other.minLeadingWidth == minLeadingWidth
       && other.enableFeedback == enableFeedback
       && other.mouseCursor == mouseCursor
-      && other.visualDensity == visualDensity;
+      && other.visualDensity == visualDensity
+      && other.titleAlignment == titleAlignment;
   }
 
   @override
@@ -264,6 +272,7 @@ class ListTileThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
+    properties.add(DiagnosticsProperty<ListTileTitleAlignment>('titleAlignment', titleAlignment, defaultValue: null));
   }
 }
 
@@ -471,6 +480,9 @@ class ListTileTheme extends InheritedTheme {
     Color? selectedColor,
     Color? iconColor,
     Color? textColor,
+    TextStyle? titleTextStyle,
+    TextStyle? subtitleTextStyle,
+    TextStyle? leadingAndTrailingTextStyle,
     EdgeInsetsGeometry? contentPadding,
     Color? tileColor,
     Color? selectedTileColor,
@@ -478,9 +490,11 @@ class ListTileTheme extends InheritedTheme {
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
+    ListTileTitleAlignment? titleAlignment,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    VisualDensity? visualDensity,
     required Widget child,
   }) {
-    assert(child != null);
     return Builder(
       builder: (BuildContext context) {
         final ListTileThemeData parent = ListTileTheme.of(context);
@@ -493,6 +507,9 @@ class ListTileTheme extends InheritedTheme {
             selectedColor: selectedColor ?? parent.selectedColor,
             iconColor: iconColor ?? parent.iconColor,
             textColor: textColor ?? parent.textColor,
+            titleTextStyle: titleTextStyle ?? parent.titleTextStyle,
+            subtitleTextStyle: subtitleTextStyle ?? parent.subtitleTextStyle,
+            leadingAndTrailingTextStyle: leadingAndTrailingTextStyle ?? parent.leadingAndTrailingTextStyle,
             contentPadding: contentPadding ?? parent.contentPadding,
             tileColor: tileColor ?? parent.tileColor,
             selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
@@ -500,6 +517,9 @@ class ListTileTheme extends InheritedTheme {
             horizontalTitleGap: horizontalTitleGap ?? parent.horizontalTitleGap,
             minVerticalPadding: minVerticalPadding ?? parent.minVerticalPadding,
             minLeadingWidth: minLeadingWidth ?? parent.minLeadingWidth,
+            titleAlignment: titleAlignment ?? parent.titleAlignment,
+            mouseCursor: mouseCursor ?? parent.mouseCursor,
+            visualDensity: visualDensity ?? parent.visualDensity,
           ),
           child: child,
         );

@@ -19,6 +19,22 @@ TaskFunction createAndroidRunReleaseTest() {
   return AndroidRunOutputTest(release: true).call;
 }
 
+TaskFunction createLinuxRunDebugTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: false,
+  ).call;
+}
+
+TaskFunction createLinuxRunReleaseTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: true,
+  ).call;
+}
+
 TaskFunction createMacOSRunDebugTest() {
   return DesktopRunOutputTest(
     // TODO(cbracken): https://github.com/flutter/flutter/issues/87508#issuecomment-1043753201
@@ -42,7 +58,7 @@ TaskFunction createMacOSRunReleaseTest() {
 }
 
 TaskFunction createWindowsRunDebugTest() {
-  return DesktopRunOutputTest(
+  return WindowsRunOutputTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/empty.dart',
     release: false,
@@ -50,7 +66,7 @@ TaskFunction createWindowsRunDebugTest() {
 }
 
 TaskFunction createWindowsRunReleaseTest() {
-  return DesktopRunOutputTest(
+  return WindowsRunOutputTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/empty.dart',
     release: true,
@@ -148,6 +164,52 @@ class AndroidRunOutputTest extends RunOutputTask {
   }
 }
 
+class WindowsRunOutputTest extends DesktopRunOutputTest {
+  WindowsRunOutputTest(
+    super.testDirectory,
+    super.testTarget, {
+      required super.release,
+      super.allowStderr = false,
+    }
+  );
+
+  static final RegExp _buildOutput = RegExp(
+    r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
+    multiLine: true,
+  );
+  static final RegExp _builtOutput = RegExp(
+    r'Built build\\windows\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?\.',
+  );
+
+  @override
+  void verifyBuildOutput(List<String> stdout) {
+    _findNextMatcherInList(
+      stdout,
+      _buildOutput.hasMatch,
+      'Building Windows application...',
+    );
+
+    final String buildMode = release ? 'Release' : 'Debug';
+    _findNextMatcherInList(
+      stdout,
+      (String line) {
+        if (!_builtOutput.hasMatch(line) || !line.contains(buildMode)) {
+          return false;
+        }
+
+        // Size information is only included in release builds.
+        final bool hasSize = line.contains('MB).');
+        if (release != hasSize) {
+          return false;
+        }
+
+        return true;
+      },
+      'Built build\\windows\\runner\\$buildMode\\app.exe',
+    );
+  }
+}
+
 class DesktopRunOutputTest extends RunOutputTask {
   DesktopRunOutputTest(
     super.testDirectory,
@@ -172,6 +234,8 @@ class DesktopRunOutputTest extends RunOutputTask {
       'Launching $testTarget on',
     );
 
+    verifyBuildOutput(stdout);
+
     _findNextMatcherInList(
       stdout,
       (String line) => line.contains('Quit (terminate the application on the device).'),
@@ -186,6 +250,9 @@ class DesktopRunOutputTest extends RunOutputTask {
 
     return TaskResult.success(null);
   }
+
+  /// Verify the output from `flutter run`'s build step.
+  void verifyBuildOutput(List<String> stdout) {}
 }
 
 /// Test that the output of `flutter run` is expected.

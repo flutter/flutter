@@ -33,8 +33,8 @@ import 'table.dart';
 /// Combined with [debugPrintScheduleBuildForStacks], this lets you watch a
 /// widget's dirty/clean lifecycle.
 ///
-/// To get similar information but showing it on the timeline available from the
-/// Observatory rather than getting it in the console (where it can be
+/// To get similar information but showing it on the timeline available from
+/// Flutter DevTools rather than getting it in the console (where it can be
 /// overwhelming), consider [debugProfileBuildsEnabled].
 ///
 /// See also:
@@ -170,7 +170,6 @@ bool debugHighlightDeprecatedWidgets = false;
 Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
   for (final Widget widget in widgets) {
-    assert(widget != null);
     if (widget.key == null) {
       continue;
     }

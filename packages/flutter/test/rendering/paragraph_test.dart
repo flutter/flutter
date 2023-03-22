@@ -148,7 +148,7 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'First ',
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
         children: <InlineSpan>[
           TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 5.0)),
           TextSpan(text: 'third fourth fifth'),
@@ -175,14 +175,14 @@ void main() {
     // The widths of the boxes should match the calculations above.
     // The heights should all be 10, except for the box for 'smallsecond ',
     // which should have height 5, and be alphabetic baseline-aligned with
-    // 'First '. The Ahem font specifies alphabetic baselines at 0.2em above the
-    // bottom extent, and 0.8em below the top, so the difference in top
-    // alignment becomes (10px * 0.8 - 5px * 0.8) = 4px.
+    // 'First '. The test font specifies alphabetic baselines at 0.25em above
+    // the bottom extent, and 0.75em below the top, so the difference in top
+    // alignment becomes (10px * 0.75 - 5px * 0.75) = 3.75px.
 
     // 'First ':
     expect(boxes[0], const TextBox.fromLTRBD(0.0, 0.0, 60.0, 10.0, TextDirection.ltr));
     // 'smallsecond ' in size 5:
-    expect(boxes[1], const TextBox.fromLTRBD(60.0, 4.0, 120.0, 9.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(60.0, 3.75, 120.0, 8.75, TextDirection.ltr));
     // 'third fourth ':
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
@@ -193,7 +193,7 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'First ',
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
         children: <InlineSpan>[
           TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 8.0)),
           TextSpan(text: 'third fourth fifth'),
@@ -253,7 +253,7 @@ void main() {
       const TextSpan(
         text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
               'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
       maxLines: 1,
@@ -333,7 +333,7 @@ void main() {
         text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
             // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
             // 0          1          2       3       4      5     6         7         8    9       10      11     12
-        style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+        style: TextStyle(fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -869,19 +869,19 @@ void main() {
       layout(paragraph);
       final MockPaintingContext paintingContext = MockPaintingContext();
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, isNull);
-      expect(paintingContext.canvas.drawedRectPaint, isNull);
+      expect(paintingContext.canvas.drawnRect, isNull);
+      expect(paintingContext.canvas.drawnRectPaint, isNull);
       selectionParagraph(paragraph, const TextPosition(offset: 1), const TextPosition(offset: 5));
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
-      expect(paintingContext.canvas.drawedRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawedRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
 
       selectionParagraph(paragraph, const TextPosition(offset: 2), const TextPosition(offset: 4));
       paragraph.paint(paintingContext, Offset.zero);
-      expect(paintingContext.canvas.drawedRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
-      expect(paintingContext.canvas.drawedRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawedRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
     });
 
     test('getPositionForOffset works', () async {
@@ -1059,12 +1059,8 @@ void main() {
         ),
       );
       selection = paragraph.selections[0];
-      expect(selection.start, 4); // how [are you]
-      if (isBrowser && !isCanvasKit) {
-        expect(selection.end, 12);
-      } else {
-        expect(selection.end, 11);
-      }
+      // how [are you]
+      expect(selection, const TextRange(start: 4, end: 11));
 
       // Equivalent to sending shift + meta + arrow-left.
       registrar.selectables[0].dispatchSelectionEvent(
@@ -1075,8 +1071,8 @@ void main() {
         ),
       );
       selection = paragraph.selections[0];
-      expect(selection.start, 0); // [how ]are you
-      expect(selection.end, 4);
+      // [how ]are you
+      expect(selection, const TextRange(start: 0, end: 4));
     });
 
     test('can granularly extend selection - document', () async {
@@ -1361,13 +1357,13 @@ void main() {
 }
 
 class MockCanvas extends Fake implements Canvas {
-  Rect? drawedRect;
-  Paint? drawedRectPaint;
+  Rect? drawnRect;
+  Paint? drawnRectPaint;
 
   @override
   void drawRect(Rect rect, Paint paint) {
-    drawedRect = rect;
-    drawedRectPaint = paint;
+    drawnRect = rect;
+    drawnRectPaint = paint;
   }
 
   @override

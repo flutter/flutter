@@ -47,7 +47,7 @@ class LicenseCollector {
 
     for (final Package package in packageConfig.packages) {
       final Uri packageUri = package.packageUriRoot;
-      if (packageUri == null || packageUri.scheme != 'file') {
+      if (packageUri.scheme != 'file') {
         continue;
       }
       // First check for NOTICES, then fallback to LICENSE

@@ -185,7 +185,7 @@ class L10nMissingPlaceholderException extends L10nParserException {
 //   }
 // }
 class OptionalParameter {
-  const OptionalParameter(this.name, this.value) : assert(name != null), assert(value != null);
+  const OptionalParameter(this.name, this.value);
 
   final String name;
   final Object value;
@@ -226,9 +226,7 @@ class OptionalParameter {
 //
 class Placeholder {
   Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
-    : assert(resourceId != null),
-      assert(name != null),
-      example = _stringAttribute(resourceId, name, attributes, 'example'),
+    : example = _stringAttribute(resourceId, name, attributes, 'example'),
       type = _stringAttribute(resourceId, name, attributes, 'type'),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
@@ -338,9 +336,7 @@ class Message {
       this.useEscaping = false,
       this.logger,
     }
-  ) : assert(templateBundle != null),
-      assert(allBundles != null),
-      assert(resourceId != null && resourceId.isNotEmpty),
+  ) : assert(resourceId.isNotEmpty),
       value = _value(templateBundle.resources, resourceId),
       description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
       placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
@@ -353,13 +349,20 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
-      parsedMessages[bundle.locale] = translation == null ? null : Parser(
-        resourceId,
-        bundle.file.basename,
-        translation,
-        useEscaping: useEscaping,
-        logger: logger
-      ).parse();
+      try {
+        parsedMessages[bundle.locale] = translation == null ? null : Parser(
+          resourceId,
+          bundle.file.basename,
+          translation,
+          useEscaping: useEscaping,
+          logger: logger
+        ).parse();
+      } on L10nParserException catch (error) {
+        logger?.printError(error.toString());
+        // Treat it as an untranslated message in case we can't parse.
+        parsedMessages[bundle.locale] = null;
+        hadErrors = true;
+      }
     }
     // Infer the placeholders
     _inferPlaceholders(filenames);
@@ -373,6 +376,7 @@ class Message {
   final Map<String, Placeholder> placeholders;
   final bool useEscaping;
   final Logger? logger;
+  bool hadErrors = false;
 
   bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
 
@@ -529,7 +533,6 @@ class Message {
 // Represents the contents of one ARB file.
 class AppResourceBundle {
   factory AppResourceBundle(File file) {
-    assert(file != null);
     // Assuming that the caller has verified that the file exists and is readable.
     Map<String, Object?> resources;
     try {
@@ -548,7 +551,7 @@ class AppResourceBundle {
 
     for (int index = 0; index < fileName.length; index += 1) {
       // If an underscore was found, check if locale string follows.
-      if (fileName[index] == '_' && fileName[index + 1] != null) {
+      if (fileName[index] == '_') {
         // If Locale.tryParse fails, it returns null.
         final Locale? parserResult = Locale.tryParse(fileName.substring(index + 1));
         // If the parserResult is not an actual locale identifier, end the loop.
@@ -613,7 +616,6 @@ class AppResourceBundle {
 // Represents all of the ARB files in [directory] as [AppResourceBundle]s.
 class AppResourceBundleCollection {
   factory AppResourceBundleCollection(Directory directory) {
-    assert(directory != null);
     // Assuming that the caller has verified that the directory is readable.
 
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');

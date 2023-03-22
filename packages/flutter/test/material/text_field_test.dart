@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// no-shuffle:
-//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
-//   dependencies have been fixed.
-//   https://github.com/flutter/flutter/issues/85160
-//   Fails with "flutter test --test-randomize-ordering-seed=456"
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
+// no-shuffle:
+// TODO(122950): Remove this tag once this test's state leaks/test
+// dependencies have been fixed.
+// https://github.com/flutter/flutter/issues/122950
+// Fails with "flutter test --test-randomize-ordering-seed=20230318"
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, WindowPadding;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -140,26 +140,6 @@ class TestFormatter extends TextInputFormatter {
   }
 }
 
-// Used to set window.viewInsets since the real ui.WindowPadding has only a
-// private constructor.
-class _TestWindowPadding implements ui.WindowPadding {
-  const _TestWindowPadding({
-    required this.bottom,
-  });
-
-  @override
-  final double bottom;
-
-  @override
-  double get top => 0.0;
-
-  @override
-  double get left => 0.0;
-
-  @override
-  double get right => 0.0;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -176,7 +156,7 @@ void main() {
 
   setUp(() async {
     debugResetSemanticsIdCounter();
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
@@ -186,7 +166,7 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       null,
     );
@@ -2241,7 +2221,7 @@ void main() {
           child: TextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+            style: const TextStyle(fontSize: 10.0),
           ),
         ),
       ),
@@ -2566,6 +2546,171 @@ void main() {
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
+  testWidgets(
+    'Can drag the left handle while the right handle remains off-screen',
+    (WidgetTester tester) async {
+      // Text is longer than textfield width.
+      const String testValue =
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
+      final TextEditingController controller = TextEditingController(text: testValue);
+      final ScrollController scrollController = ScrollController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(800.0, 600.0)),
+              child: TextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                scrollController: scrollController,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap 'b' to show handles.
+      final Offset bPos = textOffsetToPosition(tester, testValue.indexOf('b'));
+      await tester.tapAt(bPos);
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(bPos);
+      await tester.pumpAndSettle();
+
+      final TextSelection selection = controller.selection;
+      expect(selection.baseOffset, 28);
+      expect(selection.extentOffset, testValue.length);
+
+      // Move to the left edge.
+      scrollController.jumpTo(0);
+      await tester.pumpAndSettle();
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Left handle should appear between textfield's left and right position.
+      final Offset textFieldLeftPosition =
+          tester.getTopLeft(find.byType(TextField));
+      expect(endpoints[0].point.dx - textFieldLeftPosition.dx, isPositive);
+      final Offset textFieldRightPosition =
+          tester.getTopRight(find.byType(TextField));
+      expect(textFieldRightPosition.dx - endpoints[0].point.dx, isPositive);
+      // Right handle should remain off-screen.
+      expect(endpoints[1].point.dx - textFieldRightPosition.dx, isPositive);
+
+      // Drag the left handle to the right by 25 offset.
+      const int toOffset = 25;
+      final double beforeScrollOffset = scrollController.offset;
+      final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+      final Offset newHandlePos = textOffsetToPosition(tester, toOffset);
+      final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(newHandlePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          // On Apple platforms, dragging the base handle makes it the extent.
+          expect(controller.selection.baseOffset, testValue.length);
+          expect(controller.selection.extentOffset, toOffset);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(controller.selection.baseOffset, toOffset);
+          expect(controller.selection.extentOffset, testValue.length);
+          break;
+      }
+
+      // The scroll area of text field should not move.
+      expect(scrollController.offset, beforeScrollOffset);
+    },
+  );
+
+  testWidgets(
+    'Can drag the right handle while the left handle remains off-screen',
+    (WidgetTester tester) async {
+      // Text is longer than textfield width.
+      const String testValue =
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
+      final TextEditingController controller = TextEditingController(text: testValue);
+      final ScrollController scrollController = ScrollController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(800.0, 600.0)),
+              child: TextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                scrollController: scrollController,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap 'a' to show handles.
+      final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+      await tester.tapAt(aPos);
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(aPos);
+      await tester.pumpAndSettle();
+
+      final TextSelection selection = controller.selection;
+      expect(selection.baseOffset, 0);
+      expect(selection.extentOffset, 27);
+
+      // Move to the right edge.
+      scrollController.jumpTo(800);
+      await tester.pumpAndSettle();
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+
+      // Right handle should appear between textfield's left and right position.
+      final Offset textFieldLeftPosition =
+          tester.getTopLeft(find.byType(TextField));
+      expect(endpoints[1].point.dx - textFieldLeftPosition.dx, isPositive);
+      final Offset textFieldRightPosition =
+          tester.getTopRight(find.byType(TextField));
+      expect(textFieldRightPosition.dx - endpoints[1].point.dx, isPositive);
+      // Left handle should remain off-screen.
+      expect(endpoints[0].point.dx, isNegative);
+
+      // Drag the right handle to the left by 50 offset.
+      const int toOffset = 50;
+      final double beforeScrollOffset = scrollController.offset;
+      final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+      final Offset newHandlePos = textOffsetToPosition(tester, toOffset);
+      final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+      await tester.pump();
+      await gesture.moveTo(newHandlePos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, toOffset);
+
+      // The scroll area of text field should not move.
+      expect(scrollController.offset, beforeScrollOffset);
+    },
+  );
+
   testWidgets('Drag handles trigger feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
@@ -2621,7 +2766,7 @@ void main() {
     expect(feedback.hapticCount, 2);
   });
 
-  testWidgets('Draging a collapsed handle should trigger feedback.', (WidgetTester tester) async {
+  testWidgets('Dragging a collapsed handle should trigger feedback.', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
     final TextEditingController controller = TextEditingController();
@@ -3384,10 +3529,8 @@ void main() {
       // Add a viewInset tall enough to push the field to the top, where there
       // is no room to display the toolbar above. This is similar to when the
       // keyboard is shown.
-      tester.binding.window.viewInsetsTestValue = const _TestWindowPadding(
-        bottom: 500.0,
-      );
-      addTearDown(tester.binding.window.clearViewInsetsTestValue);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+      addTearDown(tester.view.reset);
       await tester.pumpAndSettle();
 
       // Verify the selection toolbar position is below the text.
@@ -3396,7 +3539,7 @@ void main() {
       expect(toolbarTopLeft.dy, greaterThan(textFieldTopLeft.dy));
 
       // Remove the viewInset, as if the keyboard were hidden.
-      tester.binding.window.clearViewInsetsTestValue();
+      tester.view.resetViewInsets();
       await tester.pumpAndSettle();
 
       // Verify the selection toolbar position is below the text.
@@ -4514,6 +4657,7 @@ void main() {
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
+    semantics.dispose();
   });
 
   testWidgets('TextField with specified suffixStyle', (WidgetTester tester) async {
@@ -4794,13 +4938,14 @@ void main() {
     );
 
     final RenderEditable editable = findRenderEditable(tester);
+    assert(editable.size.width == 300);
     Offset topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    // The overlay() function centers its child within a 800x600 window.
-    // Default cursorWidth is 2.0, test windowWidth is 800
-    // Centered cursor topLeft.dx: 399 == windowWidth/2 - cursorWidth/2
+    // The overlay() function centers its child within a 800x600 view.
+    // Default cursorWidth is 2.0, test viewWidth is 800
+    // Centered cursor topLeft.dx: 399 == viewWidth/2 - cursorWidth/2
     expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
@@ -4834,9 +4979,9 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    // The overlay() function centers its child within a 800x600 window.
-    // Default cursorWidth is 2.0, test windowWidth is 800
-    // Centered cursor topLeft.dx: 399 == windowWidth/2 - cursorWidth/2
+    // The overlay() function centers its child within a 800x600 view.
+    // Default cursorWidth is 2.0, test viewWidth is 800
+    // Centered cursor topLeft.dx: 399 == viewWidth/2 - cursorWidth/2
     expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(TextField), 'abcd');
@@ -5931,6 +6076,51 @@ void main() {
     expect(errorWidget.style!.color, equals(Colors.transparent));
   });
 
+  testWidgets('Disabled text field has default M2 disabled text style for the input text', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, Colors.black38); // Colors.black38 is the default disabled color for ThemeData.light().
+  });
+
+  testWidgets('Disabled text field has default M3 disabled text style for the input text', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+
+    final ThemeData theme = ThemeData.light(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.color, theme.textTheme.bodyLarge!.color!.withOpacity(0.38));
+  });
+
   testWidgets('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController();
@@ -5996,27 +6186,29 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets("Disabled TextField can't be traversed to when disabled.", (WidgetTester tester) async {
+  testWidgets("Disabled TextField can't be traversed to.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                TextField(
-                  focusNode: focusNode1,
-                  autofocus: true,
-                  maxLength: 10,
-                  enabled: true,
-                ),
-                TextField(
-                  focusNode: focusNode2,
-                  maxLength: 10,
-                  enabled: false,
-                ),
-              ],
+          child: FocusScope(
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    focusNode: focusNode1,
+                    autofocus: true,
+                    maxLength: 10,
+                    enabled: true,
+                  ),
+                  TextField(
+                    focusNode: focusNode2,
+                    maxLength: 10,
+                    enabled: false,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -6745,20 +6937,26 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontSize: 10.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 12.0),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
             const Text(
               'abc',
-              style: TextStyle(fontSize: 20.0),
+              // The point size of the font must be a multiple of 4 until
+              // https://github.com/flutter/flutter/issues/122066 is resolved.
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 24.0),
             ),
             Expanded(
               child: TextField(
                 key: keyB,
                 decoration: null,
                 controller: controllerB,
-                style: const TextStyle(fontSize: 30.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 36.0),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
@@ -6767,17 +6965,17 @@ void main() {
       ),
     );
 
-    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // The test font extends 0.25 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
     //  A  abc  B
-    //  ---------   baseline
-    //  2  4    6   space below the baseline = 0.2 * fontSize
-    //  ---------   rowBottomY
+    //  ---------  baseline
+    //  3   6   9  space below the baseline = 0.25 * fontSize
+    //  ---------  rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, moreOrLessEquals(rowBottomY - 4.0, epsilon: 0.001));
-    expect(tester.getBottomLeft(find.text('abc')).dy, moreOrLessEquals(rowBottomY - 2.0, epsilon: 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 6.0);
+    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 3.0);
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -6798,19 +6996,25 @@ void main() {
                 key: keyA,
                 decoration: null,
                 controller: controllerA,
-                style: const TextStyle(fontSize: 10.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 12.0),
               ),
             ),
             const Text(
               'abc',
-              style: TextStyle(fontSize: 20.0),
+              // The point size of the font must be a multiple of 4 until
+              // https://github.com/flutter/flutter/issues/122066 is resolved.
+              style: TextStyle(fontFamily: 'FlutterTest', fontSize: 24.0),
             ),
             Expanded(
               child: TextField(
                 key: keyB,
                 decoration: null,
                 controller: controllerB,
-                style: const TextStyle(fontSize: 30.0),
+                // The point size of the font must be a multiple of 4 until
+                // https://github.com/flutter/flutter/issues/122066 is resolved.
+                style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 36.0),
               ),
             ),
           ],
@@ -6818,18 +7022,18 @@ void main() {
       ),
     );
 
-    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // The test font extends 0.25 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
     //  A  abc  B
-    //  ---------   baseline
-    //  2  4    6   space below the baseline = 0.2 * fontSize
-    //  ---------   rowBottomY
+    //  ---------  baseline
+    //  3   6   9  space below the baseline = 0.25 * fontSize
+    //  ---------  rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
     // The values here should match the version with strut disabled ('TextField baseline alignment no-strut')
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, moreOrLessEquals(rowBottomY - 4.0, epsilon: 0.001));
-    expect(tester.getBottomLeft(find.text('abc')).dy, moreOrLessEquals(rowBottomY - 2.0, epsilon: 0.001));
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 6.0);
+    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 3.0);
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -6860,7 +7064,7 @@ void main() {
     await tester.tap(find.byKey(key));
     await tester.pump();
 
-    expect(node.label, 'label\nhint');
+    expect(node.label, 'label');
     expect(node.value, '');
     semantics.dispose();
   });
@@ -6928,7 +7132,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('TextField semantics always include hint when no label is given', (WidgetTester tester) async {
+  testWidgets('TextField semantics only include hint when it is visible', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController(text: 'value');
     final Key key = UniqueKey();
@@ -6947,15 +7151,23 @@ void main() {
 
     final SemanticsNode node = tester.getSemantics(find.byKey(key));
 
-    expect(node.label, 'hint');
+    expect(node.label, '');
     expect(node.value, 'value');
 
     // Focus text field.
     await tester.tap(find.byKey(key));
     await tester.pump();
 
-    expect(node.label, 'hint');
+    expect(node.label, '');
     expect(node.value, 'value');
+
+    // Clear the Text.
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpAndSettle();
+
+    expect(node.value, '');
+    expect(node.label, 'hint');
+
     semantics.dispose();
   });
 
@@ -7696,7 +7908,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'label\nhint',
+          label: 'label',
           id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
@@ -7835,7 +8047,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: 4.0),
+              data: const MediaQueryData(textScaleFactor: 4.0),
               child: Center(
                 child: TextField(
                   decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),
@@ -8193,7 +8405,11 @@ void main() {
     // Empty TextStyle is overridden by theme
     await tester.pumpWidget(buildFrame(const TextStyle()));
     EditableText editableText = tester.widget(find.byType(EditableText));
+
+    // According to material 3 spec, the input text should be the color of onSurface.
+    // https://github.com/flutter/flutter/issues/107686 is tracking this issue.
     expect(editableText.style.color, themeData.textTheme.bodyLarge!.color);
+
     expect(editableText.style.background, themeData.textTheme.bodyLarge!.background);
     expect(editableText.style.shadows, themeData.textTheme.bodyLarge!.shadows);
     expect(editableText.style.decoration, themeData.textTheme.bodyLarge!.decoration);
@@ -9785,7 +10001,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 56, affinity: TextAffinity.upstream),
+      // arrowRight always sets the affinity to downstream.
+      const TextSelection.collapsed(offset: 56),
     );
 
     // Keep moving out.
@@ -9795,7 +10012,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 62, affinity: TextAffinity.upstream),
+      const TextSelection.collapsed(offset: 62),
     );
     for (int i = 0; i < (66 - 62); i += 1) {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -9803,7 +10020,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       controller.selection,
-      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+      const TextSelection.collapsed(offset: 66),
     ); // We're at the edge now.
 
     await tester.pumpAndSettle();
@@ -11036,7 +11253,7 @@ void main() {
       expect(
         tester.getSize(find.byType(TextField)),
         // When the strut fontSize is larger than a provided TextStyle, the
-        // the strut's height takes precedence.
+        // strut's height takes precedence.
         const Size(800, 78),
       );
     },
@@ -11576,7 +11793,7 @@ void main() {
 
     // The ListView has scrolled to keep the TextField and cursor handle
     // visible.
-    expect(scrollController.offset, 48.0);
+    expect(scrollController.offset, 50.0);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/74566
@@ -11609,7 +11826,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // The ListView has scrolled to keep the TextField visible.
-    expect(scrollController.offset, 48.0);
+    expect(scrollController.offset, 50.0);
     expect(textFieldScrollController.offset, 0.0);
 
     // After entering some long text, the last input character remains on the screen.
@@ -11911,7 +12128,7 @@ void main() {
     },
   );
 
-  testWidgets('Web does not check the clipboard status', (WidgetTester tester) async {
+  testWidgets('clipboard status is checked via hasStrings without getting the full clipboard contents', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -11955,14 +12172,8 @@ void main() {
     // getData is not called unless something is pasted.  hasStrings is used to
     // check the status of the clipboard.
     expect(calledGetData, false);
-    if (kIsWeb) {
-      // hasStrings is not checked because web doesn't show a custom text
-      // selection menu.
-      expect(calledHasStrings, false);
-    } else {
-      // hasStrings is checked in order to decide if the content can be pasted.
-      expect(calledHasStrings, true);
-    }
+    // hasStrings is checked in order to decide if the content can be pasted.
+    expect(calledHasStrings, true);
   });
 
   testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -12447,6 +12658,57 @@ void main() {
       expect(state.currentTextEditingValue.text, '侬好啊旁友');
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
+  });
+
+  testWidgets('TextField does not leak touch events when deadline has exceeded', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/118340.
+    int textFieldTapCount = 0;
+    int prefixTapCount = 0;
+    int suffixTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            onTap: () { textFieldTapCount += 1; },
+            decoration: InputDecoration(
+              labelText: 'Label',
+              prefix: ElevatedButton(
+                onPressed: () { prefixTapCount += 1; },
+                child: const Text('prefix'),
+              ),
+              suffix: ElevatedButton(
+                onPressed: () { suffixTapCount += 1; },
+                child: const Text('suffix'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    TestGesture gesture =
+        await tester.startGesture(
+          tester.getRect(find.text('prefix')).center,
+          pointer: 7,
+          kind: PointerDeviceKind.mouse,
+        );
+    await tester.pumpAndSettle();
+    await gesture.up();
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 0);
+
+    gesture = await tester.startGesture(
+      tester.getRect(find.text('suffix')).center,
+      pointer: 7,
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    await gesture.up();
+    expect(textFieldTapCount, 0);
+    expect(prefixTapCount, 1);
+    expect(suffixTapCount, 1);
   });
 
   testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
@@ -13310,6 +13572,48 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
+  testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    // Default test. The canRequestFocus is true by default and the text field can be focused
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          focusNode: focusNode,
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+
+    // Set canRequestFocus to false: the text field cannot be focused when it is tapped/long pressed.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          focusNode: focusNode,
+          canRequestFocus: false,
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    // The text field cannot be focused if it is tapped.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+
+    // The text field cannot be focused if it is long pressed.
+    await tester.longPress(find.byType(TextField));
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   group('Right click focus', () {
     testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/103228
@@ -13464,6 +13768,34 @@ void main() {
       expect(controller.selection.baseOffset, 0);
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+    testWidgets('Right clicking cannot request focus if canRequestFocus is false', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  key: key,
+                  focusNode: focusNode,
+                  canRequestFocus: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tapAt(
+        tester.getCenter(find.byKey(key)),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+
+      expect(focusNode.hasFocus, isFalse);
+    });
   });
 
   group('context menu', () {

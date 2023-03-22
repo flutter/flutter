@@ -42,10 +42,17 @@ class ValidateProject {
         continue;
       }
       if (!results.containsKey(validator) && validator.supportsProject(project)) {
-        results[validator] = validator.start(project).catchError((Object exception, StackTrace trace) {
-          hasCrash = true;
-          return <ProjectValidatorResult>[ProjectValidatorResult.crash(exception, trace)];
-        });
+        results[validator] = validator
+            .start(project)
+            .then(
+              (List<ProjectValidatorResult> results) => results,
+              onError: (Object exception, StackTrace trace) {
+                hasCrash = true;
+                return <ProjectValidatorResult>[
+                  ProjectValidatorResult.crash(exception, trace),
+                ];
+              },
+            );
       }
     }
 

@@ -42,12 +42,7 @@ class IconTreeShaker {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-  }) : assert(_environment != null),
-       assert(processManager != null),
-       assert(logger != null),
-       assert(fileSystem != null),
-       assert(artifacts != null),
-       _processManager = processManager,
+  }) : _processManager = processManager,
        _logger = logger,
        _fs = fileSystem,
        _artifacts = artifacts,
@@ -366,9 +361,7 @@ class _IconTreeShakerData {
     required this.family,
     required this.relativePath,
     required this.codePoints,
-  }) : assert(family != null),
-       assert(relativePath != null),
-       assert(codePoints != null);
+  });
 
   /// The font family name, e.g. "MaterialIcons".
   final String family;
