@@ -29,10 +29,10 @@
 
 namespace impeller {
 namespace testing {
-using ComputeTest = ComputePlaygroundTest;
-INSTANTIATE_COMPUTE_SUITE(ComputeTest);
+using ComputeSubgroupTest = ComputePlaygroundTest;
+INSTANTIATE_COMPUTE_SUITE(ComputeSubgroupTest);
 
-TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
+TEST_P(ComputeSubgroupTest, HeartCubicsToStrokeVertices) {
   using CS = CubicToQuadsComputeShader;
   using QS = QuadPolylineComputeShader;
   using SS = StrokeComputeShader;
@@ -256,7 +256,7 @@ TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_P(ComputeTest, QuadsToPolyline) {
+TEST_P(ComputeSubgroupTest, QuadsToPolyline) {
   using QS = QuadPolylineComputeShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
