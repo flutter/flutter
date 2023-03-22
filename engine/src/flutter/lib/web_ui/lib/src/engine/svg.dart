@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'package:js/js.dart';
 
 import 'dom.dart';
@@ -91,8 +92,14 @@ extension SVGAnimatedLengthExtension on SVGAnimatedLength {
 class SVGLength {}
 
 extension SVGLengthExtension on SVGLength {
-  external set valueAsString(String? value);
-  external void newValueSpecifiedUnits(int unitType, num valueInSpecifiedUnits);
+  @JS('valueAsString')
+  external set _valueAsString(JSString? value);
+  set valueAsString(String? value) => _valueAsString = value?.toJS;
+
+  @JS('newValueSpecifiedUnits')
+  external JSVoid _newValueSpecifiedUnits(JSNumber unitType, JSNumber valueInSpecifiedUnits);
+  void newValueSpecifiedUnits(int unitType, num valueInSpecifiedUnits) =>
+      _newValueSpecifiedUnits(unitType.toJS, valueInSpecifiedUnits.toJS);
 }
 
 const int svgLengthTypeNumber = 1;
@@ -102,7 +109,9 @@ const int svgLengthTypeNumber = 1;
 class SVGAnimatedEnumeration {}
 
 extension SVGAnimatedEnumerationExtenson on SVGAnimatedEnumeration {
-  external set baseVal(int? value);
+  @JS('baseVal')
+  external set _baseVal(JSNumber? value);
+  set baseVal(int? value) => _baseVal = value?.toJS;
 }
 
 @JS()
@@ -186,7 +195,9 @@ extension SVGFEBlendCompositeExtension on SVGFECompositeElement {
 class SVGAnimatedString {}
 
 extension SVGAnimatedStringExtension on SVGAnimatedString {
-  external set baseVal(String? value);
+  @JS('baseVal')
+  external set _baseVal(JSString? value);
+  set baseVal(String? value) => _baseVal = value?.toJS;
 }
 
 @JS()
@@ -194,7 +205,9 @@ extension SVGAnimatedStringExtension on SVGAnimatedString {
 class SVGAnimatedNumber {}
 
 extension SVGAnimatedNumberExtension on SVGAnimatedNumber {
-  external set baseVal(num? value);
+  @JS('baseVal')
+  external set _baseVal(JSNumber? value);
+  set baseVal(num? value) => _baseVal = value?.toJS;
 }
 
 @JS()
@@ -218,5 +231,7 @@ extension SVGNumberListExtension on SVGNumberList {
 class SVGNumber {}
 
 extension SVGNumberExtension on SVGNumber {
-  external set value(num? value);
+  @JS('value')
+  external set _value(JSNumber? value);
+  set value(num? v) => _value = v?.toJS;
 }

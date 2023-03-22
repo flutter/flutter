@@ -4,6 +4,7 @@
 @JS()
 library embedder_test; // We need this to mess with the ShadowDOM.
 
+import 'dart:js_interop';
 import 'package:js/js.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -112,7 +113,9 @@ void testMain() {
 }
 
 @JS('Element.prototype.attachShadow')
-external dynamic get attachShadow;
+external JSAny? get _attachShadow;
+dynamic get attachShadow => _attachShadow?.toObjectShallow;
 
 @JS('Element.prototype.attachShadow')
-external set attachShadow(dynamic x);
+external set _attachShadow(JSAny? x);
+set attachShadow(Object? x) => _attachShadow = x?.toJSAnyShallow;

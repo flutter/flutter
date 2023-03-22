@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
@@ -10,7 +11,8 @@ import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
 @JS('_flutter')
-external set loader(Object? loader);
+external set _loader(JSAny? loader);
+set loader(Object? l) => _loader = l?.toJSAnyShallow;
 
 @JS('_flutter.loader.didCreateEngineInitializer')
 external set didCreateEngineInitializer(Object? callback);

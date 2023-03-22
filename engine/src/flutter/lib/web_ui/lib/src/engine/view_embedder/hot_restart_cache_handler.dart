@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:js/js.dart';
 import 'package:ui/src/engine.dart';
 
@@ -11,10 +13,14 @@ import '../dom.dart';
 /// to clear.  Delay removal of old visible state to make the
 /// transition appear smooth.
 @JS('window.__flutterState')
-external List<Object?>? get hotRestartStore;
+external JSArray? get _hotRestartStore;
+List<Object?>? get hotRestartStore =>
+    _hotRestartStore?.toObjectShallow as List<Object>?;
 
 @JS('window.__flutterState')
-external set hotRestartStore(List<Object?>? nodes);
+external set _hotRestartStore(JSArray? nodes);
+set hotRestartStore(List<Object?>? nodes) =>
+    _hotRestartStore = nodes?.toJSAnyShallow as JSArray?;
 
 /// Handles [DomElement]s that need to be removed after a hot-restart.
 ///

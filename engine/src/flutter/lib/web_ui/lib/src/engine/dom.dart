@@ -2260,13 +2260,10 @@ extension DomMediaQueryListExtension on DomMediaQueryList {
   bool get matches => _matches.toDart;
 
   @JS('addListener')
-  external JSVoid _addListener(JSFunction? listener);
-  void addListener(DomEventListener? listener) => _addListener(listener?.toJS);
+  external JSVoid addListener(JSFunction? listener);
 
   @JS('removeListener')
-  external JSVoid _removeListener(JSFunction? listener);
-  void removeListener(DomEventListener? listener) =>
-      _removeListener(listener?.toJS);
+  external JSVoid removeListener(JSFunction? listener);
 }
 
 @JS()
