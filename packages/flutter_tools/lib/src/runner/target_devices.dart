@@ -358,7 +358,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   void startPollingWirelessDeviceDiscoverers({
     Duration? deviceDiscoveryTimeout,
   }) {
-    if (deviceDiscoveryTimeout != null) {
+    if (deviceDiscoveryTimeout == null) {
       _wirelessDevicesRefresh ??= _deviceManager.refreshWirelessDeviceDiscoverers(
         timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
       );
