@@ -19,6 +19,35 @@ Widget boilerplate({required Widget child}) {
 
 void main() {
 
+  testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2')),
+                ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Expect SegmentedButton to be built with type MaterialType.transparency.
+    final Finder text = find.text('1');
+    final Finder parent = find.ancestor(of: text, matching: find.byType(Material)).first;
+    final Finder parentMaterial = find.ancestor(of: parent, matching: find.byType(Material)).first;
+    final Material material = tester.widget<Material>(parentMaterial);
+    expect(material.type, MaterialType.transparency);
+  });
+
   testWidgets('SegmentedButton supports exclusive choice by default', (WidgetTester tester) async {
     int callbackCount = 0;
     int selectedSegment = 2;

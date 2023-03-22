@@ -354,6 +354,7 @@ class SegmentedButton<T> extends StatelessWidget {
     final List<Widget> buttons = segments.map(buttonFor).toList();
 
     return Material(
+      type: MaterialType.transparency,
       shape: enabledBorder.copyWith(side: BorderSide.none),
       elevation: resolve<double?>((ButtonStyle? style) => style?.elevation)!,
       shadowColor: resolve<Color?>((ButtonStyle? style) => style?.shadowColor),
