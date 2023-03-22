@@ -36,8 +36,7 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// radio button's [groupValue].
 ///
 /// {@tool dartpad}
-/// Here is an example of Radio widgets wrapped in ListTiles, which is similar
-/// to what you could get with the RadioListTile widget.
+/// Here is an example of CupertinoRadio widgets wrapped in CupertinoListTiles.
 ///
 /// The currently selected character is passed into `groupValue`, which is
 /// maintained by the example's `State`. In this case, the first [CupertinoRadio]
@@ -49,7 +48,7 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// This causes the buttons to rebuild with the updated `groupValue`, and
 /// therefore the selection of the second button.
 ///
-/// ** See code in examples/api/lib/material/radio/radio.0.dart **
+/// ** See code in examples/api/lib/cupertino/radio/radio.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -144,7 +143,7 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// This example shows how to enable deselecting a radio button by setting the
   /// [toggleable] attribute.
   ///
-  /// ** See code in examples/api/lib/material/radio/radio.toggleable.0.dart **
+  /// ** See code in examples/api/lib/cupertino/radio/radio.toggleable.0.dart **
   /// {@end-tool}
   final bool toggleable;
 
