@@ -444,6 +444,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
         case TraversalEdgeBehavior.closedLoop:
           _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
           return true;
+        // TODO(goderbauer): Remove this hack once exhaustiveness bug is fixed, https://github.com/flutter/flutter/issues/123243.
+        default: // ignore: no_default_cases
+          throw UnsupportedError('unreachable');
       }
     }
     if (!forward && focusedChild == sortedNodes.first) {
@@ -454,6 +457,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
         case TraversalEdgeBehavior.closedLoop:
           _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
           return true;
+        // TODO(goderbauer): Remove this hack once exhaustiveness bug is fixed, https://github.com/flutter/flutter/issues/123243.
+        default: // ignore: no_default_cases
+          throw UnsupportedError('unreachable');
       }
     }
 
