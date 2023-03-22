@@ -667,9 +667,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebResourcesCdnFlag() {
+    // TODO(hterkelsen): Default to true once we have a smoke test.
     argParser.addFlag(
       FlutterOptions.kWebResourcesCdnFlag,
-      defaultsTo: true,
+      defaultsTo: false,
       help: 'Use Web static resources hosted on a CDN.',
     );
   }
