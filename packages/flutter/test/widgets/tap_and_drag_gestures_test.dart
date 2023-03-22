@@ -106,6 +106,26 @@ void main() {
     position: Offset(25.0, 25.0),
   );
 
+  // Mouse Down/move/up sequence 6: intervening motion - kPrecisePointerPanSlop
+  const PointerDownEvent down6 = PointerDownEvent(
+    kind: PointerDeviceKind.mouse,
+    pointer: 6,
+    position: Offset(10.0, 10.0),
+  );
+
+  const PointerMoveEvent move6 = PointerMoveEvent(
+    kind: PointerDeviceKind.mouse,
+    pointer: 6,
+    position: Offset(15.0, 15.0),
+    delta: Offset(5.0, 5.0),
+  );
+
+  const PointerUpEvent up6 = PointerUpEvent(
+    kind: PointerDeviceKind.mouse,
+    pointer: 6,
+    position: Offset(15.0, 15.0),
+  );
+
   testGesture('Recognizes consecutive taps', (GestureTester tester) {
     tapAndDrag.addPointer(down1);
     tester.closeArena(1);
@@ -357,6 +377,30 @@ void main() {
     tester.route(up5);
     GestureBinding.instance.gestureArena.sweep(5);
     expect(events, <String>['down#1', 'dragstart#1', 'dragend#1']);
+  });
+
+  testGesture('Beats TapGestureRecognizer when mouse pointer moves past kPrecisePointerPanSlop', (GestureTester tester) {
+    // Regression test for https://github.com/flutter/flutter/issues/122141
+    final TapGestureRecognizer taps = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {
+        events.add('tapdown');
+      }
+      ..onTapUp =  (TapUpDetails details) {
+        events.add('tapup');
+      }
+      ..onTapCancel = () {
+        events.add('tapscancel');
+      };
+
+    tapAndDrag.addPointer(down6);
+    taps.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    tester.route(move6);
+    tester.route(up6);
+    GestureBinding.instance.gestureArena.sweep(6);
+
+    expect(events, <String>['down#1', 'dragstart#1', 'dragupdate#1', 'dragend#1']);
   });
 
   testGesture('Recognizer loses when competing against a DragGestureRecognizer when the pointer travels minimum distance to be considered a drag', (GestureTester tester) {
