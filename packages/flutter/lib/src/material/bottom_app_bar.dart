@@ -325,7 +325,6 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
     : super(
       elevation: 3.0,
       height: 80.0,
-      shape: const AutomaticNotchedShape(RoundedRectangleBorder()),
     );
 
   final BuildContext context;
