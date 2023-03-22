@@ -209,8 +209,7 @@ abstract class MultiRootFileSystemEntity<T extends FileSystemEntity,
 }
 
 class MultiRootFile extends MultiRootFileSystemEntity<File, io.File>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingFile { // ignore: prefer_mixin
+    with ForwardingFile {
   MultiRootFile({
     required super.fileSystem,
     required super.delegate,
@@ -223,8 +222,7 @@ class MultiRootFile extends MultiRootFileSystemEntity<File, io.File>
 
 class MultiRootDirectory
     extends MultiRootFileSystemEntity<Directory, io.Directory>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingDirectory<Directory> { // ignore: prefer_mixin
+    with ForwardingDirectory<Directory> {
   MultiRootDirectory({
     required super.fileSystem,
     required super.delegate,
@@ -251,8 +249,7 @@ class MultiRootDirectory
 }
 
 class MultiRootLink extends MultiRootFileSystemEntity<Link, io.Link>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingLink { // ignore: prefer_mixin
+    with ForwardingLink {
   MultiRootLink({
     required super.fileSystem,
     required super.delegate,

@@ -154,10 +154,8 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   String toString() => delegate.toString();
 }
 
-class ErrorHandlingFile
-    extends ForwardingFileSystemEntity<File, io.File>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingFile { // ignore: prefer_mixin
+class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File>
+    with ForwardingFile {
   ErrorHandlingFile({
     required Platform platform,
     required this.fileSystem,
@@ -369,8 +367,7 @@ class ErrorHandlingFile
 
 class ErrorHandlingDirectory
     extends ForwardingFileSystemEntity<Directory, io.Directory>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingDirectory<Directory> { // ignore: prefer_mixin
+    with ForwardingDirectory<Directory> {
   ErrorHandlingDirectory({
     required Platform platform,
     required this.fileSystem,
@@ -506,8 +503,7 @@ class ErrorHandlingDirectory
 
 class ErrorHandlingLink
     extends ForwardingFileSystemEntity<Link, io.Link>
-    // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
-    with ForwardingLink { // ignore: prefer_mixin
+    with ForwardingLink {
   ErrorHandlingLink({
     required Platform platform,
     required this.fileSystem,
