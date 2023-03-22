@@ -13,8 +13,6 @@ import 'toggleable.dart';
 // late SingingCharacter? _character;
 // late StateSetter setState;
 
-// const double _kOuterRadius = 8.0;
-// const double _kInnerRadius = 3.4;
 const double _kOuterRadius = 7.0;
 const double _kInnerRadius = 2.975;
 
@@ -24,12 +22,12 @@ const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
-/// A Material Design radio button.
+/// A macOS style radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
 /// button in a group is selected, the other radio buttons in the group cease to
-/// be selected. The values are of type `T`, the type parameter of the [Radio]
-/// class. Enums are commonly used for this purpose.
+/// be selected. The values are of type `T`, the type parameter of the
+/// [CupertinoRadio] class. Enums are commonly used for this purpose.
 ///
 /// The radio button itself does not maintain any state. Instead, selecting the
 /// radio invokes the [onChanged] callback, passing [value] as a parameter. If
@@ -42,7 +40,7 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// to what you could get with the RadioListTile widget.
 ///
 /// The currently selected character is passed into `groupValue`, which is
-/// maintained by the example's `State`. In this case, the first [Radio]
+/// maintained by the example's `State`. In this case, the first [CupertinoRadio]
 /// will start off selected because `_character` is initialized to
 /// `SingingCharacter.lafayette`.
 ///
@@ -51,20 +49,17 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// This causes the buttons to rebuild with the updated `groupValue`, and
 /// therefore the selection of the second button.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
-///
 /// ** See code in examples/api/lib/material/radio/radio.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [RadioListTile], which combines this widget with a [ListTile] so that
-///    you can give the radio button a label.
-///  * [Slider], for selecting a value in a range.
-///  * [Checkbox] and [Switch], for toggling a particular value on or off.
-///  * <https://material.io/design/components/selection-controls.html#radio-buttons>
+///  * [CupertinoSlider], for selecting a value in a range.
+///  * [CupertinoCheckbox] and [CupertinoSwitch], for toggling a particular value on or off.
+///  * [Radio], the Material Design equivalent.
+///  * <https://developer.apple.com/design/human-interface-guidelines/components/selection-and-input/toggles/>
 class CupertinoRadio<T> extends StatefulWidget {
-  /// Creates a Material Design radio button.
+  /// Creates a macOS-styled radio button.
   ///
   /// The radio button itself does not maintain any state. Instead, when the
   /// radio button is selected, the widget calls the [onChanged] callback. Most
@@ -116,7 +111,7 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// Radio<SingingCharacter>(
+  /// CupertinoRadio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
   ///   groupValue: _character,
   ///   onChanged: (SingingCharacter? newValue) {
@@ -155,66 +150,22 @@ class CupertinoRadio<T> extends StatefulWidget {
 
   /// The color to use when this radio button is selected.
   ///
-  /// Defaults to [ColorScheme.secondary].
-  ///
-  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
-  /// state, it will be used instead of this color.
+  /// Defaults to [CupertinoColors.activeBlue].
   final Color? activeColor;
 
-  /// The color to use when this radio button is selected.
+  /// The color to use when this radio button is not selected.
   ///
-  /// Defaults to [ColorScheme.secondary].
-  ///
-  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
-  /// state, it will be used instead of this color.
+  /// Defaults to [CupertinoColors.white].
   final Color? inactiveColor;
 
-  /// {@template flutter.material.radio.fillColor}
-  /// The color that fills the radio button, in all [MaterialState]s.
+  /// The color that fills the inner circle of the radio button when selected.
   ///
-  /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
-  ///
-  /// {@tool snippet}
-  /// This example resolves the [fillColor] based on the current [MaterialState]
-  /// of the [Radio], providing a different [Color] when it is
-  /// [MaterialState.disabled].
-  ///
-  /// ```dart
-  /// Radio<int>(
-  ///   value: 1,
-  ///   groupValue: 1,
-  ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.disabled)) {
-  ///       return Colors.orange.withOpacity(.32);
-  ///     }
-  ///     return Colors.orange;
-  ///   })
-  /// )
-  /// ```
-  /// {@end-tool}
-  /// {@endtemplate}
-  ///
-  /// If null, then the value of [activeColor] is used in the selected state. If
-  /// that is also null, then the value of [RadioThemeData.fillColor] is used.
-  /// If that is also null, then [ThemeData.disabledColor] is used in
-  /// the disabled state, [ColorScheme.secondary] is used in the
-  /// selected state, and [ThemeData.unselectedWidgetColor] is used in the
-  /// default state.
+  /// Defaults to [CupertinoColors.white].
   final Color? fillColor;
 
-  /// The color for the radio's [Material] when it has the input focus.
+  /// The color for the radio's border shadow when it has the input focus.
   ///
-  /// If [overlayColor] returns a non-null color in the [MaterialState.focused]
-  /// state, it will be used instead.
-  ///
-  /// If null, then the value of [RadioThemeData.overlayColor] is used in the
-  /// focused state. If that is also null, then the value of
-  /// [ThemeData.focusColor] is used.
+  /// If null, then a paler form of the [activeColor] will be used.
   final Color? focusColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
