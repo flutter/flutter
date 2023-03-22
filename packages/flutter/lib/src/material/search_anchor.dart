@@ -716,6 +716,14 @@ class _ViewContentState extends State<_ViewContent> {
       ?? widget.viewTheme.dividerColor
       ?? widget.dividerTheme.color
       ?? widget.viewDefaults.dividerColor!;
+    final MaterialStateProperty<TextStyle?>? effectiveTextStyle = widget.viewHeaderTextStyle
+      ?? widget.viewTheme.headerTextStyle
+      ?? widget.viewDefaults.headerTextStyle;
+    final MaterialStateProperty<TextStyle?>? effectiveHintStyle = widget.viewHeaderHintStyle
+      ?? widget.viewTheme.headerHintStyle
+      ?? widget.viewHeaderTextStyle
+      ?? widget.viewTheme.headerTextStyle
+      ?? widget.viewDefaults.headerTextStyle;
 
     final Widget viewDivider = DividerTheme(
       data: widget.dividerTheme.copyWith(color: effectiveDividerColor),
@@ -757,8 +765,8 @@ class _ViewContentState extends State<_ViewContent> {
                         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
                         overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
                         elevation: const MaterialStatePropertyAll<double>(0.0),
-                        textStyle: widget.viewHeaderTextStyle,
-                        hintStyle: widget.viewHeaderHintStyle,
+                        textStyle: effectiveTextStyle,
+                        hintStyle: effectiveHintStyle,
                         controller: _controller,
                         onChanged: (_) {
                           updateSuggestions();
