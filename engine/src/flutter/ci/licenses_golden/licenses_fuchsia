@@ -1,4 +1,4 @@
-Signature: 58ffd3138389374107b90af94a444c01
+Signature: 2006100b52be2a2cbcfef9bb51dbc2e9
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -17,6 +17,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -67,7 +68,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/features.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fmtmsg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fnmatch.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/getopt.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/glob.h
@@ -110,7 +110,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/pwd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/regex.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/resolv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/search.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/semaphore.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/signal.h
@@ -127,41 +126,33 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/eventfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/fsuid.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/inotify.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/klog.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mman.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mount.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mtio.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/personality.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/quota.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/reboot.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/reg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/select.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/shm.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/signalfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/socket.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/statvfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/swap.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/syslog.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/termios.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timeb.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timerfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timex.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ttydefaults.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ucontext.h
@@ -205,6 +196,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -255,7 +247,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/features.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fmtmsg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fnmatch.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/getopt.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/glob.h
@@ -298,7 +289,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/pwd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/regex.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/resolv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/search.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/semaphore.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/signal.h
@@ -315,41 +305,33 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/eventfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/fsuid.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/inotify.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/klog.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mman.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mount.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mtio.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/personality.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/quota.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/reboot.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/reg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/select.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/shm.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/signalfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/socket.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/statvfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/swap.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/syslog.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/termios.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timeb.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timerfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timex.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ttydefaults.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ucontext.h
@@ -700,6 +682,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/io.h + ../../../fuc
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/vfs.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/watcher.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/thread_checker.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_common_defs.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/include/lib/media/cpp/timeline_function.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/include/lib/media/cpp/timeline_rate.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/timeline_function.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -790,6 +774,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/io.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/vfs.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/watcher.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/thread_checker.h
+FILE: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma.h
+FILE: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_common_defs.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/include/lib/media/cpp/timeline_function.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/include/lib/media/cpp/timeline_rate.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/timeline_function.cc
@@ -1740,6 +1726,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -1790,7 +1777,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/features.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fmtmsg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fnmatch.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/getopt.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/glob.h
@@ -1833,7 +1819,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/pwd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/regex.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/resolv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/search.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/semaphore.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/signal.h
@@ -1850,41 +1835,33 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/eventfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/fsuid.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/inotify.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/klog.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mman.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mount.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mtio.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/personality.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/quota.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/reboot.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/reg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/select.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/shm.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/signalfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/socket.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/statvfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/swap.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/syslog.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/termios.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timeb.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timerfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timex.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ttydefaults.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ucontext.h
@@ -1928,6 +1905,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -1978,7 +1956,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/features.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fmtmsg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fnmatch.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/getopt.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/glob.h
@@ -2021,7 +1998,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/pwd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/regex.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/resolv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/search.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/semaphore.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/signal.h
@@ -2038,41 +2014,33 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/eventfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/fsuid.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/inotify.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/klog.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mman.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mount.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mtio.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/personality.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/quota.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/reboot.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/reg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/select.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/shm.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/signalfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/socket.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/statvfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/swap.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/syslog.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/termios.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timeb.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timerfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timex.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ttydefaults.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ucontext.h
@@ -2406,6 +2374,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/service/cpp/service.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/reader.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/service.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_sysmem.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/modular_cpp/agent.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/modular_cpp/include/lib/modular/cpp/agent.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -2726,6 +2695,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/ser
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/service/cpp/service.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/reader.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/service.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_sysmem.h
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/agent.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/include/lib/modular/cpp/agent.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h
@@ -4069,6 +4039,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -4119,7 +4090,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/features.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fmtmsg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fnmatch.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/getopt.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/glob.h
@@ -4162,7 +4132,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/pwd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/regex.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/resolv.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/search.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/semaphore.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/signal.h
@@ -4179,41 +4148,33 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/eventfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/fsuid.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/inotify.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/klog.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mman.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mount.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mtio.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/personality.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/quota.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/reboot.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/reg.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/select.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/shm.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/signalfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/socket.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/statvfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/swap.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/syslog.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/termios.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timeb.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timerfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timex.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ttydefaults.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ucontext.h
@@ -4257,6 +4218,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -4307,7 +4269,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/features.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fmtmsg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fnmatch.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/getopt.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/glob.h
@@ -4350,7 +4311,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/pwd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/regex.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/resolv.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/search.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/semaphore.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/setjmp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/signal.h
@@ -4367,41 +4327,33 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/errno.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/eventfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/fcntl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/fsuid.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/inotify.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/io.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ioctl.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/klog.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mman.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mount.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/msg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mtio.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/personality.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/quota.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/reboot.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/reg.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/select.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/sem.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/shm.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/signalfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/socket.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/stat.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/statfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/statvfs.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/swap.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/syslog.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/termios.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timeb.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timerfd.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timex.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ttydefaults.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ucontext.h
