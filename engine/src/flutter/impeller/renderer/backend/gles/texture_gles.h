@@ -37,7 +37,7 @@ class TextureGLES final : public Texture,
 
   [[nodiscard]] bool Bind() const;
 
-  [[nodiscard]] bool GenerateMipmaps() const;
+  [[nodiscard]] bool GenerateMipmap();
 
   enum class AttachmentPoint {
     kColor0,

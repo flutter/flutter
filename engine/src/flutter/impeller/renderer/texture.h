@@ -41,6 +41,8 @@ class Texture {
 
   virtual Scalar GetYCoordScale() const;
 
+  bool NeedsMipmapGeneration() const;
+
  protected:
   explicit Texture(TextureDescriptor desc);
 
@@ -51,6 +53,8 @@ class Texture {
   [[nodiscard]] virtual bool OnSetContents(
       std::shared_ptr<const fml::Mapping> mapping,
       size_t slice) = 0;
+
+  bool mipmap_generated_ = false;
 
  private:
   TextureIntent intent_ = TextureIntent::kRenderToTexture;

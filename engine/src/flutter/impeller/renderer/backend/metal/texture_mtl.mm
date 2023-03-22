@@ -92,4 +92,15 @@ bool TextureMTL::IsWrapped() const {
   return is_wrapped_;
 }
 
+bool TextureMTL::GenerateMipmap(id<MTLBlitCommandEncoder> encoder) {
+  if (!texture_) {
+    return false;
+  }
+
+  [encoder generateMipmapsForTexture:texture_];
+  mipmap_generated_ = true;
+
+  return true;
+}
+
 }  // namespace impeller
