@@ -156,7 +156,6 @@ targets:
       emulator_arch: "x64"
       enable_cso: "true"
     timeout: 60
-    bringup: true
 
   - name: Linux Fuchsia arm64 FEMU
     recipe: engine/femu_test
