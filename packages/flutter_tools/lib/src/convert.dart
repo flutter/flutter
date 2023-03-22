@@ -63,7 +63,7 @@ class Utf8Decoder extends Converter<List<int>, String> {
         'The Flutter team would greatly appreciate if you could file a bug explaining '
         'exactly what you were doing when this happened:\n'
         'https://github.com/flutter/flutter/issues/new/choose\n'
-        'The source bytes were:\n$codeUnits\n\n');
+        'The source bytes were:\n$input\n\n');
     }
     return result;
   }
