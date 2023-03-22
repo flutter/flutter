@@ -5,11 +5,6 @@
 #ifndef PATH_GLSL_
 #define PATH_GLSL_
 
-#define MOVE 0
-#define LINE 1
-#define QUAD 2
-#define CUBIC 3
-
 struct LineData {
   vec2 p1;
   vec2 p2;

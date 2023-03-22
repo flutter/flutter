@@ -32,9 +32,7 @@ namespace testing {
 using ComputeTest = ComputePlaygroundTest;
 INSTANTIATE_COMPUTE_SUITE(ComputeTest);
 
-// TODO(dnfield): Re-enable
-// https://github.com/flutter/flutter/issues/122828
-TEST_P(ComputeTest, DISABLED_HeartCubicsToStrokeVertices) {
+TEST_P(ComputeTest, HeartCubicsToStrokeVertices) {
   using CS = CubicToQuadsComputeShader;
   using QS = QuadPolylineComputeShader;
   using SS = StrokeComputeShader;
@@ -258,9 +256,7 @@ TEST_P(ComputeTest, DISABLED_HeartCubicsToStrokeVertices) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-// TODO(dnfield): Re-enable
-// https://github.com/flutter/flutter/issues/122828
-TEST_P(ComputeTest, DISABLED_QuadsToPolyline) {
+TEST_P(ComputeTest, QuadsToPolyline) {
   using QS = QuadPolylineComputeShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
