@@ -147,14 +147,7 @@ std::string BlitGenerateMipmapCommandMTL::GetLabel() const {
 
 bool BlitGenerateMipmapCommandMTL::Encode(
     id<MTLBlitCommandEncoder> encoder) const {
-  auto texture_mtl = TextureMTL::Cast(*texture).GetMTLTexture();
-  if (!texture_mtl) {
-    return false;
-  }
-
-  [encoder generateMipmapsForTexture:texture_mtl];
-
-  return true;
+  return TextureMTL::Cast(*texture).GenerateMipmap(encoder);
 };
 
 }  // namespace impeller

@@ -29,6 +29,8 @@ class TextureMTL final : public Texture,
 
   bool IsWrapped() const;
 
+  bool GenerateMipmap(id<MTLBlitCommandEncoder> encoder);
+
  private:
   id<MTLTexture> texture_ = nullptr;
   bool is_valid_ = false;

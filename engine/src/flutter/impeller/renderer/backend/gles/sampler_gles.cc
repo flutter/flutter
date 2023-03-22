@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/gles/sampler_gles.h"
+
 #include <iostream>
 
+#include "impeller/base/validation.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
@@ -66,6 +68,13 @@ static GLint ToAddressMode(SamplerAddressMode mode) {
 bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
                                         const ProcTableGLES& gl) const {
   if (!IsValid()) {
+    return false;
+  }
+
+  if (texture.NeedsMipmapGeneration()) {
+    VALIDATION_LOG
+        << "Texture mip count is > 1, but the mipmap has not been generated. "
+           "Texture can not be sampled safely.";
     return false;
   }
 

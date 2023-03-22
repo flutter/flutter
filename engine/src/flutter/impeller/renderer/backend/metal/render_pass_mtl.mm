@@ -382,6 +382,13 @@ static bool Bind(PassBindingsCache& pass,
     return false;
   }
 
+  if (texture.NeedsMipmapGeneration()) {
+    VALIDATION_LOG
+        << "Texture at binding index " << bind_index
+        << " has a mip count > 1, but the mipmap has not been generated.";
+    return false;
+  }
+
   return pass.SetTexture(stage, bind_index,
                          TextureMTL::Cast(texture).GetMTLTexture());
 }
