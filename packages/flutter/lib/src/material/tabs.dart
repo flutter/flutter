@@ -186,11 +186,10 @@ class _TabStyle extends AnimatedWidget {
   TabBarTheme _defaults(BuildContext context) {
     if (Theme.of(context).useMaterial3) {
       return isPrimary
-          ? _TabsPrimaryDefaultsM3(context)
-          : _TabsSecondaryDefaultsM3(context);
-    } else {
-      return _TabsDefaultsM2(context);
+        ? _TabsPrimaryDefaultsM3(context)
+        : _TabsSecondaryDefaultsM3(context);
     }
+    return _TabsDefaultsM2(context);
   }
 
   MaterialStateColor _resolveWithLabelColor(BuildContext context) {
