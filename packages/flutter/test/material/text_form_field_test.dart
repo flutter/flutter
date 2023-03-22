@@ -1178,7 +1178,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: TextField(
+        body: TextFormField(
           magnifierConfiguration: myTextMagnifierConfiguration,
         ),
       ),
