@@ -323,7 +323,8 @@ sk_sp<DlImage> ImageDecoderImpeller::UploadTextureToShared(
   texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
   texture_descriptor.format = pixel_format.value();
   texture_descriptor.size = {image_info.width(), image_info.height()};
-  texture_descriptor.mip_count = texture_descriptor.size.MipCount();
+  texture_descriptor.mip_count =
+      create_mips ? texture_descriptor.size.MipCount() : 1;
 
   auto texture =
       context->GetResourceAllocator()->CreateTexture(texture_descriptor);
