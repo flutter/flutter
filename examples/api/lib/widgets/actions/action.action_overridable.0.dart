@@ -64,14 +64,14 @@ class VerificationCodeGenerator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>> { CopyTextIntent: CallbackAction<CopyTextIntent>(onInvoke: _copy) },
-      child: Column(
+      child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('Press Ctrl-C to Copy'),
-          const SizedBox(height: 10),
+          Text('Press Ctrl-C to Copy'),
+          SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               CopyableText(text: '111'),
               SizedBox(width: 5,),
               CopyableText(text: '222'),

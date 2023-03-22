@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show PlatformAssetBundle;
+import 'package:flutter/services.dart' show AssetManifest, PlatformAssetBundle, rootBundle;
 import 'package:flutter/widgets.dart';
 
 import '../common.dart';
@@ -18,16 +15,12 @@ void main() async {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
   final Stopwatch watch = Stopwatch();
-  final PlatformAssetBundle bundle = PlatformAssetBundle();
+  final PlatformAssetBundle bundle = rootBundle as PlatformAssetBundle;
 
-  final ByteData assetManifestBytes = await bundle.load('money_asset_manifest.json');
   watch.start();
   for (int i = 0; i < _kNumIterations; i++) {
+    await AssetManifest.loadFromAssetBundle(bundle);
     bundle.clear();
-    final String json = utf8.decode(assetManifestBytes.buffer.asUint8List());
-    // This is a test, so we don't need to worry about this rule.
-    // ignore: invalid_use_of_visible_for_testing_member
-    await AssetImage.manifestParser(json);
   }
   watch.stop();
 

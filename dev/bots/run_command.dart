@@ -190,13 +190,24 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
         print(result.flattenedStderr);
         break;
     }
+    String allOutput;
+    if (failureMessage == null) {
+      allOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
+      if (allOutput.split('\n').length > 10) {
+        allOutput = '(stdout/stderr output was more than 10 lines)';
+      }
+    } else {
+      allOutput = '';
+    }
     foundError(<String>[
       if (failureMessage != null)
-        failureMessage
-      else
-        '$bold${red}Command exited with exit code ${result.exitCode} but expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',
+        failureMessage,
       '${bold}Command: $green$commandDescription$reset',
-      '${bold}Relative working directory: $cyan$relativeWorkingDir$reset',
+      if (failureMessage == null)
+        '$bold${red}Command exited with exit code ${result.exitCode} but expected ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',
+      '${bold}Working directory: $cyan${path.absolute(relativeWorkingDir)}$reset',
+      if (allOutput.isNotEmpty)
+        '${bold}stdout and stderr output:\n$allOutput',
     ]);
   } else {
     print('ELAPSED TIME: ${prettyPrintDuration(result.elapsedTime)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');

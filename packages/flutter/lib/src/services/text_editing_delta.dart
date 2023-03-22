@@ -64,9 +64,7 @@ abstract class TextEditingDelta with Diagnosticable {
     required this.oldText,
     required this.selection,
     required this.composing,
-  }) : assert(oldText != null),
-       assert(selection != null),
-       assert(composing != null);
+  });
 
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
@@ -95,7 +93,7 @@ abstract class TextEditingDelta with Diagnosticable {
     // 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd}
     // can be considered an insertion. In this case we inserted 'd'.
     //
-    // Similarly for a a deletion, say we are currently composing the word: 'worl'.
+    // Similarly for a deletion, say we are currently composing the word: 'worl'.
     // Our current state is 'world|' with the cursor at the end of 'd'. If we
     // press backspace to delete the character 'd', the platform will tell us 'world'
     // was replaced with 'worl' at range (0,5). Here we can check if the text found
@@ -279,7 +277,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
-    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
     assert(_debugTextRangeIsValid(TextRange.collapsed(insertionOffset), newText), 'Applying TextEditingDeltaInsertion failed, the insertionOffset: $insertionOffset is not within the bounds of $newText of length: ${newText.length}');
@@ -325,7 +323,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
-    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
     assert(_debugTextRangeIsValid(deletedRange, newText), 'Applying TextEditingDeltaDeletion failed, the deletedRange: $deletedRange is not within the bounds of $newText of length: ${newText.length}');
@@ -381,7 +379,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
-    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
     assert(_debugTextRangeIsValid(replacedRange, newText), 'Applying TextEditingDeltaReplacement failed, the replacedRange: $replacedRange is not within the bounds of $newText of length: ${newText.length}');
@@ -427,7 +425,7 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
-    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
     assert(_debugTextRangeIsValid(selection, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the selection range: $selection is not within the bounds of $oldText of length: ${oldText.length}');
     assert(_debugTextRangeIsValid(composing, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the composing region: $composing is not within the bounds of $oldText of length: ${oldText.length}');

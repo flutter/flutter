@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../common.dart';
 
-// Various tests to verify that the Opacity layer propagates the opacity to various
+// Various tests to verify that the opacity layer propagates the opacity to various
 // combinations of children that can apply it themselves.
 // See https://github.com/flutter/flutter/issues/75697
 class OpacityPeepholePage extends StatelessWidget {

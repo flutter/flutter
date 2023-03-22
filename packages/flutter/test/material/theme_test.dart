@@ -444,7 +444,7 @@ void main() {
       ];
     }
 
-    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
+    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
       for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
@@ -644,12 +644,12 @@ void main() {
           primarySwatch: Colors.blue,
           cupertinoOverrideTheme: const CupertinoThemeData(
             // But the primary material color is preempted by the override.
-            primaryColor: CupertinoColors.activeOrange,
+            primaryColor: CupertinoColors.systemRed,
           ),
         ));
 
         expect(buildCount, 2);
-        expect(theme.primaryColor, CupertinoColors.activeOrange);
+        expect(theme.primaryColor, CupertinoColors.systemRed);
       },
     );
 

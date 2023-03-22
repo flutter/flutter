@@ -23,7 +23,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -60,7 +60,7 @@ homepage: http://flutter.dev
 version: 1.0.0
 
 environment:
-  sdk: ">=2.14.0-383.0.dev <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
   flutter: ">=2.5.0-6.0.pre.30 <3.0.0"
 
 dependencies:
@@ -236,6 +236,7 @@ void main() {
             sourcePath: '/path/to/pubspec.yaml',
             kind: DependencyKind.normal,
             isTransitive: false,
+            isDevDependency: false,
           ),
         ],
         doUpgrade: true,
@@ -255,6 +256,7 @@ void main() {
             sourcePath: '/path/to/pubspec.yaml',
             kind: DependencyKind.normal,
             isTransitive: false,
+            isDevDependency: false,
           ),
         ],
       );
@@ -275,7 +277,6 @@ class FakePub extends Fake implements Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
@@ -283,7 +284,7 @@ class FakePub extends Fake implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     pubGetDirectories.add(project.directory.path);
     project.directory.childFile('pubspec.lock')

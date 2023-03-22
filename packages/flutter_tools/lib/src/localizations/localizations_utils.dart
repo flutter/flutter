@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import 'gen_l10n_types.dart';
@@ -51,7 +52,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
       scriptCode = codes[1].length > codes[2].length ? codes[1] : codes[2];
       countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
     }
-    assert(codes[0] != null && codes[0].isNotEmpty);
+    assert(codes[0].isNotEmpty);
     assert(countryCode == null || countryCode.isNotEmpty);
     assert(scriptCode == null || scriptCode.isNotEmpty);
 
@@ -340,7 +341,7 @@ class LocalizationOptions {
     this.format = false,
     this.useEscaping = false,
     this.suppressWarnings = false,
-  }) : assert(useSyntheticPackage != null);
+  });
 
   /// The `--arb-dir` argument.
   ///
@@ -436,7 +437,12 @@ LocalizationOptions parseLocalizationsOptions({
   if (contents.trim().isEmpty) {
     return const LocalizationOptions();
   }
-  final YamlNode yamlNode = loadYamlNode(file.readAsStringSync());
+  final YamlNode yamlNode;
+  try {
+    yamlNode = loadYamlNode(file.readAsStringSync());
+  } on YamlException catch (err) {
+    throwToolExit(err.message);
+  }
   if (yamlNode is! YamlMap) {
     logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
     throw Exception();

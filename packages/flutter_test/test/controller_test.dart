@@ -711,6 +711,25 @@ void main() {
     });
   });
 
+  testWidgets('platformDispatcher exposes the platformDispatcher from binding', (WidgetTester tester) async {
+    expect(tester.platformDispatcher, tester.binding.platformDispatcher);
+  });
+
+  testWidgets('view exposes the implicitView from platformDispatcher', (WidgetTester tester) async {
+    expect(tester.view, tester.platformDispatcher.implicitView);
+  });
+
+  testWidgets('viewOf finds a view when the view is implicit', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Center(
+        child: Text('Test'),
+      )
+    ));
+
+    expect(() => tester.viewOf(find.text('Test')), isNot(throwsA(anything)));
+    expect(tester.viewOf(find.text('Test')), isA<TestFlutterView>());
+  });
+
   group('SemanticsController', () {
     group('find', () {
       testWidgets('throws when there are no semantics', (WidgetTester tester) async {
@@ -727,10 +746,10 @@ void main() {
 
       testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: Scaffold(
               body: Row(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('hello'),
                   Text('hello'),
                 ],
@@ -876,7 +895,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We look for a SingleChildScrollView since the view itself isn't
-        // important for accessiblity, so it won't show up in the traversal
+        // important for accessibility, so it won't show up in the traversal
         expect(
           () => tester.semantics.simulatedAccessibilityTraversal(start: find.byType(SingleChildScrollView)),
           throwsA(isA<StateError>()),

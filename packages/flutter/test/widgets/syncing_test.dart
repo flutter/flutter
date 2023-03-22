@@ -130,7 +130,7 @@ void main() {
   testWidgets('swap instances around', (WidgetTester tester) async {
     const Widget a = TestWidget(persistentState: 0x61, syncedState: 0x41, child: Text('apple', textDirection: TextDirection.ltr));
     const Widget b = TestWidget(persistentState: 0x62, syncedState: 0x42, child: Text('banana', textDirection: TextDirection.ltr));
-    await tester.pumpWidget(Column());
+    await tester.pumpWidget(const Column());
 
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();

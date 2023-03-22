@@ -67,7 +67,9 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                       leadingIcon: const Icon(Icons.search),
                       label: const Text('Icon'),
                       dropdownMenuEntries: iconEntries,
-                      inputDecorationTheme: const InputDecorationTheme(filled: true),
+                      inputDecorationTheme: const InputDecorationTheme(
+                        filled: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 5.0)),
                       onSelected: (IconLabel? icon) {
                         setState(() {
                           selectedIcon = icon;

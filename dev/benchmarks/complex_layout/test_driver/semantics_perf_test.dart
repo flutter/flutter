@@ -34,9 +34,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null) {
-        driver.close();
-      }
+      driver.close();
     });
 
     test('initial tree creation', () async {

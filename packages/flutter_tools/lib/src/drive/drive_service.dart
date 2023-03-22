@@ -184,7 +184,7 @@ class FlutterDriverService extends DriverService {
         userIdentifier: userIdentifier,
         prebuiltApplication: prebuiltApplication,
       );
-      if (result != null && result.started) {
+      if (result.started) {
         break;
       }
       // On attempts past 1, assume the application is built correctly and re-use it.
@@ -196,7 +196,7 @@ class FlutterDriverService extends DriverService {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
     }
     return reuseApplication(
-      result.observatoryUri!,
+      result.vmServiceUri!,
       device,
       debuggingOptions,
       ipv6,

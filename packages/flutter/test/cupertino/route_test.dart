@@ -160,7 +160,7 @@ void main() {
 
     // Also shows the previous page's title next to the back button.
     expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
-    // 3 paddings + 1 ahem character at font size 34.0.
+    // 3 paddings + 1 test font character at font size 34.0.
     expect(tester.getTopLeft(find.text('An iPod')).dx, 8.0 + 4.0 + 34.0 + 6.0);
   });
 
@@ -1484,6 +1484,7 @@ void main() {
       label: 'Dismiss',
     )));
     debugDefaultTargetPlatformOverride = null;
+    semantics.dispose();
   });
 
   testWidgets('showCupertinoModalPopup allows for semantics dismiss when set', (WidgetTester tester) async {
@@ -1519,6 +1520,7 @@ void main() {
       label: 'Dismiss',
     ));
     debugDefaultTargetPlatformOverride = null;
+    semantics.dispose();
   });
 
   testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
@@ -1700,6 +1702,7 @@ void main() {
     ];
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1726,6 +1729,7 @@ void main() {
 
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1754,6 +1758,7 @@ void main() {
     ];
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1775,6 +1780,7 @@ void main() {
 
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test shouldn't call this.
@@ -1830,7 +1836,6 @@ void main() {
             child: const Text('Home'),
             onPressed: () {
               navigator = Navigator.of(context);
-              assert(navigator != null);
               navigator.push<void>(r);
             },
           );
@@ -2212,12 +2217,13 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 
 Widget buildNavigator({
   required List<Page<dynamic>> pages,
+  required FlutterView view,
   PopPageCallback? onPopPage,
   GlobalKey<NavigatorState>? key,
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+    data: MediaQueryData.fromView(view),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -2314,6 +2320,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
 class _RestorableModalTestWidget extends StatelessWidget {
   const _RestorableModalTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
     return CupertinoModalPopupRoute<void>(
       builder: (BuildContext context) {

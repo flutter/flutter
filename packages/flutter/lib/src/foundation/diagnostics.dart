@@ -253,28 +253,7 @@ class TextTreeConfiguration {
     this.beforeName = '',
     this.suffixLineOne = '',
     this.mandatoryFooter = '',
-  }) : assert(prefixLineOne != null),
-       assert(prefixOtherLines != null),
-       assert(prefixLastChildLineOne != null),
-       assert(prefixOtherLinesRootNode != null),
-       assert(linkCharacter != null),
-       assert(propertyPrefixIfChildren != null),
-       assert(propertyPrefixNoChildren != null),
-       assert(lineBreak != null),
-       assert(lineBreakProperties != null),
-       assert(afterName != null),
-       assert(afterDescriptionIfBody != null),
-       assert(afterDescription != null),
-       assert(beforeProperties != null),
-       assert(afterProperties != null),
-       assert(propertySeparator != null),
-       assert(bodyIndent != null),
-       assert(footer != null),
-       assert(showChildren != null),
-       assert(addBlankLineIfNoChildren != null),
-       assert(isNameOnOwnLine != null),
-       assert(isBlankLineBetweenPropertiesAndChildren != null),
-       childLinkSpace = ' ' * linkCharacter.length;
+  }) : childLinkSpace = ' ' * linkCharacter.length;
 
   /// Prefix to add to the first line to display a child with this style.
   final String prefixLineOne;
@@ -1113,8 +1092,7 @@ class TextTreeRenderer {
     int wrapWidth = 100,
     int wrapWidthProperties = 65,
     int maxDescendentsTruncatableNode = -1,
-  }) : assert(minLevel != null),
-       _minLevel = minLevel,
+  }) : _minLevel = minLevel,
        _wrapWidth = wrapWidth,
        _wrapWidthProperties = wrapWidthProperties,
        _maxDescendentsTruncatableNode = maxDescendentsTruncatableNode;
@@ -1218,7 +1196,7 @@ class TextTreeRenderer {
 
     List<DiagnosticsNode> children = node.getChildren();
 
-    String? description = node.toDescription(parentConfiguration: parentConfiguration);
+    String description = node.toDescription(parentConfiguration: parentConfiguration);
     if (config.beforeName.isNotEmpty) {
       builder.write(config.beforeName);
     }
@@ -1229,7 +1207,7 @@ class TextTreeRenderer {
     if (uppercaseTitle) {
       name = name?.toUpperCase();
     }
-    if (description == null || description.isEmpty) {
+    if (description.isEmpty) {
       if (node.showName && name != null) {
         builder.write(name, allowWrap: wrapName);
       }
@@ -1388,7 +1366,6 @@ class TextTreeRenderer {
 
       for (int i = 0; i < children.length; i++) {
         final DiagnosticsNode child = children[i];
-        assert(child != null);
         final TextTreeConfiguration childConfig = _childTextConfiguration(child, config)!;
         if (i == children.length - 1) {
           final String lastChildPrefixLineOne = '$prefixChildrenRaw${childConfig.prefixLastChildLineOne}';
@@ -1463,12 +1440,10 @@ abstract class DiagnosticsNode {
     this.showName = true,
     this.showSeparator = true,
     this.linePrefix,
-  }) : assert(showName != null),
-       assert(showSeparator != null),
-       // A name ending with ':' indicates that the user forgot that the ':' will
-       // be automatically added for them when generating descriptions of the
-       // property.
-       assert(
+  }) : assert(
+         // A name ending with ':' indicates that the user forgot that the ':' will
+         // be automatically added for them when generating descriptions of the
+         // property.
          name == null || !name.endsWith(':'),
          'Names of diagnostic nodes must not end with colons.\n'
          'name:\n'
@@ -1490,8 +1465,6 @@ abstract class DiagnosticsNode {
     DiagnosticLevel level = DiagnosticLevel.info,
     bool allowWrap = true,
   }) {
-    assert(style != null);
-    assert(level != null);
     return DiagnosticsProperty<void>(
       '',
       null,
@@ -1728,7 +1701,6 @@ abstract class DiagnosticsNode {
   }) {
     String result = super.toString();
     assert(style != null);
-    assert(minLevel != null);
     assert(() {
       if (_isSingleLine(style)) {
         result = toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
@@ -1866,11 +1838,7 @@ class MessageProperty extends DiagnosticsProperty<void> {
     String message, {
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(name != null),
-       assert(message != null),
-       assert(style != null),
-       assert(level != null),
-       super(name, null, description: message, style: style, level: level);
+  }) : super(name, null, description: message, style: style, level: level);
 }
 
 /// Property which encloses its string [value] in quotes.
@@ -1894,10 +1862,7 @@ class StringProperty extends DiagnosticsProperty<String> {
     super.ifEmpty,
     super.style,
     super.level,
-  }) : assert(showName != null),
-       assert(quoted != null),
-       assert(style != null),
-       assert(level != null);
+  });
 
   /// Whether the value is enclosed in double quotes.
   final bool quoted;
@@ -2005,9 +1970,7 @@ class DoubleProperty extends _NumProperty<double> {
     super.showName,
     super.style,
     super.level,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null);
+  });
 
   /// Property with a [value] that is computed only when needed.
   ///
@@ -2024,9 +1987,7 @@ class DoubleProperty extends _NumProperty<double> {
     super.tooltip,
     super.defaultValue,
     super.level,
-  }) : assert(showName != null),
-       assert(level != null),
-       super.lazy();
+  }) : super.lazy();
 
   @override
   String numberToString() => debugFormatDouble(value);
@@ -2048,9 +2009,7 @@ class IntProperty extends _NumProperty<int> {
     super.defaultValue,
     super.style,
     super.level,
-  }) : assert(showName != null),
-       assert(level != null),
-       assert(style != null);
+  });
 
   @override
   String numberToString() => value.toString();
@@ -2075,8 +2034,7 @@ class PercentProperty extends DoubleProperty {
     super.tooltip,
     super.unit,
     super.level,
-  }) : assert(showName != null),
-       assert(level != null);
+  });
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
@@ -2150,9 +2108,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
     bool showName = false,
     Object? defaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(level != null),
-       assert(ifTrue != null || ifFalse != null),
+  }) : assert(ifTrue != null || ifFalse != null),
        super(
          name,
          value,
@@ -2254,10 +2210,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
     super.showName,
     super.showSeparator,
     super.level,
-  }) : assert(style != null),
-       assert(showName != null),
-       assert(showSeparator != null),
-       assert(level != null);
+  });
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
@@ -2335,7 +2288,7 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
     super.value, {
     super.defaultValue,
     super.level,
-  }) : assert(level != null);
+  });
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
@@ -2382,9 +2335,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
     super.ifNull,
     super.showName = false,
     super.level,
-  }) : assert(ifPresent != null || ifNull != null),
-       assert(showName != null),
-       assert(level != null);
+  }) : assert(ifPresent != null || ifNull != null);
 
   /// Shorthand constructor to describe whether the property has a value.
   ///
@@ -2396,9 +2347,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
     String super.name,
     super.value, {
     super.level,
-  }) : assert(name != null),
-       assert(level != null),
-       ifPresent = 'has $name',
+  }) : ifPresent = 'has $name',
        super(
     showName: false,
   );
@@ -2495,17 +2444,13 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
     super.showName,
     super.showSeparator,
     super.level,
-  }) : assert(value != null),
-       assert(showName != null),
-       assert(showSeparator != null),
-       assert(level != null);
+  });
 
   @override
   Map<String, T?> get value => super.value!;
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
-    assert(value != null);
     if (!_hasNonNullEntry() && ifEmpty != null) {
       return ifEmpty!;
     }
@@ -2598,11 +2543,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     this.allowNameWrap = true,
     DiagnosticsTreeStyle super.style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(showSeparator != null),
-       assert(style != null),
-       assert(level != null),
-       _description = description,
+  }) : _description = description,
        _valueComputed = true,
        _value = value,
        _computeValue = null,
@@ -2620,7 +2561,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// The [showName], [showSeparator], [style], [missingIfNull], and [level]
   /// arguments must not be null.
   ///
-  /// The [level] argument is just a suggestion and can be overridden if
+  /// The [level] argument is just a suggestion and can be overridden
   /// if something else about the property causes it to have a lower or higher
   /// level. For example, if calling `computeValue` throws an exception, [level]
   /// will always return [DiagnosticLevel.error].
@@ -2640,12 +2581,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     this.allowNameWrap = true,
     DiagnosticsTreeStyle super.style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(showSeparator != null),
-       assert(defaultValue == kNoDefaultValue || defaultValue is T?),
-       assert(missingIfNull != null),
-       assert(style != null),
-       assert(level != null),
+  }) : assert(defaultValue == kNoDefaultValue || defaultValue is T?),
        _description = description,
        _valueComputed = false,
        _value = null,
@@ -2765,7 +2701,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   ///
   /// `text` must not be null.
   String _addTooltip(String text) {
-    assert(text != null);
     return tooltip == null ? text : '$text ($tooltip)';
   }
 
@@ -2938,7 +2873,7 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
     super.name,
     required this.value,
     required super.style,
-  }) : assert(value != null);
+  });
 
   @override
   final T value;
@@ -3152,6 +3087,8 @@ mixin Diagnosticable {
   }
 
   /// Add additional properties associated with the node.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=DnC7eT-vh1k}
   ///
   /// Use the most specific [DiagnosticsProperty] existing subclass to describe
   /// each property instead of the [DiagnosticsProperty] base class. There are

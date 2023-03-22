@@ -2491,7 +2491,6 @@ void main() {
 }
 
 Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection }) {
-  assert(textDirection != null);
   return MaterialApp(
     home: Localizations(
       locale: const Locale('en', 'US'),

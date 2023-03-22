@@ -1981,7 +1981,7 @@ class _CoversSameAreaAs extends Matcher {
 class _ColorMatcher extends Matcher {
   const _ColorMatcher({
     required this.targetColor,
-  }) : assert(targetColor != null);
+  });
 
   final Color targetColor;
 

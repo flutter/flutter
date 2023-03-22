@@ -20,7 +20,7 @@ class TestPaintingContext implements PaintingContext {
 void main() {
   testWidgets('Can construct an empty Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(),
       ),
@@ -29,7 +29,7 @@ void main() {
 
   testWidgets('Can construct an empty Centered Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(child: Stack()),
       ),
@@ -40,9 +40,9 @@ void main() {
     const Key key = Key('container');
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         alignment: Alignment.topLeft,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             left: 10.0,
             child: SizedBox(
@@ -68,9 +68,9 @@ void main() {
     expect(parentData.height, isNull);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         alignment: Alignment.topLeft,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             right: 10.0,
             child: SizedBox(
@@ -98,9 +98,9 @@ void main() {
     const SizedBox sizedBox = SizedBox(key: key, width: 10.0, height: 10.0);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[ Positioned(left: 10.0, child: sizedBox) ],
+        children: <Widget>[ Positioned(left: 10.0, child: sizedBox) ],
       ),
     );
     Element containerElement = tester.element(find.byKey(key));
@@ -115,9 +115,9 @@ void main() {
     expect(parentData.height, isNull);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[ sizedBox ],
+        children: <Widget>[ sizedBox ],
       ),
     );
     containerElement = tester.element(find.byKey(key));
@@ -136,12 +136,12 @@ void main() {
     const Key child1Key = Key('child1');
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(key: child0Key, width: 20.0, height: 20.0),
               SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
@@ -159,12 +159,12 @@ void main() {
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(key: child0Key, width: 20.0, height: 20.0),
               SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
@@ -182,12 +182,12 @@ void main() {
     const Key child1Key = Key('child1');
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(key: child0Key, width: 20.0, height: 20.0),
               SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
@@ -205,12 +205,12 @@ void main() {
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(key: child0Key, width: 20.0, height: 20.0),
               SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
@@ -225,7 +225,7 @@ void main() {
 
   testWidgets('Can construct an empty IndexedStack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: IndexedStack(),
       ),
@@ -234,7 +234,7 @@ void main() {
 
   testWidgets('Can construct an empty Centered IndexedStack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(child: IndexedStack()),
       ),
@@ -316,9 +316,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             left: 10.0,
             width: 11.0,
@@ -348,9 +348,9 @@ void main() {
     expect(renderBox.size.height, equals(12.0));
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             right: 10.0,
             width: 11.0,
@@ -377,18 +377,18 @@ void main() {
   });
 
   testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
     final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
   });
 
   testWidgets('Clip.none is respected by describeApproximateClip', (WidgetTester tester) async {
-    await tester.pumpWidget(Stack(
+    await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
-      children: const <Widget>[Positioned(left: 1000, right: 2000, child: SizedBox(width: 2000, height: 2000))],
+      children: <Widget>[Positioned(left: 1000, right: 2000, child: SizedBox(width: 2000, height: 2000))],
     ));
     final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
@@ -440,11 +440,11 @@ void main() {
 
   testWidgets('Stack clip test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(
                 width: 100.0,
                 height: 100.0,
@@ -469,12 +469,12 @@ void main() {
     expect(context.invocations.first.memberName, equals(#pushClipRect));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
             clipBehavior: Clip.none,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(
                 width: 100.0,
                 height: 100.0,
@@ -645,17 +645,17 @@ void main() {
 
   testWidgets('Can change the text direction of a Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         alignment: Alignment.center,
       ),
     );
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.rtl,
       ),
     );
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         alignment: Alignment.center,
       ),
     );
@@ -663,11 +663,11 @@ void main() {
 
   testWidgets('Alignment with partially-positioned children', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
         child: Stack(
           alignment: Alignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 100.0, height: 100.0),
             Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
@@ -692,11 +692,11 @@ void main() {
     expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           alignment: Alignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 100.0, height: 100.0),
             Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
@@ -721,11 +721,11 @@ void main() {
     expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           alignment: Alignment.bottomRight,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 100.0, height: 100.0),
             Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
@@ -750,11 +750,11 @@ void main() {
     expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           alignment: Alignment.topLeft,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 100.0, height: 100.0),
             Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
@@ -781,7 +781,7 @@ void main() {
 
   testWidgets('Stack error messages', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Stack(),
+      const Stack(),
     );
     final String exception = tester.takeException().toString();
 
@@ -808,14 +808,14 @@ void main() {
 
   testWidgets('Can update clipBehavior of IndexedStack',
       (WidgetTester tester) async {
-    await tester.pumpWidget(IndexedStack(textDirection: TextDirection.ltr));
+    await tester.pumpWidget(const IndexedStack(textDirection: TextDirection.ltr));
     final RenderIndexedStack renderObject =
       tester.renderObject<RenderIndexedStack>(find.byType(IndexedStack));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // Update clipBehavior to Clip.antiAlias
 
-    await tester.pumpWidget(IndexedStack(
+    await tester.pumpWidget(const IndexedStack(
       textDirection: TextDirection.ltr,
       clipBehavior: Clip.antiAlias,
     ));

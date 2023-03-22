@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'badge_theme.dart';
@@ -35,6 +36,7 @@ class Badge extends StatelessWidget {
     this.textStyle,
     this.padding,
     this.alignment,
+    this.offset,
     this.label,
     this.isLabelVisible = true,
     this.child,
@@ -54,6 +56,7 @@ class Badge extends StatelessWidget {
     this.textStyle,
     this.padding,
     this.alignment,
+    this.offset,
     required int count,
     this.isLabelVisible = true,
     this.child,
@@ -106,13 +109,29 @@ class Badge extends StatelessWidget {
   /// left and right if the theme's value is null.
   final EdgeInsetsGeometry? padding;
 
-  /// The location of the [label] relative to the [child].
+  /// Combined with [offset] to determine the location of the [label]
+  /// relative to the [child].
+  ///
+  /// The alignment positions the label in the same way a child of an
+  /// [Align] widget is positioned, except that, the alignment is
+  /// resolved as if the label was a [largeSize] square and [offset]
+  /// is added to the result.
   ///
   /// This value is only used if [label] is non-null.
   ///
-  /// Defaults to the [BadgeTheme]'s alignment, or `start = 12`
-  /// and `top = -4` if the theme's value is null.
-  final AlignmentDirectional? alignment;
+  /// Defaults to the [BadgeTheme]'s alignment, or
+  /// [AlignmentDirectional.topEnd] if the theme's value is null.
+  final AlignmentGeometry? alignment;
+
+  /// Combined with [alignment] to determine the location of the [label]
+  /// relative to the [child].
+  ///
+  /// This value is only used if [label] is non-null.
+  ///
+  /// Defaults to the [BadgeTheme]'s offset, or
+  /// if the theme's value is null then `Offset(4, -4)` for
+  /// [TextDirection.ltr] or `Offset(-4, -4)` for [TextDirection.rtl].
+  final Offset? offset;
 
   /// The badge's content, typically a [Text] widget that contains 1 to 4
   /// characters.
@@ -168,23 +187,98 @@ class Badge extends StatelessWidget {
       return badge;
     }
 
-    final AlignmentDirectional effectiveAlignment = alignment ?? badgeTheme.alignment ?? defaults.alignment!;
+    final AlignmentGeometry effectiveAlignment = alignment ?? badgeTheme.alignment ?? defaults.alignment!;
+    final TextDirection textDirection = Directionality.of(context);
+    final Offset defaultOffset = textDirection == TextDirection.ltr ? const Offset(4, -4) : const Offset(-4, -4);
+    final Offset effectiveOffset = offset ?? badgeTheme.offset ?? defaultOffset;
+
     return
       Stack(
         clipBehavior: Clip.none,
         children: <Widget>[
           child!,
-          Positioned.directional(
-            textDirection: Directionality.of(context),
-            start: label == null ? null : effectiveAlignment.start,
-            end: label == null ? 0 : null,
-            top: label == null ? 0 : effectiveAlignment.y,
-            child: badge,
+          Positioned.fill(
+            child: _Badge(
+              alignment: effectiveAlignment,
+              offset: label == null ? Offset.zero : effectiveOffset,
+              textDirection: textDirection,
+              child: badge,
+            ),
           ),
         ],
       );
   }
 }
+
+class _Badge extends SingleChildRenderObjectWidget {
+  const _Badge({
+    required this.alignment,
+    required this.offset,
+    required this.textDirection,
+    super.child, // the badge
+  });
+
+  final AlignmentGeometry alignment;
+  final Offset offset;
+  final TextDirection textDirection;
+
+  @override
+  _RenderBadge createRenderObject(BuildContext context) {
+    return _RenderBadge(
+      alignment: alignment,
+      offset: offset,
+      textDirection: Directionality.maybeOf(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBadge renderObject) {
+    renderObject
+      ..alignment = alignment
+      ..offset = offset
+      ..textDirection = Directionality.maybeOf(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset));
+  }
+}
+
+class _RenderBadge extends RenderAligningShiftedBox {
+  _RenderBadge({
+    super.textDirection,
+    super.alignment,
+    required Offset offset,
+  }) : _offset = offset;
+
+  Offset get offset => _offset;
+  Offset _offset;
+  set offset(Offset value) {
+    if (_offset == value) {
+      return;
+    }
+    _offset = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    assert(constraints.hasBoundedWidth);
+    assert(constraints.hasBoundedHeight);
+    size = constraints.biggest;
+
+    child!.layout(const BoxConstraints(), parentUsesSize: true);
+    final double badgeSize = child!.size.height;
+    final Alignment resolvedAlignment = alignment.resolve(textDirection);
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    childParentData.offset = offset + resolvedAlignment.alongOffset(Offset(size.width - badgeSize, size.height - badgeSize));
+  }
+}
+
 
 // BEGIN GENERATED TOKEN PROPERTIES - Badge
 
@@ -193,14 +287,14 @@ class Badge extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
 class _BadgeDefaultsM3 extends BadgeThemeData {
   _BadgeDefaultsM3(this.context) : super(
     smallSize: 6.0,
     largeSize: 16.0,
     padding: const EdgeInsets.symmetric(horizontal: 4),
-    alignment: const AlignmentDirectional(12, -4),
+    alignment: AlignmentDirectional.topEnd,
   );
 
   final BuildContext context;

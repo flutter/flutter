@@ -15,7 +15,6 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-
 # * Fixes in this file are for the ThemeData class from the Material library. *
 #   For fixes to
 #     * AppBar: fix_app_bar.yaml
