@@ -115,9 +115,9 @@ class _StaticIconProvider {
 /// ```dart
 /// @staticIconProvider
 /// abstract final class MyCustomIcons {
-///   static const fontFamily = 'MyCustomIcons';
-///   static const happyFace = IconData(1, fontFamily: fontFamily);
-///   static const sadFace = IconData(2, fontFamily: fontFamily);
+///   static const String fontFamily = 'MyCustomIcons';
+///   static const IconData happyFace = IconData(1, fontFamily: fontFamily);
+///   static const IconData sadFace = IconData(2, fontFamily: fontFamily);
 /// }
 /// ```
 const Object staticIconProvider = _StaticIconProvider();
