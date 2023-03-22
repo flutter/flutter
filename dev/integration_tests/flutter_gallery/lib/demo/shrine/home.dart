@@ -3,15 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/shrine/backdrop.dart';
-import 'package:flutter_gallery/demo/shrine/expanding_bottom_sheet.dart';
-import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
-import 'package:flutter_gallery/demo/shrine/model/product.dart';
-import 'package:flutter_gallery/demo/shrine/supplemental/asymmetric_view.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+import 'backdrop.dart';
+import 'expanding_bottom_sheet.dart';
+import 'model/app_state_model.dart';
+import 'model/product.dart';
+import 'supplemental/asymmetric_view.dart';
+
 class ProductPage extends StatelessWidget {
-  const ProductPage({Key? key, this.category = Category.all}) : super(key: key);
+  const ProductPage({super.key, this.category = Category.all});
 
   final Category category;
 
@@ -28,8 +29,8 @@ class HomePage extends StatelessWidget {
   const HomePage({
     this.expandingBottomSheet,
     this.backdrop,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final ExpandingBottomSheet? expandingBottomSheet;
   final Backdrop? backdrop;

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Image.frameBuilder
+// Flutter code sample for [Image.frameBuilder].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   @override
@@ -42,10 +42,10 @@ class MyStatelessWidget extends StatelessWidget {
             return child;
           }
           return AnimatedOpacity(
-            child: child,
             opacity: frame == null ? 0 : 1,
             duration: const Duration(seconds: 1),
             curve: Curves.easeOut,
+            child: child,
           );
         },
       ),

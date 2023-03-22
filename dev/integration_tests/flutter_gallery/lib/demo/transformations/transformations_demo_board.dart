@@ -110,7 +110,7 @@ class Board extends IterableMixin<BoardPoint?> {
     return distanceFromCenter <= boardRadius;
   }
 
-  // Get the distance between two BoardPoins.
+  // Get the distance between two BoardPoints.
   static int getDistance(BoardPoint a, BoardPoint b) {
     final Vector3 a3 = a.cubeCoordinates;
     final Vector3 b3 = b.cubeCoordinates;
@@ -275,7 +275,7 @@ class BoardPoint {
   }
 
   @override
-  int get hashCode => hashValues(q, r);
+  int get hashCode => Object.hash(q, r);
 
   BoardPoint copyWithColor(Color nextColor) => BoardPoint(q, r, color: nextColor);
 

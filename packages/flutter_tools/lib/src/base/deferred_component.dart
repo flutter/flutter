@@ -50,7 +50,7 @@ class DeferredComponent {
 
   /// Indicates if the component has loading units assigned.
   ///
-  /// Unassigned components simply reflect the pubspec.yaml configuration directly,
+  /// Unassigned components reflect the pubspec.yaml configuration directly,
   /// contain no loading unit data, and [loadingUnits] is null. Once assigned, the component
   /// will contain a set of [loadingUnits] which contains the [LoadingUnit]s that the
   /// component needs to include. Loading units can be assigned with the [assignLoadingUnits]
@@ -71,9 +71,6 @@ class DeferredComponent {
   void assignLoadingUnits(List<LoadingUnit> allLoadingUnits) {
     _assigned = true;
     _loadingUnits = <LoadingUnit>{};
-    if (allLoadingUnits == null) {
-      return;
-    }
     for (final String lib in libraries) {
       for (final LoadingUnit loadingUnit in allLoadingUnits) {
         if (loadingUnit.libraries.contains(lib)) {
@@ -195,7 +192,7 @@ class LoadingUnit {
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     // Setup android source directory
     if (manifest != null) {
-      for (final dynamic loadingUnitMetadata in manifest['loadingUnits']) {
+      for (final dynamic loadingUnitMetadata in manifest['loadingUnits'] as List<dynamic>) {
         final Map<String, dynamic> loadingUnitMap = loadingUnitMetadata as Map<String, dynamic>;
         if (loadingUnitMap['id'] == 1) {
           continue; // Skip base unit

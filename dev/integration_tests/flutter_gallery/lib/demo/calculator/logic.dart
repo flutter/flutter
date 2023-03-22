@@ -17,7 +17,7 @@ class ExpressionToken {
 
 /// A token that represents a number.
 class NumberToken extends ExpressionToken {
-  NumberToken(String stringRep, this.number) : super(stringRep);
+  NumberToken(String super.stringRep, this.number);
 
   NumberToken.fromNumber(num number) : this('$number', number);
 
@@ -35,10 +35,12 @@ class FloatToken extends NumberToken {
 
   static double _parse(String stringRep) {
     String toParse = stringRep;
-    if (toParse.startsWith('.'))
+    if (toParse.startsWith('.')) {
       toParse = '0$toParse';
-    if (toParse.endsWith('.'))
+    }
+    if (toParse.endsWith('.')) {
       toParse = '${toParse}0';
+    }
     return double.parse(toParse);
   }
 }
@@ -51,8 +53,9 @@ class ResultToken extends NumberToken {
   /// floating point number is guaranteed to have at least this many
   /// decimal digits of precision.
   static num round(num number) {
-    if (number is int)
+    if (number is int) {
       return number;
+    }
     return double.parse(number.toStringAsPrecision(14));
   }
 }
@@ -136,7 +139,7 @@ class CalcExpression {
   /// in the calculator's display panel.
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer('');
+    final StringBuffer buffer = StringBuffer();
     buffer.writeAll(_list);
     return buffer.toString();
   }
@@ -257,8 +260,6 @@ class CalcExpression {
       case ExpressionState.NumberWithPoint:
       case ExpressionState.Result:
         return appendOperation(Operation.Subtraction);
-      default:
-        return null;
     }
   }
 
@@ -332,10 +333,11 @@ class CalcExpression {
       // Remove the next number token.
       final NumberToken nextNumToken = list.removeAt(0)! as NumberToken;
       final num nextNumber = nextNumToken.number;
-      if (isDivision)
+      if (isDivision) {
         currentValue /= nextNumber;
-      else
+      } else {
         currentValue *= nextNumber;
+      }
     }
     return currentValue;
   }

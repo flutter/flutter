@@ -26,8 +26,9 @@
   "-": ["Minus", null, null, "NumpadSubtract"],
   "+": ["Add", null, null, "NumpadAdd"],
   "Enter": ["Enter", null, null, "NumpadEnter"],
-  "Shift": [null, "ShiftLeft", "ShiftRight", null],
-  "Control": [null, "ControlLeft", "ControlRight", null],
-  "Alt": [null, "AltLeft", "AltRight", null],
-  "Meta": [null, "MetaLeft", "MetaRight", null]
+  "Shift": ["ShiftLeft", "ShiftLeft", "ShiftRight", null],
+  "Control": ["ControlLeft", "ControlLeft", "ControlRight", null],
+  "Alt": ["AltLeft", "AltLeft", "AltRight", null],
+  "AltGraph": ["AltGraph", null, "AltGraph", null],
+  "Meta": ["MetaLeft", "MetaLeft", "MetaRight", null]
 }

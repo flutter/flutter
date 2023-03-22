@@ -29,7 +29,7 @@ class _BufferGoldenMatcher extends AsyncMatcher {
     } else if (item is Future<List<int>>) {
       buffer = Uint8List.fromList(await item);
     } else {
-      throw 'Expected `List<int>` or `Future<List<int>>`, instead found: ${item.runtimeType}';
+      throw AssertionError('Expected `List<int>` or `Future<List<int>>`, instead found: ${item.runtimeType}');
     }
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
     if (autoUpdateGoldenFiles) {
@@ -60,11 +60,11 @@ class _BufferGoldenMatcher extends AsyncMatcher {
 /// golden files. This parameter is optional.
 ///
 /// {@tool snippet}
-/// Sample invocations of [matchesGoldenFile].
+/// Sample invocations of [bufferMatchesGoldenFile].
 ///
 /// ```dart
 /// await expectLater(
-///   const <int>[],
+///   const <int>[ /* bytes... */ ],
 ///   bufferMatchesGoldenFile('sample.png'),
 /// );
 /// ```

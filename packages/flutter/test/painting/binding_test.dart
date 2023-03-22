@@ -15,18 +15,17 @@ Future<void> main() async {
   final ui.Image image = await createTestImage();
 
   testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
-    imageCache!.putIfAbsent(1, () => OneFrameImageStreamCompleter(
+    imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
         image: image,
-        scale: 1.0,
       )),
     ));
 
     await tester.idle();
-    expect(imageCache!.currentSize, 1);
+    expect(imageCache.currentSize, 1);
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
-    expect(imageCache!.currentSize, 0);
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    expect(imageCache.currentSize, 0);
   });
 
   test('evict clears live references', () async {
@@ -47,6 +46,9 @@ Future<void> main() async {
 class TestBindingBase implements BindingBase {
   @override
   void initInstances() {}
+
+  @override
+  bool debugCheckZone(String entryPoint) { return true; }
 
   @override
   void initServiceExtensions() {}
@@ -89,14 +91,13 @@ class TestBindingBase implements BindingBase {
   void unlocked() {}
 
   @override
-  ui.SingletonFlutterWindow get window => throw UnimplementedError();
+  ui.SingletonFlutterWindow get window => throw UnimplementedError(); // ignore: deprecated_member_use
 
   @override
   ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
 }
 
 class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
-
   @override
   final FakeImageCache imageCache = FakeImageCache();
 

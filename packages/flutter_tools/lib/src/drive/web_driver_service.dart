@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -13,12 +13,13 @@ import 'package:package_config/package_config.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/web_runner.dart';
@@ -27,9 +28,9 @@ import 'drive_service.dart';
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
-    @required ProcessUtils processUtils,
-    @required String dartSdkPath,
-    @required Logger logger,
+    required ProcessUtils processUtils,
+    required String dartSdkPath,
+    required Logger logger,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _logger = logger;
@@ -38,15 +39,15 @@ class WebDriverService extends DriverService {
   final String _dartSdkPath;
   final Logger _logger;
 
-  ResidentRunner _residentRunner;
-  Uri _webUri;
+  late ResidentRunner _residentRunner;
+  Uri? _webUri;
 
   /// The result of [ResidentRunner.run].
   ///
   /// This is expected to stay `null` throughout the test, as the application
   /// must be running until [stop] is called. If it becomes non-null, it likely
   /// indicates a bug.
-  int _runResult;
+  int? _runResult;
 
   @override
   Future<void> start(
@@ -54,10 +55,10 @@ class WebDriverService extends DriverService {
     Device device,
     DebuggingOptions debuggingOptions,
     bool ipv6, {
-    File applicationBinary,
-    String route,
-    String userIdentifier,
-    String mainPath,
+    File? applicationBinary,
+    String? route,
+    String? userIdentifier,
+    String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
@@ -66,7 +67,7 @@ class WebDriverService extends DriverService {
       buildInfo: buildInfo,
       platform: globals.platform,
     );
-    _residentRunner = webRunnerFactory.createWebRunner(
+    _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
       ipv6: ipv6,
@@ -81,7 +82,6 @@ class WebDriverService extends DriverService {
           disablePortPublication: debuggingOptions.disablePortPublication,
         ),
       stayResident: true,
-      urlTunneller: null,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
       usage: globals.flutterUsage,
@@ -89,15 +89,14 @@ class WebDriverService extends DriverService {
       systemClock: globals.systemClock,
     );
     final Completer<void> appStartedCompleter = Completer<void>.sync();
-    final Future<int> runFuture = _residentRunner.run(
+    final Future<int?> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
-      enableDevTools: false,
       route: route,
     );
 
     bool isAppStarted = false;
-    await Future.any<Object>(<Future<Object>>[
-      runFuture.then((int result) {
+    await Future.any(<Future<Object?>>[
+      runFuture.then((int? result) {
         _runResult = result;
         return null;
       }),
@@ -126,42 +125,50 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<int> startTest(String testFile, List<String> arguments, Map<String, String> environment, PackageConfig packageConfig, {
-    bool headless,
-    String chromeBinary,
-    String browserName,
-    bool androidEmulator,
-    int driverPort,
-    List<String> browserDimension,
-    String profileMemory,
+  Future<int> startTest(
+    String testFile,
+    List<String> arguments,
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
+    bool? headless,
+    String? chromeBinary,
+    String? browserName,
+    bool? androidEmulator,
+    int? driverPort,
+    List<String> webBrowserFlags = const <String>[],
+    List<String>? browserDimension,
+    String? profileMemory,
   }) async {
-    async_io.WebDriver webDriver;
+    late async_io.WebDriver webDriver;
     final Browser browser = _browserNameToEnum(browserName);
     try {
       webDriver = await async_io.createDriver(
         uri: Uri.parse('http://localhost:$driverPort/'),
-        desired: getDesiredCapabilities(browser, headless, chromeBinary),
-        spec: async_io.WebDriverSpec.Auto
+        desired: getDesiredCapabilities(
+          browser,
+          headless,
+          webBrowserFlags: webBrowserFlags,
+          chromeBinary: chromeBinary,
+        ),
       );
-    } on Exception catch (ex) {
+    } on SocketException catch (error) {
+      _logger.printTrace('$error');
       throwToolExit(
-        'Unable to start WebDriver Session for Flutter for Web testing.\n'
-        'Make sure you have the correct WebDriver Server running at $driverPort.\n'
-        'Make sure the WebDriver Server matches option --browser-name.\n'
-        'For more information see: '
+        'Unable to start a WebDriver session for web testing.\n'
+        'Make sure you have the correct WebDriver server (e.g. chromedriver) running at $driverPort.\n'
+        'For instructions on how to obtain and run a WebDriver server, see:\n'
         'https://flutter.dev/docs/testing/integration-tests#running-in-a-browser\n'
-        '$ex'
       );
     }
 
     final bool isAndroidChrome = browser == Browser.androidChrome;
     // Do not set the window size for android chrome browser.
     if (!isAndroidChrome) {
-      assert(browserDimension.length == 2);
-      int x;
-      int y;
+      assert(browserDimension!.length == 2);
+      late int x;
+      late int y;
       try {
-        x = int.parse(browserDimension[0]);
+        x = int.parse(browserDimension![0]);
         y = int.parse(browserDimension[1]);
       } on FormatException catch (ex) {
         throwToolExit('Dimension provided to --browser-dimension is invalid: $ex');
@@ -185,7 +192,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<void> stop({File writeSkslOnExit, String userIdentifier}) async {
+  Future<void> stop({File? writeSkslOnExit, String? userIdentifier}) async {
     final bool appDidFinishPrematurely = _runResult != null;
     await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();
@@ -198,7 +205,7 @@ class WebDriverService extends DriverService {
     }
   }
 
-  Map<String, String> _additionalDriverEnvironment(async_io.WebDriver webDriver, String browserName, bool androidEmulator) {
+  Map<String, String> _additionalDriverEnvironment(async_io.WebDriver webDriver, String? browserName, bool? androidEmulator) {
     return <String, String>{
       'DRIVER_SESSION_ID': webDriver.id,
       'DRIVER_SESSION_URI': webDriver.uri.toString(),
@@ -206,7 +213,7 @@ class WebDriverService extends DriverService {
       'DRIVER_SESSION_CAPABILITIES': json.encode(webDriver.capabilities),
       'SUPPORT_TIMELINE_ACTION': (_browserNameToEnum(browserName) == Browser.chrome).toString(),
       'FLUTTER_WEB_TEST': 'true',
-      'ANDROID_CHROME_ON_EMULATOR': (_browserNameToEnum(browserName) == Browser.androidChrome && androidEmulator).toString(),
+      'ANDROID_CHROME_ON_EMULATOR': (_browserNameToEnum(browserName) == Browser.androidChrome && androidEmulator!).toString(),
     };
   }
 
@@ -232,10 +239,15 @@ enum Browser {
   safari,
 }
 
-/// Returns desired capabilities for given [browser], [headless] and
-/// [chromeBinary].
+/// Returns desired capabilities for given [browser], [headless], [chromeBinary]
+/// and [webBrowserFlags].
 @visibleForTesting
-Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [String chromeBinary]) {
+Map<String, dynamic> getDesiredCapabilities(
+  Browser browser,
+  bool? headless, {
+  List<String> webBrowserFlags = const <String>[],
+  String? chromeBinary,
+}) {
   switch (browser) {
     case Browser.chrome:
       return <String, dynamic>{
@@ -245,10 +257,10 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
           async_io.LogType.browser: 'INFO',
           async_io.LogType.performance: 'ALL',
         },
-        'chromeOptions': <String, dynamic>{
+        'goog:chromeOptions': <String, dynamic>{
           if (chromeBinary != null)
             'binary': chromeBinary,
-          'w3c': false,
+          'w3c': true,
           'args': <String>[
             '--bwsi',
             '--disable-background-timer-throttling',
@@ -259,24 +271,25 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
             '--no-default-browser-check',
             '--no-sandbox',
             '--no-first-run',
-            if (headless) '--headless'
+            if (headless!) '--headless',
+            ...webBrowserFlags,
           ],
           'perfLoggingPrefs': <String, String>{
             'traceCategories':
             'devtools.timeline,'
-                'v8,blink.console,benchmark,blink,'
-                'blink.user_timing'
-          }
+            'v8,blink.console,benchmark,blink,'
+            'blink.user_timing',
+          },
         },
       };
-      break;
     case Browser.firefox:
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'firefox',
         'moz:firefoxOptions' : <String, dynamic>{
           'args': <String>[
-            if (headless) '-headless'
+            if (headless!) '-headless',
+            ...webBrowserFlags,
           ],
           'prefs': <String, dynamic>{
             'dom.file.createInChild': true,
@@ -286,28 +299,25 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
             'media.gmp-provider.enabled': false,
             'network.captive-portal-service.enabled': false,
             'security.insecure_field_warning.contextual.enabled': false,
-            'test.currentTimeOffsetSeconds': 11491200
+            'test.currentTimeOffsetSeconds': 11491200,
           },
-          'log': <String, String>{'level': 'trace'}
-        }
+          'log': <String, String>{'level': 'trace'},
+        },
       };
-      break;
     case Browser.edge:
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'edge',
       };
-      break;
     case Browser.safari:
       return <String, dynamic>{
         'browserName': 'safari',
       };
-      break;
     case Browser.iosSafari:
       return <String, dynamic>{
         'platformName': 'ios',
         'browserName': 'safari',
-        'safari:useSimulator': true
+        'safari:useSimulator': true,
       };
     case Browser.androidChrome:
       return <String, dynamic>{
@@ -315,16 +325,17 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [Str
         'platformName': 'android',
         'goog:chromeOptions': <String, dynamic>{
           'androidPackage': 'com.android.chrome',
-          'args': <String>['--disable-fullscreen']
+          'args': <String>[
+            '--disable-fullscreen',
+            ...webBrowserFlags,
+          ],
         },
       };
-    default:
-      throw UnsupportedError('Browser $browser not supported.');
   }
 }
 
 /// Converts [browserName] string to [Browser]
-Browser _browserNameToEnum(String browserName) {
+Browser _browserNameToEnum(String? browserName) {
   switch (browserName) {
     case 'android-chrome': return Browser.androidChrome;
     case 'chrome': return Browser.chrome;

@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 
 import 'base_code_gen.dart';
 import 'constants.dart';
+import 'data.dart';
 import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
@@ -28,8 +29,7 @@ const List<String> kSpecialLogicalKeys = <String>['CapsLock'];
 /// Generates the key mapping for iOS, based on the information in the key
 /// data structure given to it.
 class IOSCodeGenerator extends PlatformCodeGenerator {
-  IOSCodeGenerator(PhysicalKeyData keyData, LogicalKeyData logicalData)
-      : super(keyData, logicalData);
+  IOSCodeGenerator(super.keyData, super.logicalData);
 
   /// This generates the map of iOS key codes to physical keys.
   String get _scanCodeMap {
@@ -81,7 +81,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
       buffer.write(wrapString(constant.description, prefix: ' * '));
       buffer.writeln(' */');
       buffer.writeln('const uint64_t k${constant.upperCamelName} = ${toHex(constant.value, digits: 11)};');
-      buffer.writeln('');
+      buffer.writeln();
     }
     return buffer.toString().trimRight();
   }
@@ -90,7 +90,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _keyToModifierFlagMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      final String line ='    {${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},';
+      final String line = '{${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},';
       modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
     }
     return modifierKeyMap.toString().trimRight();
@@ -100,10 +100,19 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _modifierFlagToKeyMap {
     final StringBuffer modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      final String line ='    {kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},';
+      final String line = '{kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},';
       modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
     }
     return modifierKeyMap.toString().trimRight();
+  }
+
+  String get _specialKeyMapping {
+    final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
+    kIosSpecialKeyMapping.forEach((String key, String logicalName) {
+      final int value = logicalData.entryByName(logicalName).value;
+      lines.add(value, '  @"$key" : @(${toHex(value)}),');
+    });
+    return lines.join().trimRight();
   }
 
   /// This generates some keys that needs special attention.
@@ -123,7 +132,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   @override
   String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'darwin', 'ios', 'framework', 'Source', 'KeyCodeMap.mm');
+      'shell', 'platform', 'darwin', 'ios', 'framework', 'Source', 'KeyCodeMap.g.mm');
 
   @override
   Map<String, String> mappings() {
@@ -138,6 +147,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
       'KEYCODE_TO_MODIFIER_FLAG_MAP': _keyToModifierFlagMap,
       'MODIFIER_FLAG_TO_KEYCODE_MAP': _modifierFlagToKeyMap,
       'SPECIAL_KEY_CONSTANTS': _specialKeyConstants,
+      'SPECIAL_KEY_MAPPING': _specialKeyMapping,
     };
   }
 }

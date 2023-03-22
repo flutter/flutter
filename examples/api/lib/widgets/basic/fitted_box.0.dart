@@ -2,33 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FittedBox
+// Flutter code sample for [FittedBox].
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const FittedBoxApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  static const String _title = 'Flutter Code Sample';
+class FittedBoxApp extends StatelessWidget {
+  const FittedBoxApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('FittedBox Sample')),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: FittedBoxExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class FittedBoxExample extends StatelessWidget {
+  const FittedBoxExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +34,10 @@ class MyStatelessWidget extends StatelessWidget {
       width: 300,
       color: Colors.red,
       child: FittedBox(
-        child: Image.network(
-            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
         fit: BoxFit.fill,
+        child: Image.network(
+          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+        ),
       ),
     );
   }

@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This test clones the framework and downloads pre-built binaries; it sometimes
+// times out with the default 5 minutes: https://github.com/flutter/flutter/issues/100937
+@Timeout(Duration(minutes: 10))
+library;
+
 import 'package:args/command_runner.dart';
 import 'package:conductor_core/src/codesign.dart' show CodesignCommand;
 import 'package:conductor_core/src/globals.dart';
-import 'package:conductor_core/src/repository.dart' show Checkouts;
+import 'package:conductor_core/src/repository.dart' show Checkouts, FrameworkRepository;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:platform/platform.dart';
@@ -35,9 +40,24 @@ void main() {
       fileSystem.file(platform.executable),
     );
 
-    final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '')
-      ..addCommand(
-          CodesignCommand(checkouts: checkouts, flutterRoot: flutterRoot));
+    final String currentHead = (processManager.runSync(
+      <String>['git', 'rev-parse', 'HEAD'],
+      workingDirectory: flutterRoot.path,
+    ).stdout as String).trim();
+
+    final FrameworkRepository framework = FrameworkRepository.localRepoAsUpstream(
+      checkouts,
+      upstreamPath: flutterRoot.path,
+      initialRef: currentHead,
+    );
+    final CommandRunner<void> runner = CommandRunner<void>('codesign-test', '');
+    runner.addCommand(
+      CodesignCommand(
+        checkouts: checkouts,
+        framework: framework,
+        flutterRoot: flutterRoot,
+      ),
+    );
 
     try {
       await runner.run(<String>[

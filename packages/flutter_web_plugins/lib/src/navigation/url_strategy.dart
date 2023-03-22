@@ -6,13 +6,34 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
 
+import '../navigation_common/url_strategy.dart';
 import 'js_url_strategy.dart';
 import 'utils.dart';
+
+/// Saves the current [UrlStrategy] to be accessed by [urlStrategy] or
+/// [setUrlStrategy].
+///
+/// This is particularly required for web plugins relying on valid URL
+/// encoding.
+//
+// Keep this in sync with the default url strategy in the web engine.
+// Find it at:
+// https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/window.dart#L360
+//
+UrlStrategy? _urlStrategy = const HashUrlStrategy();
+
+/// Returns the present [UrlStrategy] for handling the browser URL.
+///
+/// In case null is returned, the browser integration has been manually
+/// disabled by [setUrlStrategy].
+UrlStrategy? get urlStrategy => _urlStrategy;
 
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
 void setUrlStrategy(UrlStrategy? strategy) {
+  _urlStrategy = strategy;
+
   JsUrlStrategy? jsUrlStrategy;
   if (strategy != null) {
     jsUrlStrategy = convertToJsUrlStrategy(strategy);
@@ -20,53 +41,9 @@ void setUrlStrategy(UrlStrategy? strategy) {
   jsSetUrlStrategy(jsUrlStrategy);
 }
 
-/// Represents and reads route state from the browser's URL.
-///
-/// By default, the [HashUrlStrategy] subclass is used if the app doesn't
-/// specify one.
-abstract class UrlStrategy {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const UrlStrategy();
-
-  /// Adds a listener to the `popstate` event and returns a function that, when
-  /// invoked, removes the listener.
-  ui.VoidCallback addPopStateListener(html.EventListener fn);
-
-  /// Returns the active path in the browser.
-  String getPath();
-
-  /// The state of the current browser history entry.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
-  Object? getState();
-
-  /// Given a path that's internal to the app, create the external url that
-  /// will be used in the browser.
-  String prepareExternalUrl(String internalUrl);
-
-  /// Push a new history entry.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  void pushState(Object? state, String title, String url);
-
-  /// Replace the currently active history entry.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  void replaceState(Object? state, String title, String url);
-
-  /// Moves forwards or backwards through the history stack.
-  ///
-  /// A negative [count] value causes a backward move in the history stack. And
-  /// a positive [count] value causes a forward move.
-  ///
-  /// Examples:
-  ///
-  /// * `go(-2)` moves back 2 steps in history.
-  /// * `go(3)` moves forward 3 steps in history.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  Future<void> go(int count);
+/// Use the [PathUrlStrategy] to handle the browser URL.
+void usePathUrlStrategy() {
+  setUrlStrategy(PathUrlStrategy());
 }
 
 /// Uses the browser URL's [hash fragments](https://en.wikipedia.org/wiki/Uniform_Resource_Locator#Syntax)
@@ -94,7 +71,7 @@ class HashUrlStrategy extends UrlStrategy {
   final PlatformLocation _platformLocation;
 
   @override
-  ui.VoidCallback addPopStateListener(html.EventListener fn) {
+  ui.VoidCallback addPopStateListener(EventListener fn) {
     _platformLocation.addPopStateListener(fn);
     return () => _platformLocation.removePopStateListener(fn);
   }
@@ -175,11 +152,10 @@ class PathUrlStrategy extends HashUrlStrategy {
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// interactions.
   PathUrlStrategy([
-    PlatformLocation _platformLocation = const BrowserPlatformLocation(),
+    super.platformLocation,
   ])  : _basePath = stripTrailingSlash(extractPathname(checkBaseHref(
-          _platformLocation.getBaseHref(),
-        ))),
-        super(_platformLocation);
+          platformLocation.getBaseHref(),
+        )));
 
   final String _basePath;
 
@@ -201,76 +177,6 @@ class PathUrlStrategy extends HashUrlStrategy {
   }
 }
 
-/// Encapsulates all calls to DOM apis, which allows the [UrlStrategy] classes
-/// to be platform agnostic and testable.
-///
-/// For convenience, the [PlatformLocation] class can be used by implementations
-/// of [UrlStrategy] to interact with DOM apis like pushState, popState, etc.
-abstract class PlatformLocation {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const PlatformLocation();
-
-  /// Registers an event listener for the `popstate` event.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void addPopStateListener(html.EventListener fn);
-
-  /// Unregisters the given listener (added by [addPopStateListener]) from the
-  /// `popstate` event.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void removePopStateListener(html.EventListener fn);
-
-  /// The `pathname` part of the URL in the browser address bar.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/pathname
-  String get pathname;
-
-  /// The `query` part of the URL in the browser address bar.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/search
-  String get search;
-
-  /// The `hash` part of the URL in the browser address bar.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/hash
-  String get hash;
-
-  /// The `state` in the current history entry.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
-  Object? get state;
-
-  /// Adds a new entry to the browser history stack.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  void pushState(Object? state, String title, String url);
-
-  /// Replaces the current entry in the browser history stack.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  void replaceState(Object? state, String title, String url);
-
-  /// Moves forwards or backwards through the history stack.
-  ///
-  /// A negative [count] value causes a backward move in the history stack. And
-  /// a positive [count] value causes a forward move.
-  ///
-  /// Examples:
-  ///
-  /// * `go(-2)` moves back 2 steps in history.
-  /// * `go(3)` moves forward 3 steps in history.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  void go(int count);
-
-  /// The base href where the Flutter app is being served.
-  ///
-  /// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-  String? getBaseHref();
-}
-
 /// Delegates to real browser APIs to provide platform location functionality.
 class BrowserPlatformLocation extends PlatformLocation {
   /// Default constructor for [BrowserPlatformLocation].
@@ -285,6 +191,7 @@ class BrowserPlatformLocation extends PlatformLocation {
   static const String _defaultSearch = '';
 
   html.Location get _location => html.window.location;
+
   html.History get _history => html.window.history;
 
   @override

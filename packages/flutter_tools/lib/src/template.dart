@@ -17,7 +17,7 @@ import 'dart/package_map.dart';
 /// They are escaped in Kotlin files.
 ///
 /// https://kotlinlang.org/docs/keyword-reference.html
-const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
+const List<String> kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
@@ -38,15 +38,15 @@ const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
 /// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
 /// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
-  factory Template(Directory templateSource, Directory imageSourceDir, {
+  factory Template(Directory templateSource, Directory? imageSourceDir, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
-    required Set<Uri>? templateManifest,
+    Set<Uri>? templateManifest,
   }) {
     return Template._(
       <Directory>[templateSource],
-      <Directory>[imageSourceDir],
+      imageSourceDir != null ? <Directory>[imageSourceDir] : <Directory>[],
       fileSystem: fileSystem,
       logger: logger,
       templateRenderer: templateRenderer,
@@ -86,7 +86,7 @@ class Template {
           from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
-        // is a candidate for rendering. This catches cases where the folder
+        // a candidate for rendering. This catches cases where the folder
         // itself is a template.
         _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
       }
@@ -101,7 +101,7 @@ class Template {
   }) async {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
-    final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger);
+    final Directory imageDir = await templateImageDirectory(name, fileSystem, logger);
     return Template._(
       <Directory>[templateDir],
       <Directory>[imageDir],
@@ -122,12 +122,12 @@ class Template {
     return Template._(
       <Directory>[
         for (final String name in names)
-          _templateDirectoryInPackage(name, fileSystem)
+          _templateDirectoryInPackage(name, fileSystem),
       ],
       <Directory>[
         for (final String name in names)
-          if ((await _templateImageDirectory(name, fileSystem, logger)).existsSync())
-            await _templateImageDirectory(name, fileSystem, logger)
+          if ((await templateImageDirectory(name, fileSystem, logger)).existsSync())
+            await templateImageDirectory(name, fileSystem, logger),
       ],
       fileSystem: fileSystem,
       logger: logger,
@@ -155,7 +155,7 @@ class Template {
   /// May throw a [ToolExit] if the directory is not writable.
   int render(
     Directory destination,
-    Map<String, Object> context, {
+    Map<String, Object?> context, {
     bool overwriteExisting = true,
     bool printStatusWhenWriting = true,
   }) {
@@ -166,7 +166,7 @@ class Template {
       throwToolExit('Failed to flutter create at ${destination.path}.');
     }
     int fileCount = 0;
-    final bool implementationTests = (context['implementationTests'] as bool?) == true;
+    final bool implementationTests = (context['implementationTests'] as bool?) ?? false;
 
     /// Returns the resolved destination path corresponding to the specified
     /// raw destination path, after performing language filtering and template
@@ -184,39 +184,34 @@ class Template {
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
 
-      final bool android = (context['android'] as bool?) == true;
+      final bool android = (context['android'] as bool?) ?? false;
       if (relativeDestinationPath.contains('android') && !android) {
         return null;
       }
 
-      final bool ios = (context['ios'] as bool?) == true;
+      final bool ios = (context['ios'] as bool?) ?? false;
       if (relativeDestinationPath.contains('ios') && !ios) {
         return null;
       }
 
       // Only build a web project if explicitly asked.
-      final bool web = (context['web'] as bool?) == true;
+      final bool web = (context['web'] as bool?) ?? false;
       if (relativeDestinationPath.contains('web') && !web) {
         return null;
       }
       // Only build a Linux project if explicitly asked.
-      final bool linux = (context['linux'] as bool?) == true;
+      final bool linux = (context['linux'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('linux.tmpl') && !linux) {
         return null;
       }
       // Only build a macOS project if explicitly asked.
-      final bool macOS = (context['macos'] as bool?) == true;
+      final bool macOS = (context['macos'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
         return null;
       }
       // Only build a Windows project if explicitly asked.
-      final bool windows = (context['windows'] as bool?) == true;
+      final bool windows = (context['windows'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
-        return null;
-      }
-      // Only build a Windows UWP project if explicitly asked.
-      final bool windowsUwp = (context['winuwp'] as bool?) == true;
-      if (relativeDestinationPath.startsWith('winuwp.tmpl') && !windowsUwp) {
         return null;
       }
 
@@ -233,7 +228,7 @@ class Template {
         .replaceAll(testTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
-      if (android != null && android && androidIdentifier != null) {
+      if (android && androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
@@ -309,7 +304,7 @@ class Template {
         final List<File> potentials = <File>[
           for (final Directory imageSourceDir in imageSourceDirectories)
             _fileSystem.file(_fileSystem.path
-                .join(imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')))
+                .join(imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, ''))),
         ];
 
         if (potentials.any((File file) => file.existsSync())) {
@@ -355,9 +350,10 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
 }
 
-// Returns the directory containing the 'name' template directory in
-// flutter_template_images, to resolve image placeholder against.
-Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
+/// Returns the directory containing the 'name' template directory in
+/// flutter_template_images, to resolve image placeholder against.
+/// if 'name' is null, return the parent template directory.
+Future<Directory> templateImageDirectory(String? name, FileSystem fileSystem, Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot!, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
@@ -366,10 +362,10 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Lo
     logger: logger,
   );
   final Uri? imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
-  return fileSystem.directory(imagePackageLibDir)
+  final Directory templateDirectory = fileSystem.directory(imagePackageLibDir)
       .parent
-      .childDirectory('templates')
-      .childDirectory(name);
+      .childDirectory('templates');
+  return name == null ? templateDirectory : templateDirectory.childDirectory(name);
 }
 
 String _escapeKotlinKeywords(String androidIdentifier) {

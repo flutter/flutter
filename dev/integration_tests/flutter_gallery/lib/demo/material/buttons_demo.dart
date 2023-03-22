@@ -46,7 +46,7 @@ const String _actionText =
 const String _actionCode = 'buttons_action';
 
 class ButtonsDemo extends StatefulWidget {
-  const ButtonsDemo({Key? key}) : super(key: key);
+  const ButtonsDemo({super.key});
 
   static const String routeName = '/material/buttons';
 
@@ -275,7 +275,6 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           ListTile(
             title: const Text('Simple dropdown:'),

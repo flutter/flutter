@@ -26,8 +26,9 @@ Future<void> main() async {
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
-    if (javaHome == null)
+    if (javaHome == null) {
       return TaskResult.failure('Could not find Java');
+    }
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create Flutter module project');
@@ -58,7 +59,7 @@ Future<void> main() async {
       if (!Platform.isWindows) {
         await exec('chmod', <String>[
           '444',
-          readonlyTxtAssetFile.path
+          readonlyTxtAssetFile.path,
         ]);
       }
 
@@ -75,7 +76,7 @@ Future<void> main() async {
       content = await pubspec.readAsString();
       content = content.replaceFirst(
         '${platformLineSep}dependencies:$platformLineSep',
-        '${platformLineSep}dependencies:$platformLineSep  device_info: 0.4.1$platformLineSep  package_info: 0.4.0+9$platformLineSep',
+        '${platformLineSep}dependencies:$platformLineSep  device_info: 2.0.3$platformLineSep  package_info: 2.0.2$platformLineSep',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -277,7 +278,7 @@ Future<void> main() async {
 
       String modes = readonlyDebugAssetFile.statSync().modeString();
       print('\nread-only.txt file access modes = $modes');
-      if (modes != null && modes.compareTo(fileReadWriteMode) != 0) {
+      if (modes.compareTo(fileReadWriteMode) != 0) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
       }
 
@@ -325,7 +326,7 @@ Future<void> main() async {
         // Shouldn't be missing since we already checked it exists above.
         final ArchiveFile? noticesFile = apk.findFile('assets/flutter_assets/NOTICES.Z');
 
-        final Uint8List licenseData = noticesFile?.content as Uint8List;
+        final Uint8List? licenseData = noticesFile?.content as Uint8List?;
         if (licenseData == null) {
           return TaskResult.failure('Invalid license file.');
         }
@@ -367,7 +368,7 @@ Future<void> main() async {
 
       modes = readonlyReleaseAssetFile.statSync().modeString();
       print('\nread-only.txt file access modes = $modes');
-      if (modes != null && modes.compareTo(fileReadWriteMode) != 0) {
+      if (modes.compareTo(fileReadWriteMode) != 0) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
       }
 

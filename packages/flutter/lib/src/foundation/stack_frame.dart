@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:meta/meta.dart';
 
 import 'constants.dart';
@@ -37,16 +35,7 @@ class StackFrame {
     required this.method,
     this.isConstructor = false,
     required this.source,
-  })  : assert(number != null),
-        assert(column != null),
-        assert(line != null),
-        assert(method != null),
-        assert(packageScheme != null),
-        assert(package != null),
-        assert(packagePath != null),
-        assert(className != null),
-        assert(isConstructor != null),
-        assert(source != null);
+  });
 
   /// A stack frame representing an asynchronous suspension.
   static const StackFrame asynchronousSuspension = StackFrame(
@@ -76,13 +65,11 @@ class StackFrame {
   ///
   /// This is normally useful with [StackTrace.current].
   static List<StackFrame> fromStackTrace(StackTrace stack) {
-    assert(stack != null);
     return fromStackString(stack.toString());
   }
 
   /// Parses a list of [StackFrame]s from the [StackTrace.toString] method.
   static List<StackFrame> fromStackString(String stack) {
-    assert(stack != null);
     return stack
         .trim()
         .split('\n')
@@ -183,7 +170,6 @@ class StackFrame {
 
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
   static StackFrame? fromStackTraceLine(String line) {
-    assert(line != null);
     if (line == '<asynchronous suspension>') {
       return asynchronousSuspension;
     } else if (line == '...') {
@@ -296,12 +282,13 @@ class StackFrame {
   final bool isConstructor;
 
   @override
-  int get hashCode => hashValues(number, package, line, column, className, method, source);
+  int get hashCode => Object.hash(number, package, line, column, className, method, source);
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is StackFrame
         && other.number == number
         && other.package == package

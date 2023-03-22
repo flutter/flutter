@@ -4,7 +4,6 @@
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../reporting/reporting.dart';
 import '../../xcode_project.dart';
@@ -13,26 +12,23 @@ import '../../xcode_project.dart';
 class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveMacOSFrameworkLinkAndEmbeddingMigration(
     MacOSProject project,
-    Logger logger,
+    super.logger,
     Usage usage,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _usage = usage,
-        super(logger);
+        _usage = usage;
 
   final File _xcodeProjectInfoFile;
   final Usage _usage;
 
   @override
-  bool migrate() {
+  void migrate() {
     if (!_xcodeProjectInfoFile.existsSync()) {
       logger.printTrace(
           'Xcode project not found, skipping framework link and embedding migration');
-      return true;
+      return;
     }
 
     processFileLines(_xcodeProjectInfoFile);
-
-    return true;
   }
 
   @override

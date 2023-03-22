@@ -9,9 +9,11 @@ import 'rendering_tester.dart';
 
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('only send semantics update if semantics have changed', () {
     final TestRender testRender = TestRender()
-      ..attributedLabel = AttributedString('hello')
+      ..properties = const SemanticsProperties(label: 'hello')
       ..textDirection = TextDirection.ltr;
 
     final RenderConstrainedBox tree = RenderConstrainedBox(
@@ -19,7 +21,7 @@ void main() {
       child: testRender,
     );
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
       },
@@ -46,7 +48,7 @@ void main() {
     semanticsUpdateCount = 0;
 
     // Change semantics and request update.
-    testRender.attributedLabel = AttributedString('bye');
+    testRender.properties = const SemanticsProperties(label: 'bye');
     testRender.markNeedsSemanticsUpdate();
     pumpFrame(phase: EnginePhase.flushSemantics);
 
@@ -59,6 +61,8 @@ void main() {
 }
 
 class TestRender extends RenderSemanticsAnnotations {
+  TestRender() : super(properties: const SemanticsProperties());
+
   int describeSemanticsConfigurationCallCount = 0;
 
   @override

@@ -3,7 +3,7 @@
 This package contains the localizations used by the Flutter framework
 itself.
 
-See the [localization README](./lib/src/README.md) for more detailed
+See the [localization README](./lib/src/l10n/README.md) for more detailed
 information about the localizations themselves.
 
 ## Adding a new string to localizations
@@ -15,11 +15,46 @@ and it has a tooltip), follow these steps (these instructions are for
 `MaterialLocalizations`, but apply equally to `CupertinoLocalizations`
 and `WidgetsLocalizations`, with appropriate name substitutions):
 
-1. Add the new getter to the localizations class `MaterialLocalizations`,
-   in `flutter_localizations/lib/src/material_localizations.dart`.
+1. ### For messages without parameters, add new getter
+   ```
+   String get showMenuTooltip;
+   ```
+   to the localizations class `MaterialLocalizations`,
+   in [`packages/flutter/lib/src/material/material_localizations.dart`](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/material_localizations.dart);
 
-2. Implement a default value in `DefaultMaterialLocalizations` in
-   `flutter_localizations/lib/src/material_localizations.dart`
+   ### For messages with parameters, add new function
+   ```
+   String aboutListTileTitle(String applicationName);
+   ```
+   to the same localization class.
+
+2. Implement a default return value in `DefaultMaterialLocalizations` in
+   the same file as in step 1.
+
+   ### Messages without parameters:
+   ```
+   @override
+   String get showMenuTooltip => 'Show menu';
+   ```
+   ### Messages with parameters:
+   ```
+   @override
+   String aboutListTileTitle(String applicationName) => 'About $applicationName';
+   ```
+   For messages with parameters, do also add the function to `GlobalMaterialLocalizations`  in [`packages/flutter_localizations/lib/src/material_localizations.dart`](https://github.com/flutter/flutter/blob/master/packages/flutter_localizations/lib/src/material_localizations.dart), and add a raw getter as demonstrated below:
+
+   ```
+   /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
+   /// in the string.
+   @protected
+   String get aboutListTileTitleRaw;
+
+   @override
+   String aboutListTileTitle(String applicationName) {
+     final String text = aboutListTileTitleRaw;
+     return text.replaceFirst(r'$applicationName', applicationName);
+   }
+   ```
 
 3. Add a test to `test/material/localizations_test.dart` that verifies that
    this new value is implemented.
@@ -27,6 +62,23 @@ and `WidgetsLocalizations`, with appropriate name substitutions):
 4. Update the `flutter_localizations` package. To add a new string to the
    `flutter_localizations` package, you must first add it to the English
    translations (`lib/src/l10n/material_en.arb`), including a description.
+
+   ### Messages without parameters:
+   ```
+   "showMenuTooltip": "Show menu",
+   "@showMenuTooltip": {
+     "description": "The tooltip for the button that shows a popup menu."
+   },
+   ```
+
+   ### Messages with parameters:
+   ```
+   "aboutListTileTitle": "About $applicationName",
+   "@aboutListTileTitle": {
+     "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
+     "parameters": "applicationName"
+   },
+   ```
 
    Then you need to add new entries for the string to all of the other
    language locale files by running:
@@ -41,7 +93,14 @@ and `WidgetsLocalizations`, with appropriate name substitutions):
    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
    ```
 
-   There is a [localization README](./lib/src/README.md) file with further
+   If you got an error when running this command, [this issue](https://github.com/flutter/flutter/issues/104601) might be helpful.
+
+   TL;DR: If you got the same type of errors as discussed in the issue, run this instead:
+   ```
+   dart dev/tools/localization/bin/gen_localizations.dart --overwrite --remove-undefined
+   ```
+
+   There is a [localization README](./lib/src/l10n/README.md) file with further
    information in the `lib/src/l10n/` directory.
 
 5. If you are a Google employee, you should then also follow the instructions
@@ -68,7 +127,7 @@ existing string in the MaterialLocalizations objects, follow these steps:
    Leave them as they were generated, and they will be picked up for
    translation.
 
-   There is a [localization README](./lib/src/README.md) file with further
+   There is a [localization README](./lib/src/l10n/README.md) file with further
    information in the `lib/src/l10n/` directory.
 
 3. If you are a Google employee, you should then also follow the instructions

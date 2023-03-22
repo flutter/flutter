@@ -16,41 +16,35 @@ Future<String> fileType(String pathToBinary) {
   return eval('file', <String>[pathToBinary]);
 }
 
-Future<bool> containsBitcode(String pathToBinary) async {
-  // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
+Future<String?> minPhoneOSVersion(String pathToBinary) async {
   final String loadCommands = await eval('otool', <String>[
     '-l',
     '-arch',
     'arm64',
     pathToBinary,
   ]);
-  if (!loadCommands.contains('__LLVM')) {
-    return false;
+  if (!loadCommands.contains('LC_VERSION_MIN_IPHONEOS')) {
+    return null;
   }
-  // Presence of the section may mean a bitcode marker was embedded (size=1), but there is no content.
-  if (!loadCommands.contains('size 0x0000000000000001')) {
-    return true;
-  }
-  // Check the false positives: size=1 wasn't referencing the __LLVM section.
 
-  bool emptyBitcodeMarkerFound = false;
-  //  Section
-  //  sectname __bundle
-  //  segname __LLVM
-  //  addr 0x003c4000
-  //  size 0x0042b633
-  //  offset 3932160
+  String? minVersion;
+  // Load command 7
+  // cmd LC_VERSION_MIN_IPHONEOS
+  // cmdsize 16
+  // version 9.0
+  // sdk 15.2
   //  ...
   final List<String> lines = LineSplitter.split(loadCommands).toList();
   lines.asMap().forEach((int index, String line) {
-    if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
-      emptyBitcodeMarkerFound |= lines
-        .skip(index - 1)
-        .take(4)
-        .any((String line) => line.contains(' size 0x0000000000000001'));
+    if (line.contains('LC_VERSION_MIN_IPHONEOS') && lines.length - index - 1 > 3) {
+      final String versionLine = lines
+          .skip(index - 1)
+          .take(4).last;
+      final RegExp versionRegex = RegExp(r'\s*version\s*(\S*)');
+      minVersion = versionRegex.firstMatch(versionLine)?.group(1);
     }
   });
-  return !emptyBitcodeMarkerFound;
+  return minVersion;
 }
 
 /// Creates and boots a new simulator, passes the new simulator's identifier to
@@ -116,14 +110,14 @@ Future<void> testWithNewIOSSimulator(
 }
 
 /// Shuts down and deletes simulator with deviceId.
-Future<void> removeIOSimulator(String deviceId) async {
+Future<void> removeIOSimulator(String? deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',
       <String>[
         'simctl',
         'shutdown',
-        deviceId
+        deviceId,
       ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
@@ -133,20 +127,31 @@ Future<void> removeIOSimulator(String deviceId) async {
       <String>[
         'simctl',
         'delete',
-        deviceId],
+        deviceId,
+      ],
       canFail: true,
       workingDirectory: flutterDirectory.path,
     );
   }
 }
 
-Future<bool> runXcodeTests(String platformDirectory, String destination, String testName) async {
+Future<bool> runXcodeTests({
+  required String platformDirectory,
+  required String destination,
+  required String testName,
+  String configuration = 'Release',
+  bool skipCodesign = false,
+}) async {
   final Map<String, String> environment = Platform.environment;
-  // If not running on CI, inject the Flutter team code signing properties.
-  final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-  final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-  final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
-
+  String? developmentTeam;
+  String? codeSignStyle;
+  String? provisioningProfile;
+  if (!skipCodesign) {
+    // If not running on CI, inject the Flutter team code signing properties.
+    developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+    codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+    provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+  }
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
@@ -157,14 +162,15 @@ Future<bool> runXcodeTests(String platformDirectory, String destination, String 
       '-scheme',
       'Runner',
       '-configuration',
-      'Release',
+      configuration,
       '-destination',
       destination,
       '-resultBundlePath',
       resultBundlePath,
       'test',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      'DEVELOPMENT_TEAM=$developmentTeam',
+      if (developmentTeam != null)
+        'DEVELOPMENT_TEAM=$developmentTeam',
       if (codeSignStyle != null)
         'CODE_SIGN_STYLE=$codeSignStyle',
       if (provisioningProfile != null)
@@ -187,6 +193,7 @@ Future<bool> runXcodeTests(String platformDirectory, String destination, String 
           <String>[
             '-r',
             '-9',
+            '-q',
             zipPath,
             path.basename(xcresultBundle.path),
           ],

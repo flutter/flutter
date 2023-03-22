@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -12,7 +10,7 @@ import 'test_utils.dart';
 
 void main() {
   final String dartBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'dart');
-  Directory tempDir;
+  late Directory tempDir;
 
   setUp(() {
     tempDir = createResolvedTempDirectorySync('exit_code_test.');
@@ -36,8 +34,9 @@ void main() {
       fileSystem.path.join(tempDir.path, 'main.dart'),
     ]);
 
-    print(result.stdout);
-    print(result.stderr);
+    printOnFailure('Output of dart main.dart:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
     expect(result.exitCode, 0);
   });
 
@@ -55,8 +54,9 @@ void main() {
       fileSystem.path.join(tempDir.path, 'main.dart'),
     ]);
 
-    print(result.stdout);
-    print(result.stderr);
+    printOnFailure('Output of dart main.dart:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
     expect(result.exitCode, 1);
   });
 }

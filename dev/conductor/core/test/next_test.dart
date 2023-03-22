@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:conductor_core/src/git.dart';
+import 'package:conductor_core/src/globals.dart';
 import 'package:conductor_core/src/next.dart';
 import 'package:conductor_core/src/proto/conductor_state.pb.dart' as pb;
 import 'package:conductor_core/src/proto/conductor_state.pbenum.dart' show ReleasePhase;
 import 'package:conductor_core/src/repository.dart';
 import 'package:conductor_core/src/state.dart';
+import 'package:conductor_core/src/stdio.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
@@ -15,23 +18,24 @@ import 'package:platform/platform.dart';
 import './common.dart';
 
 void main() {
+  const String flutterRoot = '/flutter';
+  const String checkoutsParentDirectory = '$flutterRoot/dev/conductor';
+  const String candidateBranch = 'flutter-1.2-candidate.3';
+  const String workingBranch = 'cherrypicks-$candidateBranch';
+  const String remoteUrl = 'https://github.com/org/repo.git';
+  const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
+  const String revision2 = 'f99555c1e1392bf2a8135056b9446680c2af4ddf';
+  const String revision3 = 'ffffffffffffffffffffffffffffffffffffffff';
+  const String revision4 = '280e23318a0d8341415c66aa32581352a421d974';
+  const String releaseVersion = '1.2.0-3.0.pre';
+  const String releaseChannel = 'beta';
+  const String stateFile = '/state-file.json';
+  final String localPathSeparator = const LocalPlatform().pathSeparator;
+  final String localOperatingSystem = const LocalPlatform().operatingSystem;
+
   group('next command', () {
-    const String flutterRoot = '/flutter';
-    const String checkoutsParentDirectory = '$flutterRoot/dev/conductor';
-    const String candidateBranch = 'flutter-1.2-candidate.3';
-    const String workingBranch = 'cherrypicks-$candidateBranch';
-    const String remoteUrl = 'https://github.com/org/repo.git';
-    final String localPathSeparator = const LocalPlatform().pathSeparator;
-    final String localOperatingSystem = const LocalPlatform().pathSeparator;
-    const String revision1 = 'd3af60d18e01fcb36e0c0fa06c8502e4935ed095';
-    const String revision2 = 'f99555c1e1392bf2a8135056b9446680c2af4ddf';
-    const String revision3 = '98a5ca242b9d270ce000b26309b8a3cdc9c89df5';
-    const String revision4 = '280e23318a0d8341415c66aa32581352a421d974';
-    const String releaseVersion = '1.2.0-3.0.pre';
-    const String releaseChannel = 'beta';
     late MemoryFileSystem fileSystem;
     late TestStdio stdio;
-    const String stateFile = '/state-file.json';
 
     setUp(() {
       stdio = TestStdio();
@@ -78,12 +82,7 @@ void main() {
 
     group('APPLY_ENGINE_CHERRYPICKS to CODESIGN_ENGINE_BINARIES', () {
       test('does not prompt user and updates currentPhase if there are no engine cherrypicks', () async {
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          const FakeCommand(
-            command: <String>['git', 'checkout', workingBranch],
-          ),
-        ]);
+        final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -141,24 +140,7 @@ void main() {
         final File ciYaml = fileSystem.file('$checkoutsParentDirectory/engine/.ci.yaml')
             ..createSync(recursive: true);
         _initializeCiYamlFile(ciYaml);
-        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
-          const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM blah',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>[
-            'git',
-            'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
-          ]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
-          ),
-        ]);
+        final FakeProcessManager processManager = FakeProcessManager.empty();
         final FakePlatform platform = FakePlatform(
           environment: <String, String>{
             'HOME': <String>['path', 'to', 'home'].join(localPathSeparator),
@@ -210,7 +192,7 @@ void main() {
 
       test('updates lastPhase if user responds yes', () async {
         const String remoteUrl = 'https://github.com/org/repo.git';
-        const String releaseChannel = 'dev';
+        const String releaseChannel = 'beta';
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
@@ -223,16 +205,6 @@ void main() {
                   ..createSync(recursive: true);
               _initializeCiYamlFile(file);
             },
-          ),
-          const FakeCommand(
-            command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM .ci.yaml',
-          ),
-          const FakeCommand(command: <String>['git', 'add', '--all']),
-          const FakeCommand(command: <String>['git', 'commit', "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'"]),
-          const FakeCommand(
-            command: <String>['git', 'rev-parse', 'HEAD'],
-            stdout: revision2,
           ),
           const FakeCommand(command: <String>['git', 'push', 'mirror', 'HEAD:refs/heads/$workingBranch']),
         ]);
@@ -351,6 +323,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.CODESIGN_ENGINE_BINARIES);
         expect(stdio.error.contains('Aborting command.'), true);
@@ -388,6 +361,7 @@ void main() {
           fileSystem.file(stateFile),
         );
 
+        expect(processManager, hasNoRemainingExpectations);
         expect(stdio.stdout, contains('Has CI passed for the engine PR and binaries been codesigned? (y/n) '));
         expect(finalState.currentPhase, ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS);
       });
@@ -451,8 +425,60 @@ void main() {
         engineRevisionFile.writeAsStringSync(oldEngineVersion, flush: true);
       });
 
-      test('with no dart, engine or framework cherrypicks, no user input, no PR needed', () async {
-        state = pb.ConductorState(
+      test('with no dart, engine or framework cherrypicks, updates engine revision if version mismatch', () async {
+        stdio.stdin.add('n');
+          processManager.addCommands(<FakeCommand>[
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          // we want merged upstream commit, not local working commit
+          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision1,
+          ),
+          const FakeCommand(command: <String>['git', 'fetch', 'upstream']),
+          FakeCommand(
+            command: const <String>['git', 'checkout', workingBranch],
+            onRun: () {
+              final File file = fileSystem.file('$checkoutsParentDirectory/framework/.ci.yaml')
+                  ..createSync();
+              _initializeCiYamlFile(file);
+            },
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM bin/internal/release-candidate-branch.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision3,
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM bin/internal/engine.version',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(command: <String>[
+            'git',
+            'commit',
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
+          ]),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision4,
+          ),
+        ]);
+        final pb.ConductorState state = pb.ConductorState(
+          releaseChannel: releaseChannel,
+          releaseVersion: releaseVersion,
+          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
           framework: pb.Repository(
             candidateBranch: candidateBranch,
             checkoutPath: frameworkCheckoutPath,
@@ -464,16 +490,14 @@ void main() {
             candidateBranch: candidateBranch,
             checkoutPath: engineCheckoutPath,
             upstream: pb.Remote(name: 'upstream', url: engineUpstreamRemoteUrl),
+            currentGitHead: revision1,
           ),
-          currentPhase: ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS,
         );
-
         writeStateToFile(
           fileSystem.file(stateFile),
           state,
           <String>[],
         );
-
         final Checkouts checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
@@ -482,23 +506,16 @@ void main() {
           stdio: stdio,
         );
         final CommandRunner<void> runner = createRunner(checkouts: checkouts);
-
         await runner.run(<String>[
           'next',
           '--$kStateOption',
           stateFile,
         ]);
 
-        final pb.ConductorState finalState = readStateFromFile(
-          fileSystem.file(stateFile),
-        );
-
-        expect(finalState.currentPhase, ReleasePhase.PUBLISH_VERSION);
-        expect(stdio.error, isEmpty);
-        expect(
-          stdio.stdout,
-          contains('pull request is not required'),
-        );
+        expect(processManager, hasNoRemainingExpectations);
+        expect(stdio.stdout, contains('release-candidate-branch.version containing $candidateBranch'));
+        expect(stdio.stdout, contains('Updating engine revision from $oldEngineVersion to $revision1'));
+        expect(stdio.stdout, contains('Are you ready to push your framework branch'));
       });
 
       test('with no engine cherrypicks but a dart revision update, updates engine revision', () async {
@@ -522,13 +539,14 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM /path/to/.ci.yaml',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -536,13 +554,14 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM /path/to/engine.version',
+            stdout: 'MM bin/internal/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -587,6 +606,7 @@ void main() {
         ]);
 
         expect(processManager, hasNoRemainingExpectations);
+        expect(stdio.stdout, contains('release-candidate-branch.version containing $candidateBranch'));
         expect(stdio.stdout, contains('Updating engine revision from $oldEngineVersion to $revision1'));
         expect(stdio.stdout, contains('Are you ready to push your framework branch'));
       });
@@ -612,13 +632,14 @@ void main() {
           const FakeCommand(command: <String>['git', 'checkout', workingBranch]),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/.ci.yaml',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -626,13 +647,14 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/engine.version',
+            stdout: 'MM bin/internal/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -690,13 +712,14 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/.ci.yaml',
+            stdout: 'MM bin/internal/release-candidate-branch.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='add branch $candidateBranch to enabled_branches in .ci.yaml'",
+            '--message',
+            'Create candidate branch version $candidateBranch for $releaseChannel',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -704,13 +727,14 @@ void main() {
           ),
           const FakeCommand(
             command: <String>['git', 'status', '--porcelain'],
-            stdout: 'MM path/to/engine.version',
+            stdout: 'MM bin/internal/engine.version',
           ),
           const FakeCommand(command: <String>['git', 'add', '--all']),
           const FakeCommand(command: <String>[
             'git',
             'commit',
-            "--message='Update Engine revision to $revision1 for $releaseChannel release $releaseVersion'",
+            '--message',
+            'Update Engine revision to $revision1 for $releaseChannel release $releaseVersion',
           ]),
           const FakeCommand(
             command: <String>['git', 'rev-parse', 'HEAD'],
@@ -777,6 +801,10 @@ void main() {
             candidateBranch: candidateBranch,
             upstream: pb.Remote(url: FrameworkRepository.defaultUpstream),
           ),
+          engine: pb.Repository(
+            candidateBranch: candidateBranch,
+            upstream: pb.Remote(url: EngineRepository.defaultUpstream),
+          ),
           releaseVersion: releaseVersion,
         );
         platform = FakePlatform(
@@ -792,6 +820,18 @@ void main() {
         stdio.stdin.add('n');
         final FakeProcessManager processManager = FakeProcessManager.list(
           <FakeCommand>[
+            // Framework checkout
+            const FakeCommand(
+              command: <String>['git', 'fetch', 'upstream'],
+            ),
+            const FakeCommand(
+              command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+            ),
+            const FakeCommand(
+              command: <String>['git', 'rev-parse', 'HEAD'],
+              stdout: revision1,
+            ),
+            // Engine checkout
             const FakeCommand(
               command: <String>['git', 'fetch', 'upstream'],
             ),
@@ -837,6 +877,7 @@ void main() {
       test('updates state.currentPhase if user responds yes', () async {
         stdio.stdin.add('y');
         final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          // Framework checkout
           const FakeCommand(
             command: <String>['git', 'fetch', 'upstream'],
           ),
@@ -847,8 +888,27 @@ void main() {
             command: <String>['git', 'rev-parse', 'HEAD'],
             stdout: revision1,
           ),
+          // Engine checkout
+          const FakeCommand(
+            command: <String>['git', 'fetch', 'upstream'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'checkout', '$remoteName/$candidateBranch'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'rev-parse', 'HEAD'],
+            stdout: revision2,
+          ),
+          // Framework tag
           const FakeCommand(
             command: <String>['git', 'tag', releaseVersion, revision1],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'push', remoteName, releaseVersion],
+          ),
+          // Engine tag
+          const FakeCommand(
+            command: <String>['git', 'tag', releaseVersion, revision2],
           ),
           const FakeCommand(
             command: <String>['git', 'push', remoteName, releaseVersion],
@@ -1009,7 +1069,8 @@ void main() {
         );
         expect(
           stdio.stdout,
-          contains('Release archive packages must be verified on cloud storage: https://ci.chromium.org/p/flutter/g/beta_packaging/console'),
+          contains(
+              'Release archive packages must be verified on cloud storage: https://luci-milo.appspot.com/p/dart-internal/g/flutter_packaging/console'),
         );
         expect(finalState.currentPhase, ReleasePhase.VERIFY_RELEASE);
       });
@@ -1052,13 +1113,186 @@ void main() {
   }, onPlatform: <String, dynamic>{
     'windows': const Skip('Flutter Conductor only supported on macos/linux'),
   });
+
+  group('prompt', () {
+    test('can be overridden for different frontend implementations', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Stdio stdio = _UnimplementedStdio.instance;
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory('/'),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.empty(),
+        stdio: stdio,
+      );
+      final _TestNextContext context = _TestNextContext(
+        checkouts: checkouts,
+        stateFile: fileSystem.file('/statefile.json'),
+      );
+
+      final bool response = await context.prompt(
+        'A prompt that will immediately be agreed to',
+      );
+      expect(response, true);
+    });
+
+    test('throws if user inputs character that is not "y" or "n"', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final TestStdio stdio = TestStdio(
+        stdin: <String>['x'],
+        verbose: true,
+      );
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory('/'),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.empty(),
+        stdio: stdio,
+      );
+      final NextContext context = NextContext(
+        autoAccept: false,
+        force: false,
+        checkouts: checkouts,
+        stateFile: fileSystem.file('/statefile.json'),
+      );
+
+      expect(
+        () => context.prompt('Asking a question?'),
+        throwsExceptionWith('Unknown user input (expected "y" or "n")'),
+      );
+    });
+  });
+
+  group('.pushWorkingBranch()', () {
+    late MemoryFileSystem fileSystem;
+    late TestStdio stdio;
+    late Platform platform;
+
+    setUp(() {
+      stdio = TestStdio();
+      fileSystem = MemoryFileSystem.test();
+      platform = FakePlatform();
+    });
+
+    test('catches GitException if the push was rejected and instead throws a helpful ConductorException', () async {
+      const String gitPushErrorMessage = '''
+ To github.com:user/engine.git
+
+  ! [rejected]            HEAD -> cherrypicks-flutter-2.8-candidate.3 (non-fast-forward)
+ error: failed to push some refs to 'github.com:user/engine.git'
+ hint: Updates were rejected because the tip of your current branch is behind
+ hint: its remote counterpart. Integrate the remote changes (e.g.
+ hint: 'git pull ...') before pushing again.
+ hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+''';
+      final Checkouts checkouts = Checkouts(
+        fileSystem: fileSystem,
+        parentDirectory: fileSystem.directory(checkoutsParentDirectory)..createSync(recursive: true),
+        platform: platform,
+        processManager: FakeProcessManager.empty(),
+        stdio: stdio,
+      );
+      final Repository testRepository = _TestRepository.fromCheckouts(checkouts);
+      final pb.Repository testPbRepository = pb.Repository();
+      (checkouts.processManager as FakeProcessManager).addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>['git', 'clone', '--origin', 'upstream', '--', testRepository.upstreamRemote.url, '/flutter/dev/conductor/flutter_conductor_checkouts/test-repo/test-repo'],
+        ),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', 'HEAD'],
+          stdout: revision1,
+        ),
+        FakeCommand(
+          command: const <String>['git', 'push', '', 'HEAD:refs/heads/'],
+          exception: GitException(gitPushErrorMessage, <String>['git', 'push', '--force', '', 'HEAD:refs/heads/']),
+        ),
+      ]);
+      final NextContext nextContext = NextContext(
+        autoAccept: false,
+        checkouts: checkouts,
+        force: false,
+        stateFile: fileSystem.file(stateFile),
+      );
+
+      expect(
+        () => nextContext.pushWorkingBranch(testRepository, testPbRepository),
+        throwsA(isA<ConductorException>().having(
+          (ConductorException exception) => exception.message,
+          'has correct message',
+          contains('Re-run this command with --force to overwrite the remote branch'),
+        )),
+      );
+    });
+  });
+}
+
+/// A [Stdio] that will throw an exception if any of its methods are called.
+class _UnimplementedStdio implements Stdio {
+  const _UnimplementedStdio();
+
+  static const _UnimplementedStdio _instance = _UnimplementedStdio();
+  static _UnimplementedStdio get instance => _instance;
+
+  Never _throw() => throw Exception('Unimplemented!');
+
+  @override
+  List<String> get logs => _throw();
+
+  @override
+  void printError(String message) => _throw();
+
+  @override
+  void printWarning(String message) => _throw();
+
+  @override
+  void printStatus(String message) => _throw();
+
+  @override
+  void printTrace(String message) => _throw();
+
+  @override
+  void write(String message) => _throw();
+
+  @override
+  String readLineSync() => _throw();
+}
+
+class _TestRepository extends Repository {
+  _TestRepository.fromCheckouts(Checkouts checkouts, [String name = 'test-repo']) : super(
+    fileSystem: checkouts.fileSystem,
+    parentDirectory: checkouts.directory.childDirectory(name),
+    platform: checkouts.platform,
+    processManager: checkouts.processManager,
+    name: name,
+    requiredLocalBranches: <String>[],
+    stdio: checkouts.stdio,
+    upstreamRemote: const Remote(name: RemoteName.upstream, url: 'git@github.com:upstream/repo.git'),
+  );
+
+  @override
+  Future<_TestRepository> cloneRepository(String? cloneName) async {
+    throw Exception('Unimplemented!');
+  }
+}
+
+class _TestNextContext extends NextContext {
+  const _TestNextContext({
+    required super.stateFile,
+    required super.checkouts,
+  }) : super(autoAccept: false, force: false);
+
+  @override
+  Future<bool> prompt(String message) {
+    // always say yes
+    return Future<bool>.value(true);
+  }
 }
 
 void _initializeCiYamlFile(
   File file, {
   List<String>? enabledBranches,
 }) {
-  enabledBranches ??= <String>['master', 'dev', 'beta', 'stable'];
+  enabledBranches ??= <String>['master', 'beta', 'stable'];
   file.createSync(recursive: true);
   final StringBuffer buffer = StringBuffer('enabled_branches:\n');
   for (final String branch in enabledBranches) {

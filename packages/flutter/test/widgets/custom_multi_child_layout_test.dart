@@ -12,8 +12,9 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   Size getSize(BoxConstraints constraints) {
-    if (!RenderObject.debugCheckingIntrinsics)
+    if (!RenderObject.debugCheckingIntrinsics) {
       getSizeConstraints = constraints;
+    }
     return const Size(200.0, 300.0);
   }
 
@@ -150,10 +151,9 @@ class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
 
 class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   const LayoutWithMissingId({
-    Key? key,
-    required Widget child,
-  }) : assert(child != null),
-       super(key: key, child: child);
+    super.key,
+    required super.child,
+  });
 
   @override
   void applyParentData(RenderObject renderObject) {}
@@ -372,7 +372,9 @@ void main() {
           '   in its parent data.\n'
           '   The following child has no ID: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT:\n'
           '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
-          '       CustomMultiChildLayout ← Center ← [root]\n'
+          '       CustomMultiChildLayout ← Center ← MediaQuery ←\n'
+          '       _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
+          '       TestFlutterView#00000] ← [root]\n'
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'
           '     constraints: MISSING\n'
           '     size: MISSING\n'

@@ -15,14 +15,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.content.Context;
+import androidx.annotation.NonNull;
 
-import io.flutter.app.FlutterActivity;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterView;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugins.GeneratedPluginRegistrant;
-import io.flutter.view.FlutterView;
 
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -30,10 +35,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 public class MainActivity extends FlutterActivity {
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      GeneratedPluginRegistrant.registerWith(this);
-      new MethodChannel(getFlutterView(), "semantics").setMethodCallHandler(new SemanticsTesterMethodHandler());
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+      GeneratedPluginRegistrant.registerWith(flutterEngine);
+      new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "semantics")
+              .setMethodCallHandler(new SemanticsTesterMethodHandler());
   }
 
   class SemanticsTesterMethodHandler implements MethodCallHandler {
@@ -41,7 +46,7 @@ public class MainActivity extends FlutterActivity {
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        FlutterView flutterView = getFlutterView();
+        FlutterView flutterView = findViewById(FLUTTER_VIEW_ID);
         AccessibilityNodeProvider provider = flutterView.getAccessibilityNodeProvider();
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
@@ -61,6 +66,16 @@ public class MainActivity extends FlutterActivity {
             }
             AccessibilityNodeInfo node = provider.createAccessibilityNodeInfo(id);
             result.success(convertSemantics(node, id));
+            return;
+        }
+        if (methodCall.method.equals("setClipboard")) {
+            Map<String, Object> data = methodCall.arguments();
+            @SuppressWarnings("unchecked")
+            String message = (String) data.get("message");
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("message", message);
+            clipboard.setPrimaryClip(clip);
+            result.success(null);
             return;
         }
         result.notImplemented();

@@ -36,38 +36,46 @@ class CardTheme with Diagnosticable {
     this.clipBehavior,
     this.color,
     this.shadowColor,
+    this.surfaceTintColor,
     this.elevation,
     this.margin,
     this.shape,
   }) : assert(elevation == null || elevation >= 0.0);
 
-  /// Default value for [Card.clipBehavior].
+  /// Overrides the default value for [Card.clipBehavior].
   ///
   /// If null, [Card] uses [Clip.none].
   final Clip? clipBehavior;
 
-  /// Default value for [Card.color].
+  /// Overrides the default value for [Card.color].
   ///
   /// If null, [Card] uses [ThemeData.cardColor].
   final Color? color;
 
-  /// Default value for [Card.shadowColor].
+  /// Overrides the default value for [Card.shadowColor].
   ///
   /// If null, [Card] defaults to fully opaque black.
   final Color? shadowColor;
 
-  /// Default value for [Card.elevation].
+  /// Overrides the default value for [Card.surfaceTintColor].
+  ///
+  /// If null, [Card] will not display an overlay color.
+  ///
+  /// See [Material.surfaceTintColor] for more details.
+  final Color? surfaceTintColor;
+
+  /// Overrides the default value for [Card.elevation].
   ///
   /// If null, [Card] uses a default of 1.0.
   final double? elevation;
 
-  /// Default value for [Card.margin].
+  /// Overrides the default value for [Card.margin].
   ///
   /// If null, [Card] uses a default margin of 4.0 logical pixels on all sides:
   /// `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry? margin;
 
-  /// Default value for [Card.shape].
+  /// Overrides the default value for [Card.shape].
   ///
   /// If null, [Card] then uses a [RoundedRectangleBorder] with a circular
   /// corner radius of 4.0.
@@ -79,6 +87,7 @@ class CardTheme with Diagnosticable {
     Clip? clipBehavior,
     Color? color,
     Color? shadowColor,
+    Color? surfaceTintColor,
     double? elevation,
     EdgeInsetsGeometry? margin,
     ShapeBorder? shape,
@@ -87,6 +96,7 @@ class CardTheme with Diagnosticable {
       clipBehavior: clipBehavior ?? this.clipBehavior,
       color: color ?? this.color,
       shadowColor: shadowColor ?? this.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       elevation: elevation ?? this.elevation,
       margin: margin ?? this.margin,
       shape: shape ?? this.shape,
@@ -104,11 +114,14 @@ class CardTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static CardTheme lerp(CardTheme? a, CardTheme? b, double t) {
-    assert(t != null);
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return CardTheme(
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -116,27 +129,29 @@ class CardTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      clipBehavior,
-      color,
-      shadowColor,
-      elevation,
-      margin,
-      shape,
-    );
-  }
+  int get hashCode => Object.hash(
+    clipBehavior,
+    color,
+    shadowColor,
+    surfaceTintColor,
+    elevation,
+    margin,
+    shape,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is CardTheme
         && other.clipBehavior == clipBehavior
         && other.color == color
         && other.shadowColor == shadowColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.elevation == elevation
         && other.margin == margin
         && other.shape == shape;
@@ -148,6 +163,7 @@ class CardTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));

@@ -6,7 +6,7 @@ import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// For a given build, determines whether dependencies have changed since the
@@ -28,7 +28,6 @@ Future<void> processPodsIfNeeded(
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
-      xcodeProject.generatedXcodePropertiesFile.path,
       globals.fs.path.join(
         Cache.flutterRoot!,
         'packages',
@@ -45,7 +44,7 @@ Future<void> processPodsIfNeeded(
     xcodeProject: xcodeProject,
     buildMode: buildMode,
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
-  ) == true;
+  ) ?? false;
   if (didPodInstall) {
     fingerprinter.writeFingerprint();
   }

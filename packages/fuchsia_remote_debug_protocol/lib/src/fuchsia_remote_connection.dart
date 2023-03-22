@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:process/process.dart';
@@ -260,8 +261,7 @@ class FuchsiaRemoteConnection {
         if (event.eventType == DartVmEventType.started) {
           _log.fine('New VM found on port: ${event.servicePort}. Searching '
               'for Isolate: $pattern');
-          final DartVm? vmService = await _getDartVm(event.uri,
-            timeout: _kDartVmConnectionTimeout);
+          final DartVm? vmService = await _getDartVm(event.uri);
           // If the VM service is null, set the result to the empty list.
           final List<IsolateRef> result = await vmService?.getMainIsolatesByPattern(pattern!) ?? <IsolateRef>[];
           if (result.isNotEmpty) {
@@ -425,7 +425,7 @@ class FuchsiaRemoteConnection {
   }) async {
     if (!_dartVmCache.containsKey(uri)) {
       // When raising an HttpException this means that there is no instance of
-      // the Dart VM to communicate with.  The TimeoutException is raised when
+      // the Dart VM to communicate with. The TimeoutException is raised when
       // the Dart VM instance is shut down in the middle of communicating.
       try {
         final DartVm dartVm = await DartVm.connect(uri, timeout: timeout);
@@ -507,6 +507,39 @@ class FuchsiaRemoteConnection {
     _pollDartVms = true;
   }
 
+  /// Helper for getDeviceServicePorts() to extract the vm_service_port from
+  /// json response.
+  List<int> getVmServicePortFromInspectSnapshot(dynamic inspectSnapshot) {
+    final List<Map<String, dynamic>> snapshot =
+        List<Map<String, dynamic>>.from(inspectSnapshot as List<dynamic>);
+    final List<int> ports = <int>[];
+
+    for (final Map<String, dynamic> item in snapshot) {
+      if (!item.containsKey('payload') || item['payload'] == null) {
+        continue;
+      }
+      final Map<String, dynamic> payload =
+          Map<String, dynamic>.from(item['payload'] as Map<String, dynamic>);
+
+      if (!payload.containsKey('root') || payload['root'] == null) {
+        continue;
+      }
+      final Map<String, dynamic> root =
+          Map<String, dynamic>.from(payload['root'] as Map<String, dynamic>);
+
+      if (!root.containsKey('vm_service_port') ||
+          root['vm_service_port'] == null) {
+        continue;
+      }
+
+      final int? port = int.tryParse(root['vm_service_port'] as String);
+      if (port != null) {
+        ports.add(port);
+      }
+    }
+    return ports;
+  }
+
   /// Gets the open Dart VM service ports on a remote Fuchsia device.
   ///
   /// The method attempts to get service ports through an SSH connection. Upon
@@ -515,24 +548,14 @@ class FuchsiaRemoteConnection {
   /// found. An exception is thrown in the event of an actual error when
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
-    final List<String> portPaths = await _sshCommandRunner
-        .run('/bin/find /hub -name vmservice-port');
-    final List<int> ports = <int>[];
-    for (final String path in portPaths) {
-      if (path == '') {
-        continue;
-      }
-      final List<String> lsOutput =
-          await _sshCommandRunner.run('/bin/ls $path');
-      for (final String line in lsOutput) {
-        if (line == '') {
-          continue;
-        }
-        final int? port = int.tryParse(line);
-        if (port != null) {
-          ports.add(port);
-        }
-      }
+    final List<String> inspectResult = await _sshCommandRunner
+        .run("iquery --format json show '**:root:vm_service_port'");
+    final dynamic inspectOutputJson = jsonDecode(inspectResult.join('\n'));
+    final List<int> ports =
+        getVmServicePortFromInspectSnapshot(inspectOutputJson);
+
+    if (ports.length > 1) {
+      throw StateError('More than one Flutter observatory port found');
     }
     return ports;
   }
@@ -680,14 +703,13 @@ class _SshPortForwarder implements PortForwarder {
   /// If successful returns a valid [ServerSocket] (which must be disconnected
   /// later).
   static Future<ServerSocket?> _createLocalSocket() async {
-    ServerSocket s;
     try {
-      s = await ServerSocket.bind(_ipv4Loopback, 0);
+      return await ServerSocket.bind(_ipv4Loopback, 0);
     } catch (e) {
-      // Failures are signaled by a return value of 0 from this function.
+      // We should not be catching all errors arbitrarily here, this might hide real errors.
+      // TODO(ianh): Determine which exceptions to catch here.
       _log.warning('_createLocalSocket failed: $e');
       return null;
     }
-    return s;
   }
 }

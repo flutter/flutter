@@ -44,7 +44,6 @@ enum CrossFadeState {
 /// ```dart
 /// Widget defaultLayoutBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
 ///   return Stack(
-///     fit: StackFit.loose,
 ///     children: <Widget>[
 ///       Positioned(
 ///         key: bottomChildKey,
@@ -119,7 +118,7 @@ class AnimatedCrossFade extends StatefulWidget {
   ///
   /// All the arguments other than [key] must be non-null.
   const AnimatedCrossFade({
-    Key? key,
+    super.key,
     required this.firstChild,
     required this.secondChild,
     this.firstCurve = Curves.linear,
@@ -130,16 +129,8 @@ class AnimatedCrossFade extends StatefulWidget {
     required this.duration,
     this.reverseDuration,
     this.layoutBuilder = defaultLayoutBuilder,
-  }) : assert(firstChild != null),
-       assert(secondChild != null),
-       assert(firstCurve != null),
-       assert(secondCurve != null),
-       assert(sizeCurve != null),
-       assert(alignment != null),
-       assert(crossFadeState != null),
-       assert(duration != null),
-       assert(layoutBuilder != null),
-       super(key: key);
+    this.excludeBottomFocus = true,
+  });
 
   /// The child that is visible when [crossFadeState] is
   /// [CrossFadeState.showFirst]. It fades out when transitioning
@@ -206,6 +197,15 @@ class AnimatedCrossFade extends StatefulWidget {
   /// result in the widgets jumping about when the cross-fade state is changed.
   final AnimatedCrossFadeBuilder layoutBuilder;
 
+  /// When true, this is equivalent to wrapping the bottom widget with an [ExcludeFocus]
+  /// widget while it is at the bottom of the cross-fade stack.
+  ///
+  /// Defaults to true. When it is false, the bottom widget in the cross-fade stack
+  /// can remain in focus until the top widget requests focus. This is useful for
+  /// animating between different [TextField]s so the keyboard remains open during the
+  /// cross-fade animation.
+  final bool excludeBottomFocus;
+
   /// The default layout algorithm used by [AnimatedCrossFade].
   ///
   /// The top child is placed in a stack that sizes itself to match the top
@@ -248,7 +248,7 @@ class AnimatedCrossFade extends StatefulWidget {
 }
 
 class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProviderStateMixin {
-  AnimationController? _controller;
+  late AnimationController _controller;
   late Animation<double> _firstAnimation;
   late Animation<double> _secondAnimation;
 
@@ -260,11 +260,12 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       reverseDuration: widget.reverseDuration,
       vsync: this,
     );
-    if (widget.crossFadeState == CrossFadeState.showSecond)
-      _controller!.value = 1.0;
+    if (widget.crossFadeState == CrossFadeState.showSecond) {
+      _controller.value = 1.0;
+    }
     _firstAnimation = _initAnimation(widget.firstCurve, true);
     _secondAnimation = _initAnimation(widget.secondCurve, false);
-    _controller!.addStatusListener((AnimationStatus status) {
+    _controller.addStatusListener((AnimationStatus status) {
       setState(() {
         // Trigger a rebuild because it depends on _isTransitioning, which
         // changes its value together with animation status.
@@ -273,50 +274,55 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   Animation<double> _initAnimation(Curve curve, bool inverted) {
-    Animation<double> result = _controller!.drive(CurveTween(curve: curve));
-    if (inverted)
+    Animation<double> result = _controller.drive(CurveTween(curve: curve));
+    if (inverted) {
       result = result.drive(Tween<double>(begin: 1.0, end: 0.0));
+    }
     return result;
   }
 
   @override
   void dispose() {
-    _controller!.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   void didUpdateWidget(AnimatedCrossFade oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.duration != oldWidget.duration)
-      _controller!.duration = widget.duration;
-    if (widget.reverseDuration != oldWidget.reverseDuration)
-      _controller!.reverseDuration = widget.reverseDuration;
-    if (widget.firstCurve != oldWidget.firstCurve)
+    if (widget.duration != oldWidget.duration) {
+      _controller.duration = widget.duration;
+    }
+    if (widget.reverseDuration != oldWidget.reverseDuration) {
+      _controller.reverseDuration = widget.reverseDuration;
+    }
+    if (widget.firstCurve != oldWidget.firstCurve) {
       _firstAnimation = _initAnimation(widget.firstCurve, true);
-    if (widget.secondCurve != oldWidget.secondCurve)
+    }
+    if (widget.secondCurve != oldWidget.secondCurve) {
       _secondAnimation = _initAnimation(widget.secondCurve, false);
+    }
     if (widget.crossFadeState != oldWidget.crossFadeState) {
       switch (widget.crossFadeState) {
         case CrossFadeState.showFirst:
-          _controller!.reverse();
+          _controller.reverse();
           break;
         case CrossFadeState.showSecond:
-          _controller!.forward();
+          _controller.forward();
           break;
       }
     }
   }
 
   /// Whether we're in the middle of cross-fading this frame.
-  bool get _isTransitioning => _controller!.status == AnimationStatus.forward || _controller!.status == AnimationStatus.reverse;
+  bool get _isTransitioning => _controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.reverse;
 
   @override
   Widget build(BuildContext context) {
     const Key kFirstChildKey = ValueKey<CrossFadeState>(CrossFadeState.showFirst);
     const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
-    final bool transitioningForwards = _controller!.status == AnimationStatus.completed ||
-                                       _controller!.status == AnimationStatus.forward;
+    final bool transitioningForwards = _controller.status == AnimationStatus.completed ||
+                                       _controller.status == AnimationStatus.forward;
     final Key topKey;
     Widget topChild;
     final Animation<double> topAnimation;
@@ -342,12 +348,14 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     bottomChild = TickerMode(
       key: bottomKey,
       enabled: _isTransitioning,
-      child: ExcludeSemantics(
-        excluding: true, // Always exclude the semantics of the widget that's fading out.
-        child: ExcludeFocus(
-          child: FadeTransition(
-            opacity: bottomAnimation,
-            child: bottomChild,
+      child: IgnorePointer(
+        child: ExcludeSemantics( // Always exclude the semantics of the widget that's fading out.
+          child: ExcludeFocus(
+            excluding: widget.excludeBottomFocus,
+            child: FadeTransition(
+              opacity: bottomAnimation,
+              child: bottomChild,
+            ),
           ),
         ),
       ),
@@ -355,13 +363,16 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     topChild = TickerMode(
       key: topKey,
       enabled: true, // Top widget always has its animations enabled.
-      child: ExcludeSemantics(
-        excluding: false, // Always publish semantics for the widget that's fading in.
-        child: ExcludeFocus(
-          excluding: false,
-          child: FadeTransition(
-            opacity: topAnimation,
-            child: topChild,
+      child: IgnorePointer(
+        ignoring: false,
+        child: ExcludeSemantics(
+          excluding: false, // Always publish semantics for the widget that's fading in.
+          child: ExcludeFocus(
+            excluding: false,
+            child: FadeTransition(
+              opacity: topAnimation,
+              child: topChild,
+            ),
           ),
         ),
       ),

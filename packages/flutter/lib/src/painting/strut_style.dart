@@ -347,8 +347,7 @@ class StrutStyle with Diagnosticable {
     this.forceStrutHeight,
     String? debugLabel,
     String? package,
-  }) : assert(textStyle != null),
-       assert(fontSize == null || fontSize > 0),
+  }) : assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
        assert(package == null || fontFamily != null || fontFamilyFallback != null),
        fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
@@ -405,8 +404,9 @@ class StrutStyle with Diagnosticable {
   /// The package name should be provided by the `package` argument in the
   /// constructor.
   List<String>? get fontFamilyFallback {
-    if (_package != null && _fontFamilyFallback != null)
+    if (_package != null && _fontFamilyFallback != null) {
       return _fontFamilyFallback!.map((String family) => 'packages/$_package/$family').toList();
+    }
     return _fontFamilyFallback;
   }
   final List<String>? _fontFamilyFallback;
@@ -460,7 +460,7 @@ class StrutStyle with Diagnosticable {
   /// evenly over and under the strut, regardless of [leadingDistribution].
   ///
   /// Defaults to null, which defers to the paragraph's
-  /// `ParagraphStyle.textHeightBehavior`'s `leadingDistribution`.
+  /// `ParagraphStyle.textHeightBehavior`'s [leadingDistribution].
   final TextLeadingDistribution? leadingDistribution;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
@@ -518,8 +518,9 @@ class StrutStyle with Diagnosticable {
   ///
   ///  * [TextSpan.compareTo], which does the same thing for entire [TextSpan]s.
   RenderComparison compareTo(StrutStyle other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return RenderComparison.identical;
+    }
     if (fontFamily != other.fontFamily ||
         fontSize != other.fontSize ||
         fontWeight != other.fontWeight ||
@@ -527,8 +528,9 @@ class StrutStyle with Diagnosticable {
         height != other.height ||
         leading != other.leading ||
         forceStrutHeight != other.forceStrutHeight ||
-        !listEquals(fontFamilyFallback, other.fontFamilyFallback))
+        !listEquals(fontFamilyFallback, other.fontFamilyFallback)) {
       return RenderComparison.layout;
+    }
     return RenderComparison.identical;
   }
 
@@ -541,8 +543,9 @@ class StrutStyle with Diagnosticable {
   ///
   /// If the given text style is null, returns this strut style.
   StrutStyle inheritFromTextStyle(TextStyle? other) {
-    if (other == null)
+    if (other == null) {
       return this;
+    }
 
     return StrutStyle(
       fontFamily: fontFamily ?? other.fontFamily,
@@ -560,10 +563,12 @@ class StrutStyle with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is StrutStyle
         && other.fontFamily == fontFamily
         && other.fontSize == fontSize
@@ -575,17 +580,15 @@ class StrutStyle with Diagnosticable {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      fontFamily,
-      fontSize,
-      fontWeight,
-      fontStyle,
-      height,
-      leading,
-      forceStrutHeight,
-    );
-  }
+  int get hashCode => Object.hash(
+    fontFamily,
+    fontSize,
+    fontWeight,
+    fontStyle,
+    height,
+    leading,
+    forceStrutHeight,
+  );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'StrutStyle');
@@ -594,8 +597,9 @@ class StrutStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     super.debugFillProperties(properties);
-    if (debugLabel != null)
+    if (debugLabel != null) {
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
+    }
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[
       StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
       IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null),
@@ -616,12 +620,13 @@ class StrutStyle with Diagnosticable {
     ));
     styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
+    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     styles.forEach(properties.add);
 
-    if (!styleSpecified)
+    if (!styleSpecified) {
       properties.add(FlagProperty('forceStrutHeight', value: forceStrutHeight, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
+    }
   }
 }

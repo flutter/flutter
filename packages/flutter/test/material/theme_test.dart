@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -47,6 +46,55 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
   });
 
+  testWidgets('Theme overrides selection style', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    const Color defaultSelectionColor = Color(0x11111111);
+    const Color defaultCursorColor = Color(0x22222222);
+    const Color themeSelectionColor = Color(0x33333333);
+    const Color themeCursorColor = Color(0x44444444);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(brightness: Brightness.dark),
+        home: Scaffold(
+          body: DefaultSelectionStyle(
+            selectionColor: defaultSelectionColor,
+            cursorColor: defaultCursorColor,
+            child: Theme(
+              data: ThemeData(
+                textSelectionTheme: const TextSelectionThemeData(
+                  selectionColor: themeSelectionColor,
+                  cursorColor: themeCursorColor,
+                ),
+              ),
+              child: TextField(
+                key: key,
+              ),
+            )
+          ),
+        ),
+      ),
+    );
+    // Finds RenderEditable.
+    final RenderObject root = tester.renderObject(find.byType(EditableText));
+    late RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+
+    // Focus text field so it has a selection color. The selection color is null
+    // on an unfocused text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(renderEditable.selectionColor, themeSelectionColor);
+    expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor, themeCursorColor);
+  });
+
   testWidgets('Fallback theme', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
@@ -82,6 +130,12 @@ void main() {
       ThemeData.localize(light, defaultGeometryTheme),
       isNot(same(ThemeData.localize(dark, defaultGeometryTheme))),
     );
+  });
+
+  testWidgets('ThemeData with null typography uses proper defaults', (WidgetTester tester) async {
+    expect(ThemeData().typography, Typography.material2014());
+    final ThemeData m3Theme = ThemeData(useMaterial3: true);
+    expect(m3Theme.typography, Typography.material2021(colorScheme: m3Theme.colorScheme));
   });
 
   testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {
@@ -147,8 +201,9 @@ void main() {
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for (final Element item in tester.elementList(find.text('menuItem')))
+    for (final Element item in tester.elementList(find.text('menuItem'))) {
       expect(Theme.of(item).brightness, equals(Brightness.light));
+    }
   });
 
   testWidgets('ModalBottomSheet inherits shadowed app theme', (WidgetTester tester) async {
@@ -329,16 +384,16 @@ void main() {
   );
 
   testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (WidgetTester tester) async {
-    const double _kMagicFontSize = 4321.0;
+    const double kMagicFontSize = 4321.0;
     final ThemeData fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
-        bodyText2: fallback.primaryTextTheme.bodyText2!.copyWith(
-          fontSize: _kMagicFontSize,
+        bodyMedium: fallback.primaryTextTheme.bodyMedium!.copyWith(
+          fontSize: kMagicFontSize,
         ),
       ),
     );
-    expect(customTheme.primaryTextTheme.bodyText2!.fontSize, _kMagicFontSize);
+    expect(customTheme.primaryTextTheme.bodyMedium!.fontSize, kMagicFontSize);
 
     late double actualFontSize;
     await tester.pumpWidget(Directionality(
@@ -347,16 +402,16 @@ void main() {
         data: customTheme,
         child: Builder(builder: (BuildContext context) {
           final ThemeData theme = Theme.of(context);
-          actualFontSize = theme.primaryTextTheme.bodyText2!.fontSize!;
+          actualFontSize = theme.primaryTextTheme.bodyMedium!.fontSize!;
           return Text(
             'A',
-            style: theme.primaryTextTheme.bodyText2,
+            style: theme.primaryTextTheme.bodyMedium,
           );
         }),
       ),
     ));
 
-    expect(actualFontSize, _kMagicFontSize);
+    expect(actualFontSize, kMagicFontSize);
   });
 
   testWidgets('Default Theme provides all basic TextStyle properties', (WidgetTester tester) async {
@@ -373,21 +428,23 @@ void main() {
 
     List<TextStyle> extractStyles(TextTheme textTheme) {
       return <TextStyle>[
-        textTheme.headline1!,
-        textTheme.headline2!,
-        textTheme.headline3!,
-        textTheme.headline4!,
-        textTheme.headline5!,
-        textTheme.headline6!,
-        textTheme.subtitle1!,
-        textTheme.bodyText1!,
-        textTheme.bodyText2!,
-        textTheme.caption!,
-        textTheme.button!,
+        textTheme.displayLarge!,
+        textTheme.displayMedium!,
+        textTheme.displaySmall!,
+        textTheme.headlineLarge!,
+        textTheme.headlineMedium!,
+        textTheme.headlineSmall!,
+        textTheme.titleLarge!,
+        textTheme.titleMedium!,
+        textTheme.bodyLarge!,
+        textTheme.bodyMedium!,
+        textTheme.bodySmall!,
+        textTheme.labelLarge!,
+        textTheme.labelMedium!,
       ];
     }
 
-    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
+    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
       for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
@@ -408,7 +465,7 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.headline1!.debugLabel, '(englishLike display4 2014).merge(blackMountainView headline1)');
+    expect(theme.textTheme.displayLarge!.debugLabel, '(englishLike displayLarge 2014).merge(blackMountainView displayLarge)');
   });
 
   group('Cupertino theme', () {
@@ -587,12 +644,12 @@ void main() {
           primarySwatch: Colors.blue,
           cupertinoOverrideTheme: const CupertinoThemeData(
             // But the primary material color is preempted by the override.
-            primaryColor: CupertinoColors.activeOrange,
+            primaryColor: CupertinoColors.systemRed,
           ),
         ));
 
         expect(buildCount, 2);
-        expect(theme.primaryColor, CupertinoColors.activeOrange);
+        expect(theme.primaryColor, CupertinoColors.systemRed);
       },
     );
 
@@ -672,14 +729,9 @@ void main() {
 }
 
 int testBuildCalled = 0;
-class Test extends StatefulWidget {
-  const Test({ Key? key }) : super(key: key);
+class Test extends StatelessWidget {
+  const Test({ super.key });
 
-  @override
-  State<Test> createState() => _TestState();
-}
-
-class _TestState extends State<Test> {
   @override
   Widget build(BuildContext context) {
     testBuildCalled += 1;
@@ -748,6 +800,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   List<ui.FontFeature>? get fontFeatures => _delegate.fontFeatures;
   @override
+  List<ui.FontVariation>? get fontVariations => _delegate.fontVariations;
+  @override
   TextOverflow? get overflow => _delegate.overflow;
 
   @override
@@ -790,6 +844,7 @@ class _TextStyleProxy implements TextStyle {
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     TextOverflow? overflow,
     String? package,
   }) {
@@ -821,6 +876,7 @@ class _TextStyleProxy implements TextStyle {
     ui.Paint? background,
     List<Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     TextDecoration? decoration,
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,

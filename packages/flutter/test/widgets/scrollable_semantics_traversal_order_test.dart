@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -176,7 +174,6 @@ void main() {
           ),
         ],
       ),
-      childOrder: DebugSemanticsDumpOrder.traversalOrder,
       ignoreId: true,
       ignoreTransform: true,
       ignoreRect: true,
@@ -316,7 +313,6 @@ void main() {
           ),
         ],
       ),
-      childOrder: DebugSemanticsDumpOrder.traversalOrder,
       ignoreId: true,
       ignoreTransform: true,
       ignoreRect: true,
@@ -445,7 +441,6 @@ void main() {
           ),
         ],
       ),
-      childOrder: DebugSemanticsDumpOrder.traversalOrder,
       ignoreId: true,
       ignoreTransform: true,
       ignoreRect: true,
@@ -582,7 +577,6 @@ void main() {
           ),
         ],
       ),
-      childOrder: DebugSemanticsDumpOrder.traversalOrder,
       ignoreId: true,
       ignoreTransform: true,
       ignoreRect: true,
@@ -630,6 +624,25 @@ void main() {
       ),
     );
 
+    final List<TestSemantics> children = <TestSemantics>[];
+    for (int index = 0; index < 30; index += 1) {
+      final bool isHidden = index < 15 ||  index > 17;
+      children.add(
+        TestSemantics(
+          flags: isHidden ? <SemanticsFlag>[SemanticsFlag.isHidden] : 0,
+          label: 'Item ${index}a',
+          textDirection: TextDirection.ltr,
+        ),
+      );
+      children.add(
+        TestSemantics(
+          flags: isHidden ? <SemanticsFlag>[SemanticsFlag.isHidden] : 0,
+          label: 'item ${index}b',
+          textDirection: TextDirection.ltr,
+        ),
+      );
+    }
+
     expect(semantics, hasSemantics(
       TestSemantics.root(
         children: <TestSemantics>[
@@ -644,78 +657,12 @@ void main() {
                   SemanticsAction.scrollUp,
                   SemanticsAction.scrollDown,
                 ],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'Item 13a',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'item 13b',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'Item 14a',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'item 14b',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    label: 'Item 15a',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    label: 'item 15b',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    label: 'Item 16a',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    label: 'item 16b',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    label: 'Item 17a',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    label: 'item 17b',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'Item 18a',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'item 18b',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'Item 19a',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'item 19b',
-                    textDirection: TextDirection.ltr,
-                  ),
-                ],
+                children: children,
               ),
             ],
           ),
         ],
       ),
-      childOrder: DebugSemanticsDumpOrder.traversalOrder,
       ignoreId: true,
       ignoreTransform: true,
       ignoreRect: true,

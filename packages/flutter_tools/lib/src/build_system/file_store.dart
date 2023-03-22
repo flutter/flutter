@@ -84,7 +84,7 @@ enum FileStoreStrategy {
 /// through this class.
 ///
 /// This class uses either timestamps or file hashes depending on the
-/// provided [FileStoreStrategy]. All information  is held in memory during
+/// provided [FileStoreStrategy]. All information is held in memory during
 /// a build operation, and may be persisted to cache in the root build
 /// directory.
 ///
@@ -236,7 +236,7 @@ class FileStore {
     final Md5Hash hash = Md5Hash();
     RandomAccessFile? openFile;
     try {
-      openFile = file.openSync(mode: FileMode.read);
+      openFile = file.openSync();
       int bytes = 0;
       while (bytes < fileBytes) {
         final int bytesRead = openFile.readIntoSync(_readBuffer);

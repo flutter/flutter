@@ -70,9 +70,6 @@ class DevelopmentArtifact {
   /// Artifacts required for the Flutter Runner.
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', feature: flutterFuchsiaFeature);
 
-  /// Artifacts required for desktop Windows UWP.
-  static const DevelopmentArtifact windowsUwp = DevelopmentArtifact._('winuwp', feature: windowsUwpEmbedding);
-
   /// Artifacts required for any development platform.
   ///
   /// This does not need to be explicitly returned from requiredArtifacts as
@@ -92,7 +89,6 @@ class DevelopmentArtifact {
     fuchsia,
     universal,
     flutterRunner,
-    windowsUwp,
   ];
 
   @override
@@ -103,6 +99,20 @@ class DevelopmentArtifact {
 ///
 /// This does not provide any artifacts by default. See [FlutterCache] for the default
 /// artifact set.
+///
+/// ## Artifact mirrors
+///
+/// Some environments cannot reach the Google Cloud Storage buckets and CIPD due
+/// to regional or corporate policies.
+///
+/// To enable Flutter users in these environments, the Flutter tool supports
+/// custom artifact mirrors that the administrators of such environments may
+/// provide. To use an artifact mirror, the user defines the [kFlutterStorageBaseUrl]
+/// (`FLUTTER_STORAGE_BASE_URL`) environment variable that points to the mirror.
+/// Flutter tool reads this variable and uses it instead of the default URLs.
+///
+/// For more details on specific URLs used to download artifacts, see
+/// [storageBaseUrl] and [cipdBaseUrl].
 class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
@@ -127,7 +137,6 @@ class Cache {
   /// Defaults to a memory file system, fake platform,
   /// buffer logger, and no accessible artifacts.
   /// By default, the root cache directory path is "cache".
-  @visibleForTesting
   factory Cache.test({
     Directory? rootOverride,
     List<ArtifactSet>? artifacts,
@@ -140,7 +149,7 @@ class Cache {
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
     return Cache(
-      rootOverride: rootOverride ??= fileSystem.directory('cache'),
+      rootOverride: rootOverride ?? fileSystem.directory('cache'),
       artifacts: artifacts ?? <ArtifactSet>[],
       logger: logger,
       fileSystem: fileSystem,
@@ -165,6 +174,7 @@ class Cache {
 
   late final ArtifactUpdater _artifactUpdater = _createUpdater();
 
+  @visibleForTesting
   @protected
   void registerArtifact(ArtifactSet artifactSet) {
     _artifacts.add(artifactSet);
@@ -179,11 +189,16 @@ class Cache {
       tempStorage: getDownloadDir(),
       platform: _platform,
       httpClient: HttpClient(),
+      allowedBaseUrls: <String>[
+        storageBaseUrl,
+        cipdBaseUrl,
+      ],
     );
   }
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
+    'chrome-infra-packages.appspot.com',
   ];
 
   // Initialized by FlutterCommandRunner on startup.
@@ -247,6 +262,7 @@ class Cache {
       }
     } on Exception catch (error) {
       // There is currently no logger attached since this is computed at startup.
+      // ignore: avoid_print
       print(userMessages.runnerNoRoot('$error'));
     }
     return normalize('.');
@@ -320,13 +336,17 @@ class Cache {
       } on FileSystemException {
         if (!printed) {
           _logger.printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock!.path}');
-          // This needs to go to stderr to avoid cluttering up stdout if a parent
-          // process is collecting stdout. It's not really an "error" though,
-          // so print it in grey.
-          _logger.printError(
+          // This needs to go to stderr to avoid cluttering up stdout if a
+          // parent process is collecting stdout (e.g. when calling "flutter
+          // version --machine"). It's not really a "warning" though, so print it
+          // in grey. Also, make sure that it isn't counted as a warning for
+          // Logger.warningsAreFatal.
+          final bool oldWarnings = _logger.hadWarningOutput;
+          _logger.printWarning(
             'Waiting for another flutter command to release the startup lock...',
             color: TerminalColor.grey,
           );
+          _logger.hadWarningOutput = oldWarnings;
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -355,6 +375,35 @@ class Cache {
       );
     }
   }
+
+  String get devToolsVersion {
+    if (_devToolsVersion == null) {
+      const String devToolsDirPath = 'dart-sdk/bin/resources/devtools';
+      final Directory devToolsDir = getCacheDir(devToolsDirPath, shouldCreate: false);
+      if (!devToolsDir.existsSync()) {
+        throw Exception('Could not find directory at ${devToolsDir.path}');
+      }
+      final String versionFilePath = '${devToolsDir.path}/version.json';
+      final File versionFile = _fileSystem.file(versionFilePath);
+      if (!versionFile.existsSync()) {
+        throw Exception('Could not find file at $versionFilePath');
+      }
+      final dynamic data = jsonDecode(versionFile.readAsStringSync());
+      if (data is! Map<String, Object?>) {
+        throw Exception("Expected object of type 'Map<String, Object?>' but got one of type '${data.runtimeType}'");
+      }
+      final Object? version = data['version'];
+      if (version == null) {
+        throw Exception('Could not parse DevTools version from $version');
+      }
+      if (version is! String) {
+        throw Exception("Could not parse DevTools version. Expected object of type 'String', but got one of type '${version.runtimeType}'");
+      }
+      return _devToolsVersion = version;
+    }
+    return _devToolsVersion!;
+  }
+  String ? _devToolsVersion;
 
   /// The current version of Dart used to build Flutter and run the tool.
   String get dartSdkVersion {
@@ -397,8 +446,19 @@ class Cache {
   }
   String? _engineRevision;
 
+  /// The base for URLs that store Flutter engine artifacts that are fetched
+  /// during the installation of the Flutter SDK.
+  ///
+  /// By default the base URL is https://storage.googleapis.com. However, if
+  /// `FLUTTER_STORAGE_BASE_URL` environment variable ([kFlutterStorageBaseUrl])
+  /// is provided, the environment variable value is returned instead.
+  ///
+  /// See also:
+  ///
+  ///  * [cipdBaseUrl], which determines how CIPD artifacts are fetched.
+  ///  * [Cache] class-level dartdocs that explain how artifact mirrors work.
   String get storageBaseUrl {
-    final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
     if (overrideUrl == null) {
       return 'https://storage.googleapis.com';
     }
@@ -406,10 +466,52 @@ class Cache {
     try {
       Uri.parse(overrideUrl);
     } on FormatException catch (err) {
-      throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
+      throwToolExit('"$kFlutterStorageBaseUrl" contains an invalid URL:\n$err');
     }
     _maybeWarnAboutStorageOverride(overrideUrl);
     return overrideUrl;
+  }
+
+  /// The base for URLs that store Flutter engine artifacts in CIPD.
+  ///
+  /// For some platforms, such as Web and Fuchsia, CIPD artifacts are fetched
+  /// during the installation of the Flutter SDK, in addition to those fetched
+  /// from [storageBaseUrl].
+  ///
+  /// By default the base URL is https://chrome-infra-packages.appspot.com/dl.
+  /// However, if `FLUTTER_STORAGE_BASE_URL` environment variable is provided
+  /// ([kFlutterStorageBaseUrl]), then the following value is used:
+  ///
+  ///     FLUTTER_STORAGE_BASE_URL/flutter_infra_release/cipd
+  ///
+  /// See also:
+  ///
+  ///  * [storageBaseUrl], which determines how engine artifacts stored in the
+  ///    Google Cloud Storage buckets are fetched.
+  ///  * https://chromium.googlesource.com/infra/luci/luci-go/+/refs/heads/main/cipd,
+  ///    which contains information about CIPD.
+  ///  * [Cache] class-level dartdocs that explain how artifact mirrors work.
+  String get cipdBaseUrl {
+    final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
+    if (overrideUrl == null) {
+      return 'https://chrome-infra-packages.appspot.com/dl';
+    }
+
+    final Uri original;
+    try {
+      original = Uri.parse(overrideUrl);
+    } on FormatException catch (err) {
+      throwToolExit('"$kFlutterStorageBaseUrl" contains an invalid URL:\n$err');
+    }
+
+    final String cipdOverride = original.replace(
+      pathSegments: <String>[
+        ...original.pathSegments,
+        'flutter_infra_release',
+        'cipd',
+      ],
+    ).toString();
+    return cipdOverride;
   }
 
   bool _hasWarnedAboutStorageOverride = false;
@@ -418,7 +520,7 @@ class Cache {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
-    _logger.printStatus(
+    _logger.printWarning(
       'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
       emphasis: true,
     );
@@ -439,9 +541,12 @@ class Cache {
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
-  Directory getCacheDir(String name) {
+  ///
+  /// When [shouldCreate] is true, the cache directory at [name] will be created
+  /// if it does not already exist.
+  Directory getCacheDir(String name, { bool shouldCreate = true }) {
     final Directory dir = _fileSystem.directory(_fileSystem.path.join(getRoot().path, name));
-    if (!dir.existsSync()) {
+    if (!dir.existsSync() && shouldCreate) {
       dir.createSync(recursive: true);
       _osUtils.chmod(dir, '755');
     }
@@ -470,7 +575,7 @@ class Cache {
     final List<String> paths = <String>[];
     for (final ArtifactSet artifact in _artifacts) {
       final Map<String, String> env = artifact.environment;
-      if (env == null || !env.containsKey('DYLD_LIBRARY_PATH')) {
+      if (!env.containsKey('DYLD_LIBRARY_PATH')) {
         continue;
       }
       final String path = env['DYLD_LIBRARY_PATH']!;
@@ -509,7 +614,7 @@ class Cache {
         ErrorHandlingFileSystem.deleteIfExists(file);
       }
     } on FileSystemException catch (err) {
-      _logger.printError('Failed to delete some stamp files: $err');
+      _logger.printWarning('Failed to delete some stamp files: $err');
     }
   }
 
@@ -556,7 +661,7 @@ class Cache {
   }
 
   /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
     if (!_lockEnabled) {
       return;
     }
@@ -569,7 +674,7 @@ class Cache {
         continue;
       }
       try {
-        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils);
+        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils, offline: offline);
       } on SocketException catch (e) {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
           _logger.printError(
@@ -616,7 +721,7 @@ class Cache {
 
 /// Representation of a set of artifacts used by the tool.
 abstract class ArtifactSet {
-  ArtifactSet(this.developmentArtifact) : assert(developmentArtifact != null);
+  ArtifactSet(this.developmentArtifact);
 
   /// The development artifact.
   final DevelopmentArtifact developmentArtifact;
@@ -635,6 +740,7 @@ abstract class ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
   );
 
   /// The canonical name of the artifact.
@@ -688,6 +794,7 @@ abstract class CachedArtifact extends ArtifactSet {
     Logger logger,
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
   ) async {
     if (!location.existsSync()) {
       try {
@@ -703,7 +810,7 @@ abstract class CachedArtifact extends ArtifactSet {
     await updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
     try {
       if (version == null) {
-        logger.printError(
+        logger.printWarning(
           'No known version for the artifact name "$name". '
           'Flutter can continue, but the artifact may be re-downloaded on '
           'subsequent invocations until the problem is resolved.',
@@ -712,7 +819,7 @@ abstract class CachedArtifact extends ArtifactSet {
         cache.setStampFor(stampName, version!);
       }
     } on FileSystemException catch (err) {
-      logger.printError(
+      logger.printWarning(
         'The new artifact "$name" was downloaded, but Flutter failed to update '
         'its stamp file, receiving the error "$err". '
         'Flutter can continue, but the artifact may be re-downloaded on '
@@ -865,12 +972,14 @@ class ArtifactUpdater {
     required Directory tempStorage,
     required HttpClient httpClient,
     required Platform platform,
+    required List<String> allowedBaseUrls,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _httpClient = httpClient,
        _logger = logger,
        _fileSystem = fileSystem,
        _tempStorage = tempStorage,
-       _platform = platform;
+       _platform = platform,
+       _allowedBaseUrls = allowedBaseUrls;
 
   /// The number of times the artifact updater will repeat the artifact download loop.
   static const int _kRetryCount = 2;
@@ -881,6 +990,13 @@ class ArtifactUpdater {
   final Directory _tempStorage;
   final HttpClient _httpClient;
   final Platform _platform;
+
+  /// Artifacts should only be downloaded from URLs that use one of these
+  /// prefixes.
+  ///
+  /// [ArtifactUpdater] will issue a warning if an attempt to download from a
+  /// non-compliant URL is made.
+  final List<String> _allowedBaseUrls;
 
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
@@ -934,7 +1050,7 @@ class ArtifactUpdater {
         if (tempFile.existsSync()) {
           tempFile.deleteSync();
         }
-        await _download(url, tempFile);
+        await _download(url, tempFile, status);
 
         if (!tempFile.existsSync()) {
           throw Exception('Did not find downloaded file ${tempFile.path}');
@@ -949,11 +1065,11 @@ class ArtifactUpdater {
         }
         continue;
       } on ArgumentError catch (error) {
-        final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+        final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
         if (overrideUrl != null && url.toString().contains(overrideUrl)) {
           _logger.printError(error.toString());
           throwToolExit(
-            'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
+            'The value of $kFlutterStorageBaseUrl ($overrideUrl) could not be '
             'parsed as a valid url. Please see https://flutter.dev/community/china '
             'for an example of how to use it.\n'
             'Full URL: $url',
@@ -1017,7 +1133,26 @@ class ArtifactUpdater {
   ///
   /// See also:
   ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
-  Future<void> _download(Uri url, File file) async {
+  Future<void> _download(Uri url, File file, Status status) async {
+    final bool isAllowedUrl = _allowedBaseUrls.any((String baseUrl) => url.toString().startsWith(baseUrl));
+
+    // In tests make this a hard failure.
+    assert(
+      isAllowedUrl,
+      'URL not allowed: $url\n'
+      'Allowed URLs must be based on one of: ${_allowedBaseUrls.join(', ')}',
+    );
+
+    // In production, issue a warning but allow the download to proceed.
+    if (!isAllowedUrl) {
+      status.pause();
+      _logger.printWarning(
+        'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
+        'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=1_activation.yml'
+      );
+      status.resume();
+    }
+
     final HttpClientRequest request = await _httpClient.getUrl(url);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
@@ -1103,10 +1238,14 @@ class ArtifactUpdater {
       try {
         file.deleteSync();
       } on FileSystemException catch (e) {
-        _logger.printError('Failed to delete "${file.path}". Please delete manually. $e');
+        _logger.printWarning('Failed to delete "${file.path}". Please delete manually. $e');
         continue;
       }
       for (Directory directory = file.parent; directory.absolute.path != _tempStorage.absolute.path; directory = directory.parent) {
+        // Handle race condition when the directory is deleted before this step
+        if (!directory.existsSync()) {
+          break;
+        }
         if (directory.listSync().isNotEmpty) {
           break;
         }

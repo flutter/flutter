@@ -26,7 +26,7 @@ Future<void> main(List<String> args) async {
   );
   final Checkouts checkouts = Checkouts(
     fileSystem: fileSystem,
-    parentDirectory: localFlutterRoot.parent,
+    parentDirectory: _localFlutterRoot.parent,
     platform: platform,
     processManager: processManager,
     stdio: stdio,
@@ -39,30 +39,30 @@ Future<void> main(List<String> args) async {
     usageLineLength: 80,
   );
 
+  final String conductorVersion = (await const Git(processManager).getOutput(
+    <String>['rev-parse'],
+    'Get the revision of the current Flutter SDK',
+    workingDirectory: _localFlutterRoot.path,
+  )).trim();
+
   <Command<void>>[
-    RollDevCommand(
-      checkouts: checkouts,
-      fileSystem: fileSystem,
-      platform: platform,
-      stdio: stdio,
-    ),
     CodesignCommand(
       checkouts: checkouts,
-      flutterRoot: localFlutterRoot,
+      flutterRoot: _localFlutterRoot,
     ),
     StatusCommand(
       checkouts: checkouts,
     ),
     StartCommand(
       checkouts: checkouts,
-      flutterRoot: localFlutterRoot,
+      conductorVersion: conductorVersion,
     ),
     CleanCommand(
       checkouts: checkouts,
     ),
     CandidatesCommand(
       checkouts: checkouts,
-      flutterRoot: localFlutterRoot,
+      flutterRoot: _localFlutterRoot,
     ),
     NextCommand(
       checkouts: checkouts,
@@ -80,4 +80,22 @@ Future<void> main(List<String> args) async {
     stdio.printError('$e\n\n$stacktrace');
     io.exit(1);
   }
+}
+
+Directory get _localFlutterRoot {
+  String filePath;
+  const FileSystem fileSystem = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+
+  filePath = platform.script.toFilePath();
+  final String checkoutsDirname = fileSystem.path.normalize(
+    fileSystem.path.join(
+      fileSystem.path.dirname(filePath), // flutter/dev/conductor/core/bin
+      '..', // flutter/dev/conductor/core
+      '..', // flutter/dev/conductor
+      '..', // flutter/dev
+      '..', // flutter
+    ),
+  );
+  return fileSystem.directory(checkoutsDirname);
 }

@@ -46,7 +46,6 @@ Future<vms.VmService> _waitAndConnect(
       final vms.VmService service = vms.VmService(
         controller.stream,
         socket.add,
-        log: null,
         disposeHandler: () => socket.close(),
         streamClosed: streamClosedCompleter.future
       );
@@ -55,6 +54,8 @@ Future<vms.VmService> _waitAndConnect(
       await service.getVersion();
       return service;
     } catch (e) {
+      // We should not be catching all errors arbitrarily here, this might hide real errors.
+      // TODO(ianh): Determine which exceptions to catch here.
       await socket.close();
       if (attempts > 5) {
         _log.warning('It is taking an unusually long time to connect to the VM...');

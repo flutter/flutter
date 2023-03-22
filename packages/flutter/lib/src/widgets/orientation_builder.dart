@@ -29,14 +29,13 @@ class OrientationBuilder extends StatelessWidget {
   ///
   /// The [builder] argument must not be null.
   const OrientationBuilder({
-    Key? key,
+    super.key,
     required this.builder,
-  }) : assert(builder != null),
-       super(key: key);
+  });
 
   /// Builds the widgets below this widget given this widget's orientation.
   ///
-  /// A widget's orientation is simply a factor of its width relative to its
+  /// A widget's orientation is a factor of its width relative to its
   /// height. For example, a [Column] widget will have a landscape orientation
   /// if its width exceeds its height, even though it displays its children in
   /// a vertical array.

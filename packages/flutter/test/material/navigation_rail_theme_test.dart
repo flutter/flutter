@@ -13,8 +13,10 @@ void main() {
   });
 
   testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
+    // Material 3 defaults
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData.light().copyWith(useMaterial3: true),
         home: Scaffold(
           body: NavigationRail(
             selectedIndex: 0,
@@ -26,6 +28,41 @@ void main() {
 
     expect(_railMaterial(tester).color, ThemeData().colorScheme.surface);
     expect(_railMaterial(tester).elevation, 0);
+    expect(_destinationSize(tester).width, 80.0);
+    expect(_selectedIconTheme(tester).size, 24.0);
+    expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.onSecondaryContainer);
+    expect(_selectedIconTheme(tester).opacity, null);
+    expect(_unselectedIconTheme(tester).size, 24.0);
+    expect(_unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
+    expect(_unselectedIconTheme(tester).opacity, null);
+    expect(_selectedLabelStyle(tester).fontSize, 14.0);
+    expect(_unselectedLabelStyle(tester).fontSize, 14.0);
+    expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
+    expect(_labelType(tester), NavigationRailLabelType.none);
+    expect(find.byType(NavigationIndicator), findsWidgets);
+    expect(_indicatorDecoration(tester)?.color, ThemeData().colorScheme.secondaryContainer);
+    expect(_indicatorDecoration(tester)?.shape, const StadiumBorder());
+    final InkResponse inkResponse = tester.allWidgets.firstWhere((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell') as InkResponse;
+    expect(inkResponse.customBorder, const StadiumBorder());
+  });
+
+  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
+    // This test can be removed when `useMaterial3` is deprecated.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light().copyWith(useMaterial3: false),
+        home: Scaffold(
+          body: NavigationRail(
+            selectedIndex: 0,
+            destinations: _destinations(),
+          ),
+        ),
+      ),
+    );
+
+    expect(_railMaterial(tester).color, ThemeData().colorScheme.surface);
+    expect(_railMaterial(tester).elevation, 0);
+    expect(_destinationSize(tester).width, 72.0);
     expect(_selectedIconTheme(tester).size, 24.0);
     expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.primary);
     expect(_selectedIconTheme(tester).opacity, 1.0);
@@ -36,6 +73,7 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, 14.0);
     expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
     expect(_labelType(tester), NavigationRailLabelType.none);
+    expect(find.byType(NavigationIndicator), findsNothing);
   });
 
   testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
@@ -51,6 +89,9 @@ void main() {
     const double unselectedLabelFontSize = 11.0;
     const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
+    const bool useIndicator = true;
+    const Color indicatorColor = Color(0x00000004);
+    const ShapeBorder indicatorShape = RoundedRectangleBorder();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -73,6 +114,9 @@ void main() {
               unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
+              useIndicator: useIndicator,
+              indicatorColor: indicatorColor,
+              indicatorShape: indicatorShape,
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -95,6 +139,9 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
+    expect(find.byType(NavigationIndicator), findsWidgets);
+    expect(_indicatorDecoration(tester)?.color, indicatorColor);
+    expect(_indicatorDecoration(tester)?.shape, indicatorShape);
   });
 
   testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
@@ -110,6 +157,8 @@ void main() {
     const double unselectedLabelFontSize = 11.0;
     const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
+    const bool useIndicator = true;
+    const Color indicatorColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -132,6 +181,8 @@ void main() {
               unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
               groupAlignment: 1.0,
               labelType: NavigationRailLabelType.selected,
+              useIndicator: false,
+              indicatorColor: Color(0x00000096),
             ),
             child: NavigationRail(
               selectedIndex: 0,
@@ -152,6 +203,8 @@ void main() {
               unselectedLabelTextStyle: const TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
+              useIndicator: useIndicator,
+              indicatorColor: indicatorColor,
             ),
           ),
         ),
@@ -170,6 +223,16 @@ void main() {
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
+    expect(find.byType(NavigationIndicator), findsWidgets);
+    expect(_indicatorDecoration(tester)?.color, indicatorColor);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/118618.
+  testWidgets('NavigationRailThemeData lerps correctly with null iconThemes', (WidgetTester tester) async {
+    final NavigationRailThemeData lerp = NavigationRailThemeData.lerp(const NavigationRailThemeData(), const NavigationRailThemeData(), 0.5)!;
+
+    expect(lerp.selectedIconTheme, isNull);
+    expect(lerp.unselectedIconTheme, isNull);
   });
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
@@ -195,6 +258,9 @@ void main() {
       unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
       groupAlignment: 1.0,
       labelType: NavigationRailLabelType.selected,
+      useIndicator: true,
+      indicatorColor: Color(0x00000096),
+      indicatorShape: CircleBorder(),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -215,7 +281,9 @@ void main() {
 
     expect(description[6], 'groupAlignment: 1.0');
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
-
+    expect(description[8], 'useIndicator: true');
+    expect(description[9], 'indicatorColor: Color(0x00000096)');
+    expect(description[10], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
   });
 }
 
@@ -242,6 +310,16 @@ Material _railMaterial(WidgetTester tester) {
       matching: find.byType(Material),
     ),
   );
+}
+
+
+ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(NavigationIndicator),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
@@ -280,6 +358,16 @@ TextStyle _unselectedLabelStyle(WidgetTester tester) {
   ).text.style!;
 }
 
+Size _destinationSize(WidgetTester tester) {
+  return tester.getSize(
+    find.ancestor(
+      of: find.byIcon(Icons.favorite),
+      matching: find.byType(Material),
+    )
+    .first
+  );
+}
+
 Align _destinationsAlign(WidgetTester tester) {
   // The first Expanded widget is the one within the main Column for the rail
   // content.
@@ -292,27 +380,27 @@ Align _destinationsAlign(WidgetTester tester) {
 }
 
 NavigationRailLabelType _labelType(WidgetTester tester) {
-  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty && _opacityAboveLabel('Def').evaluate().isNotEmpty) {
-    return _labelOpacity(tester, 'Abc') == 1 ? NavigationRailLabelType.selected : NavigationRailLabelType.none;
+  if (_visibilityAboveLabel('Abc').evaluate().isNotEmpty && _visibilityAboveLabel('Def').evaluate().isNotEmpty) {
+    return _labelVisibility(tester, 'Abc') ? NavigationRailLabelType.selected : NavigationRailLabelType.none;
   } else {
     return NavigationRailLabelType.all;
   }
 }
 
-Finder _opacityAboveLabel(String text) {
+Finder _visibilityAboveLabel(String text) {
   return find.ancestor(
     of: find.text(text),
-    matching: find.byType(Opacity),
+    matching: find.byType(Visibility),
   );
 }
 
 // Only valid when labelType != all.
-double _labelOpacity(WidgetTester tester, String text) {
-  final Opacity opacityWidget = tester.widget<Opacity>(
+bool _labelVisibility(WidgetTester tester, String text) {
+  final Visibility visibilityWidget = tester.widget<Visibility>(
     find.ancestor(
       of: find.text(text),
-      matching: find.byType(Opacity),
+      matching: find.byType(Visibility),
     ),
   );
-  return opacityWidget.opacity;
+  return visibilityWidget.visible;
 }

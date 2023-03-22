@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for DecoratedBoxTransition
+// Flutter code sample for [DecoratedBoxTransition].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -23,13 +23,14 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-/// AnimationControllers can be created with `vsync: this` because of TickerProviderStateMixin.
+/// [AnimationController]s can be created with `vsync: this` because of
+/// [TickerProviderStateMixin].
 class _MyStatefulWidgetState extends State<MyStatefulWidget>
     with TickerProviderStateMixin {
   final DecorationTween decorationTween = DecorationTween(
@@ -37,14 +38,13 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       color: const Color(0xFFFFFFFF),
       border: Border.all(style: BorderStyle.none),
       borderRadius: BorderRadius.circular(60.0),
-      shape: BoxShape.rectangle,
       boxShadow: const <BoxShadow>[
         BoxShadow(
           color: Color(0x66666666),
           blurRadius: 10.0,
           spreadRadius: 3.0,
           offset: Offset(0, 6.0),
-        )
+        ),
       ],
     ),
     end: BoxDecoration(
@@ -70,11 +70,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: Center(
         child: DecoratedBoxTransition(
-          position: DecorationPosition.background,
           decoration: decorationTween.animate(_controller),
           child: Container(
             width: 200,

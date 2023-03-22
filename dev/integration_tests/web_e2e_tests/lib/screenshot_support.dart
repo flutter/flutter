@@ -5,7 +5,6 @@
 import 'dart:math';
 
 import 'package:flutter_driver/flutter_driver.dart';
-
 import 'package:integration_test/integration_test_driver_extended.dart' as test;
 
 /// Browser screen dimensions for the FlutterDriver test.
@@ -26,7 +25,7 @@ Future<void> runTestWithScreenshots({
 
   test.integrationDriver(
     driver: driver,
-    onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
+    onScreenshot: (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
       // TODO(yjbanov): implement, see https://github.com/flutter/flutter/issues/86120
       return true;
     },

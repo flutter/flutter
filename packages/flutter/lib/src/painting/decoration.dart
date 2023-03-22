@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'edge_insets.dart';
 import 'image_provider.dart';
+
+// Examples can assume:
+// late Decoration myDecoration;
 
 // This group of classes is intended for painting in cartesian coordinates.
 
@@ -57,7 +59,7 @@ abstract class Decoration with Diagnosticable {
   /// [EdgeInsetsGeometry.resolve] to obtain an absolute [EdgeInsets]. (For
   /// example, [BorderDirectional] will return an [EdgeInsetsDirectional] for
   /// its [padding].)
-  EdgeInsetsGeometry? get padding => EdgeInsets.zero;
+  EdgeInsetsGeometry get padding => EdgeInsets.zero;
 
   /// Whether this decoration is complex enough to benefit from caching its painting.
   bool get isComplex => false;
@@ -67,7 +69,7 @@ abstract class Decoration with Diagnosticable {
   ///
   /// When implementing this method in subclasses, return null if this class
   /// cannot interpolate from `a`. In that case, [lerp] will try `a`'s [lerpTo]
-  /// method instead.
+  /// method instead. Classes should implement both [lerpFrom] and [lerpTo].
   ///
   /// Supporting interpolating from null is recommended as the [Decoration.lerp]
   /// method uses this as a fallback when two classes can't interpolate between
@@ -93,11 +95,11 @@ abstract class Decoration with Diagnosticable {
   /// Linearly interpolates from `this` to another [Decoration] (which may be of
   /// a different class).
   ///
-  /// This is called if `b`'s [lerpTo] did not know how to handle this class.
+  /// This is called if `b`'s [lerpFrom] did not know how to handle this class.
   ///
   /// When implementing this method in subclasses, return null if this class
   /// cannot interpolate from `b`. In that case, [lerp] will apply a default
-  /// behavior instead.
+  /// behavior instead. Classes should implement both [lerpFrom] and [lerpTo].
   ///
   /// Supporting interpolating to null is recommended as the [Decoration.lerp]
   /// method uses this as a fallback when two classes can't interpolate between
@@ -127,17 +129,21 @@ abstract class Decoration with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Decoration? lerp(Decoration? a, Decoration? b, double t) {
-    assert(t != null);
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b!.lerpFrom(null, t) ?? b;
-    if (b == null)
-      return a.lerpTo(null, t) ?? a;
-    if (t == 0.0)
+    if (identical(a, b)) {
       return a;
-    if (t == 1.0)
+    }
+    if (a == null) {
+      return b!.lerpFrom(null, t) ?? b;
+    }
+    if (b == null) {
+      return a.lerpTo(null, t) ?? a;
+    }
+    if (t == 0.0) {
+      return a;
+    }
+    if (t == 1.0) {
       return b;
+    }
     return b.lerpFrom(a, t)
         ?? a.lerpTo(b, t)
         ?? (t < 0.5 ? (a.lerpTo(null, t * 2.0) ?? a) : (b.lerpFrom(null, (t - 0.5) * 2.0) ?? b));

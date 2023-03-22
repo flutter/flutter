@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('Should route pointers', () {
@@ -176,7 +175,7 @@ void main() {
       globalEvents.add(event);
     }, transform);
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
     const Offset firstPosition = Offset(16, 36);
     router.route(pointer1.down(firstPosition));
 

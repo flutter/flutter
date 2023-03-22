@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'animation.dart';
 import 'tween.dart';
+
+export 'tween.dart' show Animatable;
 
 // Examples can assume:
 // late AnimationController myAnimationController;
@@ -47,17 +47,17 @@ class TweenSequence<T> extends Animatable<T> {
   ///
   /// The [items] parameter must be a list of one or more [TweenSequenceItem]s.
   ///
-  /// There's a small cost associated with building a `TweenSequence` so it's
+  /// There's a small cost associated with building a [TweenSequence] so it's
   /// best to reuse one, rather than rebuilding it on every frame, when that's
   /// possible.
   TweenSequence(List<TweenSequenceItem<T>> items)
-      : assert(items != null),
-        assert(items.isNotEmpty) {
+      : assert(items.isNotEmpty) {
     _items.addAll(items);
 
     double totalWeight = 0.0;
-    for (final TweenSequenceItem<T> item in _items)
+    for (final TweenSequenceItem<T> item in _items) {
       totalWeight += item.weight;
+    }
     assert(totalWeight > 0.0);
 
     double start = 0.0;
@@ -80,11 +80,13 @@ class TweenSequence<T> extends Animatable<T> {
   @override
   T transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    if (t == 1.0)
+    if (t == 1.0) {
       return _evaluateAt(t, _items.length - 1);
+    }
     for (int index = 0; index < _items.length; index++) {
-      if (_intervals[index].contains(t))
+      if (_intervals[index].contains(t)) {
         return _evaluateAt(t, index);
+      }
     }
     // Should be unreachable.
     throw StateError('TweenSequence.evaluate() could not find an interval for $t');
@@ -110,9 +112,7 @@ class FlippedTweenSequence extends TweenSequence<double> {
   /// There's a small cost associated with building a `TweenSequence` so it's
   /// best to reuse one, rather than rebuilding it on every frame, when that's
   /// possible.
-  FlippedTweenSequence(List<TweenSequenceItem<double>> items)
-    : assert(items != null),
-      super(items);
+  FlippedTweenSequence(super.items);
 
   @override
   double transform(double t) => 1 - super.transform(1 - t);
@@ -126,9 +126,7 @@ class TweenSequenceItem<T> {
   const TweenSequenceItem({
     required this.tween,
     required this.weight,
-  }) : assert(tween != null),
-       assert(weight != null),
-       assert(weight > 0.0);
+  }) : assert(weight > 0.0);
 
   /// Defines the value of the [TweenSequence] for the interval within the
   /// animation's duration indicated by [weight] and this item's position

@@ -5,28 +5,17 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-
-// Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultHeaderMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
-
-// Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultFooterMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+import 'list_section.dart';
 
 // Used for iOS "Inset Grouped" margin, determined from SwiftUI's Forms in
 // iOS 14.2 SDK.
-const EdgeInsetsDirectional _kDefaultInsetGroupedRowsMargin =
-    EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
+const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
-// Used for iOS "Inset Grouped" border radius, estimated from SwiftUI's Forms in
-// iOS 14.2 SDK.
-// TODO(edrisian): This should be a rounded rectangle once that shape is added.
-const BorderRadius _kDefaultInsetGroupedBorderRadius =
-    BorderRadius.all(Radius.circular(10.0));
+// Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
+const EdgeInsetsDirectional _kFormDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
 
-// Used to differentiate the edge-to-edge section with the centered section.
-enum _CupertinoFormSectionType { base, insetGrouped }
+// Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
+const EdgeInsetsDirectional _kFormDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
 /// An iOS-style form section.
 ///
@@ -65,6 +54,12 @@ enum _CupertinoFormSectionType { base, insetGrouped }
 /// If null, defaults to [CupertinoColors.systemGroupedBackground].
 ///
 /// {@macro flutter.material.Material.clipBehavior}
+///
+/// See also:
+///
+///  * [CupertinoFormRow], an iOS-style list tile, a typical child of
+///    [CupertinoFormSection].
+///  * [CupertinoListSection], an iOS-style list section.
 class CupertinoFormSection extends StatelessWidget {
   /// Creates a section that mimics standard iOS forms.
   ///
@@ -99,7 +94,7 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoFormSection({
-    Key? key,
+    super.key,
     required this.children,
     this.header,
     this.footer,
@@ -107,9 +102,8 @@ class CupertinoFormSection extends StatelessWidget {
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.none,
-  })  : _type = _CupertinoFormSectionType.base,
-        assert(children.length > 0),
-        super(key: key);
+  })  : _type = CupertinoListSectionType.base,
+        assert(children.length > 0);
 
   /// Creates a section that mimics standard "Inset Grouped" iOS forms.
   ///
@@ -146,19 +140,18 @@ class CupertinoFormSection extends StatelessWidget {
   ///
   /// {@macro flutter.material.Material.clipBehavior}
   const CupertinoFormSection.insetGrouped({
-    Key? key,
+    super.key,
     required this.children,
     this.header,
     this.footer,
-    this.margin = _kDefaultInsetGroupedRowsMargin,
+    this.margin = _kFormDefaultInsetGroupedRowsMargin,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.none,
-  })  : _type = _CupertinoFormSectionType.insetGrouped,
-        assert(children.length > 0),
-        super(key: key);
+  })  : _type = CupertinoListSectionType.insetGrouped,
+        assert(children.length > 0);
 
-  final _CupertinoFormSectionType _type;
+  final CupertinoListSectionType _type;
 
   /// Sets the form section header. The section header lies above the
   /// [children] rows.
@@ -205,118 +198,48 @@ class CupertinoFormSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
-    final double dividerHeight = 1.0 / MediaQuery.of(context).devicePixelRatio;
-
-    // Long divider is used for wrapping the top and bottom of rows.
-    // Only used in _CupertinoFormSectionType.base mode
-    final Widget longDivider = Container(
-      color: dividerColor,
-      height: dividerHeight,
-    );
-
-    // Short divider is used between rows.
-    // The value of the starting inset (15.0) is determined using SwiftUI's Form
-    // separators in the iOS 14.2 SDK.
-    final Widget shortDivider = Container(
-      margin: const EdgeInsetsDirectional.only(start: 15.0),
-      color: dividerColor,
-      height: dividerHeight,
-    );
-
-    // We construct childrenWithDividers as follows:
-    // Insert a short divider between all rows.
-    // If it is a `_CupertinoFormSectionType.base` type, add a long divider
-    // to the top and bottom of the rows.
-    assert(children.isNotEmpty);
-
-    final List<Widget> childrenWithDividers = <Widget>[];
-
-    if (_type == _CupertinoFormSectionType.base) {
-      childrenWithDividers.add(longDivider);
-    }
-
-    children.sublist(0, children.length - 1).forEach((Widget widget) {
-      childrenWithDividers.add(widget);
-      childrenWithDividers.add(shortDivider);
-    });
-
-    childrenWithDividers.add(children.last);
-    if (_type == _CupertinoFormSectionType.base) {
-      childrenWithDividers.add(longDivider);
-    }
-
-    final BorderRadius childrenGroupBorderRadius;
-    switch (_type) {
-      case _CupertinoFormSectionType.insetGrouped:
-        childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
-        break;
-      case _CupertinoFormSectionType.base:
-        childrenGroupBorderRadius = BorderRadius.zero;
-        break;
-    }
-
-    // Refactored the decorate children group in one place to avoid repeating it
-    // twice down bellow in the returned widget.
-    final DecoratedBox decoratedChildrenGroup = DecoratedBox(
-      decoration: decoration ?? BoxDecoration(
-        color: CupertinoDynamicColor.resolve(
-          decoration?.color ?? CupertinoColors.secondarySystemGroupedBackground,
-          context,
-        ),
-        borderRadius: childrenGroupBorderRadius,
-      ),
-      child: Column(
-        children: childrenWithDividers,
-      ),
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: CupertinoDynamicColor.resolve(backgroundColor, context),
-      ),
-      child: Column(
-        children: <Widget>[
-          if (header != null)
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: DefaultTextStyle(
-                style: TextStyle(
-                  fontSize: 13.0,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-                child: Padding(
-                  padding: _kDefaultHeaderMargin,
-                  child: header,
-                ),
-              ),
+    final Widget? headerWidget = header == null
+        ? null
+        : DefaultTextStyle(
+            style: TextStyle(
+              fontSize: 13.0,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-          Padding(
-            padding: margin,
-            child: clipBehavior == Clip.none
-              ? decoratedChildrenGroup
-              : ClipRRect(
-                  borderRadius: childrenGroupBorderRadius,
-                  clipBehavior: clipBehavior,
-                  child: decoratedChildrenGroup,
-                ),
-          ),
-          if (footer != null)
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: DefaultTextStyle(
-                style: TextStyle(
-                  fontSize: 13.0,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-                child: Padding(
-                  padding: _kDefaultFooterMargin,
-                  child: footer,
-                ),
-              ),
+            child: Padding(
+              padding: _kFormDefaultHeaderMargin,
+              child: header,
+            ));
+
+    final Widget? footerWidget = footer == null
+        ? null
+        : DefaultTextStyle(
+            style: TextStyle(
+              fontSize: 13.0,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-        ],
-      ),
-    );
+            child: Padding(
+              padding: _kFormDefaultFooterMargin,
+              child: footer,
+            ));
+
+    return _type == CupertinoListSectionType.base
+        ? CupertinoListSection(
+            header: headerWidget,
+            footer: footerWidget,
+            margin: margin,
+            backgroundColor: backgroundColor,
+            decoration: decoration,
+            clipBehavior: clipBehavior,
+            hasLeading: false,
+            children: children)
+        : CupertinoListSection.insetGrouped(
+            header: headerWidget,
+            footer: footerWidget,
+            margin: margin,
+            backgroundColor: backgroundColor,
+            decoration: decoration,
+            clipBehavior: clipBehavior,
+            hasLeading: false,
+            children: children);
   }
 }

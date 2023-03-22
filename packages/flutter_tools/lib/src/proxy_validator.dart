@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'base/io.dart';
 import 'base/platform.dart';
 import 'doctor_validator.dart';
 
@@ -33,7 +34,7 @@ class ProxyValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     if (_httpProxy.isEmpty) {
       return const ValidationResult(
-          ValidationType.installed, <ValidationMessage>[]);
+          ValidationType.success, <ValidationMessage>[]);
     }
 
     final List<ValidationMessage> messages = <ValidationMessage>[
@@ -43,7 +44,7 @@ class ProxyValidator extends DoctorValidator {
       else
         ...<ValidationMessage>[
           ValidationMessage('NO_PROXY is $_noProxy'),
-          for (String host in const <String>['127.0.0.1', 'localhost'])
+          for (final String host in await _getLoopbackAddresses())
             if (_noProxy.contains(host))
               ValidationMessage('NO_PROXY contains $host')
             else
@@ -55,8 +56,25 @@ class ProxyValidator extends DoctorValidator {
       (ValidationMessage msg) => msg.isHint || msg.isError);
 
     return ValidationResult(
-      hasIssues ? ValidationType.partial : ValidationType.installed,
+      hasIssues ? ValidationType.partial : ValidationType.success,
       messages,
     );
+  }
+
+  Future<List<String>> _getLoopbackAddresses() async {
+    final List<String> loopBackAddresses = <String>['localhost'];
+
+    final List<NetworkInterface> networkInterfaces =
+      await listNetworkInterfaces(includeLinkLocal: true, includeLoopback: true);
+
+    for (final NetworkInterface networkInterface in networkInterfaces) {
+      for (final InternetAddress internetAddress in networkInterface.addresses) {
+        if (internetAddress.isLoopback) {
+          loopBackAddresses.add(internetAddress.address);
+        }
+      }
+    }
+
+    return loopBackAddresses;
   }
 }

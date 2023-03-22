@@ -6,6 +6,8 @@ import 'dart:collection';
 
 import 'events.dart';
 
+export 'events.dart' show PointerEvent;
+
 /// A callback used by [PointerEventResampler.sample] and
 /// [PointerEventResampler.stop] to process a resampled `event`.
 typedef HandleEventCallback = void Function(PointerEvent event);
@@ -238,7 +240,8 @@ class PointerEventResampler {
       // generated when the position has changed.
       if (event is! PointerMoveEvent && event is! PointerHoverEvent) {
         // Add synthetics `move` or `hover` event if position has changed.
-        // Note: Devices without `hover` events are expected to always have
+        //
+        // Devices without `hover` events are expected to always have
         // `add` and `down` events with the same position and this logic will
         // therefore never produce `hover` events.
         if (position != _position) {

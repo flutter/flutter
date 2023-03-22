@@ -4,7 +4,7 @@
 
 import 'package:args/command_runner.dart';
 
-import 'package:flutter_devicelab/framework/runner.dart';
+import '../framework/runner.dart';
 
 class TestCommand extends Command<void> {
   TestCommand() {
@@ -49,8 +49,11 @@ class TestCommand extends Command<void> {
             'task, will write test results to the file.');
     argParser.addFlag(
       'silent',
-      negatable: true,
-      defaultsTo: false,
+      help: 'Suppresses standard output and only print standard error output.',
+    );
+    argParser.addFlag(
+      'use-emulator',
+      help: 'Use an emulator instead of a device to run tests.'
     );
   }
 
@@ -75,6 +78,7 @@ class TestCommand extends Command<void> {
       luciBuilder: argResults!['luci-builder'] as String?,
       resultsPath: argResults!['results-file'] as String?,
       silent: (argResults!['silent'] as bool?) ?? false,
+      useEmulator: (argResults!['use-emulator'] as bool?) ?? false,
       taskArgs: taskArgs,
     );
   }

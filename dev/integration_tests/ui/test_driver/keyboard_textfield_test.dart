@@ -24,6 +24,7 @@ void main() {
       final SerializableFinder listViewFinder = find.byValueKey(keys.kListView);
       final SerializableFinder textFieldFinder = find.byValueKey(keys.kDefaultTextField);
       final SerializableFinder offsetFinder = find.byValueKey(keys.kOffsetText);
+      final SerializableFinder keyboardVisibilityIndicatorFinder = find.byValueKey(keys.kKeyboardVisibleView);
 
       // Align TextField with bottom edge to ensure it would be covered when keyboard comes up.
       await driver.waitForAbsent(textFieldFinder);
@@ -38,7 +39,11 @@ void main() {
 
       // Bring up keyboard
       await driver.tap(textFieldFinder);
-      await Future<void>.delayed(const Duration(seconds: 1));
+
+      // The blinking cursor may have animation. Do not wait for it to finish.
+      await driver.runUnsynchronized(() async {
+        await driver.waitFor(keyboardVisibilityIndicatorFinder);
+      });
 
       // Ensure that TextField is visible again
       await driver.waitFor(textFieldFinder);

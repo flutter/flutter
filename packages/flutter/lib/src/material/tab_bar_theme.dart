@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'ink_well.dart';
+import 'material_state.dart';
 import 'tabs.dart';
 import 'theme.dart';
 
@@ -27,58 +29,96 @@ class TabBarTheme with Diagnosticable {
   /// Creates a tab bar theme that can be used with [ThemeData.tabBarTheme].
   const TabBarTheme({
     this.indicator,
+    this.indicatorColor,
     this.indicatorSize,
+    this.dividerColor,
     this.labelColor,
     this.labelPadding,
     this.labelStyle,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
+    this.overlayColor,
+    this.splashFactory,
+    this.mouseCursor,
   });
 
-  /// Default value for [TabBar.indicator].
+  /// Overrides the default value for [TabBar.indicator].
   final Decoration? indicator;
 
-  /// Default value for [TabBar.indicatorSize].
+  /// Overrides the default value for [TabBar.indicatorColor].
+  final Color? indicatorColor;
+
+  /// Overrides the default value for [TabBar.indicatorSize].
   final TabBarIndicatorSize? indicatorSize;
 
-  /// Default value for [TabBar.labelColor].
+  /// Overrides the default value for [TabBar.dividerColor].
+  final Color? dividerColor;
+
+  /// Overrides the default value for [TabBar.labelColor].
+  ///
+  /// If [labelColor] is a [MaterialStateColor], then the effective color will
+  /// depend on the [MaterialState.selected] state, i.e. if the [Tab] is
+  /// selected or not. In case of unselected state, this [MaterialStateColor]'s
+  /// resolved color will be used even if [TabBar.unselectedLabelColor] or
+  /// [unselectedLabelColor] is non-null.
   final Color? labelColor;
 
-  /// Default value for [TabBar.labelPadding].
+  /// Overrides the default value for [TabBar.labelPadding].
   ///
   /// If there are few tabs with both icon and text and few
   /// tabs with only icon or text, this padding is vertically
   /// adjusted to provide uniform padding to all tabs.
   final EdgeInsetsGeometry? labelPadding;
 
-  /// Default value for [TabBar.labelStyle].
+  /// Overrides the default value for [TabBar.labelStyle].
   final TextStyle? labelStyle;
 
-  /// Default value for [TabBar.unselectedLabelColor].
+  /// Overrides the default value for [TabBar.unselectedLabelColor].
   final Color? unselectedLabelColor;
 
-  /// Default value for [TabBar.unselectedLabelStyle].
+  /// Overrides the default value for [TabBar.unselectedLabelStyle].
   final TextStyle? unselectedLabelStyle;
+
+  /// Overrides the default value for [TabBar.overlayColor].
+  final MaterialStateProperty<Color?>? overlayColor;
+
+  /// Overrides the default value for [TabBar.splashFactory].
+  final InteractiveInkFeatureFactory? splashFactory;
+
+  /// {@macro flutter.material.tabs.mouseCursor}
+  ///
+  /// If specified, overrides the default value of [TabBar.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarTheme copyWith({
     Decoration? indicator,
+    Color? indicatorColor,
     TabBarIndicatorSize? indicatorSize,
+    Color? dividerColor,
     Color? labelColor,
     EdgeInsetsGeometry? labelPadding,
     TextStyle? labelStyle,
     Color? unselectedLabelColor,
     TextStyle? unselectedLabelStyle,
+    MaterialStateProperty<Color?>? overlayColor,
+    InteractiveInkFeatureFactory? splashFactory,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
+      indicatorColor: indicatorColor ?? this.indicatorColor,
       indicatorSize: indicatorSize ?? this.indicatorSize,
+      dividerColor: dividerColor ?? this.dividerColor,
       labelColor: labelColor ?? this.labelColor,
       labelPadding: labelPadding ?? this.labelPadding,
       labelStyle: labelStyle ?? this.labelStyle,
       unselectedLabelColor: unselectedLabelColor ?? this.unselectedLabelColor,
       unselectedLabelStyle: unselectedLabelStyle ?? this.unselectedLabelStyle,
+      overlayColor: overlayColor ?? this.overlayColor,
+      splashFactory: splashFactory ?? this.splashFactory,
+      mouseCursor: mouseCursor ?? this.mouseCursor,
     );
   }
 
@@ -93,46 +133,61 @@ class TabBarTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TabBarTheme lerp(TabBarTheme a, TabBarTheme b, double t) {
-    assert(a != null);
-    assert(b != null);
-    assert(t != null);
+    if (identical(a, b)) {
+      return a;
+    }
     return TabBarTheme(
       indicator: Decoration.lerp(a.indicator, b.indicator, t),
+      indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
       indicatorSize: t < 0.5 ? a.indicatorSize : b.indicatorSize,
+      dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t),
       labelColor: Color.lerp(a.labelColor, b.labelColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a.labelPadding, b.labelPadding, t),
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
       unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
       unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
+      overlayColor: MaterialStateProperty.lerp<Color?>(a.overlayColor, b.overlayColor, t, Color.lerp),
+      splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
+      mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
     );
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      indicator,
-      indicatorSize,
-      labelColor,
-      labelPadding,
-      labelStyle,
-      unselectedLabelColor,
-      unselectedLabelStyle,
-    );
-  }
+  int get hashCode => Object.hash(
+    indicator,
+    indicatorColor,
+    indicatorSize,
+    dividerColor,
+    labelColor,
+    labelPadding,
+    labelStyle,
+    unselectedLabelColor,
+    unselectedLabelStyle,
+    overlayColor,
+    splashFactory,
+    mouseCursor,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is TabBarTheme
         && other.indicator == indicator
+        && other.indicatorColor == indicatorColor
         && other.indicatorSize == indicatorSize
+        && other.dividerColor == dividerColor
         && other.labelColor == labelColor
         && other.labelPadding == labelPadding
         && other.labelStyle == labelStyle
         && other.unselectedLabelColor == unselectedLabelColor
-        && other.unselectedLabelStyle == unselectedLabelStyle;
+        && other.unselectedLabelStyle == unselectedLabelStyle
+        && other.overlayColor == overlayColor
+        && other.splashFactory == splashFactory
+        && other.mouseCursor == mouseCursor;
   }
 }

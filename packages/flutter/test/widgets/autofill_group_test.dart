@@ -17,7 +17,7 @@ void main() {
     const TextField client2 = TextField(autofillHints: <String>['2']);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: AutofillGroup(
             key: outerKey,
@@ -25,7 +25,7 @@ void main() {
               client1,
               AutofillGroup(
                 key: innerKey,
-                child: Column(children: const <Widget>[client2, TextField(autofillHints: null)]),
+                child: Column(children: <Widget>[client2, TextField(autofillHints: null)]),
               ),
             ]),
           ),
@@ -135,9 +135,9 @@ void main() {
             child: Column(children: <Widget>[
               client1,
               TextField(key: keyClient3, autofillHints: const <String>['3']),
-              AutofillGroup(
+              const AutofillGroup(
                 key: innerKey,
-                child: Column(children: const <Widget>[client2]),
+                child: Column(children: <Widget>[client2]),
               ),
             ]),
           ),
@@ -161,13 +161,11 @@ void main() {
     List<Widget> children = const <Widget> [
       AutofillGroup(
         key: group1,
-        onDisposeAction: AutofillContextAction.commit,
         child: AutofillGroup(child: placeholder),
       ),
       AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
       AutofillGroup(
         key: group3,
-        onDisposeAction: AutofillContextAction.commit,
         child: AutofillGroup(child: placeholder),
       ),
     ];
@@ -198,7 +196,6 @@ void main() {
         AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
         AutofillGroup(
           key: group3,
-          onDisposeAction: AutofillContextAction.commit,
           child: AutofillGroup(child: placeholder),
         ),
       ];
@@ -218,7 +215,6 @@ void main() {
       children = const <Widget> [
         AutofillGroup(
           key: group3,
-          onDisposeAction: AutofillContextAction.commit,
           child: AutofillGroup(child: placeholder),
         ),
       ];
@@ -238,7 +234,6 @@ void main() {
       children = const <Widget> [
         AutofillGroup(
           key: group3,
-          onDisposeAction: AutofillContextAction.commit,
           child: placeholder,
         ),
       ];

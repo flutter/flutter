@@ -11,12 +11,12 @@ import '../rendering/src/sector_layout.dart';
 RenderBoxToRenderSectorAdapter initCircle() {
   return RenderBoxToRenderSectorAdapter(
     innerRadius: 25.0,
-    child: RenderSectorRing(padding: 0.0),
+    child: RenderSectorRing(),
   );
 }
 
 class SectorApp extends StatefulWidget {
-  const SectorApp({Key? key}) : super(key: key);
+  const SectorApp({super.key});
 
   @override
   SectorAppState createState() => SectorAppState();
@@ -35,10 +35,11 @@ class SectorAppState extends State<SectorApp> {
     final double currentTheta = this.currentTheta;
     if (currentTheta < kTwoPi) {
       double deltaTheta;
-      if (currentTheta >= kTwoPi - (math.pi * 0.2 + 0.05))
+      if (currentTheta >= kTwoPi - (math.pi * 0.2 + 0.05)) {
         deltaTheta = kTwoPi - currentTheta;
-      else
+      } else {
         deltaTheta = math.pi * rand.nextDouble() / 5.0 + 0.05;
+      }
       wantedSectorSizes.add(deltaTheta);
       updateEnabledState();
     }
@@ -53,8 +54,9 @@ class SectorAppState extends State<SectorApp> {
 
   void doUpdates() {
     int index = 0;
-    while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index])
+    while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index]) {
       index += 1;
+    }
     final RenderSectorRing ring = sectors.child! as RenderSectorRing;
     while (index < actualSectorSizes.length) {
       ring.remove(ring.lastChild!);

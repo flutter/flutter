@@ -6,9 +6,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class TestTextInputFormatter extends TextInputFormatter {
+  const TestTextInputFormatter();
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    super.noSuchMethod(invocation);
+  }
+}
+
 void main() {
   TextEditingValue testOldValue = TextEditingValue.empty;
   TextEditingValue testNewValue = TextEditingValue.empty;
+
+  test('test const constructor', () {
+    const TestTextInputFormatter testValue1 = TestTextInputFormatter();
+    const TestTextInputFormatter testValue2 = TestTextInputFormatter();
+
+    expect(testValue1, same(testValue2));
+  });
 
   test('withFunction wraps formatting function', () {
     testOldValue = TextEditingValue.empty;
@@ -232,7 +248,6 @@ void main() {
 
     test('test length limiting formatter with zero-length string', () {
       testNewValue = const TextEditingValue(
-        text: '',
         selection: TextSelection(
           baseOffset: 0,
           extentOffset: 0,
@@ -245,7 +260,6 @@ void main() {
 
       // Expecting the empty string.
       expect(actualValue, const TextEditingValue(
-        text: '',
         selection: TextSelection(
           baseOffset: 0,
           extentOffset: 0,
@@ -356,8 +370,6 @@ void main() {
       test('Removes characters from the end', () async {
         const TextEditingValue value = TextEditingValue(
           text: '01234567890',
-          selection: TextSelection.collapsed(offset: -1),
-          composing: TextRange.empty,
         );
         final TextEditingValue truncated = LengthLimitingTextInputFormatter
             .truncate(value, 10);
@@ -371,7 +383,6 @@ void main() {
           // Put the cursor at the end of the overflowing string to test if it
           // ends up at the end of the new string after truncation.
           selection: TextSelection.collapsed(offset: stringOverflowing.length),
-          composing: TextRange.empty,
         );
         final TextEditingValue truncated = LengthLimitingTextInputFormatter
             .truncate(value, 10);
@@ -381,14 +392,13 @@ void main() {
         expect(truncated.selection.extentOffset, stringTruncated.length);
       });
 
-      test('Counts grapheme clustsers as single characters', () async {
+      test('Counts grapheme clusters as single characters', () async {
         const String stringOverflowing = '👨‍👩‍👦01234567890';
         const TextEditingValue value = TextEditingValue(
           text: stringOverflowing,
           // Put the cursor at the end of the overflowing string to test if it
           // ends up at the end of the new string after truncation.
           selection: TextSelection.collapsed(offset: stringOverflowing.length),
-          composing: TextRange.empty,
         );
         final TextEditingValue truncated = LengthLimitingTextInputFormatter
             .truncate(value, 10);
@@ -405,13 +415,9 @@ void main() {
       test('Passes through when under limit', () async {
         const TextEditingValue oldValue = TextEditingValue(
           text: 'aaa',
-          selection: TextSelection.collapsed(offset: -1),
-          composing: TextRange.empty,
         );
         const TextEditingValue newValue = TextEditingValue(
           text: 'aaab',
-          selection: TextSelection.collapsed(offset: -1),
-          composing: TextRange.empty,
         );
         final LengthLimitingTextInputFormatter formatter =
             LengthLimitingTextInputFormatter(maxLength);
@@ -425,13 +431,9 @@ void main() {
       test('Uses old value when at the limit', () async {
         const TextEditingValue oldValue = TextEditingValue(
           text: 'aaaaaaaaaa',
-          selection: TextSelection.collapsed(offset: -1),
-          composing: TextRange.empty,
         );
         const TextEditingValue newValue = TextEditingValue(
           text: 'aaaaabbbbbaaaaa',
-          selection: TextSelection.collapsed(offset: -1),
-          composing: TextRange.empty,
         );
         final LengthLimitingTextInputFormatter formatter =
             LengthLimitingTextInputFormatter(maxLength);
@@ -445,13 +447,9 @@ void main() {
       test('Truncates newValue when oldValue already over limit', () async {
         const TextEditingValue oldValue = TextEditingValue(
           text: 'aaaaaaaaaaaaaaaaaaaa',
-          selection: TextSelection.collapsed(offset: -1),
-          composing: TextRange.empty,
         );
         const TextEditingValue newValue = TextEditingValue(
           text: 'bbbbbbbbbbbbbbbbbbbb',
-          selection: TextSelection.collapsed(offset: -1),
-          composing: TextRange.empty,
         );
         final LengthLimitingTextInputFormatter formatter =
             LengthLimitingTextInputFormatter(maxLength);
@@ -726,7 +724,7 @@ void main() {
 
       // AAA | BBB | CCC => AAA | CCC
       expect(
-        FilteringTextInputFormatter.deny('BBB', replacementString: '').formatEditUpdate(
+        FilteringTextInputFormatter.deny('BBB').formatEditUpdate(
           oldValue,
           newValue.copyWith(
             selection: const TextSelection(baseOffset: 6, extentOffset: 3),
@@ -736,7 +734,7 @@ void main() {
       );
 
       expect(
-        FilteringTextInputFormatter.deny('BBB', replacementString: '').formatEditUpdate(
+        FilteringTextInputFormatter.deny('BBB').formatEditUpdate(
           oldValue,
           newValue.copyWith(
             selection: const TextSelection(baseOffset: 6, extentOffset: 3),
@@ -797,7 +795,7 @@ void main() {
 
       // Overlapping matches: AAA | BBBBB | CCC => | BBB |
       expect(
-        FilteringTextInputFormatter.allow('BBB', replacementString: '').formatEditUpdate(
+        FilteringTextInputFormatter.allow('BBB').formatEditUpdate(
           oldValue,
           const TextEditingValue(
             text: 'AAABBBBBCCC',
@@ -858,7 +856,7 @@ void main() {
 
       // AAA | BBB | CCC => | AAA CCC
       expect(
-        FilteringTextInputFormatter.deny('BBB', replacementString: '').formatEditUpdate(
+        FilteringTextInputFormatter.deny('BBB').formatEditUpdate(
           oldValue,
           newValue.copyWith(
             composing: const TextRange(start: 3, end: 6),

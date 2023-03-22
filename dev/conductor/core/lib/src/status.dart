@@ -30,7 +30,6 @@ class StatusCommand extends Command<void> {
     argParser.addFlag(
       kVerboseFlag,
       abbr: 'v',
-      defaultsTo: false,
       help: 'Also print logs.',
     );
   }

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Dismissible
+// Flutter code sample for [Dismissible].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -42,11 +42,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       padding: const EdgeInsets.symmetric(vertical: 16),
       itemBuilder: (BuildContext context, int index) {
         return Dismissible(
-          child: ListTile(
-            title: Text(
-              'Item ${items[index]}',
-            ),
-          ),
           background: Container(
             color: Colors.green,
           ),
@@ -56,6 +51,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               items.removeAt(index);
             });
           },
+          child: ListTile(
+            title: Text(
+              'Item ${items[index]}',
+            ),
+          ),
         );
       },
     );

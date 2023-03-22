@@ -10,10 +10,10 @@ import 'transformations_demo_color_picker.dart';
 @immutable
 class EditBoardPoint extends StatelessWidget {
   const EditBoardPoint({
-    Key? key,
+    super.key,
     required this.boardPoint,
     this.onColorSelection,
-  }) : super(key: key);
+  });
 
   final BoardPoint boardPoint;
   final ValueChanged<Color>? onColorSelection;

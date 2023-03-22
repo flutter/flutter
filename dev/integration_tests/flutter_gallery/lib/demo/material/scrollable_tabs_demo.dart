@@ -36,7 +36,7 @@ const List<_Page> _allPages = <_Page>[
 ];
 
 class ScrollableTabsDemo extends StatefulWidget {
-  const ScrollableTabsDemo({Key? key}) : super(key: key);
+  const ScrollableTabsDemo({super.key});
 
   static const String routeName = '/material/scrollable-tabs';
 
@@ -68,8 +68,9 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
   }
 
   Decoration? getIndicator() {
-    if (!_customIndicator)
+    if (!_customIndicator) {
       return const UnderlineTabIndicator();
+    }
 
     switch(_demoStyle) {
       case TabsDemoStyle.iconsAndText:
@@ -169,8 +170,6 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
                 return Tab(icon: Icon(page.icon));
               case TabsDemoStyle.textOnly:
                 return Tab(text: page.text);
-              default:
-                return Tab();
             }
           }).toList()
         ),

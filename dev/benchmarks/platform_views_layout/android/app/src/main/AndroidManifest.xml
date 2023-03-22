@@ -7,9 +7,10 @@ found in the LICENSE file. -->
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:name="io.flutter.app.FlutterApplication" android:label="platform_view_layout">
+    <application android:name="${applicationName}" android:label="platform_view_layout">
         <activity android:name=".DummyPlatformViewActivity"
                   android:launchMode="singleTop"
+                  android:exported="true"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
                   android:hardwareAccelerated="true"
@@ -19,5 +20,6 @@ found in the LICENSE file. -->
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
     </application>
 </manifest>

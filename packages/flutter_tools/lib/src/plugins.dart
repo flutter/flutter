@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
@@ -15,16 +16,11 @@ class Plugin {
     required this.platforms,
     required this.defaultPackagePlatforms,
     required this.pluginDartClassPlatforms,
+    this.flutterConstraint,
     required this.dependencies,
     required this.isDirectDependency,
     this.implementsPackage,
-  }) : assert(name != null),
-       assert(path != null),
-       assert(platforms != null),
-       assert(defaultPackagePlatforms != null),
-       assert(pluginDartClassPlatforms != null),
-       assert(dependencies != null),
-       assert(isDirectDependency != null);
+  });
 
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
@@ -47,17 +43,23 @@ class Plugin {
   ///            package: io.flutter.plugins.sample
   ///            pluginClass: SamplePlugin
   ///          ios:
+  ///            # A plugin implemented through method channels.
   ///            pluginClass: SamplePlugin
   ///          linux:
-  ///            pluginClass: SamplePlugin
+  ///            # A plugin implemented purely in Dart code.
+  ///            dartPluginClass: SamplePlugin
   ///          macos:
-  ///            pluginClass: SamplePlugin
+  ///            # A plugin implemented with `dart:ffi`.
+  ///            ffiPlugin: true
   ///          windows:
+  ///            # A plugin using platform-specific Dart and method channels.
+  ///            dartPluginClass: SamplePlugin
   ///            pluginClass: SamplePlugin
   factory Plugin.fromYaml(
     String name,
     String path,
     YamlMap? pluginYaml,
+    VersionConstraint? flutterConstraint,
     List<String> dependencies, {
     required FileSystem fileSystem,
     Set<String>? appDependencies,
@@ -71,6 +73,7 @@ class Plugin {
         name,
         path,
         pluginYaml,
+        flutterConstraint,
         dependencies,
         fileSystem,
         appDependencies != null && appDependencies.contains(name),
@@ -80,6 +83,7 @@ class Plugin {
       name,
       path,
       pluginYaml,
+      flutterConstraint,
       dependencies,
       fileSystem,
       appDependencies != null && appDependencies.contains(name),
@@ -90,6 +94,7 @@ class Plugin {
     String name,
     String path,
     YamlMap pluginYaml,
+    VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
     bool isDirectDependency,
@@ -165,6 +170,7 @@ class Plugin {
       platforms: platforms,
       defaultPackagePlatforms: defaultPackages,
       pluginDartClassPlatforms: dartPluginClasses,
+      flutterConstraint: flutterConstraint,
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
       implementsPackage: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
@@ -175,18 +181,19 @@ class Plugin {
     String name,
     String path,
     dynamic pluginYaml,
+    VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
     bool isDirectDependency,
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
-    final String pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String;
-    if (pluginYaml != null && pluginClass != null) {
-      final String androidPackage = pluginYaml['androidPackage'] as String;
+    final String? pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
+    if (pluginClass != null) {
+      final String? androidPackage = pluginYaml['androidPackage'] as String?;
       if (androidPackage != null) {
         platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
           name: name,
-          package: pluginYaml['androidPackage'] as String,
+          package: androidPackage,
           pluginClass: pluginClass,
           pluginPath: path,
           fileSystem: fileSystem,
@@ -207,6 +214,7 @@ class Plugin {
       platforms: platforms,
       defaultPackagePlatforms: <String, String>{},
       pluginDartClassPlatforms: <String, String>{},
+      flutterConstraint: flutterConstraint,
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
     );
@@ -371,6 +379,9 @@ class Plugin {
   /// If [null], this plugin doesn't implement an interface.
   final String? implementsPackage;
 
+  /// The required version of Flutter, if specified.
+  final VersionConstraint? flutterConstraint;
+
   /// The name of the packages this plugin depends on.
   final List<String> dependencies;
 
@@ -393,8 +404,7 @@ class PluginInterfaceResolution {
   PluginInterfaceResolution({
     required this.plugin,
     required this.platform,
-  }) : assert(plugin != null),
-       assert(platform != null);
+  });
 
   /// The plugin.
   final Plugin plugin;
@@ -407,5 +417,10 @@ class PluginInterfaceResolution {
       'platform': platform,
       'dartClass': plugin.pluginDartClassPlatforms[platform] ?? '',
     };
+  }
+
+  @override
+  String toString() {
+    return '<PluginInterfaceResolution ${plugin.name} for $platform>';
   }
 }

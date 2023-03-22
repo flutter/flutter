@@ -12,7 +12,7 @@
 
 # Last manual update 2021-09-24 (changing this comment will re-build image)
 
-FROM debian:bullseye
+FROM ubuntu:bionic@sha256:eb1392bbdde63147bc2b4ff1a4053dcfe6d15e4dfd3cce29e9b9f52a4f88bc74
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
 RUN apt-get update -y && \
@@ -45,14 +45,14 @@ RUN apt-get update && apt-get install -y google-cloud-sdk && \
     gcloud config set core/disable_usage_reporting true && \
     gcloud config set component_manager/disable_update_check true
 
-# Add repo for OpenJDK 8 from JFrog.io
+# Add repo for OpenJDK from JFrog.io
 RUN wget -q -O - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
 RUN echo 'deb [arch=amd64] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb bullseye main' | \
     tee /etc/apt/sources.list.d/adoptopenjdk.list
 
 # Install the dependencies needed for the rest of the build.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  adoptopenjdk-8-hotspot \
+  adoptopenjdk-11-hotspot \
   build-essential \
   default-jdk-headless \
   gcc \
@@ -67,10 +67,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ruby-dev && \
   apt-get clean
 
-ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64"
+ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64"
 
 # Install the Android SDK Dependency.
-ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
+# In the event of an update you can visit this page: https://developer.android.com/studio and scroll to the bottom to find
+# the latest version to update. Be wary of any changes to the name of the package as you will need to adjust the paths below.
+ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
 ENV ANDROID_TOOLS_ROOT="/opt/android_sdk"
 RUN mkdir -p "${ANDROID_TOOLS_ROOT}"
 RUN mkdir -p ~/.android
@@ -79,51 +81,37 @@ RUN touch ~/.android/repositories.cfg
 ENV ANDROID_SDK_ARCHIVE="${ANDROID_TOOLS_ROOT}/archive"
 RUN wget --progress=dot:giga "${ANDROID_SDK_URL}" -O "${ANDROID_SDK_ARCHIVE}"
 RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
+
+RUN mkdir "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+
+RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/NOTICE.txt" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/bin" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/lib" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+RUN mv "${ANDROID_TOOLS_ROOT}/cmdline-tools/source.properties" "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools"
+
 # Suppressing output of sdkmanager to keep log size down
 # (it prints install progress WAY too often).
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-30" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "cmdline-tools;latest" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "patcher;v4" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "tools" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "platforms;android-30" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "platform-tools" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "cmdline-tools;latest" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "extras;google;m2repository" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin/sdkmanager" "patcher;v4" > /dev/null
 RUN rm "${ANDROID_SDK_ARCHIVE}"
-ENV PATH="${ANDROID_TOOLS_ROOT}/tools:${PATH}"
-ENV PATH="${ANDROID_TOOLS_ROOT}/tools/bin:${PATH}"
+ENV PATH="${ANDROID_TOOLS_ROOT}/cmdline-tools/tools:${PATH}"
+ENV PATH="${ANDROID_TOOLS_ROOT}/cmdline-tools/tools/bin:${PATH}"
 # Silence warnings when accepting android licenses.
 RUN mkdir -p ~/.android
 RUN touch ~/.android/repositories.cfg
 
 # Add npm to path.
 ENV PATH="/usr/bin:${PATH}"
-RUN dpkg-query -L nodejs
-# Install Firebase
-# This is why we need nodejs installed.
-RUN /usr/bin/npm --verbose install -g firebase-tools
-
-# Install golang more recent than in repo (necessary for dashing to build)
-RUN curl 'https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz' | tar xvz
-ENV GOBINARY=/go/bin/go
-
-# Install dashing
-RUN mkdir -p /opt/gopath/bin
-ENV GOPATH=/opt/gopath
-ENV PATH="${GOPATH}/bin:${PATH}"
-RUN $GOBINARY get -u github.com/technosophos/dashing
 
 # Set locale to en_US
 RUN locale-gen en_US "en_US.UTF-8" && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
-
-# Install fastlane via pinned Gemfile & Gemfile.lock
-# Skip all the documentation (-N) since it's just on CI.
-RUN gem install bundler -N
-
-# Gemfile last edited 1/6/2019 (update to trigger a rebuild of Docker image)
-COPY ci/docker_linux/Gemfile /Gemfile
-COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 
 # Install dependencies for desktop flutter run
 RUN apt-get install -y --no-install-recommends \
@@ -137,6 +125,3 @@ RUN apt-get install -y --no-install-recommends \
 	xvfb && \
   apt-get upgrade -y --no-install-recommends && \
   apt-get clean
-
-RUN bundle config set system 'true' && \
-  bundle install --system

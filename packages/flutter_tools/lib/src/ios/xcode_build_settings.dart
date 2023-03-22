@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../project.dart';
 
 String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
@@ -169,27 +170,31 @@ Future<List<String>> _xcodeBuildSettingsLines({
   final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  final Artifacts? artifacts = globals.artifacts;
-  if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
-    final String engineOutPath = localEngineArtifacts.engineOutPath;
+  final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
+  if (localEngineInfo != null) {
+    final String engineOutPath = localEngineInfo.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
 
-    final String localEngineName = globals.fs.path.basename(engineOutPath);
+    final String localEngineName = localEngineInfo.localEngineName;
     xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
     //
-    // NOTE: this assumes that local engine binary paths are consistent with
+    // This assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
     // paths ending in _arm, 64-bit builds are not.
-    //
-    // Skip this step for macOS builds.
-    if (!useMacOSConfig) {
-      String arch;
+
+    String arch;
+    if (useMacOSConfig) {
+      if (localEngineName.contains('_arm64')) {
+        arch = 'arm64';
+      } else {
+        arch = 'x86_64';
+      }
+    } else {
       if (localEngineName.endsWith('_arm')) {
-        arch = 'armv7';
+        throwToolExit('32-bit iOS local engine binaries are not supported.');
       } else if (localEngineName.contains('_arm64')) {
         arch = 'arm64';
       } else if (localEngineName.contains('_sim')) {
@@ -197,22 +202,20 @@ Future<List<String>> _xcodeBuildSettingsLines({
       } else {
         arch = 'arm64';
       }
-      xcodeBuildSettings.add('ARCHS=$arch');
     }
+    xcodeBuildSettings.add('ARCHS=$arch');
   }
-  if (useMacOSConfig) {
-    // ARM not yet supported https://github.com/flutter/flutter/issues/69221
-    xcodeBuildSettings.add('EXCLUDED_ARCHS=arm64');
-  } else {
-    String excludedSimulatorArchs = 'i386';
 
+  if (!useMacOSConfig) {
     // If any plugins or their dependencies do not support arm64 simulators
     // (to run natively without Rosetta translation on an ARM Mac),
     // the app will fail to build unless it also excludes arm64 simulators.
+    String excludedSimulatorArchs = 'i386';
     if (!(await project.ios.pluginsSupportArmSimulator())) {
       excludedSimulatorArchs += ' arm64';
     }
     xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphonesimulator*]=$excludedSimulatorArchs');
+    xcodeBuildSettings.add('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7');
   }
 
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {

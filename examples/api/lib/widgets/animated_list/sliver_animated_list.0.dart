@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for SliverAnimatedList
+// Flutter code sample for [SliverAnimatedList].
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const SliverAnimatedListSample());
 
 class SliverAnimatedListSample extends StatefulWidget {
-  const SliverAnimatedListSample({Key? key}) : super(key: key);
+  const SliverAnimatedListSample({super.key});
 
   @override
   State<SliverAnimatedListSample> createState() =>
@@ -54,18 +53,18 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
     );
   }
 
-  // Used to build an item after it has been removed from the list. This
-  // method is needed because a removed item remains visible until its
-  // animation has completed (even though it's gone as far this ListModel is
-  // concerned). The widget will be used by the
-  // [AnimatedListState.removeItem] method's
-  // [AnimatedListRemovedItemBuilder] parameter.
+  /// The builder function used to build items that have been removed.
+  ///
+  /// Used to build an item after it has been removed from the list. This method
+  /// is needed because a removed item remains visible until its animation has
+  /// completed (even though it's gone as far this ListModel is concerned). The
+  /// widget will be used by the [AnimatedListState.removeItem] method's
+  /// [AnimatedRemovedItemBuilder] parameter.
   Widget _buildRemovedItem(
       int item, BuildContext context, Animation<double> animation) {
     return CardItem(
       animation: animation,
       item: item,
-      selected: false,
     );
   }
 
@@ -136,8 +135,8 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   }
 }
 
-typedef RemovedItemBuilder = Widget Function(
-    int item, BuildContext context, Animation<double> animation);
+typedef RemovedItemBuilder<E> = Widget Function(
+    E item, BuildContext context, Animation<double> animation);
 
 // Keeps a Dart [List] in sync with an [AnimatedList].
 //
@@ -156,7 +155,7 @@ class ListModel<E> {
   }) : _items = List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<SliverAnimatedListState> listKey;
-  final RemovedItemBuilder removedItemBuilder;
+  final RemovedItemBuilder<E> removedItemBuilder;
   final List<E> _items;
 
   SliverAnimatedListState get _animatedList => listKey.currentState!;
@@ -172,7 +171,7 @@ class ListModel<E> {
       _animatedList.removeItem(
         index,
         (BuildContext context, Animation<double> animation) =>
-            removedItemBuilder(index, context, animation),
+            removedItemBuilder(removedItem, context, animation),
       );
     }
     return removedItem;
@@ -193,13 +192,12 @@ class ListModel<E> {
 // transitions from 0.0 to 1.0.
 class CardItem extends StatelessWidget {
   const CardItem({
-    Key? key,
+    super.key,
     this.onTap,
     this.selected = false,
     required this.animation,
     required this.item,
-  })  : assert(item >= 0),
-        super(key: key);
+  }) : assert(item >= 0);
 
   final Animation<double> animation;
   final VoidCallback? onTap;
@@ -213,10 +211,8 @@ class CardItem extends StatelessWidget {
         left: 2.0,
         right: 2.0,
         top: 2.0,
-        bottom: 0.0,
       ),
       child: SizeTransition(
-        axis: Axis.vertical,
         sizeFactor: animation,
         child: GestureDetector(
           onTap: onTap,
@@ -229,7 +225,7 @@ class CardItem extends StatelessWidget {
               child: Center(
                 child: Text(
                   'Item $item',
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ),
             ),

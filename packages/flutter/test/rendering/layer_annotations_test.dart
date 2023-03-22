@@ -524,7 +524,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: false),
+          AnnotatedRegionLayer<int>(1),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: false),
           ],
@@ -626,7 +626,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: false, size: Size.zero),
+          AnnotatedRegionLayer<int>(1, size: Size.zero),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: true),
           ],
@@ -651,7 +651,7 @@ void main() {
       final Layer root = _withBackgroundAnnotation(
         1000,
         _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: false),
+          AnnotatedRegionLayer<int>(1),
           children: <Object>[
             _TestAnnotatedLayer(2, opaque: false),
           ],
@@ -845,7 +845,7 @@ class _TestAnnotatedLayer extends Layer {
   final Size? size;
 
   @override
-  EngineLayer? addToScene(SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  EngineLayer? addToScene(SceneBuilder builder) {
     return null;
   }
 
@@ -858,10 +858,12 @@ class _TestAnnotatedLayer extends Layer {
     Offset localPosition, {
     required bool onlyFirst,
   }) {
-    if (S != int)
+    if (S != int) {
       return false;
-    if (size != null && !(offset & size!).contains(localPosition))
+    }
+    if (size != null && !(offset & size!).contains(localPosition)) {
       return false;
+    }
     final Object untypedValue = value;
     final S typedValue = untypedValue as S;
     result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: localPosition));

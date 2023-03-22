@@ -34,6 +34,7 @@ Declarer get _declarer {
     Future<void>(() {
       Invoker.guard<Future<void>>(() async {
         final _Reporter reporter = _Reporter(color: false); // disable color when run directly.
+        // ignore: recursive_getters, this self-call is safe since it will just fetch the declarer instance
         final Group group = _declarer.build();
         final Suite suite = Suite(group, SuitePlatform(Runtime.vm));
         await _runGroup(suite, group, <Group>[], reporter);
@@ -96,7 +97,7 @@ Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter report
 Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, _Reporter reporter) async {
   final LocalTest skipped = LocalTest(test.name, test.metadata, () { }, trace: test.trace);
   if (skipped.metadata.skipReason != null) {
-    print('Skip: ${skipped.metadata.skipReason}');
+    reporter.log('Skip: ${skipped.metadata.skipReason}');
   }
   final LiveTest liveTest = skipped.load(suiteConfig);
   reporter._onTestStarted(liveTest);
@@ -334,7 +335,7 @@ class _Reporter {
       if (message.type == MessageType.skip) {
         text = '  $_yellow$text$_noColor';
       }
-      print(text);
+      log(text);
     }));
   }
 
@@ -351,8 +352,8 @@ class _Reporter {
       return;
     }
     _progressLine(_description(liveTest), suffix: ' $_bold$_red[E]$_noColor');
-    print(_indent(error.toString()));
-    print(_indent('$stackTrace'));
+    log(_indent(error.toString()));
+    log(_indent('$stackTrace'));
   }
 
   /// A callback called when the engine is finished running tests.
@@ -421,7 +422,7 @@ class _Reporter {
     buffer.write(message);
     buffer.write(_noColor);
 
-    print(buffer.toString());
+    log(buffer.toString());
   }
 
   /// Returns a representation of [duration] as `MM:SS`.
@@ -441,6 +442,13 @@ class _Reporter {
       name = '${liveTest.suite.path}: $name';
     }
     return name;
+  }
+
+  /// Print the message to the console.
+  void log(String message) {
+    // We centralize all the prints in this file through this one method so that
+    // in principle we can reroute the output easily should we need to.
+    print(message); // ignore: avoid_print
   }
 }
 

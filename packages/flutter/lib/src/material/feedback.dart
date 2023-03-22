@@ -32,7 +32,7 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithWrappedHandler extends StatelessWidget {
-///   const WidgetWithWrappedHandler({Key? key}) : super(key: key);
+///   const WidgetWithWrappedHandler({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithExplicitCall extends StatelessWidget {
-///   const WidgetWithExplicitCall({Key? key}) : super(key: key);
+///   const WidgetWithExplicitCall({super.key});
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -119,8 +119,9 @@ class Feedback {
   ///  * [forTap] to just trigger the platform-specific feedback without wrapping
   ///    a [GestureTapCallback].
   static GestureTapCallback? wrapForTap(GestureTapCallback? callback, BuildContext context) {
-    if (callback == null)
+    if (callback == null) {
       return null;
+    }
     return () {
       Feedback.forTap(context);
       callback();
@@ -162,8 +163,9 @@ class Feedback {
   ///  * [forLongPress] to just trigger the platform-specific feedback without
   ///    wrapping a [GestureLongPressCallback].
   static GestureLongPressCallback? wrapForLongPress(GestureLongPressCallback? callback, BuildContext context) {
-    if (callback == null)
+    if (callback == null) {
       return null;
+    }
     return () {
       Feedback.forLongPress(context);
       callback();

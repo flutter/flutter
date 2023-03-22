@@ -2,18 +2,53 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
 
-const Duration _frameDuration = Duration(milliseconds: 100);
-
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return PageView.builder(
+              itemCount: itemCount,
+              itemBuilder: (BuildContext _, int index) => Container(
+                key: Key('$index'),
+                height: 2000.0,
+              ),
+              findChildIndexCallback: (Key key) {
+                finderCalled = true;
+                return null;
+              },
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   testWidgets('PageView resize from zero-size viewport should not lose state', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
     final PageController controller = PageController(
@@ -27,9 +62,9 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
               onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
         ),
@@ -72,9 +107,9 @@ void main() {
           child: SizedBox.fromSize(
             size: size,
             child: PageView(
-              children: kStates.map<Widget>((String state) => Text(state)).toList(),
               controller: controller,
               onPageChanged: (int page) { },
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
             ),
           ),
         ),
@@ -97,6 +132,45 @@ void main() {
     await tester.pumpWidget(build(const Size(200.0, 200.0)));
     expect(controller.page, kStates.indexOf('Illinois'));
     expect(find.text('Illinois'), findsOneWidget);
+  });
+
+  testWidgets('_PagePosition.applyViewportDimension should not throw', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/101007
+    final PageController controller = PageController(
+      initialPage: 1,
+    );
+
+    // Set the starting viewportDimension to 0.0
+    await tester.binding.setSurfaceSize(Size.zero);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
+
+    Widget build(Size size) {
+      return MediaQuery(
+        data: mediaQueryData.copyWith(size: size),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.expand(
+              child: PageView(
+                controller: controller,
+                onPageChanged: (int page) { },
+                children: kStates.map<Widget>((String state) => Text(state)).toList(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(Size.zero));
+    const Size surfaceSize = Size(500,400);
+    await tester.binding.setSurfaceSize(surfaceSize);
+    await tester.pumpWidget(build(surfaceSize));
+
+    expect(tester.takeException(), isNull);
+
+    // Reset TestWidgetsFlutterBinding surfaceSize
+    await tester.binding.setSurfaceSize(null);
   });
 
   testWidgets('PageController cannot return page while unattached',
@@ -141,13 +215,13 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
     expect(find.text('Arizona'), findsNothing);
 
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsOneWidget);
     expect(find.text('Alaska'), findsNothing);
 
     await tester.drag(find.byType(PageView), const Offset(-401.0, 0.0));
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -158,14 +232,14 @@ void main() {
     log.clear();
 
     await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
 
     await tester.fling(find.byType(PageView), const Offset(200.0, 0.0), 1000.0);
-    await tester.pumpAndSettle(_frameDuration);
+    await tester.pumpAndSettle();
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -198,7 +272,12 @@ void main() {
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
     // Easing overscroll past overscroll limit.
-    await tester.drag(find.byType(PageView), const Offset(-200.0, 0.0));
+    if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+      await tester.drag(find.byType(PageView), const Offset(-500.0, 0.0));
+    }
+    else {
+      await tester.drag(find.byType(PageView), const Offset(-200.0, 0.0));
+    }
     await tester.pump();
 
     expect(leftOf(0), lessThan(0.0));
@@ -225,7 +304,7 @@ void main() {
     expect(find.text('California'), findsOneWidget);
 
     controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('Colorado'), findsOneWidget);
 
@@ -246,7 +325,7 @@ void main() {
     expect(find.text('Colorado'), findsOneWidget);
 
     controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('California'), findsOneWidget);
   });
@@ -268,7 +347,7 @@ void main() {
     expect(find.text('Alabama'), findsOneWidget);
 
     await tester.drag(find.byType(PageView), const Offset(-1250.0, 0.0));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(find.text('Arizona'), findsOneWidget);
 
@@ -339,9 +418,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: SizedBox(
-          width: 0.0,
-          height: 0.0,
+        child: SizedBox.shrink(
           child: PageView(
             children: kStates.map<Widget>((String state) => Text(state)).toList(),
           ),
@@ -732,7 +809,7 @@ void main() {
     'All visible pages are able to receive touch events',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/23873.
-      final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
+      final PageController controller = PageController(viewportFraction: 1/4);
       late int tappedIndex;
 
       Widget build() {
@@ -971,6 +1048,7 @@ void main() {
       viewportDimension: 25.0,
       axisDirection: AxisDirection.right,
       viewportFraction: 1.0,
+      devicePixelRatio: tester.view.devicePixelRatio,
     );
     expect(page.page, 6);
     final PageMetrics page2 = page.copyWith(
@@ -1083,9 +1161,7 @@ void main() {
     // PageView() defaults to true.
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: PageView(
-        children: const <Widget>[],
-      ),
+      child: PageView(),
     ));
 
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, true);
@@ -1095,10 +1171,36 @@ void main() {
       textDirection: TextDirection.ltr,
       child: PageView(
         padEnds: false,
-        children: const <Widget>[],
       ),
     ));
 
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
+  });
+
+  testWidgets('PageView - precision error inside RenderSliverFixedExtentBoxAdaptor', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/95101
+
+    final PageController controller = PageController(initialPage: 152);
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 392.72727272727275,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: PageView.builder(
+              controller: controller,
+              itemCount: 366,
+              itemBuilder: (BuildContext context, int index) {
+                return const SizedBox();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    controller.jumpToPage(365);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 }

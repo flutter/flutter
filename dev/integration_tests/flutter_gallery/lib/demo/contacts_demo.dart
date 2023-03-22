@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
-  const _ContactCategory({ Key? key, this.icon, this.children }) : super(key: key);
+  const _ContactCategory({ this.icon, this.children });
 
   final IconData? icon;
   final List<Widget>? children;
@@ -20,7 +20,7 @@ class _ContactCategory extends StatelessWidget {
         border: Border(bottom: BorderSide(color: themeData.dividerColor))
       ),
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.subtitle1!,
+        style: Theme.of(context).textTheme.titleMedium!,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -42,9 +42,8 @@ class _ContactCategory extends StatelessWidget {
 }
 
 class _ContactItem extends StatelessWidget {
-  const _ContactItem({ Key? key, this.icon, required this.lines, this.tooltip, this.onPressed })
-    : assert(lines.length > 1),
-      super(key: key);
+  const _ContactItem({ this.icon, required this.lines, this.tooltip, this.onPressed })
+    : assert(lines.length > 1);
 
   final IconData? icon;
   final List<String> lines;
@@ -65,7 +64,7 @@ class _ContactItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   ...lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)),
-                  Text(lines.last, style: themeData.textTheme.caption),
+                  Text(lines.last, style: themeData.textTheme.bodySmall),
                 ],
               ),
             ),
@@ -86,7 +85,7 @@ class _ContactItem extends StatelessWidget {
 }
 
 class ContactsDemo extends StatefulWidget {
-  const ContactsDemo({Key? key}) : super(key: key);
+  const ContactsDemo({super.key});
 
   static const String routeName = '/contacts';
 

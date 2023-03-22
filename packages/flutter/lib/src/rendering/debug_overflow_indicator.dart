@@ -53,10 +53,10 @@ class _OverflowRegionData {
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
 ///   MyRenderObject({
-///     AlignmentGeometry alignment = Alignment.center,
-///     TextDirection? textDirection,
-///     RenderBox? child,
-///   }) : super.mixin(alignment, textDirection, child);
+///     super.alignment = Alignment.center,
+///     required super.textDirection,
+///     super.child,
+///   });
 ///
 ///   late Rect _containerRect;
 ///   late Rect _childRect;
@@ -85,8 +85,8 @@ class _OverflowRegionData {
 ///
 /// See also:
 ///
-///  * [RenderConstraintsTransformBox], [RenderUnconstrainedBox] and
-///    [RenderFlex], for examples of classes that use this indicator mixin.
+///  * [RenderConstraintsTransformBox] and [RenderFlex] for examples of classes
+///    that use this indicator mixin.
 mixin DebugOverflowIndicatorMixin on RenderObject {
   static const Color _black = Color(0xBF000000);
   static const Color _yellow = Color(0xBFFFFF00);
@@ -113,6 +113,14 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     _OverflowSide.values.length,
     TextPainter(textDirection: TextDirection.ltr), // This label is in English.
   );
+
+  @override
+  void dispose() {
+    for (final TextPainter painter in _indicatorLabel) {
+      painter.dispose();
+    }
+    super.dispose();
+  }
 
   // Set to true to trigger a debug message in the console upon
   // the next paint call. Will be reset after each paint.
@@ -176,7 +184,6 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         rect: markerRect,
         label: 'TOP OVERFLOWED BY ${_formatPixels(overflow.top)} PIXELS',
         labelOffset: markerRect.topCenter + const Offset(0.0, _indicatorLabelPaddingPixels),
-        rotation: 0.0,
         side: _OverflowSide.top,
       ));
     }
@@ -192,7 +199,6 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         label: 'BOTTOM OVERFLOWED BY ${_formatPixels(overflow.bottom)} PIXELS',
         labelOffset: markerRect.bottomCenter -
             const Offset(0.0, _indicatorFontSizePixels + _indicatorLabelPaddingPixels),
-        rotation: 0.0,
         side: _OverflowSide.bottom,
       ));
     }
@@ -243,16 +249,18 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         exception: FlutterError('A $runtimeType overflowed by $overflowText.'),
         library: 'rendering library',
         context: ErrorDescription('during layout'),
-        informationCollector: () sync* {
-          if (debugCreator != null)
-            yield DiagnosticsDebugCreator(debugCreator!);
-          yield* overflowHints!;
-          yield describeForError('The specific $runtimeType in question is');
+        informationCollector: () => <DiagnosticsNode>[
+          // debugCreator should only be set in DebugMode, but we want the
+          // treeshaker to know that.
+          if (kDebugMode && debugCreator != null)
+            DiagnosticsDebugCreator(debugCreator!),
+          ...overflowHints!,
+          describeForError('The specific $runtimeType in question is'),
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the
           // future.
-          yield DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false);
-        },
+          DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false),
+        ],
       ),
     );
   }

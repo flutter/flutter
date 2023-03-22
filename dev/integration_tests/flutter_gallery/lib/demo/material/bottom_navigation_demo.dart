@@ -75,7 +75,7 @@ class NavigationIconView {
 }
 
 class CustomIcon extends StatelessWidget {
-  const CustomIcon({Key? key}) : super(key: key);
+  const CustomIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,7 @@ class CustomIcon extends StatelessWidget {
 }
 
 class CustomInactiveIcon extends StatelessWidget {
-  const CustomInactiveIcon({Key? key}) : super(key: key);
+  const CustomInactiveIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +107,7 @@ class CustomInactiveIcon extends StatelessWidget {
 }
 
 class BottomNavigationDemo extends StatefulWidget {
-  const BottomNavigationDemo({Key? key}) : super(key: key);
+  const BottomNavigationDemo({super.key});
 
   static const String routeName = '/material/bottom_navigation';
 
@@ -165,8 +165,9 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
   @override
   void dispose() {
-    for (final NavigationIconView view in _navigationViews)
+    for (final NavigationIconView view in _navigationViews) {
       view.controller.dispose();
+    }
     super.dispose();
   }
 

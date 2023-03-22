@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
+
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -17,6 +17,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
@@ -44,10 +45,10 @@ const FakeCommand kListEmulatorsCommand = FakeCommand(
 );
 
 void main() {
-  FakeProcessManager fakeProcessManager;
-  FakeAndroidSdk sdk;
-  FileSystem fileSystem;
-  Xcode xcode;
+  late FakeProcessManager fakeProcessManager;
+  late FakeAndroidSdk sdk;
+  late FileSystem fileSystem;
+  late Xcode xcode;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -78,7 +79,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
@@ -97,11 +97,9 @@ void main() {
             stdout: 'existing-avd-1',
           ),
         ]),
-        androidSdk: null,
         androidWorkflow: AndroidWorkflow(
-          androidSdk: null,
+          androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
@@ -110,7 +108,15 @@ void main() {
     });
 
     testWithoutContext('getEmulatorsById', () async {
-      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators);
+      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators,
+        logger: BufferLogger.test(),
+        processManager: fakeProcessManager,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+        fileSystem: fileSystem,
+      );
 
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5'), <Emulator>[emulator1]);
       expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X'), <Emulator>[emulator2]);
@@ -135,7 +141,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -171,13 +176,12 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -208,13 +212,12 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -246,14 +249,13 @@ void main() {
             ],
             exitCode: 1,
             stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
-              'Use --force if you want to replace it.'
-          )
+              'Use --force if you want to replace it.',
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'existing-avd-1');
@@ -289,13 +291,12 @@ void main() {
               '-d',
               'pixel',
             ],
-          )
+          ),
         ]),
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -324,13 +325,13 @@ void main() {
             'open',
             '-a',
             '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
-          ])
+          ]),
         ],
       );
 
       const Emulator emulator = IOSEmulator('ios');
       await emulator.launch();
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => fakeProcessManager,
       Xcode: () => xcode,
@@ -340,7 +341,12 @@ void main() {
 }
 
 class TestEmulatorManager extends EmulatorManager {
-  TestEmulatorManager(this.allEmulators);
+  TestEmulatorManager(this.allEmulators, {
+    required super.logger,
+    required super.processManager,
+    required super.androidWorkflow,
+    required super.fileSystem,
+  });
 
   final List<Emulator> allEmulators;
 
@@ -374,16 +380,16 @@ class FakeEmulator extends Emulator {
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
-  String avdManagerPath;
+  String? avdManagerPath;
 
   @override
-  String emulatorPath;
+  String? emulatorPath;
 
   @override
-  String adbPath;
+  String? adbPath;
 
   @override
-  String getAvdManagerPath() => avdManagerPath;
+  String? getAvdManagerPath() => avdManagerPath;
 
   @override
   String getAvdPath() => 'avd';

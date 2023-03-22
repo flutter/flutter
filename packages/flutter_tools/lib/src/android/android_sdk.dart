@@ -9,7 +9,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import 'android_studio.dart';
 
 // ANDROID_HOME is deprecated.
@@ -198,7 +198,7 @@ class AndroidSdk {
       }
     }
 
-    for (final String searchPath in searchPaths.whereType<String>()) {
+    for (final String searchPath in searchPaths) {
       if (globals.fs.directory(searchPath).existsSync()) {
         return searchPath;
       }
@@ -354,12 +354,16 @@ class AndroidSdk {
           platformVersion = int.parse(numberedVersion.group(1)!);
         } else {
           final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
-          final String? versionString = const LineSplitter()
+          final Iterable<Match> versionMatches = const LineSplitter()
               .convert(buildProps)
               .map<RegExpMatch?>(_sdkVersionRe.firstMatch)
-              .whereType<Match>()
-              .first
-              .group(1);
+              .whereType<Match>();
+
+          if (versionMatches.isEmpty) {
+            return null;
+          }
+
+          final String? versionString = versionMatches.first.group(1);
           if (versionString == null) {
             return null;
           }
@@ -431,11 +435,9 @@ class AndroidSdk {
           throwOnError: true,
           hideStdout: true,
         ).stdout.trim();
-        if (javaHomeOutput != null) {
-          if ((javaHomeOutput != null) && (javaHomeOutput.isNotEmpty)) {
-            final String javaHome = javaHomeOutput.split('\n').last.trim();
-            return fileSystem.path.join(javaHome, 'bin', 'java');
-          }
+        if (javaHomeOutput.isNotEmpty) {
+          final String javaHome = javaHomeOutput.split('\n').last.trim();
+          return fileSystem.path.join(javaHome, 'bin', 'java');
         }
       } on Exception { /* ignore */ }
     }
@@ -496,10 +498,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     required this.platformName,
     required this.buildToolsVersion,
     required FileSystem fileSystem,
-  }) : assert(sdkLevel != null),
-       assert(platformName != null),
-       assert(buildToolsVersion != null),
-       _fileSystem = fileSystem;
+  }) : _fileSystem = fileSystem;
 
   final AndroidSdk sdk;
   final int sdkLevel;

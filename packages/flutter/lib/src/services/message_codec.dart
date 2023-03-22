@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 
 import 'platform_channel.dart';
@@ -32,13 +29,12 @@ abstract class MessageCodec<T> {
   T? decodeMessage(ByteData? message);
 }
 
-/// An command object representing the invocation of a named method.
+/// A command object representing the invocation of a named method.
 @immutable
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].
-  const MethodCall(this.method, [this.arguments])
-    : assert(method != null);
+  const MethodCall(this.method, [this.arguments]);
 
   /// The name of the method to be called.
   final String method;
@@ -117,7 +113,7 @@ class PlatformException implements Exception {
     this.message,
     this.details,
     this.stacktrace,
-  }) : assert(code != null);
+  });
 
   /// An error code.
   final String code;
@@ -140,11 +136,60 @@ class PlatformException implements Exception {
   ///
   /// ```dart
   /// try {
-  ///   ...
+  ///   // ...
   /// } catch (e, stacktrace) {
   ///   print(stacktrace);
   /// }
   /// ```
+  ///
+  /// On Android this field is populated when a `RuntimeException` or a subclass of it is thrown in the method call handler,
+  /// as shown in the following example:
+  ///
+  /// ```kotlin
+  /// import androidx.annotation.NonNull
+  /// import io.flutter.embedding.android.FlutterActivity
+  /// import io.flutter.embedding.engine.FlutterEngine
+  /// import io.flutter.plugin.common.MethodChannel
+  ///
+  /// class MainActivity: FlutterActivity() {
+  ///   private val CHANNEL = "channel_name"
+  ///
+  ///   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+  ///     super.configureFlutterEngine(flutterEngine)
+  ///     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
+  ///       call, result -> throw RuntimeException("Oh no")
+  ///     }
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// It is also populated on Android if the method channel result is not serializable.
+  /// If the result is not serializable, an exception gets thrown during the serialization process.
+  /// This can be seen in the following example:
+  ///
+  /// ```kotlin
+  /// import androidx.annotation.NonNull
+  /// import io.flutter.embedding.android.FlutterActivity
+  /// import io.flutter.embedding.engine.FlutterEngine
+  /// import io.flutter.plugin.common.MethodChannel
+  ///
+  /// class MainActivity: FlutterActivity() {
+  ///   private val CHANNEL = "channel_name"
+  ///
+  ///   override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+  ///     super.configureFlutterEngine(flutterEngine)
+  ///     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
+  ///       call, result -> result.success(Object())
+  ///     }
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// In the cases described above, the content of [stacktrace] will be the unprocessed output of calling `toString()` on the exception.
+  ///
+  /// MacOS, iOS, Linux and Windows don't support querying the native stacktrace.
+  ///
+  /// On custom Flutter embedders this value will be null on platforms that don't support querying the call stack.
   final String? stacktrace;
 
   @override

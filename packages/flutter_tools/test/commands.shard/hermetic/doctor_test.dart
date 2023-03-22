@@ -2,14 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210723"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -17,7 +9,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -26,11 +17,11 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -43,15 +34,10 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-final Platform macPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{'HOME': '/foo/bar'}
-);
-
 void main() {
-  FakeFlutterVersion flutterVersion;
-  BufferLogger logger;
-  FakeProcessManager fakeProcessManager;
+  late FakeFlutterVersion flutterVersion;
+  late BufferLogger logger;
+  late FakeProcessManager fakeProcessManager;
 
   setUp(() {
     flutterVersion = FakeFlutterVersion();
@@ -72,7 +58,7 @@ void main() {
   group('doctor', () {
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -88,7 +74,7 @@ void main() {
 
     testUsingContext('No IDE Validator includes expected installation messages', () async {
       final ValidationResult result = await NoIdeValidator().validate();
-      expect(result.type, ValidationType.missing);
+      expect(result.type, ValidationType.notAvailable);
 
       expect(
         result.messages.map((ValidationMessage vm) => vm.message),
@@ -99,7 +85,7 @@ void main() {
     testUsingContext('vs code validator when 64bit installed', () async {
       expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -114,7 +100,7 @@ void main() {
 
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -171,7 +157,7 @@ void main() {
           userMessages: UserMessages(),
         );
         final ValidationResult result = await deviceValidator.validate();
-        expect(result.type, ValidationType.installed);
+        expect(result.type, ValidationType.success);
         expect(result.messages, const <ValidationMessage>[
           ValidationMessage('name (mobile) • device-id • android • 1.2.3'),
           ValidationMessage.hint('Device locked'),
@@ -194,12 +180,13 @@ void main() {
               '• No issues found!\n'
       ));
     }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
     });
   });
 
   group('doctor usage params', () {
-    TestUsage testUsage;
+    late TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -313,6 +300,14 @@ void main() {
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
+
+    testUsingContext('sending events can be skipped', () async {
+      await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
+
+      expect(testUsage.events, isEmpty);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
+    });
   });
 
   group('doctor with fake validators', () {
@@ -327,6 +322,8 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate non-verbose output format for run with crash', () async {
@@ -338,19 +335,33 @@ void main() {
               '[☠] Crashing validator (the doctor check crashed)\n'
               '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
               'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-              '    ✗ fatal error\n'
+              '    ✗ Bad state: fatal error\n'
               '[✓] Validators are fun (with statusInfo)\n'
               '[✓] Four score and seven validators ago (with statusInfo)\n'
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate verbose output format contains trace for run with crash', () async {
-      expect(await FakeCrashingDoctor(logger).diagnose(verbose: true), isFalse);
+      expect(await FakeCrashingDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, contains('#0      CrashingValidator.validate'));
     });
 
+    testUsingContext('validate tool exit when exceeding timeout', () async {
+      FakeAsync().run<void>((FakeAsync time) {
+        final Doctor doctor = FakeAsyncStuckDoctor(logger);
+        doctor.diagnose(verbose: false);
+        time.elapse(const Duration(minutes: 5));
+        time.flushMicrotasks();
+      });
+
+      expect(logger.statusText, contains('Stuck validator that never completes exceeded maximum allowed duration of '));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
+    });
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
       final Completer<void> completer = Completer<void>();
@@ -370,12 +381,14 @@ void main() {
               '[☠] Async crashing validator (the doctor check crashed)\n'
               '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
               'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
-              '    ✗ fatal error\n'
+              '    ✗ Bad state: fatal error\n'
               '[✓] Validators are fun (with statusInfo)\n'
               '[✓] Four score and seven validators ago (with statusInfo)\n'
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
 
@@ -388,6 +401,8 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
@@ -404,6 +419,8 @@ void main() {
               '\n'
               '! Doctor found issues in 2 categories.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate non-verbose output format', () async {
@@ -425,10 +442,12 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate verbose output format', () async {
-      expect(await FakeDoctor(logger).diagnose(verbose: true), isFalse);
+      expect(await FakeDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, equals(
               '[✓] Passing Validator (with statusInfo)\n'
               '    • A helpful message\n'
@@ -455,6 +474,83 @@ void main() {
               '\n'
               '! Doctor found issues in 4 categories.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
+    });
+
+    testUsingContext('validate PII can be hidden', () async {
+      expect(await FakePiiDoctor(logger).diagnose(showPii: false), isTrue);
+      expect(logger.statusText, equals(
+        '[✓] PII Validator\n'
+        '    • Does not contain PII\n'
+        '\n'
+        '• No issues found!\n'
+      ));
+      logger.clear();
+      // PII shown.
+      expect(await FakePiiDoctor(logger).diagnose(), isTrue);
+      expect(logger.statusText, equals(
+          '[✓] PII Validator\n'
+              '    • Contains PII path/to/username\n'
+              '\n'
+              '• No issues found!\n'
+      ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
+    });
+  });
+
+  group('doctor diagnosis wrapper', () {
+    late TestUsage testUsage;
+    late BufferLogger logger;
+
+    setUp(() {
+      testUsage = TestUsage();
+      logger = BufferLogger.test();
+    });
+
+    testUsingContext('PII separated, events only sent once', () async {
+      final Doctor fakeDoctor = FakePiiDoctor(logger);
+      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      const String expectedPiiText = '[✓] PII Validator\n'
+          '    • Contains PII path/to/username\n'
+          '\n'
+          '• No issues found!\n';
+      const String expectedPiiStrippedText =
+          '[✓] PII Validator\n'
+          '    • Does not contain PII\n'
+          '\n'
+          '• No issues found!\n';
+
+      // Run each multiple times to make sure the logger buffer is being cleared,
+      // and that events are only sent once.
+      expect(await doctorText.text, expectedPiiText);
+      expect(await doctorText.text, expectedPiiText);
+
+      expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
+      expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
+
+      // Only one event sent.
+      expect(testUsage.events, <TestUsageEvent>[
+        const TestUsageEvent(
+          'doctor-result',
+          'PiiValidator',
+          label: 'installed',
+        ),
+      ]);
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
+      Usage: () => testUsage,
+    });
+
+    testUsingContext('without PII has same text and PII-stripped text', () async {
+      final Doctor fakeDoctor = FakePassingDoctor(logger);
+      final DoctorText doctorText = DoctorText(logger, doctor: fakeDoctor);
+      final String piiText = await doctorText.text;
+      expect(piiText, isNotEmpty);
+      expect(piiText, await doctorText.piiStrippedText);
+    }, overrides: <Type, Generator>{
+      Usage: () => testUsage,
     });
   });
 
@@ -489,13 +585,15 @@ void main() {
         '! Doctor found issues in 4\n'
         '  categories.\n'
     ));
+  }, overrides: <Type, Generator>{
+    AnsiTerminal: () => FakeTerminal(),
   });
 
   testUsingContext('validate verbose output wrapping', () async {
     final BufferLogger wrapLogger = BufferLogger.test(
       outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 30),
     );
-    expect(await FakeDoctor(wrapLogger).diagnose(verbose: true), isFalse);
+    expect(await FakeDoctor(wrapLogger).diagnose(), isFalse);
     expect(wrapLogger.statusText, equals(
         '[✓] Passing Validator (with\n'
         '    statusInfo)\n'
@@ -533,8 +631,9 @@ void main() {
         '! Doctor found issues in 4\n'
         '  categories.\n'
     ));
+  }, overrides: <Type, Generator>{
+    AnsiTerminal: () => FakeTerminal(),
   });
-
 
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
@@ -550,6 +649,8 @@ void main() {
               '\n'
               '! Doctor found issues in 1 category.\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
@@ -562,6 +663,8 @@ void main() {
               '\n'
               '• No issues found!\n'
       ));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
   });
 
@@ -573,54 +676,91 @@ void main() {
     testUsingContext('validate installed + installed = installed', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[✓]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate installed + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate installed + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, missing).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate partial + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate partial + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate partial + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, missing).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate missing + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate missing + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
 
     testUsingContext('validate missing + missing = missing', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, missing).diagnose(), isFalse);
       expect(logger.statusText, startsWith('[✗]'));
+    }, overrides: <Type, Generator>{
+      AnsiTerminal: () => FakeTerminal(),
     });
   });
 
   testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
-    expect(DoctorValidatorsProvider.defaultInstance.workflows,
-      contains(isA<WebWorkflow>()));
+    final List<Workflow> workflows = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(isWebEnabled: true),
+      platform: FakePlatform(),
+    ).workflows;
+    expect(
+      workflows,
+      contains(isA<WebWorkflow>()),
+    );
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => fakeProcessManager,
+  });
+
+  testUsingContext('CustomDevicesWorkflow is a part of validator workflows if enabled', () async {
+    final List<Workflow> workflows = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      platform: FakePlatform(),
+    ).workflows;
+    expect(
+      workflows,
+      contains(isA<CustomDeviceWorkflow>()),
+    );
+  }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => fakeProcessManager,
   });
@@ -643,12 +783,29 @@ void main() {
   }, initializeFlutterRoot: false);
 
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
-    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<AndroidStudioValidator>())));
-    expect(DoctorValidatorsProvider.defaultInstance.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
+    final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(isAndroidEnabled: false),
+    );
+    expect(provider.validators, isNot(contains(isA<AndroidStudioValidator>())));
+    expect(provider.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false),
+    AndroidWorkflow: () => FakeAndroidWorkflow(appliesToHostPlatform: false),
   });
 }
+
+class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
+  FakeAndroidWorkflow({
+    this.canListDevices = true,
+    this.appliesToHostPlatform = true,
+  });
+
+  @override
+  final bool canListDevices;
+
+  @override
+  final bool appliesToHostPlatform;
+}
+
 
 class NoOpDoctor implements Doctor {
   @override
@@ -665,7 +822,10 @@ class NoOpDoctor implements Doctor {
     bool androidLicenses = false,
     bool verbose = true,
     bool showColor = true,
-    AndroidLicenseValidator androidLicenseValidator,
+    AndroidLicenseValidator? androidLicenseValidator,
+    bool showPii = true,
+    List<ValidatorTask>? startedValidatorTasks,
+    bool sendEvent = true,
   }) async => true;
 
   @override
@@ -682,7 +842,7 @@ class NoOpDoctor implements Doctor {
 }
 
 class PassingValidator extends DoctorValidator {
-  PassingValidator(String name) : super(name);
+  PassingValidator(super.name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -690,7 +850,19 @@ class PassingValidator extends DoctorValidator {
       ValidationMessage('A helpful message'),
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+    return const ValidationResult(ValidationType.success, messages, statusInfo: 'with statusInfo');
+  }
+}
+
+class PiiValidator extends DoctorValidator {
+  PiiValidator() : super('PII Validator');
+
+  @override
+  Future<ValidationResult> validate() async {
+    const List<ValidationMessage> messages = <ValidationMessage>[
+      ValidationMessage('Contains PII path/to/username', piiStrippedMessage: 'Does not contain PII'),
+    ];
+    return const ValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -719,6 +891,18 @@ class NotAvailableValidator extends DoctorValidator {
       ValidationMessage.hint('A hint message'),
     ];
     return const ValidationResult(ValidationType.notAvailable, messages);
+  }
+}
+
+class StuckValidator extends DoctorValidator {
+  StuckValidator() : super('Stuck validator that never completes');
+
+  @override
+  Future<ValidationResult> validate() {
+    final Completer<ValidationResult> completer = Completer<ValidationResult>();
+
+    // This future will never complete
+    return completer.future;
   }
 }
 
@@ -754,7 +938,7 @@ class CrashingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    throw 'fatal error';
+    throw StateError('fatal error');
   }
 }
 
@@ -766,10 +950,10 @@ class AsyncCrashingValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() {
     const Duration delay = Duration(seconds: 1);
-    final Future<ValidationResult> result = Future<ValidationResult>.delayed(delay)
-      .then((_) {
-        throw 'fatal error';
-      });
+    final Future<ValidationResult> result = Future<ValidationResult>.delayed(
+      delay,
+      () => throw StateError('fatal error'),
+    );
     _time.elapse(const Duration(seconds: 1));
     _time.flushMicrotasks();
     return result;
@@ -780,34 +964,27 @@ class AsyncCrashingValidator extends DoctorValidator {
 class FakeDoctor extends Doctor {
   FakeDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
-
   @override
-  List<DoctorValidator> get validators {
-    return _validators ??= <DoctorValidator>[
-      PassingValidator('Passing Validator'),
-      MissingValidator(),
-      NotAvailableValidator(),
-      PartialValidatorWithHintsOnly(),
-      PartialValidatorWithErrors(),
-    ];
-  }
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    PassingValidator('Passing Validator'),
+    MissingValidator(),
+    NotAvailableValidator(),
+    PartialValidatorWithHintsOnly(),
+    PartialValidatorWithErrors(),
+  ];
 }
 
 /// A doctor that should pass, but still has issues in some categories.
 class FakePassingDoctor extends Doctor {
   FakePassingDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
   @override
-  List<DoctorValidator> get validators {
-    return _validators ??= <DoctorValidator>[
-      PassingValidator('Passing Validator'),
-      PartialValidatorWithHintsOnly(),
-      PartialValidatorWithErrors(),
-      PassingValidator('Another Passing Validator'),
-    ];
-  }
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    PassingValidator('Passing Validator'),
+    PartialValidatorWithHintsOnly(),
+    PartialValidatorWithErrors(),
+    PassingValidator('Another Passing Validator'),
+  ];
 }
 
 /// A doctor that should pass, but still has 1 issue to test the singular of
@@ -815,48 +992,61 @@ class FakePassingDoctor extends Doctor {
 class FakeSinglePassingDoctor extends Doctor {
   FakeSinglePassingDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
   @override
-  List<DoctorValidator> get validators {
-    return _validators ??= <DoctorValidator>[
-      PartialValidatorWithHintsOnly(),
-    ];
-  }
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    PartialValidatorWithHintsOnly(),
+  ];
 }
 
 /// A doctor that passes and has no issues anywhere.
 class FakeQuietDoctor extends Doctor {
   FakeQuietDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
   @override
-  List<DoctorValidator> get validators {
-    return _validators ??= <DoctorValidator>[
-      PassingValidator('Passing Validator'),
-      PassingValidator('Another Passing Validator'),
-      PassingValidator('Validators are fun'),
-      PassingValidator('Four score and seven validators ago'),
-    ];
-  }
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    PassingValidator('Passing Validator'),
+    PassingValidator('Another Passing Validator'),
+    PassingValidator('Validators are fun'),
+    PassingValidator('Four score and seven validators ago'),
+  ];
+}
+
+/// A doctor that passes and contains PII that can be hidden.
+class FakePiiDoctor extends Doctor {
+  FakePiiDoctor(Logger logger) : super(logger: logger);
+
+  @override
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    PiiValidator(),
+  ];
 }
 
 /// A doctor with a validator that throws an exception.
 class FakeCrashingDoctor extends Doctor {
   FakeCrashingDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
   @override
-  List<DoctorValidator> get validators {
-    if (_validators == null) {
-      _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator'));
-      _validators.add(PassingValidator('Another Passing Validator'));
-      _validators.add(CrashingValidator());
-      _validators.add(PassingValidator('Validators are fun'));
-      _validators.add(PassingValidator('Four score and seven validators ago'));
-    }
-    return _validators;
-  }
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    PassingValidator('Passing Validator'),
+    PassingValidator('Another Passing Validator'),
+    CrashingValidator(),
+    PassingValidator('Validators are fun'),
+    PassingValidator('Four score and seven validators ago'),
+  ];
+}
+
+/// A doctor with a validator that will never finish.
+class FakeAsyncStuckDoctor extends Doctor {
+  FakeAsyncStuckDoctor(Logger logger) : super(logger: logger);
+
+  @override
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    PassingValidator('Passing Validator'),
+    PassingValidator('Another Passing Validator'),
+    StuckValidator(),
+    PassingValidator('Validators are fun'),
+    PassingValidator('Four score and seven validators ago'),
+  ];
 }
 
 /// A doctor with a validator that throws an exception.
@@ -865,19 +1055,14 @@ class FakeAsyncCrashingDoctor extends Doctor {
 
   final FakeAsync _time;
 
-  List<DoctorValidator> _validators;
   @override
-  List<DoctorValidator> get validators {
-    if (_validators == null) {
-      _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator'));
-      _validators.add(PassingValidator('Another Passing Validator'));
-      _validators.add(AsyncCrashingValidator(_time));
-      _validators.add(PassingValidator('Validators are fun'));
-      _validators.add(PassingValidator('Four score and seven validators ago'));
-    }
-    return _validators;
-  }
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    PassingValidator('Passing Validator'),
+    PassingValidator('Another Passing Validator'),
+    AsyncCrashingValidator(_time),
+    PassingValidator('Validators are fun'),
+    PassingValidator('Four score and seven validators ago'),
+  ];
 }
 
 /// A DoctorValidatorsProvider that overrides the default validators without
@@ -897,19 +1082,19 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 class PassingGroupedValidator extends DoctorValidator {
-  PassingGroupedValidator(String name) : super(name);
+  PassingGroupedValidator(super.name);
 
   @override
   Future<ValidationResult> validate() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages);
+    return const ValidationResult(ValidationType.success, messages);
   }
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name) : super(name);
+  MissingGroupedValidator(super.name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -921,7 +1106,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name) : super(name);
+  PartialGroupedValidator(super.name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -933,14 +1118,14 @@ class PartialGroupedValidator extends DoctorValidator {
 }
 
 class PassingGroupedValidatorWithStatus extends DoctorValidator {
-  PassingGroupedValidatorWithStatus(String name) : super(name);
+  PassingGroupedValidatorWithStatus(super.name);
 
   @override
   Future<ValidationResult> validate() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A different message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
+    return const ValidationResult(ValidationType.success, messages, statusInfo: 'A status message');
   }
 }
 
@@ -948,52 +1133,44 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
 class FakeGroupedDoctor extends Doctor {
   FakeGroupedDoctor(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
   @override
-  List<DoctorValidator> get validators {
-    return _validators ??= <DoctorValidator>[
-      GroupedValidator(<DoctorValidator>[
-        PassingGroupedValidator('Category 1'),
-        PassingGroupedValidator('Category 1'),
-      ]),
-      GroupedValidator(<DoctorValidator>[
-        PassingGroupedValidator('Category 2'),
-        MissingGroupedValidator('Category 2'),
-      ]),
-    ];
-  }
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    GroupedValidator(<DoctorValidator>[
+      PassingGroupedValidator('Category 1'),
+      PassingGroupedValidator('Category 1'),
+    ]),
+    GroupedValidator(<DoctorValidator>[
+      PassingGroupedValidator('Category 2'),
+      MissingGroupedValidator('Category 2'),
+    ]),
+  ];
 }
 
 class FakeGroupedDoctorWithStatus extends Doctor {
   FakeGroupedDoctorWithStatus(Logger logger) : super(logger: logger);
 
-  List<DoctorValidator> _validators;
   @override
-  List<DoctorValidator> get validators {
-    return _validators ??= <DoctorValidator>[
-      GroupedValidator(<DoctorValidator>[
-        PassingGroupedValidator('First validator title'),
-        PassingGroupedValidatorWithStatus('Second validator title'),
-      ]),
-    ];
-  }
+  late final List<DoctorValidator> validators = <DoctorValidator>[
+    GroupedValidator(<DoctorValidator>[
+      PassingGroupedValidator('First validator title'),
+      PassingGroupedValidatorWithStatus('Second validator title'),
+    ]),
+  ];
 }
 
 /// A doctor that takes any two validators. Used to check behavior when
 /// merging ValidationTypes (installed, missing, partial).
 class FakeSmallGroupDoctor extends Doctor {
-  FakeSmallGroupDoctor(Logger logger, DoctorValidator val1, DoctorValidator val2) : super(logger: logger) {
-    _validators = <DoctorValidator>[GroupedValidator(<DoctorValidator>[val1, val2])];
-  }
-
-  List<DoctorValidator> _validators;
+  FakeSmallGroupDoctor(Logger logger, DoctorValidator val1, DoctorValidator val2)
+    : validators = <DoctorValidator>[GroupedValidator(<DoctorValidator>[val1, val2])],
+      super(logger: logger);
 
   @override
-  List<DoctorValidator> get validators => _validators;
+  final List<DoctorValidator> validators;
 }
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
-  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
+  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String? edition})
     : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition, fileSystem: globals.fs));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
@@ -1015,7 +1192,9 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   List<Device> devices = <Device>[];
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
   Future<List<String>> getDeviceDiagnostics() async => diagnostics;
@@ -1048,4 +1227,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<TargetPlatform> get targetPlatform =>  Future<TargetPlatform>.value(TargetPlatform.android);
+}
+
+class FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  final bool supportsColor = false;
 }

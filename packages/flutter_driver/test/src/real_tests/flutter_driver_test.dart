@@ -10,6 +10,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/layer_tree.dart';
+import 'package:flutter_driver/src/common/text_input_action.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
@@ -82,7 +83,7 @@ void main() {
       });
 
       test('logFilePathName was set when a new driver was created', () {
-        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, logCommunicationToFile: true);
+        driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
         logFile = File(driver.logFilePathName);
         expect(logFile.path, endsWith('.log'));
       });
@@ -108,12 +109,12 @@ void main() {
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
       expect(log, <String>[
         'VMServiceFlutterDriver: >>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
-        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}'
+        'VMServiceFlutterDriver: <<< {isError: false, response: {status: ok}}',
       ]);
     });
 
     test('printCommunication = false', () async {
-      driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate, printCommunication: false);
+      driver = VMServiceFlutterDriver.connectedTo(fakeClient, fakeIsolate);
       await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
       expect(log, <String>[]);
     });
@@ -188,6 +189,33 @@ void main() {
       );
     });
 
+    test('Refreshes isolate if it is not started for long time', () async {
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kNone, timestamp: 0);
+      fakeClient.onGetIsolate = changeIsolateEventAfter(
+        5,
+        vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 1),
+      );
+
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expect(driver, isNotNull);
+      expect(
+        fakeClient.connectionLog,
+        <String>[
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'getIsolate',
+          'setFlag pause_isolates_on_start false',
+          'resume',
+          'streamListen Isolate',
+          'getIsolate',
+          'onIsolateEvent',
+          'streamCancel Isolate',
+        ],
+      );
+    });
+
     test('Connects to isolate number', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseStart, timestamp: 0);
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '', isolateNumber: int.parse(fakeIsolate.number!));
@@ -239,6 +267,14 @@ void main() {
 
     test('connects to isolate paused mid-flight', () async {
       fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPauseBreakpoint, timestamp: 0);
+
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      expect(driver, isNotNull);
+      expectLogContains('Isolate is paused mid-flight');
+    });
+
+    test('connects to isolate paused mid-flight after request', () async {
+      fakeIsolate.pauseEvent = vms.Event(kind: vms.EventKind.kPausePostRequest, timestamp: 0);
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -347,6 +383,16 @@ void main() {
         expect(result, 'hello');
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: get_text, timeout: $_kSerializedTestTimeout, finderType: ByValueKey, keyValueString: 123, keyValueType: int}',
+        ]);
+      });
+    });
+
+    group('sendTextInputAction', () {
+      test('sends the SendTextInputAction command with action done', () async {
+        fakeClient.responses['send_text_input_action'] = makeFakeResponse(<String, dynamic>{});
+        await driver.sendTextInputAction(TextInputAction.done, timeout: _kTestTimeout);
+        expect(fakeClient.commandLog, <String>[
+          'ext.flutter.driver {command: send_text_input_action, timeout: $_kSerializedTestTimeout, action: done}',
         ]);
       });
     });
@@ -587,7 +633,7 @@ void main() {
           'setVMTimelineFlags [Dart, GC, Compiler]',
           'getFlagList',
           'setVMTimelineFlags []',
-          'getVMTimeline null null'
+          'getVMTimeline null null',
         ]);
 
         expect(timeline.events!.single.name, 'test event');
@@ -679,7 +725,7 @@ void main() {
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: set_frame_sync, enabled: false}',
           'ext.flutter.driver {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}',
-          'ext.flutter.driver {command: set_frame_sync, enabled: true}'
+          'ext.flutter.driver {command: set_frame_sync, enabled: true}',
         ]);
       });
     });
@@ -745,8 +791,8 @@ void main() {
       const String waitForCommandLog = '>>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: logCommunicationToFile test}';
       const String responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
 
-      expect(commandLog.contains(waitForCommandLog), true, reason: '$commandLog not contains $waitForCommandLog');
-      expect(commandLog.contains(responseLog), true, reason: '$commandLog not contains $responseLog');
+      expect(commandLog, contains(waitForCommandLog), reason: '$commandLog not contains $waitForCommandLog');
+      expect(commandLog, contains(responseLog), reason: '$commandLog not contains $responseLog');
     });
 
     test('logCommunicationToFile = false', () async {
@@ -783,7 +829,7 @@ void main() {
     });
 
     test('printCommunication = false', () async {
-      driver = WebFlutterDriver.connectedTo(fakeConnection, printCommunication: false);
+      driver = WebFlutterDriver.connectedTo(fakeConnection);
       await driver.waitFor(find.byTooltip('printCommunication test'), timeout: _kTestTimeout);
       expect(log, <String>[]);
     });
@@ -1044,6 +1090,15 @@ vms.Response? makeFakeResponse(
   });
 }
 
+void Function(vms.Isolate) changeIsolateEventAfter(int gets, vms.Event nextEvent) {
+  return (vms.Isolate i) {
+    gets -= 1;
+    if (gets == 0) {
+      i.pauseEvent = nextEvent;
+    }
+  };
+}
+
 class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   @override
   bool supportsTimelineAction = false;
@@ -1071,6 +1126,7 @@ class FakeVmService extends Fake implements vms.VmService {
   FakeVM? vm;
   bool failOnSetFlag = false;
   bool failOnResumeWith101 = false;
+  void Function(vms.Isolate)? onGetIsolate;
 
   final List<String> connectionLog = <String>[];
 
@@ -1081,6 +1137,7 @@ class FakeVmService extends Fake implements vms.VmService {
   Future<vms.Isolate> getIsolate(String isolateId) async {
     connectionLog.add('getIsolate');
     if (isolateId == vm!.isolate!.id) {
+      onGetIsolate?.call(vm!.isolate!);
       return vm!.isolate!;
     }
     throw UnimplementedError('getIsolate called with unrecognized $isolateId');
@@ -1136,9 +1193,9 @@ class FakeVmService extends Fake implements vms.VmService {
     commandLog.add('$method $args');
     await artificialExtensionDelay;
 
-    final vms.Response response = responses[args!['command']]!;
+    final vms.Response? response = responses[args!['command']];
     assert(response != null, 'Failed to create a response for ${args['command']}');
-    return response;
+    return response!;
   }
 
   @override
@@ -1186,9 +1243,9 @@ class FakeVmService extends Fake implements vms.VmService {
   @override
   Future<vms.Timeline> getVMTimeline({int? timeOriginMicros, int? timeExtentMicros}) async {
     connectionLog.add('getVMTimeline $timeOriginMicros $timeExtentMicros');
-    final vms.Timeline timeline = timelineResponses[timeOriginMicros ?? 1]!;
+    final vms.Timeline? timeline = timelineResponses[timeOriginMicros ?? 1];
     assert(timeline != null, 'Missing entry in timelineResponses[$timeOriginMicros]');
-    return timeline;
+    return timeline!;
   }
 
   @override
@@ -1220,16 +1277,5 @@ class FakeVM extends Fake implements vms.VM {
 vms.Isolate createFakeIsolate() => vms.Isolate(
   id: '123',
   number: '123',
-  name: null,
-  isSystemIsolate: null,
-  isolateFlags: null,
-  startTime: null,
-  runnable: null,
-  livePorts: null,
-  pauseOnExit: null,
-  pauseEvent: null,
-  libraries: null,
-  breakpoints: null,
-  exceptionPauseMode: null,
   extensionRPCs: <String>[],
 );

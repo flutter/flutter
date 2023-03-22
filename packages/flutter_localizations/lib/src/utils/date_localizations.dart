@@ -17,11 +17,9 @@ bool _dateIntlDataInitialized = false;
 void loadDateIntlDataIfNotLoaded() {
   if (!_dateIntlDataInitialized) {
     date_localizations.dateSymbols
-      .cast<String, Map<String, dynamic>>()
-      .forEach((String locale, Map<String, dynamic> data) {
+      .forEach((String locale, intl.DateSymbols symbols) {
         // Perform initialization.
         assert(date_localizations.datePatterns.containsKey(locale));
-        final intl.DateSymbols symbols = intl.DateSymbols.deserializeFromMap(data);
         date_symbol_data_custom.initializeDateFormattingCustom(
           locale: locale,
           symbols: symbols,

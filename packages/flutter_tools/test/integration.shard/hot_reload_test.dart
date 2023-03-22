@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
@@ -16,9 +13,9 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  Directory tempDir;
+  late Directory tempDir;
   final HotReloadProject project = HotReloadProject();
-  FlutterRunTestDriver flutter;
+  late FlutterRunTestDriver flutter;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('hot_reload_test.');
@@ -27,7 +24,7 @@ void main() {
   });
 
   tearDown(() async {
-    await flutter?.stop();
+    await flutter.stop();
     tryToDelete(tempDir);
   });
 
@@ -108,8 +105,14 @@ void main() {
     await flutter.resume(); // we start paused so we can set up our TICK 1 listener before the app starts
     unawaited(sawTick1.future.timeout(
       const Duration(seconds: 5),
-      onTimeout: () { print('The test app is taking longer than expected to print its synchronization line...'); },
+      onTimeout: () {
+        // This print is useful for people debugging this test. Normally we would avoid printing in
+        // a test but this is an exception because it's useful ambient information.
+        // ignore: avoid_print
+        print('The test app is taking longer than expected to print its synchronization line...');
+      },
     ));
+    printOnFailure('waiting for synchronization line...');
     await sawTick1.future; // after this, app is in steady state
     await flutter.addBreakpoint(
       project.scheduledBreakpointUri,
@@ -118,7 +121,7 @@ void main() {
     await Future<void>.delayed(const Duration(seconds: 2));
     await flutter.hotReload(); // reload triggers code which eventually hits the breakpoint
     isolate = await flutter.waitForPause();
-    expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
+    expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
     await flutter.resume();
     await flutter.addBreakpoint(
       project.buildBreakpointUri,
@@ -126,19 +129,19 @@ void main() {
     );
     bool reloaded = false;
     final Future<void> reloadFuture = flutter.hotReload().then((void value) { reloaded = true; });
-    print('waiting for pause...');
+    printOnFailure('waiting for pause...');
     isolate = await flutter.waitForPause();
-    expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
-    print('waiting for debugger message...');
+    expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
+    printOnFailure('waiting for debugger message...');
     await sawDebuggerPausedMessage.future;
     expect(reloaded, isFalse);
-    print('waiting for resume...');
+    printOnFailure('waiting for resume...');
     await flutter.resume();
-    print('waiting for reload future...');
+    printOnFailure('waiting for reload future...');
     await reloadFuture;
     expect(reloaded, isTrue);
     reloaded = false;
-    print('subscription cancel...');
+    printOnFailure('subscription cancel...');
     await subscription.cancel();
   });
 
@@ -148,7 +151,7 @@ void main() {
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen(
       (String line) {
-        print('[LOG]:"$line"');
+        printOnFailure('[LOG]:"$line"');
         if (line.contains('(((TICK 1)))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
@@ -174,7 +177,7 @@ void main() {
     await Future<void>.delayed(const Duration(seconds: 1));
     final Future<void> reloadFuture = flutter.hotReload().then((void value) { reloaded = true; });
     final Isolate isolate = await flutter.waitForPause();
-    expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
+    expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
     expect(reloaded, isFalse);
     await sawDebuggerPausedMessage1.future; // this is the one where it say "uh, you broke into the debugger while reloading"
     await reloadFuture; // this is the one where it times out because you're in the debugger
@@ -186,10 +189,10 @@ void main() {
   });
 }
 
-bool _isHotReloadCompletionEvent(Map<String, dynamic> event) {
+bool _isHotReloadCompletionEvent(Map<String, Object?>? event) {
   return event != null &&
       event['event'] == 'app.progress' &&
       event['params'] != null &&
-      (event['params'] as Map<String, dynamic>)['progressId'] == 'hot.reload' &&
-      (event['params'] as Map<String, dynamic>)['finished'] == true;
+      (event['params']! as Map<String, Object?>)['progressId'] == 'hot.reload' &&
+      (event['params']! as Map<String, Object?>)['finished'] == true;
 }

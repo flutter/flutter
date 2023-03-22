@@ -105,20 +105,24 @@ void main() {
     expect(painter, paints..circle(x: 400.0));
     await slowDrag(tester, const Offset(100.0, 200.0), const Offset(0.0, 10.0));
     expect(painter, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
+      if (method != #drawCircle) {
         return false;
+      }
       final Offset center = arguments[0] as Offset;
-      if (center.dx < 400.0)
+      if (center.dx < 400.0) {
         return true;
+      }
       throw 'Dragging on left hand side did not overscroll on left hand side.';
     }));
     await slowDrag(tester, const Offset(700.0, 200.0), const Offset(0.0, 10.0));
     expect(painter, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
+      if (method != #drawCircle) {
         return false;
+      }
       final Offset center = arguments[0] as Offset;
-      if (center.dx > 400.0)
+      if (center.dx > 400.0) {
         return true;
+      }
       throw 'Dragging on right hand side did not overscroll on right hand side.';
     }));
 
@@ -146,11 +150,13 @@ void main() {
       await gesture.moveBy(const Offset(50.0, 50.0));
       await tester.pump(const Duration(milliseconds: 20));
       expect(painter, paints..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle)
+        if (method != #drawCircle) {
           return false;
+        }
         final Offset center = arguments[0] as Offset;
-        if (center.dx <= oldX)
+        if (center.dx <= oldX) {
           throw 'Sliding to the right did not make the center of the radius slide to the right.';
+        }
         oldX = center.dx;
         return true;
       }));
@@ -222,6 +228,35 @@ void main() {
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
     expect(painter, paints..circle()..circle());
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(painter, doesNotOverscroll);
+  });
+
+  testWidgets('Overscroll ignored from alternate axis', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: TestScrollBehaviorNoGlow(),
+          child: GlowingOverscrollIndicator(
+            axisDirection: AxisDirection.right,
+            color: Color(0xFF0000FF),
+            child: CustomScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 20.0)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+    expect(painter, doesNotOverscroll);
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
+    expect(painter, doesNotOverscroll);
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
@@ -562,5 +597,14 @@ class TestScrollBehavior2 extends ScrollBehavior {
       color: const Color(0xFF0000FF),
       child: child,
     );
+  }
+}
+
+class TestScrollBehaviorNoGlow extends ScrollBehavior {
+  const TestScrollBehaviorNoGlow();
+
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
   }
 }

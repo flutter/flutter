@@ -15,7 +15,8 @@ import 'package:gen_keycodes/keyboard_maps_code_gen.dart';
 import 'package:gen_keycodes/logical_key_data.dart';
 import 'package:gen_keycodes/macos_code_gen.dart';
 import 'package:gen_keycodes/physical_key_data.dart';
-import 'package:gen_keycodes/testing_key_codes_gen.dart';
+import 'package:gen_keycodes/testing_key_codes_cc_gen.dart';
+import 'package:gen_keycodes/testing_key_codes_java_gen.dart';
 import 'package:gen_keycodes/utils.dart';
 import 'package:gen_keycodes/web_code_gen.dart';
 import 'package:gen_keycodes/windows_code_gen.dart';
@@ -64,7 +65,7 @@ Future<String> getGlfwKeyCodes() async {
 }
 
 Future<String> getGtkKeyCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/master/gdk/gdkkeysyms.h');
+  final Uri keyCodesUri = Uri.parse('https://gitlab.gnome.org/GNOME/gtk/-/raw/gtk-3-24/gdk/gdkkeysyms.h');
   return http.read(keyCodesUri);
 }
 
@@ -79,6 +80,15 @@ bool _assertsEnabled() {
     return true;
   }());
   return enabledAsserts;
+}
+
+Future<void> generate(String name, String outDir, BaseCodeGenerator generator) {
+  final File codeFile = File(outDir);
+  if (!codeFile.existsSync()) {
+    codeFile.createSync(recursive: true);
+  }
+  print('Writing ${name.padRight(15)}${codeFile.absolute}');
+  return codeFile.writeAsString(generator.generate());
 }
 
 Future<void> main(List<String> rawArguments) async {
@@ -98,7 +108,7 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'physical-data',
-    defaultsTo: path.join(dataRoot, 'physical_key_data.json'),
+    defaultsTo: path.join(dataRoot, 'physical_key_data.g.json'),
     help: 'The path to where the physical key data file should be written when '
         'collected, and read from when generating output code. If --physical-data is '
         'not specified, the output will be written to/read from the current '
@@ -107,7 +117,7 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'logical-data',
-    defaultsTo: path.join(dataRoot, 'logical_key_data.json'),
+    defaultsTo: path.join(dataRoot, 'logical_key_data.g.json'),
     help: 'The path to where the logical key data file should be written when '
         'collected, and read from when generating output code. If --logical-data is '
         'not specified, the output will be written to/read from the current '
@@ -116,32 +126,30 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'code',
-    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_key.dart'),
-    help: 'The path to where the output "keyboard_key.dart" file should be '
+    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_key.g.dart'),
+    help: 'The path to where the output "keyboard_key.g.dart" file should be '
         'written. If --code is not specified, the output will be written to the '
         'correct directory in the flutter tree. If the output directory does not '
         'exist, it, and the path to it, will be created.',
   );
   argParser.addOption(
     'maps',
-    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_maps.dart'),
-    help: 'The path to where the output "keyboard_maps.dart" file should be '
+    defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_maps.g.dart'),
+    help: 'The path to where the output "keyboard_maps.g.dart" file should be '
       'written. If --maps is not specified, the output will be written to the '
       'correct directory in the flutter tree. If the output directory does not '
       'exist, it, and the path to it, will be created.',
   );
   argParser.addFlag(
     'collect',
-    defaultsTo: false,
     negatable: false,
     help: 'If this flag is set, then collect and parse header files from '
         'Chromium and Android instead of reading pre-parsed data from '
-        '"physical_key_data.json" and "logical_key_data.json", and then '
+        '"physical_key_data.g.json" and "logical_key_data.g.json", and then '
         'update these files with the fresh data.',
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );
@@ -208,27 +216,22 @@ Future<void> main(List<String> rawArguments) async {
     logicalData = LogicalKeyData.fromJson(json.decode(await File(parsedArguments['logical-data'] as String).readAsString()) as Map<String, dynamic>);
   }
 
-  final File codeFile = File(parsedArguments['code'] as String);
-  if (!codeFile.existsSync()) {
-    codeFile.createSync(recursive: true);
-  }
-  print('Writing ${'key codes'.padRight(15)}${codeFile.absolute}');
-  await codeFile.writeAsString(KeyboardKeysCodeGenerator(physicalData, logicalData).generate());
+  final Map<String, bool> layoutGoals = parseMapOfBool(readDataFile('layout_goals.json'));
 
-  final File mapsFile = File(parsedArguments['maps'] as String);
-  if (!mapsFile.existsSync()) {
-    mapsFile.createSync(recursive: true);
-  }
-  print('Writing ${'key maps'.padRight(15)}${mapsFile.absolute}');
-  await mapsFile.writeAsString(KeyboardMapsCodeGenerator(physicalData, logicalData).generate());
-
-  final File keyCodesFile = File(path.join(PlatformCodeGenerator.engineRoot,
-      'shell', 'platform', 'embedder', 'test_utils', 'key_codes.h'));
-  if (!mapsFile.existsSync()) {
-    mapsFile.createSync(recursive: true);
-  }
-  print('Writing ${'engine key codes'.padRight(15)}${mapsFile.absolute}');
-  await keyCodesFile.writeAsString(KeyCodesCcGenerator(physicalData, logicalData).generate());
+  await generate('key codes',
+      parsedArguments['code'] as String,
+      KeyboardKeysCodeGenerator(physicalData, logicalData));
+  await generate('key maps',
+      parsedArguments['maps'] as String,
+      KeyboardMapsCodeGenerator(physicalData, logicalData));
+  await generate('engine utils',
+      path.join(PlatformCodeGenerator.engineRoot,
+          'shell', 'platform', 'embedder', 'test_utils', 'key_codes.g.h'),
+      KeyCodesCcGenerator(physicalData, logicalData));
+  await generate('android utils',
+      path.join(PlatformCodeGenerator.engineRoot, 'shell', 'platform',
+          path.join('android', 'test', 'io', 'flutter', 'util', 'KeyCodes.java')),
+      KeyCodesJavaGenerator(physicalData, logicalData));
 
   final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
     'android': AndroidCodeGenerator(
@@ -238,6 +241,7 @@ Future<void> main(List<String> rawArguments) async {
     'macos': MacOSCodeGenerator(
       physicalData,
       logicalData,
+      layoutGoals,
     ),
     'ios': IOSCodeGenerator(
       physicalData,
@@ -253,6 +257,7 @@ Future<void> main(List<String> rawArguments) async {
       logicalData,
       readDataFile('gtk_modifier_bit_mapping.json'),
       readDataFile('gtk_lock_bit_mapping.json'),
+      layoutGoals,
     ),
     'web': WebCodeGenerator(
       physicalData,
@@ -263,11 +268,8 @@ Future<void> main(List<String> rawArguments) async {
   await Future.wait(platforms.entries.map((MapEntry<String, PlatformCodeGenerator> entry) {
     final String platform = entry.key;
     final PlatformCodeGenerator codeGenerator = entry.value;
-    final File platformFile = File(codeGenerator.outputPath(platform));
-    if (!platformFile.existsSync()) {
-      platformFile.createSync(recursive: true);
-    }
-    print('Writing ${'$platform map'.padRight(15)}${platformFile.absolute}');
-    return platformFile.writeAsString(codeGenerator.generate());
+    return generate('$platform map',
+        codeGenerator.outputPath(platform),
+        codeGenerator);
   }));
 }

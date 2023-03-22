@@ -8,15 +8,19 @@ import 'package:dds/dds.dart' as dds;
 import 'package:meta/meta.dart';
 
 import 'common.dart';
+import 'context.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 
+// TODO(fujino): This should be direct injected, rather than mutable global state.
 @visibleForTesting
 Future<dds.DartDevelopmentService> Function(
   Uri remoteVmServiceUri, {
   bool enableAuthCodes,
   bool ipv6,
   Uri? serviceUri,
+  List<String> cachedUserTags,
+  dds.UriConverter? uriConverter,
 }) ddsLauncherCallback = dds.DartDevelopmentService.startDartDevelopmentService;
 
 /// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
@@ -31,27 +35,31 @@ class DartDevelopmentService {
   final Completer<void> _completer = Completer<void>();
 
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri, {
+    Uri vmServiceUri, {
     required Logger logger,
     int? hostPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
   }) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
-      host: (ipv6 == true ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4).host,
+      host: ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4).host,
       port: hostPort ?? 0,
     );
     logger.printTrace(
       'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
-      'connecting to VM service at $observatoryUri.',
+      'connecting to VM service at $vmServiceUri.',
     );
     try {
       _ddsInstance = await ddsLauncherCallback(
-          observatoryUri,
+          vmServiceUri,
           serviceUri: ddsUri,
           enableAuthCodes: disableServiceAuthCodes != true,
-          ipv6: ipv6 == true,
+          ipv6: ipv6 ?? false,
+          // Enables caching of CPU samples collected during application startup.
+          cachedUserTags: cacheStartupProfile ? const <String>['AppStartUp'] : const <String>[],
+          uriConverter: context.get<dds.UriConverter>(),
         );
       unawaited(_ddsInstance?.done.whenComplete(() {
         if (!_completer.isCompleted) {
@@ -63,9 +71,21 @@ class DartDevelopmentService {
       logger.printTrace('Warning: Failed to start DDS: ${e.message}');
       if (e.errorCode == dds.DartDevelopmentServiceException.existingDdsInstanceError) {
         try {
-          _existingDdsUri = Uri.parse(
-            e.message.split(' ').firstWhere((String e) => e.startsWith('http'))
-          );
+          // First try to use the new field to avoid parsing from the message.
+          _existingDdsUri = e is dds.ExistingDartDevelopmentServiceException ? e.ddsUri : null;
+
+            // Otherwise, fall back to parsing from the exception (old DDS).
+            // This is not completely reliable which is why the new field above
+            // was added.
+            if (_existingDdsUri == null) {
+              String parsedUrl = e.message.split(' ').firstWhere((String e) => e.startsWith('http'));
+              // Trim trailing full stops from the message.
+              // https://github.com/flutter/flutter/issues/118609.
+              if (parsedUrl.endsWith('.')) {
+                parsedUrl = parsedUrl.substring(0, parsedUrl.length - 1);
+              }
+              _existingDdsUri ??= Uri.parse(parsedUrl);
+            }
         } on StateError {
           if (e.message.contains('Existing VM service clients prevent DDS from taking control.')) {
             throwToolExit('${e.message}. Please rebuild your application with a newer version of Flutter.');
@@ -88,4 +108,8 @@ class DartDevelopmentService {
   }
 
   Future<void> shutdown() async => _ddsInstance?.shutdown();
+
+  void setExternalDevToolsUri(Uri uri) {
+    _ddsInstance?.setExternalDevToolsUri(uri);
+  }
 }

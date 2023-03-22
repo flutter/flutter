@@ -41,7 +41,7 @@ void main() {
 
     expectNoAnimation();
 
-    final double halfTolerance = controller.position.physics.tolerance.distance / 2;
+    final double halfTolerance = controller.position.physics.toleranceFor(controller.position).distance / 2;
     expect(halfTolerance, isNonZero);
     final double targetPosition = controller.position.pixels + halfTolerance;
     controller.position.animateTo(targetPosition, duration: const Duration(seconds: 10), curve: Curves.linear);
@@ -64,15 +64,15 @@ void main() {
 
     expectNoAnimation();
 
-    final double doubleTolerance = controller.position.physics.tolerance.distance * 2;
+    final double doubleTolerance = controller.position.physics.toleranceFor(controller.position).distance * 2;
     expect(doubleTolerance, isNonZero);
     final double targetPosition = controller.position.pixels + doubleTolerance;
     controller.position.animateTo(targetPosition, duration: const Duration(seconds: 10), curve: Curves.linear);
 
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1), reason: 'Expected an animation.');
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(1), reason: 'Expected an animation.');
   });
 }
 
 void expectNoAnimation() {
-  expect(SchedulerBinding.instance!.transientCallbackCount, equals(0), reason: 'Expected no animation.');
+  expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
 }

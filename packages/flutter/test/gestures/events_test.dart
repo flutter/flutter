@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'gesture_tester.dart';
 
 void main() {
-  setUp(ensureGestureBinding);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   testGesture('toString control tests', (GestureTester tester) {
     expect(const PointerDownEvent(), hasOneLineDescription);
@@ -496,12 +495,44 @@ void main() {
 
     const PointerScrollEvent scroll = PointerScrollEvent(
       timeStamp: Duration(seconds: 2),
-      kind: PointerDeviceKind.mouse,
       device: 1,
       position: Offset(20, 30),
     );
     _expectTransformedEvent(
       original: scroll,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
+    const PointerPanZoomStartEvent panZoomStart = PointerPanZoomStartEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomStart,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
+    const PointerPanZoomUpdateEvent panZoomUpdate = PointerPanZoomUpdateEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomUpdate,
+      transform: transform,
+      localPosition: localPosition,
+    );
+
+    const PointerPanZoomEndEvent panZoomEnd = PointerPanZoomEndEvent(
+      timeStamp: Duration(seconds: 2),
+      device: 1,
+      position: Offset(20, 30),
+    );
+    _expectTransformedEvent(
+      original: panZoomEnd,
       transform: transform,
       localPosition: localPosition,
     );
@@ -812,6 +843,22 @@ void main() {
       expect(event.tilt,        empty.tilt);
       expect(event.synthesized, empty.synthesized);
     });
+  });
+
+  test('Ensure certain event types are allowed', () {
+    // Regression test for https://github.com/flutter/flutter/issues/107962
+    expect(const PointerHoverEvent(kind: PointerDeviceKind.trackpad), isNotNull);
+    // Regression test for https://github.com/flutter/flutter/issues/108176
+    expect(const PointerScrollInertiaCancelEvent(kind: PointerDeviceKind.trackpad), isNotNull);
+
+    expect(const PointerScrollEvent(kind: PointerDeviceKind.trackpad), isNotNull);
+    // The test passes if it compiles.
+  });
+
+  test('Ensure certain event types are not allowed', () {
+    expect(() => PointerDownEvent(kind: PointerDeviceKind.trackpad), throwsAssertionError);
+    expect(() => PointerMoveEvent(kind: PointerDeviceKind.trackpad), throwsAssertionError);
+    expect(() => PointerUpEvent(kind: PointerDeviceKind.trackpad), throwsAssertionError);
   });
 }
 

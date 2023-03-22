@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -10,15 +12,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
-    renderer;
-
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
-    final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {
-      onNeedVisualUpdateCallCount +=1;
-    });
+    final PipelineOwner owner = PipelineOwner(
+      onNeedVisualUpdate: () {
+        onNeedVisualUpdateCallCount +=1;
+      },
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {}
+    );
     owner.ensureSemantics();
     renderObject.attach(owner);
     renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information is up to date.
@@ -27,6 +32,49 @@ void main() {
     expect(onNeedVisualUpdateCallCount, 1);
     renderObject.markNeedsSemanticsUpdate();
     expect(onNeedVisualUpdateCallCount, 2);
+  });
+
+  test('onSemanticsUpdate is called during flushSemantics.', () {
+    int onSemanticsUpdateCallCount = 0;
+    final PipelineOwner owner = PipelineOwner(
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+        onSemanticsUpdateCallCount += 1;
+      },
+    );
+    owner.ensureSemantics();
+
+    expect(onSemanticsUpdateCallCount, 0);
+
+    final TestRenderObject renderObject = TestRenderObject();
+    renderObject.attach(owner);
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    owner.flushSemantics();
+
+    expect(onSemanticsUpdateCallCount, 1);
+  });
+
+  test('Enabling semantics without configuring onSemanticsUpdate is invalid.', () {
+    final PipelineOwner pipelineOwner = PipelineOwner();
+    expect(() => pipelineOwner.ensureSemantics(), throwsAssertionError);
+  });
+
+
+  test('onSemanticsUpdate during sendSemanticsUpdate.', () {
+    int onSemanticsUpdateCallCount = 0;
+    final SemanticsOwner owner = SemanticsOwner(
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+        onSemanticsUpdateCallCount += 1;
+      },
+    );
+
+    final SemanticsNode node = SemanticsNode.root(owner: owner);
+    node.rect = Rect.largest;
+
+    expect(onSemanticsUpdateCallCount, 0);
+
+    owner.sendSemanticsUpdate();
+
+    expect(onSemanticsUpdateCallCount, 1);
   });
 
   test('detached RenderObject does not do semantics', () {
@@ -153,6 +201,76 @@ void main() {
     expect(renderObject.toStringShort(), contains('DISPOSED'));
   });
 
+  test('Leader layer can switch to a different render object within one frame', () {
+    List<FlutterErrorDetails?>? caughtErrors;
+    TestRenderingFlutterBinding.instance.onErrors = () {
+      caughtErrors = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
+    };
+
+    final LayerLink layerLink = LayerLink();
+    // renderObject1 paints the leader layer first.
+    final LeaderLayerRenderObject renderObject1 = LeaderLayerRenderObject();
+    renderObject1.layerLink = layerLink;
+    renderObject1.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    final OffsetLayer rootLayer1 = OffsetLayer();
+    rootLayer1.attach(renderObject1);
+    renderObject1.scheduleInitialPaint(rootLayer1);
+    renderObject1.layout(const BoxConstraints.tightForFinite());
+
+    final LeaderLayerRenderObject renderObject2 = LeaderLayerRenderObject();
+    final OffsetLayer rootLayer2 = OffsetLayer();
+    rootLayer2.attach(renderObject2);
+    renderObject2.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    renderObject2.scheduleInitialPaint(rootLayer2);
+    renderObject2.layout(const BoxConstraints.tightForFinite());
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+
+    // Swap the layer link to renderObject2 in the same frame
+    renderObject1.layerLink = null;
+    renderObject1.markNeedsPaint();
+    renderObject2.layerLink = layerLink;
+    renderObject2.markNeedsPaint();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+
+    // Swap the layer link to renderObject1 in the same frame
+    renderObject1.layerLink = layerLink;
+    renderObject1.markNeedsPaint();
+    renderObject2.layerLink = null;
+    renderObject2.markNeedsPaint();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+
+    TestRenderingFlutterBinding.instance.onErrors = null;
+    expect(caughtErrors, isNull);
+  });
+
+  test('Leader layer append to two render objects does crash', () {
+    List<FlutterErrorDetails?>? caughtErrors;
+    TestRenderingFlutterBinding.instance.onErrors = () {
+      caughtErrors = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
+    };
+    final LayerLink layerLink = LayerLink();
+    // renderObject1 paints the leader layer first.
+    final LeaderLayerRenderObject renderObject1 = LeaderLayerRenderObject();
+    renderObject1.layerLink = layerLink;
+    renderObject1.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    final OffsetLayer rootLayer1 = OffsetLayer();
+    rootLayer1.attach(renderObject1);
+    renderObject1.scheduleInitialPaint(rootLayer1);
+    renderObject1.layout(const BoxConstraints.tightForFinite());
+
+    final LeaderLayerRenderObject renderObject2 = LeaderLayerRenderObject();
+    renderObject2.layerLink = layerLink;
+    final OffsetLayer rootLayer2 = OffsetLayer();
+    rootLayer2.attach(renderObject2);
+    renderObject2.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    renderObject2.scheduleInitialPaint(rootLayer2);
+    renderObject2.layout(const BoxConstraints.tightForFinite());
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+
+    TestRenderingFlutterBinding.instance.onErrors = null;
+    expect(caughtErrors!.isNotEmpty, isTrue);
+  });
+
   test('RenderObject.dispose null the layer on repaint boundaries', () {
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true);
     // Force a layer to get set.
@@ -176,8 +294,39 @@ void main() {
     renderObject.dispose();
     expect(renderObject.debugLayer, null);
   });
+
+  test('Add composition callback works', () {
+    final ContainerLayer root = ContainerLayer();
+    final PaintingContext context = PaintingContext(root, Rect.zero);
+    bool calledBack = false;
+    final TestObservingRenderObject object = TestObservingRenderObject((Layer layer) {
+      expect(layer, root);
+      calledBack = true;
+    });
+
+    expect(calledBack, false);
+    object.paint(context, Offset.zero);
+    expect(calledBack, false);
+
+    root.buildScene(ui.SceneBuilder()).dispose();
+    expect(calledBack, true);
+  });
 }
 
+
+class TestObservingRenderObject extends RenderBox {
+  TestObservingRenderObject(this.callback);
+
+  final CompositionCallback callback;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.addCompositionCallback(callback);
+  }
+}
 // Tests the create-update cycle by pumping two frames. The first frame has no
 // prior layer and forces the painting context to create a new one. The second
 // frame reuses the layer painted on the first frame.
@@ -253,6 +402,39 @@ class TestRenderObject extends RenderObject {
     config.isSemanticBoundary = true;
     describeSemanticsConfigurationCallCount++;
   }
+}
+
+class LeaderLayerRenderObject extends RenderObject {
+  LeaderLayerRenderObject();
+
+  LayerLink? layerLink;
+
+  @override
+  bool isRepaintBoundary = true;
+
+  @override
+  void debugAssertDoesMeetConstraints() { }
+
+  @override
+  Rect get paintBounds {
+    return Rect.zero;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (layerLink != null) {
+      context.pushLayer(LeaderLayer(link: layerLink!), super.paint, offset);
+    }
+  }
+
+  @override
+  void performLayout() { }
+
+  @override
+  void performResize() { }
+
+  @override
+  Rect get semanticBounds => const Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
 }
 
 class TestThrowingRenderObject extends RenderObject {

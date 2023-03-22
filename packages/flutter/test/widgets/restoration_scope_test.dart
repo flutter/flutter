@@ -42,7 +42,6 @@ void main() {
     testWidgets('null bucket disables restoration', (WidgetTester tester) async {
       await tester.pumpWidget(
         const UnmanagedRestorationScope(
-          bucket: null,
           child: BucketSpy(),
         ),
       );

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file implements debugPrint in terms of print, so avoiding
+// calling "print" is sort of a non-starter here...
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -51,8 +55,9 @@ void debugPrintThrottled(String? message, { int? wrapWidth }) {
   } else {
     _debugPrintBuffer.addAll(messageLines);
   }
-  if (!_debugPrintScheduled)
+  if (!_debugPrintScheduled) {
     _debugPrintTask();
+  }
 }
 int _debugPrintedCharacters = 0;
 const int _kDebugPrintCapacity = 12 * 1024;
@@ -109,11 +114,11 @@ enum _WordWrapParseMode { inSpace, inWord, atBreak }
 /// and so forth. It is only intended for formatting error messages.
 ///
 /// The default [debugPrint] implementation uses this for its line wrapping.
-Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = '' }) sync* {
+Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = '' }) {
   if (message.length < width || message.trimLeft()[0] == '#') {
-    yield message;
-    return;
+    return <String>[message];
   }
+  final List<String> wrapped = <String>[];
   final Match prefixMatch = _indentPattern.matchAsPrefix(message)!;
   final String prefix = wrapIndent + ' ' * prefixMatch.group(0)!.length;
   int start = 0;
@@ -126,14 +131,16 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
   while (true) {
     switch (mode) {
       case _WordWrapParseMode.inSpace: // at start of break point (or start of line); can't break until next break
-        while ((index < message.length) && (message[index] == ' '))
+        while ((index < message.length) && (message[index] == ' ')) {
           index += 1;
+        }
         lastWordStart = index;
         mode = _WordWrapParseMode.inWord;
         break;
       case _WordWrapParseMode.inWord: // looking for a good break point
-        while ((index < message.length) && (message[index] != ' '))
+        while ((index < message.length) && (message[index] != ' ')) {
           index += 1;
+        }
         mode = _WordWrapParseMode.atBreak;
         break;
       case _WordWrapParseMode.atBreak: // at start of break point
@@ -145,19 +152,21 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
             lastWordEnd = index;
           }
           if (addPrefix) {
-            yield prefix + message.substring(start, lastWordEnd);
+            wrapped.add(prefix + message.substring(start, lastWordEnd));
           } else {
-            yield message.substring(start, lastWordEnd);
+            wrapped.add(message.substring(start, lastWordEnd));
             addPrefix = true;
           }
-          if (lastWordEnd >= message.length)
-            return;
+          if (lastWordEnd >= message.length) {
+            return wrapped;
+          }
           // just yielded a line
           if (lastWordEnd == index) {
             // we broke at current position
             // eat all the spaces, then set our start point
-            while ((index < message.length) && (message[index] == ' '))
+            while ((index < message.length) && (message[index] == ' ')) {
               index += 1;
+            }
             start = index;
             mode = _WordWrapParseMode.inWord;
           } else {

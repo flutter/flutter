@@ -14,7 +14,7 @@ void main() {
   enableFlutterDriverExtension();
 
   final Completer<List<FrameTiming>> completer = Completer<List<FrameTiming>>();
-  SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
+  SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
     completer.complete(timings);
   });
 
@@ -26,9 +26,8 @@ void main() {
 
 class _FirstFrameTimings extends StatefulWidget {
   const _FirstFrameTimings({
-    Key? key,
     required this.completer,
-  }) : super(key: key);
+  });
 
   final Completer<List<FrameTiming>> completer;
 

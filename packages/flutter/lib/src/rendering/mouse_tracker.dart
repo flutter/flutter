@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This library intentionally uses the LinkedHashMap constructor to declare that
+// entries will be ordered. Using collection literals for this requires casting the
+// resulting map, which has a runtime cost.
+// ignore_for_file: prefer_collection_literals
+
 import 'dart:collection' show LinkedHashMap;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-
-import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'object.dart';
 
@@ -27,8 +30,7 @@ typedef MouseDetectorAnnotationFinder = HitTestResult Function(Offset offset);
 class _MouseState {
   _MouseState({
     required PointerEvent initialEvent,
-  }) : assert(initialEvent != null),
-       _latestEvent = initialEvent;
+  }) : _latestEvent = initialEvent;
 
   // The list of annotations that contains this device.
   //
@@ -37,7 +39,6 @@ class _MouseState {
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _annotations = LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
 
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> replaceAnnotations(LinkedHashMap<MouseTrackerAnnotation, Matrix4> value) {
-    assert(value != null);
     final LinkedHashMap<MouseTrackerAnnotation, Matrix4> previous = _annotations;
     _annotations = value;
     return previous;
@@ -48,7 +49,6 @@ class _MouseState {
   PointerEvent _latestEvent;
 
   PointerEvent replaceLatestEvent(PointerEvent value) {
-    assert(value != null);
     assert(value.device == _latestEvent.device);
     final PointerEvent previous = _latestEvent;
     _latestEvent = value;
@@ -80,10 +80,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
     required this.lastAnnotations,
     required this.nextAnnotations,
     required PointerEvent this.previousEvent,
-  }) : assert(previousEvent != null),
-       assert(lastAnnotations != null),
-       assert(nextAnnotations != null),
-       triggeringEvent = null;
+  }) : triggeringEvent = null;
 
   /// When device update is triggered by a pointer event.
   ///
@@ -94,9 +91,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
     required this.nextAnnotations,
     this.previousEvent,
     required PointerEvent this.triggeringEvent,
-  }) : assert(triggeringEvent != null),
-       assert(lastAnnotations != null),
-       assert(nextAnnotations != null);
+  });
 
   /// The annotations that the device is hovering before the update.
   ///
@@ -126,7 +121,6 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   /// The pointing device of this update.
   int get device {
     final int result = (previousEvent ?? triggeringEvent)!.device;
-    assert(result != null);
     return result;
   }
 
@@ -135,7 +129,6 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   /// The [latestEvent] is never null.
   PointerEvent get latestEvent {
     final PointerEvent result = triggeringEvent ?? previousEvent!;
-    assert(result != null);
     return result;
   }
 
@@ -188,8 +181,9 @@ class MouseTracker extends ChangeNotifier {
   void _monitorMouseConnection(VoidCallback task) {
     final bool mouseWasConnected = mouseIsConnected;
     task();
-    if (mouseWasConnected != mouseIsConnected)
+    if (mouseWasConnected != mouseIsConnected) {
       notifyListeners();
+    }
   }
 
   bool _debugDuringDeviceUpdate = false;
@@ -212,9 +206,9 @@ class MouseTracker extends ChangeNotifier {
 
   // Whether an observed event might update a device.
   static bool _shouldMarkStateDirty(_MouseState? state, PointerEvent event) {
-    if (state == null)
+    if (state == null) {
       return true;
-    assert(event != null);
+    }
     final PointerEvent lastEvent = state.latestEvent;
     assert(event.device == lastEvent.device);
     // An Added can only follow a Removed, and a Removed can only be followed
@@ -222,20 +216,20 @@ class MouseTracker extends ChangeNotifier {
     assert((event is PointerAddedEvent) == (lastEvent is PointerRemovedEvent));
 
     // Ignore events that are unrelated to mouse tracking.
-    if (event is PointerSignalEvent)
+    if (event is PointerSignalEvent) {
       return false;
+    }
     return lastEvent is PointerAddedEvent
       || event is PointerRemovedEvent
       || lastEvent.position != event.position;
   }
 
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _hitTestResultToAnnotations(HitTestResult result) {
-    assert(result != null);
-    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = <MouseTrackerAnnotation, Matrix4>{}
-        as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
+    final LinkedHashMap<MouseTrackerAnnotation, Matrix4> annotations = LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
     for (final HitTestEntry entry in result.path) {
-      if (entry.target is MouseTrackerAnnotation) {
-        annotations[entry.target as MouseTrackerAnnotation] = entry.transform!;
+      final Object target = entry.target;
+      if (target is MouseTrackerAnnotation) {
+        annotations[target] = entry.transform!;
       }
     }
     return annotations;
@@ -247,12 +241,11 @@ class MouseTracker extends ChangeNotifier {
   // If the device is not connected or not a mouse, an empty map is returned
   // without calling `hitTest`.
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _findAnnotations(_MouseState state, MouseDetectorAnnotationFinder hitTest) {
-    assert(state != null);
-    assert(hitTest != null);
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
-    if (!_mouseStates.containsKey(device))
-      return <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4>;
+    if (!_mouseStates.containsKey(device)) {
+      return LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
+    }
 
     return _hitTestResultToAnnotations(hitTest(globalPosition));
   }
@@ -290,23 +283,26 @@ class MouseTracker extends ChangeNotifier {
   /// result.
   ///
   /// The [updateWithEvent] indicates that an event has been observed, and is
-  /// called during the handler of the event.  It is typically called by
+  /// called during the handler of the event. It is typically called by
   /// [RendererBinding], and should be called with all events received, and let
   /// [MouseTracker] filter which to react to.
   ///
   /// The `getResult` is a function to return the hit test result at the
-  /// position of the event. It should not simply return cached hit test
-  /// result, because the cache does not change throughout a tap sequence.
+  /// position of the event. It should not return a cached hit test
+  /// result, because the cache would not change during a tap sequence.
   void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
-    if (event.kind != PointerDeviceKind.mouse)
+    if (event.kind != PointerDeviceKind.mouse) {
       return;
-    if (event is PointerSignalEvent)
+    }
+    if (event is PointerSignalEvent) {
       return;
+    }
     final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
     final int device = event.device;
     final _MouseState? existingState = _mouseStates[device];
-    if (!_shouldMarkStateDirty(existingState, event))
+    if (!_shouldMarkStateDirty(existingState, event)) {
       return;
+    }
 
     _monitorMouseConnection(() {
       _deviceUpdatePhase(() {
@@ -314,18 +310,21 @@ class MouseTracker extends ChangeNotifier {
         // so that [mouseIsConnected], which is decided by `_mouseStates`, is
         // correct during the callbacks.
         if (existingState == null) {
-          assert(event is! PointerRemovedEvent);
+          if (event is PointerRemovedEvent) {
+            return;
+          }
           _mouseStates[device] = _MouseState(initialEvent: event);
         } else {
           assert(event is! PointerAddedEvent);
-          if (event is PointerRemovedEvent)
+          if (event is PointerRemovedEvent) {
             _mouseStates.remove(event.device);
+          }
         }
         final _MouseState targetState = _mouseStates[device] ?? existingState!;
 
         final PointerEvent lastEvent = targetState.replaceLatestEvent(event);
         final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations = event is PointerRemovedEvent ?
-            <MouseTrackerAnnotation, Matrix4>{} as LinkedHashMap<MouseTrackerAnnotation, Matrix4> :
+            LinkedHashMap<MouseTrackerAnnotation, Matrix4>() :
             _hitTestResultToAnnotations(result);
         final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations = targetState.replaceAnnotations(nextAnnotations);
 
@@ -393,9 +392,11 @@ class MouseTracker extends ChangeNotifier {
     // hit-test order.
     final PointerExitEvent baseExitEvent = PointerExitEvent.fromMouseEvent(latestEvent);
     lastAnnotations.forEach((MouseTrackerAnnotation annotation, Matrix4 transform) {
-      if (!nextAnnotations.containsKey(annotation))
-        if (annotation.validForMouseTracker && annotation.onExit != null)
+      if (!nextAnnotations.containsKey(annotation)) {
+        if (annotation.validForMouseTracker && annotation.onExit != null) {
           annotation.onExit!(baseExitEvent.transformed(lastAnnotations[annotation]));
+        }
+      }
     });
 
     // Send enter events to annotations that are not in last but in next, in
@@ -405,8 +406,9 @@ class MouseTracker extends ChangeNotifier {
     ).toList();
     final PointerEnterEvent baseEnterEvent = PointerEnterEvent.fromMouseEvent(latestEvent);
     for (final MouseTrackerAnnotation annotation in enteringAnnotations.reversed) {
-      if (annotation.validForMouseTracker && annotation.onEnter != null)
+      if (annotation.validForMouseTracker && annotation.onEnter != null) {
         annotation.onEnter!(baseEnterEvent.transformed(nextAnnotations[annotation]));
+      }
     }
   }
 }

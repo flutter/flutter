@@ -68,8 +68,8 @@ enum CocoaPodsStatus {
   brokenInstall,
 }
 
-const Version cocoaPodsMinimumVersion = Version.withText(1, 9, 0, '1.9.0');
-const Version cocoaPodsRecommendedVersion = Version.withText(1, 10, 0, '1.10.0');
+const Version cocoaPodsMinimumVersion = Version.withText(1, 10, 0, '1.10.0');
+const Version cocoaPodsRecommendedVersion = Version.withText(1, 11, 0, '1.11.0');
 
 /// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
@@ -176,7 +176,7 @@ class CocoaPods {
     final CocoaPodsStatus installation = await evaluateCocoaPodsInstallation;
     switch (installation) {
       case CocoaPodsStatus.notInstalled:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: CocoaPods not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
           'To install $cocoaPodsInstallInstructions\n',
@@ -184,7 +184,7 @@ class CocoaPods {
         );
         return false;
       case CocoaPodsStatus.brokenInstall:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
           '$brokenCocoaPodsConsequence\n'
           'To re-install $cocoaPodsInstallInstructions\n',
@@ -192,7 +192,7 @@ class CocoaPods {
         );
         return false;
       case CocoaPodsStatus.unknownVersion:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: Unknown CocoaPods version installed.\n'
           '$unknownCocoaPodsConsequence\n'
           'To upgrade $cocoaPodsInstallInstructions\n',
@@ -200,7 +200,7 @@ class CocoaPods {
         );
         break;
       case CocoaPodsStatus.belowMinimumVersion:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
           'To upgrade $cocoaPodsInstallInstructions\n',
@@ -208,7 +208,7 @@ class CocoaPods {
         );
         return false;
       case CocoaPodsStatus.belowRecommendedVersion:
-        _logger.printError(
+        _logger.printWarning(
           'Warning: CocoaPods recommended version $cocoaPodsRecommendedVersion or greater not installed.\n'
           'Pods handling may fail on some projects involving plugins.\n'
           'To upgrade $cocoaPodsInstallInstructions\n',
@@ -275,7 +275,7 @@ class CocoaPods {
       final String includeFile = 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
           .toLowerCase()}.xcconfig';
       final String include = '#include? "$includeFile"';
-      if (!content.contains(includeFile)) {
+      if (!content.contains('Pods/Target Support Files/Pods-')) {
         file.writeAsStringSync('$include\n$content', flush: true);
       }
     }
@@ -349,10 +349,11 @@ class CocoaPods {
   }
 
   void _diagnosePodInstallFailure(ProcessResult result) {
-    if (result.stdout is! String) {
+    final Object? stdout = result.stdout;
+    final Object? stderr = result.stderr;
+    if (stdout is! String || stderr is! String) {
       return;
     }
-    final String stdout = result.stdout as String;
     if (stdout.contains('out-of-date source repos')) {
       _logger.printError(
         "Error: CocoaPods's specs repository is too out-of-date to satisfy dependencies.\n"
@@ -360,9 +361,8 @@ class CocoaPods {
         '  pod repo update\n',
         emphasis: true,
       );
-    } else if (stdout.contains('Init_ffi_c') &&
-        stdout.contains('symbol not found') &&
-        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+    } else if ((_isFfiX86Error(stdout) || _isFfiX86Error(stderr)) &&
+        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // https://github.com/flutter/flutter/issues/70796
       UsageEvent(
         'pod-install-failure',
@@ -371,10 +371,14 @@ class CocoaPods {
       ).send();
       _logger.printError(
         'Error: To set up CocoaPods for ARM macOS, run:\n'
-        '  arch -x86_64 sudo gem install ffi\n',
+        '  sudo gem uninstall ffi && sudo gem install ffi -- --enable-libffi-alloc\n',
         emphasis: true,
       );
     }
+  }
+
+  bool _isFfiX86Error(String error) {
+    return error.contains('ffi_c.bundle') || error.contains('/ffi/');
   }
 
   void _warnIfPodfileOutOfDate(XcodeBasedProject xcodeProject) {
@@ -406,15 +410,15 @@ class CocoaPods {
     // plugin_pods = parse_KV_file('../.flutter-plugins')
     if (xcodeProject.podfile.existsSync() &&
       xcodeProject.podfile.readAsStringSync().contains(".flutter-plugins'")) {
-      const String error = 'Warning: Podfile is out of date\n'
+      const String warning = 'Warning: Podfile is out of date\n'
           '$outOfDatePluginsPodfileConsequence\n'
           'To regenerate the Podfile, run:\n';
       if (isIos) {
-        throwToolExit('$error\n$podfileIosMigrationInstructions\n');
+        throwToolExit('$warning\n$podfileIosMigrationInstructions\n');
       } else {
         // The old macOS Podfile will work until `.flutter-plugins` is removed.
         // Warn instead of exit.
-        _logger.printError('$error\n$podfileMacOSMigrationInstructions\n', emphasis: true);
+        _logger.printWarning('$warning\n$podfileMacOSMigrationInstructions\n', emphasis: true);
       }
     }
   }

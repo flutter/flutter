@@ -17,12 +17,12 @@ void main() {
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   testWidgets('Changing query moves cursor to the end of query', (WidgetTester tester) async {
@@ -109,7 +109,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
     expect(selectedResults, <String?>[null]);
@@ -321,7 +321,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
@@ -335,7 +334,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
@@ -357,7 +355,6 @@ void main() {
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
       passInInitialQuery: true,
-      initialQuery: null,
     ));
 
     // runs while search fades in
@@ -557,8 +554,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text hintText = tester.widget(find.text(searchHintText));
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
     expect(hintText.style?.color, delegate.searchFieldStyle?.color);
     expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+    expect(textField.style?.color, delegate.searchFieldStyle?.color);
+    expect(textField.style?.fontSize, delegate.searchFieldStyle?.fontSize);
+
   });
 
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
@@ -619,7 +621,7 @@ void main() {
                               SemanticsFlag.isFocusable,
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap],
-                            label: 'Back',
+                            tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
                           TestSemantics(
@@ -632,7 +634,8 @@ void main() {
                                 debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
-                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS)
+                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+                                debugDefaultTargetPlatformOverride == TargetPlatform.windows)
                                 SemanticsAction.didGainAccessibilityFocus,
                               SemanticsAction.tap,
                               SemanticsAction.setSelection,
@@ -753,7 +756,7 @@ void main() {
     expect(appBarBackground.color, Colors.white);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, themeData.textTheme.bodyLarge!.color);
     expect(textField.style!.color, isNot(equals(Colors.white)));
   });
 
@@ -781,7 +784,7 @@ void main() {
     expect(appBarBackground.color, themeData.primaryColor);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, themeData.textTheme.bodyLarge!.color);
     expect(textField.style!.color, isNot(equals(themeData.primaryColor)));
   });
 
@@ -789,10 +792,7 @@ void main() {
   testWidgets('`Leading` and `Actions` nullable test', (WidgetTester tester) async {
     // The search delegate page is displayed with no issues
     // even with a null return values for [buildLeading] and [buildActions].
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
-      result: 'Result',
-      suggestions: 'Suggestions',
-    );
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
     final List<String> selectedResults = <String>[];
 
     await tester.pumpWidget(TestHomePage(
@@ -831,10 +831,7 @@ void main() {
     final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
     final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
 
-    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate(
-      result: 'Result',
-      suggestions: 'Suggestions',
-    );
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
 
     await tester.pumpWidget(MaterialApp(
       navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -886,17 +883,53 @@ void main() {
     expect(rootObserver.pushCount, 1);
     expect(localObserver.pushCount, 1);
   });
+
+  testWidgets('Query text field shows toolbar initially', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/95588
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final List<String> selectedResults = <String>[];
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // Open search.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.controller!.text.length, 0);
+
+    mockClipboard.handleMethodCall(const MethodCall(
+      'Clipboard.setData',
+      <String, dynamic>{
+        'text': 'pasteablestring',
+      },
+    ));
+
+    // Long press shows toolbar.
+    await tester.longPress(textFieldFinder);
+    await tester.pump();
+    expect(find.text('Paste'), findsOneWidget);
+
+    await tester.tap(find.text('Paste'));
+    await tester.pump();
+    expect(textField.controller!.text.length, 15);
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
 
 class TestHomePage extends StatelessWidget {
   const TestHomePage({
-    Key? key,
+    super.key,
     this.results,
     required this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
     this.themeData,
-  }) : super(key: key);
+  });
 
   final List<String?>? results;
   final SearchDelegate<String> delegate;
@@ -948,15 +981,12 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.result = 'Result',
     this.actions = const <Widget>[],
     this.defaultAppBarTheme = false,
-    InputDecorationTheme? searchFieldDecorationTheme,
-    TextStyle? searchFieldStyle,
+    super.searchFieldDecorationTheme,
+    super.searchFieldStyle,
     String? searchHint,
-    TextInputAction textInputAction = TextInputAction.search,
+    super.textInputAction,
   }) : super(
           searchFieldLabel: searchHint,
-          textInputAction: textInputAction,
-          searchFieldStyle: searchFieldStyle,
-          searchFieldDecorationTheme: searchFieldDecorationTheme,
         );
 
   final bool defaultAppBarTheme;
@@ -1028,14 +1058,6 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 }
 
 class _TestEmptySearchDelegate extends SearchDelegate<String> {
-  _TestEmptySearchDelegate({
-    this.suggestions = 'Suggestions',
-    this.result = 'Result',
-  }) : super();
-
-  final String suggestions;
-  final String result;
-
   @override
   Widget? buildLeading(BuildContext context) => null;
 
@@ -1048,7 +1070,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
       onPressed: () {
         showResults(context);
       },
-      child: Text(suggestions),
+      child: const Text('Suggestions'),
     );
   }
 
@@ -1065,7 +1087,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
         tooltip: 'Close',
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
-          close(context, result);
+          close(context, 'Result');
         },
       ),
     );

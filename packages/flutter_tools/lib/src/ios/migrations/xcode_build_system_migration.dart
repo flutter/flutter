@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
@@ -13,20 +12,20 @@ import '../../xcode_project.dart';
 class XcodeBuildSystemMigration extends ProjectMigrator {
   XcodeBuildSystemMigration(
     IosProject project,
-    Logger logger,
-  ) : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings,
-      super(logger);
+    super.logger,
+  ) : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings;
 
-  final File _xcodeWorkspaceSharedSettings;
+  final File? _xcodeWorkspaceSharedSettings;
 
   @override
-  bool migrate() {
-    if (!_xcodeWorkspaceSharedSettings.existsSync()) {
+  void migrate() {
+    final File? xcodeWorkspaceSharedSettings = _xcodeWorkspaceSharedSettings;
+    if (xcodeWorkspaceSharedSettings == null || !xcodeWorkspaceSharedSettings.existsSync()) {
       logger.printTrace('Xcode workspace settings not found, skipping build system migration');
-      return true;
+      return;
     }
 
-    final String contents = _xcodeWorkspaceSharedSettings.readAsStringSync();
+    final String contents = xcodeWorkspaceSharedSettings.readAsStringSync();
 
     // Only delete this file when it is pointing to the legacy build system.
     const String legacyBuildSettingsWorkspace = '''
@@ -35,10 +34,8 @@ class XcodeBuildSystemMigration extends ProjectMigrator {
 
     // contains instead of equals to ignore newline file ending variance.
     if (contents.contains(legacyBuildSettingsWorkspace)) {
-      logger.printStatus('Legacy build system detected, removing ${_xcodeWorkspaceSharedSettings.path}');
-      _xcodeWorkspaceSharedSettings.deleteSync();
+      logger.printStatus('Legacy build system detected, removing ${xcodeWorkspaceSharedSettings.path}');
+      xcodeWorkspaceSharedSettings.deleteSync();
     }
-
-    return true;
   }
 }

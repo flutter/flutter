@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -36,7 +34,7 @@ void main() {
           '-T',
           "'$kLastLogcatTimestamp'",
         ],
-      )
+      ),
     ]);
     await AdbLogReader.createLogReader(
       createFakeDevice(kLollipopVersionCode),
@@ -59,7 +57,7 @@ void main() {
           '-v',
           'time',
         ],
-      )
+      ),
     ]);
     await AdbLogReader.createLogReader(
       createFakeDevice(kLollipopVersionCode - 1),
@@ -82,7 +80,7 @@ void main() {
           '-v',
           'time',
         ],
-      )
+      ),
     ]);
     await AdbLogReader.createLogReader(
       createFakeDevice(null),
@@ -107,7 +105,7 @@ void main() {
           '-s',
           'flutter',
         ],
-      )
+      ),
     ]);
     await AdbLogReader.createLogReader(
       createFakeDevice(null),
@@ -133,7 +131,7 @@ void main() {
         ],
         completer: Completer<void>.sync(),
         stdout: 'Hello There\n',
-      )
+      ),
     ]);
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
       createFakeDevice(null),
@@ -167,7 +165,7 @@ void main() {
           '05-11 12:54:46.665 E/AndroidRuntime(11787): Process: com.example.foobar, PID: 11787\n'
           '05-11 12:54:46.665 java.lang.RuntimeException: Unable to instantiate application '
           'io.flutter.app.FlutterApplication2: java.lang.ClassNotFoundException:\n',
-      )
+      ),
     ]);
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
       createFakeDevice(null),
@@ -183,7 +181,7 @@ void main() {
   });
 }
 
-AndroidDevice createFakeDevice(int sdkLevel) {
+AndroidDevice createFakeDevice(int? sdkLevel) {
   return FakeAndroidDevice(
     sdkLevel.toString(),
     kLastLogcatTimestamp,

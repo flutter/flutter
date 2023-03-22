@@ -151,6 +151,29 @@ void main() {
     expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
     events.clear();
 
+    // Key press keyA with physical keyQ
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyQ);
+    expect(events.length, 1);
+    _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.keyQ, LogicalKeyboardKey.keyA, 'a');
+    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.keyQ}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.keyA}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
+    events.clear();
+
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyQ);
+    _verifyKeyEvent<KeyRepeatEvent>(events[0], PhysicalKeyboardKey.keyQ, LogicalKeyboardKey.keyA, 'a');
+    expect(HardwareKeyboard.instance.physicalKeysPressed, equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.keyQ}));
+    expect(HardwareKeyboard.instance.logicalKeysPressed, equals(<LogicalKeyboardKey>{LogicalKeyboardKey.keyA}));
+    expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
+    events.clear();
+
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA, physicalKey: PhysicalKeyboardKey.keyQ);
+    _verifyKeyEvent<KeyUpEvent>(events[0], PhysicalKeyboardKey.keyQ, LogicalKeyboardKey.keyA, null);
+    expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
+    expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
+    expect(HardwareKeyboard.instance.lockModesEnabled, isEmpty);
+    events.clear();
+
     // Key press numpad1
     await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad1);
     _verifyKeyEvent<KeyDownEvent>(events[0], PhysicalKeyboardKey.numpad1, LogicalKeyboardKey.numpad1, null);
@@ -317,7 +340,7 @@ void main() {
     // A (physical keyA, logical keyB) is released.
     //
     // Since this event is transmitted to HardwareKeyboard as-is, it will be rejected due to
-    // inconsistent logical key. This does not indicate behaviral difference,
+    // inconsistent logical key. This does not indicate behavioral difference,
     // since KeyData is will never send malformed data sequence in real applications.
     await _shouldThrow<AssertionError>(() =>
       simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA));

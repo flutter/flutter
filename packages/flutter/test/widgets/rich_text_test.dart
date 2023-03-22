@@ -26,23 +26,15 @@ void main() {
       children: <Matcher>[
         matchesSemantics(
           label: 'root',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'one',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'two',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
         matchesSemantics(
           label: 'three',
-          hasTapAction: false,
-          hasLongPressAction: false,
         ),
       ],
     ));
@@ -151,21 +143,21 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: ColoredBox(
             color: Colors.green,
             child: IntrinsicHeight(
               child: RichText(
-                text: TextSpan(
+                text: const TextSpan(
                   children: <InlineSpan>[
-                    const TextSpan(text: 'Start\n', style: TextStyle(height: 1.0, fontSize: 16)),
+                    TextSpan(text: 'Start\n', style: TextStyle(height: 1.0, fontSize: 16)),
                     WidgetSpan(
                       child: Row(
-                        children: const <Widget>[
+                        children: <Widget>[
                           SizedBox(height: 16, width: 16),
                         ],
                       ),
                     ),
-                    const TextSpan(text: 'End', style: TextStyle(height: 1.0, fontSize: 16)),
+                    TextSpan(text: 'End', style: TextStyle(height: 1.0, fontSize: 16)),
                   ],
                 ),
               ),

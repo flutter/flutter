@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:flutter_devicelab/framework/runner.dart';
 
 import 'common.dart';
@@ -11,10 +9,9 @@ import 'common.dart';
 void main() {
   final Map<String, String> isolateParams = <String, String>{
     'runFlutterConfig': 'false',
-    'runProcessCleanup': 'false',
     'timeoutInMinutes': '1',
   };
-  List<String> printLog;
+  late List<String> printLog;
   void print(String s) => printLog.add(s);
 
   group('run.dart script', () {
@@ -27,7 +24,7 @@ void main() {
         logs: printLog,
       );
       expect(printLog.length, 2);
-      expect(printLog[0], 'Total 1 executions: 1 success');
+      expect(printLog[0], 'Test passed on first attempt.');
       expect(printLog[1], 'flaky: false');
     });
 
@@ -40,7 +37,7 @@ void main() {
         logs: printLog,
       );
       expect(printLog.length, 2);
-      expect(printLog[0], 'Total 3 executions: 0 success');
+      expect(printLog[0], 'Consistently failed across all 3 executions.');
       expect(printLog[1], 'flaky: false');
     });
   });

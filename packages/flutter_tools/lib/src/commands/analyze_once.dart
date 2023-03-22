@@ -2,85 +2,56 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
-import 'package:args/args.dart';
-import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../dart/analysis.dart';
 import 'analyze_base.dart';
 
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
-    ArgResults argResults,
+    super.argResults,
     List<String> repoRoots,
     List<Directory> repoPackages, {
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required Platform platform,
-    @required ProcessManager processManager,
-    @required Terminal terminal,
-    @required Artifacts artifacts,
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+    required super.terminal,
+    required super.artifacts,
     this.workingDirectory,
   }) : super(
-        argResults,
         repoRoots: repoRoots,
         repoPackages: repoPackages,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        terminal: terminal,
-        artifacts: artifacts,
       );
 
   /// The working directory for testing analysis using dartanalyzer.
-  final Directory workingDirectory;
+  final Directory? workingDirectory;
 
   @override
   Future<void> analyze() async {
     final String currentDirectory =
         (workingDirectory ?? fileSystem.currentDirectory).path;
-
-    // find directories from argResults.rest
-    final Set<String> directories = Set<String>.of(argResults.rest
-        .map<String>((String path) => fileSystem.path.canonicalize(path)));
-    if (directories.isNotEmpty) {
-      for (final String directory in directories) {
-        final FileSystemEntityType type = fileSystem.typeSync(directory);
-
-        if (type == FileSystemEntityType.notFound) {
-          throwToolExit("'$directory' does not exist");
-        } else if (type != FileSystemEntityType.directory) {
-          throwToolExit("'$directory' is not a directory");
-        }
-      }
-    }
+    final Set<String> items = findDirectories(argResults, fileSystem);
 
     if (isFlutterRepo) {
       // check for conflicting dependencies
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
-      directories.addAll(repoRoots);
+      items.addAll(repoRoots);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
-        directories.add(currentDirectory);
+        items.add(currentDirectory);
       }
     } else {
-      if (argResults['current-package'] as bool) {
-        directories.add(currentDirectory);
+      if ((argResults['current-package'] as bool) && items.isEmpty) {
+        items.add(currentDirectory);
       }
     }
 
-    if (directories.isEmpty) {
+    if (items.isEmpty) {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
@@ -89,7 +60,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
-      directories.toList(),
+      items.toList(),
       fileSystem: fileSystem,
       platform: platform,
       logger: logger,
@@ -98,10 +69,10 @@ class AnalyzeOnce extends AnalyzeBase {
       protocolTrafficLog: protocolTrafficLog,
     );
 
-    Stopwatch timer;
-    Status progress;
+    Stopwatch? timer;
+    Status? progress;
     try {
-      StreamSubscription<bool> subscription;
+      StreamSubscription<bool>? subscription;
 
       void handleAnalysisStatus(bool isAnalyzing) {
         if (!isAnalyzing) {
@@ -123,18 +94,23 @@ class AnalyzeOnce extends AnalyzeBase {
 
       await server.start();
       // Completing the future in the callback can't fail.
-      unawaited(server.onExit.then<void>((int exitCode) {
+      unawaited(server.onExit.then<void>((int? exitCode) {
         if (!analysisCompleter.isCompleted) {
-          analysisCompleter.completeError('analysis server exited: $exitCode');
+          analysisCompleter.completeError(
+            // Include the last 20 lines of server output in exception message
+            Exception(
+              'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
+            ),
+          );
         }
       }));
 
       // collect results
       timer = Stopwatch()..start();
-      final String message = directories.length > 1
-          ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
-          : fileSystem.path.basename(directories.first);
-      progress = argResults['preamble'] as bool
+      final String message = items.length > 1
+          ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
+          : fileSystem.path.basename(items.first);
+      progress = argResults['preamble'] == true
           ? logger.startProgress(
             'Analyzing $message...',
           )
@@ -191,8 +167,7 @@ class AnalyzeOnce extends AnalyzeBase {
       if (severityLevel == AnalysisSeverity.error) {
         return true;
       }
-      if (severityLevel == AnalysisSeverity.warning &&
-        (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
+      if (severityLevel == AnalysisSeverity.warning && argResults['fatal-warnings'] as bool) {
         return true;
       }
       if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {

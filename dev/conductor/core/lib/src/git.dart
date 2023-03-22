@@ -9,8 +9,14 @@ import 'package:process/process.dart';
 import './globals.dart';
 
 /// A wrapper around git process calls that can be mocked for unit testing.
+///
+/// The `Git` class is a relatively (compared to `Repository`) lightweight
+/// abstraction over invocations to the `git` cli tool. The main
+/// motivation for creating this class was so that it could be overridden in
+/// tests. However, now that tests rely on the [FakeProcessManager] this
+/// abstraction is redundant.
 class Git {
-  Git(this.processManager) : assert(processManager != null);
+  const Git(this.processManager);
 
   final ProcessManager processManager;
 
@@ -33,7 +39,12 @@ class Git {
     bool allowNonZeroExitCode = false,
     required String workingDirectory,
   }) async {
-    final ProcessResult result = await _run(args, workingDirectory);
+    late final ProcessResult result;
+    try {
+      result = await _run(args, workingDirectory);
+    } on ProcessException {
+      _reportFailureAndExit(args, workingDirectory, result, explanation);
+    }
     if (result.exitCode != 0 && !allowNonZeroExitCode) {
       _reportFailureAndExit(args, workingDirectory, result, explanation);
     }
@@ -69,15 +80,55 @@ class Git {
     if ((result.stderr as String).isNotEmpty) {
       message.writeln('stderr from git:\n${result.stderr}\n');
     }
-    throw GitException(message.toString());
+    throw GitException(message.toString(), args);
   }
 }
 
+enum GitExceptionType {
+  /// Git push failed because the remote branch contained commits the local did
+  /// not.
+  ///
+  /// Either the local branch was wrong, and needs a rebase before pushing
+  /// again, or the remote branch needs to be overwritten with a force push.
+  ///
+  /// Example output:
+  ///
+  /// ```
+  /// To github.com:user/engine.git
+  ///
+  ///  ! [rejected]            HEAD -> cherrypicks-flutter-2.8-candidate.3 (non-fast-forward)
+  /// error: failed to push some refs to 'github.com:user/engine.git'
+  /// hint: Updates were rejected because the tip of your current branch is behind
+  /// hint: its remote counterpart. Integrate the remote changes (e.g.
+  /// hint: 'git pull ...') before pushing again.
+  /// hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+  /// ```
+  PushRejected,
+}
+
+/// An exception created because a git subprocess failed.
+///
+/// Known git failures will be assigned a [GitExceptionType] in the [type]
+/// field. If this field is null it means and unknown git failure.
 class GitException implements Exception {
-  GitException(this.message);
+  GitException(this.message, this.args) {
+    if (_pushRejectedPattern.hasMatch(message)) {
+      type = GitExceptionType.PushRejected;
+    } else {
+      // because type is late final, it must be explicitly set before it is
+      // accessed.
+      type = null;
+    }
+  }
+
+  static final RegExp _pushRejectedPattern = RegExp(
+    r'Updates were rejected because the tip of your current branch is behind',
+  );
 
   final String message;
+  final List<String> args;
+  late final GitExceptionType? type;
 
   @override
-  String toString() => 'Exception: $message';
+  String toString() => 'Exception on command "${args.join(' ')}": $message';
 }

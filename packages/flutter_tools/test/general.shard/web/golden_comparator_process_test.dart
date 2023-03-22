@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/test/flutter_web_goldens.dart';
 
 import '../../src/common.dart';
@@ -16,11 +14,11 @@ import '../../src/fakes.dart';
 
 void main() {
   group('Test that TestGoldenComparatorProcess', () {
-    File imageFile;
-    Uri goldenKey;
-    File imageFile2;
-    Uri goldenKey2;
-    FakeProcess Function(String) createFakeProcess;
+    late File imageFile;
+    late Uri goldenKey;
+    late File imageFile2;
+    late Uri goldenKey2;
+    late FakeProcess Function(String) createFakeProcess;
 
     setUpAll(() {
       imageFile = globals.fs.file('test_image_file');

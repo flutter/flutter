@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../globals_null_migrated.dart' as globals;
-
-import 'fuchsia_sdk.dart';
+import '../globals.dart' as globals;
 
 /// This is a basic wrapper class for the Fuchsia SDK's `pm` tool.
 class FuchsiaPM {
@@ -41,7 +41,7 @@ class FuchsiaPM {
   /// which describe the contents of the Fuchsia package. It must also contain
   /// two other entries:
   ///
-  ///     meta/$APPNAME.cmx=/path/to/cmx/on/the/host/$APPNAME.cmx
+  ///     meta/$APPNAME.cm=/path/to/cm/on/the/host/$APPNAME.cm
   ///     meta/package=/path/to/package/file/from/init/package
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
@@ -87,7 +87,7 @@ class FuchsiaPM {
   ///
   /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
-  /// [FuchsiaDevFinder.resolve] or [FuchsiaFfx.resolve] and [port] should be an unused port for the
+  /// [FuchsiaFfx.resolve], and [port] should be an unused port for the
   /// http server to bind.
   Future<Process> serve(String repoPath, String host, int port) async {
     final File? pm = globals.fuchsiaArtifacts?.pm;
@@ -157,7 +157,7 @@ class FuchsiaPM {
 /// var server = FuchsiaPackageServer(
 ///     '/path/to/repo',
 ///     'server_name',
-///     await FuchsiaDevFinder.resolve(deviceName),
+///     await FuchsiaFfx.resolve(deviceName),
 ///     await freshPort());
 /// try {
 ///   await server.start();
@@ -199,7 +199,7 @@ class FuchsiaPackageServer {
       return false;
     }
     // initialize a new repo.
-    final FuchsiaPM? fuchsiaPM = fuchsiaSdk?.fuchsiaPM;
+    final FuchsiaPM? fuchsiaPM = globals.fuchsiaSdk?.fuchsiaPM;
     if (fuchsiaPM == null || !await fuchsiaPM.newrepo(_repo)) {
       globals.printError('Failed to create a new package server repo');
       return false;
@@ -232,12 +232,14 @@ class FuchsiaPackageServer {
     if (_process == null) {
       return false;
     }
-    return (await fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) == true;
+    return (await globals.fuchsiaSdk?.fuchsiaPM.publish(_repo, package.path)) ??
+        false;
   }
 
   @override
   String toString() {
-    final String p = (_process == null) ? 'stopped' : 'running ${_process?.pid}';
+    final String p =
+        (_process == null) ? 'stopped' : 'running ${_process?.pid}';
     return 'FuchsiaPackageServer at $_host:$_port ($p)';
   }
 }

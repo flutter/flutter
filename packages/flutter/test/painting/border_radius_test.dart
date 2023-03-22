@@ -73,9 +73,7 @@ void main() {
     expect(borderRadius.bottomRight, radius2);
     expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(
       rect,
-      topLeft: Radius.zero,
       topRight: radius1,
-      bottomLeft: Radius.zero,
       bottomRight: radius2,
     ));
 
@@ -139,6 +137,12 @@ void main() {
     expect(BorderRadius.lerp(null, null, 0.25), isNull);
     expect(BorderRadius.lerp(null, b, 0.25), equals(b * 0.25));
     expect(BorderRadius.lerp(a, null, 0.25), equals(a * 0.75));
+  });
+
+  test('BorderRadius.lerp identical a,b', () {
+    expect(BorderRadius.lerp(null, null, 0), null);
+    const BorderRadius border = BorderRadius.zero;
+    expect(identical(BorderRadius.lerp(border, border, 0.5), border), true);
   });
 
   test('BorderRadius.lerp() crazy', () {
@@ -245,17 +249,13 @@ void main() {
     expect(borderRadius.bottomEnd, radius2);
     expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectAndCorners(
       rect,
-      topLeft: Radius.zero,
       topRight: radius1,
-      bottomLeft: Radius.zero,
       bottomRight: radius2,
     ));
     expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: radius1,
-      topRight: Radius.zero,
       bottomLeft: radius2,
-      bottomRight: Radius.zero,
     ));
 
     expect(
@@ -320,6 +320,12 @@ void main() {
     expect(BorderRadiusDirectional.lerp(a, null, 0.25), equals(a * 0.75));
   });
 
+  test('BorderRadiusDirectional.lerp identical a,b', () {
+    expect(BorderRadiusDirectional.lerp(null, null, 0), null);
+    const BorderRadiusDirectional border = BorderRadiusDirectional.zero;
+    expect(identical(BorderRadiusDirectional.lerp(border, border, 0.5), border), true);
+  });
+
   test('BorderRadiusDirectional.lerp() crazy', () {
     const BorderRadiusDirectional a = BorderRadiusDirectional.only(
       topStart: Radius.elliptical(10.0, 20.0),
@@ -367,6 +373,12 @@ void main() {
     expect(BorderRadiusGeometry.lerp(a, b, 0.5)!.resolve(TextDirection.rtl), rtl);
     expect(BorderRadiusGeometry.lerp(a, b, 0.0)!.resolve(TextDirection.ltr), a);
     expect(BorderRadiusGeometry.lerp(a, b, 1.0)!.resolve(TextDirection.rtl), b.resolve(TextDirection.rtl));
+  });
+
+  test('BorderRadiusGeometry.lerp identical a,b', () {
+    expect(BorderRadiusDirectional.lerp(null, null, 0), null);
+    const BorderRadiusGeometry border = BorderRadius.zero;
+    expect(identical(BorderRadiusGeometry.lerp(border, border, 0.5), border), true);
   });
 
   test('BorderRadiusGeometry subtract', () {
@@ -458,14 +470,11 @@ void main() {
     const BorderRadius ltr = BorderRadius.only(
       topLeft: Radius.elliptical(300.0, 500.0), // tL + 0 - 0
       topRight: Radius.elliptical(30.0, 50.0), // 0 + tE - 0
-      bottomLeft: Radius.elliptical(-3.0, -5.0), // 0 + 0 - bL
-      bottomRight: Radius.zero, // 0 + 0 - 0
+      bottomLeft: Radius.elliptical(-3.0, -5.0), // 0 + 0 - 0
     );
     const BorderRadius rtl = BorderRadius.only(
-      topLeft: Radius.elliptical(330.0, 550.0), // tL + tE - 0
-      topRight: Radius.zero, // 0 + 0 - 0
-      bottomLeft: Radius.elliptical(-3.0, -5.0), // 0 + 0 - bL
-      bottomRight: Radius.zero, // 0 + 0 - 0
+      topLeft: Radius.elliptical(330.0, 550.0), // 0 + 0 - 0
+      bottomLeft: Radius.elliptical(-3.0, -5.0), // 0 + 0 - 0
     );
     expect(a.add(b.subtract(c)).resolve(TextDirection.ltr), ltr);
     expect(a.add(b.subtract(c)).resolve(TextDirection.rtl), rtl);

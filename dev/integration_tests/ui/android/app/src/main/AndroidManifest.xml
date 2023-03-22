@@ -11,14 +11,15 @@ found in the LICENSE file. -->
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <!-- io.flutter.app.FlutterApplication is an android.app.Application that
-         calls FlutterMain.startInitialization(this); in its onCreate method.
+    <!-- ${applicationName} is used by the Flutter tool to select the Application
+         class to use. For most apps, this is the default Android application.
          In most cases you can leave this as-is, but you if you want to provide
          additional functionality it is fine to subclass or reimplement
-         FlutterApplication and put your custom class here. -->
-    <application android:name="io.flutter.app.FlutterApplication" android:label="IntegrationUI">
+         Application and put your custom class here. -->
+    <application android:name="${applicationName}" android:label="IntegrationUI">
         <activity android:name=".MainActivity"
                   android:launchMode="singleTop"
+                  android:exported="true"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density"
                   android:hardwareAccelerated="true"

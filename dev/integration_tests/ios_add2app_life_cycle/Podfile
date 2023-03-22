@@ -13,3 +13,7 @@ target 'ios_add2appTests' do
   install_flutter_engine_pod
   pod 'EarlGreyTest'
 end
+
+post_install do |installer|
+  flutter_post_install(installer)
+end

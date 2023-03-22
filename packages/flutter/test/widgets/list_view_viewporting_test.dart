@@ -192,8 +192,9 @@ void main() {
     }
 
     void collectText(Widget widget) {
-      if (widget is Text)
+      if (widget is Text) {
         text.add(widget.data);
+      }
     }
 
     Widget builder() {
@@ -325,7 +326,7 @@ void main() {
     expect(
       list.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderSliverList#00000 relayoutBoundary=up1\n'
+        'RenderSliverList#00000 relayoutBoundary=up2\n'
         ' │ needs compositing\n'
         ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
@@ -338,7 +339,7 @@ void main() {
         ' │   maxPaintExtent: 300.0, cacheExtent: 300.0)\n'
         ' │ currently live children: 0 to 2\n'
         ' │\n'
-        ' ├─child with index 0: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        ' ├─child with index 0: RenderRepaintBoundary#00000 relayoutBoundary=up3\n'
         ' │ │ needs compositing\n'
         ' │ │ parentData: index=0; layoutOffset=0.0 (can use size)\n'
         ' │ │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
@@ -348,7 +349,7 @@ void main() {
         ' │ │ diagnosis: insufficient data to draw conclusion (less than five\n'
         ' │ │   repaints)\n'
         ' │ │\n'
-        ' │ └─child: RenderConstrainedBox#00000 relayoutBoundary=up3\n'
+        ' │ └─child: RenderConstrainedBox#00000 relayoutBoundary=up4\n'
         ' │   │ parentData: <none> (can use size)\n'
         ' │   │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │   │ size: Size(800.0, 100.0)\n'
@@ -367,7 +368,7 @@ void main() {
         ' │         size: Size(800.0, 100.0)\n'
         ' │         additionalConstraints: BoxConstraints(biggest)\n'
         ' │\n'
-        ' ├─child with index 1: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        ' ├─child with index 1: RenderRepaintBoundary#00000 relayoutBoundary=up3\n'
         ' │ │ needs compositing\n'
         ' │ │ parentData: index=1; layoutOffset=100.0 (can use size)\n'
         ' │ │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
@@ -377,7 +378,7 @@ void main() {
         ' │ │ diagnosis: insufficient data to draw conclusion (less than five\n'
         ' │ │   repaints)\n'
         ' │ │\n'
-        ' │ └─child: RenderConstrainedBox#00000 relayoutBoundary=up3\n'
+        ' │ └─child: RenderConstrainedBox#00000 relayoutBoundary=up4\n'
         ' │   │ parentData: <none> (can use size)\n'
         ' │   │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │   │ size: Size(800.0, 100.0)\n'
@@ -396,7 +397,7 @@ void main() {
         ' │         size: Size(800.0, 100.0)\n'
         ' │         additionalConstraints: BoxConstraints(biggest)\n'
         ' │\n'
-        ' └─child with index 2: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        ' └─child with index 2: RenderRepaintBoundary#00000 relayoutBoundary=up3\n'
         '   │ needs compositing\n'
         '   │ parentData: index=2; layoutOffset=200.0 (can use size)\n'
         '   │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
@@ -406,7 +407,7 @@ void main() {
         '   │ diagnosis: insufficient data to draw conclusion (less than five\n'
         '   │   repaints)\n'
         '   │\n'
-        '   └─child: RenderConstrainedBox#00000 relayoutBoundary=up3\n'
+        '   └─child: RenderConstrainedBox#00000 relayoutBoundary=up4\n'
         '     │ parentData: <none> (can use size)\n'
         '     │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         '     │ size: Size(800.0, 100.0)\n'

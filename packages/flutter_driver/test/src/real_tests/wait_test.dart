@@ -135,7 +135,7 @@ void main() {
       const CombinedCondition combinedCondition =
           CombinedCondition(<SerializableWaitCondition>[
         NoTransientCallbacks(),
-        NoPendingFrame()
+        NoPendingFrame(),
       ]);
 
       expect(combinedCondition.serialize(), <String, String>{

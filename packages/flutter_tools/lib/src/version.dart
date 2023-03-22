@@ -8,26 +8,40 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/time.dart';
 import 'cache.dart';
 import 'convert.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
 const String _unknownFrameworkVersion = '0.0.0-unknown';
+
+/// A git shortcut for the branch that is being tracked by the current one.
+///
+/// See `man gitrevisions` for more information.
+const String kGitTrackingUpstream = '@{upstream}';
+
+/// This maps old branch names to the names of branches that replaced them.
+///
+/// For example, in 2021 we deprecated the "dev" channel and transitioned "dev"
+/// users to the "beta" channel.
+const Map<String, String> kObsoleteBranches = <String, String>{
+  'dev': 'beta',
+};
 
 /// The names of each channel/branch in order of increasing stability.
 enum Channel {
   master,
-  dev,
+  main,
   beta,
   stable,
 }
 
 // Beware: Keep order in accordance with stability
 const Set<String> kOfficialChannels = <String>{
-  'master',
-  'dev',
+  globals.kDefaultFrameworkChannel,
+  'main',
   'beta',
   'stable',
 };
@@ -67,7 +81,7 @@ class FlutterVersion {
       globals.processUtils,
       _workingDirectory,
     );
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, fetchTags: false, gitRef: _frameworkRevision);
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, gitRef: _frameworkRevision);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
@@ -81,7 +95,7 @@ class FlutterVersion {
   /// user explicitly wants to get the version, e.g. for `flutter --version` or
   /// `flutter doctor`.
   void fetchTagsAndUpdate() {
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, workingDirectory: _workingDirectory, fetchTags: true);
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, fetchTags: true);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
@@ -98,7 +112,7 @@ class FlutterVersion {
     String? channel = _channel;
     if (channel == null) {
       final String gitChannel = _runGit(
-        'git rev-parse --abbrev-ref --symbolic @{u}',
+        'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
         globals.processUtils,
         _workingDirectory,
       );
@@ -144,6 +158,8 @@ class FlutterVersion {
   late String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
 
+  String get devToolsVersion => globals.cache.devToolsVersion;
+
   String get dartSdkVersion => globals.cache.dartSdkVersion;
 
   String get engineRevision => globals.cache.engineRevision;
@@ -159,10 +175,10 @@ class FlutterVersion {
     final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
-    final String toolsText = 'Tools • Dart $dartSdkVersion';
+    final String toolsText = 'Tools • Dart $dartSdkVersion • DevTools $devToolsVersion';
 
     // Flutter 1.10.2-pre.69 • channel master • https://github.com/flutter/flutter.git
-    // Framework • revision 340c158f32 (84 minutes ago) • 2018-10-26 11:27:22 -0400
+    // Framework • revision 340c158f32 (85 minutes ago) • 2018-10-26 11:27:22 -0400
     // Engine • revision 9c46333e14
     // Tools • Dart 2.1.0 (build 2.1.0-dev.8.0 bf26f760b1)
 
@@ -177,6 +193,7 @@ class FlutterVersion {
     'frameworkCommitDate': frameworkCommitDate,
     'engineRevision': engineRevision,
     'dartSdkVersion': dartSdkVersion,
+    'devToolsVersion': devToolsVersion,
   };
 
   String get frameworkDate => frameworkCommitDate;
@@ -184,19 +201,19 @@ class FlutterVersion {
   /// A date String describing the last framework commit.
   ///
   /// If a git command fails, this will return a placeholder date.
-  String get frameworkCommitDate => _latestGitCommitDate(lenient: true);
+  String get frameworkCommitDate => _gitCommitDate(lenient: true);
 
-  // The date of the latest commit on the given branch. If no branch is
-  // specified, then it is the current local branch.
+  // The date of the given commit hash as [gitRef]. If no hash is specified,
+  // then it is the HEAD of the current local branch.
   //
   // If lenient is true, and the git command fails, a placeholder date is
   // returned. Otherwise, the VersionCheckError exception is propagated.
-  static String _latestGitCommitDate({
-    String? branch,
+  static String _gitCommitDate({
+    String gitRef = 'HEAD',
     bool lenient = false,
   }) {
     final List<String> args = gitLog(<String>[
-      if (branch != null) branch,
+      gitRef,
       '-n',
       '1',
       '--pretty=format:%ad',
@@ -229,74 +246,42 @@ class FlutterVersion {
     if (!kOfficialChannels.contains(channel)) {
       return;
     }
+    // Don't perform the update check if the tracking remote is not standard.
+    if (VersionUpstreamValidator(version: this, platform: globals.platform).run() != null) {
+      return;
+    }
     DateTime localFrameworkCommitDate;
     try {
-      localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate(
-        lenient: false
-      ));
+      // Don't perform the update check if fetching the latest local commit failed.
+      localFrameworkCommitDate = DateTime.parse(_gitCommitDate());
     } on VersionCheckError {
-      // Don't perform the update check if the version check failed.
       return;
     }
     final DateTime? latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
 
-    await checkVersionFreshness(
-      this,
+    return VersionFreshnessValidator(
+      version: this,
       clock: _clock,
       localFrameworkCommitDate: localFrameworkCommitDate,
       latestFlutterCommitDate: latestFlutterCommitDate,
       logger: globals.logger,
       cache: globals.cache,
-      pauseTime: timeToPauseToLetUserReadTheMessage,
-    );
+      pauseTime: VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage,
+    ).run();
   }
-
-  /// The name of the temporary git remote used to check for the latest
-  /// available Flutter framework version.
-  ///
-  /// In the absence of bugs and crashes a Flutter developer should never see
-  /// this remote appear in their `git remote` list, but also if it happens to
-  /// persist we do the proper clean-up for extra robustness.
-  static const String _versionCheckRemote = '__flutter_version_check__';
 
   /// The date of the latest framework commit in the remote repository.
   ///
   /// Throws [VersionCheckError] if a git command fails, for example, when the
   /// remote git repository is not reachable due to a network issue.
-  static Future<String> fetchRemoteFrameworkCommitDate(String branch) async {
-    await _removeVersionCheckRemoteIfExists();
+  static Future<String> fetchRemoteFrameworkCommitDate() async {
     try {
-      await _run(<String>[
-        'git',
-        'remote',
-        'add',
-        _versionCheckRemote,
-        globals.flutterGit,
-      ]);
-      await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
-      return _latestGitCommitDate(
-        branch: '$_versionCheckRemote/$branch',
-        lenient: false,
-      );
+      // Fetch upstream branch's commit and tags
+      await _run(<String>['git', 'fetch', '--tags']);
+      return _gitCommitDate(gitRef: kGitTrackingUpstream);
     } on VersionCheckError catch (error) {
-      if (globals.platform.environment.containsKey('FLUTTER_GIT_URL')) {
-        globals.logger.printError('Warning: the Flutter git upstream was overridden '
-        'by the environment variable FLUTTER_GIT_URL = ${globals.flutterGit}');
-      }
-      globals.logger.printError(error.toString());
+      globals.printError(error.message);
       rethrow;
-    } finally {
-      await _removeVersionCheckRemoteIfExists();
-    }
-  }
-
-  static Future<void> _removeVersionCheckRemoteIfExists() async {
-    final List<String> remotes = (await _run(<String>['git', 'remote']))
-        .split('\n')
-        .map<String>((String name) => name.trim()) // to account for OS-specific line-breaks
-        .toList();
-    if (remotes.contains(_versionCheckRemote)) {
-      await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
     }
   }
 
@@ -319,7 +304,7 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kOfficialChannels.contains(_branch)) {
+      if (!kOfficialChannels.contains(_branch) && !kObsoleteBranches.containsKey(_branch)) {
         return '[user-branch]';
       }
     }
@@ -343,7 +328,7 @@ class FlutterVersion {
   }
 
   /// log.showSignature=false is a user setting and it will break things,
-  /// so we want to disable it for every git log call.  This is a convenience
+  /// so we want to disable it for every git log call. This is a convenience
   /// wrapper that does that.
   @visibleForTesting
   static List<String> gitLog(List<String> args) {
@@ -361,13 +346,14 @@ class FlutterVersion {
     globals.cache.checkLockAcquired();
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load(globals.cache, globals.logger);
 
+    final DateTime now = _clock.now();
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
-      final Duration timeSinceLastCheck = _clock.now().difference(
+      final Duration timeSinceLastCheck = now.difference(
         versionCheckStamp.lastTimeVersionWasChecked!,
       );
 
       // Don't ping the server too often. Return cached value if it's fresh.
-      if (timeSinceLastCheck < checkAgeConsideredUpToDate) {
+      if (timeSinceLastCheck < VersionFreshnessValidator.checkAgeConsideredUpToDate) {
         return versionCheckStamp.lastKnownRemoteVersion;
       }
     }
@@ -375,10 +361,10 @@ class FlutterVersion {
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
       final DateTime remoteFrameworkCommitDate = DateTime.parse(
-        await FlutterVersion.fetchRemoteFrameworkCommitDate(channel),
+        await FlutterVersion.fetchRemoteFrameworkCommitDate(),
       );
       await versionCheckStamp.store(
-        newTimeVersionWasChecked: _clock.now(),
+        newTimeVersionWasChecked: now,
         newKnownRemoteVersion: remoteFrameworkCommitDate,
       );
       return remoteFrameworkCommitDate;
@@ -390,10 +376,102 @@ class FlutterVersion {
       // Still update the timestamp to avoid us hitting the server on every single
       // command if for some reason we cannot connect (eg. we may be offline).
       await versionCheckStamp.store(
-        newTimeVersionWasChecked: _clock.now(),
+        newTimeVersionWasChecked: now,
       );
       return null;
     }
+  }
+}
+
+/// Checks if the provided [version] is tracking a standard remote.
+///
+/// A "standard remote" is one having the same url as(in order of precedence):
+///  * The value of `FLUTTER_GIT_URL` environment variable.
+///  * The HTTPS or SSH url of the Flutter repository as provided by GitHub.
+///
+/// To initiate the validation check, call [run].
+///
+/// This prevents the tool to check for version freshness from the standard
+/// remote but fetch updates from the upstream of current branch/channel, both
+/// of which can be different.
+///
+/// This also prevents unnecessary freshness check from a forked repo unless the
+/// user explicitly configures the environment to do so.
+class VersionUpstreamValidator {
+  VersionUpstreamValidator({
+    required this.version,
+    required this.platform,
+  });
+
+  final Platform platform;
+  final FlutterVersion version;
+
+  /// Performs the validation against the tracking remote of the [version].
+  ///
+  /// Returns [VersionCheckError] if the tracking remote is not standard.
+  VersionCheckError? run(){
+    final String? flutterGit = platform.environment['FLUTTER_GIT_URL'];
+    final String? repositoryUrl = version.repositoryUrl;
+
+    if (repositoryUrl == null) {
+      return VersionCheckError(
+        'The tool could not determine the remote upstream which is being '
+        'tracked by the SDK.'
+      );
+    }
+
+    // Strip `.git` suffix before comparing the remotes
+    final List<String> sanitizedStandardRemotes = <String>[
+      // If `FLUTTER_GIT_URL` is set, use that as standard remote.
+      if (flutterGit != null) flutterGit
+      // Else use the predefined standard remotes.
+      else ..._standardRemotes,
+    ].map((String remote) => stripDotGit(remote)).toList();
+
+    final String sanitizedRepositoryUrl = stripDotGit(repositoryUrl);
+
+    if (!sanitizedStandardRemotes.contains(sanitizedRepositoryUrl)) {
+      if (flutterGit != null) {
+        // If `FLUTTER_GIT_URL` is set, inform to either remove the
+        // `FLUTTER_GIT_URL` environment variable or set it to the current
+        // tracking remote.
+        return VersionCheckError(
+          'The Flutter SDK is tracking "$repositoryUrl" but "FLUTTER_GIT_URL" '
+          'is set to "$flutterGit".\n'
+          'Either remove "FLUTTER_GIT_URL" from the environment or set it to '
+          '"$repositoryUrl". '
+          'If this is intentional, it is recommended to use "git" directly to '
+          'manage the SDK.'
+        );
+      }
+      // If `FLUTTER_GIT_URL` is unset, inform to set the environment variable.
+      return VersionCheckError(
+        'The Flutter SDK is tracking a non-standard remote "$repositoryUrl".\n'
+        'Set the environment variable "FLUTTER_GIT_URL" to '
+        '"$repositoryUrl". '
+        'If this is intentional, it is recommended to use "git" directly to '
+        'manage the SDK.'
+      );
+    }
+    return null;
+  }
+
+  // The predefined list of remotes that are considered to be standard.
+  static final List<String> _standardRemotes = <String>[
+    'https://github.com/flutter/flutter.git',
+    'git@github.com:flutter/flutter.git',
+  ];
+
+  // Strips ".git" suffix from a given string, preferably an url.
+  // For example, changes 'https://github.com/flutter/flutter.git' to 'https://github.com/flutter/flutter'.
+  // URLs without ".git" suffix will remain unaffected.
+  static final RegExp _patternUrlDotGit = RegExp(r'(.*)(\.git)$');
+  static String stripDotGit(String url) {
+    final RegExpMatch? match = _patternUrlDotGit.firstMatch(url);
+    if (match == null) {
+      return url;
+    }
+    return match.group(1)!;
   }
 }
 
@@ -623,15 +701,23 @@ class GitTagVersion {
   /// The git tag that is this version's closest ancestor.
   final String? gitTag;
 
-  static GitTagVersion determine(ProcessUtils processUtils, {String? workingDirectory, bool fetchTags = false, String gitRef = 'HEAD'}) {
+  static GitTagVersion determine(
+    ProcessUtils processUtils,
+    Platform platform, {
+    String? workingDirectory,
+    bool fetchTags = false,
+    String gitRef = 'HEAD'
+  }) {
     if (fetchTags) {
       final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
       if (channel == 'dev' || channel == 'beta' || channel == 'stable') {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
-        _runGit('git fetch ${globals.flutterGit} --tags -f', processUtils, workingDirectory);
+        final String flutterGit = platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
+        _runGit('git fetch $flutterGit --tags -f', processUtils, workingDirectory);
       }
     }
+    // find all tags attached to the given [gitRef]
     final List<String> tags = _runGit(
       'git tag --points-at $gitRef', processUtils, workingDirectory).trim().split('\n');
 
@@ -727,7 +813,9 @@ class GitTagVersion {
       return '$x.$y.$z+hotfix.${hotfix! + 1}.pre.$commits';
     }
     if (devPatch != null && devVersion != null) {
-      return '$x.$y.$z-${devVersion! + 1}.0.pre.$commits';
+      // The next tag that will contain this commit will be the next candidate
+      // branch, which will increment the devVersion.
+      return '$x.$y.0-${devVersion! + 1}.0.pre.$commits';
     }
     return '$x.$y.${z! + 1}-0.0.pre.$commits';
   }
@@ -743,53 +831,147 @@ enum VersionCheckResult {
   newVersionAvailable,
 }
 
-@visibleForTesting
-Future<void> checkVersionFreshness(FlutterVersion version, {
-  required DateTime localFrameworkCommitDate,
-  required DateTime? latestFlutterCommitDate,
-  required SystemClock clock,
-  required Cache cache,
-  required Logger logger,
-  Duration pauseTime = Duration.zero,
-}) async {
-  // Don't perform update checks if we're not on an official channel.
-  if (!kOfficialChannels.contains(version.channel)) {
-    return;
+/// Determine whether or not the provided [version] is "fresh" and notify the user if appropriate.
+///
+/// To initiate the validation check, call [run].
+///
+/// We do not want to check with the upstream git remote for newer commits on
+/// every tool invocation, as this would significantly slow down running tool
+/// commands. Thus, the tool writes to the [VersionCheckStamp] every time that
+/// it actually has fetched commits from upstream, and this validator only
+/// checks again if it has been more than [checkAgeConsideredUpToDate] since the
+/// last fetch.
+///
+/// We do not want to notify users with "reasonably" fresh versions about new
+/// releases. The method [versionAgeConsideredUpToDate] defines a different
+/// duration of freshness for each channel. If [localFrameworkCommitDate] is
+/// newer than this duration, then we do not show the warning.
+///
+/// We do not want to annoy users who intentionally disregard the warning and
+/// choose not to upgrade. Thus, we only show the message if it has been more
+/// than [maxTimeSinceLastWarning] since the last time the user saw the warning.
+class VersionFreshnessValidator {
+  VersionFreshnessValidator({
+    required this.version,
+    required this.localFrameworkCommitDate,
+    required this.clock,
+    required this.cache,
+    required this.logger,
+    this.latestFlutterCommitDate,
+    this.pauseTime = Duration.zero,
+  });
+
+  final FlutterVersion version;
+  final DateTime localFrameworkCommitDate;
+  final SystemClock clock;
+  final Cache cache;
+  final Logger logger;
+  final Duration pauseTime;
+  final DateTime? latestFlutterCommitDate;
+
+  late final DateTime now = clock.now();
+  late final Duration frameworkAge = now.difference(localFrameworkCommitDate);
+
+  /// The amount of time we wait before pinging the server to check for the
+  /// availability of a newer version of Flutter.
+  @visibleForTesting
+  static const Duration checkAgeConsideredUpToDate = Duration(days: 3);
+
+  /// The amount of time we wait between issuing a warning.
+  ///
+  /// This is to avoid annoying users who are unable to upgrade right away.
+  @visibleForTesting
+  static const Duration maxTimeSinceLastWarning = Duration(days: 1);
+
+  /// The amount of time we pause for to let the user read the message about
+  /// outdated Flutter installation.
+  ///
+  /// This can be customized in tests to speed them up.
+  @visibleForTesting
+  static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
+
+  // We show a warning if either we know there is a new remote version, or we
+  // couldn't tell but the local version is outdated.
+  @visibleForTesting
+  bool canShowWarning(VersionCheckResult remoteVersionStatus) {
+    final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(version.channel);
+    if (remoteVersionStatus == VersionCheckResult.newVersionAvailable) {
+      return true;
+    }
+    if (!installationSeemsOutdated) {
+      return false;
+    }
+    return remoteVersionStatus == VersionCheckResult.unknown;
   }
 
-  final Duration frameworkAge = clock.now().difference(localFrameworkCommitDate);
-  final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(version.channel);
+  /// We warn the user if the age of their Flutter installation is greater than
+  /// this duration. The durations are slightly longer than the expected release
+  /// cadence for each channel, to give the user a grace period before they get
+  /// notified.
+  ///
+  /// For example, for the beta channel, this is set to eight weeks because
+  /// beta releases happen approximately every month.
+  @visibleForTesting
+  static Duration versionAgeConsideredUpToDate(String channel) {
+    switch (channel) {
+      case 'stable':
+        return const Duration(days: 365 ~/ 2); // Six months
+      case 'beta':
+        return const Duration(days: 7 * 8); // Eight weeks
+      case 'dev':
+        return const Duration(days: 7 * 4); // Four weeks
+      default:
+        return const Duration(days: 7 * 3); // Three weeks
+    }
+  }
 
-  // Get whether there's a newer version on the remote. This only goes
-  // to the server if we haven't checked recently so won't happen on every
-  // command.
-  final VersionCheckResult remoteVersionStatus = latestFlutterCommitDate == null
-      ? VersionCheckResult.unknown
-      : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
-        ? VersionCheckResult.newVersionAvailable
-        : VersionCheckResult.versionIsCurrent;
+  /// Execute validations and print warning to [logger] if necessary.
+  Future<void> run() async {
+    // Get whether there's a newer version on the remote. This only goes
+    // to the server if we haven't checked recently so won't happen on every
+    // command.
+    final VersionCheckResult remoteVersionStatus;
 
-  // Do not load the stamp before the above server check as it may modify the stamp file.
-  final VersionCheckStamp stamp = await VersionCheckStamp.load(cache, logger);
-  final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? clock.ago(maxTimeSinceLastWarning * 2);
-  final bool beenAWhileSinceWarningWasPrinted = clock.now().difference(lastTimeWarningWasPrinted) > maxTimeSinceLastWarning;
+    if (latestFlutterCommitDate == null) {
+      remoteVersionStatus = VersionCheckResult.unknown;
+    } else {
+      if (latestFlutterCommitDate!.isAfter(localFrameworkCommitDate)) {
+        remoteVersionStatus = VersionCheckResult.newVersionAvailable;
+      } else {
+        remoteVersionStatus = VersionCheckResult.versionIsCurrent;
+      }
+    }
 
-  // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
-  // version is outdated.
-  final bool canShowWarning =
-    remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
-      (remoteVersionStatus == VersionCheckResult.unknown &&
-        installationSeemsOutdated);
+    // Do not load the stamp before the above server check as it may modify the stamp file.
+    final VersionCheckStamp stamp = await VersionCheckStamp.load(cache, logger);
+    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? clock.ago(maxTimeSinceLastWarning * 2);
+    final bool beenAWhileSinceWarningWasPrinted = now.difference(lastTimeWarningWasPrinted) > maxTimeSinceLastWarning;
+    if (!beenAWhileSinceWarningWasPrinted) {
+      return;
+    }
 
-  if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
-    final String updateMessage =
-      remoteVersionStatus == VersionCheckResult.newVersionAvailable
-        ? newVersionAvailableMessage()
-        : versionOutOfDateMessage(frameworkAge);
-    logger.printStatus(updateMessage, emphasis: true);
+    final bool canShowWarningResult = canShowWarning(remoteVersionStatus);
+
+    if (!canShowWarningResult) {
+      return;
+    }
+
+    // By this point, we should show the update message
+    final String updateMessage;
+    switch (remoteVersionStatus) {
+      case VersionCheckResult.newVersionAvailable:
+        updateMessage = _newVersionAvailableMessage;
+        break;
+      case VersionCheckResult.versionIsCurrent:
+      case VersionCheckResult.unknown:
+        updateMessage = versionOutOfDateMessage(frameworkAge);
+        break;
+    }
+
+    logger.printBox(updateMessage);
     await Future.wait<void>(<Future<void>>[
       stamp.store(
-        newTimeWarningWasPrinted: clock.now(),
+        newTimeWarningWasPrinted: now,
         cache: cache,
       ),
       Future<void>.delayed(pauseTime),
@@ -797,67 +979,15 @@ Future<void> checkVersionFreshness(FlutterVersion version, {
   }
 }
 
-/// The amount of time we wait before pinging the server to check for the
-/// availability of a newer version of Flutter.
-@visibleForTesting
-const Duration checkAgeConsideredUpToDate = Duration(days: 3);
-
-/// We warn the user if the age of their Flutter installation is greater than
-/// this duration. The durations are slightly longer than the expected release
-/// cadence for each channel, to give the user a grace period before they get
-/// notified.
-///
-/// For example, for the beta channel, this is set to five weeks because
-/// beta releases happen approximately every month.
-@visibleForTesting
-Duration versionAgeConsideredUpToDate(String channel) {
-  switch (channel) {
-    case 'stable':
-      return const Duration(days: 365 ~/ 2); // Six months
-    case 'beta':
-      return const Duration(days: 7 * 8); // Eight weeks
-    case 'dev':
-      return const Duration(days: 7 * 4); // Four weeks
-    default:
-      return const Duration(days: 7 * 3); // Three weeks
-  }
-}
-
-/// The amount of time we wait between issuing a warning.
-///
-/// This is to avoid annoying users who are unable to upgrade right away.
-@visibleForTesting
-const Duration maxTimeSinceLastWarning = Duration(days: 1);
-
-/// The amount of time we pause for to let the user read the message about
-/// outdated Flutter installation.
-///
-/// This can be customized in tests to speed them up.
-@visibleForTesting
-Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
-
 @visibleForTesting
 String versionOutOfDateMessage(Duration frameworkAge) {
-  String warning = 'WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.';
-  // Append enough spaces to match the message box width.
-  warning += ' ' * (74 - warning.length);
-
   return '''
-╔════════════════════════════════════════════════════════════════════════════╗
-║ $warning ║
-║                                                                            ║
-║ To update to the latest version, run "flutter upgrade".                    ║
-╚════════════════════════════════════════════════════════════════════════════╝
-''';
+WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.
+
+To update to the latest version, run "flutter upgrade".''';
 }
 
-@visibleForTesting
-String newVersionAvailableMessage() {
-  return '''
-╔════════════════════════════════════════════════════════════════════════════╗
-║ A new version of Flutter is available!                                     ║
-║                                                                            ║
-║ To update to the latest version, run "flutter upgrade".                    ║
-╚════════════════════════════════════════════════════════════════════════════╝
-''';
-}
+const String _newVersionAvailableMessage = '''
+A new version of Flutter is available!
+
+To update to the latest version, run "flutter upgrade".''';

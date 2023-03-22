@@ -149,7 +149,7 @@ class SizeAnalyzer {
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
 
     for (final ArchiveFile archiveFile in archive.files) {
-      final InputStream? rawContent = archiveFile.rawContent;
+      final InputStreamBase? rawContent = archiveFile.rawContent;
       if (rawContent != null) {
         pathsToSize[_fileSystem.path.split(archiveFile.name)] = rawContent.length;
       }
@@ -430,9 +430,7 @@ class _SymbolNode {
   _SymbolNode(
     this.name, {
     this.byteSize = 0,
-  })  : assert(name != null),
-        assert(byteSize != null),
-        _children = <String, _SymbolNode>{};
+  })  : _children = <String, _SymbolNode>{};
 
   /// The human friendly identifier for this node.
   String name;
@@ -467,7 +465,7 @@ class _SymbolNode {
   Map<String, Object?> toJson() {
     final Map<String, Object?> json = <String, Object?>{
       'n': name,
-      'value': byteSize
+      'value': byteSize,
     };
     final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[];
     for (final _SymbolNode child in children) {

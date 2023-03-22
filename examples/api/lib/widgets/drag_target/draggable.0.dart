@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Draggable
+// Flutter code sample for [Draggable].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -43,14 +43,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         Draggable<int>(
           // Data is the value this Draggable stores.
           data: 10,
-          child: Container(
-            height: 100.0,
-            width: 100.0,
-            color: Colors.lightGreenAccent,
-            child: const Center(
-              child: Text('Draggable'),
-            ),
-          ),
           feedback: Container(
             color: Colors.deepOrange,
             height: 100,
@@ -63,6 +55,14 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             color: Colors.pinkAccent,
             child: const Center(
               child: Text('Child When Dragging'),
+            ),
+          ),
+          child: Container(
+            height: 100.0,
+            width: 100.0,
+            color: Colors.lightGreenAccent,
+            child: const Center(
+              child: Text('Draggable'),
             ),
           ),
         ),

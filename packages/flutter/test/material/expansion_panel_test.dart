@@ -7,14 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   const SimpleExpansionPanelListTestWidget({
-    Key? key,
+    super.key,
     this.firstPanelKey,
     this.secondPanelKey,
     this.canTapOnHeader = false,
     this.expandedHeaderPadding,
     this.dividerColor,
     this.elevation = 2,
-  }) : super(key: key);
+  });
 
   final Key? firstPanelKey;
   final Key? secondPanelKey;
@@ -42,9 +42,9 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
   Widget build(BuildContext context) {
     return ExpansionPanelList(
       expandedHeaderPadding: widget.expandedHeaderPadding ?? SimpleExpansionPanelListTestWidget.defaultExpandedHeaderPadding(),
-      expansionCallback: (int _index, bool _isExpanded) {
+      expansionCallback: (int index, bool isExpanded) {
         setState(() {
-          extendedState[_index] = !extendedState[_index];
+          extendedState[index] = !extendedState[index];
         });
       },
       dividerColor: widget.dividerColor,
@@ -72,7 +72,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
 }
 
 class ExpansionPanelListSemanticsTest extends StatefulWidget {
-  const ExpansionPanelListSemanticsTest({ Key? key, required this.headerKey }) : super(key: key);
+  const ExpansionPanelListSemanticsTest({ super.key, required this.headerKey });
 
   final Key headerKey;
 
@@ -89,7 +89,6 @@ class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSeman
         ExpansionPanelList(
           children: <ExpansionPanel>[
             ExpansionPanel(
-              canTapOnHeader: false,
               headerBuilder: (BuildContext context, bool isExpanded) {
                 return MergeSemantics(
                   key: widget.headerKey,
@@ -114,16 +113,16 @@ class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSeman
 
 void main() {
   testWidgets('ExpansionPanelList test', (WidgetTester tester) async {
-    late int index;
-    late bool isExpanded;
+    late int capturedIndex;
+    late bool capturedIsExpanded;
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
           child: ExpansionPanelList(
-            expansionCallback: (int _index, bool _isExpanded) {
-              index = _index;
-              isExpanded = _isExpanded;
+            expansionCallback: (int index, bool isExpanded) {
+              capturedIndex = index;
+              capturedIsExpanded = isExpanded;
             },
             children: <ExpansionPanel>[
               ExpansionPanel(
@@ -144,8 +143,8 @@ void main() {
     final double oldHeight = box.size.height;
     expect(find.byType(ExpandIcon), findsOneWidget);
     await tester.tap(find.byType(ExpandIcon));
-    expect(index, 0);
-    expect(isExpanded, isFalse);
+    expect(capturedIndex, 0);
+    expect(capturedIsExpanded, isFalse);
     box = tester.renderObject(find.byType(ExpansionPanelList));
     expect(box.size.height, equals(oldHeight));
 
@@ -154,9 +153,9 @@ void main() {
       MaterialApp(
         home: SingleChildScrollView(
           child: ExpansionPanelList(
-            expansionCallback: (int _index, bool _isExpanded) {
-              index = _index;
-              isExpanded = _isExpanded;
+            expansionCallback: (int index, bool isExpanded) {
+              capturedIndex = index;
+              capturedIsExpanded = isExpanded;
             },
             children: <ExpansionPanel>[
               ExpansionPanel(
@@ -311,37 +310,37 @@ void main() {
 
     await tester.pumpWidget(build(false, false, false));
     expect(tester.renderObjectList(find.byType(AnimatedSize)), hasLength(3));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pump(const Duration(milliseconds: 200));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pumpWidget(build(false, true, false));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 97.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 146.0, 800.0, 0.0));
 
     await tester.pump(kSizeAnimationDuration ~/ 2);
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     final Rect rect1 = tester.getRect(find.byType(AnimatedSize).at(1));
     expect(rect1.left, 0.0);
-    expect(rect1.top, inExclusiveRange(113.0, 113.0 + 16.0 + 32.0)); // 16.0 material gap, plus 16.0 top and bottom margins added to the header
+    expect(rect1.top, inExclusiveRange(113.0, 113.0 + 16.0 + 24.0)); // 16.0 material gap, plus 12.0 top and bottom margins added to the header
     expect(rect1.width, 800.0);
     expect(rect1.height, inExclusiveRange(0.0, 100.0));
     final Rect rect2 = tester.getRect(find.byType(AnimatedSize).at(2));
-    expect(rect2, Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 56.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 56.0 is the header height.
+    expect(rect2, Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 48.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 48.0 is the header height.
 
     await tester.pumpWidget(build(false, false, false));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
     await tester.pumpWidget(build(false, false, true));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
@@ -349,18 +348,18 @@ void main() {
     await tester.pump();
     await tester.pump();
     await tester.pump();
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), const Rect.fromLTWH(0.0, 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), const Rect.fromLTWH(0.0, 48.0 + 1.0 + 48.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   });
 
   testWidgets('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
-    final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
+    final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'B' : 'A');
@@ -384,14 +383,14 @@ void main() {
       ),
     ];
 
-    final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
-      children: _demoItemsRadio,
+    final ExpansionPanelList expansionListRadio = ExpansionPanelList.radio(
+      children: demoItemsRadio,
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: _expansionListRadio,
+          child: expansionListRadio,
         ),
       ),
     );
@@ -445,7 +444,7 @@ void main() {
 
     expect(box.size.height, greaterThanOrEqualTo(oldHeight));
 
-    _demoItemsRadio.removeAt(0);
+    demoItemsRadio.removeAt(0);
 
     await tester.pumpAndSettle();
 
@@ -456,38 +455,35 @@ void main() {
     expect(find.text('F'), findsNothing);
 
 
-    final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
+    final List<ExpansionPanel> demoItems = <ExpansionPanel>[
       ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'B' : 'A');
         },
         body: const SizedBox(height: 100.0),
-        isExpanded: false,
       ),
       ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'D' : 'C');
         },
         body: const SizedBox(height: 100.0),
-        isExpanded: false,
       ),
       ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'F' : 'E');
         },
         body: const SizedBox(height: 100.0),
-        isExpanded: false,
       ),
     ];
 
-    final ExpansionPanelList _expansionList = ExpansionPanelList(
-      children: _demoItems,
+    final ExpansionPanelList expansionList = ExpansionPanelList(
+      children: demoItems,
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: _expansionList,
+          child: expansionList,
         ),
       ),
     );
@@ -502,7 +498,7 @@ void main() {
   });
 
   testWidgets('Radio mode calls expansionCallback once if other panels closed', (WidgetTester tester) async {
-    final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
+    final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'B' : 'A');
@@ -527,20 +523,20 @@ void main() {
     ];
 
     final List<Map<String, dynamic>> callbackHistory = <Map<String, dynamic>>[];
-    final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
-      expansionCallback: (int _index, bool _isExpanded) {
+    final ExpansionPanelList expansionListRadio = ExpansionPanelList.radio(
+      expansionCallback: (int index, bool isExpanded) {
         callbackHistory.add(<String, dynamic>{
-          'index': _index,
-          'isExpanded': _isExpanded,
+          'index': index,
+          'isExpanded': isExpanded,
         });
       },
-      children: _demoItemsRadio,
+      children: demoItemsRadio,
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: _expansionListRadio,
+          child: expansionListRadio,
         ),
       ),
     );
@@ -573,7 +569,7 @@ void main() {
   });
 
   testWidgets('Radio mode calls expansionCallback twice if other panel open prior', (WidgetTester tester) async {
-    final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
+    final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'B' : 'A');
@@ -600,20 +596,20 @@ void main() {
     final List<Map<String, dynamic>> callbackHistory = <Map<String, dynamic>>[];
     Map<String, dynamic> callbackResults;
 
-    final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
-      expansionCallback: (int _index, bool _isExpanded) {
+    final ExpansionPanelList expansionListRadio = ExpansionPanelList.radio(
+      expansionCallback: (int index, bool isExpanded) {
         callbackHistory.add(<String, dynamic>{
-          'index': _index,
-          'isExpanded': _isExpanded,
+          'index': index,
+          'isExpanded': isExpanded,
         });
       },
-      children: _demoItemsRadio,
+      children: demoItemsRadio,
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: _expansionListRadio,
+          child: expansionListRadio,
         ),
       ),
     );
@@ -657,7 +653,7 @@ void main() {
     'and ExpansionPaneList.radio',
     (WidgetTester tester) async {
       bool isRadioList = false;
-      final List<bool> _panelExpansionState = <bool>[
+      final List<bool> panelExpansionState = <bool>[
         false,
         false,
         false,
@@ -694,24 +690,24 @@ void main() {
 
       ExpansionPanelList buildExpansionPanelList(StateSetter setState) {
         return ExpansionPanelList(
-          expansionCallback: (int index, _) => setState(() { _panelExpansionState[index] = !_panelExpansionState[index]; }),
+          expansionCallback: (int index, _) => setState(() { panelExpansionState[index] = !panelExpansionState[index]; }),
           children: <ExpansionPanel>[
             ExpansionPanel(
-              isExpanded: _panelExpansionState[0],
+              isExpanded: panelExpansionState[0],
               headerBuilder: (BuildContext context, bool isExpanded) {
                 return Text(isExpanded ? 'B' : 'A');
               },
               body: const SizedBox(height: 100.0),
             ),
             ExpansionPanel(
-              isExpanded: _panelExpansionState[1],
+              isExpanded: panelExpansionState[1],
               headerBuilder: (BuildContext context, bool isExpanded) {
                 return Text(isExpanded ? 'D' : 'C');
               },
               body: const SizedBox(height: 100.0),
             ),
             ExpansionPanel(
-              isExpanded: _panelExpansionState[2],
+              isExpanded: panelExpansionState[2],
               headerBuilder: (BuildContext context, bool isExpanded) {
                 return Text(isExpanded ? 'F' : 'E');
               },
@@ -911,7 +907,7 @@ void main() {
     const Key collapsedKey = Key('collapsed');
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     final SemanticsHandle handle = tester.ensureSemantics();
-    final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
+    final List<ExpansionPanel> demoItems = <ExpansionPanel>[
       ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return const Text('Expanded', key: expandedKey);
@@ -924,18 +920,17 @@ void main() {
           return const Text('Collapsed', key: collapsedKey);
         },
         body: const SizedBox(height: 100.0),
-        isExpanded: false,
       ),
     ];
 
-    final ExpansionPanelList _expansionList = ExpansionPanelList(
-      children: _demoItems,
+    final ExpansionPanelList expansionList = ExpansionPanelList(
+      children: demoItems,
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: _expansionList,
+          child: expansionList,
         ),
       ),
     );
@@ -995,7 +990,7 @@ void main() {
     const Key expandedKey = Key('expanded');
     const Key collapsedKey = Key('collapsed');
     final SemanticsHandle handle = tester.ensureSemantics();
-    final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
+    final List<ExpansionPanel> demoItems = <ExpansionPanel>[
       ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return const Text('Expanded', key: expandedKey);
@@ -1010,18 +1005,17 @@ void main() {
         },
         canTapOnHeader: true,
         body: const SizedBox(height: 100.0),
-        isExpanded: false,
       ),
     ];
 
-    final ExpansionPanelList _expansionList = ExpansionPanelList(
-      children: _demoItems,
+    final ExpansionPanelList expansionList = ExpansionPanelList(
+      children: demoItems,
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: _expansionList,
+          child: expansionList,
         ),
       ),
     );
@@ -1046,19 +1040,19 @@ void main() {
   });
 
   testWidgets('Ensure canTapOnHeader is false by default',  (WidgetTester tester) async {
-    final ExpansionPanel _expansionPanel = ExpansionPanel(
+    final ExpansionPanel expansionPanel = ExpansionPanel(
       headerBuilder: (BuildContext context, bool isExpanded) => const Text('Demo'),
       body: const SizedBox(height: 100.0),
     );
 
-    expect(_expansionPanel.canTapOnHeader, isFalse);
+    expect(expansionPanel.canTapOnHeader, isFalse);
   });
 
   testWidgets('Toggle ExpansionPanelRadio when tapping header and canTapOnHeader is true',  (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
-    final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
+    final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'B' : 'A', key: firstPanelKey);
@@ -1077,14 +1071,14 @@ void main() {
       ),
     ];
 
-    final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
-      children: _demoItemsRadio,
+    final ExpansionPanelList expansionListRadio = ExpansionPanelList.radio(
+      children: demoItemsRadio,
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: _expansionListRadio,
+          child: expansionListRadio,
         ),
       ),
     );
@@ -1217,7 +1211,7 @@ void main() {
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
 
-    final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
+    final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'B' : 'A', key: firstPanelKey);
@@ -1234,14 +1228,14 @@ void main() {
       ),
     ];
 
-    final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
-      children: _demoItemsRadio,
+    final ExpansionPanelList expansionListRadio = ExpansionPanelList.radio(
+      children: demoItemsRadio,
     );
 
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
-          child: _expansionListRadio,
+          child: expansionListRadio,
         ),
       ),
     );
@@ -1292,7 +1286,7 @@ void main() {
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
-    expect(box.size.width, equals(736.0));
+    expect(box.size.width, equals(744.0));
 
     // Now, expand the child panel.
     await tester.tap(find.byKey(firstPanelKey));
@@ -1304,8 +1298,57 @@ void main() {
 
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 32.0 (double default padding)
-    expect(box.size.width, equals(736.0));
+    expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 24.0 (double default padding)
+    expect(box.size.width, equals(744.0));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/5848.
+  testWidgets('The AnimatedContainer and IconButton have the same height of 48px', (WidgetTester tester) async {
+    const Key firstPanelKey = Key('firstPanelKey');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          child: SimpleExpansionPanelListTestWidget(
+            firstPanelKey: firstPanelKey,
+            canTapOnHeader: true,
+          ),
+        ),
+      ),
+    );
+
+    // The panel is closed.
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    // No padding applied to closed header.
+    final RenderBox boxOfContainer = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    final RenderBox boxOfIconButton = tester.renderObject(find.byType(IconButton).first);
+    expect(boxOfContainer.size.height, equals(boxOfIconButton.size.height));
+    expect(boxOfContainer.size.height, equals(48.0)); // Header should have 48px height according to Material 2 Design spec.
+  });
+
+  testWidgets("The AnimatedContainer's height is at least kMinInteractiveDimension", (WidgetTester tester) async {
+    const Key firstPanelKey = Key('firstPanelKey');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          child: SimpleExpansionPanelListTestWidget(
+            firstPanelKey: firstPanelKey,
+            canTapOnHeader: true,
+          ),
+        ),
+      ),
+    );
+
+    // The panel is closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    // No padding applied to closed header
+    final RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    expect(box.size.height, greaterThanOrEqualTo(kMinInteractiveDimension));
   });
 
   testWidgets('Correct custom header padding', (WidgetTester tester) async {
@@ -1330,7 +1373,7 @@ void main() {
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
-    expect(box.size.width, equals(736.0));
+    expect(box.size.width, equals(744.0));
 
     // Now, expand the child panel.
     await tester.tap(find.byKey(firstPanelKey));
@@ -1343,7 +1386,7 @@ void main() {
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
     expect(box.size.height, equals(128.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
-    expect(box.size.width, equals(736.0));
+    expect(box.size.width, equals(744.0));
   });
 
   testWidgets('ExpansionPanelList respects dividerColor', (WidgetTester tester) async {
@@ -1396,25 +1439,74 @@ void main() {
     expect(boxDecoration.border!.top.color, dividerColor);
   });
 
+  testWidgets('ExpansionPanelList respects expandIconColor', (WidgetTester tester) async {
+    const Color expandIconColor = Colors.blue;
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          expandIconColor: expandIconColor,
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const SizedBox.shrink();
+              }
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+
+    expect(expandIcon.color, expandIconColor);
+  });
+
+  testWidgets('ExpansionPanelList.radio respects expandIconColor', (WidgetTester tester) async {
+    const Color expandIconColor = Colors.blue;
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList.radio(
+          expandIconColor: expandIconColor,
+          children: <ExpansionPanelRadio>[
+            ExpansionPanelRadio(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const SizedBox.shrink();
+              },
+              value: true
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+
+    expect(expandIcon.color, expandIconColor);
+  });
+
   testWidgets('elevation is propagated properly to MergeableMaterial', (WidgetTester tester) async {
-    const double _elevation = 8;
+    const double elevation = 8;
 
     // Test for ExpansionPanelList.
     await tester.pumpWidget(const MaterialApp(
       home: SingleChildScrollView(
         child: SimpleExpansionPanelListTestWidget(
-          elevation: _elevation,
+          elevation: elevation,
         ),
       ),
     ));
 
-    expect(tester.widget<MergeableMaterial>(find.byType(MergeableMaterial)).elevation, _elevation);
+    expect(tester.widget<MergeableMaterial>(find.byType(MergeableMaterial)).elevation, elevation);
 
     // Test for ExpansionPanelList.radio.
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
         child: ExpansionPanelList.radio(
-          elevation: _elevation,
+          elevation: elevation,
           children: <ExpansionPanelRadio>[
             ExpansionPanelRadio(
               headerBuilder: (BuildContext context, bool isExpanded) {
@@ -1435,7 +1527,7 @@ void main() {
       ),
     ));
 
-    expect(tester.widget<MergeableMaterial>(find.byType(MergeableMaterial)).elevation, _elevation);
+    expect(tester.widget<MergeableMaterial>(find.byType(MergeableMaterial)).elevation, elevation);
   });
 
   testWidgets('Using a value non defined value throws assertion error', (WidgetTester tester) async {
@@ -1465,7 +1557,7 @@ void main() {
       MaterialApp(
         home: SingleChildScrollView(
           child: ExpansionPanelList(
-            expansionCallback: (int _index, bool _isExpanded) {},
+            expansionCallback: (int index, bool isExpanded) {},
             children: <ExpansionPanel>[
               ExpansionPanel(
                 backgroundColor: firstPanelColor,

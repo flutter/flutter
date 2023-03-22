@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
-import 'package:meta/meta.dart';
-
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -19,10 +15,17 @@ import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand({ @required bool verboseHelp }) {
+  BuildMacosCommand({
+    required bool verboseHelp,
+  }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    usesBuildNumberOption();
-    usesBuildNameOption();
+    usesFlavorOption();
+    argParser
+      .addFlag('config-only',
+        help: 'Update the project configuration without performing a build. '
+          'This can be used in CI/CD process that create an archive to avoid '
+          'performing duplicate work.'
+    );
   }
 
   @override
@@ -42,6 +45,8 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   bool get supported => globals.platform.isMacOS;
 
+  bool get configOnly => boolArg('config-only');
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
@@ -52,12 +57,12 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!supported) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
-    displayNullSafetyMode(buildInfo);
     await buildMacOS(
       flutterProject: flutterProject,
       buildInfo: buildInfo,
       targetOverride: targetFile,
       verboseLogging: globals.logger.isVerbose,
+      configOnly: configOnly,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,

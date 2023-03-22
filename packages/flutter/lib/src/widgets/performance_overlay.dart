@@ -29,16 +29,16 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   /// mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
   const PerformanceOverlay({
-    Key? key,
+    super.key,
     this.optionsMask = 0,
     this.rasterizerThreshold = 0,
     this.checkerboardRasterCacheImages = false,
     this.checkerboardOffscreenLayers = false,
-  }) : super(key: key);
+  });
 
   /// Create a performance overlay that displays all available statistics.
   PerformanceOverlay.allEnabled({
-    Key? key,
+    super.key,
     this.rasterizerThreshold = 0,
     this.checkerboardRasterCacheImages = false,
     this.checkerboardOffscreenLayers = false,
@@ -46,8 +46,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
         1 << PerformanceOverlayOption.displayRasterizerStatistics.index |
         1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index |
         1 << PerformanceOverlayOption.displayEngineStatistics.index |
-        1 << PerformanceOverlayOption.visualizeEngineStatistics.index,
-      super(key: key);
+        1 << PerformanceOverlayOption.visualizeEngineStatistics.index;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -60,7 +59,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   /// For example, if you want a trace of all pictures that could not be
   /// rendered by the rasterizer within the frame boundary (and hence caused
   /// jank), specify 1. Specifying 2 will trace all pictures that took more
-  /// more than 2 frame intervals to render. Adjust this value to only capture
+  /// than 2 frame intervals to render. Adjust this value to only capture
   /// the particularly expensive pictures while skipping the others. Specifying
   /// 0 disables all capture.
   ///
@@ -116,6 +115,8 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPerformanceOverlay renderObject) {
     renderObject
       ..optionsMask = optionsMask
-      ..rasterizerThreshold = rasterizerThreshold;
+      ..rasterizerThreshold = rasterizerThreshold
+      ..checkerboardRasterCacheImages = checkerboardRasterCacheImages
+      ..checkerboardOffscreenLayers = checkerboardOffscreenLayers;
   }
 }

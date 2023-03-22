@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 // This tests whether the Opacity layer raster cache works with color filters.
 // See https://github.com/flutter/flutter/issues/51975.
 class ColorFilterAndFadePage extends StatefulWidget {
-  const ColorFilterAndFadePage({Key? key}) : super(key: key);
+  const ColorFilterAndFadePage({super.key});
 
   @override
   State<ColorFilterAndFadePage> createState() => _ColorFilterAndFadePageState();
@@ -147,7 +147,6 @@ class _ShadowWidget extends StatelessWidget {
         ),
         size: Size(width, height),
         isComplex: true,
-        willChange: false,
       ),
     );
   }

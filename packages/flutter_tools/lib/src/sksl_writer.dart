@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -13,14 +11,14 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals_null_migrated.dart' as globals;
+import 'globals.dart' as globals;
 
-Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
-  File outputFile,
-  Logger logger,
+Future<String?> sharedSkSlWriter(Device device, Map<String, Object?>? data, {
+  File? outputFile,
+  Logger? logger,
 }) async {
   logger ??= globals.logger;
-  if (data.isEmpty) {
+  if (data == null || data.isEmpty) {
     logger.printStatus(
       'No data was received. To ensure SkSL data can be generated use a '
       'physical device then:\n'
@@ -47,7 +45,16 @@ Future<String> sharedSkSlWriter(Device device, Map<String, Object> data, {
     case TargetPlatform.android_x86:
       targetPlatform = TargetPlatform.android;
       break;
-    default:
+    case TargetPlatform.android:
+    case TargetPlatform.darwin:
+    case TargetPlatform.ios:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_x64:
       break;
   }
   final Map<String, Object> manifest = <String, Object>{

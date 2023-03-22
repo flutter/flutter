@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for Tooltip
+// Flutter code sample for [Tooltip].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Tooltip Sample';
 
   @override
   Widget build(BuildContext context) {
@@ -20,21 +20,20 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: TooltipSample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+class TooltipSample extends StatelessWidget {
+  const TooltipSample({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: 'I am a Tooltip',
-      child: const Text('Tap this text and hold down to show a tooltip.'),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
         gradient:
@@ -48,6 +47,7 @@ class MyStatelessWidget extends StatelessWidget {
       ),
       showDuration: const Duration(seconds: 2),
       waitDuration: const Duration(seconds: 1),
+      child: const Text('Tap this text and hold down to show a tooltip.'),
     );
   }
 }

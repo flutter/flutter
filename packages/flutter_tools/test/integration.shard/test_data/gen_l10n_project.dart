@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 
 import '../test_utils.dart';
 import 'project.dart';
@@ -37,7 +34,7 @@ class GenL10nProject extends Project {
   final String pubspec = '''
 name: test_l10n_project
 environment:
-  sdk: ">=2.12.0-0 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   flutter:
@@ -230,6 +227,11 @@ class Home extends StatelessWidget {
               "${localizations.doubleQuoteSelect('cabriolet')}",
               "${localizations.pluralInString(1)}",
               "${localizations.selectInString('he')}",
+              "${localizations.selectWithPlaceholder('male', 'ice cream')}",
+              "${localizations.selectWithPlaceholder('female', 'chocolate')}",
+              "${localizations.selectInPlural('male', 1)}",
+              "${localizations.selectInPlural('male', 2)}",
+              "${localizations.selectInPlural('female', 1)}",
             ]);
           },
         ),
@@ -628,7 +630,7 @@ void main() {
     }
   },
 
-  "singleQuoteSelect": "{vehicleType, select, sedan{Sedan's elegance} cabriolet{Cabriolet' acceleration} truck{truck's heavy duty} other{Other's mirrors!}}",
+  "singleQuoteSelect": "{vehicleType, select, sedan{Sedan's elegance} cabriolet{Cabriolet's acceleration} truck{truck's heavy duty} other{Other's mirrors!}}",
   "@singleQuoteSelect": {
     "description": "A select message with a single quote.",
     "placeholders": {
@@ -658,6 +660,28 @@ void main() {
     "placeholders": {
       "gender": {}
     }
+  },
+
+  "selectWithPlaceholder": "Indeed, {gender, select, male {he likes {preference}} female {she likes {preference}} other {they like {preference}}}!",
+  "@selectWithPlaceholder": {
+    "description": "A select message with prefix, suffix strings, and a placeholder.",
+    "placeholders": {
+      "gender": {},
+      "preference": {}
+    }
+  },
+
+  "selectInPlural": "{count, plural, =1{{gender, select, male{he} female{she} other{they}}} other{they}}",
+  "@selectInPlural": {
+    "description": "Pronoun dependent on the count and gender.",
+    "placeholders": {
+      "gender": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
   }
 }
 ''';
@@ -676,9 +700,9 @@ void main() {
 }
 ''';
 
-  /// All messages are simply the template language's message with 'ES - '
-  /// appended. This makes validating test behavior easier. The interpolated
-  /// messages are different where applicable.
+  // All these messages are the template language's message with 'ES - '
+  // appended. This makes validating test behavior easier. The interpolated
+  // messages are different where applicable.
   final String appEs = r'''
 {
   "@@locale": "es",
@@ -694,7 +718,7 @@ void main() {
   "helloFor": "ES - Hello for {value}",
   "helloAdjectiveWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello {adjective} World} =2{ES - Hello two {adjective} worlds} other{ES - Hello other {count} {adjective} worlds}}",
   "helloWorldsOn": "{count,plural, =0{ES - Hello on {date}} =1{ES - Hello World, on {date}} =2{ES - Hello two worlds, on {date}} other{ES - Hello other {count} worlds, on {date}}}",
-  "helloWorldPopulation": "{ES - count,plural, =1{ES - Hello World of {population} citizens} =2{ES - Hello two worlds with {population} total citizens} many{ES - Hello all {count} worlds, with a total of {population} citizens} other{ES - Hello other {count} worlds, with a total of {population} citizens}}",
+  "helloWorldPopulation": "{count,plural, =1{ES - Hello World of {population} citizens} =2{ES - Hello two worlds with {population} total citizens} many{ES - Hello all {count} worlds, with a total of {population} citizens} other{ES - Hello other {count} worlds, with a total of {population} citizens}}",
   "helloWorldInterpolation": "ES - [{hello}] #{world}#",
   "helloWorldsInterpolation": "{count,plural, other {ES - [{hello}] -{world}- #{count}#}}",
   "dollarSign": "ES - $!",
@@ -750,8 +774,8 @@ void main() {
 ''';
 
   String l10nYaml({
-    @required bool useDeferredLoading,
-    @required bool useSyntheticPackage,
+    required bool useDeferredLoading,
+    required bool useSyntheticPackage,
   }) {
     String l10nYamlString = '';
 

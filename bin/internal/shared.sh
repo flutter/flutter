@@ -17,11 +17,11 @@ set -e
 # Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
 
-function retry_upgrade {
+function pub_upgrade_with_retry {
   local total_tries="10"
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_TOOLS_DIR" && "$DART" __deprecated_pub upgrade "$VERBOSITY" --no-precompile) && break
+    (cd "$FLUTTER_TOOLS_DIR" && "$DART" pub upgrade --suppress-analytics) && break
     >&2 echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$((remaining_tries - 1))
     sleep 5
@@ -115,13 +115,15 @@ function upgrade_flutter () (
   mkdir -p "$FLUTTER_ROOT/bin/cache"
 
   local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
+  local compilekey="$revision:$FLUTTER_TOOL_ARGS"
 
   # Invalidate cache if:
   #  * SNAPSHOT_PATH is not a file, or
-  #  * STAMP_PATH is not a file with nonzero size, or
-  #  * Contents of STAMP_PATH is not our local git HEAD revision, or
+  #  * STAMP_PATH is not a file, or
+  #  * STAMP_PATH is an empty file, or
+  #  * Contents of STAMP_PATH is not what we are going to compile, or
   #  * pubspec.yaml last modified after pubspec.lock
-  if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+  if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$compilekey" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     # Waits for the update lock to be acquired. Placing this check inside the
     # conditional allows the majority of flutter/dart installations to bypass
     # the lock entirely, but as a result this required a second verification that
@@ -129,31 +131,42 @@ function upgrade_flutter () (
     _wait_for_lock
 
     # A different shell process might have updated the tool/SDK.
-    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(cat "$STAMP_PATH")" == "$revision" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(cat "$STAMP_PATH")" == "$compilekey" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
       exit $?
     fi
 
+    # Fetch Dart...
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
-    VERBOSITY="--verbosity=error"
 
     >&2 echo Building flutter tool...
+
+    # Prepare packages...
     if [[ "$CI" == "true" || "$BOT" == "true" || "$CONTINUOUS_INTEGRATION" == "true" || "$CHROME_HEADLESS" == "1" ]]; then
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
-      VERBOSITY="--verbosity=normal"
+    else
+      export PUB_SUMMARY_ONLY=1
     fi
-
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
+    pub_upgrade_with_retry
 
-    if [[ -d "$FLUTTER_ROOT/.pub-cache" ]]; then
-      export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_ROOT/.pub-cache"}"
+    # Move the old snapshot - we can't just overwrite it as the VM might currently have it
+    # memory mapped (e.g. on flutter upgrade). For downloading a new dart sdk the folder is moved,
+    # so we take the same approach of moving the file here.
+    SNAPSHOT_PATH_OLD="$SNAPSHOT_PATH.old"
+    if [ -f "$SNAPSHOT_PATH" ]; then
+      mv "$SNAPSHOT_PATH" "$SNAPSHOT_PATH_OLD"
     fi
 
-    retry_upgrade
+    # Compile...
+    "$DART" --verbosity=error --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
+    echo "$compilekey" > "$STAMP_PATH"
 
-    "$DART" --verbosity=error --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" --no-enable-mirrors "$SCRIPT_PATH"
-    echo "$revision" > "$STAMP_PATH"
+    # Delete any temporary snapshot path.
+    if [ -f "$SNAPSHOT_PATH_OLD" ]; then
+      rm -f "$SNAPSHOT_PATH_OLD"
+    fi
   fi
   # The exit here is extraneous since the function is run in a subshell, but
   # this serves as documentation that running the function in a subshell is
@@ -184,7 +197,7 @@ function shared::execute() {
   # If running over git-bash, overrides the default UNIX executables with win32
   # executables
   case "$(uname -s)" in
-    MINGW*)
+    MINGW* | MSYS* )
       DART="$DART.exe"
       ;;
   esac
@@ -212,11 +225,6 @@ function shared::execute() {
     exit 1
   fi
 
-  # To debug the tool, you can uncomment the following lines to enable checked
-  # mode and set an observatory port:
-  # FLUTTER_TOOL_ARGS="--enable-asserts $FLUTTER_TOOL_ARGS"
-  # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
-
   upgrade_flutter 7< "$PROG_NAME"
 
   BIN_NAME="$(basename "$PROG_NAME")"
@@ -224,10 +232,10 @@ function shared::execute() {
     flutter*)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
-      "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      exec "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
       ;;
     dart*)
-      "$DART" "$@"
+      exec "$DART" "$@"
       ;;
     *)
       >&2 echo "Error! Executable name $BIN_NAME not recognized!"

@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -34,21 +31,22 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
-  final FakePlatform linuxPlatform = FakePlatform(operatingSystem: 'linux');
+  final FakePlatform linuxPlatform = FakePlatform();
   final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
   group('IOSDevice', () {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    Cache cache;
-    Logger logger;
-    IOSDeploy iosDeploy;
-    IMobileDevice iMobileDevice;
-    FileSystem nullFileSystem;
+    late Cache cache;
+    late Logger logger;
+    late IOSDeploy iosDeploy;
+    late IMobileDevice iMobileDevice;
+    late FileSystem fileSystem;
 
     setUp(() {
       final Artifacts artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
+      fileSystem = MemoryFileSystem.test();
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
         cache: cache,
@@ -65,10 +63,10 @@ void main() {
     });
 
     testWithoutContext('successfully instantiates on Mac OS', () {
-      IOSDevice(
+      final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: nullFileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -76,15 +74,32 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
+      expect(device.isSupported(), isTrue);
+    });
+
+    testWithoutContext('32-bit devices are unsupported', () {
+      final IOSDevice device = IOSDevice(
+        'device-123',
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: macPlatform,
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        name: 'iPhone 1',
+        cpuArchitecture: DarwinArch.armv7,
+        connectionInterface: DeviceConnectionInterface.attached,
+      );
+      expect(device.isSupported(), isFalse);
     });
 
     testWithoutContext('parses major version', () {
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: nullFileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -92,12 +107,12 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: nullFileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -105,12 +120,12 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: nullFileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -118,12 +133,12 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: nullFileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -131,12 +146,12 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: nullFileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -144,7 +159,7 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       ).majorSdkVersion, 0);
     });
 
@@ -152,7 +167,7 @@ void main() {
       final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: nullFileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -160,7 +175,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3 17C54',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
 
       expect(await device.sdkNameAndVersion,'iOS 13.3 17C54');
@@ -170,7 +185,7 @@ void main() {
       final IOSDevice device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: nullFileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -178,7 +193,7 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -194,7 +209,7 @@ void main() {
             IOSDevice(
               'device-123',
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-              fileSystem: nullFileSystem,
+              fileSystem: fileSystem,
               logger: logger,
               platform: platform,
               iosDeploy: iosDeploy,
@@ -202,7 +217,7 @@ void main() {
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
-              interfaceType: IOSDeviceConnectionInterface.usb,
+              connectionInterface: DeviceConnectionInterface.attached,
             );
           },
           throwsAssertionError,
@@ -211,21 +226,21 @@ void main() {
     }
 
     group('.dispose()', () {
-      IOSDevice device;
-      FakeIOSApp appPackage1;
-      FakeIOSApp appPackage2;
-      IOSDeviceLogReader logReader1;
-      IOSDeviceLogReader logReader2;
-      FakeProcess process1;
-      FakeProcess process2;
-      FakeProcess process3;
-      IOSDevicePortForwarder portForwarder;
-      ForwardedPort forwardedPort;
-      Cache cache;
-      Logger logger;
-      IOSDeploy iosDeploy;
-      FileSystem nullFileSystem;
-      IProxy iproxy;
+      late IOSDevice device;
+      late FakeIOSApp appPackage1;
+      late FakeIOSApp appPackage2;
+      late IOSDeviceLogReader logReader1;
+      late IOSDeviceLogReader logReader2;
+      late FakeProcess process1;
+      late FakeProcess process2;
+      late FakeProcess process3;
+      late IOSDevicePortForwarder portForwarder;
+      late ForwardedPort forwardedPort;
+      late Cache cache;
+      late Logger logger;
+      late IOSDeploy iosDeploy;
+      late FileSystem fileSystem;
+      late IProxy iproxy;
 
       IOSDevicePortForwarder createPortForwarder(
           ForwardedPort forwardedPort,
@@ -235,7 +250,7 @@ void main() {
           id: device.id,
           logger: logger,
           operatingSystemUtils: OperatingSystemUtils(
-            fileSystem: nullFileSystem,
+            fileSystem: fileSystem,
             logger: logger,
             platform: FakePlatform(operatingSystem: 'macos'),
             processManager: FakeProcessManager.any(),
@@ -253,7 +268,7 @@ void main() {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.create(
           device: device,
           app: appPackage,
-          iMobileDevice: null, // not used by this test.
+          iMobileDevice: IMobileDevice.test(processManager: FakeProcessManager.any()),
         );
         logReader.idevicesyslogProcess = process;
         return logReader;
@@ -269,6 +284,8 @@ void main() {
         cache = Cache.test(
           processManager: FakeProcessManager.any(),
         );
+        fileSystem = MemoryFileSystem.test();
+        logger = BufferLogger.test();
         iosDeploy = IOSDeploy(
           artifacts: Artifacts.test(),
           cache: cache,
@@ -282,7 +299,7 @@ void main() {
         device = IOSDevice(
           '123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: nullFileSystem,
+          fileSystem: fileSystem,
           logger: logger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
@@ -290,7 +307,7 @@ void main() {
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
-          interfaceType: IOSDeviceConnectionInterface.usb,
+          connectionInterface: DeviceConnectionInterface.attached,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -309,15 +326,15 @@ void main() {
   });
 
   group('polling', () {
-    FakeXcdevice xcdevice;
-    Cache cache;
-    FakeProcessManager fakeProcessManager;
-    BufferLogger logger;
-    IOSDeploy iosDeploy;
-    IMobileDevice iMobileDevice;
-    IOSWorkflow iosWorkflow;
-    IOSDevice device1;
-    IOSDevice device2;
+    late FakeXcdevice xcdevice;
+    late Cache cache;
+    late FakeProcessManager fakeProcessManager;
+    late BufferLogger logger;
+    late IOSDeploy iosDeploy;
+    late IMobileDevice iMobileDevice;
+    late IOSWorkflow iosWorkflow;
+    late IOSDevice device1;
+    late IOSDevice device2;
 
     setUp(() {
       xcdevice = FakeXcdevice();
@@ -351,7 +368,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
 
       device2 = IOSDevice(
@@ -365,7 +382,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
       );
     });
 
@@ -414,27 +431,27 @@ void main() {
       await iosDevices.startPolling();
       expect(xcdevice.getAvailableIOSDevicesCount, 1);
 
-      expect(iosDevices.deviceNotifier.items, isEmpty);
+      expect(iosDevices.deviceNotifier!.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
       });
       await added.future;
-      expect(iosDevices.deviceNotifier.items.length, 2);
-      expect(iosDevices.deviceNotifier.items, contains(device1));
-      expect(iosDevices.deviceNotifier.items, contains(device2));
+      expect(iosDevices.deviceNotifier!.items.length, 2);
+      expect(iosDevices.deviceNotifier!.items, contains(device1));
+      expect(iosDevices.deviceNotifier!.items, contains(device2));
 
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
       });
       await removed.future;
-      expect(iosDevices.deviceNotifier.items, <Device>[device2]);
+      expect(iosDevices.deviceNotifier!.items, <Device>[device2]);
 
       // Remove stream will throw over-completion if called more than once
       // which proves this is ignored.
       xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'bogus'
+        XCDeviceEvent.detach: 'bogus',
       });
 
       expect(addedCount, 2);
@@ -489,7 +506,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
 
       await iosDevices.startPolling();
-      expect(iosDevices.deviceNotifier.items, isEmpty);
+      expect(iosDevices.deviceNotifier!.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
       iosDevices.dispose();
@@ -531,9 +548,9 @@ void main() {
   });
 
   group('getDiagnostics', () {
-    FakeXcdevice xcdevice;
-    IOSWorkflow iosWorkflow;
-    Logger logger;
+    late FakeXcdevice xcdevice;
+    late IOSWorkflow iosWorkflow;
+    late Logger logger;
 
     setUp(() {
       xcdevice = FakeXcdevice();
@@ -601,7 +618,7 @@ class FakeXcdevice extends Fake implements XCDevice {
   }
 
   @override
-  Future<List<IOSDevice>> getAvailableIOSDevices({Duration timeout}) async {
+  Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
     return devices[getAvailableIOSDevicesCount++];
   }
 }

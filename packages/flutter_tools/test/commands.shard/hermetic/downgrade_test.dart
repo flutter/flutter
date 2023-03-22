@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -20,11 +18,11 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger bufferLogger;
-  FakeTerminal terminal;
-  ProcessManager processManager;
-  FakeStdio stdio;
+  late FileSystem fileSystem;
+  late BufferLogger bufferLogger;
+  late FakeTerminal terminal;
+  late ProcessManager processManager;
+  late FakeStdio stdio;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -43,7 +41,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on unknown channel', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'unknown');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -60,7 +58,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on no recorded version', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'dev');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'beta');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"abcd"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -68,11 +66,10 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'abcd'
+            'git', 'describe', '--tags', 'abcd',
           ],
-          exitCode: 0,
-          stdout: 'v1.2.3'
-        )
+          stdout: 'v1.2.3',
+        ),
       ]),
       terminal: terminal,
       stdio: stdio,
@@ -82,7 +79,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
       throwsToolExit(message:
-        'There is no previously recorded version for channel "dev".\n'
+        'There is no previously recorded version for channel "beta".\n'
         'Channel "master" was previously on: v1.2.3.'
       ),
     );
@@ -97,10 +94,10 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'invalid'
+            'git', 'describe', '--tags', 'invalid',
           ],
           exitCode: 1,
-        )
+        ),
       ]),
       terminal: terminal,
       stdio: stdio,
@@ -189,19 +186,19 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'g6b00b5e88'
+            'git', 'describe', '--tags', 'g6b00b5e88',
           ],
           stdout: 'v1.2.3',
         ),
         const FakeCommand(
           command: <String>[
-            'git', 'reset', '--hard', 'g6b00b5e88'
+            'git', 'reset', '--hard', 'g6b00b5e88',
           ],
         ),
         const FakeCommand(
           command: <String>[
-            'git', 'checkout', 'master', '--'
-          ]
+            'git', 'checkout', 'master', '--',
+          ],
         ),
       ]),
       terminal: terminal,
@@ -225,11 +222,11 @@ class FakeTerminal extends Fake implements Terminal {
     _selected = selected;
   }
 
-  List<String> _characters;
-  String _selected;
+  List<String>? _characters;
+  late String _selected;
 
   @override
-  Future<String> promptForCharInput(List<String> acceptedCharacters, {Logger logger, String prompt, int defaultChoiceIndex, bool displayAcceptedCharacters = true}) async {
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {Logger? logger, String? prompt, int? defaultChoiceIndex, bool displayAcceptedCharacters = true}) async {
     expect(acceptedCharacters, _characters);
     return _selected;
   }

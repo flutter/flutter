@@ -143,7 +143,7 @@ void main() {
 
     // Default drawerScrimColor
 
-    await tester.pumpWidget(buildFrame(drawerScrimColor: null));
+    await tester.pumpWidget(buildFrame());
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
@@ -378,5 +378,359 @@ void main() {
     await tester.restoreFrom(data);
     expect(find.text('drawer'), findsNothing);
     expect(find.text('endDrawer'), findsOneWidget);
+  });
+
+  testWidgets('ScaffoldState close drawer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Text('Drawer'),
+          body: Container(),
+        ),
+      ),
+    );
+
+    expect(find.text('Drawer'), findsNothing);
+
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('Drawer'), findsOneWidget);
+
+    scaffoldKey.currentState!.closeDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('Drawer'), findsNothing);
+  });
+
+  testWidgets('ScaffoldState close drawer do not crash if drawer is already closed', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Text('Drawer'),
+          body: Container(),
+        ),
+      ),
+    );
+
+    expect(find.text('Drawer'), findsNothing);
+
+    scaffoldKey.currentState!.closeDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('Drawer'), findsNothing);
+  });
+
+  testWidgets('Disposing drawer does not crash if drawer is open and framework is locked', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/34978
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(1800.0, 2400.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: OrientationBuilder(
+          builder: (BuildContext context, Orientation orientation) {
+            switch (orientation) {
+              case Orientation.portrait:
+                return Scaffold(
+                  drawer: const Text('drawer'),
+                  body: Container(),
+                );
+              case Orientation.landscape:
+                return Scaffold(
+                  appBar: AppBar(),
+                  body: Container(),
+                );
+            }
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('drawer'), findsNothing);
+
+    // Using a global key is a workaround for this issue.
+    final ScaffoldState portraitScaffoldState = tester.firstState(find.byType(Scaffold));
+    portraitScaffoldState.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    // Change the orientation and cause the drawer controller to be disposed
+    // while the framework is locked.
+    tester.view.physicalSize = const Size(2400.0, 1800.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsNothing);
+  });
+
+  testWidgets('Disposing endDrawer does not crash if endDrawer is open and framework is locked', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/34978
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(1800.0, 2400.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: OrientationBuilder(
+          builder: (BuildContext context, Orientation orientation) {
+            switch (orientation) {
+              case Orientation.portrait:
+                return Scaffold(
+                  endDrawer: const Text('endDrawer'),
+                  body: Container(),
+                );
+              case Orientation.landscape:
+                return Scaffold(
+                  appBar: AppBar(),
+                  body: Container(),
+                );
+            }
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('endDrawer'), findsNothing);
+
+    // Using a global key is a workaround for this issue.
+    final ScaffoldState portraitScaffoldState = tester.firstState(find.byType(Scaffold));
+    portraitScaffoldState.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    // Change the orientation and cause the drawer controller to be disposed
+    // while the framework is locked.
+    tester.view.physicalSize = const Size(2400.0, 1800.0);
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsNothing);
+  });
+
+  testWidgets('ScaffoldState close end drawer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          endDrawer: const Text('endDrawer'),
+          body: Container(),
+        ),
+      ),
+    );
+
+    expect(find.text('endDrawer'), findsNothing);
+
+    scaffoldKey.currentState!.openEndDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsOneWidget);
+
+    scaffoldKey.currentState!.closeEndDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('endDrawer'), findsNothing);
+  });
+
+  testWidgets('Drawer width defaults to Material spec', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          drawer: Drawer(),
+        ),
+      ),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final RenderBox box = tester.renderObject(find.byType(Drawer));
+    expect(box.size.width, equals(304.0));
+  });
+
+  testWidgets('Drawer width can be customized by parameter', (WidgetTester tester) async {
+    const double smallWidth = 200;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          drawer: Drawer(
+            width: smallWidth,
+          ),
+        ),
+      ),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+
+    await tester.pumpAndSettle();
+
+    final RenderBox box = tester.renderObject(find.byType(Drawer));
+    expect(box.size.width, equals(smallWidth));
+  });
+
+  testWidgets('Drawer default shape (ltr)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      ),
+    );
+
+    final Finder drawerMaterial = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Material),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+    // Open the drawer.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the drawer shape.
+    Material material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16.0),
+          bottomRight: Radius.circular(16.0),
+        ),
+      ),
+    );
+
+    // Close the opened drawer.
+    await tester.tapAt(const Offset(750, 300));
+    await tester.pumpAndSettle();
+
+    // Open the end drawer.
+    state.openEndDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the end drawer shape.
+    material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          bottomLeft: Radius.circular(16.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Drawer default shape (rtl)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      ),
+    );
+
+    final Finder drawerMaterial = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Material),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+    // Open the drawer.
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the drawer shape.
+    Material material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          bottomLeft: Radius.circular(16.0),
+        ),
+      ),
+    );
+
+    // Close the opened drawer.
+    await tester.tapAt(const Offset(750, 300));
+    await tester.pumpAndSettle();
+
+    // Open the end drawer.
+    state.openEndDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test the end drawer shape.
+    material = tester.widget<Material>(drawerMaterial);
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16.0),
+          bottomRight: Radius.circular(16.0),
+        ),
+      ),
+    );
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('Drawer default shape', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
+            drawer: Drawer(),
+            endDrawer: Drawer(),
+          ),
+        ),
+      );
+
+      final Finder drawerMaterial = find.descendant(
+        of: find.byType(Drawer),
+        matching: find.byType(Material),
+      );
+
+      final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+
+      // Open the drawer.
+      state.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Test the drawer shape.
+      Material material = tester.widget<Material>(drawerMaterial);
+      expect(material.shape, null);
+
+      // Close the opened drawer.
+      await tester.tapAt(const Offset(750, 300));
+      await tester.pumpAndSettle();
+
+      // Open the end drawer.
+      state.openEndDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Test the end drawer shape.
+      material = tester.widget<Material>(drawerMaterial);
+      expect(material.shape, null);
+    });
   });
 }

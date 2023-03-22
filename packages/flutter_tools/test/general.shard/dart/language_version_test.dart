@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=456"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -287,7 +288,6 @@ library funstuff;
     final Package package = Package(
       'foo',
       Uri.parse('file://foo/'),
-      languageVersion: null,
     );
 
     expect(determineLanguageVersion(file, package, flutterRoot), testCurrentLanguageVersion);

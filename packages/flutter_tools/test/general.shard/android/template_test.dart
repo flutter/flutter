@@ -33,16 +33,15 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         templateRenderer: const MustacheTemplateRenderer(),
-        templateManifest: null
     );
 
     final Map<String, Object> context = <String, Object>{
-      'androidIdentifier': 'in.when.there'
+      'androidIdentifier': 'is.in.when.there',
     };
     template.render(destination, context);
 
     final File destinationFile = destination.childFile(outputClass);
-    expect(destinationFile.readAsStringSync(), equals('package `in`.`when`.there;'));
+    expect(destinationFile.readAsStringSync(), equals('package `is`.`in`.`when`.there;'));
   });
 
 }

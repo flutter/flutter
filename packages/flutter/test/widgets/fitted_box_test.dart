@@ -346,7 +346,6 @@ void main() {
           width: 100.0,
           height: 10.0,
           child: FittedBox(
-            fit: BoxFit.contain,
             child: SizedBox(
               width: 50.0,
               height: 50.0,
@@ -445,21 +444,20 @@ void main() {
 
   testWidgets('Big child into small fitted box - hit testing', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
-    bool _pointerDown = false;
+    bool pointerDown = false;
     await tester.pumpWidget(
       Center(
         child: SizedBox(
           width: 100.0,
           height: 100.0,
           child: FittedBox(
-            fit: BoxFit.contain,
             alignment: FractionalOffset.center,
             child: SizedBox(
               width: 1000.0,
               height: 1000.0,
               child: Listener(
                 onPointerDown: (PointerDownEvent event) {
-                  _pointerDown = true;
+                  pointerDown = true;
                 },
                 child: Container(
                   key: key1,
@@ -471,9 +469,9 @@ void main() {
         ),
       ),
     );
-    expect(_pointerDown, isFalse);
+    expect(pointerDown, isFalse);
     await tester.tap(find.byKey(key1));
-    expect(_pointerDown, isTrue);
+    expect(pointerDown, isTrue);
   });
 
   testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
@@ -611,7 +609,7 @@ void main() {
 
 List<Type> getLayers() {
   final List<Type> layers = <Type>[];
-  Layer? container = RendererBinding.instance!.renderView.debugLayer;
+  Layer? container = RendererBinding.instance.renderView.debugLayer;
   while (container is ContainerLayer) {
     layers.add(container.runtimeType);
     expect(container.firstChild, same(container.lastChild));

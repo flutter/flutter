@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -132,7 +134,7 @@ void _tests() {
                                   tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                                   flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
                                   actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
-                                  label: '‪Interactive text‬',
+                                  label: '\u202aInteractive text\u202c',
                                   value: 'test-value',
                                   increasedValue: 'test-increasedValue',
                                   decreasedValue: 'test-decreasedValue',

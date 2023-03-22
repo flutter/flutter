@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,8 +15,8 @@ void main() {
     const TextSpan a2 = TextSpan(text: 'a');
     const TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
     const TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
-    const TextSpan c1 = TextSpan(text: null);
-    const TextSpan c2 = TextSpan(text: null);
+    const TextSpan c1 = TextSpan();
+    const TextSpan c2 = TextSpan();
 
     expect(a1 == a2, isTrue);
     expect(b1 == b2, isTrue);
@@ -306,16 +308,15 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) + const Offset(40, 0));
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
@@ -350,7 +351,6 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
     expect(logEvents, isEmpty);

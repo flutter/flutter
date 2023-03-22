@@ -82,14 +82,13 @@ void main() {
     debugResetSemanticsIdCounter();
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: Card(
-              semanticContainer: true,
               child: Column(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('First child'),
                   Text('Second child'),
                 ],
@@ -181,14 +180,14 @@ void main() {
             clipBehavior: Clip.antiAliasWithSaveLayer,
           ),
         ),
-        child: const Card(clipBehavior: null),
+        child: const Card(),
       );
     }));
     expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAliasWithSaveLayer);
   });
 
   testWidgets('Card shadowColor', (WidgetTester tester) async {
-    Material _getCardMaterial(WidgetTester tester) {
+    Material getCardMaterial(WidgetTester tester) {
       return tester.widget<Material>(
         find.descendant(
           of: find.byType(Card),
@@ -197,7 +196,7 @@ void main() {
       );
     }
 
-    Card _getCard(WidgetTester tester) {
+    Card getCard(WidgetTester tester) {
       return tester.widget<Card>(
         find.byType(Card),
       );
@@ -207,8 +206,8 @@ void main() {
       const Card(),
     );
 
-    expect(_getCard(tester).shadowColor, null);
-    expect(_getCardMaterial(tester).shadowColor, const Color(0xFF000000));
+    expect(getCard(tester).shadowColor, null);
+    expect(getCardMaterial(tester).shadowColor, const Color(0xFF000000));
 
     await tester.pumpWidget(
       const Card(
@@ -216,7 +215,7 @@ void main() {
       ),
     );
 
-    expect(_getCardMaterial(tester).shadowColor, _getCard(tester).shadowColor);
-    expect(_getCardMaterial(tester).shadowColor, Colors.red);
+    expect(getCardMaterial(tester).shadowColor, getCard(tester).shadowColor);
+    expect(getCardMaterial(tester).shadowColor, Colors.red);
   });
 }

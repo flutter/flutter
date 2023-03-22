@@ -90,7 +90,7 @@ abstract class OperatingSystemUtils {
   /// if `which` was not able to locate the binary.
   File? which(String execName) {
     final List<File> result = _which(execName);
-    if (result == null || result.isEmpty) {
+    if (result.isEmpty) {
       return null;
     }
     return result.first;
@@ -166,16 +166,11 @@ abstract class OperatingSystemUtils {
 
 class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  }) : super._private();
 
   @override
   void makeExecutable(File file) {
@@ -184,20 +179,22 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void chmod(FileSystemEntity entity, String mode) {
+    // Errors here are silently ignored (except when tracing).
     try {
       final ProcessResult result = _processManager.runSync(
         <String>['chmod', mode, entity.path],
       );
       if (result.exitCode != 0) {
         _logger.printTrace(
-          'Error trying to run chmod on ${entity.absolute.path}'
-          '\nstdout: ${result.stdout}'
-          '\nstderr: ${result.stderr}',
+          'Error trying to run "chmod $mode ${entity.path}":\n'
+          '  exit code: ${result.exitCode}\n'
+          '  stdout: ${result.stdout.toString().trimRight()}\n'
+          '  stderr: ${result.stderr.toString().trimRight()}'
         );
       }
     } on ProcessException catch (error) {
       _logger.printTrace(
-        'Error trying to run chmod on ${entity.absolute.path}: $error',
+        'Error trying to run "chmod $mode ${entity.path}": $error',
       );
     }
   }
@@ -268,20 +265,22 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      final RunResult hostPlatformCheck =
-          _processUtils.runSync(<String>['uname', '-m']);
+      final RunResult hostPlatformCheck = _processUtils.runSync(<String>['uname', '-m']);
       // On x64 stdout is "uname -m: x86_64"
       // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
       if (hostPlatformCheck.exitCode != 0) {
-        _logger.printError(
-          'Error trying to run uname -m'
-          '\nstdout: ${hostPlatformCheck.stdout}'
-          '\nstderr: ${hostPlatformCheck.stderr}',
-        );
         _hostPlatform = HostPlatform.linux_x64;
+        _logger.printError(
+          'Encountered an error trying to run "uname -m":\n'
+          '  exit code: ${hostPlatformCheck.exitCode}\n'
+          '  stdout: ${hostPlatformCheck.stdout.trimRight()}\n'
+          '  stderr: ${hostPlatformCheck.stderr.trimRight()}\n'
+          'Assuming host platform is ${getNameForHostPlatform(_hostPlatform!)}.',
+        );
       } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
         _hostPlatform = HostPlatform.linux_x64;
       } else {
+        // We default to ARM if it's not x86_64 and we did not get an error.
         _hostPlatform = HostPlatform.linux_arm64;
       }
     }
@@ -291,16 +290,11 @@ class _PosixUtils extends OperatingSystemUtils {
 
 class _LinuxUtils extends _PosixUtils {
   _LinuxUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  });
 
   String? _name;
 
@@ -324,13 +318,13 @@ class _LinuxUtils extends _PosixUtils {
       try {
         // Split the operating system version which should be formatted as
         // "Linux kernelRelease build", by spaces.
-        final List<String> osVersionSplitted = _platform.operatingSystemVersion.split(' ');
-        if (osVersionSplitted.length < 3) {
+        final List<String> osVersionSplit = _platform.operatingSystemVersion.split(' ');
+        if (osVersionSplit.length < 3) {
           // The operating system version didn't have the expected format.
           // Initialize as an empty string.
           kernelRelease = '';
         } else {
-          kernelRelease = ' ${osVersionSplitted[1]}';
+          kernelRelease = ' ${osVersionSplit[1]}';
         }
       } on Exception catch (e) {
         _logger.printTrace('Failed obtaining kernel release for Linux: $e');
@@ -342,8 +336,8 @@ class _LinuxUtils extends _PosixUtils {
   }
 
   String _getOsReleaseValueForKey(String osRelease, String key) {
-    final List<String> osReleaseSplitted = osRelease.split('\n');
-    for (String entry in osReleaseSplitted) {
+    final List<String> osReleaseSplit = osRelease.split('\n');
+    for (String entry in osReleaseSplit) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
       if(entryKeyValuePair[0] == key) {
@@ -363,16 +357,11 @@ class _LinuxUtils extends _PosixUtils {
 
 class _MacOSUtils extends _PosixUtils {
   _MacOSUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  });
 
   String? _name;
 
@@ -383,10 +372,16 @@ class _MacOSUtils extends _PosixUtils {
         _processUtils.runSync(<String>['sw_vers', '-productName']),
         _processUtils.runSync(<String>['sw_vers', '-productVersion']),
         _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+        _processUtils.runSync(<String>['uname', '-m']),
       ];
       if (results.every((RunResult result) => result.exitCode == 0)) {
+        String osName = getNameForHostPlatform(hostPlatform);
+        // If the script is running in Rosetta, "uname -m" will return x86_64.
+        if (hostPlatform == HostPlatform.darwin_arm64 && results[3].stdout.contains('x86_64')) {
+          osName = '$osName (Rosetta)';
+        }
         _name =
-            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} ${getNameForHostPlatform(hostPlatform)}';
+            '${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()} $osName';
       }
       _name ??= super.name;
     }
@@ -420,7 +415,7 @@ class _MacOSUtils extends _PosixUtils {
       // On arm64 stdout is "sysctl hw.optional.arm64: 1"
       // On x86 hw.optional.arm64 is unavailable and exits with 1.
       if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
-        _hostPlatform = HostPlatform.darwin_arm;
+        _hostPlatform = HostPlatform.darwin_arm64;
       } else {
         _hostPlatform = HostPlatform.darwin_x64;
       }
@@ -447,8 +442,9 @@ class _MacOSUtils extends _PosixUtils {
         );
         for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
           // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
+          // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
           _processUtils.runSync(
-            <String>['rsync', '-av', '--delete', unzippedFile.path, targetDirectory.path],
+            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
             throwOnError: true,
             verboseExceptions: true,
           );
@@ -470,16 +466,11 @@ class _MacOSUtils extends _PosixUtils {
 
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : super._private(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+    required super.processManager,
+  }) : super._private();
 
   @override
   HostPlatform hostPlatform = HostPlatform.windows_x64;
@@ -534,10 +525,32 @@ class _WindowsUtils extends OperatingSystemUtils {
         continue;
       }
 
-      final File destFile = _fileSystem.file(_fileSystem.path.join(
+      final File destFile = _fileSystem.file(
+        _fileSystem.path.canonicalize(
+          _fileSystem.path.join(
+            targetDirectory.path,
+            archiveFile.name,
+          ),
+        ),
+      );
+
+      // Validate that the destFile is within the targetDirectory we want to
+      // extract to.
+      //
+      // See https://snyk.io/research/zip-slip-vulnerability for more context.
+      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(
+        destFile.path,
+      );
+      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
         targetDirectory.path,
-        archiveFile.name,
-      ));
+      );
+      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
+        throw StateError(
+          'Tried to extract the file $destinationFileCanonicalPath outside of the '
+          'target directory $targetDirectoryCanonicalPath',
+        );
+      }
+
       if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
       }
@@ -577,21 +590,21 @@ class _WindowsUtils extends OperatingSystemUtils {
 String? findProjectRoot(FileSystem fileSystem, [ String? directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fileSystem.currentDirectory.path;
+  Directory currentDirectory = fileSystem.directory(directory).absolute;
   while (true) {
-    if (fileSystem.isFileSync(fileSystem.path.join(directory!, kProjectRootSentinel))) {
-      return directory;
+    if (currentDirectory.childFile(kProjectRootSentinel).existsSync()) {
+      return currentDirectory.path;
     }
-    final String parent = fileSystem.path.dirname(directory);
-    if (directory == parent) {
+    if (!currentDirectory.existsSync() || currentDirectory.parent.path == currentDirectory.path) {
       return null;
     }
-    directory = parent;
+    currentDirectory = currentDirectory.parent;
   }
 }
 
 enum HostPlatform {
   darwin_x64,
-  darwin_arm,
+  darwin_arm64,
   linux_x64,
   linux_arm64,
   windows_x64,
@@ -601,8 +614,8 @@ String getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
       return 'darwin-x64';
-    case HostPlatform.darwin_arm:
-      return 'darwin-arm';
+    case HostPlatform.darwin_arm64:
+      return 'darwin-arm64';
     case HostPlatform.linux_x64:
       return 'linux-x64';
     case HostPlatform.linux_arm64:

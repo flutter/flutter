@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FocusTraversalGroup
+// Flutter code sample for [FocusTraversalGroup].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -26,12 +26,12 @@ class MyApp extends StatelessWidget {
 /// the type of T.
 class OrderedButton<T> extends StatefulWidget {
   const OrderedButton({
-    Key? key,
+    super.key,
     required this.name,
     this.canRequestFocus = true,
     this.autofocus = false,
     required this.order,
-  }) : super(key: key);
+  });
 
   final String name;
   final bool canRequestFocus;
@@ -68,7 +68,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
 
   void _handleOnPressed() {
     focusNode.requestFocus();
-    print('Button ${widget.name} pressed.');
+    debugPrint('Button ${widget.name} pressed.');
     debugDumpFocusTree();
   }
 
@@ -121,11 +121,11 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
 }
 
 class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({Key? key}) : super(key: key);
+  const MyStatelessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: FocusTraversalGroup(
         policy: OrderedTraversalPolicy(),
@@ -164,7 +164,7 @@ class MyStatelessWidget extends StatelessWidget {
             ),
             // A group that orders in widget order, regardless of what the order is set to.
             FocusTraversalGroup(
-              // Note that because this is NOT an OrderedTraversalPolicy, the
+              // Because this is NOT an OrderedTraversalPolicy, the
               // assigned order of these OrderedButtons is ignored, and they
               // are traversed in widget order. TRY THIS: change this to
               // "OrderedTraversalPolicy()" and see that it now follows the

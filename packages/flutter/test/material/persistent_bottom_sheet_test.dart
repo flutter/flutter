@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
-  Future<void> _checkNonLinearAnimation(WidgetTester tester) async {
+  Future<void> checkNonLinearAnimation(WidgetTester tester) async {
     final Offset firstPosition = tester.getCenter(find.text('One'));
     await tester.pump(const Duration(milliseconds: 30));
     final Offset secondPosition = tester.getCenter(find.text('One'));
@@ -21,6 +21,79 @@ void main() {
     // If the animation were linear, these two values would be the same.
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
+
+  testWidgets('Persistent draggableScrollableSheet localHistoryEntries test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110123
+    Widget buildFrame(Widget? bottomSheet) {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: Text('body')),
+          bottomSheet: bottomSheet,
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: Text('fab'),
+          ),
+        ),
+      );
+    }
+    final Widget draggableScrollableSheet = DraggableScrollableSheet(
+      expand: false,
+      snap: true,
+      initialChildSize: 0.3,
+      minChildSize: 0.3,
+      builder: (_, ScrollController controller) {
+        return ListView.builder(
+          itemExtent: 50.0,
+          itemCount: 50,
+          itemBuilder: (_, int index) => Text('Item $index'),
+          controller: controller,
+        );
+      },
+    );
+
+    await tester.pumpWidget(buildFrame(draggableScrollableSheet));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+
+    await tester.drag(find.text('Item 2'), const Offset(0, -200.0));
+    await tester.pumpAndSettle();
+    // We've started to drag up, we should have a back button now for a11y
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+
+    await tester.fling(find.text('Item 2'), const Offset(0, 200.0), 2000.0);
+    await tester.pumpAndSettle();
+    // BackButton should be hidden
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+
+    // Show the back button again
+    await tester.drag(find.text('Item 2'), const Offset(0, -200.0));
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+
+    // Remove the draggableScrollableSheet should hide the back button
+    await tester.pumpWidget(buildFrame(null));
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/83668
+  testWidgets('Scaffold.bottomSheet update test', (WidgetTester tester) async {
+    Widget buildFrame(Widget? bottomSheet) {
+      return MaterialApp(
+        home: Scaffold(
+          body: const Placeholder(),
+          bottomSheet: bottomSheet,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
+    await tester.pumpWidget(buildFrame(null));
+
+    // The disappearing animation has not yet been completed.
+    await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
+  });
 
   testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -134,14 +207,14 @@ void main() {
       );
     });
     await tester.pump();
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
 
     await tester.pumpAndSettle();
 
     expect(find.text('Two'), findsOneWidget);
 
     await tester.drag(find.text('Two'), const Offset(0.0, 200.0));
-    await _checkNonLinearAnimation(tester);
+    await checkNonLinearAnimation(tester);
     await tester.pumpAndSettle();
 
     expect(find.text('Two'), findsNothing);
@@ -466,7 +539,6 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          bottomSheet: null,
           body: Placeholder(),
         ),
       ),
@@ -505,7 +577,7 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
     const double elevation = 9.0;
-    final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+    const ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
     const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(MaterialApp(

@@ -29,9 +29,13 @@ class TestAPISubclass extends TestAPI {
   }
 }
 
+class RecognizableTestException implements Exception {
+  const RecognizableTestException();
+}
+
 Future<Object> _guardedThrower() {
   return TestAsyncUtils.guard<Object>(() async {
-    throw 'Hello';
+    throw const RecognizableTestException();
   });
 }
 
@@ -42,7 +46,7 @@ void main() {
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard2();
-      throw 'unexpectedly did not throw';
+      fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
@@ -56,7 +60,7 @@ void main() {
     }
     expect(await f1, isNull);
     expect(f2, isNull);
-  });
+  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
   test('TestAsyncUtils - two classes, all callers in superclass', () async {
     final TestAPI testAPI = TestAPISubclass();
@@ -64,7 +68,7 @@ void main() {
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard2();
-      throw 'unexpectedly did not throw';
+      fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
@@ -78,7 +82,7 @@ void main() {
     }
     expect(await f1, isNull);
     expect(f2, isNull);
-  });
+  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
   test('TestAsyncUtils - two classes, mixed callers', () async {
     final TestAPISubclass testAPI = TestAPISubclass();
@@ -86,7 +90,7 @@ void main() {
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard3();
-      throw 'unexpectedly did not throw';
+      fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
@@ -100,7 +104,7 @@ void main() {
     }
     expect(await f1, isNull);
     expect(f2, isNull);
-  });
+  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
   test('TestAsyncUtils - expect() catches pending async work', () async {
     final TestAPI testAPI = TestAPISubclass();
@@ -108,7 +112,7 @@ void main() {
     f1 = testAPI.testGuard1();
     try {
       flutter_test.expect(0, 0);
-      throw 'unexpectedly did not throw';
+      fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
@@ -122,14 +126,14 @@ void main() {
       real_test.expect(lines.length, greaterThan(7));
     }
     expect(await f1, isNull);
-  });
+  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
     Future<Object?>? f1, f2;
     try {
       f1 = tester.pump();
       f2 = tester.pump();
-      throw 'unexpectedly did not throw';
+      fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict.');
@@ -164,14 +168,14 @@ void main() {
     }
     await f1;
     await f2;
-  });
+  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
     Future<Object?>? f1;
     try {
       f1 = tester.pump();
       TestAsyncUtils.verifyAllScopesClosed();
-      throw 'unexpectedly did not throw';
+      fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Asynchronous call to guarded function leaked.');
@@ -189,14 +193,14 @@ void main() {
       real_test.expect(information[3].level, DiagnosticLevel.info);
     }
     await f1;
-  });
+  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
     Future<Object?>? f1;
     try {
       f1 = tester.pump();
       TestAsyncUtils.verifyAllScopesClosed();
-      throw 'unexpectedly did not throw';
+      fail('unexpectedly did not throw');
     } on FlutterError catch (e) {
       final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Asynchronous call to guarded function leaked.');
@@ -214,16 +218,35 @@ void main() {
       real_test.expect(information[3].level, DiagnosticLevel.info);
     }
     await f1;
-  });
+  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
   testWidgets('TestAsyncUtils - guard body can throw', (WidgetTester tester) async {
     try {
       await _guardedThrower();
       expect(false, true); // _guardedThrower should throw and we shouldn't reach here
-    } on String catch (s) {
-      expect(s, 'Hello');
+    } on RecognizableTestException catch (e) {
+      expect(e, const RecognizableTestException());
     }
   });
+
+  test('TestAsyncUtils - web', () async {
+    final TestAPI testAPI = TestAPI();
+    Future<Object?>? f1, f2;
+    f1 = testAPI.testGuard1();
+    try {
+      f2 = testAPI.testGuard2();
+      fail('unexpectedly did not throw');
+    } on FlutterError catch (e) {
+      final List<String> lines = e.message.split('\n');
+      real_test.expect(lines[0], 'Guarded function conflict.');
+      real_test.expect(lines[1], 'You must use "await" with all Future-returning test APIs.');
+      real_test.expect(lines[2], '');
+      real_test.expect(lines[3], 'When the first function was called, this was the stack:');
+      real_test.expect(lines.length, greaterThan(3));
+    }
+    expect(await f1, isNull);
+    expect(f2, isNull);
+  }, skip: !kIsWeb); // [intended] depends on platform-specific stack traces.
 
   // see also dev/manual_tests/test_data which contains tests run by the flutter_tools tests for 'flutter test'
 }

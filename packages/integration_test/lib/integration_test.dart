@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:io' show HttpClient, SocketException, WebSocket;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -12,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
-import 'package:vm_service/vm_service_io.dart' as vm_io;
 
 import '_callback_io.dart' if (dart.library.html) '_callback_web.dart' as driver_actions;
 import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
@@ -60,11 +60,11 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
                 return MapEntry<String, dynamic>(name, result.details);
               }
               return MapEntry<String, Object>(name, result);
-            })
+            }),
           },
         );
       } on MissingPluginException {
-        print(r'''
+        debugPrint(r'''
 Warning: integration_test plugin was not detected.
 
 If you're running the tests with `flutter drive`, please make sure your tests
@@ -118,11 +118,12 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
-    return TestViewConfiguration(
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
+    return TestViewConfiguration.fromView(
       size: size,
-      window: window,
+      view: view,
     );
   }
 
@@ -133,16 +134,31 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   @override
   List<Failure> get failureMethodsDetails => results.values.whereType<Failure>().toList();
 
-  /// Similar to [WidgetsFlutterBinding.ensureInitialized].
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
   ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [IntegrationTestWidgetsFlutterBinding.ensureInitialized].
+  static IntegrationTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static IntegrationTestWidgetsFlutterBinding? _instance;
+
   /// Returns an instance of the [IntegrationTestWidgetsFlutterBinding], creating and
   /// initializing it if necessary.
-  static WidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null) {
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsFlutterBinding.ensureInitialized], the equivalent in the widgets framework.
+  static IntegrationTestWidgetsFlutterBinding ensureInitialized() {
+    if (_instance == null) {
       IntegrationTestWidgetsFlutterBinding();
     }
-    assert(WidgetsBinding.instance is IntegrationTestWidgetsFlutterBinding);
-    return WidgetsBinding.instance!;
+    return _instance!;
   }
 
   /// Test results that will be populated after the tests have completed.
@@ -169,10 +185,10 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
   /// pump a frame before taking a screenshot.
-  Future<List<int>> takeScreenshot(String screenshotName) async {
+  Future<List<int>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
-    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName);
+    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName, args);
     assert(data.containsKey('bytes'));
 
     (reportData!['screenshots']! as List<dynamic>).add(data);
@@ -235,8 +251,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   Future<void> enableTimeline({
     List<String> streams = const <String>['all'],
     @visibleForTesting vm.VmService? vmService,
+    @visibleForTesting HttpClient? httpClient,
   }) async {
-    assert(streams != null);
     assert(streams.isNotEmpty);
     if (vmService != null) {
       _vmService = vmService;
@@ -244,9 +260,18 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     if (_vmService == null) {
       final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
       assert(info.serverUri != null);
-      _vmService = await vm_io.vmServiceConnectUri(
-        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
-      );
+      final String address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
+      try {
+        _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
+      } on SocketException catch(e, s) {
+        throw StateError(
+          'Failed to connect to VM Service at $address.\n'
+          'This may happen if DDS is enabled. If this test was launched via '
+          '`flutter drive`, try adding `--no-dds`.\n'
+          'The original exception was:\n'
+          '$e\n$s',
+        );
+      }
     }
     await _vmService!.setVMTimelineFlags(streams);
   }
@@ -381,7 +406,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     // The engine could batch FrameTimings and send them only once per second.
     // Delay for a sufficient time so either old FrameTimings are flushed and not
     // interfering our measurements here, or new FrameTimings are all reported.
-    // TODO(CareF): remove this when flush FrameTiming is readly in engine.
+    // TODO(CareF): remove this when flush FrameTiming is readily in engine.
     //              See https://github.com/flutter/flutter/issues/64808
     //              and https://github.com/flutter/flutter/issues/67593
     final List<FrameTiming> frameTimings = <FrameTiming>[];
@@ -391,7 +416,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
         count++;
         await Future<void>.delayed(const Duration(seconds: 2));
         if (count > 20) {
-          print('delayForFrameTimings is taking longer than expected...');
+          debugPrint('delayForFrameTimings is taking longer than expected...');
         }
       }
     }
@@ -446,4 +471,30 @@ class _GarbageCollectionInfo {
 
   final int oldCount;
   final int newCount;
+}
+
+// Connect to the given uri and return a new [VmService] instance.
+//
+// Copied from vm_service_io so that we can pass a custom [HttpClient] for
+// testing. Currently, the WebSocket API reuses an HttpClient that
+// is created before the test can change the HttpOverrides.
+Future<vm.VmService> _vmServiceConnectUri(
+  String wsUri, {
+  HttpClient? httpClient,
+}) async {
+  final WebSocket socket = await WebSocket.connect(wsUri, customClient: httpClient);
+  final StreamController<dynamic> controller = StreamController<dynamic>();
+  final Completer<void> streamClosedCompleter = Completer<void>();
+
+  socket.listen(
+    (dynamic data) => controller.add(data),
+    onDone: () => streamClosedCompleter.complete(),
+  );
+
+  return vm.VmService(
+    controller.stream,
+    (String message) => socket.add(message),
+    disposeHandler: () => socket.close(),
+    streamClosed: streamClosedCompleter.future,
+  );
 }

@@ -11,26 +11,8 @@ void main() {
   ));
 }
 
-class DemoButton extends StatelessWidget {
-  const DemoButton({Key? key, required this.name}) : super(key: key);
-
-  final String name;
-
-  void _handleOnPressed() {
-    print('Button $name pressed.');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () => _handleOnPressed(),
-      child: Text(name),
-    );
-  }
-}
-
 class HoverDemo extends StatefulWidget {
-  const HoverDemo({Key? key}) : super(key: key);
+  const HoverDemo({super.key});
 
   @override
   State<HoverDemo> createState() => _HoverDemoState();
@@ -47,7 +29,7 @@ class _HoverDemoState extends State<HoverDemo> {
     );
 
     return DefaultTextStyle(
-      style: textTheme.headline4!,
+      style: textTheme.headlineMedium!,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Hover Demo'),
@@ -89,7 +71,6 @@ class _HoverDemoState extends State<HoverDemo> {
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: TextField(
-                    autofocus: false,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Enter Text',

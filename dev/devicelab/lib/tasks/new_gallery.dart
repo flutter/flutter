@@ -4,23 +4,24 @@
 
 import 'dart:io';
 
-import 'package:flutter_devicelab/tasks/perf_tests.dart';
-
-
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 import '../versions/gallery.dart' show galleryVersion;
+import 'perf_tests.dart';
 
 class NewGalleryPerfTest extends PerfTest {
   NewGalleryPerfTest(
     this.galleryDir, {
     String timelineFileName = 'transitions',
     String dartDefine = '',
+    bool enableImpeller = false,
+    super.timeoutSeconds,
   }) : super(
     galleryDir.path,
     'test_driver/transitions_perf.dart',
     timelineFileName,
     dartDefine: dartDefine,
+    enableImpeller: enableImpeller,
   );
 
   @override

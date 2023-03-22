@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
-
 import 'test_async_utils.dart';
 
 final Map<int, ui.Image> _cache = <int, ui.Image>{};
@@ -31,11 +29,10 @@ Future<ui.Image> createTestImage({
   int height = 1,
   bool cache = true,
 }) => TestAsyncUtils.guard(() async {
-  assert(width != null && width > 0);
-  assert(height != null && height > 0);
-  assert(cache != null);
+  assert(width > 0);
+  assert(height > 0);
 
-  final int cacheKey = hashValues(width, height);
+  final int cacheKey = Object.hash(width, height);
   if (cache && _cache.containsKey(cacheKey)) {
     return _cache[cacheKey]!.clone();
   }
@@ -50,7 +47,7 @@ Future<ui.Image> createTestImage({
 Future<ui.Image> _createImage(int width, int height) async {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromPixels(
-    Uint8List.fromList(List<int>.filled(width * height * 4, 0, growable: false)),
+    Uint8List.fromList(List<int>.filled(width * height * 4, 0)),
     width,
     height,
     ui.PixelFormat.rgba8888,

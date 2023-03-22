@@ -3,11 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+
+class SpyFixedExtentScrollController extends FixedExtentScrollController {
+  /// Override for test visibility only.
+  @override
+  bool get hasListeners => super.hasListeners;
+}
 
 void main() {
   testWidgets('Picker respects theme styling', (WidgetTester tester) async {
@@ -182,9 +190,9 @@ void main() {
             width: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
-              children: const <Widget>[Text('1'), Text('1')],
               onSelectedItemChanged: (int i) {},
               selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
+              children: const <Widget>[Text('1'), Text('1')],
             ),
           ),
         ),
@@ -226,6 +234,7 @@ void main() {
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
+          return null;
         });
 
         await tester.pumpWidget(
@@ -279,6 +288,7 @@ void main() {
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
           systemCalls.add(methodCall);
+          return null;
         });
 
         await tester.pumpWidget(
@@ -394,9 +404,11 @@ void main() {
         warnIfMissed: false, // has an IgnorePointer
       );
 
-      // Should have been flung far enough that even the first item goes off
-      // screen and gets removed.
-      expect(find.widgetWithText(SizedBox, '0').evaluate().isEmpty, true);
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.iOS) {
+        // Should have been flung far enough that even the first item goes off
+        // screen and gets removed.
+        expect(find.widgetWithText(SizedBox, '0').evaluate().isEmpty, true);
+      }
 
       expect(
         selectedItems,
@@ -418,6 +430,102 @@ void main() {
         // Falling back to 0 shouldn't produce more callbacks.
         <int>[8, 6, 4, 2, 0],
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
+
+  testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+    Widget buildCupertinoPicker(Brightness brightness) {
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              itemExtent: 50.0,
+              onSelectedItemChanged: (_) { },
+              children: List<Widget>.generate(3, (int index) {
+                return SizedBox(
+                  height: 50.0,
+                  width: 300.0,
+                  child: Text(index.toString()),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // CupertinoPicker with light theme.
+    await tester.pumpWidget(buildCupertinoPicker(Brightness.light));
+    RenderParagraph paragraph = tester.renderObject(find.text('1'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+
+    // CupertinoPicker with dark theme.
+    await tester.pumpWidget(buildCupertinoPicker(Brightness.dark));
+    paragraph = tester.renderObject(find.text('1'));
+    expect(paragraph.text.style!.color, CupertinoColors.label);
+    // Text style should not return unresolved color.
+    expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
+  });
+
+  group('CupertinoPickerDefaultSelectionOverlay', () {
+    testWidgets('should be using directional decoration', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          home: CupertinoPicker(
+            itemExtent: 15.0,
+            onSelectedItemChanged: (int i) {},
+            selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
+            children: const <Widget>[Text('1'), Text('1')],
+          ),
+        ),
+      );
+
+      final Finder selectionContainer = find.byType(Container);
+      final Container container = tester.firstWidget<Container>(selectionContainer);
+      final EdgeInsetsGeometry? margin = container.margin;
+      final BorderRadiusGeometry? borderRadius = (container.decoration as BoxDecoration?)?.borderRadius;
+
+      expect(margin, isA<EdgeInsetsDirectional>());
+      expect(borderRadius, isA<BorderRadiusDirectional>());
+    });
+  });
+
+  testWidgets('Scroll controller is detached upon dispose', (WidgetTester tester) async {
+    final SpyFixedExtentScrollController controller = SpyFixedExtentScrollController();
+    expect(controller.hasListeners, false);
+    expect(controller.positions.length, 0);
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: Center(
+          child: CupertinoPicker(
+            scrollController: controller,
+            itemExtent: 50.0,
+            onSelectedItemChanged: (_) { },
+            children: List<Widget>.generate(3, (int index) {
+              return SizedBox(
+                width: 300.0,
+                child: Text(index.toString()),
+              );
+            }),
+          ),
+        ),
+      ),
+    ));
+    expect(controller.hasListeners, true);
+    expect(controller.positions.length, 1);
+
+    await tester.pumpWidget(const SizedBox.expand());
+    expect(controller.hasListeners, false);
+    expect(controller.positions.length, 0);
+  });
+
 }

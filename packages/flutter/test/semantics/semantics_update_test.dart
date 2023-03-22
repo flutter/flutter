@@ -151,6 +151,18 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0] is SpellOutStringAttribute, isTrue);
     expect(SemanticsUpdateBuilderSpy.observations[1]!.hintAttributes![0].range, const TextRange(start: 1, end: 2));
 
+    expect(
+      tester.widget(find.byType(Semantics)).toString(),
+      'Semantics('
+        'container: false, '
+        'properties: SemanticsProperties, '
+        'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
+        'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
+        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))], '
+        'tooltip: null'// ignore: missing_whitespace_between_adjacent_strings
+      ')',
+    );
+
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   });
@@ -185,15 +197,15 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required double thickness,
     required Rect rect,
     required String label,
-    List<ui.StringAttribute>? labelAttributes,
+    List<StringAttribute>? labelAttributes,
     required String value,
-    List<ui.StringAttribute>? valueAttributes,
+    List<StringAttribute>? valueAttributes,
     required String increasedValue,
-    List<ui.StringAttribute>? increasedValueAttributes,
+    List<StringAttribute>? increasedValueAttributes,
     required String decreasedValue,
-    List<ui.StringAttribute>? decreasedValueAttributes,
+    List<StringAttribute>? decreasedValueAttributes,
     required String hint,
-    List<ui.StringAttribute>? hintAttributes,
+    List<StringAttribute>? hintAttributes,
     String? tooltip,
     TextDirection? textDirection,
     required Float64List transform,
@@ -291,15 +303,15 @@ class SemanticsNodeUpdateObservation {
   final double thickness;
   final Rect rect;
   final String label;
-  final List<ui.StringAttribute>? labelAttributes;
+  final List<StringAttribute>? labelAttributes;
   final String value;
-  final List<ui.StringAttribute>? valueAttributes;
+  final List<StringAttribute>? valueAttributes;
   final String increasedValue;
-  final List<ui.StringAttribute>? increasedValueAttributes;
+  final List<StringAttribute>? increasedValueAttributes;
   final String decreasedValue;
-  final List<ui.StringAttribute>? decreasedValueAttributes;
+  final List<StringAttribute>? decreasedValueAttributes;
   final String hint;
-  final List<ui.StringAttribute>? hintAttributes;
+  final List<StringAttribute>? hintAttributes;
   final TextDirection? textDirection;
   final Float64List transform;
   final Int32List childrenInTraversalOrder;

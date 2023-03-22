@@ -20,12 +20,11 @@ class BenchSimpleLazyTextScroll extends WidgetRecorder {
 
   @override
   Widget createWidget() {
-    return Directionality(
+    return const Directionality(
       textDirection: TextDirection.ltr,
       child: Row(
-        children: const <Widget>[
+        children: <Widget>[
           Flexible(
-            flex: 1,
             child: _TestScrollingWidget(
               initialScrollOffset: 0,
               scrollDistance: 300,
@@ -33,7 +32,6 @@ class BenchSimpleLazyTextScroll extends WidgetRecorder {
             ),
           ),
           Flexible(
-            flex: 1,
             child: _TestScrollingWidget(
               initialScrollOffset: 1000,
               scrollDistance: 500,
@@ -41,7 +39,6 @@ class BenchSimpleLazyTextScroll extends WidgetRecorder {
             ),
           ),
           Flexible(
-            flex: 1,
             child: _TestScrollingWidget(
               initialScrollOffset: 2000,
               scrollDistance: 700,

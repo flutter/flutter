@@ -22,8 +22,7 @@ List<String> _allDemos = kAllGalleryDemos.map(
 
 void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
+  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   group('flutter gallery transitions on e2e', () {
     testWidgets('find.bySemanticsLabel', (WidgetTester tester) async {
@@ -31,7 +30,7 @@ void main([List<String> args = const <String>[]]) {
       await tester.pumpAndSettle();
       final int id = tester.getSemantics(find.bySemanticsLabel('Material')).id;
       expect(id, greaterThan(-1));
-    }, skip: !withSemantics, semanticsEnabled: true);
+    }, skip: !withSemantics);
 
     testWidgets(
       'all demos',

@@ -28,15 +28,9 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   ///
   /// The [builder] argument must not be null.
   const SliverLayoutBuilder({
-    Key? key,
-    required SliverLayoutWidgetBuilder builder,
-  }) : super(key: key, builder: builder);
-
-  /// Called at layout time to construct the widget tree.
-  ///
-  /// The builder must return a non-null sliver widget.
-  @override
-  SliverLayoutWidgetBuilder get builder => super.builder;
+    super.key,
+    required super.builder,
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
@@ -45,7 +39,6 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
 class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
   @override
   double childMainAxisPosition(RenderObject child) {
-    assert(child != null);
     assert(child == this.child);
     return 0;
   }
@@ -59,7 +52,6 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     assert(child == this.child);
     // child's offset is always (0, 0), transform.translate(0, 0) does not mutate the transform.
   }
@@ -67,8 +59,9 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   @override
   void paint(PaintingContext context, Offset offset) {
     // This renderObject does not introduce additional offset to child's position.
-    if (child?.geometry?.visible == true)
+    if (child?.geometry?.visible ?? false) {
       context.paintChild(child!, offset);
+    }
   }
 
   @override

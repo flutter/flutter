@@ -28,6 +28,7 @@ const String kSignatures = 'signatures';
 const String kRevision = 'revision';
 const String kUpstream = 'upstream';
 
+
 /// Command to codesign and verify the signatures of cached binaries.
 class CodesignCommand extends Command<void> {
   CodesignCommand({
@@ -43,15 +44,13 @@ class CodesignCommand extends Command<void> {
     }
     argParser.addFlag(
       kVerify,
-      help:
-          'Only verify expected binaries exist and are codesigned with entitlements.',
+      help: 'Only verify expected binaries exist and are codesigned with entitlements.',
     );
     argParser.addFlag(
       kSignatures,
       defaultsTo: true,
-      help:
-          'When off, this command will only verify the existence of binaries, and not their\n'
-          'signatures or entitlements. Must be used with --verify flag.',
+      help: 'When off, this command will only verify the existence of binaries, and not their\n'
+            'signatures or entitlements. Must be used with --verify flag.',
     );
     argParser.addOption(
       kUpstream,
@@ -75,9 +74,12 @@ class CodesignCommand extends Command<void> {
 
   FrameworkRepository? _framework;
   FrameworkRepository get framework {
-    return _framework ??= FrameworkRepository.localRepoAsUpstream(
+    return _framework ??= FrameworkRepository(
       checkouts,
-      upstreamPath: flutterRoot.path,
+      upstreamRemote: Remote(
+        name: RemoteName.upstream,
+        url: argResults![kUpstream] as String,
+      ),
     );
   }
 
@@ -92,29 +94,30 @@ class CodesignCommand extends Command<void> {
   Future<void> run() async {
     if (!platform.isMacOS) {
       throw ConductorException(
-          'Error! Expected operating system "macos", actual operating system is: '
-          '"${platform.operatingSystem}"');
+        'Error! Expected operating system "macos", actual operating system is: '
+        '"${platform.operatingSystem}"',
+      );
     }
 
     if (argResults!['verify'] as bool != true) {
       throw ConductorException(
-          'Sorry, but codesigning is not implemented yet. Please pass the '
-          '--$kVerify flag to verify signatures.');
+        'Sorry, but codesigning is not implemented yet. Please pass the '
+        '--$kVerify flag to verify signatures.',
+      );
     }
 
     String revision;
     if (argResults!.wasParsed(kRevision)) {
-      stdio.printError(
-          'Warning! When providing an arbitrary revision, the contents of the cache may not');
-      stdio.printError(
-          'match the expected binaries in the conductor tool. It is preferred to check out');
-      stdio.printError(
-          'the desired revision and run that version of the conductor.\n');
+      stdio.printWarning(
+        'Warning! When providing an arbitrary revision, the contents of the cache may not '
+        'match the expected binaries in the conductor tool. It is preferred to check out '
+        'the desired revision and run that version of the conductor.\n',
+      );
       revision = argResults![kRevision] as String;
     } else {
       revision = ((await processManager.run(
         <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: (await framework.checkoutDirectory).path,
+        workingDirectory: flutterRoot.path,
       )).stdout as String).trim();
       assert(revision.isNotEmpty);
     }
@@ -144,15 +147,18 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/android-x64-profile/darwin-x64/gen_snapshot',
       'artifacts/engine/android-x64-release/darwin-x64/gen_snapshot',
       'artifacts/engine/darwin-x64-profile/gen_snapshot',
+      'artifacts/engine/darwin-x64-profile/gen_snapshot_arm64',
+      'artifacts/engine/darwin-x64-profile/gen_snapshot_x64',
       'artifacts/engine/darwin-x64-release/gen_snapshot',
+      'artifacts/engine/darwin-x64-release/gen_snapshot_arm64',
+      'artifacts/engine/darwin-x64-release/gen_snapshot_x64',
       'artifacts/engine/darwin-x64/flutter_tester',
       'artifacts/engine/darwin-x64/gen_snapshot',
+      'artifacts/engine/darwin-x64/gen_snapshot_arm64',
+      'artifacts/engine/darwin-x64/gen_snapshot_x64',
       'artifacts/engine/ios-profile/gen_snapshot_arm64',
-      'artifacts/engine/ios-profile/gen_snapshot_armv7',
       'artifacts/engine/ios-release/gen_snapshot_arm64',
-      'artifacts/engine/ios-release/gen_snapshot_armv7',
       'artifacts/engine/ios/gen_snapshot_arm64',
-      'artifacts/engine/ios/gen_snapshot_armv7',
       'artifacts/libimobiledevice/idevicescreenshot',
       'artifacts/libimobiledevice/idevicesyslog',
       'artifacts/libimobiledevice/libimobiledevice-1.0.6.dylib',
@@ -164,6 +170,7 @@ class CodesignCommand extends Command<void> {
       'dart-sdk/bin/dart',
       'dart-sdk/bin/dartaotruntime',
       'dart-sdk/bin/utils/gen_snapshot',
+      'dart-sdk/bin/utils/wasm-opt',
     ]
         .map((String relativePath) =>
             fileSystem.path.join(frameworkCacheDirectory, relativePath))
@@ -181,11 +188,14 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/darwin-x64-release/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
       'artifacts/engine/darwin-x64/font-subset',
-      'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/darwin-x64/impellerc',
+      'artifacts/engine/darwin-x64/libpath_ops.dylib',
+      'artifacts/engine/darwin-x64/libtessellator.dylib',
+      'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-      'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
-      'artifacts/engine/ios/Flutter.xcframework/ios-arm64_armv7/Flutter.framework/Flutter',
+      'artifacts/engine/ios/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/ios-deploy/ios-deploy',
     ]
@@ -225,13 +235,11 @@ class CodesignCommand extends Command<void> {
           )
           .toList();
       stdio.printError(
-          'Expected binaries not found in cache:\n\n${unfoundFiles.join('\n')}\n');
-      stdio.printError(
-          'If this commit is removing binaries from the cache, this test should be fixed by');
-      stdio.printError(
-          'removing the relevant entry from either the `binariesWithEntitlements` or');
-      stdio.printError(
-          '`binariesWithoutEntitlements` getters in dev/tools/lib/codesign.dart.');
+        'Expected binaries not found in cache:\n\n${unfoundFiles.join('\n')}\n\n'
+        'If this commit is removing binaries from the cache, this test should be fixed by\n'
+        'removing the relevant entry from either the "binariesWithEntitlements" or\n'
+        '"binariesWithoutEntitlements" getters in dev/tools/lib/codesign.dart.',
+      );
       throw ConductorException('Did not find all expected binaries!');
     }
 
@@ -271,9 +279,10 @@ class CodesignCommand extends Command<void> {
       if (codeSignResult.exitCode != 0) {
         unsignedBinaries.add(binaryPath);
         stdio.printError(
-            'File "$binaryPath" does not appear to be codesigned.\n'
-            'The `codesign` command failed with exit code ${codeSignResult.exitCode}:\n'
-            '${codeSignResult.stderr}\n');
+          'File "$binaryPath" does not appear to be codesigned.\n'
+          'The `codesign` command failed with exit code ${codeSignResult.exitCode}:\n'
+          '${codeSignResult.stderr}\n',
+        );
         continue;
       }
       if (verifyEntitlements) {
@@ -291,42 +300,39 @@ class CodesignCommand extends Command<void> {
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
-      stdio.printError(
-          'Found ${wrongEntitlementBinaries.length} binaries with unexpected entitlements:');
+      stdio.printError('Found ${wrongEntitlementBinaries.length} binaries with unexpected entitlements:');
       wrongEntitlementBinaries.forEach(stdio.printError);
     }
 
     if (unexpectedBinaries.isNotEmpty) {
-      stdio.printError(
-          'Found ${unexpectedBinaries.length} unexpected binaries in the cache:');
+      stdio.printError('Found ${unexpectedBinaries.length} unexpected binaries in the cache:');
       unexpectedBinaries.forEach(print);
     }
 
     // Finally, exit on any invalid state
     if (unsignedBinaries.isNotEmpty) {
-      throw ConductorException(
-          'Test failed because unsigned binaries detected.');
+      throw ConductorException('Test failed because unsigned binaries detected.');
     }
 
     if (wrongEntitlementBinaries.isNotEmpty) {
       throw ConductorException(
-          'Test failed because files found with the wrong entitlements:\n'
-          '${wrongEntitlementBinaries.join('\n')}');
+        'Test failed because files found with the wrong entitlements:\n'
+        '${wrongEntitlementBinaries.join('\n')}',
+      );
     }
 
     if (unexpectedBinaries.isNotEmpty) {
-      throw ConductorException(
-          'Test failed because unexpected binaries found in the cache.');
+      throw ConductorException('Test failed because unexpected binaries found in the cache.');
     }
 
     final String? desiredRevision = argResults![kRevision] as String?;
     if (desiredRevision == null) {
-      stdio.printStatus(
-          'Verified that binaries are codesigned and have expected entitlements.');
+      stdio.printStatus('Verified that binaries are codesigned and have expected entitlements.');
     } else {
       stdio.printStatus(
-          'Verified that binaries for commit $desiredRevision are codesigned and have '
-          'expected entitlements.');
+        'Verified that binaries for commit $desiredRevision are codesigned and have '
+        'expected entitlements.',
+      );
     }
   }
 
@@ -387,8 +393,9 @@ class CodesignCommand extends Command<void> {
 
     if (entitlementResult.exitCode != 0) {
       stdio.printError(
-          'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
-          '${entitlementResult.stderr}\n');
+        'The `codesign --entitlements` command failed with exit code ${entitlementResult.exitCode}:\n'
+        '${entitlementResult.stderr}\n',
+      );
       return false;
     }
 
@@ -399,8 +406,9 @@ class CodesignCommand extends Command<void> {
           (await binariesWithEntitlements).contains(binaryPath);
       if (output.contains(entitlement) != entitlementExpected) {
         stdio.printError(
-            'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} '
-            'entitlement $entitlement.');
+          'File "$binaryPath" ${entitlementExpected ? 'does not have expected' : 'has unexpected'} '
+          'entitlement $entitlement.',
+        );
         passes = false;
       }
     }

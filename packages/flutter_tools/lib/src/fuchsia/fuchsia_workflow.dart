@@ -31,28 +31,13 @@ class FuchsiaWorkflow implements Workflow {
   @override
   bool get appliesToHostPlatform => _featureFlags.isFuchsiaEnabled && (_platform.isLinux || _platform.isMacOS);
 
-  bool get shouldUseDeviceFinder {
-    final String? useDeviceFinder = _platform.environment.containsKey('FUCHSIA_DISABLED_ffx_discovery')
-      ? _platform.environment['FUCHSIA_DISABLED_ffx_discovery'] : '0';
-    if (useDeviceFinder == '1') {
-      return true;
-    }
-    return false;
-  }
-
   @override
   bool get canListDevices {
-    if (shouldUseDeviceFinder) {
-      return _fuchsiaArtifacts.devFinder != null;
-    }
     return _fuchsiaArtifacts.ffx != null;
   }
 
   @override
   bool get canLaunchDevices {
-    if (shouldUseDeviceFinder) {
-      return _fuchsiaArtifacts.devFinder != null && _fuchsiaArtifacts.sshConfig != null;
-    }
     return _fuchsiaArtifacts.ffx != null && _fuchsiaArtifacts.sshConfig != null;
   }
 

@@ -1,0 +1,18 @@
+changelog:
+  exclude:
+    authors:
+      - engine-flutter-autoroll
+      - fluttergithubbot
+    labels:
+      - passed first triage
+      - passed secondary triage
+  categories:
+    - title: Framework
+      labels:
+        - framework
+    - title: Tooling
+      labels:
+        - tool
+    - title: MacOS
+      labels:
+        - platform-mac

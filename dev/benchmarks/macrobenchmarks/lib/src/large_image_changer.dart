@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 /// Displays a new (from image cache's perspective) large image every 500ms.
 class LargeImageChangerPage extends StatefulWidget {
-  const LargeImageChangerPage({Key? key}) : super(key: key);
+  const LargeImageChangerPage({super.key});
 
   @override
   State<LargeImageChangerPage> createState() => _LargeImageChangerState();

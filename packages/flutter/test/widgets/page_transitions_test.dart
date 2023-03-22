@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestOverlayRoute extends OverlayRoute<void> {
-  TestOverlayRoute({ RouteSettings? settings }) : super(settings: settings);
+  TestOverlayRoute({ super.settings });
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield OverlayEntry(builder: _build);
@@ -15,7 +15,7 @@ class TestOverlayRoute extends OverlayRoute<void> {
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
-  const PersistentBottomSheetTest({ Key? key }) : super(key: key);
+  const PersistentBottomSheetTest({ super.key });
 
   @override
   PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();
@@ -136,9 +136,9 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => Scaffold(
         key: containerKey1,
-        body: Container(
-          color: const Color(0xff00ffff),
-          child: const Hero(
+        body: const ColoredBox(
+          color: Color(0xff00ffff),
+          child: Hero(
             tag: kHeroTag,
             child: Text('Home'),
           ),

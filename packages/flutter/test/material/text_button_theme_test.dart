@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('TextButtonTheme lerp special cases', () {
+    expect(TextButtonThemeData.lerp(null, null, 0), null);
+    const TextButtonThemeData data = TextButtonThemeData();
+    expect(identical(TextButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no TextButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
@@ -33,7 +39,7 @@ void main() {
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)));
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
@@ -44,9 +50,9 @@ void main() {
   });
 
   group('[Theme, TextTheme, TextButton style overrides]', () {
-    const Color primaryColor = Color(0xff000001);
-    const Color onSurfaceColor = Color(0xff000002);
-    const Color backgroundColor = Color(0xff000003);
+    const Color foregroundColor = Color(0xff000001);
+    const Color backgroundColor = Color(0xff000002);
+    const Color disabledColor = Color(0xff000003);
     const Color shadowColor = Color(0xff000004);
     const double elevation = 3;
     const TextStyle textStyle = TextStyle(fontSize: 12.0);
@@ -62,9 +68,10 @@ void main() {
     const AlignmentGeometry alignment = Alignment.centerLeft;
 
     final ButtonStyle style = TextButton.styleFrom(
-      primary: primaryColor,
-      onSurface: onSurfaceColor,
+      foregroundColor: foregroundColor,
+      disabledForegroundColor: disabledColor,
       backgroundColor: backgroundColor,
+      disabledBackgroundColor: disabledColor,
       shadowColor: shadowColor,
       elevation: elevation,
       textStyle: textStyle,
@@ -125,15 +132,15 @@ void main() {
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
       final InkWell inkWell = tester.widget<InkWell>(findInkWell);
-      expect(material.textStyle!.color, primaryColor);
+      expect(material.textStyle!.color, foregroundColor);
       expect(material.textStyle!.fontSize, 12);
       expect(material.color, backgroundColor);
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
       expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
-      expect(inkWell.overlayColor!.resolve(hovered), primaryColor.withOpacity(0.04));
-      expect(inkWell.overlayColor!.resolve(focused), primaryColor.withOpacity(0.12));
+      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.04));
+      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.12));
       expect(inkWell.enableFeedback, enableFeedback);
       expect(material.borderRadius, null);
       expect(material.shape, shape);
@@ -176,7 +183,7 @@ void main() {
     });
 
     testWidgets('Overall Theme button theme style overrides defaults, null theme and empty overall style', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), themeStyle: null, overallStyle: style));
+      await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), overallStyle: style));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });

@@ -4,15 +4,11 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert';
-import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'image_provider.dart';
-
-const String _kAssetManifestFileName = 'AssetManifest.json';
 
 /// A screen with a device-pixel ratio strictly less than this value is
 /// considered a low-resolution screen (typically entry-level to mid-range
@@ -41,11 +37,9 @@ const double _kLowDprLimit = 2.0;
 /// as 2.0 and 4.0 pixel ratios (variants). The asset bundle should then
 /// contain the following assets:
 ///
-/// ```
-/// heart.png
-/// 2.0x/heart.png
-/// 4.0x/heart.png
-/// ```
+///     heart.png
+///     2.0x/heart.png
+///     4.0x/heart.png
 ///
 /// On a device with a 1.0 device pixel ratio, the image chosen would be
 /// heart.png; on a device with a 2.0 device pixel ratio, the image chosen
@@ -89,15 +83,12 @@ const double _kLowDprLimit = 2.0;
 /// at the equivalent level; that is, the following is also a valid bundle
 /// structure:
 ///
-/// ```
-/// icons/heart.png
-/// icons/1.5x/heart.png
-/// icons/2.0x/heart.png
-/// ```
+///     icons/heart.png
+///     icons/1.5x/heart.png
+///     icons/2.0x/heart.png
 ///
 /// assets/icons/3.0x/heart.png would be a valid variant of
 /// assets/icons/heart.png.
-///
 ///
 /// ## Fetching assets
 ///
@@ -114,7 +105,7 @@ const double _kLowDprLimit = 2.0;
 ///
 /// Then, to fetch the image, use:
 /// ```dart
-/// AssetImage('icons/heart.png')
+/// const AssetImage('icons/heart.png')
 /// ```
 ///
 /// {@tool snippet}
@@ -127,9 +118,9 @@ const double _kLowDprLimit = 2.0;
 /// ```dart
 /// class MyImage extends StatefulWidget {
 ///   const MyImage({
-///     Key? key,
+///     super.key,
 ///     required this.assetImage,
-///   }) : super(key: key);
+///   });
 ///
 ///   final AssetImage assetImage;
 ///
@@ -205,7 +196,7 @@ const double _kLowDprLimit = 2.0;
 /// `my_icons`. Then to fetch the image, use:
 ///
 /// ```dart
-/// AssetImage('icons/heart.png', package: 'my_icons')
+/// const AssetImage('icons/heart.png', package: 'my_icons')
 /// ```
 ///
 /// Assets used by the package itself should also be fetched using the [package]
@@ -220,11 +211,9 @@ const double _kLowDprLimit = 2.0;
 /// bundled, the app has to specify which ones to include. For instance a
 /// package named `fancy_backgrounds` could have:
 ///
-/// ```
-/// lib/backgrounds/background1.png
-/// lib/backgrounds/background2.png
-/// lib/backgrounds/background3.png
-/// ```
+///     lib/backgrounds/background1.png
+///     lib/backgrounds/background2.png
+///     lib/backgrounds/background3.png
 ///
 /// To include, say the first image, the `pubspec.yaml` of the app should specify
 /// it in the `assets` section:
@@ -252,7 +241,7 @@ class AssetImage extends AssetBundleImageProvider {
     this.assetName, {
     this.bundle,
     this.package,
-  }) : assert(assetName != null);
+  });
 
   /// The name of the main asset from the set of images to choose from. See the
   /// documentation for the [AssetImage] class itself for details.
@@ -292,18 +281,18 @@ class AssetImage extends AssetBundleImageProvider {
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
 
-    chosenBundle.loadStructuredData<Map<String, List<String>>?>(_kAssetManifestFileName, _manifestParser).then<void>(
-      (Map<String, List<String>>? manifest) {
-        final String chosenName = _chooseVariant(
+    AssetManifest.loadFromAssetBundle(chosenBundle)
+      .then((AssetManifest manifest) {
+        final Iterable<AssetMetadata>? candidateVariants = manifest.getAssetVariants(keyName);
+        final AssetMetadata chosenVariant = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : manifest[keyName],
-        )!;
-        final double chosenScale = _parseScale(chosenName);
+          candidateVariants,
+        );
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
-          name: chosenName,
-          scale: chosenScale,
+          name: chosenVariant.key,
+          scale: chosenVariant.targetDevicePixelRatio ?? _naturalResolution,
         );
         if (completer != null) {
           // We already returned from this function, which means we are in the
@@ -317,14 +306,15 @@ class AssetImage extends AssetBundleImageProvider {
           // ourselves.
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
-      },
-    ).catchError((Object error, StackTrace stack) {
-      // We had an error. (This guarantees we weren't called synchronously.)
-      // Forward the error to the caller.
-      assert(completer != null);
-      assert(result == null);
-      completer!.completeError(error, stack);
-    });
+      })
+      .onError((Object error, StackTrace stack) {
+        // We had an error. (This guarantees we weren't called synchronously.)
+        // Forward the error to the caller.
+        assert(completer != null);
+        assert(result == null);
+        completer!.completeError(error, stack);
+      });
+
     if (result != null) {
       // The code above ran synchronously, and came up with an answer.
       // Return the SynchronousFuture that we created above.
@@ -336,30 +326,24 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  static Future<Map<String, List<String>>?> _manifestParser(String? jsonData) {
-    if (jsonData == null)
-      return SynchronousFuture<Map<String, List<String>>?>(null);
-    // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
-    final Iterable<String> keys = parsedJson.keys;
-    final Map<String, List<String>> parsedManifest = <String, List<String>> {
-      for (final String key in keys) key: List<String>.from(parsedJson[key] as List<dynamic>),
-    };
-    // TODO(ianh): convert that data structure to the right types.
-    return SynchronousFuture<Map<String, List<String>>?>(parsedManifest);
-  }
+  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata>? candidateVariants) {
+    if (candidateVariants == null) {
+      return AssetMetadata(key: mainAssetKey, targetDevicePixelRatio: null, main: true);
+    }
 
-  String? _chooseVariant(String main, ImageConfiguration config, List<String>? candidates) {
-    if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
-      return main;
-    // TODO(ianh): Consider moving this parsing logic into _manifestParser.
-    final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
-    for (final String candidate in candidates)
-      mapping[_parseScale(candidate)] = candidate;
+    if (config.devicePixelRatio == null) {
+      return candidateVariants.firstWhere((AssetMetadata variant) => variant.main);
+    }
+
+    final SplayTreeMap<double, AssetMetadata> candidatesByDevicePixelRatio =
+      SplayTreeMap<double, AssetMetadata>();
+    for (final AssetMetadata candidate in candidateVariants) {
+      candidatesByDevicePixelRatio[candidate.targetDevicePixelRatio ?? _naturalResolution] = candidate;
+    }
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
     // docs)
-    return _findBestVariant(mapping, config.devicePixelRatio!);
+    return _findBestVariant(candidatesByDevicePixelRatio, config.devicePixelRatio!);
   }
 
   // Returns the "best" asset variant amongst the available `candidates`.
@@ -374,56 +358,42 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  String? _findBestVariant(SplayTreeMap<double, String> candidates, double value) {
-    if (candidates.containsKey(value))
-      return candidates[value]!;
-    final double? lower = candidates.lastKeyBefore(value);
-    final double? upper = candidates.firstKeyAfter(value);
-    if (lower == null)
-      return candidates[upper];
-    if (upper == null)
-      return candidates[lower];
+  AssetMetadata _findBestVariant(SplayTreeMap<double, AssetMetadata> candidatesByDpr, double value) {
+    if (candidatesByDpr.containsKey(value)) {
+      return candidatesByDpr[value]!;
+    }
+    final double? lower = candidatesByDpr.lastKeyBefore(value);
+    final double? upper = candidatesByDpr.firstKeyAfter(value);
+    if (lower == null) {
+      return candidatesByDpr[upper]!;
+    }
+    if (upper == null) {
+      return candidatesByDpr[lower]!;
+    }
 
     // On screens with low device-pixel ratios the artifacts from upscaling
     // images are more visible than on screens with a higher device-pixel
     // ratios because the physical pixels are larger. Choose the higher
     // resolution image in that case instead of the nearest one.
-    if (value < _kLowDprLimit || value > (lower + upper) / 2)
-      return candidates[upper];
-    else
-      return candidates[lower];
-  }
-
-  static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
-
-  double _parseScale(String key) {
-    if (key == assetName) {
-      return _naturalResolution;
+    if (value < _kLowDprLimit || value > (lower + upper) / 2) {
+      return candidatesByDpr[upper]!;
+    } else {
+      return candidatesByDpr[lower]!;
     }
-
-    final Uri assetUri = Uri.parse(key);
-    String directoryPath = '';
-    if (assetUri.pathSegments.length > 1) {
-      directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
-    }
-
-    final Match? match = _extractRatioRegExp.firstMatch(directoryPath);
-    if (match != null && match.groupCount > 0)
-      return double.parse(match.group(1)!);
-    return _naturalResolution; // i.e. default to 1.0x
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is AssetImage
         && other.keyName == keyName
         && other.bundle == bundle;
   }
 
   @override
-  int get hashCode => hashValues(keyName, bundle);
+  int get hashCode => Object.hash(keyName, bundle);
 
   @override
   String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';

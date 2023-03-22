@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 /// This script removes published archives from the cloud storage and the
 /// corresponding JSON metadata file that the website uses to determine what
 /// releases are available.
@@ -10,15 +9,15 @@
 /// If asked to remove a release that is currently the release on that channel,
 /// it will replace that release with the next most recent release on that
 /// channel.
+library;
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Platform;
-import 'dart:typed_data';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show Platform, LocalPlatform;
+import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
 
 const String gsBase = 'gs://flutter_infra_release';
@@ -38,9 +37,7 @@ class UnpublishException implements Exception {
   @override
   String toString() {
     String output = runtimeType.toString();
-    if (message != null) {
-      output += ': $message';
-    }
+    output += ': $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
@@ -114,9 +111,7 @@ class ProcessRunner {
     this.subprocessOutput = true,
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
-  }) : assert(subprocessOutput != null),
-       assert(processManager != null),
-       assert(platform != null) {
+  }) {
     environment = Map<String, String>.from(platform.environment);
   }
 
@@ -190,11 +185,11 @@ class ProcessRunner {
       }
     } on ProcessException catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
-          'failed with:\n${e.toString()}';
+          'failed with:\n$e';
       throw UnpublishException(message);
     } on ArgumentError catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
-          'failed with:\n${e.toString()}';
+          'failed with:\n$e';
       throw UnpublishException(message);
     }
 
@@ -209,8 +204,6 @@ class ProcessRunner {
     return utf8.decoder.convert(output).trim();
   }
 }
-
-typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> headers});
 
 class ArchiveUnpublisher {
   ArchiveUnpublisher(
@@ -258,9 +251,6 @@ class ArchiveUnpublisher {
         continue;
       }
       final Map<String, String> replacementRelease = releases.firstWhere((Map<String, String> value) => value['channel'] == getChannelName(channel));
-      if (replacementRelease == null) {
-        throw UnpublishException('Unable to find previous release for channel ${getChannelName(channel)}.');
-      }
       (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] = replacementRelease['hash'];
       print(
         '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
@@ -401,7 +391,6 @@ Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
-    defaultsTo: null,
     help: 'A location where temporary files may be written. Defaults to a '
         'directory in the system temp folder. If a temp_dir is not '
         'specified, then by default a generated temporary directory will be '
@@ -431,16 +420,14 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addFlag(
     'confirm',
-    defaultsTo: false,
     help: 'If set, will actually remove the archive from Google Cloud Storage '
         'upon successful execution of this script. Published archives will be '
-        'removed from this directory: $baseUrl$releaseFolder.  This option '
+        'removed from this directory: $baseUrl$releaseFolder. This option '
         'must be set to perform any action on the server, otherwise only a dry '
         'run is performed.',
   );
   argParser.addFlag(
     'help',
-    defaultsTo: false,
     negatable: false,
     help: 'Print help for this command.',
   );
@@ -474,7 +461,7 @@ Future<void> main(List<String> rawArguments) async {
   final String tempDirArg = parsedArguments['temp_dir'] as String;
   Directory tempDir;
   bool removeTempDir = false;
-  if (tempDirArg == null || tempDirArg.isEmpty) {
+  if (tempDirArg.isEmpty) {
     tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
   } else {
@@ -485,7 +472,7 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   if (!(parsedArguments['confirm'] as bool)) {
-    _printBanner('This will be just a dry run.  To actually perform the changes below, re-run with --confirm argument.');
+    _printBanner('This will be just a dry run. To actually perform the changes below, re-run with --confirm argument.');
   }
 
   final List<String> channelArg = parsedArguments['channel'] as List<String>;
@@ -524,7 +511,7 @@ Future<void> main(List<String> rawArguments) async {
       errorExit('$message\n$stack', exitCode: exitCode);
     }
     if (!(parsedArguments['confirm'] as bool)) {
-      _printBanner('This was just a dry run.  To actually perform the above changes, re-run with --confirm argument.');
+      _printBanner('This was just a dry run. To actually perform the above changes, re-run with --confirm argument.');
     }
     exit(0);
   }

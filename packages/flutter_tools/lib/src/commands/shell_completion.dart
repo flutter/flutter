@@ -2,21 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:completion/completion.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../globals_null_migrated.dart' as globals;
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {
   ShellCompletionCommand() {
     argParser.addFlag(
       'overwrite',
-      defaultsTo: false,
-      negatable: true,
       help: 'Causes the given shell completion setup script to be overwritten if it already exists.',
     );
   }
@@ -42,21 +38,22 @@ class ShellCompletionCommand extends FlutterCommand {
 
   /// Return null to disable analytics recording of the `bash-completion` command.
   @override
-  Future<String> get usagePath async => null;
+  Future<String?> get usagePath async => null;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.length > 1) {
+    final List<String> rest = argResults?.rest ?? <String>[];
+    if (rest.length > 1) {
       throwToolExit('Too many arguments given to bash-completion command.', exitCode: 1);
     }
 
-    if (argResults.rest.isEmpty || argResults.rest.first == '-') {
+    if (rest.isEmpty || rest.first == '-') {
       final String script = generateCompletionScript(<String>['flutter']);
       globals.stdio.stdoutWrite(script);
       return FlutterCommandResult.warning();
     }
 
-    final File outputFile = globals.fs.file(argResults.rest.first);
+    final File outputFile = globals.fs.file(rest.first);
     if (outputFile.existsSync() && !boolArg('overwrite')) {
       throwToolExit(
         'Output file ${outputFile.path} already exists, will not overwrite. '

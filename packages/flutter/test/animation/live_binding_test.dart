@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,7 +28,7 @@ void main() {
           home: Container(
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 128, 128, 128),
-              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+              border: Border.all(),
             ),
             child: Center(
               child: Container(
@@ -85,7 +86,7 @@ void main() {
           home: Container(
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 128, 128, 128),
-              border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)),
+              border: Border.all(),
             ),
             child: Center(
               child: Container(

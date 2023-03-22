@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ElevationDemo extends StatefulWidget {
-  const ElevationDemo({Key? key}) : super(key: key);
+  const ElevationDemo({super.key});
 
   static const String routeName = '/material/elevation';
 
@@ -64,7 +64,12 @@ class _ElevationDemoState extends State<ElevationDemo> {
           ),
         ],
       ),
-      body: Scrollbar(child: ListView(children: buildCards())),
+      body: Scrollbar(
+        child: ListView(
+          primary: true,
+          children: buildCards(),
+        ),
+      ),
     );
   }
 }

@@ -8,10 +8,49 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import '../rendering/rendering_tester.dart';
+import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'states.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/100451
+  testWidgets('GridView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+    bool finderCalled = false;
+    int itemCount = 7;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return GridView.builder(
+              itemCount: itemCount,
+              itemBuilder: (BuildContext _, int index) => Container(
+                key: Key('$index'),
+                height: 2000.0,
+              ),
+              findChildIndexCallback: (Key key) {
+                finderCalled = true;
+                return null;
+              },
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+              ),
+            );
+          },
+        ),
+      )
+    );
+    expect(finderCalled, false);
+
+    // Trigger update.
+    stateSetter(() => itemCount = 77);
+    await tester.pump();
+
+    expect(finderCalled, true);
+  });
+
   testWidgets('Empty GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -19,7 +58,6 @@ void main() {
         child: GridView.count(
           dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
-          children: const <Widget>[],
         ),
       ),
     );
@@ -40,7 +78,7 @@ void main() {
               onTap: () {
                 log.add(state);
               },
-              child: Container(
+              child: ColoredBox(
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
@@ -64,8 +102,9 @@ void main() {
     await tester.drag(find.text('Arkansas'), const Offset(0.0, -200.0));
     await tester.pump();
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i) {
       expect(find.text(kStates[i]), findsNothing);
+    }
 
     for (int i = 4; i < 12; ++i) {
       await tester.tap(find.text(kStates[i]));
@@ -112,7 +151,7 @@ void main() {
               onTap: () {
                 log.add(state);
               },
-              child: Container(
+              child: ColoredBox(
                 color: const Color(0xFF0000FF),
                 child: Text(state),
               ),
@@ -436,9 +475,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: GridView.count(
               crossAxisCount: 4,
               children: List<Widget>.generate(20, (int i) {
@@ -606,13 +643,50 @@ void main() {
     expect(counters[4], 2);
   });
 
+  testWidgets('GridView does not report visual overflow unnecessarily', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+          children: <Widget>[
+            Container(height: 200.0),
+          ],
+        ),
+      ),
+    );
+
+    // 1st, check that the render object has received the default clip behavior.
+    final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+
+    // The context will get Clip.none because there is no actual visual overflow.
+    final TestClipPaintingContext context = TestClipPaintingContext();
+    renderObject.paint(context, Offset.zero);
+    expect(context.clipBehavior, equals(Clip.none));
+  });
+
   testWidgets('GridView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-          children: <Widget>[Container(height: 2000.0)],
+          children: <Widget>[
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+          ],
         ),
       ),
     );
@@ -633,7 +707,21 @@ void main() {
         child: GridView(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
           clipBehavior: Clip.antiAlias,
-          children: <Widget>[Container(height: 2000.0)],
+          children: <Widget>[
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+            Container(height: 2000.0),
+          ],
         ),
       ),
     );

@@ -11,7 +11,7 @@ const int _kNumWarmUpIters = 20;
 const int _kNumIters = 300;
 
 Future<void> main() async {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   final Stopwatch watch = Stopwatch();
   print('GestureDetector semantics benchmark...');
 

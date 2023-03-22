@@ -1,0 +1,95 @@
+{
+  "version": "v0_162",
+
+  "md.sys.shape.corner.extra-large": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 28.0,
+    "topRight": 28.0,
+    "bottomLeft": 28.0,
+    "bottomRight": 28.0
+  },
+
+  "md.sys.shape.corner.extra-large.top": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 28.0,
+    "topRight": 28.0,
+    "bottomLeft": 0.0,
+    "bottomRight": 0.0
+  },
+
+  "md.sys.shape.corner.extra-small": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 4.0,
+    "topRight": 4.0,
+    "bottomLeft": 4.0,
+    "bottomRight": 4.0
+  },
+
+  "md.sys.shape.corner.extra-small.top": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 4.0,
+    "topRight": 4.0,
+    "bottomLeft": 0.0,
+    "bottomRight": 0.0
+  },
+
+  "md.sys.shape.corner.full": {
+    "family": "SHAPE_FAMILY_CIRCULAR"
+  },
+
+  "md.sys.shape.corner.large": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 16.0,
+    "topRight": 16.0,
+    "bottomLeft": 16.0,
+    "bottomRight": 16.0
+  },
+
+  "md.sys.shape.corner.large.end": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 0.0,
+    "topRight": 16.0,
+    "bottomLeft": 0.0,
+    "bottomRight": 16.0
+  },
+
+  "md.sys.shape.corner.large.start": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 16.0,
+    "topRight": 0.0,
+    "bottomLeft": 16.0,
+    "bottomRight": 0.0
+  },
+
+  "md.sys.shape.corner.large.top": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 16.0,
+    "topRight": 16.0,
+    "bottomLeft": 0.0,
+    "bottomRight": 0.0
+  },
+
+  "md.sys.shape.corner.medium": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 12.0,
+    "topRight": 12.0,
+    "bottomLeft": 12.0,
+    "bottomRight": 12.0
+  },
+
+  "md.sys.shape.corner.none": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 0.0,
+    "topRight": 0.0,
+    "bottomLeft": 0.0,
+    "bottomRight": 0.0
+  },
+
+  "md.sys.shape.corner.small": {
+    "family": "SHAPE_FAMILY_ROUNDED_CORNERS",
+    "topLeft": 8.0,
+    "topRight": 8.0,
+    "bottomLeft": 8.0,
+    "bottomRight": 8.0
+  }
+}

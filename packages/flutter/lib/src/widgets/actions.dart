@@ -97,6 +97,10 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 /// developers to change that if they add an ancestor [Actions] widget that maps
 /// [SelectAllTextIntent] to a different [Action].
 ///
+/// See the article on [Using Actions and
+/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// for a detailed explanation.
+///
 /// See also:
 ///
 ///  * [Shortcuts], which is a widget that contains a key map, in which it looks
@@ -141,12 +145,16 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// parent widgets that also support this [Intent].
   ///
   /// {@tool dartpad}
-  /// This sample implements a custom text input field that handles the
-  /// [DeleteTextIntent] intent, as well as a US telephone number input widget
-  /// that consists of multiple text fields for area code, prefix and line
-  /// number. When the backspace key is pressed, the phone number input widget
-  /// sends the focus to the preceding text field when the currently focused
-  /// field becomes empty.
+  /// This sample shows how to implement a rudimentary `CopyableText` widget
+  /// that responds to Ctrl-C by copying its own content to the clipboard.
+  ///
+  /// if `CopyableText` is to be provided in a package, developers using the
+  /// widget may want to change how copying is handled. As the author of the
+  /// package, you can enable that by making the corresponding [Action]
+  /// overridable. In the second part of the code sample, three `CopyableText`
+  /// widgets are used to build a verification code widget which overrides the
+  /// "copy" action by copying the combined numbers from all three `CopyableText`
+  /// widgets.
   ///
   /// ** See code in examples/api/lib/widgets/actions/action.action_overridable.0.dart **
   /// {@end-tool}
@@ -160,6 +168,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
   Action<T>? _currentCallingAction;
+  // ignore: use_setters_to_change_properties, (code predates enabling of this lint)
   void _updateCallingAction(Action<T>? value) {
     _currentCallingAction = value;
   }
@@ -242,6 +251,25 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// The default implementation returns true.
   bool consumesKey(T intent) => true;
 
+  /// Converts the result of [invoke] of this action to a [KeyEventResult].
+  ///
+  /// This is typically used when the action is invoked in response to a keyboard
+  /// shortcut.
+  ///
+  /// The [invokeResult] argument is the value returned by the [invoke] method.
+  ///
+  /// By default, calls [consumesKey] and converts the returned boolean to
+  /// [KeyEventResult.handled] if it's true, and [KeyEventResult.skipRemainingHandlers]
+  /// if it's false.
+  ///
+  /// Concrete implementations may refine the type of [invokeResult], since
+  /// they know the type returned by [invoke].
+  KeyEventResult toKeyEventResult(T intent, covariant Object? invokeResult) {
+    return consumesKey(intent)
+      ? KeyEventResult.handled
+      : KeyEventResult.skipRemainingHandlers;
+  }
+
   /// Called when the action is to be performed.
   ///
   /// This is called by the [ActionDispatcher] when an action is invoked via
@@ -255,12 +283,12 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
-  /// For instance, if your override of `invoke` returns an `int`, then define
-  /// it like so:
+  /// For instance, if an override of [invoke] returned an `int`, then it might
+  /// be defined like so:
   ///
   /// ```dart
   /// class IncrementIntent extends Intent {
-  ///   const IncrementIntent({this.index});
+  ///   const IncrementIntent({required this.index});
   ///
   ///   final int index;
   /// }
@@ -340,17 +368,17 @@ abstract class Action<T extends Intent> with Diagnosticable {
 
     // Make a local copy so that a listener can unregister while the list is
     // being iterated over.
-    final List<ActionListenerCallback> localListeners = List<ActionListenerCallback>.from(_listeners);
+    final List<ActionListenerCallback> localListeners = List<ActionListenerCallback>.of(_listeners);
     for (final ActionListenerCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
-        collector = () sync* {
-          yield DiagnosticsProperty<Action<T>>(
+        collector = () => <DiagnosticsNode>[
+          DiagnosticsProperty<Action<T>>(
             'The $runtimeType sending notification was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
-          );
-        };
+          ),
+        ];
         return true;
       }());
       try {
@@ -399,14 +427,11 @@ class ActionListener extends StatefulWidget {
   ///
   /// The [listener], [action], and [child] arguments must not be null.
   const ActionListener({
-    Key? key,
+    super.key,
     required this.listener,
     required this.action,
     required this.child,
-  })  : assert(listener != null),
-        assert(action != null),
-        assert(child != null),
-        super(key: key);
+  });
 
   /// The [ActionListenerCallback] callback to register with the [action].
   ///
@@ -475,19 +500,19 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
-  /// For instance, if your override of `invoke` returns an `int`, then define
-  /// it like so:
+  /// For instance, if an override of [invoke] returned an `int`, then it might
+  /// be defined like so:
   ///
   /// ```dart
   /// class IncrementIntent extends Intent {
-  ///   const IncrementIntent({this.index});
+  ///   const IncrementIntent({required this.index});
   ///
   ///   final int index;
   /// }
   ///
   /// class MyIncrementAction extends ContextAction<IncrementIntent> {
   ///   @override
-  ///   int invoke(IncrementIntent intent, [BuildContext context]) {
+  ///   int invoke(IncrementIntent intent, [BuildContext? context]) {
   ///     return intent.index + 1;
   ///   }
   /// }
@@ -521,7 +546,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
   ///
   /// The `intentKey` and [onInvoke] parameters must not be null.
   /// The [onInvoke] parameter is required.
-  CallbackAction({required this.onInvoke}) : assert(onInvoke != null);
+  CallbackAction({required this.onInvoke});
 
   /// The callback to be called when invoked.
   ///
@@ -533,7 +558,13 @@ class CallbackAction<T extends Intent> extends Action<T> {
   Object? invoke(T intent) => onInvoke(intent);
 }
 
-/// An action dispatcher that simply invokes the actions given to it.
+/// An action dispatcher that invokes the actions given to it.
+///
+/// The [invokeAction] method on this class directly calls the [Action.invoke]
+/// method on the [Action] object.
+///
+/// For [ContextAction] actions, if no `context` is provided, the
+/// [BuildContext] of the [primaryFocus] is used instead.
 ///
 /// See also:
 ///
@@ -562,8 +593,6 @@ class ActionDispatcher with Diagnosticable {
     covariant Intent intent, [
     BuildContext? context,
   ]) {
-    assert(action != null);
-    assert(intent != null);
     assert(action.isEnabled(intent), 'Action must be enabled when calling invokeAction');
     if (action is ContextAction) {
       context ??= primaryFocus?.context;
@@ -576,6 +605,8 @@ class ActionDispatcher with Diagnosticable {
 
 /// A widget that establishes an [ActionDispatcher] and a map of [Intent] to
 /// [Action] to be used by its descendants when invoking an [Action].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XawP1i314WM}
 ///
 /// Actions are typically invoked using [Actions.invoke] with the context
 /// containing the ambient [Actions] widget.
@@ -612,13 +643,11 @@ class Actions extends StatefulWidget {
   ///
   /// The [child], [actions], and [dispatcher] arguments must not be null.
   const Actions({
-    Key? key,
+    super.key,
     this.dispatcher,
     required this.actions,
     required this.child,
-  })  : assert(actions != null),
-        assert(child != null),
-        super(key: key);
+  });
 
   /// The [ActionDispatcher] object that invokes actions.
   ///
@@ -647,7 +676,7 @@ class Actions extends StatefulWidget {
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
   static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
-    InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
+    InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsScope>();
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {
         break;
@@ -656,7 +685,7 @@ class Actions extends StatefulWidget {
       // context.getElementForInheritedWidgetOfExactType will return itself if it
       // happens to be of the correct type.
       final BuildContext parent = _getParent(actionsElement);
-      actionsElement = parent.getElementForInheritedWidgetOfExactType<_ActionsMarker>();
+      actionsElement = parent.getElementForInheritedWidgetOfExactType<_ActionsScope>();
     }
     return actionsElement != null;
   }
@@ -666,7 +695,7 @@ class Actions extends StatefulWidget {
   static ActionDispatcher _findDispatcher(BuildContext context) {
     ActionDispatcher? dispatcher;
     _visitActionsAncestors(context, (InheritedElement element) {
-      final ActionDispatcher? found = (element.widget as _ActionsMarker).dispatcher;
+      final ActionDispatcher? found = (element.widget as _ActionsScope).dispatcher;
       if (found != null) {
         dispatcher = found;
         return true;
@@ -773,7 +802,7 @@ class Actions extends StatefulWidget {
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
         context.dependOnInheritedElement(element);
@@ -802,7 +831,7 @@ class Actions extends StatefulWidget {
     );
 
     _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
         action = result;
@@ -815,8 +844,8 @@ class Actions extends StatefulWidget {
   }
 
   // Find the [Action] that handles the given `intent` in the given
-  // `_ActionsMarker`, and verify it has the right type parameter.
-  static Action<T>? _castAction<T extends Intent>(_ActionsMarker actionsMarker, { T? intent }) {
+  // `_ActionsScope`, and verify it has the right type parameter.
+  static Action<T>? _castAction<T extends Intent>(_ActionsScope actionsMarker, { T? intent }) {
     final Action<Intent>? mappedAction = actionsMarker.actions[intent?.runtimeType ?? T];
     if (mappedAction is Action<T>?) {
       return mappedAction;
@@ -835,8 +864,7 @@ class Actions extends StatefulWidget {
   /// Will return a newly created [ActionDispatcher] if no ambient [Actions]
   /// widget is found.
   static ActionDispatcher of(BuildContext context) {
-    assert(context != null);
-    final _ActionsMarker? marker = context.dependOnInheritedWidgetOfExactType<_ActionsMarker>();
+    final _ActionsScope? marker = context.dependOnInheritedWidgetOfExactType<_ActionsScope>();
     return marker?.dispatcher ?? _findDispatcher(context);
   }
 
@@ -858,12 +886,10 @@ class Actions extends StatefulWidget {
     BuildContext context,
     T intent,
   ) {
-    assert(intent != null);
-    assert(context != null);
     Object? returnValue;
 
     final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result.isEnabled(intent)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
@@ -911,16 +937,14 @@ class Actions extends StatefulWidget {
     BuildContext context,
     T intent,
   ) {
-    assert(intent != null);
-    assert(context != null);
     Object? returnValue;
 
     _visitActionsAncestors(context, (InheritedElement element) {
-      final _ActionsMarker actions = element.widget as _ActionsMarker;
+      final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result.isEnabled(intent)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
-        // Element we found.
+        // element we found.
         returnValue = _findDispatcher(element).invokeAction(result, intent, context);
       }
       return result != null;
@@ -990,7 +1014,7 @@ class _ActionsState extends State<Actions> {
 
   @override
   Widget build(BuildContext context) {
-    return _ActionsMarker(
+    return _ActionsScope(
       actions: widget.actions,
       dispatcher: widget.dispatcher,
       rebuildKey: rebuildKey,
@@ -1001,23 +1025,20 @@ class _ActionsState extends State<Actions> {
 
 // An inherited widget used by Actions widget for fast lookup of the Actions
 // widget information.
-class _ActionsMarker extends InheritedWidget {
-  const _ActionsMarker({
+class _ActionsScope extends InheritedWidget {
+  const _ActionsScope({
     required this.dispatcher,
     required this.actions,
     required this.rebuildKey,
-    Key? key,
-    required Widget child,
-  })  : assert(child != null),
-        assert(actions != null),
-        super(key: key, child: child);
+    required super.child,
+  });
 
   final ActionDispatcher? dispatcher;
   final Map<Type, Action<Intent>> actions;
   final Object rebuildKey;
 
   @override
-  bool updateShouldNotify(_ActionsMarker oldWidget) {
+  bool updateShouldNotify(_ActionsScope oldWidget) {
     return rebuildKey != oldWidget.rebuildKey
         || oldWidget.dispatcher != dispatcher
         || !mapEquals<Type, Action<Intent>>(oldWidget.actions, actions);
@@ -1028,6 +1049,8 @@ class _ActionsMarker extends InheritedWidget {
 /// [MouseRegion] and a [Focus] widget to create a detector that defines actions
 /// and key bindings, and provides callbacks for handling focus and hover
 /// highlights.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=R84AGg0lKs8}
 ///
 /// This widget can be used to give a control the required detection modes for
 /// focus and hover handling. It is most often used when authoring a new control
@@ -1058,23 +1081,21 @@ class FocusableActionDetector extends StatefulWidget {
   ///
   /// The [enabled], [autofocus], [mouseCursor], and [child] arguments must not be null.
   const FocusableActionDetector({
-    Key? key,
+    super.key,
     this.enabled = true,
     this.focusNode,
     this.autofocus = false,
     this.descendantsAreFocusable = true,
+    this.descendantsAreTraversable = true,
     this.shortcuts,
     this.actions,
     this.onShowFocusHighlight,
     this.onShowHoverHighlight,
     this.onFocusChange,
     this.mouseCursor = MouseCursor.defer,
+    this.includeFocusSemantics = true,
     required this.child,
-  })  : assert(enabled != null),
-        assert(autofocus != null),
-        assert(mouseCursor != null),
-        assert(child != null),
-        super(key: key);
+  });
 
   /// Is this widget enabled or not.
   ///
@@ -1093,6 +1114,9 @@ class FocusableActionDetector extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
   final bool descendantsAreFocusable;
+
+  /// {@macro flutter.widgets.Focus.descendantsAreTraversable}
+  final bool descendantsAreTraversable;
 
   /// {@macro flutter.widgets.actions.actions}
   final Map<Type, Action<Intent>>? actions;
@@ -1123,6 +1147,11 @@ class FocusableActionDetector extends StatefulWidget {
   /// cursor to the next region behind it in hit-test order.
   final MouseCursor mouseCursor;
 
+  /// Whether to include semantics from [Focus].
+  ///
+  /// Defaults to true.
+  final bool includeFocusSemantics;
+
   /// The child widget for this [FocusableActionDetector] widget.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -1136,7 +1165,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
       _updateHighlightMode(FocusManager.instance.highlightMode);
     });
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
@@ -1212,7 +1241,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool canRequestFocus(FocusableActionDetector target) {
-      final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+      final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
       switch (mode) {
         case NavigationMode.traditional:
           return target.enabled;
@@ -1225,7 +1254,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       return _focused && _canShowHighlight && canRequestFocus(target);
     }
 
-    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     final FocusableActionDetector oldTarget = oldWidget ?? widget;
     final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
     final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
@@ -1246,14 +1275,14 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void didUpdateWidget(FocusableActionDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
-      SchedulerBinding.instance!.addPostFrameCallback((Duration duration) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         _mayTriggerCallback(oldWidget: oldWidget);
       });
     }
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return widget.enabled;
@@ -1280,8 +1309,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         descendantsAreFocusable: widget.descendantsAreFocusable,
+        descendantsAreTraversable: widget.descendantsAreTraversable,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
+        includeSemantics: widget.includeFocusSemantics,
         child: widget.child,
       ),
     );
@@ -1295,7 +1326,34 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 }
 
-/// An [Intent], that is bound to a [DoNothingAction].
+/// An [Intent] that keeps a [VoidCallback] to be invoked by a
+/// [VoidCallbackAction] when it receives this intent.
+class VoidCallbackIntent extends Intent {
+  /// Creates a [VoidCallbackIntent].
+  const VoidCallbackIntent(this.callback);
+
+  /// The callback that is to be called by the [VoidCallbackAction] that
+  /// receives this intent.
+  final VoidCallback callback;
+}
+
+/// An [Action] that invokes the [VoidCallback] given to it in the
+/// [VoidCallbackIntent] passed to it when invoked.
+///
+/// See also:
+///
+///  * [CallbackAction], which is an action that will invoke a callback with the
+///    intent passed to the action's invoke method. The callback is configured
+///    on the action, not the intent, like this class.
+class VoidCallbackAction extends Action<VoidCallbackIntent> {
+  @override
+  Object? invoke(VoidCallbackIntent intent) {
+    intent.callback();
+    return null;
+  }
+}
+
+/// An [Intent] that is bound to a [DoNothingAction].
 ///
 /// Attaching a [DoNothingIntent] to a [Shortcuts] mapping is one way to disable
 /// a keyboard shortcut defined by a widget higher in the widget hierarchy and
@@ -1310,13 +1368,13 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 ///    handlers in the focus chain.
 class DoNothingIntent extends Intent {
   /// Creates a const [DoNothingIntent].
-  factory DoNothingIntent() => const DoNothingIntent._();
+  const factory DoNothingIntent() = DoNothingIntent._;
 
   // Make DoNothingIntent constructor private so it can't be subclassed.
   const DoNothingIntent._();
 }
 
-/// An [Intent], that is bound to a [DoNothingAction], but, in addition to not
+/// An [Intent] that is bound to a [DoNothingAction], but, in addition to not
 /// performing an action, also stops the propagation of the key event bound to
 /// this intent to other key event handlers in the focus chain.
 ///
@@ -1335,13 +1393,13 @@ class DoNothingIntent extends Intent {
 ///  * [DoNothingIntent], a similar intent that will handle the key event.
 class DoNothingAndStopPropagationIntent extends Intent {
   /// Creates a const [DoNothingAndStopPropagationIntent].
-  factory DoNothingAndStopPropagationIntent() => const DoNothingAndStopPropagationIntent._();
+  const factory DoNothingAndStopPropagationIntent() = DoNothingAndStopPropagationIntent._;
 
   // Make DoNothingAndStopPropagationIntent constructor private so it can't be subclassed.
   const DoNothingAndStopPropagationIntent._();
 }
 
-/// An [Action], that doesn't perform any action when invoked.
+/// An [Action] that doesn't perform any action when invoked.
 ///
 /// Attaching a [DoNothingAction] to an [Actions.actions] mapping is a way to
 /// disable an action defined by a widget higher in the widget hierarchy.
@@ -1406,11 +1464,12 @@ class ActivateIntent extends Intent {
 ///  * [WidgetsApp.shortcuts], which defines the shortcuts to use in an
 ///    application (and defaults to [WidgetsApp.defaultShortcuts]).
 class ButtonActivateIntent extends Intent {
-  /// Creates an intent that the currently focused control, if it's a button.
+  /// Creates an intent that activates the currently focused control,
+  /// if it's a button.
   const ButtonActivateIntent();
 }
 
-/// An action that activates the currently focused control.
+/// An [Action] that activates the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
 /// activate a control. By default, is bound to [LogicalKeyboardKey.enter],
@@ -1418,8 +1477,11 @@ class ButtonActivateIntent extends Intent {
 /// default keyboard map in [WidgetsApp].
 abstract class ActivateAction extends Action<ActivateIntent> { }
 
-/// An intent that selects the currently focused control.
-class SelectIntent extends Intent { }
+/// An [Intent] that selects the currently focused control.
+class SelectIntent extends Intent {
+  /// Creates an intent that selects the currently focused control.
+  const SelectIntent();
+}
 
 /// An action that selects the currently focused control.
 ///
@@ -1440,7 +1502,7 @@ class DismissIntent extends Intent {
   const DismissIntent();
 }
 
-/// An action that dismisses the focused widget.
+/// An [Action] that dismisses the focused widget.
 ///
 /// This is an abstract class that serves as a base class for dismiss actions.
 abstract class DismissAction extends Action<DismissIntent> { }
@@ -1454,7 +1516,7 @@ class PrioritizedIntents extends Intent {
   /// of intents, the first available of which will be used.
   const PrioritizedIntents({
     required this.orderedIntents,
-  })  : assert(orderedIntents != null);
+  });
 
   /// List of intents to be evaluated in order for execution. When an
   /// [Action.isEnabled] returns true, that action will be invoked and
@@ -1471,8 +1533,9 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   @override
   bool isEnabled(PrioritizedIntents intent) {
     final FocusNode? focus = primaryFocus;
-    if  (focus == null || focus.context == null)
+    if  (focus == null || focus.context == null) {
       return false;
+    }
     for (final Intent candidateIntent in intent.orderedIntents) {
       final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
         focus.context!,
@@ -1488,9 +1551,7 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   }
 
   @override
-  Object? invoke(PrioritizedIntents intent) {
-    assert(_selectedAction != null);
-    assert(_selectedIntent != null);
+  void invoke(PrioritizedIntents intent) {
     _selectedAction.invoke(_selectedIntent);
   }
 }
@@ -1505,7 +1566,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   bool debugAssertConsumeKeyMutuallyRecursive = false;
 
   // The default action to invoke if an enabled override Action can't be found
-  // using [lookupContext];
+  // using [lookupContext].
   Action<T> get defaultAction;
 
   // The [BuildContext] used to find the override of this [Action].

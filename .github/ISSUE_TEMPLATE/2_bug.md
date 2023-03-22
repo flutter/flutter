@@ -23,15 +23,36 @@ assignees: ''
 
 ## Steps to Reproduce
 
-<!-- You must include full steps to reproduce so that we can reproduce the problem. -->
+<!-- Please include full steps to reproduce so that we can reproduce the problem. -->
 
-1. Run `flutter create bug`.
-2. Update the files as follows: ... <!-- include every file that is different from the template app! -->
-3. ... <!-- describe how to reproduce the problem -->
+1. Execute `flutter run` on the code sample <!-- (see "Code sample" section below) -->
+2. ... <!-- describe steps to demonstrate bug -->
+3. ... <!-- for example "Tap on X and see a crash" -->
 
 **Expected results:** <!-- what did you want to see? -->
 
 **Actual results:** <!-- what did you see? -->
+
+<details>
+<summary>Code sample</summary>
+
+<!--
+      Please create a minimal reproducible sample that shows the problem
+      and attach it below between the lines with the backticks.
+
+      To create it you can use `flutter create bug` command and update the `main.dart` file.
+
+      Alternatively, you can use https://dartpad.dev/
+      which is capable of creating and running small Flutter apps.
+
+      Without this we will unlikely be able to progress on the issue, and because of that
+      we regretfully will have to close it.
+-->
+
+```dart
+```
+
+</details>
 
 <details>
   <summary>Logs</summary>
@@ -40,7 +61,8 @@ assignees: ''
       Run your application with `flutter run --verbose` and attach all the
       log output below between the lines with the backticks. If there is an
       exception, please see if the error message includes enough information
-      to explain how to solve the issue.
+      to explain how to solve the issue. If there is a crash, please include
+      the entirety of the crash log including the backtrace.
 -->
 
 ```
@@ -60,3 +82,12 @@ assignees: ''
 ```
 
 </details>
+
+
+<!--
+      Consider also attaching screenshots and/or videos to better
+      illustrate the issue.
+
+      You can upload them directly on GitHub.
+      Beware that video file size is limited to 10MB.
+-->

@@ -25,7 +25,6 @@ final Platform windowsPlatform = FakePlatform(
 );
 
 final Platform linuxPlatform = FakePlatform(
-  operatingSystem: 'linux',
   environment: <String, String>{}
 );
 
@@ -47,6 +46,11 @@ void main() {
     final File file = fileSystem.file('file')..createSync();
 
      expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
+  });
+
+  testWithoutContext('create accepts exclusive argument', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    expect(fileSystem.file('file').create(exclusive: true), isNotNull);
   });
 
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
@@ -889,8 +893,8 @@ void main() {
 
     testWithoutContext('when PackageProcess throws an exception without containing non-executable bits', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
-        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('', candidates: <String>[])),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('')),
+        const FakeCommand(command: <String>['foo'], exception: ProcessPackageExecutableNotFoundException('')),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -959,7 +963,8 @@ void main() {
         platform: windowsPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo". The flutter tool cannot access the file or directory.\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
@@ -1017,7 +1022,8 @@ void main() {
         platform: linuxPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
 
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -1047,6 +1053,7 @@ void main() {
   group('ProcessManager on macOS throws tool exit', () {
     const int enospc = 28;
     const int eacces = 13;
+    const int ebadarch = 86;
 
     testWithoutContext('when writing to a full device', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
@@ -1080,7 +1087,8 @@ void main() {
         platform: macOSPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
 
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -1105,6 +1113,29 @@ void main() {
 
       expect(() async => processManager.canRun('/path/to/dart'), throwsToolExit(message: expectedMessage));
     });
+
+    testWithoutContext('when bad CPU type', () async {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: macOSPlatform,
+      );
+
+      const String expectedMessage = 'Flutter failed to run "foo --bar".\n'
+          'The binary was built with the incorrect architecture to run on this machine.';
+
+      expect(() async => processManager.start(<String>['foo', '--bar']),
+          throwsToolExit(message: expectedMessage));
+      expect(() async => processManager.run(<String>['foo', '--bar']),
+          throwsToolExit(message: expectedMessage));
+      expect(() => processManager.runSync(<String>['foo', '--bar']),
+          throwsToolExit(message: expectedMessage));
+    });
   });
 
   testWithoutContext('ErrorHandlingProcessManager delegates killPid correctly', () async {
@@ -1114,7 +1145,7 @@ void main() {
       platform: linuxPlatform,
     );
 
-    expect(processManager.killPid(1, io.ProcessSignal.sigterm), true);
+    expect(processManager.killPid(1), true);
     expect(processManager.killPid(3, io.ProcessSignal.sigkill), true);
     expect(fakeProcessManager.killedProcesses, <int, io.ProcessSignal>{
       1: io.ProcessSignal.sigterm,
@@ -1163,7 +1194,7 @@ void main() {
       );
 
       const String expectedMessage =
-          'Flutter failed to copy source to dest due to destination location error.\n'
+          'Flutter failed to create file at "dest".\n'
           'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
       expect(() => fileSystem.file('source').copySync('dest'), throwsToolExit(message: expectedMessage));
     });
@@ -1241,7 +1272,7 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
 }
 
 class FakeExistsFile extends Fake implements File {
-  late Object error;
+  late Exception error;
   int existsCount = 0;
 
 

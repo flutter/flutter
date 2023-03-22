@@ -34,6 +34,24 @@ void main() {
     expect(Alignment.lerp(a, null, 0.25), equals(const Alignment(-0.75, -0.75)));
   });
 
+  test('Alignment.lerp identical a,b', () {
+    expect(Alignment.lerp(null, null, 0), null);
+    const Alignment alignment = Alignment.topLeft;
+    expect(identical(Alignment.lerp(alignment, alignment, 0.5), alignment), true);
+  });
+
+  test('AlignmentGeometry.lerp identical a,b', () {
+    expect(AlignmentGeometry.lerp(null, null, 0), null);
+    const AlignmentGeometry alignment = Alignment.topLeft;
+    expect(identical(AlignmentGeometry.lerp(alignment, alignment, 0.5), alignment), true);
+  });
+
+  test('AlignmentDirectional.lerp identical a,b', () {
+    expect(AlignmentDirectional.lerp(null, null, 0), null);
+    const AlignmentDirectional alignment = AlignmentDirectional.topStart;
+    expect(identical(AlignmentDirectional.lerp(alignment, alignment, 0.5), alignment), true);
+  });
+
   test('AlignmentGeometry invariants', () {
     const AlignmentDirectional topStart = AlignmentDirectional.topStart;
     const AlignmentDirectional topEnd = AlignmentDirectional.topEnd;
@@ -60,8 +78,9 @@ void main() {
     for (final double n in numbers) {
       expect((topStart * n).add(topStart), topStart * (n + 1.0));
       expect((topEnd * n).add(topEnd), topEnd * (n + 1.0));
-      for (final double m in numbers)
+      for (final double m in numbers) {
         expect((topStart * n).add(topStart * m), topStart * (n + m));
+      }
     }
     expect(topStart + topStart + topStart, topStart * 3.0); // without using "add"
     for (final TextDirection x in TextDirection.values) {

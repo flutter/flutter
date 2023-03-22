@@ -10,11 +10,11 @@ import 'package:flutter_devicelab/tasks/build_test_task.dart';
 /// Smoke test of a successful task.
 Future<void> main(List<String> args) async {
   deviceOperatingSystem = DeviceOperatingSystem.fake;
-  await task(FakeBuildTestTask(args));
+  await task(FakeBuildTestTask(args).call);
 }
 
 class FakeBuildTestTask extends BuildTestTask {
-  FakeBuildTestTask(List<String> args) : super(args, runFlutterClean: false) {
+  FakeBuildTestTask(super.args) : super(runFlutterClean: false) {
     deviceOperatingSystem = DeviceOperatingSystem.fake;
   }
 

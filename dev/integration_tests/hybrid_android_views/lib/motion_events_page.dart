@@ -27,7 +27,7 @@ class MotionEventsPage extends PageWidget {
 }
 
 class MotionEventsBody extends StatefulWidget {
-  const MotionEventsBody({Key? key}) : super(key: key);
+  const MotionEventsBody({super.key});
 
   @override
   State createState() => MotionEventsBodyState();
@@ -128,16 +128,19 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 
       await viewChannel!.invokeMethod<void>('stopTouchEvents');
 
-      if (flutterViewEvents.length != embeddedViewEvents.length)
+      if (flutterViewEvents.length != embeddedViewEvents.length) {
         return 'Synthesized ${flutterViewEvents.length} events but the embedded view received ${embeddedViewEvents.length} events';
+      }
 
       final StringBuffer diff = StringBuffer();
       for (int i = 0; i < flutterViewEvents.length; ++i) {
         final String currentDiff = diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
-        if (currentDiff.isEmpty)
+        if (currentDiff.isEmpty) {
           continue;
-        if (diff.isNotEmpty)
+        }
+        if (diff.isNotEmpty) {
           diff.write(', ');
+        }
         diff.write(currentDiff);
       }
       return diff.toString();
@@ -154,8 +157,9 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 
   Future<void> saveRecordedEvents(ByteData data, BuildContext context) async {
     if (await channel.invokeMethod<bool>('getStoragePermission') != true) {
-      showMessage(
-          context, 'External storage permissions are required to save events');
+      if (mounted) {
+        showMessage(context, 'External storage permissions are required to save events');
+      }
       return;
     }
     try {
@@ -163,9 +167,15 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       // This test only runs on Android so we can assume path separator is '/'.
       final File file = File('${outDir.path}/$kEventsFileName');
       await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes), flush: true);
+      if (!mounted) {
+        return;
+      }
       showMessage(context, 'Saved original events to ${file.path}');
     } catch (e) {
-      showMessage(context, 'Failed saving ${e.toString()}');
+      if (!mounted) {
+        return;
+      }
+      showMessage(context, 'Failed saving $e');
     }
   }
 
@@ -194,12 +204,13 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       case 'onTouch':
         final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
         flutterViewEvents.insert(0, map.cast<String, dynamic>());
-        if (flutterViewEvents.length > kEventsBufferSize)
+        if (flutterViewEvents.length > kEventsBufferSize) {
           flutterViewEvents.removeLast();
+        }
         setState(() {});
         break;
     }
-    return Future<dynamic>.value(null);
+    return Future<dynamic>.value();
   }
 
   Future<dynamic> onViewMethodChannelCall(MethodCall call) {
@@ -207,25 +218,27 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       case 'onTouch':
         final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
         embeddedViewEvents.insert(0, map.cast<String, dynamic>());
-        if (embeddedViewEvents.length > kEventsBufferSize)
+        if (embeddedViewEvents.length > kEventsBufferSize) {
           embeddedViewEvents.removeLast();
+        }
         setState(() {});
         break;
     }
-    return Future<dynamic>.value(null);
+    return Future<dynamic>.value();
   }
 
   Widget buildEventTile(BuildContext context, int index) {
-    if (embeddedViewEvents.length > index)
+    if (embeddedViewEvents.length > index) {
       return TouchEventDiff(
           flutterViewEvents[index], embeddedViewEvents[index]);
+    }
     return Text(
         'Unmatched event, action: ${flutterViewEvents[index]['action']}');
   }
 }
 
 class TouchEventDiff extends StatelessWidget {
-  const TouchEventDiff(this.originalEvent, this.synthesizedEvent, {Key? key}) : super(key: key);
+  const TouchEventDiff(this.originalEvent, this.synthesizedEvent, {super.key});
 
   final Map<String, dynamic> originalEvent;
   final Map<String, dynamic> synthesizedEvent;
@@ -275,6 +288,6 @@ class TouchEventDiff extends StatelessWidget {
     for (int i = 0; i < coords.length; i++) {
       buffer.write('p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ');
     }
-    print(buffer.toString());
+    print(buffer);
   }
 }

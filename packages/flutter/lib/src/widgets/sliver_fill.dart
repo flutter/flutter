@@ -26,14 +26,11 @@ import 'sliver.dart';
 class SliverFillViewport extends StatelessWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
-    Key? key,
+    super.key,
     required this.delegate,
     this.viewportFraction = 1.0,
     this.padEnds = true,
-  }) : assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
-       assert(padEnds != null),
-       super(key: key);
+  }) : assert(viewportFraction > 0.0);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///
@@ -61,7 +58,7 @@ class SliverFillViewport extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SliverFractionalPadding(
-      viewportFraction: padEnds ? (1 - viewportFraction).clamp(0, 1) / 2 : 0,
+      viewportFraction: padEnds ? clampDouble(1 - viewportFraction, 0, 1) / 2 : 0,
       sliver: _SliverFillViewportRenderObjectWidget(
         viewportFraction: viewportFraction,
         delegate: delegate,
@@ -72,12 +69,9 @@ class SliverFillViewport extends StatelessWidget {
 
 class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
   const _SliverFillViewportRenderObjectWidget({
-    Key? key,
-    required SliverChildDelegate delegate,
+    required super.delegate,
     this.viewportFraction = 1.0,
-  }) : assert(viewportFraction != null),
-      assert(viewportFraction > 0.0),
-      super(key: key, delegate: delegate);
+  }) : assert(viewportFraction > 0.0);
 
   final double viewportFraction;
 
@@ -97,8 +91,7 @@ class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   const _SliverFractionalPadding({
     this.viewportFraction = 0,
     Widget? sliver,
-  }) : assert(viewportFraction != null),
-      assert(viewportFraction >= 0),
+  }) : assert(viewportFraction >= 0),
       assert(viewportFraction <= 0.5),
       super(child: sliver);
 
@@ -116,8 +109,7 @@ class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
 class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   _RenderSliverFractionalPadding({
     double viewportFraction = 0,
-  }) : assert(viewportFraction != null),
-      assert(viewportFraction <= 0.5),
+  }) : assert(viewportFraction <= 0.5),
       assert(viewportFraction >= 0),
       _viewportFraction = viewportFraction;
 
@@ -126,9 +118,9 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double newValue) {
-    assert(newValue != null);
-    if (_viewportFraction == newValue)
+    if (_viewportFraction == newValue) {
       return;
+    }
     _viewportFraction = newValue;
     _markNeedsResolution();
   }
@@ -143,10 +135,10 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   void _resolve() {
-    if (_resolvedPadding != null && _lastResolvedConstraints == constraints)
+    if (_resolvedPadding != null && _lastResolvedConstraints == constraints) {
       return;
+    }
 
-    assert(constraints.axis != null);
     final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
     _lastResolvedConstraints = constraints;
     switch (constraints.axis) {
@@ -239,7 +231,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_fill_overscroll.mp4}
 ///
-/// {@tool sample}
+/// {@tool dartpad}
 /// In this sample the [SliverFillRemaining]'s child stretches to fill the
 /// overscroll area when [fillOverscroll] is true. This sample also features a
 /// button that is pinned to the bottom of the sliver, regardless of size or
@@ -261,13 +253,11 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 class SliverFillRemaining extends StatelessWidget {
   /// Creates a sliver that fills the remaining space in the viewport.
   const SliverFillRemaining({
-    Key? key,
+    super.key,
     this.child,
     this.hasScrollBody = true,
     this.fillOverscroll = false,
-  }) : assert(hasScrollBody != null),
-       assert(fillOverscroll != null),
-       super(key: key);
+  });
 
   /// Box child widget that fills the remaining space in the viewport.
   ///
@@ -298,10 +288,12 @@ class SliverFillRemaining extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (hasScrollBody)
+    if (hasScrollBody) {
       return _SliverFillRemainingWithScrollable(child: child);
-    if (!fillOverscroll)
+    }
+    if (!fillOverscroll) {
       return _SliverFillRemainingWithoutScrollable(child: child);
+    }
     return _SliverFillRemainingAndOverscroll(child: child);
   }
 
@@ -318,17 +310,17 @@ class SliverFillRemaining extends StatelessWidget {
       if (hasScrollBody) 'scrollable',
       if (fillOverscroll) 'fillOverscroll',
     ];
-    if (flags.isEmpty)
+    if (flags.isEmpty) {
       flags.add('nonscrollable');
+    }
     properties.add(IterableProperty<String>('mode', flags));
   }
 }
 
 class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingWithScrollable({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   RenderSliverFillRemainingWithScrollable createRenderObject(BuildContext context) => RenderSliverFillRemainingWithScrollable();
@@ -336,9 +328,8 @@ class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
 
 class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingWithoutScrollable({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
@@ -346,9 +337,8 @@ class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidge
 
 class _SliverFillRemainingAndOverscroll extends SingleChildRenderObjectWidget {
   const _SliverFillRemainingAndOverscroll({
-    Key? key,
-    Widget? child,
-  }) : super(key: key, child: child);
+    super.child,
+  });
 
   @override
   RenderSliverFillRemainingAndOverscroll createRenderObject(BuildContext context) => RenderSliverFillRemainingAndOverscroll();

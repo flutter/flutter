@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CharacterActivator
+// Flutter code sample for [CharacterActivator].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -32,7 +32,7 @@ class HelpMenuIntent extends Intent {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
@@ -56,10 +56,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             },
           ),
         },
-        child: Focus(
+        child: const Focus(
           autofocus: true,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Text('Press question mark for help'),
             ],
           ),

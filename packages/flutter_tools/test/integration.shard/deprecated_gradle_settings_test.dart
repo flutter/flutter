@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -15,7 +13,7 @@ import 'test_utils.dart';
 // TODO(egarciad): Migrate existing files, https://github.com/flutter/flutter/issues/54566
 void main() {
   test('android project using deprecated settings.gradle will still build', () async {
-    final String woringDirectory = fileSystem.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'gradle_deprecated_settings');
+    final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'gradle_deprecated_settings');
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     final ProcessResult result = await processManager.run(<String>[
@@ -25,14 +23,16 @@ void main() {
       '--debug',
       '--target-platform', 'android-arm',
       '--verbose',
-    ], workingDirectory: woringDirectory);
-    print(result.stdout);
-    print(result.stderr);
+    ], workingDirectory: workingDirectory);
+
+    printOnFailure('Output of flutter build apk:');
+    printOnFailure(result.stdout.toString());
+    printOnFailure(result.stderr.toString());
 
     expect(result.exitCode, 0);
 
     final String apkPath = fileSystem.path.join(
-      woringDirectory, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk');
+      workingDirectory, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk');
     expect(fileSystem.file(apkPath), exists);
   });
 }

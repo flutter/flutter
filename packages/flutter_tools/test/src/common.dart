@@ -4,30 +4,34 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/globals_null_migrated.dart' as globals;
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
 
-export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
 
-void tryToDelete(Directory directory) {
+void tryToDelete(FileSystemEntity fileEntity) {
   // This should not be necessary, but it turns out that
   // on Windows it's common for deletions to fail due to
   // bogus (we think) "access denied" errors.
   try {
-    if (directory.existsSync()) {
-      directory.deleteSync(recursive: true);
+    if (fileEntity.existsSync()) {
+      fileEntity.deleteSync(recursive: true);
     }
   } on FileSystemException catch (error) {
-    print('Failed to delete ${directory.path}: $error');
+    // We print this so that it's visible in the logs, to get an idea of how
+    // common this problem is, and if any patterns are ever noticed by anyone.
+    // ignore: avoid_print
+    print('Failed to delete ${fileEntity.path}: $error');
   }
 }
 
@@ -100,6 +104,18 @@ Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
 /// Matcher for [ToolExit]s.
 final TypeMatcher<ToolExit> _isToolExit = isA<ToolExit>();
 
+/// Matcher for functions that throw [UsageException].
+Matcher throwsUsageException({Pattern? message }) {
+  Matcher matcher = _isUsageException;
+  if (message != null) {
+    matcher = allOf(matcher, (UsageException e) => e.message.contains(message));
+  }
+  return throwsA(matcher);
+}
+
+/// Matcher for [UsageException]s.
+final TypeMatcher<UsageException> _isUsageException = isA<UsageException>();
+
 /// Matcher for functions that throw [ProcessException].
 Matcher throwsProcessException({ Pattern? message }) {
   Matcher matcher = _isProcessException;
@@ -159,6 +175,7 @@ void test(String description, FutureOr<void> Function() body, {
       addTearDown(() async {
         await globals.localFileSystem.dispose();
       });
+
       return body();
     },
     skip: skip,
@@ -187,7 +204,7 @@ void testWithoutContext(String description, FutureOr<void> Function() body, {
   List<String>? tags,
   Map<String, dynamic>? onPlatform,
   int? retry,
-  }) {
+}) {
   return test(
     description, () async {
       return runZoned(body, zoneValues: <Object, Object>{

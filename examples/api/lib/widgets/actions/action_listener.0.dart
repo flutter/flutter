@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for ActionListener
+// Flutter code sample for [ActionListener].
 
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ActionListenerExample extends StatefulWidget {
-  const ActionListenerExample({Key? key}) : super(key: key);
+  const ActionListenerExample({super.key});
 
   @override
   State<ActionListenerExample> createState() => _ActionListenerExampleState();
@@ -53,7 +53,6 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Padding(
@@ -92,13 +91,13 @@ class MyAction extends Action<MyIntent> {
   @override
   void addActionListener(ActionListenerCallback listener) {
     super.addActionListener(listener);
-    print('Action Listener was added');
+    debugPrint('Action Listener was added');
   }
 
   @override
   void removeActionListener(ActionListenerCallback listener) {
     super.removeActionListener(listener);
-    print('Action Listener was removed');
+    debugPrint('Action Listener was removed');
   }
 
   @override
@@ -112,7 +111,7 @@ class MyIntent extends Intent {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
+  const MyStatefulWidget({super.key});
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();

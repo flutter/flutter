@@ -38,6 +38,11 @@ void main() {
       expect(localizations.datePickerDayOfMonth(2), isNotNull);
       expect(localizations.datePickerDayOfMonth(10), isNotNull);
 
+      expect(localizations.datePickerDayOfMonth(0, 1), isNotNull);
+      expect(localizations.datePickerDayOfMonth(1, 2), isNotNull);
+      expect(localizations.datePickerDayOfMonth(2, 3), isNotNull);
+      expect(localizations.datePickerDayOfMonth(10, 4), isNotNull);
+
       expect(localizations.datePickerMediumDate(DateTime(2019, 3, 25)), isNotNull);
 
       expect(localizations.datePickerHour(0), isNotNull);
@@ -144,7 +149,7 @@ void main() {
 
 
     if (noCupertinoArbFile.existsSync() && !nbCupertinoArbFile.existsSync()) {
-      Locale locale = const Locale.fromSubtags(languageCode: 'no', scriptCode: null, countryCode: null);
+      Locale locale = const Locale.fromSubtags(languageCode: 'no');
       expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
       CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
       expect(localizations, isA<CupertinoLocalizationNo>());
@@ -153,7 +158,7 @@ void main() {
       final String copyButtonLabelNo = localizations.copyButtonLabel;
       final String cutButtonLabelNo = localizations.cutButtonLabel;
 
-      locale = const Locale.fromSubtags(languageCode: 'nb', scriptCode: null, countryCode: null);
+      locale = const Locale.fromSubtags(languageCode: 'nb');
       expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
       localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
       expect(localizations, isA<CupertinoLocalizationNb>());

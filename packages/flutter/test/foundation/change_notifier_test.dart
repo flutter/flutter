@@ -14,7 +14,7 @@ class TestNotifier extends ChangeNotifier {
 }
 
 class HasListenersTester<T> extends ValueNotifier<T> {
-  HasListenersTester(T value) : super(value);
+  HasListenersTester(super.value);
   bool get testHasListeners => hasListeners;
 }
 
@@ -49,6 +49,22 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
+  testWidgets('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
+    final TestNotifier test = TestNotifier();
+    bool callbackDidFinish = false;
+    void foo() {
+      test.dispose();
+      callbackDidFinish = true;
+    }
+
+    test.addListener(foo);
+    test.notify();
+    final AssertionError error = tester.takeException() as AssertionError;
+    expect(error.toString().contains('dispose()'), isTrue);
+    // Make sure it crashes during dispose call.
+    expect(callbackDidFinish, isFalse);
+  });
+
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
     void listener() {
@@ -323,14 +339,11 @@ void main() {
     expect(log, isEmpty);
   });
 
-  test('Cannot use a disposed ChangeNotifier', () {
+  test('Cannot use a disposed ChangeNotifier except for remove listener', () {
     final TestNotifier source = TestNotifier();
     source.dispose();
     expect(() {
       source.addListener(() {});
-    }, throwsFlutterError);
-    expect(() {
-      source.removeListener(() {});
     }, throwsFlutterError);
     expect(() {
       source.dispose();
@@ -338,6 +351,32 @@ void main() {
     expect(() {
       source.notify();
     }, throwsFlutterError);
+  });
+
+  test('Can remove listener on a disposed ChangeNotifier', () {
+    final TestNotifier source = TestNotifier();
+    FlutterError? error;
+    try {
+      source.dispose();
+      source.removeListener(() {});
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
+  });
+
+  test('Can check hasListener on a disposed ChangeNotifier', () {
+    final HasListenersTester<int> source = HasListenersTester<int>(0);
+    source.addListener(() { });
+    expect(source.testHasListeners, isTrue);
+    FlutterError? error;
+    try {
+      source.dispose();
+      expect(source.testHasListeners, isFalse);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNull);
   });
 
   test('Value notifier', () {
@@ -450,6 +489,29 @@ void main() {
     FlutterError? error;
     try {
       testNotifier.dispose();
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error, isFlutterError);
+    expect(
+      error!.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   A TestNotifier was used after being disposed.\n'
+        '   Once you have called dispose() on a TestNotifier, it can no\n'
+        '   longer be used.\n',
+      ),
+    );
+  });
+
+  test('Calling debugAssertNotDisposed works as intended', () {
+    final TestNotifier testNotifier = TestNotifier();
+    expect(ChangeNotifier.debugAssertNotDisposed(testNotifier), isTrue);
+    testNotifier.dispose();
+    FlutterError? error;
+    try {
+      ChangeNotifier.debugAssertNotDisposed(testNotifier);
     } on FlutterError catch (e) {
       error = e;
     }

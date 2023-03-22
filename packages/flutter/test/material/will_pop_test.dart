@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
-  const SamplePage({ Key? key }) : super(key: key);
+  const SamplePage({ super.key });
   @override
   SamplePageState createState() => SamplePageState();
 }
@@ -43,7 +43,7 @@ class SamplePageState extends State<SamplePage> {
 int willPopCount = 0;
 
 class SampleForm extends StatelessWidget {
-  const SampleForm({ Key? key, required this.callback }) : super(key: key);
+  const SampleForm({ super.key, required this.callback });
 
   final WillPopCallback callback;
 
@@ -65,13 +65,35 @@ class SampleForm extends StatelessWidget {
 }
 
 // Expose the protected hasScopedWillPopCallback getter
-class TestPageRoute<T> extends MaterialPageRoute<T> {
-  TestPageRoute({ required WidgetBuilder builder })
-    : super(builder: builder, maintainState: true);
+class _TestPageRoute<T> extends MaterialPageRoute<T> {
+  _TestPageRoute({
+    super.settings,
+    required super.builder,
+  }) : super(maintainState: true);
 
   bool get hasCallback => super.hasScopedWillPopCallback;
 }
 
+class _TestPage extends Page<dynamic> {
+  _TestPage({
+    required this.builder,
+    required LocalKey key,
+  })  : _key = GlobalKey(),
+        super(key: key);
+
+  final WidgetBuilder builder;
+  final GlobalKey<dynamic> _key;
+
+  @override
+  Route<dynamic> createRoute(BuildContext context) {
+    return _TestPageRoute<dynamic>(
+        settings: this,
+        builder: (BuildContext context) {
+          // keep state during move to another location in tree
+          return KeyedSubtree(key: _key, child: builder.call(context));
+        });
+  }
+}
 
 void main() {
   testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
@@ -318,7 +340,7 @@ void main() {
     late StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
     bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
-    final TestPageRoute<void> route = TestPageRoute<void>(
+    final _TestPageRoute<void> route = _TestPageRoute<void>(
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -372,5 +394,62 @@ void main() {
     await tester.pump();
 
     expect(route.hasCallback, isFalse);
+  });
+
+  testWidgets('should handle new route if page moved from one navigator to another', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/89133
+    late StateSetter contentsSetState;
+    bool moveToAnotherNavigator = false;
+
+    final List<Page<dynamic>> pages = <Page<dynamic>>[
+      _TestPage(
+        key: UniqueKey(),
+        builder: (BuildContext context) {
+          return WillPopScope(
+            onWillPop: () async => true,
+            child: const Text('anchor'),
+          );
+        },
+      ),
+    ];
+
+    Widget buildNavigator(Key? key, List<Page<dynamic>> pages) {
+      return Navigator(
+        key: key,
+        pages: pages,
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          return route.didPop(result);
+        },
+      );
+    }
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              contentsSetState = setState;
+              if (moveToAnotherNavigator) {
+                return buildNavigator(const ValueKey<int>(1), pages);
+              }
+              return buildNavigator(const ValueKey<int>(2), pages);
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pump();
+    final _TestPageRoute<dynamic> route1 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
+    expect(route1.hasCallback, isTrue);
+    moveToAnotherNavigator = true;
+    contentsSetState(() {});
+
+    await tester.pump();
+    final _TestPageRoute<dynamic> route2 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
+
+    expect(route1.hasCallback, isFalse);
+    expect(route2.hasCallback, isTrue);
   });
 }

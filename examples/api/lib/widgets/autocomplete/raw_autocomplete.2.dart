@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for RawAutocomplete
+// Flutter code sample for [RawAutocomplete].
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
-  const AutocompleteExampleApp({Key? key}) : super(key: key);
+  const AutocompleteExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +27,7 @@ class AutocompleteExampleApp extends StatelessWidget {
 }
 
 class AutocompleteFormExample extends StatefulWidget {
-  const AutocompleteFormExample({Key? key}) : super(key: key);
+  const AutocompleteFormExample({super.key});
 
   @override
   AutocompleteFormExampleState createState() => AutocompleteFormExampleState();
@@ -56,7 +55,6 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
             value: _dropdownValue,
             icon: const Icon(Icons.arrow_downward),
             hint: const Text('This is a regular DropdownButtonFormField'),
-            iconSize: 24,
             elevation: 16,
             style: const TextStyle(color: Colors.deepPurple),
             onChanged: (String? newValue) {

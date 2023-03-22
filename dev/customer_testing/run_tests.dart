@@ -41,22 +41,18 @@ Future<bool> run(List<String> arguments) async {
     )
     ..addFlag(
       'skip-on-fetch-failure',
-      defaultsTo: false,
       help: 'Whether to skip tests that we fail to download.',
     )
     ..addFlag(
       'skip-template',
-      defaultsTo: false,
       help: 'Whether to skip tests named "template.test".',
     )
     ..addFlag(
       'verbose',
-      defaultsTo: false,
       help: 'Describe what is happening in detail.',
     )
     ..addFlag(
       'help',
-      defaultsTo: false,
       negatable: false,
       help: 'Print this help message.',
     );
@@ -96,8 +92,9 @@ Future<bool> run(List<String> arguments) async {
   if (help || repeat == null || files.isEmpty || numberShards == null || numberShards <= 0 || shardIndex == null || shardIndex < 0) {
     printHelp();
     if (verbose) {
-      if (repeat == null)
+      if (repeat == null) {
         print('Error: Could not parse repeat count ("${parsedArguments['repeat']}")');
+      }
       if (numberShards == null) {
         print('Error: Could not parse shards count ("${parsedArguments['shards']}")');
       } else if (numberShards < 1) {
@@ -125,8 +122,9 @@ Future<bool> run(List<String> arguments) async {
     return false;
   }
 
-  if (files.length < numberShards)
+  if (files.length < numberShards) {
     print('Warning: There are more shards than tests. Some shards will not run any tests.');
+  }
 
   return runTests(
     repeat: repeat,

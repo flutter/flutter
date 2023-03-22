@@ -1,0 +1,18 @@
+{
+  "version": "v0_158",
+
+  "md.comp.search-view.container.color": "surface",
+  "md.comp.search-view.container.elevation": "md.sys.elevation.level3",
+  "md.comp.search-view.container.surface-tint-layer.color": "surfaceTint",
+  "md.comp.search-view.divider.color": "outline",
+  "md.comp.search-view.docked.container.shape": "md.sys.shape.corner.extra-large",
+  "md.comp.search-view.docked.header.container.height": 56.0,
+  "md.comp.search-view.full-screen.container.shape": "md.sys.shape.corner.none",
+  "md.comp.search-view.full-screen.header.container.height": 72.0,
+  "md.comp.search-view.header.input-text.color": "onSurface",
+  "md.comp.search-view.header.input-text.text-style": "bodyLarge",
+  "md.comp.search-view.header.leading-icon.color": "onSurface",
+  "md.comp.search-view.header.supporting-text.color": "onSurfaceVariant",
+  "md.comp.search-view.header.supporting-text.text-style": "bodyLarge",
+  "md.comp.search-view.header.trailing-icon.color": "onSurfaceVariant"
+}

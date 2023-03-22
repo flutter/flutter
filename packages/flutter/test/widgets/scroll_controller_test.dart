@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -44,7 +46,7 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     controller.animateTo(326.0, duration: const Duration(milliseconds: 300), curve: Curves.ease);
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
     expect(controller.offset, equals(326.0));
     expect(realOffset(), equals(controller.offset));
@@ -361,5 +363,34 @@ void main() {
     expect(controller.offset, 100.0);
     expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 1')), Offset.zero);
 
+  });
+
+  testWidgets('isScrollingNotifier works with pointer scroll', (WidgetTester tester) async {
+    Widget buildFrame(ScrollController controller) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          children: List<Widget>.generate(50, (int index) {
+            return SizedBox(height: 100.0, child: Text('Item $index'));
+          }).toList(),
+        ),
+      );
+    }
+
+    bool isScrolling = false;
+    final ScrollController controller = ScrollController();
+    controller.addListener((){
+      isScrolling = controller.position.isScrollingNotifier.value;
+    });
+    await tester.pumpWidget(buildFrame(controller));
+    final Offset scrollEventLocation = tester.getCenter(find.byType(ListView));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+    // When the listener was notified, the value of the isScrollingNotifier
+    // should have been true
+    expect(isScrolling, isTrue);
   });
 }

@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,9 +16,17 @@ void main() {
     expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
   });
 
+  test('CardTheme lerp special cases', () {
+    expect(CardTheme.lerp(null, null, 0), const CardTheme());
+    const CardTheme theme = CardTheme();
+    expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
+  });
+
   testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Scaffold(
         body: Card(),
       ),
     ));
@@ -26,11 +35,13 @@ void main() {
     final Material material = _getCardMaterial(tester);
 
     expect(material.clipBehavior, Clip.none);
-    expect(material.color, Colors.white);
+    expect(material.color, theme.colorScheme.surface);
+    expect(material.shadowColor, theme.colorScheme.shadow);
+    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint); // Default primary color
     expect(material.elevation, 1.0);
     expect(container.margin, const EdgeInsets.all(4.0));
     expect(material.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
     ));
   });
 
@@ -50,6 +61,7 @@ void main() {
     expect(material.clipBehavior, cardTheme.clipBehavior);
     expect(material.color, cardTheme.color);
     expect(material.shadowColor, cardTheme.shadowColor);
+    expect(material.surfaceTintColor, cardTheme.surfaceTintColor);
     expect(material.elevation, cardTheme.elevation);
     expect(container.margin, cardTheme.margin);
     expect(material.shape, cardTheme.shape);
@@ -129,7 +141,7 @@ void main() {
     final Key painterKey = UniqueKey();
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(cardTheme: cardTheme),
+      theme: ThemeData(cardTheme: cardTheme, useMaterial3: true),
       home: Scaffold(
         body: RepaintBoundary(
           key: painterKey,
@@ -147,6 +159,62 @@ void main() {
       matchesGoldenFile('card_theme.custom_shape.png'),
     );
   });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('Passing no CardTheme returns defaults - M2', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Scaffold(
+          body: Card(),
+        ),
+      ));
+
+      final Container container = _getCardContainer(tester);
+      final Material material = _getCardMaterial(tester);
+
+      expect(material.clipBehavior, Clip.none);
+      expect(material.color, Colors.white);
+      expect(material.shadowColor, Colors.black);
+      expect(material.surfaceTintColor, null);
+      expect(material.elevation, 1.0);
+      expect(container.margin, const EdgeInsets.all(4.0));
+      expect(material.shape, const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+      ));
+    });
+
+    testWidgets('CardTheme customizes shape - M2', (WidgetTester tester) async {
+      const CardTheme cardTheme = CardTheme(
+        color: Colors.white,
+        shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
+        elevation: 1.0,
+      );
+
+      final Key painterKey = UniqueKey();
+
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(cardTheme: cardTheme, useMaterial3: false),
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: painterKey,
+            child: Center(
+              child: Card(
+                child: SizedBox.fromSize(size: const Size(200, 300)),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile('card_theme.custom_shape_m2.png'),
+      );
+    });
+  });
 }
 
 CardTheme _cardTheme() {
@@ -154,6 +222,7 @@ CardTheme _cardTheme() {
     clipBehavior: Clip.antiAlias,
     color: Colors.green,
     shadowColor: Colors.red,
+    surfaceTintColor: Colors.purple,
     elevation: 6.0,
     margin: EdgeInsets.all(7.0),
     shape: RoundedRectangleBorder(

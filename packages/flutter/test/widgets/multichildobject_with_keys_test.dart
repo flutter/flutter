@@ -11,10 +11,10 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/48855.
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Text('0', key: ValueKey<int>(0)),
             Text('1', key: ValueKey<int>(1)),
             Text('2', key: ValueKey<int>(2)),
@@ -35,10 +35,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Text('0', key: ValueKey<int>(0)),
             Text('6', key: ValueKey<int>(6)),
             Text('7', key: ValueKey<int>(7)),
@@ -62,8 +62,8 @@ void main() {
   testWidgets('Building a new MultiChildRenderObjectElement with children having duplicated keys throws', (WidgetTester tester) async {
     const ValueKey<int> duplicatedKey = ValueKey<int>(1);
 
-    await tester.pumpWidget(Column(
-      children: const <Widget>[
+    await tester.pumpWidget(const Column(
+      children: <Widget>[
         Text('Text 1', textDirection: TextDirection.ltr, key: duplicatedKey),
         Text('Text 2', textDirection: TextDirection.ltr, key: duplicatedKey),
       ],
@@ -85,7 +85,7 @@ void main() {
     const ValueKey<int> key1 = ValueKey<int>(1);
     const ValueKey<int> key2 = ValueKey<int>(2);
 
-    Future<void> _buildWithKey(Key key) {
+    Future<void> buildWithKey(Key key) {
       return tester.pumpWidget(Column(
         children: <Widget>[
           const Text('Text 1', textDirection: TextDirection.ltr, key: key1),
@@ -95,11 +95,11 @@ void main() {
     }
 
     // Initial build with two different keys.
-    await _buildWithKey(key2);
+    await buildWithKey(key2);
     expect(tester.takeException(), isNull);
 
     // Subsequent build with duplicated keys.
-    await _buildWithKey(key1);
+    await buildWithKey(key1);
     expect(
       tester.takeException(),
       isA<FlutterError>().having(

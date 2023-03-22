@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui' show TextDirection;
 
 export 'dart:ui' show
@@ -24,9 +23,9 @@ export 'dart:ui' show
   Path,
   PathFillType,
   PathOperation,
-  Radius,
   RRect,
   RSTransform,
+  Radius,
   Rect,
   Shader,
   Size,
@@ -42,8 +41,10 @@ export 'dart:ui' show
   TextPosition,
   TileMode,
   VertexMode,
-  hashValues,
-  hashList;
+  // TODO(werainkhatri): remove these after their deprecation period in engine
+  // https://github.com/flutter/flutter/pull/99505
+  hashList, // ignore: deprecated_member_use
+  hashValues; // ignore: deprecated_member_use
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 
@@ -135,7 +136,6 @@ enum Axis {
 ///
 ///  * [flipAxisDirection], which does the same thing for [AxisDirection] values.
 Axis flipAxis(Axis direction) {
-  assert(direction != null);
   switch (direction) {
     case Axis.horizontal:
       return Axis.vertical;
@@ -203,7 +203,6 @@ enum AxisDirection {
 /// [AxisDirection.down] and returns [Axis.horizontal] for [AxisDirection.left]
 /// and [AxisDirection.right].
 Axis axisDirectionToAxis(AxisDirection axisDirection) {
-  assert(axisDirection != null);
   switch (axisDirection) {
     case AxisDirection.up:
     case AxisDirection.down:
@@ -219,7 +218,6 @@ Axis axisDirectionToAxis(AxisDirection axisDirection) {
 /// Specifically, returns [AxisDirection.left] for [TextDirection.rtl] and
 /// [AxisDirection.right] for [TextDirection.ltr].
 AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
-  assert(textDirection != null);
   switch (textDirection) {
     case TextDirection.rtl:
       return AxisDirection.left;
@@ -238,7 +236,6 @@ AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
 ///
 ///  * [flipAxis], which does the same thing for [Axis] values.
 AxisDirection flipAxisDirection(AxisDirection axisDirection) {
-  assert(axisDirection != null);
   switch (axisDirection) {
     case AxisDirection.up:
       return AxisDirection.down;
@@ -257,7 +254,6 @@ AxisDirection flipAxisDirection(AxisDirection axisDirection) {
 /// Specifically, returns true for [AxisDirection.up] and [AxisDirection.left]
 /// and false for [AxisDirection.down] and [AxisDirection.right].
 bool axisDirectionIsReversed(AxisDirection axisDirection) {
-  assert(axisDirection != null);
   switch (axisDirection) {
     case AxisDirection.up:
     case AxisDirection.left:

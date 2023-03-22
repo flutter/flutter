@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -76,7 +77,6 @@ void main() {
     await tester.pumpWidget(
       const Opacity(
         opacity: 0.0,
-        alwaysIncludeSemantics: false,
         child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
@@ -110,7 +110,6 @@ void main() {
     await tester.pumpWidget(
       const Opacity(
         opacity: 0.1,
-        alwaysIncludeSemantics: false,
         child: Text('a', textDirection: TextDirection.rtl),
       ),
     );

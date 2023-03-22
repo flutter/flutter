@@ -2,11 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester tester, RenderObject renderObject) async {
+  assert(!renderObject.debugNeedsLayout);
+
+  const Map<String, dynamic> data = <String, dynamic>{
+    'type': 'fontsChange',
+  };
+  await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    'flutter/system',
+    SystemChannels.system.codec.encodeMessage(data),
+    (ByteData? data) { },
+  );
+
+  final Completer<bool> animation = Completer<bool>();
+  tester.binding.scheduleFrameCallback((Duration timeStamp) {
+    animation.complete(renderObject.debugNeedsLayout);
+  });
+
+  // The fonts change does not mark the render object as needing layout
+  // immediately.
+  expect(renderObject.debugNeedsLayout, isFalse);
+  await tester.pump();
+  expect(await animation.future, isTrue);
+}
 
 void main() {
   testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
@@ -15,17 +42,31 @@ void main() {
         home: Text('text widget'),
       ),
     );
-    const Map<String, dynamic> data = <String, dynamic>{
-      'type': 'fontsChange',
-    };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      'flutter/system',
-      SystemChannels.system.codec.encodeMessage(data),
-      (ByteData? data) { },
-    );
     final RenderObject renderObject = tester.renderObject(find.text('text widget'));
-    expect(renderObject.debugNeedsLayout, isTrue);
+    await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
+
+  testWidgets(
+    'Safe to query a RelayoutWhenSystemFontsChangeMixin for text layout after system fonts changes',
+    (WidgetTester tester) async {
+      final _RenderCustomRelayoutWhenSystemFontsChange child = _RenderCustomRelayoutWhenSystemFontsChange();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: WidgetToRenderBoxAdapter(renderBox: child),
+        ),
+      );
+      const Map<String, dynamic> data = <String, dynamic>{
+        'type': 'fontsChange',
+      };
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/system',
+        SystemChannels.system.codec.encodeMessage(data),
+        (ByteData? data) { },
+      );
+      expect(child.hasValidTextLayout, isTrue);
+    },
+  );
 
   testWidgets('RenderEditable relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -33,16 +74,9 @@ void main() {
         home: SelectableText('text widget'),
       ),
     );
-    const Map<String, dynamic> data = <String, dynamic>{
-      'type': 'fontsChange',
-    };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      'flutter/system',
-      SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
-    );
+
     final EditableTextState state = tester.state(find.byType(EditableText));
-    expect(state.renderEditable.debugNeedsLayout, isTrue);
+    await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, state.renderEditable);
   });
 
   testWidgets('Banner repaint upon system fonts changes', (WidgetTester tester) async {
@@ -57,7 +91,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -81,7 +115,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -109,7 +143,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -139,7 +173,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -169,16 +203,13 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
     );
-    final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
-
-    late bool sliderBoxNeedsLayout;
-    renderObject.visitChildren((RenderObject child) {sliderBoxNeedsLayout = child.debugNeedsLayout;});
-    expect(sliderBoxNeedsLayout, isTrue);
+    final RenderObject renderObject = tester.renderObject(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_RangeSliderRenderObjectWidget'));
+    await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
   testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
@@ -192,17 +223,9 @@ void main() {
         ),
       ),
     );
-    const Map<String, dynamic> data = <String, dynamic>{
-      'type': 'fontsChange',
-    };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      'flutter/system',
-      SystemChannels.system.codec.encodeMessage(data),
-        (ByteData? data) { },
-    );
     // _RenderSlider is the last render object in the tree.
     final RenderObject renderObject = tester.allRenderObjects.last;
-    expect(renderObject.debugNeedsLayout, isTrue);
+    await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
   testWidgets('TimePicker relayout upon system fonts changes', (WidgetTester tester) async {
@@ -239,7 +262,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -247,9 +270,25 @@ void main() {
     final RenderObject renderObject = tester.renderObject(
       find.descendant(
         of: find.byKey(const Key('parent')),
-        matching: find.byType(CustomPaint),
-      ).first,
+        matching: find.byKey(const ValueKey<String>('time-picker-dial')),
+      ),
     );
     expect(renderObject.debugNeedsPaint, isTrue);
   });
+}
+
+class _RenderCustomRelayoutWhenSystemFontsChange extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
+  bool hasValidTextLayout = false;
+
+  @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    hasValidTextLayout = false;
+  }
+
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+    hasValidTextLayout = true;
+  }
 }

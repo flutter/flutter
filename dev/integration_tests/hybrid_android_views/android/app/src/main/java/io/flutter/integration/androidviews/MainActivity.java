@@ -97,11 +97,6 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public void configureFlutterEngine(FlutterEngine flutterEngine) {
         DartExecutor executor = flutterEngine.getDartExecutor();
         flutterEngine
@@ -140,7 +135,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     public void synthesizeEvent(MethodCall methodCall) {
         MotionEvent event = MotionEventCodec.decode((HashMap<String, Object>) methodCall.arguments());
         getFlutterView().dispatchTouchEvent(event);
-        // TODO(egarciad): This can be cleaned up.
+        // TODO(egarciad): Remove invokeMethod since it is not necessary.
         mMethodChannel.invokeMethod("onTouch", MotionEventCodec.encode(event));
     }
 
@@ -148,8 +143,8 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode != STORAGE_PERMISSION_CODE || permissionResult == null)
             return;
-        boolean permisisonGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        sendPermissionResult(permisisonGranted);
+        boolean permissionGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        sendPermissionResult(permissionGranted);
     }
 
     private void getExternalStoragePermissions() {

@@ -12,26 +12,48 @@ import 'package:flutter_test/flutter_test.dart';
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
-  HandleEventCallback? callback;
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [TestGestureFlutterBinding.ensureInitialized].
+  static TestGestureFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static TestGestureFlutterBinding? _instance;
+
+  /// Returns an instance of the [TestGestureFlutterBinding], creating and
+  /// initializing it if necessary.
+  static TestGestureFlutterBinding ensureInitialized() {
+    if (_instance == null) {
+      TestGestureFlutterBinding();
+    }
+    return _instance!;
+  }
+
+  HandleEventCallback? onHandlePointerEvent;
+
+  @override
+  void handlePointerEvent(PointerEvent event) {
+    onHandlePointerEvent?.call(event);
+    super.handlePointerEvent(event);
+  }
+
+  HandleEventCallback? onHandleEvent;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (callback != null)
-      callback?.call(event);
+    onHandleEvent?.call(event);
   }
 }
 
-TestGestureFlutterBinding? _binding;
-
-void ensureTestGestureBinding() {
-  _binding ??= TestGestureFlutterBinding();
-  assert(GestureBinding.instance != null);
-  assert(SchedulerBinding.instance != null);
-}
-
 void main() {
-  setUp(ensureTestGestureBinding);
+  final TestGestureFlutterBinding binding = TestGestureFlutterBinding.ensureInitialized();
 
   test('Pointer tap events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
@@ -42,9 +64,9 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.onHandleEvent = events.add;
 
-    ui.window.onPointerDataPacket?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerUpEvent>());
@@ -60,9 +82,9 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.onHandleEvent = events.add;
 
-    ui.window.onPointerDataPacket?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerMoveEvent>());
@@ -82,12 +104,12 @@ void main() {
     );
 
     final List<PointerEvent> pointerRouterEvents = <PointerEvent>[];
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(pointerRouterEvents.add);
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.onHandleEvent = events.add;
 
-    ui.window.onPointerDataPacket?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 3);
     expect(events[0], isA<PointerHoverEvent>());
     expect(events[1], isA<PointerHoverEvent>());
@@ -105,14 +127,14 @@ void main() {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
         ui.PointerData(change: ui.PointerChange.down),
-        ui.PointerData(change: ui.PointerChange.cancel),
+        ui.PointerData(),
       ],
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = events.add;
+    binding.onHandleEvent = events.add;
 
-    ui.window.onPointerDataPacket?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerCancelEvent>());
@@ -127,17 +149,20 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding!.callback = (PointerEvent event) {
+    binding.onHandleEvent = (PointerEvent event) {
       events.add(event);
-      if (event is PointerDownEvent)
-        _binding!.cancelPointer(event.pointer);
+      if (event is PointerDownEvent) {
+        binding.cancelPointer(event.pointer);
+      }
     };
 
-    ui.window.onPointerDataPacket?.call(packet);
+    GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[1], isA<PointerCancelEvent>());
   });
+
+  const double devicePixelRatio = 2.5;
 
   test('Can expand add and hover pointers', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
@@ -150,7 +175,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -158,6 +183,47 @@ void main() {
     expect(events[2], isA<PointerRemovedEvent>());
     expect(events[3], isA<PointerAddedEvent>());
     expect(events[4], isA<PointerHoverEvent>());
+  });
+
+  test('Can handle malformed scrolling event.', () {
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, device: 24),
+      ],
+    );
+    List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+
+    expect(events.length, 1);
+    expect(events[0], isA<PointerAddedEvent>());
+
+    // Send packet contains malformed scroll events.
+    packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.infinity, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.nan, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: double.negativeInfinity, scrollDeltaY: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.infinity, scrollDeltaX: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.nan, scrollDeltaX: 10),
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaY: double.negativeInfinity, scrollDeltaX: 10),
+      ],
+    );
+    events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    expect(events.length, 0);
+
+    // Send packet with a valid scroll event.
+    packet = const ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(signalKind: ui.PointerSignalKind.scroll, device: 24, scrollDeltaX: 10, scrollDeltaY: 10),
+      ],
+    );
+    // Make sure PointerEventConverter can expand when device pixel ratio is valid.
+    events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
+    expect(events.length, 1);
+    expect(events[0], isA<PointerScrollEvent>());
+
+    // Make sure PointerEventConverter returns none when device pixel ratio is invalid.
+    events = PointerEventConverter.expand(packet.data, 0).toList();
+    expect(events.length, 0);
   });
 
   test('Can expand pointer scroll events', () {
@@ -168,7 +234,7 @@ void main() {
         ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 2);
     expect(events[0], isA<PointerAddedEvent>());
@@ -176,19 +242,18 @@ void main() {
   });
 
   test('Should synthesize kPrimaryButton for touch when no button is set', () {
-    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
-    const PointerDeviceKind kind = PointerDeviceKind.touch;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
-        ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.move, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.down, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.up, physicalX: location.dx, physicalY: location.dy),
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -204,19 +269,18 @@ void main() {
   });
 
   test('Should not synthesize kPrimaryButton for touch when a button is set', () {
-    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
-    const PointerDeviceKind kind = PointerDeviceKind.touch;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
-        ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.down, buttons: kSecondaryButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
-        ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.add, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.down, buttons: kSecondaryButton, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryButton, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.up, physicalX: location.dx, physicalY: location.dy),
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -232,7 +296,7 @@ void main() {
   });
 
   test('Should synthesize kPrimaryButton for stylus when no button is set', () {
-    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     for (final PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.stylus,
       PointerDeviceKind.invertedStylus,
@@ -248,7 +312,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -265,7 +329,7 @@ void main() {
   });
 
   test('Should synthesize kPrimaryButton for unknown devices when no button is set', () {
-    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     const PointerDeviceKind kind = PointerDeviceKind.unknown;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
@@ -277,7 +341,7 @@ void main() {
       ],
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
     expect(events.length, 5);
     expect(events[0], isA<PointerAddedEvent>());
@@ -293,7 +357,7 @@ void main() {
   });
 
   test('Should not synthesize kPrimaryButton for mouse', () {
-    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    final Offset location = const Offset(10.0, 10.0) * devicePixelRatio;
     for (final PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.mouse,
     ]) {
@@ -307,7 +371,7 @@ void main() {
         ],
       );
 
-      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio).toList();
+      final List<PointerEvent> events = PointerEventConverter.expand(packet.data, devicePixelRatio).toList();
 
       expect(events.length, 5);
       expect(events[0], isA<PointerAddedEvent>());
@@ -320,6 +384,49 @@ void main() {
       expect(events[3].buttons, equals(kMiddleMouseButton | kSecondaryMouseButton));
       expect(events[4], isA<PointerUpEvent>());
       expect(events[4].buttons, equals(0));
+    }
+  });
+
+  test('Pointer pan/zoom events', () {
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.panZoomStart),
+        ui.PointerData(change: ui.PointerChange.panZoomUpdate),
+        ui.PointerData(change: ui.PointerChange.panZoomEnd),
+      ],
+    );
+
+    final List<PointerEvent> events = <PointerEvent>[];
+    binding.onHandleEvent = events.add;
+
+    binding.platformDispatcher.onPointerDataPacket?.call(packet);
+    expect(events.length, 3);
+    expect(events[0], isA<PointerPanZoomStartEvent>());
+    expect(events[1], isA<PointerPanZoomUpdateEvent>());
+    expect(events[2], isA<PointerPanZoomEndEvent>());
+  });
+
+  test('Error handling', () {
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.down),
+        ui.PointerData(change: ui.PointerChange.up),
+      ],
+    );
+
+    final List<String> events = <String>[];
+    binding.onHandlePointerEvent = (PointerEvent event) { throw Exception('zipzapzooey $event'); };
+    FlutterError.onError = (FlutterErrorDetails details) { events.add(details.toString()); };
+    try {
+      GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
+      expect(events.length, 1);
+      expect(events[0], contains('while handling a pointer data\npacket')); // The default stringifying behavior uses 65 character wrapWidth.
+      expect(events[0], contains('zipzapzooey'));
+      expect(events[0], contains('PointerDownEvent'));
+      expect(events[0], isNot(contains('PointerUpEvent'))); // Failure happens on the first message, remaining messages aren't processed.
+    } finally {
+      binding.onHandlePointerEvent = null;
+      FlutterError.onError = FlutterError.presentError;
     }
   });
 }

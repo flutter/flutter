@@ -173,7 +173,7 @@ void main() {
                 TestSemantics(
                   actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
                   flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                  scrollIndex: 10,
+                  scrollIndex: 11,
                   children: <TestSemantics>[
                     TestSemantics(
                       label: 'Tile 7',
@@ -193,6 +193,7 @@ void main() {
                     TestSemantics(
                       label: 'Tile 10',
                       textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                     ),
                     TestSemantics(
                       label: 'Tile 11',
@@ -237,6 +238,7 @@ void main() {
       ],
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
   });
 
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
@@ -391,7 +393,6 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(
-                  pinned: false,
                   floating: true,
                   expandedHeight: 100.0,
                 ),
@@ -426,7 +427,6 @@ void main() {
               slivers: <Widget>[
                 const SliverAppBar(
                   pinned: true,
-                  floating: false,
                   expandedHeight: 100.0,
                 ),
                 SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),

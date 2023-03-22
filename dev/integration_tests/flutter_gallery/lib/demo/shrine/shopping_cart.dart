@@ -3,17 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/shrine/colors.dart';
-import 'package:flutter_gallery/demo/shrine/expanding_bottom_sheet.dart';
-import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
-import 'package:flutter_gallery/demo/shrine/model/product.dart';
 import 'package:intl/intl.dart';
 import 'package:scoped_model/scoped_model.dart';
+
+import 'colors.dart';
+import 'expanding_bottom_sheet.dart';
+import 'model/app_state_model.dart';
+import 'model/product.dart';
 
 const double _leftColumnWidth = 60.0;
 
 class ShoppingCartPage extends StatefulWidget {
-  const ShoppingCartPage({Key? key}) : super(key: key);
+  const ShoppingCartPage({super.key});
 
   @override
   State<ShoppingCartPage> createState() => _ShoppingCartPageState();
@@ -57,7 +58,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                         ),
                         Text(
                           'CART',
-                          style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
+                          style: localTheme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(width: 16.0),
                         Text('${model.totalCartQuantity} ITEMS'),
@@ -77,7 +78,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   right: 16.0,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: kShrinePink100,
+                      backgroundColor: kShrinePink100,
                       shape: const BeveledRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
@@ -102,14 +103,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 }
 
 class ShoppingCartSummary extends StatelessWidget {
-  const ShoppingCartSummary({Key? key, this.model}) : super(key: key);
+  const ShoppingCartSummary({super.key, this.model});
 
   final AppStateModel? model;
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyText2!.copyWith(color: kShrineBrown600);
-    final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headline4;
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: kShrineBrown600);
+    final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headlineMedium;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
@@ -124,7 +125,6 @@ class ShoppingCartSummary extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     const Expanded(
                       child: Text('TOTAL'),
@@ -182,11 +182,11 @@ class ShoppingCartSummary extends StatelessWidget {
 
 class ShoppingCartRow extends StatelessWidget {
   const ShoppingCartRow({
-    Key? key,
+    super.key,
     required this.product,
     required this.quantity,
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final Product product;
   final int? quantity;
@@ -243,7 +243,7 @@ class ShoppingCartRow extends StatelessWidget {
                             ),
                             Text(
                               product.name,
-                              style: localTheme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.w600),
+                              style: localTheme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
