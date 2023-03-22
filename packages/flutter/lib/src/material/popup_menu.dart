@@ -425,7 +425,6 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 ///     switch (result) {
 ///       case Commands.heroAndScholar:
 ///         setState(() { _heroAndScholar = !_heroAndScholar; });
-///         break;
 ///       case Commands.hurricaneCame:
 ///         // ...handle hurricane option
 ///         break;
