@@ -16,7 +16,6 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
-    required super.logger,
     required FileSystem fileSystem,
     required bool verboseHelp,
   }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
@@ -29,7 +28,6 @@ class BuildWebCommand extends BuildSubCommand {
     addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addNativeNullAssertions();
 
     //
@@ -132,18 +130,18 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final bool wasmRequested = boolArg('wasm')!;
+    final bool wasmRequested = boolArg('wasm');
     if (wasmRequested && !featureFlags.isFlutterWebWasmEnabled) {
       throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
     }
 
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = stringArgDeprecated('target')!;
+    final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    final String? baseHref = stringArgDeprecated('base-href');
+    final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit('base-href should start and end with /');
     }
@@ -166,21 +164,20 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    displayNullSafetyMode(buildInfo);
     await buildWeb(
       flutterProject,
       target,
       buildInfo,
-      boolArgDeprecated('csp'),
-      stringArgDeprecated('pwa-strategy')!,
-      boolArgDeprecated('source-maps'),
-      boolArgDeprecated('native-null-assertions'),
+      boolArg('csp'),
+      stringArg('pwa-strategy')!,
+      boolArg('source-maps'),
+      boolArg('native-null-assertions'),
       wasmRequested,
       baseHref: baseHref,
-      dart2jsOptimization: stringArgDeprecated('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
+      dart2jsOptimization: stringArg('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
       outputDirectoryPath: outputDirectoryPath,
-      dumpInfo: boolArgDeprecated('dump-info'),
-      noFrequencyBasedMinification: boolArgDeprecated('no-frequency-based-minification'),
+      dumpInfo: boolArg('dump-info'),
+      noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
     );
     return FlutterCommandResult.success();
   }

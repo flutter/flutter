@@ -6,7 +6,6 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
-
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -18,7 +17,6 @@ import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
-    required super.logger,
     required AndroidSdk? androidSdk,
     required FileSystem fileSystem,
     required bool verboseHelp,
@@ -51,7 +49,6 @@ class BuildAarCommand extends BuildSubCommand {
     usesDartDefineOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     usesTrackWidgetCreation(verboseHelp: false);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     argParser
@@ -67,9 +64,6 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   final String name = 'aar';
-
-  @override
-  bool get reportNullSafety => false;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -113,7 +107,7 @@ class BuildAarCommand extends BuildSubCommand {
     final Iterable<AndroidArch> targetArchitectures =
         stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
 
-    final String? buildNumberArg = stringArgDeprecated('build-number');
+    final String? buildNumberArg = stringArg('build-number');
     final String buildNumber = argParser.options.containsKey('build-number')
       && buildNumberArg != null
       && buildNumberArg.isNotEmpty
@@ -122,7 +116,7 @@ class BuildAarCommand extends BuildSubCommand {
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
-      if (boolArgDeprecated(buildMode)) {
+      if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
             await getBuildInfo(
@@ -138,7 +132,6 @@ class BuildAarCommand extends BuildSubCommand {
       throwToolExit('Please specify a build mode and try again.');
     }
 
-    displayNullSafetyMode(androidBuildInfo.first.buildInfo);
     await androidBuilder?.buildAar(
       project: _getProject(),
       target: targetFile.path,

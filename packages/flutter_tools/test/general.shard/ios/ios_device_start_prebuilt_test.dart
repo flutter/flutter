@@ -250,7 +250,7 @@ void main() {
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
-      interfaceType: IOSDeviceConnectionInterface.network,
+      interfaceType: DeviceConnectionInterface.wireless,
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -337,7 +337,7 @@ void main() {
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
-            '--dart-flags="--foo,--null_assertions"',
+            '--dart-flags="--foo"',
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -352,7 +352,7 @@ void main() {
             '--verbose-logging',
             '--cache-sksl',
             '--purge-persistent-cache',
-            '--enable-impeller',
+            '--enable-impeller=false',
             '--enable-embedder-api',
           ].join(' '),
         ],
@@ -404,8 +404,7 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
-        nullAssertions: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
         enableEmbedderApi: true,
       ),
       platformArgs: <String, dynamic>{},
@@ -560,7 +559,7 @@ IOSDevice setUpIOSDevice({
   Logger? logger,
   ProcessManager? processManager,
   IOSDeploy? iosDeploy,
-  IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.usb,
+  DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
 }) {
   final Artifacts artifacts = Artifacts.test();
   final FakePlatform macPlatform = FakePlatform(
@@ -598,7 +597,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     cpuArchitecture: DarwinArch.arm64,
-    interfaceType: interfaceType,
+    connectionInterface: interfaceType,
   );
 }
 

@@ -21,7 +21,6 @@ import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
-import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -31,6 +30,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../web/compile.dart';
 import 'flutter_command_runner.dart';
+import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
 
@@ -109,12 +109,10 @@ class FlutterOptions {
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
-  static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kCodeSizeDirectory = 'code-size-directory';
-  static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
@@ -202,7 +200,7 @@ abstract class FlutterCommand extends Command<void> {
 
   DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
-  bool get shouldRunPub => _usesPubOption && boolArgDeprecated('pub');
+  bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
   bool get shouldUpdateCache => true;
 
@@ -319,7 +317,7 @@ abstract class FlutterCommand extends Command<void> {
 
   String get targetFile {
     if (argResults?.wasParsed('target') ?? false) {
-      return stringArgDeprecated('target')!;
+      return stringArg('target')!;
     }
     final List<String>? rest = argResults?.rest;
     if (rest != null && rest.isNotEmpty) {
@@ -338,7 +336,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This can be overridden by some of its subclasses.
   String? get fileSystemScheme =>
     argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? stringArgDeprecated(FlutterOptions.kFileSystemScheme)
+          ? stringArg(FlutterOptions.kFileSystemScheme)
           : null;
 
   /// The values of the `--filesystem-root` argument.
@@ -484,7 +482,7 @@ abstract class FlutterCommand extends Command<void> {
         throwToolExit(
             'The "--[no-]dds" and "--[no-]disable-dds" arguments are mutually exclusive. Only specify "--[no-]dds".');
       }
-      ddsEnabled = !boolArgDeprecated('disable-dds');
+      ddsEnabled = !boolArg('disable-dds');
       // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
       if (false) { // ignore: dead_code
         if (ddsEnabled) {
@@ -496,7 +494,7 @@ abstract class FlutterCommand extends Command<void> {
         }
       }
     } else {
-      ddsEnabled = boolArgDeprecated('dds');
+      ddsEnabled = boolArg('dds');
     }
     return ddsEnabled;
   }();
@@ -506,9 +504,9 @@ abstract class FlutterCommand extends Command<void> {
       || (argResults?.wasParsed('host-vmservice-port') ?? false);
 
   int _tryParseHostVmservicePort() {
-    final String? vmServicePort = stringArgDeprecated(vmServicePortOption) ??
-                                  stringArgDeprecated(observatoryPortOption);
-    final String? hostPort = stringArgDeprecated('host-vmservice-port');
+    final String? vmServicePort = stringArg(vmServicePortOption) ??
+                                  stringArg(observatoryPortOption);
+    final String? hostPort = stringArg('host-vmservice-port');
     if (vmServicePort == null && hostPort == null) {
       throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
     }
@@ -525,7 +523,7 @@ abstract class FlutterCommand extends Command<void> {
       return _tryParseHostVmservicePort();
     } else if (argResults?.wasParsed('dds-port') ?? false) {
       // If an explicit DDS port is provided, use dds-port for DDS.
-      return int.tryParse(stringArgDeprecated('dds-port')!) ?? 0;
+      return int.tryParse(stringArg('dds-port')!) ?? 0;
     }
     // Otherwise, DDS can bind to a random port.
     return 0;
@@ -533,7 +531,7 @@ abstract class FlutterCommand extends Command<void> {
 
   Uri? get devToolsServerAddress {
     if (argResults?.wasParsed(kDevToolsServerAddress) ?? false) {
-      final Uri? uri = Uri.tryParse(stringArgDeprecated(kDevToolsServerAddress)!);
+      final Uri? uri = Uri.tryParse(stringArg(kDevToolsServerAddress)!);
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
         return uri;
       }
@@ -571,7 +569,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int? get deviceVmservicePort {
-    final String? devicePort = stringArgDeprecated('device-vmservice-port');
+    final String? devicePort = stringArg('device-vmservice-port');
     if (!_usesPortOption || devicePort == null) {
       return null;
     }
@@ -591,7 +589,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  Future<bool> get disablePortPublication async => !boolArgDeprecated('publish-port');
+  Future<bool> get disablePortPublication async => !boolArg('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,
@@ -604,7 +602,7 @@ abstract class FlutterCommand extends Command<void> {
     _usesIpv6Flag = true;
   }
 
-  bool? get ipv6 => _usesIpv6Flag ? boolArgDeprecated('ipv6') : null;
+  bool? get ipv6 => _usesIpv6Flag ? boolArg('ipv6') : null;
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
@@ -694,13 +692,10 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
-  /// Whether this command should report null safety analytics.
-  bool get reportNullSafety => false;
-
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false)
         && (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
-      final int? timeoutSeconds = int.tryParse(stringArgDeprecated(FlutterOptions.kDeviceTimeout)!);
+      final int? timeoutSeconds = int.tryParse(stringArg(FlutterOptions.kDeviceTimeout)!);
       if (timeoutSeconds == null) {
         throwToolExit( 'Could not parse "--${FlutterOptions.kDeviceTimeout}" argument. It must be an integer.');
       }
@@ -708,6 +703,11 @@ abstract class FlutterCommand extends Command<void> {
     }
     return null;
   }();
+
+  late final TargetDevices _targetDevices = TargetDevices(
+    deviceManager: globals.deviceManager!,
+    logger: globals.logger,
+  );
 
   void addBuildModeFlags({
     required bool verboseHelp,
@@ -797,25 +797,6 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
       help: 'This flag has no effect. Code shrinking is always enabled in release builds. '
             'To learn more, see: https://developer.android.com/studio/build/shrink-code'
-    );
-  }
-
-  void addNullSafetyModeOptions({ required bool hide }) {
-    argParser.addFlag(FlutterOptions.kNullSafety,
-      help:
-        'Whether to override the inferred null safety mode. This allows null-safe '
-        'libraries to depend on un-migrated (non-null safe) libraries. By default, '
-        'Flutter mobile & desktop applications will attempt to run at the null safety '
-        'level of their entrypoint library (usually lib/main.dart). Flutter web '
-        'applications will default to sound null-safety, unless specifically configured.',
-      defaultsTo: true,
-      hide: hide,
-    );
-    argParser.addFlag(FlutterOptions.kNullAssertions,
-      help:
-        'Perform additional null assertions on the boundaries of migrated and '
-        'un-migrated code. This setting is not currently supported on desktop '
-        'devices.'
     );
   }
 
@@ -947,7 +928,6 @@ abstract class FlutterCommand extends Command<void> {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addSplitDebugInfoOption();
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();
@@ -969,13 +949,13 @@ abstract class FlutterCommand extends Command<void> {
   BuildMode getBuildMode() {
     // No debug when _excludeDebug is true.
     // If debug is not excluded, then take the command line flag.
-    final bool debugResult = !_excludeDebug && boolArgDeprecated('debug');
-    final bool jitReleaseResult = !_excludeRelease && boolArgDeprecated('jit-release');
-    final bool releaseResult = !_excludeRelease && boolArgDeprecated('release');
+    final bool debugResult = !_excludeDebug && boolArg('debug');
+    final bool jitReleaseResult = !_excludeRelease && boolArg('jit-release');
+    final bool releaseResult = !_excludeRelease && boolArg('release');
     final List<bool> modeFlags = <bool>[
       debugResult,
       jitReleaseResult,
-      boolArgDeprecated('profile'),
+      boolArg('profile'),
       releaseResult,
     ];
     if (modeFlags.where((bool flag) => flag).length > 1) {
@@ -985,7 +965,7 @@ abstract class FlutterCommand extends Command<void> {
     if (debugResult) {
       return BuildMode.debug;
     }
-    if (boolArgDeprecated('profile')) {
+    if (boolArg('profile')) {
       return BuildMode.profile;
     }
     if (releaseResult) {
@@ -1037,11 +1017,13 @@ abstract class FlutterCommand extends Command<void> {
 
   void addEnableImpellerFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-impeller',
-        negatable: false,
         hide: !verboseHelp,
-        help: 'Whether to enable the experimental Impeller rendering engine. '
-              'Impeller is currently only supported on iOS and Android. This flag will '
-              'be ignored when targeting other platforms.',
+        defaultsTo: null,
+        help: 'Whether to enable the Impeller rendering engine. '
+              'Impeller is the default renderer on iOS. On Android, Impeller '
+              'is available but not the default. This flag will cause Impeller '
+              'to be used on Android. On other platforms, this flag will be '
+              'ignored.',
     );
   }
 
@@ -1060,10 +1042,10 @@ abstract class FlutterCommand extends Command<void> {
   /// each other.
   Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
-      boolArgDeprecated('track-widget-creation');
+      boolArg('track-widget-creation');
 
     final String? buildNumber = argParser.options.containsKey('build-number')
-      ? stringArgDeprecated('build-number')
+      ? stringArg('build-number')
       : null;
 
     final File packagesFile = globals.fs.file(
@@ -1093,65 +1075,27 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     String? codeSizeDirectory;
-    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArgDeprecated(FlutterOptions.kAnalyzeSize)) {
+    if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) && boolArg(FlutterOptions.kAnalyzeSize)) {
       Directory directory = globals.fsUtils.getUniqueDirectory(
         globals.fs.directory(getBuildDirectory()),
         'flutter_size',
       );
-      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArgDeprecated(FlutterOptions.kCodeSizeDirectory) != null) {
-        directory = globals.fs.directory(stringArgDeprecated(FlutterOptions.kCodeSizeDirectory));
+      if (argParser.options.containsKey(FlutterOptions.kCodeSizeDirectory) && stringArg(FlutterOptions.kCodeSizeDirectory) != null) {
+        directory = globals.fs.directory(stringArg(FlutterOptions.kCodeSizeDirectory));
       }
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
 
-    NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
-    if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
-      // Explicitly check for `true` and `false` so that `null` results in not
-      // passing a flag. Examine the entrypoint file to determine if it
-      // is opted in or out.
-      final bool wasNullSafetyFlagParsed = argResults?.wasParsed(FlutterOptions.kNullSafety) ?? false;
-      if (!wasNullSafetyFlagParsed && (argParser.options.containsKey('target') || forcedTargetFile != null)) {
-        final File entrypointFile = forcedTargetFile ?? globals.fs.file(targetFile);
-        final LanguageVersion languageVersion = determineLanguageVersion(
-          entrypointFile,
-          packageConfig.packageOf(entrypointFile.absolute.uri),
-          Cache.flutterRoot!,
-        );
-        // Extra frontend options are only provided if explicitly
-        // requested.
-        if ((languageVersion.major > nullSafeVersion.major) ||
-            (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
-          nullSafetyMode = NullSafetyMode.sound;
-        } else {
-          throwToolExit(
-            'This application does not support sound null-safety (its language version is $languageVersion).\n'
-            'To build this application, you must provide the CLI flag --no-sound-null-safety. Dart 3 will only '
-            'support sound null safety, see https://dart.dev/null-safety.',
-          );
-        }
-      } else if (!wasNullSafetyFlagParsed) {
-        // This mode is only used for commands which do not build a single target like
-        // 'flutter test'.
-        nullSafetyMode = NullSafetyMode.autodetect;
-      } else if (boolArgDeprecated(FlutterOptions.kNullSafety)) {
-        nullSafetyMode = NullSafetyMode.sound;
-        extraFrontEndOptions.add('--sound-null-safety');
-      } else {
-        nullSafetyMode = NullSafetyMode.unsound;
-        extraFrontEndOptions.add('--no-sound-null-safety');
-      }
-    }
-
     final bool dartObfuscation = argParser.options.containsKey(FlutterOptions.kDartObfuscationOption)
-      && boolArgDeprecated(FlutterOptions.kDartObfuscationOption);
+      && boolArg(FlutterOptions.kDartObfuscationOption);
 
     final String? splitDebugInfoPath = argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
-      ? stringArgDeprecated(FlutterOptions.kSplitDebugInfoOption)
+      ? stringArg(FlutterOptions.kSplitDebugInfoOption)
       : null;
 
     final bool androidGradleDaemon = !argParser.options.containsKey(FlutterOptions.kAndroidGradleDaemon)
-      || boolArgDeprecated(FlutterOptions.kAndroidGradleDaemon);
+      || boolArg(FlutterOptions.kAndroidGradleDaemon);
 
     final List<String> androidProjectArgs = argParser.options.containsKey(FlutterOptions.kAndroidProjectArgs)
       ? stringsArg(FlutterOptions.kAndroidProjectArgs)
@@ -1173,10 +1117,10 @@ abstract class FlutterCommand extends Command<void> {
 
     final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
       && buildMode.isPrecompiled == true
-      && boolArgDeprecated('tree-shake-icons');
+      && boolArg('tree-shake-icons');
 
     final String? bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
-      ? stringArgDeprecated(FlutterOptions.kBundleSkSLPathOption)
+      ? stringArg(FlutterOptions.kBundleSkSLPathOption)
       : null;
 
     if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
@@ -1184,7 +1128,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final String? performanceMeasurementFile = argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
-      ? stringArgDeprecated(FlutterOptions.kPerformanceMeasurementFile)
+      ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
     final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
@@ -1192,7 +1136,7 @@ abstract class FlutterCommand extends Command<void> {
 
     WebRendererMode webRenderer = WebRendererMode.autoDetect;
     if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-      final WebRendererMode? mappedMode = _webRendererModeMap[stringArgDeprecated(FlutterOptions.kWebRendererFlag)!];
+      final WebRendererMode? mappedMode = _webRendererModeMap[stringArg(FlutterOptions.kWebRendererFlag)!];
       if (mappedMode != null) {
         webRenderer = mappedMode;
       }
@@ -1201,7 +1145,7 @@ abstract class FlutterCommand extends Command<void> {
 
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
-        ? stringArgDeprecated('flavor')
+        ? stringArg('flavor')
         : null,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions.isNotEmpty
@@ -1214,7 +1158,7 @@ abstract class FlutterCommand extends Command<void> {
       fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
-          ? stringArgDeprecated('build-name')
+          ? stringArg('build-name')
           : null,
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
@@ -1226,16 +1170,15 @@ abstract class FlutterCommand extends Command<void> {
       performanceMeasurementFile: performanceMeasurementFile,
       dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
-      nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       packageConfig: packageConfig,
       androidProjectArgs: androidProjectArgs,
       initializeFromDill: argParser.options.containsKey(FlutterOptions.kInitializeFromDill)
-          ? stringArgDeprecated(FlutterOptions.kInitializeFromDill)
+          ? stringArg(FlutterOptions.kInitializeFromDill)
           : null,
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
-          && boolArgDeprecated(FlutterOptions.kAssumeInitializeFromDillUpToDate),
+          && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
     );
   }
 
@@ -1274,7 +1217,7 @@ abstract class FlutterCommand extends Command<void> {
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
         if (_usesFatalWarnings) {
-          globals.logger.fatalWarnings = boolArgDeprecated(FlutterOptions.kFatalWarnings);
+          globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
         // Prints the welcome message if needed.
         globals.flutterUsage.printWelcome();
@@ -1445,7 +1388,7 @@ abstract class FlutterCommand extends Command<void> {
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
       final bool offline;
       if (argParser.options.containsKey('offline')) {
-        offline = boolArgDeprecated('offline');
+        offline = boolArg('offline');
       } else {
         offline = false;
       }
@@ -1486,9 +1429,6 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
-      if (reportNullSafety) {
-        await _sendNullSafetyAnalyticsEvents(project);
-      }
     }
 
     setupApplicationPackages();
@@ -1500,16 +1440,6 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return runCommand();
-  }
-
-  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
-    final BuildInfo buildInfo = await getBuildInfo();
-    NullSafetyAnalysisEvent(
-      buildInfo.packageConfig,
-      buildInfo.nullSafetyMode,
-      project.manifest.appName,
-      globals.flutterUsage,
-    ).send();
   }
 
   /// The set of development artifacts required for this command.
@@ -1530,113 +1460,10 @@ abstract class FlutterCommand extends Command<void> {
   Future<List<Device>?> findAllTargetDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    if (!globals.doctor!.canLaunchAnything) {
-      globals.printError(userMessages.flutterNoDevelopmentDevice);
-      return null;
-    }
-    final DeviceManager deviceManager = globals.deviceManager!;
-    List<Device> devices = await deviceManager.findTargetDevices(
+    return _targetDevices.findAllTargetDevices(
+      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-      timeout: deviceDiscoveryTimeout,
     );
-
-    if (devices.isEmpty) {
-      if (deviceManager.hasSpecifiedDeviceId) {
-        globals.logger.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId!));
-        final List<Device> allDevices = await deviceManager.getAllDevices();
-        if (allDevices.isNotEmpty) {
-          globals.logger.printStatus('');
-          globals.logger.printStatus('The following devices were found:');
-          await Device.printDevices(allDevices, globals.logger);
-        }
-        return null;
-      } else if (deviceManager.hasSpecifiedAllDevices) {
-        globals.logger.printStatus(userMessages.flutterNoDevicesFound);
-        await _printUnsupportedDevice(deviceManager);
-        return null;
-      } else {
-        globals.logger.printStatus(userMessages.flutterNoSupportedDevices);
-        await _printUnsupportedDevice(deviceManager);
-        return null;
-      }
-    } else if (devices.length > 1) {
-      if (deviceManager.hasSpecifiedDeviceId) {
-        globals.logger.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId!));
-        return null;
-      } else if (!deviceManager.hasSpecifiedAllDevices) {
-        if (globals.terminal.stdinHasTerminal) {
-          // If DeviceManager was not able to prioritize a device. For example, if the user
-          // has two active Android devices running, then we request the user to
-          // choose one. If the user has two nonEphemeral devices running, we also
-          // request input to choose one.
-          globals.logger.printStatus(userMessages.flutterMultipleDevicesFound);
-          await Device.printDevices(devices, globals.logger);
-          final Device chosenDevice = await _chooseOneOfAvailableDevices(devices);
-
-          // Update the [DeviceManager.specifiedDeviceId] so that we will not be prompted again.
-          deviceManager.specifiedDeviceId = chosenDevice.id;
-
-          devices = <Device>[chosenDevice];
-        } else {
-          // Show an error message asking the user to specify `-d all` if they
-          // want to run on multiple devices.
-          final List<Device> allDevices = await deviceManager.getAllDevices();
-          globals.logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
-          globals.logger.printStatus('');
-          await Device.printDevices(allDevices, globals.logger);
-          return null;
-        }
-      }
-    }
-
-    return devices;
-  }
-
-  Future<void> _printUnsupportedDevice(DeviceManager deviceManager) async {
-    final List<Device> unsupportedDevices = await deviceManager.getDevices();
-    if (unsupportedDevices.isNotEmpty) {
-      final StringBuffer result = StringBuffer();
-      result.writeln(userMessages.flutterFoundButUnsupportedDevices);
-      result.writeAll(
-        (await Device.descriptions(unsupportedDevices))
-            .map((String desc) => desc)
-            .toList(),
-        '\n',
-      );
-      result.writeln();
-      result.writeln(userMessages.flutterMissPlatformProjects(
-        Device.devicesPlatformTypes(unsupportedDevices),
-      ));
-      globals.logger.printStatus(result.toString());
-    }
-  }
-
-  Future<Device> _chooseOneOfAvailableDevices(List<Device> devices) async {
-    _displayDeviceOptions(devices);
-    final String userInput =  await _readUserInput(devices.length);
-    if (userInput.toLowerCase() == 'q') {
-      throwToolExit('');
-    }
-    return devices[int.parse(userInput) - 1];
-  }
-
-  void _displayDeviceOptions(List<Device> devices) {
-    int count = 1;
-    for (final Device device in devices) {
-      globals.logger.printStatus(userMessages.flutterChooseDevice(count, device.name, device.id));
-      count++;
-    }
-  }
-
-  Future<String> _readUserInput(int deviceCount) async {
-    globals.terminal.usesTerminalUi = true;
-    final String result = await globals.terminal.promptForCharInput(
-      <String>[ for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
-      displayAcceptedCharacters: false,
-      logger: globals.logger,
-      prompt: userMessages.flutterChooseOne,
-    );
-    return result;
   }
 
   /// Find and return the target [Device] based upon currently connected
@@ -1712,30 +1539,17 @@ abstract class FlutterCommand extends Command<void> {
 
   ApplicationPackageFactory? applicationPackages;
 
-  /// Gets the parsed command-line option named [name] as a `bool`.
-  /// This has been deprecated, use [boolArg] instead.
-  bool boolArgDeprecated(String name) => argResults?[name] as bool? ?? false;
-
-  /// Gets the parsed command-line option named [name] as a `bool?`.
-  bool? boolArg(String name) {
-    if (!argParser.options.containsKey(name)) {
-      return null;
-    }
-    return argResults![name] as bool;
-  }
+  /// Gets the parsed command-line flag named [name] as a `bool`.
+  ///
+  /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
+  /// will be thrown.
+  bool boolArg(String name) => argResults![name] as bool;
 
   /// Gets the parsed command-line option named [name] as a `String`.
-  String? stringArgDeprecated(String name) => argResults?[name] as String?;
-
-  String? stringArg(String name) {
-    if (!argParser.options.containsKey(name)) {
-      return null;
-    }
-    return argResults![name] as String?;
-  }
-
-  /// Gets the parsed command-line option named [name] as an `int`.
-  int? intArg(String name) => argResults?[name] as int?;
+  ///
+  /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
+  /// will be thrown.
+  String? stringArg(String name) => argResults![name] as String?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name) {

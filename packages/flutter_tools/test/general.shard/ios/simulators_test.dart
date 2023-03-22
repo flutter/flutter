@@ -1041,8 +1041,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         cacheSkSL: true,
         purgePersistentCache: true,
         dartFlags: '--baz',
-        nullAssertions: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
         hostVmServicePort: 0,
       );
 
@@ -1065,8 +1064,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
         '--verbose-logging',
         '--cache-sksl',
         '--purge-persistent-cache',
-        '--dart-flags=--baz,--null_assertions',
-        '--enable-impeller',
+        '--dart-flags=--baz',
+        '--enable-impeller=false',
         '--vm-service-port=0',
       ]));
     }, overrides: <Type, Generator>{

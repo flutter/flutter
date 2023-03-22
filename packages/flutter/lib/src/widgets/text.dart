@@ -20,6 +20,14 @@ import 'selection_container.dart';
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
 ///
+/// {@tool dartpad}
+/// This example shows how to use [DefaultTextStyle.merge] to create a default
+/// text style that inherits styling information from the current default text
+/// style and overrides some properties.
+///
+/// ** See code in examples/api/lib/widgets/text/text.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedDefaultTextStyle], which animates changes in the text style
