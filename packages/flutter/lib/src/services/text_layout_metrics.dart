@@ -60,10 +60,10 @@ abstract class TextLayoutMetrics {
   /// (https://www.unicode.org/standard/reports/tr13/tr13-5.html).
   static bool isLineTerminator(int codeUnit) {
     switch (codeUnit) {
-      case 0xA: // line feed
-      case 0xB: // vertical feed
-      case 0xC: // form feed
-      case 0xD: // carriage return
+      case 0x0A: // line feed
+      case 0x0B: // vertical feed
+      case 0x0C: // form feed
+      case 0x0D: // carriage return
       case 0x85: // new line
       case 0x2028: // line separator
       case 0x2029: // paragraph separator

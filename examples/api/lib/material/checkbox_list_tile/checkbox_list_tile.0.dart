@@ -14,8 +14,9 @@ class CheckboxListTileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: CheckboxListTileExample(),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const CheckboxListTileExample(),
     );
   }
 }

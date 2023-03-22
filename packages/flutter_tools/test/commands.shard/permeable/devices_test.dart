@@ -88,7 +88,17 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   String? specifiedDeviceId;
 
   @override
-  Future<List<Device>> refreshAllConnectedDevices({Duration? timeout}) async {
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    return devices;
+  }
+
+  @override
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async {
     return devices;
   }
 }

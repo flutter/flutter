@@ -108,6 +108,12 @@ void main() {
     );
   });
 
+  test('TableBorder.lerp identical a,b', () {
+    expect(TableBorder.lerp(null, null, 0), null);
+    const TableBorder border = TableBorder();
+    expect(identical(TableBorder.lerp(border, border, 0.5), border), true);
+  });
+
   test('TableBorder.lerp with nulls', () {
     final TableBorder table2 = TableBorder.all(width: 2.0);
     final TableBorder table1 = TableBorder.all();

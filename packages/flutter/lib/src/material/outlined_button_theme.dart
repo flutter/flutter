@@ -49,8 +49,8 @@ class OutlinedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two outlined button themes.
   static OutlinedButtonThemeData? lerp(OutlinedButtonThemeData? a, OutlinedButtonThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return OutlinedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),

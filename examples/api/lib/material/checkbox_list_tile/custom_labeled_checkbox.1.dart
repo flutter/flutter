@@ -6,15 +6,16 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const LabeledCheckBoxApp());
+void main() => runApp(const LabeledCheckboxApp());
 
-class LabeledCheckBoxApp extends StatelessWidget {
-  const LabeledCheckBoxApp({super.key});
+class LabeledCheckboxApp extends StatelessWidget {
+  const LabeledCheckboxApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LabeledCheckBoxExample(),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const LabeledCheckboxExample(),
     );
   }
 }
@@ -57,14 +58,14 @@ class LabeledCheckbox extends StatelessWidget {
   }
 }
 
-class LabeledCheckBoxExample extends StatefulWidget {
-  const LabeledCheckBoxExample({super.key});
+class LabeledCheckboxExample extends StatefulWidget {
+  const LabeledCheckboxExample({super.key});
 
   @override
-  State<LabeledCheckBoxExample> createState() => _LabeledCheckBoxExampleState();
+  State<LabeledCheckboxExample> createState() => _LabeledCheckboxExampleState();
 }
 
-class _LabeledCheckBoxExampleState extends State<LabeledCheckBoxExample> {
+class _LabeledCheckboxExampleState extends State<LabeledCheckboxExample> {
   bool _isSelected = false;
 
   @override

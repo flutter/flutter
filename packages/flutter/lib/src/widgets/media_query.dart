@@ -211,10 +211,10 @@ class MediaQueryData {
       devicePixelRatio = view.devicePixelRatio,
       textScaleFactor = platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor,
       platformBrightness = platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
-      padding = EdgeInsets.fromWindowPadding(view.padding, view.devicePixelRatio),
-      viewPadding = EdgeInsets.fromWindowPadding(view.viewPadding, view.devicePixelRatio),
-      viewInsets = EdgeInsets.fromWindowPadding(view.viewInsets, view.devicePixelRatio),
-      systemGestureInsets = EdgeInsets.fromWindowPadding(view.systemGestureInsets, view.devicePixelRatio),
+      padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
+      viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
+      viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio),
       accessibleNavigation = platformData?.accessibleNavigation ?? view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
       invertColors = platformData?.invertColors ?? view.platformDispatcher.accessibilityFeatures.invertColors,
       disableAnimations = platformData?.disableAnimations ?? view.platformDispatcher.accessibilityFeatures.disableAnimations,
@@ -298,7 +298,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this property
+  ///  * [FlutterView], which provides some additional detail about this property
   ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
@@ -317,7 +317,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this
+  ///  * [FlutterView], which provides some additional detail about this
   ///    property and how it relates to [viewInsets] and [viewPadding].
   ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
   ///    and automatically removes it from the [MediaQuery] for its child.
@@ -341,7 +341,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this
+  ///  * [FlutterView], which provides some additional detail about this
   ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 

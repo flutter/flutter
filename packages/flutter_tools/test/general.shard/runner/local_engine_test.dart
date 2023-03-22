@@ -170,6 +170,61 @@ void main() {
     );
   });
 
+  testWithoutContext('works if local engine is simulator', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/ios_debug_sim/')
+      ..createSync(recursive: true);
+    fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/host_debug/')
+        .createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localEngineLocator.findEnginePath(localEngine: localEngine.path),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/host_debug',
+        targetEngine: '/arbitrary/engine/src/out/ios_debug_sim',
+      ),
+    );
+  });
+
+  testWithoutContext('works if local engine is simulator unoptimized',
+      () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/ios_debug_sim_unopt/')
+      ..createSync(recursive: true);
+    fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt/')
+        .createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localEngineLocator.findEnginePath(localEngine: localEngine.path),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/host_debug_unopt',
+        targetEngine: '/arbitrary/engine/src/out/ios_debug_sim_unopt',
+      ),
+    );
+  });
+
   testWithoutContext('fails if host_debug does not exist', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory localEngine = fileSystem

@@ -96,7 +96,7 @@ void main() {
       );
 
       expect(result.started, true);
-      expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
+      expect(result.vmServiceUri, Uri.parse('http://127.0.0.1/0'));
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {
@@ -159,10 +159,9 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
           'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
           'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
-          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
-          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '19',
+          'FLUTTER_ENGINE_SWITCH_17': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_18': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '18',
         }
       ),
     ]);
@@ -190,7 +189,6 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
-        nullAssertions: true,
       ),
     );
 

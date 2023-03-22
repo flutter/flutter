@@ -210,7 +210,7 @@ class MigrateConfig {
     this.unmanagedFiles = kDefaultUnmanagedFiles
   }) : platformConfigs = platformConfigs ?? <SupportedPlatform, MigratePlatformConfig>{};
 
-  /// A mapping of the files that are unmanaged by defult for each platform.
+  /// A mapping of the files that are unmanaged by default for each platform.
   static const List<String> kDefaultUnmanagedFiles = <String>[
     'lib/main.dart',
     'ios/Runner.xcodeproj/project.pbxproj',

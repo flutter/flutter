@@ -59,7 +59,7 @@ abstract class TextBoundary {
   }
 }
 
-/// A [TextBoundary] subclass for retriving the range of the grapheme the given
+/// A [TextBoundary] subclass for retrieving the range of the grapheme the given
 /// `position` is in.
 ///
 /// The class is implemented using the
@@ -150,17 +150,16 @@ class ParagraphBoundary extends TextBoundary {
       return 0;
     }
 
-    final List<int> codeUnits = _text.codeUnits;
     int index = position;
 
-    if (index > 1 && codeUnits[index] == 0xA && codeUnits[index - 1] == 0xD) {
+    if (index > 1 && _text.codeUnitAt(index) == 0x0A && _text.codeUnitAt(index - 1) == 0x0D) {
       index -= 2;
-    } else if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+    } else if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(index))) {
       index -= 1;
     }
 
     while (index > 0) {
-      if (TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+      if (TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(index))) {
         return index + 1;
       }
       index -= 1;
@@ -183,19 +182,18 @@ class ParagraphBoundary extends TextBoundary {
       return 0;
     }
 
-    final List<int> codeUnits = _text.codeUnits;
     int index = position;
 
-    while (!TextLayoutMetrics.isLineTerminator(codeUnits[index])) {
+    while (!TextLayoutMetrics.isLineTerminator(_text.codeUnitAt(index))) {
       index += 1;
-      if (index == codeUnits.length) {
+      if (index == _text.length) {
         return index;
       }
     }
 
-    return index < codeUnits.length - 1
-                && codeUnits[index] == 0xD
-                && codeUnits[index + 1] == 0xA
+    return index < _text.length - 1
+                && _text.codeUnitAt(index) == 0x0D
+                && _text.codeUnitAt(index + 1) == 0x0A
                 ? index + 2
                 : index + 1;
   }

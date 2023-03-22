@@ -180,8 +180,8 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
   File.open(copied_podspec_path, 'w') do |podspec|
     podspec.write <<~EOF
       #
-      # NOTE: This podspec is NOT to be published. It is only used as a local source!
-      #       This is a generated file; do not edit or check into version control.
+      # This podspec is NOT to be published. It is only used as a local source!
+      # This is a generated file; do not edit or check into version control.
       #
 
       Pod::Spec.new do |s|
@@ -218,8 +218,8 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
   File.open(copied_podspec_path, 'w') do |podspec|
     podspec.write <<~EOF
       #
-      # NOTE: This podspec is NOT to be published. It is only used as a local source!
-      #       This is a generated file; do not edit or check into version control.
+      # This podspec is NOT to be published. It is only used as a local source!
+      # This is a generated file; do not edit or check into version control.
       #
 
       Pod::Spec.new do |s|

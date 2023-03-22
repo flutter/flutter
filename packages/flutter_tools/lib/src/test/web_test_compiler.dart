@@ -49,24 +49,9 @@ class WebTestCompiler {
     required List<String> testFiles,
     required BuildInfo buildInfo,
   }) async {
-    LanguageVersion languageVersion = LanguageVersion(2, 8);
-    late final String platformDillName;
-
-    // TODO(zanderso): to support autodetect this would need to partition the source code into
-    // a sound and unsound set and perform separate compilations
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-    if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
-      platformDillName = 'ddc_outline.dill';
-      if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-        extraFrontEndOptions.add('--no-sound-null-safety');
-      }
-    } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
-      platformDillName = 'ddc_outline_sound.dill';
-      if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-        extraFrontEndOptions.add('--sound-null-safety');
-      }
-    }
+    final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+    const String platformDillName = 'ddc_outline_sound.dill';
 
     final String platformDillPath = _fileSystem.path.join(
       getWebPlatformBinariesDirectory(_artifacts, buildInfo.webRenderer).path,

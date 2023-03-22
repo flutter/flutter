@@ -6,35 +6,32 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const OffstageApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class OffstageApp extends StatelessWidget {
+  const OffstageApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Offstage Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: OffstageExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class OffstageExample extends StatefulWidget {
+  const OffstageExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<OffstageExample> createState() => _OffstageExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _OffstageExampleState extends State<OffstageExample> {
   final GlobalKey _key = GlobalKey();
   bool _offstage = true;
 

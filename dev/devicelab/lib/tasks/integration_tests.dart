@@ -8,9 +8,9 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createChannelsIntegrationTest() {
-  return DriverTest(
+  return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
-    'lib/main.dart',
+    'integration_test/main_test.dart',
   ).call;
 }
 
@@ -157,6 +157,14 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
+TaskFunction createWideGamutTest() {
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/wide_gamut_test',
+    'integration_test/app_test.dart',
+    createPlatforms: <String>['ios'],
+  ).call;
+}
+
 class DriverTest {
   DriverTest(
     this.testDirectory,
@@ -204,12 +212,14 @@ class IntegrationTest {
     this.testDirectory,
     this.testTarget, {
       this.extraOptions = const <String>[],
+      this.createPlatforms = const <String>[],
     }
   );
 
   final String testDirectory;
   final String testTarget;
   final List<String> extraOptions;
+  final List<String> createPlatforms;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -217,6 +227,15 @@ class IntegrationTest {
       await device.unlock();
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
+
+      if (createPlatforms.isNotEmpty) {
+        await flutter('create', options: <String>[
+          '--platforms',
+          createPlatforms.join(','),
+          '--no-overwrite',
+          '.'
+        ]);
+      }
 
       final List<String> options = <String>[
         '-v',

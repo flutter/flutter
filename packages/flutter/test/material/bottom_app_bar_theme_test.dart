@@ -11,6 +11,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('BottomAppBarTheme lerp special cases', () {
+    expect(BottomAppBarTheme.lerp(null, null, 0), const BottomAppBarTheme());
+    const BottomAppBarTheme data = BottomAppBarTheme();
+    expect(identical(BottomAppBarTheme.lerp(data, data, 0.5), data), true);
+  });
+
   group('Material 2 tests', () {
     testWidgets('BAB theme overrides color', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
@@ -188,6 +194,17 @@ void main() {
 
       final Material widget = getBabRenderObject(tester);
       expect(widget.surfaceTintColor, babThemeSurfaceTintColor);
+    });
+
+    testWidgets('BAB theme overrides shadowColor - M3', (WidgetTester tester) async {
+      const Color babThemeShadowColor = Colors.yellow;
+      const BottomAppBarTheme theme = BottomAppBarTheme(
+        shadowColor: babThemeShadowColor, elevation: 0
+      );
+      await tester.pumpWidget(_withTheme(theme, true));
+
+      final Material widget = getBabRenderObject(tester);
+      expect(widget.shadowColor, babThemeShadowColor);
     });
 
     testWidgets('BAB surfaceTintColor - Widget - M3', (WidgetTester tester) async {
