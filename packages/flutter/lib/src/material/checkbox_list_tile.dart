@@ -411,13 +411,10 @@ class CheckboxListTile extends StatelessWidget {
     switch (value) {
       case false:
         onChanged!(true);
-        break;
       case true:
         onChanged!(tristate ? null : false);
-        break;
       case null:
         onChanged!(false);
-        break;
     }
   }
 
@@ -445,12 +442,10 @@ class CheckboxListTile extends StatelessWidget {
       case ListTileControlAffinity.leading:
         leading = control;
         trailing = secondary;
-        break;
       case ListTileControlAffinity.trailing:
       case ListTileControlAffinity.platform:
         leading = secondary;
         trailing = control;
-        break;
     }
     final ThemeData theme = Theme.of(context);
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);

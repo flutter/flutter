@@ -405,10 +405,8 @@ String generateType(Map<String, dynamic>? attributes) {
     switch (attributes['x-flutter-type'] as String?) {
       case 'icuShortTimePattern':
         type = 'TimeOfDayFormat';
-        break;
       case 'scriptCategory':
         type = 'ScriptCategory';
-        break;
     }
   }
   return type + (optional ? '?' : '');

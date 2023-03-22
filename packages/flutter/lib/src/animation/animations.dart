@@ -424,13 +424,10 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         _curveDirection = null;
-        break;
       case AnimationStatus.forward:
         _curveDirection ??= AnimationStatus.forward;
-        break;
       case AnimationStatus.reverse:
         _curveDirection ??= AnimationStatus.reverse;
-        break;
     }
   }
 
@@ -571,10 +568,8 @@ class TrainHoppingAnimation extends Animation<double>
       switch (_mode!) {
         case _TrainHoppingMode.minimize:
           hop = _nextTrain!.value <= _currentTrain!.value;
-          break;
         case _TrainHoppingMode.maximize:
           hop = _nextTrain!.value >= _currentTrain!.value;
-          break;
       }
       if (hop) {
         _currentTrain!

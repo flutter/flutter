@@ -229,10 +229,8 @@ void main() {
     switch (currentBrightness) {
       case Brightness.light:
         expect(componentColor, isSameColorAs(expectedDynamicColor.color));
-        break;
       case Brightness.dark:
         expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
-        break;
     }
   }
 

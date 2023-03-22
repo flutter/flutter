@@ -587,13 +587,10 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     switch (slot) {
       case _CupertinoTextSelectionToolbarItemsSlot.backButton:
         renderObject.backButton = child;
-        break;
       case _CupertinoTextSelectionToolbarItemsSlot.nextButton:
         renderObject.nextButton = child;
-        break;
       case _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled:
         renderObject.nextButtonDisabled = child;
-        break;
     }
   }
 
