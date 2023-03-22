@@ -1226,7 +1226,6 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
     () => _runWebDebugTest('lib/web_resources_cdn_test.dart',
       additionalArguments: <String>[
-        '--web-resources-cdn',
         '--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion',
       ]),
     () => _runWebDebugTest('test/test.dart'),
