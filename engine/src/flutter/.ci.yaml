@@ -513,6 +513,9 @@ targets:
   - name: Windows windows_arm_host_engine
     recipe: engine_v2/engine_v2
     timeout: 60
+    enabled_branches:
+      # Don't run this on release branches
+      - main
     properties:
       release_build: "true"
       config_name: windows_arm_host_engine
