@@ -78,7 +78,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
                     if (searchHistory.isNotEmpty) {
                       return getHistoryList(controller);
                     }
-                    return <Widget>[ Center(child: Text('No search history.', style: TextStyle(color: colors.outline),)) ];
+                    return <Widget>[ Center(child: Text('No search history.', style: TextStyle(color: colors.outline))) ];
                   }
                   return getSuggestions(controller);
                 },
