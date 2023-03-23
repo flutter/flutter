@@ -404,7 +404,7 @@ class ExpansionTile extends StatefulWidget {
   /// which means that the expansion arrow icon will appear on the tile's trailing edge.
   final ListTileControlAffinity? controlAffinity;
 
-  ///
+  /// If provided, the controller can be used to expand and collapse tiles.
   final ExpansionTileController? controller;
 
   @override
@@ -421,7 +421,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
 
-  late AnimationController _controller;
+  late AnimationController _animationController;
   late Animation<double> _iconTurns;
   late Animation<double> _heightFactor;
   late Animation<ShapeBorder?> _border;
@@ -434,17 +434,17 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: _kExpand, vsync: this);
-    _heightFactor = _controller.drive(_easeInTween);
-    _iconTurns = _controller.drive(_halfTween.chain(_easeInTween));
-    _border = _controller.drive(_borderTween.chain(_easeOutTween));
-    _headerColor = _controller.drive(_headerColorTween.chain(_easeInTween));
-    _iconColor = _controller.drive(_iconColorTween.chain(_easeInTween));
-    _backgroundColor = _controller.drive(_backgroundColorTween.chain(_easeOutTween));
+    _animationController = AnimationController(duration: _kExpand, vsync: this);
+    _heightFactor = _animationController.drive(_easeInTween);
+    _iconTurns = _animationController.drive(_halfTween.chain(_easeInTween));
+    _border = _animationController.drive(_borderTween.chain(_easeOutTween));
+    _headerColor = _animationController.drive(_headerColorTween.chain(_easeInTween));
+    _iconColor = _animationController.drive(_iconColorTween.chain(_easeInTween));
+    _backgroundColor = _animationController.drive(_backgroundColorTween.chain(_easeOutTween));
 
     _isExpanded = PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
     if (_isExpanded) {
-      _controller.value = 1.0;
+      _animationController.value = 1.0;
     }
 
     if (widget.controller != null) {
@@ -458,7 +458,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     if (widget.controller != null) {
       widget.controller!._state = null;
     }
-    _controller.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -466,9 +466,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
-        _controller.forward();
+        _animationController.forward();
       } else {
-        _controller.reverse().then<void>((void value) {
+        _animationController.reverse().then<void>((void value) {
           if (!mounted) {
             return;
           }
@@ -477,7 +477,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           });
         });
       }
-      PageStorage.of(context).writeState(context, _isExpanded);
+      PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
   }
@@ -600,7 +600,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final bool closed = !_isExpanded && _controller.isDismissed;
+    final bool closed = !_isExpanded && _animationController.isDismissed;
     final bool shouldRemoveChildren = closed && !widget.maintainState;
 
     final Widget result = Offstage(
@@ -618,7 +618,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     );
 
     return AnimatedBuilder(
-      animation: _controller.view,
+      animation: _animationController.view,
       builder: _buildChildren,
       child: shouldRemoveChildren ? null : result,
     );
