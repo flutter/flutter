@@ -1285,7 +1285,7 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
   final bool isFullScreen;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
-  
+
   static double fullScreenBarHeight = 72.0;
 
   @override
@@ -1311,10 +1311,10 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
   @override
   MaterialStateProperty<TextStyle?> get headerHintStyle =>
     MaterialStatePropertyAll<TextStyle?>(_textTheme.bodyLarge?.copyWith(color: _colors.onSurfaceVariant));
-    
+
   @override
-  BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);  
-    
+  BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
+
   @override
   Color? get dividerColor => _colors.outline;
 }

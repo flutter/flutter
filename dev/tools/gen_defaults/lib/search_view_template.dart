@@ -19,7 +19,7 @@ class _${blockName}DefaultsM3 extends ${blockName}ThemeData {
   final bool isFullScreen;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
-  
+
   static double fullScreenBarHeight = ${tokens['md.comp.search-view.full-screen.header.container.height']};
 
   @override
@@ -45,10 +45,10 @@ class _${blockName}DefaultsM3 extends ${blockName}ThemeData {
   @override
   MaterialStateProperty<TextStyle?> get headerHintStyle =>
     MaterialStatePropertyAll<TextStyle?>(${textStyleWithColor('md.comp.search-view.header.supporting-text')});
-    
+
   @override
-  BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);  
-    
+  BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
+
   @override
   Color? get dividerColor => ${componentColor('md.comp.search-view.divider')};
 }
