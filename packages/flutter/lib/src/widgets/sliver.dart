@@ -13,7 +13,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scroll_delegate.dart';
 
-/// A base class for sliver that have [KeepAlive] children.
+/// A base class for slivers that have [KeepAlive] children.
 ///
 /// See also:
 ///
@@ -33,7 +33,7 @@ abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
   RenderSliverWithKeepAliveMixin createRenderObject(BuildContext context);
 }
 
-/// A base class for sliver that have multiple box children.
+/// A base class for slivers that have multiple box children.
 ///
 /// Helps subclasses build their children lazily using a [SliverChildDelegate].
 ///

@@ -15,6 +15,11 @@ export 'package:flutter/rendering.dart' show
   SliverGridDelegateWithFixedCrossAxisCount,
   SliverGridDelegateWithMaxCrossAxisExtent;
 
+// Examples can assume:
+// late SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
+// abstract class SomeWidget extends StatefulWidget { const SomeWidget({super.key}); }
+// typedef ChildWidget = Placeholder;
+
 /// A callback which produces a semantic index given a widget and the local index.
 ///
 /// Return a null value to prevent a widget from receiving an index.
