@@ -25,8 +25,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
       title: Text(color.label),
       trailing: IconButton(icon: const Icon(Icons.call_missed), onPressed: () {
         controller.text = color.label;
-        controller.selection =
-            TextSelection.collapsed(offset: controller.text.length);
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
       }),
     )).toList();
   }
