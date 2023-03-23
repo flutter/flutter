@@ -277,6 +277,7 @@ class SearchAnchor extends StatefulWidget {
 class _SearchAnchorState extends State<SearchAnchor> {
   bool _anchorIsVisible = true;
   final GlobalKey _anchorKey = GlobalKey();
+  bool get _viewIsOpen => !_anchorIsVisible;
   late SearchController? _internalSearchController;
   SearchController get _searchController => widget.searchController ?? _internalSearchController!;
 
@@ -325,10 +326,6 @@ class _SearchAnchorState extends State<SearchAnchor> {
       _searchController.text = selectedText;
     }
     Navigator.of(context).pop();
-  }
-
-  bool _viewIsOpen() {
-    return !_anchorIsVisible;
   }
 
   Rect? getRect(GlobalKey key) {
@@ -884,7 +881,7 @@ class SearchController extends TextEditingController {
   /// Whether or not the associated search view is currently open.
   bool get isOpen {
     assert(_anchor != null);
-    return _anchor!._viewIsOpen();
+    return _anchor!._viewIsOpen;
   }
 
   /// Opens the search view that this controller is associated with.
