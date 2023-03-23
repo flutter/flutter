@@ -1041,20 +1041,15 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
         switch (level) {
           case CupertinoUserInterfaceLevelData.base:
             resolved = isHighContrastEnabled ? highContrastColor : color;
-            break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? highContrastElevatedColor : elevatedColor;
-            break;
         }
-        break;
       case Brightness.dark:
         switch (level) {
           case CupertinoUserInterfaceLevelData.base:
             resolved = isHighContrastEnabled ? darkHighContrastColor : darkColor;
-            break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? darkHighContrastElevatedColor : darkElevatedColor;
-            break;
         }
     }
 

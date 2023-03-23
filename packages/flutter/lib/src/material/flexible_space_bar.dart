@@ -286,7 +286,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:
               title = widget.title;
-              break;
             case TargetPlatform.android:
             case TargetPlatform.fuchsia:
             case TargetPlatform.linux:
@@ -295,7 +294,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 namesRoute: true,
                 child: widget.title,
               );
-              break;
           }
 
           // StretchMode.fadeTitle

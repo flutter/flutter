@@ -2069,13 +2069,11 @@ void main() {
           case TargetPlatform.macOS:
           case TargetPlatform.iOS:
             expect(find.byType(CupertinoButton), findsNWidgets(3));
-            break;
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             expect(find.byType(CupertinoButton), findsNWidgets(4));
-            break;
         }
       }
     },
@@ -2321,13 +2319,11 @@ void main() {
           case TargetPlatform.macOS:
           case TargetPlatform.iOS:
             matchToolbarButtons = findsNWidgets(3);
-            break;
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             matchToolbarButtons = findsNWidgets(4);
-            break;
         }
       }
       expect(find.byType(CupertinoButton), matchToolbarButtons);
@@ -3422,13 +3418,11 @@ void main() {
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           matchToolbarButtons = findsNWidgets(3);
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           matchToolbarButtons = findsNWidgets(4);
-          break;
       }
     }
     expect(find.byType(CupertinoButton), matchToolbarButtons);
@@ -4909,14 +4903,12 @@ void main() {
           // On Apple platforms, dragging the base handle makes it the extent.
           expect(controller.selection.baseOffset, testValue.length);
           expect(controller.selection.extentOffset, toOffset);
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(controller.selection.baseOffset, toOffset);
           expect(controller.selection.extentOffset, testValue.length);
-          break;
       }
 
       // The scroll area of text field should not move.
@@ -6596,7 +6588,6 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 0);
-        break;
 
       // Other platforms start from the previous selection.
       case TargetPlatform.android:
@@ -6604,7 +6595,6 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 35);
-        break;
     }
     expect(controller.selection.extentOffset, 20);
   }, variant: TargetPlatformVariant.all());
@@ -7075,7 +7065,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -7085,7 +7074,6 @@ void main() {
         expect(find.text('Cut'), findsNothing);
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsOneWidget);
-        break;
     }
 
     // Right click the first word.
@@ -7101,7 +7089,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -7111,7 +7098,6 @@ void main() {
         expect(find.text('Cut'), findsNothing);
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsNothing);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),

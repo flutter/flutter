@@ -595,14 +595,12 @@ class _RenderSegmentedButton<T> extends RenderBox with
           lastChild,
           firstChild,
         );
-        break;
       case TextDirection.ltr:
         _layoutRects(
           childAfter,
           firstChild,
           lastChild,
         );
-        break;
     }
 
     size = _computeOverallSizeFromChildSize(childSize);
@@ -638,12 +636,10 @@ class _RenderSegmentedButton<T> extends RenderBox with
           segmentLeft = child == lastChild ? borderRect.left - borderOutset : childRect.left;
           segmentRight = child == firstChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentRight;
-          break;
         case TextDirection.ltr:
           segmentLeft = child == firstChild ? borderRect.left - borderOutset : childRect.left;
           segmentRight = child == lastChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentLeft;
-          break;
       }
       final Rect segmentClipRect = Rect.fromLTRB(
         segmentLeft, borderRect.top - borderOutset,

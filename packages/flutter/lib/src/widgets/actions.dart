@@ -15,11 +15,17 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'shortcuts.dart';
 
-// BuildContext/Element doesn't have a parent accessor, but it can be
-// simulated with visitAncestorElements. _getParent is needed because
-// context.getElementForInheritedWidgetOfExactType will return itself if it
-// happens to be of the correct type. getParent should be O(1), since we
-// always return false at the first ancestor.
+/// Returns the parent [BuildContext] of a given `context`.
+///
+/// [BuildContext] (or rather, [Element]) doesn't have a `parent` accessor, but
+/// the parent can be obtained using [BuildContext.visitAncestorElements].
+///
+/// [BuildContext.getElementForInheritedWidgetOfExactType] returns the same
+/// [BuildContext] if it happens to be of the correct type. To obtain the
+/// previous inherited widget, the search must therefore start from the parent;
+/// this is what [_getParent] is used for.
+///
+/// [_getParent] is O(1), because it always stops at the first ancestor.
 BuildContext _getParent(BuildContext context) {
   late final BuildContext parent;
   context.visitAncestorElements((Element ancestor) {
@@ -279,7 +285,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
   /// its subclasses, and only when [isEnabled] is true.
   ///
-  /// When overriding this method, the returned value can be any Object, but
+  /// When overriding this method, the returned value can be any [Object], but
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
@@ -527,7 +533,11 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   }
 }
 
-/// The signature of a callback accepted by [CallbackAction].
+/// The signature of a callback accepted by [CallbackAction.onInvoke].
+///
+/// Such callbacks are implementions of [Action.invoke]. The returned value
+/// is the return value of [Action.invoke], the argument is the intent passed
+/// to [Action.invoke], and so forth.
 typedef OnInvokeCallback<T extends Intent> = Object? Function(T intent);
 
 /// An [Action] that takes a callback in order to configure it without having to
@@ -544,13 +554,12 @@ typedef OnInvokeCallback<T extends Intent> = Object? Function(T intent);
 class CallbackAction<T extends Intent> extends Action<T> {
   /// A constructor for a [CallbackAction].
   ///
-  /// The `intentKey` and [onInvoke] parameters must not be null.
-  /// The [onInvoke] parameter is required.
+  /// The given callback is used as the implementation of [invoke].
   CallbackAction({required this.onInvoke});
 
   /// The callback to be called when invoked.
   ///
-  /// Must not be null.
+  /// This is effectively the implementation of [invoke].
   @protected
   final OnInvokeCallback<T> onInvoke;
 
@@ -716,6 +725,10 @@ class Actions extends StatefulWidget {
   /// Creates a dependency on the [Actions] widget that maps the bound action so
   /// that if the actions change, the context will be rebuilt and find the
   /// updated action.
+  ///
+  /// The value returned from the [Action.invoke] method is discarded when the
+  /// returned callback is called. If the return value is needed, consider using
+  /// [Actions.invoke] instead.
   static VoidCallback? handler<T extends Intent>(BuildContext context, T intent) {
     final Action<T>? action = Actions.maybeFind<T>(context);
     if (action != null && action.isEnabled(intent)) {
@@ -1183,10 +1196,8 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       switch (FocusManager.instance.highlightMode) {
         case FocusHighlightMode.touch:
           _canShowHighlight = false;
-          break;
         case FocusHighlightMode.traditional:
           _canShowHighlight = true;
-          break;
       }
     });
   }

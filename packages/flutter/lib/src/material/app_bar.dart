@@ -766,10 +766,8 @@ class _AppBarState extends State<AppBar> {
         case AxisDirection.up:
           // Scroll view is reversed
           _scrolledUnder = metrics.extentAfter > 0;
-          break;
         case AxisDirection.down:
           _scrolledUnder = metrics.extentBefore > 0;
-          break;
         case AxisDirection.right:
         case AxisDirection.left:
           // Scrolled under is only supported in the vertical axis, and should
@@ -955,7 +953,6 @@ class _AppBarState extends State<AppBar> {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           namesRoute = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           break;
@@ -2121,10 +2118,8 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     switch (variant) {
       case _ScrollUnderFlexibleVariant.medium:
         config = _MediumScrollUnderFlexibleConfig(context);
-        break;
       case _ScrollUnderFlexibleVariant.large:
         config = _LargeScrollUnderFlexibleConfig(context);
-        break;
     }
 
     late final Widget? collapsedTitle;
