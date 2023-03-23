@@ -272,7 +272,7 @@ A randomly-chosen available port will be used instead.
 
           if (port < 0 || port > 65535) {
             throwToolExit('''
-Invalid value for --web-port: ${debuggingOptions.port}
+Invalid port: ${debuggingOptions.port}
 Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     ''');
           }

@@ -1318,12 +1318,12 @@ flutter:
     DebuggingOptions debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '65536');
     ResidentRunner residentWebRunner =
         setUpResidentRunner(flutterDevice, logger: logger, debuggingOptions: debuggingOptions);
-    await expectToolExitLater(residentWebRunner.run(), matches('Invalid value for --web-port: 65536.*'));
+    await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: 65536.*'));
 
     debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '-1');
     residentWebRunner =
       setUpResidentRunner(flutterDevice, logger: logger, debuggingOptions: debuggingOptions);
-    await expectToolExitLater(residentWebRunner.run(), matches('Invalid value for --web-port: -1.*'));
+    await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: -1.*'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
