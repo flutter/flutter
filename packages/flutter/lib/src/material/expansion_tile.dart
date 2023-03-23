@@ -76,8 +76,8 @@ class ExpansionTileController {
 
   /// Collapses the [ExpansionTile] that was built with this controller.
   ///
-  /// Normally the tile is collapsed automatically when the user tap on the header.
-  /// It can be useful sometime to trigger the collapse programmatically due
+  /// Normally the tile is collapsed automatically when the user taps on the header.
+  /// It can be useful sometimes to trigger the collapse programmatically due
   /// to some external changes.
   ///
   /// If the tile is already in the collapsed state (see [isExpanded]), calling
@@ -110,7 +110,7 @@ class ExpansionTileController {
   /// To return null if there is no [ExpansionTile] use [maybeOf] instead.
   ///
   /// {@tool dartpad}
-  /// Typical usage of the [ExpansionTile.of] function is to call it from within the
+  /// Typical usage of the [ExpansionTileController.of] function is to call it from within the
   /// `build` method of a descendant of an [ExpansionTile].
   ///
   /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.of.1.dart **
@@ -132,7 +132,7 @@ class ExpansionTileController {
   /// widgets. This introduces a new context from which you can obtain the
   /// [ExpansionTileController]. In this solution, you would have an outer widget that creates
   /// the [ExpansionTile] populated by instances of your new inner widgets, and then
-  /// in these inner widgets you would use [ExpansionTile.of].
+  /// in these inner widgets you would use [ExpansionTileController.of].
   static ExpansionTileController of(BuildContext context) {
     final _ExpansionTileState? result = context.findAncestorStateOfType<_ExpansionTileState>();
     if (result != null) {
@@ -143,24 +143,24 @@ class ExpansionTileController {
         'ExpansionTileController.of() called with a context that does not contain a ExpansionTile.',
       ),
       ErrorDescription(
-        'No ExpansionTile ancestor could be found starting from the context that was passed to ExpansionTile.of(). '
+        'No ExpansionTile ancestor could be found starting from the context that was passed to ExpansionTileController.of(). '
         'This usually happens when the context provided is from the same StatefulWidget as that '
         'whose build function actually creates the ExpansionTile widget being sought.',
       ),
       ErrorHint(
         'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
         'context that is "under" the ExpansionTile. For an example of this, please see the '
-        'documentation for ExpansionTile.of():\n'
+        'documentation for ExpansionTileController.of():\n'
         '  https://api.flutter.dev/flutter/material/ExpansionTile/of.html',
       ),
       ErrorHint(
         'A more efficient solution is to split your build function into several widgets. This '
         'introduces a new context from which you can obtain the ExpansionTile. In this solution, '
         'you would have an outer widget that creates the ExpansionTile populated by instances of '
-        'your new inner widgets, and then in these inner widgets you would use ExpansionTile.of().\n'
+        'your new inner widgets, and then in these inner widgets you would use ExpansionTileController.of().\n'
         'An other solution is assign a GlobalKey to the ExpansionTile, '
         'then use the key.currentState property to obtain the ExpansionTile rather than '
-        'using the ExpansionTile.of() function.',
+        'using the ExpansionTileController.of() function.',
       ),
       context.describeElement('The context used was'),
     ]);
@@ -255,7 +255,6 @@ class ExpansionTile extends StatefulWidget {
        'CrossAxisAlignment.baseline is not supported since the expanded children '
            'are aligned in a column, not a row. Try to use another constant.',
        );
-
 
   /// A widget to display before the title.
   ///
