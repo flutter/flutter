@@ -16,6 +16,10 @@ class PowerSource {
   let info = IOPSCopyPowerSourcesInfo().takeRetainedValue()
   lazy var sources = IOPSCopyPowerSourcesList(info).takeRetainedValue() as Array
 
+  func hasBattery() -> Bool {
+    return !sources.isEmpty
+  }
+
   /// Returns the current power source capacity. Apple-defined power sources will return this value
   /// as a percentage.
   func getCurrentCapacity() -> Int {
@@ -31,8 +35,7 @@ class PowerSource {
 
   /// Returns whether the device is drawing battery power or connected to an external power source.
   func getPowerState() -> PowerState {
-    if !sources.isEmpty {
-      let source = sources[0]
+    if let source = sources.first {
       let description =
         IOPSGetPowerSourceDescription(info, source).takeUnretainedValue() as! [String: AnyObject]
       if let state = description[kIOPSPowerSourceStateKey] as? String {
