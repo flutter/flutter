@@ -576,7 +576,6 @@ class AnimationController extends Animation<double>
           // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
           // for at least one frame.
           scale = 0.05;
-          break;
         case AnimationBehavior.preserve:
           break;
       }
@@ -696,7 +695,6 @@ class AnimationController extends Animation<double>
       switch (behavior) {
         case AnimationBehavior.normal:
           scale = 200.0; // This is arbitrary (it was chosen because it worked for the drawer widget).
-          break;
         case AnimationBehavior.preserve:
           break;
       }
