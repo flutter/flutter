@@ -155,6 +155,7 @@ void main() {
       await expectToolExitLater(
         runner.run(<String>[
           'run',
+          '--no-pub',
           '--web-port=65536',
         ]),
         matches('.*web-port.*'),
@@ -163,6 +164,7 @@ void main() {
       await expectToolExitLater(
         runner.run(<String>[
           'run',
+          '--no-pub',
           '--web-port=-1',
         ]),
         matches('.*web-port.*'),
