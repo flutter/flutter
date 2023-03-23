@@ -45,8 +45,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
             controller.closeView(filteredColor.label);
             handleSelection(filteredColor);
           },
-        ))
-      .toList();
+        ));
   }
 
   void handleSelection(ColorLabel selectedColor) {
