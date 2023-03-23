@@ -1,8 +1,8 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -43,7 +43,8 @@ const String minSdkVersion = '16';
 const String targetSdkVersion = '31';
 const String ndkVersion = '23.1.7779620';
 
-final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
+final RegExp _androidPluginRegExp =
+    RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
 /// Provides utilities to run a Gradle task, such as finding the Gradle executable
 /// or constructing a Gradle project.
@@ -54,11 +55,11 @@ class GradleUtils {
     required FileSystem fileSystem,
     required Cache cache,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _platform = platform,
-       _logger = logger,
-       _cache = cache,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils;
+  })  : _platform = platform,
+        _logger = logger,
+        _cache = cache,
+        _fileSystem = fileSystem,
+        _operatingSystemUtils = operatingSystemUtils;
 
   final Cache _cache;
   final FileSystem _fileSystem;
@@ -83,35 +84,32 @@ class GradleUtils {
       return gradle.absolute.path;
     }
     throwToolExit(
-      'Unable to locate gradlew script. Please check that ${gradle.path} '
-      'exists or that ${gradle.dirname} can be read.'
-    );
+        'Unable to locate gradlew script. Please check that ${gradle.path} '
+        'exists or that ${gradle.dirname} can be read.');
   }
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
-    copyDirectory(
-      _cache.getArtifactDirectory('gradle_wrapper'),
-      directory,
-      shouldCopyFile: (File sourceFile, File destinationFile) {
-        // Don't override the existing files in the project.
-        return !destinationFile.existsSync();
-      },
-      onFileCopied: (File source, File dest) {
-        _operatingSystemUtils.makeExecutable(dest);
-      }
-    );
+    copyDirectory(_cache.getArtifactDirectory('gradle_wrapper'), directory,
+        shouldCopyFile: (File sourceFile, File destinationFile) {
+      // Don't override the existing files in the project.
+      return !destinationFile.existsSync();
+    }, onFileCopied: (File source, File dest) {
+      _operatingSystemUtils.makeExecutable(dest);
+    });
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
-    final Directory propertiesDirectory = directory
-      .childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
-    final File propertiesFile = propertiesDirectory
-      .childFile('gradle-wrapper.properties');
+    // TODO can this share code with getGradleVersion
+    final Directory propertiesDirectory =
+        directory.childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
+    final File propertiesFile =
+        propertiesDirectory.childFile('gradle-wrapper.properties');
 
     if (propertiesFile.existsSync()) {
       return;
     }
     propertiesDirectory.createSync(recursive: true);
-    final String gradleVersion = getGradleVersionForAndroidPlugin(directory, _logger);
+    final String gradleVersion =
+        getGradleVersionForAndroidPlugin(directory, _logger);
     final String propertyContents = '''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
@@ -131,18 +129,75 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   final File buildFile = directory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
-    logger.printTrace("$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
+    // TODO should this be a warning?
+    logger.printTrace(
+        "$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
-  final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
+  final Iterable<Match> pluginMatches =
+      _androidPluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
-    logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace(
+        "$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String? androidPluginVersion = pluginMatches.first.group(1);
   logger.printTrace('$buildFile provides AGP version: $androidPluginVersion');
   return getGradleVersionFor(androidPluginVersion ?? 'unknown');
+}
+
+/// Returns either the gradle-wrapper.properties value from the passed in
+/// [directory] or if not present the version available in local path.
+///
+/// If gradle version is not found null is returned.
+/// [directory] should be and android directory with a build.gradle file.
+Future<String?> getGradleVersion(
+    Directory directory, Logger logger, ProcessManager processManager) async {
+  // TODO make constant to share with other places in this file.
+  final File propertiesFile = directory
+      .childDirectory('gradle')
+      .childDirectory('wrapper')
+      .childFile('gradle-wrapper.properties');
+
+  if (propertiesFile.existsSync()) {
+    final String wrapperFileContent = propertiesFile.readAsStringSync();
+
+    final RegExp distributionUrlRegex = RegExp(r'distributionUrl=.*\.zip');
+    final RegExpMatch? distributionUrl =
+        distributionUrlRegex.firstMatch(wrapperFileContent);
+    if (distributionUrl != null) {
+      try {
+        final String androidPluginVersion =
+            distributionUrl.group(0)!.split('-')[1];
+        return androidPluginVersion;
+        // ignore: empty_catches
+      } on TypeError {}
+    } else {
+      // If no distributionUrl treat as if there was no propertiesFile.
+      logger.printTrace(
+          '$propertiesFile does not provide an Gradle version falling back to system gradle');
+    }
+  } else {
+     logger.printTrace(
+          '$propertiesFile does not exist falling back to system gradle');
+  }
+  // System installed Gradle version. 
+  if (processManager.canRun('gradle')) {
+    final String gradleVersionVerbose =
+        (await processManager.run(<String>['gradle', r'--version'])).stdout
+            as String;
+    // TODO explain regex
+    final RegExp gradleVersionRegex = RegExp(r'Gradle (\d+\.\d+(\.\d+)?)');
+    final RegExpMatch? version =
+        gradleVersionRegex.firstMatch(gradleVersionVerbose);
+    if (version == null) {
+      return null;
+    }
+    return version.group(1);
+  } else {
+    return null;
+  }
 }
 
 /// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
@@ -205,6 +260,8 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (_isWithinVersionRange(androidPluginVersion, min: '7.0', max: '7.5')) {
     return '7.5';
   }
+  // TODO update with more recent values.
+  // TODO should this be a regular thow so that chris can see these in crash logging.
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
 }
 
@@ -246,10 +303,12 @@ void updateLocalProperties({
 
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
-    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
+    changeIfNecessary(
+        'sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot!));
+  changeIfNecessary(
+      'flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot!));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(
@@ -278,15 +337,18 @@ void writeLocalProperties(File properties) {
   final SettingsFile settings = SettingsFile();
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
+    settings.values['sdk.dir'] =
+        globals.fsUtils.escapePath(androidSdk.directory.path);
   }
   settings.writeContents(properties);
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project', type: 'gradle', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
-  throwToolExit(
-    '${globals.logger.terminal.warningMark} No Android SDK found. '
-    'Try setting the ANDROID_SDK_ROOT environment variable.'
-  );
+  BuildEvent('unsupported-project',
+          type: 'gradle',
+          eventError: 'android-sdk-not-found',
+          flutterUsage: globals.flutterUsage)
+      .send();
+  throwToolExit('${globals.logger.terminal.warningMark} No Android SDK found. '
+      'Try setting the ANDROID_SDK_ROOT environment variable.');
 }
