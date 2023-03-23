@@ -107,25 +107,18 @@ String _testTypeToIndexFile(ServiceWorkerTestType type) {
   switch (type) {
     case ServiceWorkerTestType.blockedServiceWorkers:
       indexFile = 'index_with_blocked_service_workers.html';
-      break;
     case ServiceWorkerTestType.withFlutterJs:
       indexFile = 'index_with_flutterjs.html';
-      break;
     case ServiceWorkerTestType.withoutFlutterJs:
       indexFile = 'index_without_flutterjs.html';
-      break;
     case ServiceWorkerTestType.withFlutterJsShort:
       indexFile = 'index_with_flutterjs_short.html';
-      break;
     case ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent:
       indexFile = 'index_with_flutterjs_entrypoint_loaded.html';
-      break;
     case ServiceWorkerTestType.withFlutterJsTrustedTypesOn:
       indexFile = 'index_with_flutterjs_el_tt_on.html';
-      break;
     case ServiceWorkerTestType.generatedEntrypoint:
       indexFile = 'generated_entrypoint.html';
-      break;
   }
   return indexFile;
 }
