@@ -119,8 +119,11 @@ class TextDimensions {
       ..fontFamily = canonicalizeFontFamily(fontFamily)!;
 
     final double? height = textHeightStyle.height;
-    if (height != null) {
-      style.lineHeight = height.toString();
+    // Workaround the rounding introduced by https://github.com/flutter/flutter/issues/122066
+    // in tests.
+    final double? effectiveLineHeight = height ?? (fontFamily == 'FlutterTest' ? 1.0 : null);
+    if (effectiveLineHeight != null) {
+      style.lineHeight = effectiveLineHeight.toString();
     }
     _invalidateBoundsCache();
   }

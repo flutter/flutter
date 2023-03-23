@@ -388,7 +388,7 @@ Future<void> testMain() async {
 
   test('respects text overflow', () {
     final EngineParagraphStyle overflowStyle = EngineParagraphStyle(
-      fontFamily: 'ahem',
+      fontFamily: 'Ahem',
       fontSize: 10,
       ellipsis: '...',
     );
@@ -458,7 +458,7 @@ Future<void> testMain() async {
 
   test('respects max lines', () {
     final EngineParagraphStyle maxlinesStyle = EngineParagraphStyle(
-      fontFamily: 'ahem',
+      fontFamily: 'Ahem',
       fontSize: 10,
       maxLines: 2,
     );
@@ -506,13 +506,13 @@ Future<void> testMain() async {
 
   test('respects text overflow and max lines combined', () {
     final EngineParagraphStyle onelineStyle = EngineParagraphStyle(
-      fontFamily: 'ahem',
+      fontFamily: 'Ahem',
       fontSize: 10,
       maxLines: 1,
       ellipsis: '...',
     );
     final EngineParagraphStyle multilineStyle = EngineParagraphStyle(
-      fontFamily: 'ahem',
+      fontFamily: 'Ahem',
       fontSize: 10,
       maxLines: 2,
       ellipsis: '...',
@@ -591,7 +591,7 @@ Future<void> testMain() async {
 
     EngineParagraphStyle createStyle(ui.TextAlign textAlign) {
       return EngineParagraphStyle(
-        fontFamily: 'ahem',
+        fontFamily: 'Ahem',
         fontSize: 10,
         textAlign: textAlign,
         textDirection: ui.TextDirection.ltr,
@@ -644,7 +644,7 @@ Future<void> testMain() async {
 
     EngineParagraphStyle createStyle(ui.TextAlign textAlign) {
       return EngineParagraphStyle(
-        fontFamily: 'ahem',
+        fontFamily: 'Ahem',
         fontSize: 10,
         textAlign: textAlign,
         textDirection: ui.TextDirection.rtl,
