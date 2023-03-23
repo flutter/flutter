@@ -524,7 +524,7 @@ class _GlowController extends ChangeNotifier {
 
   @override
   String toString() {
-    return '_GlowController(color: $color, axis: ${describeEnum(axis)})';
+    return '_GlowController(color: $color, axis: ${axis.name})';
   }
 }
 

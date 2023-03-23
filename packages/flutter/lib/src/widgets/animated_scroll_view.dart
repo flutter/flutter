@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_physics.dart';
 import 'scroll_view.dart';
 import 'sliver.dart';
