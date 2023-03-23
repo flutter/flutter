@@ -113,7 +113,7 @@ class ExpansionTileController {
   /// Typical usage of the [ExpansionTileController.of] function is to call it from within the
   /// `build` method of a descendant of an [ExpansionTile].
   ///
-  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.of.1.dart **
+  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
   /// {@end-tool}
   ///
   /// {@tool dartpad}
@@ -125,7 +125,7 @@ class ExpansionTileController {
   /// to provide a new scope with a [BuildContext] that is "under" the
   /// [ExpansionTile]:
   ///
-  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.of.1.dart **
+  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
   /// {@end-tool}
   ///
   /// A more efficient solution is to split your build function into several
