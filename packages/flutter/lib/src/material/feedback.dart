@@ -81,11 +81,7 @@ import 'theme.dart';
 /// }
 /// ```
 /// {@end-tool}
-class Feedback {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Feedback._();
-
+abstract final class Feedback {
   /// Provides platform-specific feedback for a tap.
   ///
   /// On Android the click system sound is played. On iOS this is a no-op.

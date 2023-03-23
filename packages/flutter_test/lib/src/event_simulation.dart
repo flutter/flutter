@@ -38,11 +38,7 @@ String? _keyLabel(LogicalKeyboardKey key) {
 
 /// A class that serves as a namespace for a bunch of keyboard-key generation
 /// utilities.
-class KeyEventSimulator {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  KeyEventSimulator._();
-
+abstract final class KeyEventSimulator {
   // Look up a synonym key, and just return the left version of it.
   static LogicalKeyboardKey _getKeySynonym(LogicalKeyboardKey origKey) {
     if (origKey == LogicalKeyboardKey.shift) {
