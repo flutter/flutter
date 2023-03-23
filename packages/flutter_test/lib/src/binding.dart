@@ -1814,7 +1814,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           _handleViewNeedsPaint();
         }
         super.handlePointerEvent(event);
-        break;
       case TestBindingEventSource.device:
         if (shouldPropagateDevicePointerEvents) {
           super.handlePointerEvent(event);
@@ -1829,7 +1828,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             () => super.handlePointerEvent(localEvent)
           );
         }
-        break;
     }
   }
 
@@ -1838,7 +1836,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
         super.dispatchEvent(event, hitTestResult);
-        break;
       case TestBindingEventSource.device:
         assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         if (shouldPropagateDevicePointerEvents) {
@@ -1849,7 +1846,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         if (hitTestResult != null) {
           deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
         }
-        break;
     }
   }
 
