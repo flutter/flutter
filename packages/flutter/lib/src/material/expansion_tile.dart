@@ -113,26 +113,23 @@ class ExpansionTileController {
   /// Typical usage of the [ExpansionTileController.of] function is to call it from within the
   /// `build` method of a descendant of an [ExpansionTile].
   ///
-  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
-  /// {@end-tool}
-  ///
-  /// {@tool dartpad}
-  /// When the [ExpansionTile] is actually created in the same `build` function as the
-  /// , the
-  /// `context` argument to the `build` function can't be used to find the
-  /// [ExpansionTileController] (since it's "above" the widget being returned in the widget
-  /// tree). In such cases, the following technique with a [Builder] can be used
-  /// to provide a new scope with a [BuildContext] that is "under" the
-  /// [ExpansionTile]:
+  /// When the [ExpansionTile] is actually created in the same `build`
+  /// function as the callback that refers to the controller, then the
+  /// `context` argument to the `build` function can't be used to find
+  /// the [ExpansionTileController] (since it's "above" the widget
+  /// being returned in the widget tree). In cases like that you can
+  /// add a [Builder] widget, which provides a new scope with a
+  /// [BuildContext] that is "under" the [ExpansionTile]:
   ///
   /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
   /// {@end-tool}
   ///
-  /// A more efficient solution is to split your build function into several
-  /// widgets. This introduces a new context from which you can obtain the
-  /// [ExpansionTileController]. In this solution, you would have an outer widget that creates
-  /// the [ExpansionTile] populated by instances of your new inner widgets, and then
-  /// in these inner widgets you would use [ExpansionTileController.of].
+  /// A more efficient solution is to split your build function into
+  /// several widgets. This introduces a new context from which you
+  /// can obtain the [ExpansionTileController]. With this approach you
+  /// would have an outer widget that creates the [ExpansionTile]
+  /// populated by instances of your new inner widgets, and then in
+  /// these inner widgets you would use [ExpansionTileController.of].
   static ExpansionTileController of(BuildContext context) {
     final _ExpansionTileState? result = context.findAncestorStateOfType<_ExpansionTileState>();
     if (result != null) {
@@ -181,7 +178,6 @@ class ExpansionTileController {
     return context.findAncestorStateOfType<_ExpansionTileState>()?._tileController;
   }
 }
-
 
 /// A single-line [ListTile] with an expansion arrow icon that expands or collapses
 /// the tile to reveal or hide the [children].
