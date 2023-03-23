@@ -493,14 +493,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         final Size endSize = Size(endWidth, endHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
     }
-
-    final BorderSide? effectiveSide = viewSide ?? viewTheme.side ?? viewDefaults.side;
-    OutlinedBorder effectiveShape = viewShape ?? viewTheme.shape ?? viewDefaults.shape!;
-    if (effectiveSide != null) {
-      effectiveShape = effectiveShape.copyWith(side: effectiveSide);
-    }
-    _shapeTween.begin = const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
-    _shapeTween.end = effectiveShape;
   }
 
   @override
@@ -517,7 +509,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
             reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
           );
 
-          final ShapeBorder shape = _shapeTween.evaluate(curvedAnimation)!;
           final Rect viewRect = _rectTween.evaluate(curvedAnimation)!;
           final double topPadding = showFullScreenView
             ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation.value)!
@@ -536,7 +527,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
               viewBackgroundColor: viewBackgroundColor,
               viewElevation: viewElevation,
               viewSurfaceTintColor: viewSurfaceTintColor,
-              viewShape: shape,
+              viewSide: viewSide,
+              viewShape: viewShape,
               viewHeaderTextStyle: viewHeaderTextStyle,
               viewHeaderHintStyle: viewHeaderHintStyle,
               dividerColor: dividerColor,
@@ -572,7 +564,8 @@ class _ViewContent extends StatefulWidget {
     this.viewBackgroundColor,
     this.viewElevation,
     this.viewSurfaceTintColor,
-    required this.viewShape,
+    this.viewSide,
+    this.viewShape,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
@@ -596,7 +589,8 @@ class _ViewContent extends StatefulWidget {
   final Color? viewBackgroundColor;
   final double? viewElevation;
   final Color? viewSurfaceTintColor;
-  final ShapeBorder viewShape;
+  final BorderSide? viewSide;
+  final OutlinedBorder? viewShape;
   final MaterialStateProperty<TextStyle?>? viewHeaderTextStyle;
   final MaterialStateProperty<TextStyle?>? viewHeaderHintStyle;
   final Color? dividerColor;
@@ -713,6 +707,15 @@ class _ViewContentState extends State<_ViewContent> {
     final double effectiveElevation = widget.viewElevation
       ?? widget.viewTheme.elevation
       ?? widget.viewDefaults.elevation!;
+    final BorderSide? effectiveSide = widget.viewSide
+      ?? widget.viewTheme.side
+      ?? widget.viewDefaults.side;
+    OutlinedBorder effectiveShape = widget.viewShape
+      ?? widget.viewTheme.shape
+      ?? widget.viewDefaults.shape!;
+    if (effectiveSide != null) {
+      effectiveShape = effectiveShape.copyWith(side: effectiveSide);
+    }
     final Color effectiveDividerColor = widget.dividerColor
       ?? widget.viewTheme.dividerColor
       ?? widget.dividerTheme.color
@@ -739,7 +742,7 @@ class _ViewContentState extends State<_ViewContent> {
           width: _viewRect.width,
           height: _viewRect.height,
           child: Material(
-            shape: widget.viewShape,
+            shape: effectiveShape,
             color: effectiveBackgroundColor,
             surfaceTintColor: effectiveSurfaceTint,
             elevation: effectiveElevation,
