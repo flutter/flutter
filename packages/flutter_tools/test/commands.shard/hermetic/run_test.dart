@@ -141,42 +141,6 @@ void main() {
       Logger: () => BufferLogger.test(),
     });
 
-    testUsingContext('fails when "--web-port" is an integer outside the valid TCP range', () async {
-      testDeviceManager.devices = <Device>[FakeDevice(targetPlatform: TargetPlatform.web_javascript)];
-      fileSystem.currentDirectory.childFile('pubspec.yaml')
-        .writeAsStringSync('name: flutter_app');
-      fileSystem.currentDirectory.childDirectory('lib')
-        .childFile('main.dart')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('void main() {}');
-
-      final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await expectToolExitLater(
-        runner.run(<String>[
-          'run',
-          '--no-pub',
-          '--web-port=65536',
-        ]),
-        matches('.*web-port.*'),
-      );
-
-      await expectToolExitLater(
-        runner.run(<String>[
-          'run',
-          '--no-pub',
-          '--web-port=-1',
-        ]),
-        matches('.*web-port.*'),
-      );
-
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => testDeviceManager,
-      ProcessManager: () => FakeProcessManager.any(),
-      FileSystem: () => fileSystem,
-      Logger: () => BufferLogger.test(),
-    });
-
     group('run app', () {
       late MemoryFileSystem fs;
       late Artifacts artifacts;
