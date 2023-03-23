@@ -275,7 +275,7 @@ class SearchAnchor extends StatefulWidget {
 }
 
 class _SearchAnchorState extends State<SearchAnchor> {
-  bool _isVisible = true;
+  bool _anchorIsVisible = true;
   final GlobalKey _anchorKey = GlobalKey();
   late SearchController? _internalSearchController;
   SearchController get _searchController => widget.searchController ?? _internalSearchController!;
@@ -327,6 +327,10 @@ class _SearchAnchorState extends State<SearchAnchor> {
     Navigator.of(context).pop();
   }
 
+  bool _viewIsOpen() {
+    return !_anchorIsVisible;
+  }
+
   Rect? getRect(GlobalKey key) {
     final BuildContext? context = key.currentContext;
     if (context != null) {
@@ -340,9 +344,9 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
   bool toggleVisibility() {
     setState(() {
-      _isVisible = !_isVisible;
+      _anchorIsVisible = !_anchorIsVisible;
     });
-    return _isVisible;
+    return _anchorIsVisible;
   }
 
   bool showFullScreenView() {
@@ -366,7 +370,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       key: _anchorKey,
-      opacity: _isVisible ? 1.0 : 0.0,
+      opacity: _anchorIsVisible ? 1.0 : 0.0,
       duration: _kAnchorFadeDuration,
       child: GestureDetector(
         onTap: _openView,
@@ -876,6 +880,12 @@ class SearchController extends TextEditingController {
   // This is set automatically when a [SearchController] is given to the anchor
   // it controls.
   _SearchAnchorState? _anchor;
+
+  /// Whether or not the associated search view is currently open.
+  bool get isOpen {
+    assert(_anchor != null);
+    return _anchor!._viewIsOpen();
+  }
 
   /// Opens the search view that this controller is associated with.
   void openView() {
