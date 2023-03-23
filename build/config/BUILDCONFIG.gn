@@ -408,7 +408,9 @@ _native_compiler_configs += [ "//build/config/compiler:default_optimization" ]
 if (symbol_level == -1) {
   # Linux is slowed by having symbols as part of the target binary, whereas
   # Mac and Windows have them separate, so in Release Linux, default them off.
-  if (is_debug || !is_linux) {
+  # Wasm we definitely want to strip symbols in release mode because binary
+  # size is tantamount.
+  if (is_debug || is_mac || is_win) {
     symbol_level = 2
   } else if (is_asan || is_lsan || is_tsan || is_msan) {
     # Sanitizers require symbols for filename suppressions to work.

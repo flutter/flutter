@@ -26,11 +26,22 @@ if (use_goma) {
 
 template("wasm_toolchain") {
   gcc_toolchain(target_name) {
+    worker_js_file = "{{root_out_dir}}/{{target_output_name}}.worker.js"
+
     # emsdk_dir and em_config are defined in wasm.gni.
     ar = "$compiler_prefix$emsdk_dir/upstream/emscripten/emar --em-config $em_config_path"
     cc = "$compiler_prefix$emsdk_dir/upstream/emscripten/emcc --em-config $em_config_path"
     cxx = "$compiler_prefix$emsdk_dir/upstream/emscripten/em++ --em-config $em_config_path"
-    ld = cxx
+
+    # emscripten emits this .worker.js file conditionally depending on whether
+    # pthreads are on or not. Unfortunately, there is no way to conditionally
+    # change the outputs of the toolchain depending on flags that are specified
+    # in the target or configs. In order to resolve this, we will always
+    # specify the .worker.js file as an output, and touch the path to create a
+    # dummy file. If the target does use pthreads, this dummy file will be
+    # overwritten. If the target does not, the dummy file will satisfy the
+    # toolchain's requirement that it has this as an output.
+    ld = "touch $worker_js_file && $cxx"
     readelf = "readelf"
     nm = "nm"
 
@@ -39,7 +50,10 @@ template("wasm_toolchain") {
 
     is_clang = true
 
-    link_outputs = [ "{{root_out_dir}}/{{target_output_name}}.wasm" ]
+    link_outputs = [
+      "{{root_out_dir}}/{{target_output_name}}.wasm",
+      worker_js_file,
+    ]
 
     extra_toolchain_args = {
       if (defined(invoker.extra_toolchain_args)) {
