@@ -63,6 +63,15 @@ class _TestElement extends RootRenderObjectElement{
     mount(null, null);
     deactivate();
   }
+
+  @override
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+
+  @override
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
 }
 
 class _MyStatefulWidget extends StatefulWidget {
