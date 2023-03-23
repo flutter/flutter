@@ -30,7 +30,7 @@ class TextureContents final : public Contents {
 
   void SetLabel(std::string label);
 
-  void SetPath(const Path& path);
+  void SetRect(Rect rect);
 
   void SetTexture(std::shared_ptr<Texture> texture);
 
@@ -76,8 +76,7 @@ class TextureContents final : public Contents {
  private:
   std::string label_;
 
-  Path path_;
-  std::optional<Rect> rect_;
+  Rect rect_;
   bool stencil_enabled_ = true;
 
   std::shared_ptr<Texture> texture_;

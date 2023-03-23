@@ -1052,7 +1052,7 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     if (selected_input_type == 0) {
       auto texture = std::make_shared<TextureContents>();
       texture->SetSourceRect(Rect::MakeSize(boston->GetSize()));
-      texture->SetPath(PathBuilder{}.AddRect(input_rect).TakePath());
+      texture->SetRect(input_rect);
       texture->SetTexture(boston);
       texture->SetOpacity(input_color.alpha);
 
@@ -1176,7 +1176,7 @@ TEST_P(EntityTest, MorphologyFilter) {
         Rect::MakeXYWH(path_rect[0], path_rect[1], path_rect[2], path_rect[3]);
     auto texture = std::make_shared<TextureContents>();
     texture->SetSourceRect(Rect::MakeSize(boston->GetSize()));
-    texture->SetPath(PathBuilder{}.AddRect(input_rect).TakePath());
+    texture->SetRect(input_rect);
     texture->SetTexture(boston);
     texture->SetOpacity(input_color.alpha);
 
