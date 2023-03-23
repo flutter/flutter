@@ -39,8 +39,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
           title: Text(filteredColor.label),
           trailing: IconButton(icon: const Icon(Icons.call_missed), onPressed: () {
             controller.text = filteredColor.label;
-            controller.selection =
-                TextSelection.collapsed(offset: controller.text.length);
+            controller.selection = TextSelection.collapsed(offset: controller.text.length);
           }),
           onTap: () {
             controller.closeView(filteredColor.label);
