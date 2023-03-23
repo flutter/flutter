@@ -89,5 +89,39 @@
         }
 
     ],
-    "tests": []
+    "tests": [
+	{
+            "name": "chrome-unit-linux",
+	    "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+	    "dependencies": ["wasm_release", "web_tests"],
+	    "test_dependencies": [
+                {
+		    "dependency": "chrome_and_driver",
+		    "version": "version:111.0"
+	        },
+		{
+		    "dependency": "goldctl",
+		    "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"
+		}
+	    ],
+	    "recipe": "engine_v2/tester_engine",
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+	    "tasks": [
+                {
+                    "name": "felt test: chrome-unit-linux",
+                    "parameters": [
+                        "test",
+                        "--browser=chrome",
+                        "--require-skia-gold"
+                    ],
+                    "script": "flutter/lib/web_ui/dev/felt"
+                }
+            ]
+	}
+    ]
 }
