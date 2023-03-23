@@ -95,12 +95,10 @@ class RenderListBody extends RenderBox
           if (!constraints.hasBoundedWidth) {
             return true;
           }
-          break;
         case Axis.vertical:
           if (!constraints.hasBoundedHeight) {
             return true;
           }
-          break;
       }
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderListBody must have unlimited space along its main axis.'),
@@ -121,12 +119,10 @@ class RenderListBody extends RenderBox
           if (constraints.hasBoundedHeight) {
             return true;
           }
-          break;
         case Axis.vertical:
           if (constraints.hasBoundedWidth) {
             return true;
           }
-          break;
       }
       // TODO(ianh): Detect if we're actually nested blocks and say something
       // more specific to the exact situation in that case, and don't mention
@@ -170,7 +166,6 @@ class RenderListBody extends RenderBox
           child = childParentData.nextSibling;
         }
         size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
-        break;
       case AxisDirection.left:
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
         while (child != null) {
@@ -190,7 +185,6 @@ class RenderListBody extends RenderBox
           child = childParentData.nextSibling;
         }
         size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
-        break;
       case AxisDirection.down:
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
         while (child != null) {
@@ -202,7 +196,6 @@ class RenderListBody extends RenderBox
           child = childParentData.nextSibling;
         }
         size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
-        break;
       case AxisDirection.up:
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
         while (child != null) {
@@ -222,7 +215,6 @@ class RenderListBody extends RenderBox
           child = childParentData.nextSibling;
         }
         size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
-        break;
     }
     assert(size.isFinite);
   }

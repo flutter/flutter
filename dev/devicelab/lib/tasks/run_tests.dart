@@ -177,6 +177,9 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
     r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
     multiLine: true,
   );
+  static final RegExp _builtOutput = RegExp(
+    r'Built build\\windows\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?\.',
+  );
 
   @override
   void verifyBuildOutput(List<String> stdout) {
@@ -184,6 +187,25 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
       stdout,
       _buildOutput.hasMatch,
       'Building Windows application...',
+    );
+
+    final String buildMode = release ? 'Release' : 'Debug';
+    _findNextMatcherInList(
+      stdout,
+      (String line) {
+        if (!_builtOutput.hasMatch(line) || !line.contains(buildMode)) {
+          return false;
+        }
+
+        // Size information is only included in release builds.
+        final bool hasSize = line.contains('MB).');
+        if (release != hasSize) {
+          return false;
+        }
+
+        return true;
+      },
+      'Built build\\windows\\runner\\$buildMode\\app.exe',
     );
   }
 }

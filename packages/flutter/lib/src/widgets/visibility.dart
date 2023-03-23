@@ -38,6 +38,7 @@ import 'ticker_provider.dart';
 ///  * [AnimatedSwitcher], which can fade from one child to the next as the
 ///    subtree changes.
 ///  * [AnimatedCrossFade], which can fade between two specific children.
+///  * [SliverVisibility], the sliver equivalent of this widget.
 class Visibility extends StatelessWidget {
   /// Control whether the given [child] is [visible].
   ///
@@ -81,8 +82,6 @@ class Visibility extends StatelessWidget {
 
   /// Control whether the given [child] is [visible].
   ///
-  /// The [child] and [replacement] arguments must not be null.
-  ///
   /// This is equivalent to the default [Visibility] constructor with all
   /// "maintain" fields set to true. This constructor should be used in place of
   /// an [Opacity] widget that only takes on values of `0.0` or `1.0`, as it
@@ -90,13 +89,13 @@ class Visibility extends StatelessWidget {
   const Visibility.maintain({
     super.key,
     required this.child,
-    this.replacement = const SizedBox.shrink(),
     this.visible = true,
   }) :  maintainState = true,
         maintainAnimation = true,
         maintainSize = true,
         maintainSemantics = true,
-        maintainInteractivity = true;
+        maintainInteractivity = true,
+        replacement = const SizedBox.shrink(); // Unused since maintainState is always true.
 
   /// The widget to show or hide, as controlled by [visible].
   ///
@@ -293,9 +292,14 @@ class Visibility extends StatelessWidget {
 ///    sliver child.
 ///
 /// Using this widget is not necessary to hide children. The simplest way to
-/// hide a child is just to not include it, or, if a child _must_ be given (e.g.
-/// because the parent is a [StatelessWidget]) then to use a childless
-/// [SliverToBoxAdapter] instead of the child that would otherwise be included.
+/// hide a child is just to not include it. If a child _must_ be given (e.g.
+/// because the parent is a [StatelessWidget]), then including a childless
+/// [SliverToBoxAdapter] instead of the child that would otherwise be included
+/// is typically more efficient than using [SliverVisibility].
+///
+/// See also:
+///
+///  * [Visibility], the equivalent widget for boxes.
 class SliverVisibility extends StatelessWidget {
   /// Control whether the given [sliver] is [visible].
   ///
