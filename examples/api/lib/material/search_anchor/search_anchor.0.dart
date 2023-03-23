@@ -27,7 +27,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
         controller.text = color.label;
         controller.selection = TextSelection.collapsed(offset: controller.text.length);
       }),
-    )).toList();
+    ));
   }
 
   Iterable<Widget> getSuggestions(SearchController controller) {
