@@ -24,6 +24,13 @@ class MainFlutterWindow: NSWindow, FlutterStreamHandler, PowerSourceStateChangeD
     batteryChannel.setMethodCallHandler({ [weak self] (call, result) in
       switch call.method {
       case "getBatteryLevel":
+        if self?.powerSource.hasBattery() == false {
+          result(FlutterError(
+            code: "NO_BATTERY",
+            message: "Device does not have a battery",
+            details: nil))
+          return
+        }
         let level = self?.powerSource.getCurrentCapacity()
         if level == -1 {
           result(
@@ -31,6 +38,7 @@ class MainFlutterWindow: NSWindow, FlutterStreamHandler, PowerSourceStateChangeD
               code: "UNAVAILABLE",
               message: "Battery info unavailable",
               details: nil))
+          return
         }
         result(level)
       default:
