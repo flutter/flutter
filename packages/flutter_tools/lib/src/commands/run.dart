@@ -504,27 +504,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
-    void validateWebPort(String? arg) {
-      if (arg == null) {
-        return;
-      }
-      final int? parsed = int.tryParse(arg);
-      if (parsed == null) {
-        globals.printError('''
-The value provided for --web-port was not an integer: $arg
-A randomly-chosen available port will be used instead.
-''');
-        return;
-      }
-
-      if (parsed < 0 || parsed > 65535) {
-        throwToolExit('''
-Invalid value for --web-port: $parsed
-Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
-''');
-      }
-    }
-
     // When running with a prebuilt application, no command validation is
     // necessary.
     if (!runningWithPrebuiltApplication) {
@@ -554,10 +533,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     webMode = featureFlags.isWebEnabled &&
       devices!.length == 1  &&
       await devices!.single.targetPlatform == TargetPlatform.web_javascript;
-
-    if (webMode) {
-      validateWebPort(stringArg('web-port'));
-    }
   }
 
   @visibleForTesting

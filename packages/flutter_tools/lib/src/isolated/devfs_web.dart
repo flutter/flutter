@@ -178,7 +178,7 @@ class WebAssetServer implements AssetReader {
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
     String hostname,
-    int? port,
+    int port,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -201,7 +201,7 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
+        httpServer = await HttpServer.bind(address, port);
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -634,7 +634,7 @@ class WebDevFS implements DevFS {
   /// server.
   WebDevFS({
     required this.hostname,
-    required int? port,
+    required int port,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -664,7 +664,7 @@ class WebDevFS implements DevFS {
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nativeNullAssertions;
-  final int? _port;
+  final int _port;
 
   late WebAssetServer webAssetServer;
 
