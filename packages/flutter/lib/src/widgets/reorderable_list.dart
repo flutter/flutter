@@ -13,6 +13,7 @@ import 'inherited_theme.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_physics.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
