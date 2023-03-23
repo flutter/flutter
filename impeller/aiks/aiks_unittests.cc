@@ -15,9 +15,11 @@
 #include "impeller/aiks/aiks_playground.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/image.h"
+#include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/scene_contents.h"
+#include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
@@ -1945,6 +1947,50 @@ TEST_P(AiksTest, PaintWithFilters) {
   paint.color_filter = std::nullopt;
 
   ASSERT_FALSE(paint.HasColorFilter());
+}
+
+TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
+  auto entity_pass = std::make_shared<EntityPass>();
+  auto rect = Rect::MakeLTRB(0, 0, 100, 100);
+  Paint paint;
+  paint.color = Color::White().WithAlpha(0.5);
+  paint.color_filter = [](FilterInput::Ref input) {
+    return ColorFilterContents::MakeBlend(BlendMode::kSourceOver,
+                                          {std::move(input)}, Color::Blue());
+  };
+
+  // Paint has color filter, can't elide.
+  auto delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
+  ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
+
+  paint.color_filter = std::nullopt;
+  paint.image_filter = [](const FilterInput::Ref& input,
+                          const Matrix& effect_transform, bool is_subpass) {
+    return FilterContents::MakeGaussianBlur(
+        input, Sigma(1.0), Sigma(1.0), FilterContents::BlurStyle::kNormal,
+        Entity::TileMode::kClamp, effect_transform);
+  };
+
+  // Paint has image filter, can't elide.
+  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
+  ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
+
+  paint.image_filter = std::nullopt;
+  paint.color = Color::Red();
+
+  // Paint has no alpha, can't elide;
+  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
+  ASSERT_FALSE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
+
+  // Positive test.
+  Entity entity;
+  entity.SetContents(SolidColorContents::Make(
+      PathBuilder{}.AddRect(rect).TakePath(), Color::Red()));
+  entity_pass->AddEntity(entity);
+  paint.color = Color::Red().WithAlpha(0.5);
+
+  delegate = std::make_shared<OpacityPeepholePassDelegate>(paint, rect);
+  ASSERT_TRUE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 }
 
 }  // namespace testing
