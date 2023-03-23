@@ -683,10 +683,8 @@ _XCResultIssueHandlingResult _handleXCResultIssue({required XCResultIssue issue,
   switch (issue.type) {
     case XCResultIssueType.error:
       logger.printError(issueSummary);
-      break;
     case XCResultIssueType.warning:
       logger.printWarning(issueSummary);
-      break;
   }
 
   final String? message = issue.message;

@@ -2394,14 +2394,12 @@ void main() {
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 11);
         expect(controller.selection.extentOffset, 2);
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 2);
         expect(controller.selection.extentOffset, 11);
-        break;
     }
 
     // Drag the left handle 2 letters to the left again.
@@ -2424,14 +2422,12 @@ void main() {
         // The left handle was already the extent, and it remains so.
         expect(controller.selection.baseOffset, 11);
         expect(controller.selection.extentOffset, 0);
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 11);
-        break;
     }
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
@@ -2503,14 +2499,12 @@ void main() {
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 11);
         expect(controller.selection.extentOffset, 2);
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 2);
         expect(controller.selection.extentOffset, 11);
-        break;
     }
 
     // Drag the left handle 2 letters to the left again.
@@ -2533,14 +2527,12 @@ void main() {
         // The left handle was already the extent, and it remains so.
         expect(controller.selection.baseOffset, 11);
         expect(controller.selection.extentOffset, 0);
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 11);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
@@ -2620,14 +2612,12 @@ void main() {
           // On Apple platforms, dragging the base handle makes it the extent.
           expect(controller.selection.baseOffset, testValue.length);
           expect(controller.selection.extentOffset, toOffset);
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(controller.selection.baseOffset, toOffset);
           expect(controller.selection.extentOffset, testValue.length);
-          break;
       }
 
       // The scroll area of text field should not move.
@@ -12151,10 +12141,8 @@ void main() {
         switch (methodCall.method) {
           case 'Clipboard.getData':
             calledGetData = true;
-            break;
           case 'Clipboard.hasStrings':
             calledHasStrings = true;
-            break;
           default:
             break;
         }
@@ -13054,7 +13042,6 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 0);
-        break;
 
       // Other platforms start from the previous selection.
       case TargetPlatform.android:
@@ -13062,7 +13049,6 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 35);
-        break;
     }
     expect(controller.selection.extentOffset, 20);
   }, variant: TargetPlatformVariant.all());
@@ -13527,7 +13513,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -13538,7 +13523,6 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select all'), findsOneWidget);
-        break;
     }
 
     // Right click the first word.
@@ -13554,7 +13538,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -13565,7 +13548,6 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsNothing);
         expect(find.text('Select all'), findsNothing);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),
@@ -14295,21 +14277,17 @@ void main() {
               case TargetPlatform.android:
               case TargetPlatform.fuchsia:
                 expect(focusNode.hasPrimaryFocus, equals(!kIsWeb));
-                break;
               case TargetPlatform.linux:
               case TargetPlatform.macOS:
               case TargetPlatform.windows:
                 expect(focusNode.hasPrimaryFocus, isFalse);
-                break;
             }
-            break;
           case PointerDeviceKind.mouse:
           case PointerDeviceKind.stylus:
           case PointerDeviceKind.invertedStylus:
           case PointerDeviceKind.trackpad:
           case PointerDeviceKind.unknown:
             expect(focusNode.hasPrimaryFocus, isFalse);
-            break;
         }
       }, variant: TargetPlatformVariant.all());
     }

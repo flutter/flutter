@@ -920,12 +920,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (type) {
       case _HighlightType.pressed:
         statesController.update(MaterialState.pressed, value);
-        break;
       case _HighlightType.hover:
         if (callOnHover) {
           statesController.update(MaterialState.hovered, value);
         }
-        break;
       case _HighlightType.focus:
         // see handleFocusUpdate()
         break;
@@ -947,13 +945,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           switch (type) {
             case _HighlightType.pressed:
               resolvedOverlayColor = widget.highlightColor ?? theme.highlightColor;
-              break;
             case _HighlightType.focus:
               resolvedOverlayColor = widget.focusColor ?? theme.focusColor;
-              break;
             case _HighlightType.hover:
               resolvedOverlayColor = widget.hoverColor ?? theme.hoverColor;
-              break;
           }
         }
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
@@ -982,12 +977,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (type) {
       case _HighlightType.pressed:
         widget.onHighlightChanged?.call(value);
-        break;
       case _HighlightType.hover:
         if (callOnHover) {
           widget.onHover?.call(value);
         }
-        break;
       case _HighlightType.focus:
         break;
     }
@@ -1055,10 +1048,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         showFocus = false;
-        break;
       case FocusHighlightMode.traditional:
         showFocus = _shouldShowFocus;
-        break;
     }
     updateHighlight(_HighlightType.focus, value: showFocus);
   }
