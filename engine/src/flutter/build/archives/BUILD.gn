@@ -38,12 +38,15 @@ if (build_engine_artifacts && !is_android) {
       # TODO(godofredoc): Remove after paths are standardized flutter/flutter#105351.
       # Mac artifacts sometimes use mac and sometimes darwin. Standardizing the
       # names will require changes in the list of artifacts the tool is downloading.
-      prefix = "darwin-$target_cpu/"
+      if (flutter_runtime_mode == "debug") {
+        prefix = "darwin-$target_cpu/"
+      } else {
+        prefix = "darwin-$target_cpu-$flutter_runtime_mode/"
+      }
+    } else if (flutter_runtime_mode != "debug") {
+      prefix = "$full_target_platform_name-$flutter_runtime_mode/"
     } else {
       prefix = "$full_target_platform_name/"
-    }
-    if (flutter_runtime_mode != "debug") {
-      prefix = "$full_platform_name-$flutter_runtime_mode/"
     }
     output = "$prefix/artifacts.zip"
 
