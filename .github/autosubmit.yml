@@ -3,5 +3,6 @@
 # found in the LICENSE file.
 
 # This file will be added to flutter's internal repository.
-# TODO: publish design doc and link here.
+# https://github.com/flutter/flutter/wiki/Autosubmit-bot
 config_path: 'autosubmit/flutter/autosubmit_master.yml'
+
