@@ -306,7 +306,8 @@ void main() {
       ),
     );
 
-    final Material material = tester.widget(find.byType(Material).at(1));
+    final Material material = tester.widget(
+        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(Material)));
 
     expect(material.color, const Color(0xff0000ff));
   });
@@ -327,7 +328,8 @@ void main() {
       )
     );
 
-    final Material material = tester.widget(find.byType(Material).at(1));
+    final Material material = tester.widget(
+        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(Material)));
 
     expect(material.shadowColor, Colors.transparent);
   });
