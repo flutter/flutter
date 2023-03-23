@@ -90,9 +90,16 @@ class DataColumn {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// heading row.
   ///
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///
   /// If this is null, then the value of [DataTableThemeData.headingCellCursor]
-  /// is used. If that's null, then [SystemMouseCursors.click] is used.
-  final MouseCursor? mouseCursor;
+  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
 }
 
 /// Row configuration and cell data for a [DataTable].
@@ -217,6 +224,10 @@ class DataRow {
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// data row.
+  ///
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
   ///
   /// If this is null, then the value of [DataTableThemeData.dataRowCursor]
   /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
@@ -930,7 +941,6 @@ class DataTable extends StatelessWidget {
         onTapCancel: onTapCancel,
         onTapDown: onTapDown,
         overlayColor: overlayColor,
-        mouseCursor: mouseCursor,
         child: label,
       );
     } else if (onSelectChanged != null || onRowLongPress != null) {
@@ -1044,8 +1054,6 @@ class DataTable extends StatelessWidget {
         final Set<MaterialState> states = <MaterialState>{
           if (row.selected)
             MaterialState.selected,
-          if (row.onSelectChanged == null)
-            MaterialState.disabled,
         };
         tableRows[rowIndex].children[0] = _buildCheckbox(
           context: context,
@@ -1091,6 +1099,10 @@ class DataTable extends StatelessWidget {
       } else {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
+      final Set<MaterialState> headerStates = <MaterialState>{
+        if (column.onSort == null)
+          MaterialState.disabled,
+      };
       tableRows[0].children[displayColumnIndex] = _buildHeadingCell(
         context: context,
         padding: padding,
@@ -1101,15 +1113,13 @@ class DataTable extends StatelessWidget {
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
-        mouseCursor: column.onSort != null ? column.mouseCursor ?? dataTableTheme.headingCellCursor : null,
+        mouseCursor: column.mouseCursor?.resolve(headerStates) ?? dataTableTheme.headingCellCursor?.resolve(headerStates),
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
         final Set<MaterialState> states = <MaterialState>{
           if (row.selected)
             MaterialState.selected,
-          if (row.onSelectChanged == null)
-            MaterialState.disabled,
         };
         final DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(

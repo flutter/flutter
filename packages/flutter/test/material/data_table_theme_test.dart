@@ -85,7 +85,7 @@ void main() {
       columnSpacing: 4.0,
       dividerThickness: 5.0,
       checkboxHorizontalMargin: 6.0,
-      headingCellCursor: SystemMouseCursors.grab,
+      headingCellCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab),
       dataRowCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden),
     ).debugFillProperties(builder);
 
@@ -106,7 +106,7 @@ void main() {
     expect(description[9], 'columnSpacing: 4.0');
     expect(description[10], 'dividerThickness: 5.0');
     expect(description[11], 'checkboxHorizontalMargin: 6.0');
-    expect(description[12], 'headingCellCursor: SystemMouseCursor(grab)');
+    expect(description[12], 'headingCellCursor: MaterialStatePropertyAll(SystemMouseCursor(grab))');
     expect(description[13], 'dataRowCursor: MaterialStatePropertyAll(SystemMouseCursor(forbidden))');
   });
 
@@ -121,7 +121,7 @@ void main() {
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
     const double dividerThickness = 5.0;
-    const MouseCursor headingCellCursor = SystemMouseCursors.grab;
+    const MaterialStateProperty<MouseCursor> headingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab);
     const MaterialStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
 
     await tester.pumpWidget(
@@ -242,7 +242,7 @@ void main() {
     const double themeHorizontalMargin = 2.0;
     const double themeColumnSpacing = 3.0;
     const double themeDividerThickness = 4.0;
-    const MouseCursor themeHeadingCellCursor = SystemMouseCursors.copy;
+    const MaterialStateProperty<MouseCursor> themeHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
     const MaterialStateProperty<MouseCursor> themeDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
@@ -255,7 +255,7 @@ void main() {
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
     const double dividerThickness = 5.0;
-    const MouseCursor headingCellCursor = SystemMouseCursors.forbidden;
+    const MaterialStateProperty<MouseCursor> headingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
     const MaterialStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
 
     await tester.pumpWidget(
@@ -336,7 +336,7 @@ void main() {
     await gesture.addPointer(location: tester.getCenter(find.text('A')));
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), headingCellCursor);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), headingCellCursor.resolve(<MaterialState>{}));
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));
     await tester.pump();
@@ -391,7 +391,7 @@ void main() {
     const double globalThemeHorizontalMargin = 2.0;
     const double globalThemeColumnSpacing = 3.0;
     const double globalThemeDividerThickness = 4.0;
-    const MouseCursor globalHeadingCellCursor = SystemMouseCursors.allScroll;
+    const MaterialStateProperty<MouseCursor> globalHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
     const MaterialStateProperty<MouseCursor> globalDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
 
     const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
@@ -404,7 +404,7 @@ void main() {
     const double localThemeHorizontalMargin = 3.0;
     const double localThemeColumnSpacing = 4.0;
     const double localThemeDividerThickness = 5.0;
-    const MouseCursor localHeadingCellCursor = SystemMouseCursors.move;
+    const MaterialStateProperty<MouseCursor> localHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
     const MaterialStateProperty<MouseCursor> localDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
 
     await tester.pumpWidget(
@@ -489,7 +489,7 @@ void main() {
     await gesture.addPointer(location: tester.getCenter(find.text('A')));
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), localHeadingCellCursor);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), localHeadingCellCursor.resolve(<MaterialState>{}));
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));
     await tester.pump();

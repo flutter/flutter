@@ -109,7 +109,7 @@ class DataTableThemeData with Diagnosticable {
   final double? checkboxHorizontalMargin;
 
   /// If specified, overrides the default value of [DataColumn.mouseCursor].
-  final MouseCursor? headingCellCursor;
+  final MaterialStateProperty<MouseCursor?>? headingCellCursor;
 
   /// If specified, overrides the default value of [DataRow.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? dataRowCursor;
@@ -134,7 +134,7 @@ class DataTableThemeData with Diagnosticable {
     double? columnSpacing,
     double? dividerThickness,
     double? checkboxHorizontalMargin,
-    MouseCursor? headingCellCursor,
+    MaterialStateProperty<MouseCursor?>? headingCellCursor,
     MaterialStateProperty<MouseCursor?>? dataRowCursor,
   }) {
     return DataTableThemeData(
@@ -241,8 +241,8 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
     properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
-    properties.add(DiagnosticsProperty<MouseCursor>('headingCellCursor', headingCellCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('dataRowCursor', dataRowCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('headingCellCursor', headingCellCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('dataRowCursor', dataRowCursor, defaultValue: null));
   }
 }
 
