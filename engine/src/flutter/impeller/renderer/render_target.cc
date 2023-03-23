@@ -297,6 +297,7 @@ RenderTarget RenderTarget::CreateOffscreenMSAA(
       color_attachment_config.resolve_storage_mode;
   color0_resolve_tex_desc.format = pixel_format;
   color0_resolve_tex_desc.size = size;
+  color0_resolve_tex_desc.compression_type = CompressionType::kLossy;
   color0_resolve_tex_desc.usage =
       static_cast<uint64_t>(TextureUsage::kRenderTarget) |
       static_cast<uint64_t>(TextureUsage::kShaderRead);

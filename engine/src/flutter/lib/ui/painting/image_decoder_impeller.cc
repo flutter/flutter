@@ -269,6 +269,7 @@ sk_sp<DlImage> ImageDecoderImpeller::UploadTextureToPrivate(
   texture_descriptor.format = pixel_format.value();
   texture_descriptor.size = {image_info.width(), image_info.height()};
   texture_descriptor.mip_count = texture_descriptor.size.MipCount();
+  texture_descriptor.compression_type = impeller::CompressionType::kLossy;
 
   auto dest_texture =
       context->GetResourceAllocator()->CreateTexture(texture_descriptor);
