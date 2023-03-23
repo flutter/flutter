@@ -732,6 +732,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     return children != oldDelegate.children;
   }
 }
+
 class _SelectionKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
