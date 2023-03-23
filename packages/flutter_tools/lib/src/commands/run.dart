@@ -38,6 +38,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDartDefineOption();
     usesFlavorOption();
     usesWebRendererOption();
+    usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     usesApplicationBinaryOption();
