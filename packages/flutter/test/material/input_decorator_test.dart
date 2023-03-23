@@ -157,7 +157,8 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
 }
 
 void main() {
-  for (final bool useMaterial3 in  <bool>[true, false]){
+  for (final bool useMaterial3 in  <bool>[true, false]) {
+  const double subtextGap = useMaterial3 ? 4.0 : 8.0;
   testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
     // The label appears above the input text
     await tester.pumpWidget(
@@ -1244,15 +1245,15 @@ void main() {
     //   12 - help/error/counter text (font size 12dps)
 
     // isEmpty: true, the label is not floating
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 72.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0 + subtextGap));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('helper')), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(788.0, useMaterial3 ? 60.0 : 64.0));
+    expect(tester.getTopLeft(find.text('helper')), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getTopRight(find.text('counter')), Offset(788.0, 56.0 + subtextGap));
 
     // If errorText is specified then the helperText isn't shown
     await tester.pumpWidget(
@@ -1272,15 +1273,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // isEmpty: false, the label _is_ floating
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 72.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0 + subtextGap));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('error')), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(788.0, useMaterial3 ? 60.0 : 64.0));
+    expect(tester.getTopLeft(find.text('error')), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getTopRight(find.text('counter')), Offset(788.0, 56.0 + subtextGap));
     expect(find.text('helper'), findsNothing);
 
     // Overall height for this dense layout InputDecorator is 68dps. When the
@@ -1321,15 +1322,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // isEmpty: false, the label _is_ floating
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 64.0 : 68.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 60.0 + subtextGap));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 8.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('error')), Offset(12.0, useMaterial3 ? 52.0 : 56.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(788.0, useMaterial3 ? 52.0 : 56.0));
+    expect(tester.getTopLeft(find.text('error')), Offset(12.0, 48.0 + subtextGap));
+    expect(tester.getTopRight(find.text('counter')), Offset(788.0, 48.0 + subtextGap));
 
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1492,9 +1493,9 @@ void main() {
     //    8 - below the border padding
     //   36 - error text (3 lines, font size 12dps)
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 96.0 : 100.0));
-    expect(tester.getTopLeft(find.text(kError3)), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getBottomLeft(find.text(kError3)), Offset(12.0, useMaterial3 ? 96.0 : 100.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 92.0 + subtextGap));
+    expect(tester.getTopLeft(find.text(kError3)), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getBottomLeft(find.text(kError3)), Offset(12.0, 92.0 + subtextGap));
 
     // Overall height for this InputDecorator is 12 less than the first
     // one, 88dps, because errorText only occupies two lines.
@@ -1514,9 +1515,9 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 84.0 : 88.0));
-    expect(tester.getTopLeft(find.text(kError2)), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getBottomLeft(find.text(kError2)), Offset(12.0, useMaterial3 ? 84.0 : 88.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 80.0 + subtextGap));
+    expect(tester.getTopLeft(find.text(kError2)), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getBottomLeft(find.text(kError2)), Offset(12.0, 80.0 + subtextGap));
 
     // Overall height for this InputDecorator is 24 less than the first
     // one, 88dps, because errorText only occupies one line.
@@ -1536,9 +1537,9 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 72.0 : 76.0));
-    expect(tester.getTopLeft(find.text(kError1)), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getBottomLeft(find.text(kError1)), Offset(12.0, useMaterial3 ? 72.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0 + subtextGap));
+    expect(tester.getTopLeft(find.text(kError1)), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getBottomLeft(find.text(kError1)), Offset(12.0, 68.0 + subtextGap));
   });
 
   testWidgets('InputDecoration helperMaxLines', (WidgetTester tester) async {
@@ -1570,9 +1571,9 @@ void main() {
     //    8 - below the border padding
     //   36 - helper text (3 lines, font size 12dps)
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 96.0 : 100.0));
-    expect(tester.getTopLeft(find.text(kHelper3)), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getBottomLeft(find.text(kHelper3)), Offset(12.0, useMaterial3 ? 96.0 : 100.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 92.0 + subtextGap));
+    expect(tester.getTopLeft(find.text(kHelper3)), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getBottomLeft(find.text(kHelper3)), Offset(12.0, 92.0 + subtextGap));
 
     // Overall height for this InputDecorator is 12 less than the first
     // one, 88dps, because helperText only occupies two lines.
@@ -1591,9 +1592,9 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 84.0 : 88.0));
-    expect(tester.getTopLeft(find.text(kHelper3)), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getBottomLeft(find.text(kHelper3)), Offset(12.0, useMaterial3 ? 84.0 : 88.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 80.0 + subtextGap));
+    expect(tester.getTopLeft(find.text(kHelper3)), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getBottomLeft(find.text(kHelper3)), Offset(12.0, 80.0 + subtextGap));
 
     // Overall height for this InputDecorator is 12 less than the first
     // one, 88dps, because helperText only occupies two lines.
@@ -1612,9 +1613,9 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 84.0 : 88.0));
-    expect(tester.getTopLeft(find.text(kHelper2)), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getBottomLeft(find.text(kHelper2)), Offset(12.0, useMaterial3 ? 84.0 : 88.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 80.0 + subtextGap));
+    expect(tester.getTopLeft(find.text(kHelper2)), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getBottomLeft(find.text(kHelper2)), Offset(12.0, 80.0 + subtextGap));
 
     // Overall height for this InputDecorator is 24 less than the first
     // one, 88dps, because helperText only occupies one line.
@@ -1633,9 +1634,9 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 72.0 : 76.0));
-    expect(tester.getTopLeft(find.text(kHelper1)), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getBottomLeft(find.text(kHelper1)), Offset(12.0, useMaterial3 ? 72.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0 + subtextGap));
+    expect(tester.getTopLeft(find.text(kHelper1)), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getBottomLeft(find.text(kHelper1)), Offset(12.0, 68.0 + subtextGap));
   });
 
   testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
@@ -3097,7 +3098,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled
     // (dx) - 12 = (text offset)x.
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 64.0 : 68.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 60.0 + subtextGap));
     final double dx = tester.getRect(find.byType(InputDecorator)).right;
     expect(tester.getRect(find.text('test')).right, dx - 12.0);
   });
@@ -3118,7 +3119,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 64.0 : 68.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 60.0 + subtextGap));
     expect(tester.getRect(find.text('test')).left, 12.0);
   });
 
@@ -3138,7 +3139,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled
     // (dx) - 12 = (text offset)x.
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 48.0 : 52.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 44.0 + subtextGap));
     final double dx = tester.getRect(find.byType(InputDecorator)).right;
     expect(tester.getRect(find.text('test')).right, dx - 12.0);
   });
@@ -3160,7 +3161,7 @@ void main() {
 
     // Margin for text decoration is 12 when filled and top left offset is (0, 0)
     // 0 + 12 = 12.
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 48.0 : 52.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 44.0 + subtextGap));
     expect(tester.getRect(find.text('test')).left, 12.0);
   });
 
@@ -3189,15 +3190,15 @@ void main() {
     //    8 - below the border padding
     //   12 - [counter helper/error] (font size 12dps)
 
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 72.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0 + subtextGap));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('counter')), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getTopRight(find.text('helper')), Offset(788.0, useMaterial3 ? 60.0 : 64.0));
+    expect(tester.getTopLeft(find.text('counter')), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getTopRight(find.text('helper')), Offset(788.0, 56.0 + subtextGap));
 
     // If both error and helper are specified, show the error
     await tester.pumpWidget(
@@ -3216,8 +3217,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('counter')), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getTopRight(find.text('error')), Offset(788.0, useMaterial3 ? 60.0 : 64.0));
+    expect(tester.getTopLeft(find.text('counter')), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getTopRight(find.text('error')), Offset(788.0, 56.0 + subtextGap));
     expect(find.text('helper'), findsNothing);
   });
 
@@ -3833,15 +3834,15 @@ void main() {
     //   12 - help/error/counter text (font size 12dps)
 
     // Label is floating because isEmpty is false.
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 72.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 58.0 + subtextGap));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('helper')), Offset(12.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(788.0, useMaterial3 ? 60.0 : 64.0));
+    expect(tester.getTopLeft(find.text('helper')), Offset(12.0, 56.0 + subtextGap));
+    expect(tester.getTopRight(find.text('counter')), Offset(788.0, 56.0 + subtextGap));
   });
 
   testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
@@ -4090,13 +4091,13 @@ void main() {
     //   12 - bottom padding
     //    8 - below the border padding
     //   12 - help/error/counter text (font size 12dps)
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 72.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0 + subtextGap));
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
-    expect(tester.getTopLeft(find.text('helper')), Offset(0.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(800.0, useMaterial3 ? 60.0 : 64.0));
+    expect(tester.getTopLeft(find.text('helper')), Offset(0.0, 56.0 + subtextGap));
+    expect(tester.getTopRight(find.text('counter')), Offset(800.0, 56.0 + subtextGap));
 
     // Verify that the styles were passed along
     expect(tester.widget<Text>(find.text('hint')).style!.color, hintStyle.color);
