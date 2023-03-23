@@ -193,11 +193,6 @@ std::optional<DecompressResult> ImageDecoderImpeller::DecompressTexture(
       FML_DLOG(ERROR) << "Could not decompress image.";
       return std::nullopt;
     }
-  } else if (image_info.colorType() == base_image_info.colorType()) {
-    auto pixel_ref = SkMallocPixelRef::MakeWithData(
-        image_info, descriptor->row_bytes(), descriptor->data());
-    bitmap->setPixelRef(pixel_ref, 0, 0);
-    bitmap->setImmutable();
   } else {
     auto temp_bitmap = std::make_shared<SkBitmap>();
     temp_bitmap->setInfo(base_image_info);
