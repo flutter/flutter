@@ -5,4 +5,3 @@
 # This file will be added to flutter's internal repository.
 # https://github.com/flutter/flutter/wiki/Autosubmit-bot
 config_path: 'autosubmit/flutter/autosubmit_master.yml'
-
