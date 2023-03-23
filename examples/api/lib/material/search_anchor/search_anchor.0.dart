@@ -41,7 +41,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
             controller.text = filteredColor.label;
             controller.selection =
                 TextSelection.collapsed(offset: controller.text.length);
-          },),
+          }),
           onTap: () {
             controller.closeView(filteredColor.label);
             handleSelection(filteredColor);
