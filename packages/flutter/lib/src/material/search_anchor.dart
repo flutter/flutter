@@ -177,7 +177,7 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to a back button which pops the view.
   final Widget? viewLeading;
 
-  /// An optional widget list to display after the text input filed when the search
+  /// An optional widget list to display after the text input field when the search
   /// view is open.
   ///
   /// Typically the [viewTrailing] widget list has up to two widgets.
