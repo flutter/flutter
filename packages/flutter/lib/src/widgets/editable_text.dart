@@ -1487,11 +1487,13 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final Radius? cursorRadius;
 
+  /// {@template flutter.widgets.editableText.cursorOpacityAnimates}
   /// Whether the cursor will animate from fully transparent to fully opaque
   /// during each cursor blink.
   ///
   /// By default, the cursor opacity will animate on iOS platforms and will not
   /// animate on Android platforms.
+  /// {@endtemplate}
   final bool cursorOpacityAnimates;
 
   ///{@macro flutter.rendering.RenderEditable.cursorOffset}

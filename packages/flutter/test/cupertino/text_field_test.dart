@@ -381,6 +381,31 @@ void main() {
     },
   );
 
+  testWidgets('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
+
+    // True
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(autofocus: true),
+      ),
+    );
+    await tester.pump();
+    EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.cursorOpacityAnimates, true);
+
+    // False
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(autofocus: true, cursorOpacityAnimates: false),
+      ),
+    );
+    await tester.pump();
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.cursorOpacityAnimates, false);
+  });
+
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically',
     (WidgetTester tester) async {
