@@ -114,15 +114,6 @@ void main() {
   });
 
   group('Material 3 tests', () {
-    Material getBabRenderObject(WidgetTester tester) {
-      return tester.widget<Material>(
-        find.descendant(
-          of: find.byType(BottomAppBar),
-          matching: find.byType(Material),
-        ),
-      );
-    }
-
     testWidgets('BAB theme overrides color - M3', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(
@@ -131,7 +122,7 @@ void main() {
       );
       await tester.pumpWidget(_withTheme(theme, true));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, themedColor);
     });
 
@@ -147,10 +138,10 @@ void main() {
           bottomAppBarTheme: theme,
           bottomAppBarColor: themeColor
         ),
-        home: const Scaffold(body: BottomAppBar(color: babColor)),
+        home: const Scaffold(body: BottomAppBar(color: babColor, surfaceTintColor: Colors.transparent)),
       ));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, babColor);
     });
 
@@ -165,10 +156,10 @@ void main() {
           bottomAppBarTheme: theme,
           bottomAppBarColor: themeColor
         ),
-        home: const Scaffold(body: BottomAppBar()),
+        home: const Scaffold(body: BottomAppBar(surfaceTintColor: Colors.transparent)),
       ));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, babThemeColor);
     });
 
@@ -176,24 +167,25 @@ void main() {
       final ThemeData theme = ThemeData(useMaterial3: true);
       await tester.pumpWidget(MaterialApp(
         theme: theme,
-        home: const Scaffold(body: BottomAppBar()),
+        home: const Scaffold(body: BottomAppBar(surfaceTintColor: Colors.transparent)),
       ));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
 
       expect(widget.color, theme.colorScheme.surface);
       expect(widget.elevation, equals(3.0));
     });
 
     testWidgets('BAB theme overrides surfaceTintColor - M3', (WidgetTester tester) async {
+      const Color color = Colors.blue; // base color that the surface tint will be applied to
       const Color babThemeSurfaceTintColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(
-        surfaceTintColor: babThemeSurfaceTintColor, elevation: 0
+          color: color, surfaceTintColor: babThemeSurfaceTintColor, elevation: 0,
       );
       await tester.pumpWidget(_withTheme(theme, true));
 
-      final Material widget = getBabRenderObject(tester);
-      expect(widget.surfaceTintColor, babThemeSurfaceTintColor);
+      final PhysicalShape widget = _getBabRenderObject(tester);
+      expect(widget.color, ElevationOverlay.applySurfaceTint(color, babThemeSurfaceTintColor, 0));
     });
 
     testWidgets('BAB theme overrides shadowColor - M3', (WidgetTester tester) async {
@@ -203,11 +195,12 @@ void main() {
       );
       await tester.pumpWidget(_withTheme(theme, true));
 
-      final Material widget = getBabRenderObject(tester);
+      final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.shadowColor, babThemeShadowColor);
     });
 
     testWidgets('BAB surfaceTintColor - Widget - M3', (WidgetTester tester) async {
+      const Color color = Colors.white10; // base color that the surface tint will be applied to
       const Color themeSurfaceTintColor = Colors.white10;
       const Color babThemeSurfaceTintColor = Colors.black87;
       const Color babSurfaceTintColor = Colors.pink;
@@ -221,15 +214,16 @@ void main() {
           bottomAppBarColor: themeSurfaceTintColor
         ),
         home: const Scaffold(
-          body: BottomAppBar(surfaceTintColor: babSurfaceTintColor)
+          body: BottomAppBar(color: color, surfaceTintColor: babSurfaceTintColor)
         ),
       ));
 
-      final Material widget = getBabRenderObject(tester);
-      expect(widget.surfaceTintColor, babSurfaceTintColor);
+      final PhysicalShape widget = _getBabRenderObject(tester);
+      expect(widget.color, ElevationOverlay.applySurfaceTint(color, babSurfaceTintColor, 3.0));
     });
 
     testWidgets('BAB surfaceTintColor - BabTheme - M3', (WidgetTester tester) async {
+      const Color color = Colors.blue; // base color that the surface tint will be applied to
       const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(
@@ -242,11 +236,11 @@ void main() {
           bottomAppBarTheme: theme,
           bottomAppBarColor: themeColor
         ),
-        home: const Scaffold(body: BottomAppBar()),
+        home: const Scaffold(body: BottomAppBar(color: color)),
       ));
 
-      final Material widget = getBabRenderObject(tester);
-      expect(widget.surfaceTintColor, babThemeColor);
+      final PhysicalShape widget = _getBabRenderObject(tester);
+      expect(widget.color, ElevationOverlay.applySurfaceTint(color, babThemeColor, 3.0));
     });
   });
 }

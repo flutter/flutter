@@ -33,8 +33,7 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows the [BottomAppBar], which (in Material 2)
-/// can be configured to have a notch using the
+/// This example shows the [BottomAppBar], which can be configured to have a notch using the
 /// [BottomAppBar.shape] property. This also includes an optional [FloatingActionButton], which illustrates
 /// the [FloatingActionButtonLocation]s in relation to the [BottomAppBar].
 ///
@@ -52,10 +51,8 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [NotchedShape] which calculates the notch for a notched [BottomAppBar]
-///    in Material 2.
-///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for in
-///    Material 2.
+///  * [NotchedShape] which calculates the notch for a notched [BottomAppBar].
+///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
 ///  * [AppBar] for a toolbar that is shown at the top of the screen.
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
@@ -117,11 +114,6 @@ class BottomAppBar extends StatefulWidget {
   /// If this property is null then [BottomAppBarTheme.shape] of
   /// [ThemeData.bottomAppBarTheme] is used. If that's null then the shape will
   /// be rectangular with no notch.
-  ///
-  /// If the ambient [ThemeData.useMaterial3] is true,
-  /// then there is never a notch, and this property must be null.
-  /// (The Material 3 spec does not provide for a notch:
-  /// <https://m3.material.io/components/bottom-app-bar/specs#9d91e4a4-a6d9-4ad5-afad-430267ebb4e9>.)
   final NotchedShape? shape;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -184,9 +176,6 @@ class _BottomAppBarState extends State<BottomAppBar> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isMaterial3 = theme.useMaterial3;
-    assert(!isMaterial3 || widget.shape == null,
-      'The [BottomAppBar.shape] field is not permitted in Material 3.');
-
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
     final BottomAppBarTheme defaults = isMaterial3 ? _BottomAppBarDefaultsM3(context) : _BottomAppBarDefaultsM2(context);
 
@@ -204,6 +193,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final double? height = widget.height ?? babTheme.height ?? defaults.height;
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
+    final Color effectiveColor = isMaterial3
+      ? ElevationOverlay.applySurfaceTint(color, surfaceTintColor, elevation)
+      : ElevationOverlay.applyOverlay(context, color, elevation);
     final Color shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
     Widget child = Padding(
@@ -211,29 +203,18 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child: widget.child,
     );
 
-    if (isMaterial3) {
-      child = Material(
+    child = PhysicalShape(
+      clipper: clipper,
+      elevation: elevation,
+      shadowColor: shadowColor,
+      color: effectiveColor,
+      clipBehavior: widget.clipBehavior,
+      child: Material(
         key: materialKey,
-        elevation: elevation,
-        color: color,
-        surfaceTintColor: surfaceTintColor,
-        shadowColor: shadowColor,
+        type: MaterialType.transparency,
         child: SafeArea(child: child),
-      );
-    } else {
-      child = PhysicalShape(
-        clipper: clipper,
-        elevation: elevation,
-        shadowColor: shadowColor,
-        color: ElevationOverlay.applyOverlay(context, color, elevation),
-        clipBehavior: widget.clipBehavior,
-        child: Material(
-          key: materialKey,
-          type: MaterialType.transparency,
-          child: SafeArea(child: child),
-        ),
-      );
-    }
+      ),
+    );
 
     return SizedBox(height: height, child: child);
   }
@@ -315,6 +296,7 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
     : super(
       elevation: 3.0,
       height: 80.0,
+      shape: const AutomaticNotchedShape(RoundedRectangleBorder()),
     );
 
   final BuildContext context;

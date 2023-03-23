@@ -14,21 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('throws if `shape` requested in Material 3', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/123283
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
-        home: const Scaffold(
-          bottomNavigationBar: BottomAppBar(
-            shape: CircularNotchedRectangle(),
-          ),
-        ),
-      ),
-    );
-    expect(tester.takeException(), isAssertionError);
-  });
-
   testWidgets('shadow effect is not doubled', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123064
     debugDisableShadows = false;
@@ -77,8 +62,8 @@ void main() {
     final Finder finder = find.descendant(
       of: find.byType(BottomAppBar),
       matching: find.byWidgetPredicate((Widget widget) {
-        // [Material] itself can use either PhysicalShape or PhysicalModel,
-        // and the extra layer [BottomAppBar] can add is a PhysicalShape.
+        // A color layer is probably a [PhysicalShape] or [PhysicalModel],
+        // either backing a non- [Material] or used directly.
         return widget is PhysicalShape || widget is PhysicalModel;
       }),
     );
@@ -299,6 +284,7 @@ void main() {
                 ),
                 bottomNavigationBar: BottomAppBar(
                   color: Color(0xff0000ff),
+                  surfaceTintColor: Colors.transparent,
                 ),
             );
           },
@@ -306,10 +292,10 @@ void main() {
       ),
     );
 
-    final Material material = tester.widget(
-        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(Material)));
+    final PhysicalShape physicalShape = tester.widget(
+        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(PhysicalShape)));
 
-    expect(material.color, const Color(0xff0000ff));
+    expect(physicalShape.color, const Color(0xff0000ff));
   });
 
   testWidgets('Shadow color is transparent in Material 3', (WidgetTester tester) async {
@@ -328,10 +314,10 @@ void main() {
       )
     );
 
-    final Material material = tester.widget(
-        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(Material)));
+    final PhysicalShape physicalShape = tester.widget(
+        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(PhysicalShape)));
 
-    expect(material.shadowColor, Colors.transparent);
+    expect(physicalShape.shadowColor, Colors.transparent);
   });
 
   testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
