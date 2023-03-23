@@ -433,7 +433,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   late final SearchViewThemeData viewTheme;
   late final DividerThemeData dividerTheme;
   final RectTween _rectTween = RectTween();
-  final ShapeBorderTween _shapeTween = ShapeBorderTween();
 
   Rect? getRect() {
     final BuildContext? context = anchorKey.currentContext;
