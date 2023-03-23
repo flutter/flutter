@@ -11,4 +11,4 @@ PRODUCT_NAME = platform_channel
 PRODUCT_BUNDLE_IDENTIFIER = com.example.platformChannel
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2014 The Flutter Authors. All rights reserved.
