@@ -168,9 +168,9 @@ Future<String?> getGradleVersion(
         distributionUrlRegex.firstMatch(wrapperFileContent);
     if (distributionUrl != null) {
       try {
-        final String androidPluginVersion =
+        final String gradleVersion =
             distributionUrl.group(0)!.split('-')[1];
-        return androidPluginVersion;
+        return gradleVersion;
         // ignore: empty_catches
       } on TypeError {}
     } else {
@@ -182,7 +182,7 @@ Future<String?> getGradleVersion(
      logger.printTrace(
           '$propertiesFile does not exist falling back to system gradle');
   }
-  // System installed Gradle version. 
+  // System installed Gradle version.
   if (processManager.canRun('gradle')) {
     final String gradleVersionVerbose =
         (await processManager.run(<String>['gradle', r'--version'])).stdout

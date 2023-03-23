@@ -533,13 +533,15 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.isModule || _editableHostAppDirectory.existsSync();
   }
 
-  String get gradleVersion {
-    if (!isUsingGradle) {
-      // TODO fail in some clever way
-      print('Not using gradle');
-      return '';
-    }
-    return ''; // TODO call gradleUtils. 
+  Future<bool> hasValidJavaGradleAgpVersions() async {
+    String javaVersion = '11';
+    String gradleVersion = '6.7.1';
+    String agpVersion = '4.2.0';
+
+    String? localGradleVersion = await gradle.getGradleVersion(
+        hostAppGradleRoot, globals.logger, globals.processManager);
+
+    return false;
   }
 
   bool get isUsingGradle {

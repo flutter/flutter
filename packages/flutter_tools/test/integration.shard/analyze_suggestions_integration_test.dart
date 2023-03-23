@@ -27,6 +27,7 @@ void main() {
       fileSystem = globals.localFileSystem;
     });
 
+    // TODO update for java/gradle/agp content.
     testUsingContext('General Info Project Validator', () async {
       final BufferLogger loggerTest = BufferLogger.test();
       final AnalyzeCommand command = AnalyzeCommand(

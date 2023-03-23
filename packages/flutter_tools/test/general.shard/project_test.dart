@@ -401,6 +401,13 @@ void main() {
       });
     });
 
+    group('compatibality', () {
+      _testInMemory('always returns false', () async {
+        final FlutterProject project = await someProject();
+        expect(await project.android.hasValidJavaGradleAgpVersions(), isFalse);
+      });
+    });
+
     group('language', () {
       late XcodeProjectInterpreter xcodeProjectInterpreter;
       late MemoryFileSystem fs;
