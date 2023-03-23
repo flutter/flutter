@@ -793,4 +793,55 @@ void main() {
     await tester.pump();
     expect(tester.hasRunningAnimations, isFalse);
   });
+
+  testWidgets('Call to ExpansionTileController.of()', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey childKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          title: Text('Title', key: titleKey),
+          children: <Widget>[
+            Text('Child 0', key: childKey),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionTileController controller1 = ExpansionTileController.of(childKey.currentContext!);
+    expect(controller1.isExpanded, isTrue);
+
+    final ExpansionTileController controller2 = ExpansionTileController.of(titleKey.currentContext!);
+    expect(controller2.isExpanded, isTrue);
+
+    expect(controller1, controller2);
+  });
+
+  testWidgets('Call to ExpansionTile.maybeOf()', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey nonDescendantKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('Title', key: titleKey),
+              children: const <Widget>[
+                Text('Child 0'),
+              ],
+            ),
+            Text('Non descendant', key: nonDescendantKey),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionTileController? controller1 = ExpansionTileController.maybeOf(titleKey.currentContext!);
+    expect(controller1, isNotNull);
+    expect(controller1?.isExpanded, isFalse);
+
+    final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
+    expect(controller2, isNull);
+  });
 }

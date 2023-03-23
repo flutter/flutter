@@ -20,7 +20,9 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// It can be useful to expand or collapse an [ExpansionTile]
 /// programatically, for example to reconfigure an existing expansion
 /// tile based on a system event. To do so, create an [ExpansionTile]
-/// with an [ExpansionTileController] that's owned by a stateful widget.
+/// with an [ExpansionTileController] that's owned by a stateful widget
+/// or look up the tile's automatically created [ExpansionTileController]
+/// with [ExpansionTileController.of]
 ///
 /// The controller's [expand] and [collapse] methods cause the
 /// the [ExpansionTile] to rebuild, so they may not be called from
@@ -96,6 +98,87 @@ class ExpansionTileController {
     if (isExpanded) {
       _state!._toggleExpansion();
     }
+  }
+
+  /// Finds the [ExpansionTileController] for the closest [ExpansionTile] instance
+  /// that encloses the given context.
+  ///
+  /// If no [ExpansionTile] encloses the given context, calling this
+  /// method will cause an assert in debug mode, and throw an
+  /// exception in release mode.
+  ///
+  /// To return null if there is no [ExpansionTile] use [maybeOf] instead.
+  ///
+  /// {@tool dartpad}
+  /// Typical usage of the [ExpansionTile.of] function is to call it from within the
+  /// `build` method of a descendant of an [ExpansionTile].
+  ///
+  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.of.1.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// When the [ExpansionTile] is actually created in the same `build` function as the
+  /// , the
+  /// `context` argument to the `build` function can't be used to find the
+  /// [ExpansionTileController] (since it's "above" the widget being returned in the widget
+  /// tree). In such cases, the following technique with a [Builder] can be used
+  /// to provide a new scope with a [BuildContext] that is "under" the
+  /// [ExpansionTile]:
+  ///
+  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.of.1.dart **
+  /// {@end-tool}
+  ///
+  /// A more efficient solution is to split your build function into several
+  /// widgets. This introduces a new context from which you can obtain the
+  /// [ExpansionTileController]. In this solution, you would have an outer widget that creates
+  /// the [ExpansionTile] populated by instances of your new inner widgets, and then
+  /// in these inner widgets you would use [ExpansionTile.of].
+  static ExpansionTileController of(BuildContext context) {
+    final _ExpansionTileState? result = context.findAncestorStateOfType<_ExpansionTileState>();
+    if (result != null) {
+      return result._tileController;
+    }
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'ExpansionTileController.of() called with a context that does not contain a ExpansionTile.',
+      ),
+      ErrorDescription(
+        'No ExpansionTile ancestor could be found starting from the context that was passed to ExpansionTile.of(). '
+        'This usually happens when the context provided is from the same StatefulWidget as that '
+        'whose build function actually creates the ExpansionTile widget being sought.',
+      ),
+      ErrorHint(
+        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+        'context that is "under" the ExpansionTile. For an example of this, please see the '
+        'documentation for ExpansionTile.of():\n'
+        '  https://api.flutter.dev/flutter/material/ExpansionTile/of.html',
+      ),
+      ErrorHint(
+        'A more efficient solution is to split your build function into several widgets. This '
+        'introduces a new context from which you can obtain the ExpansionTile. In this solution, '
+        'you would have an outer widget that creates the ExpansionTile populated by instances of '
+        'your new inner widgets, and then in these inner widgets you would use ExpansionTile.of().\n'
+        'An other solution is assign a GlobalKey to the ExpansionTile, '
+        'then use the key.currentState property to obtain the ExpansionTile rather than '
+        'using the ExpansionTile.of() function.',
+      ),
+      context.describeElement('The context used was'),
+    ]);
+  }
+
+  /// Finds the [ExpansionTile] from the closest instance of this class that
+  /// encloses the given context and returns its [ExpansionTileController].
+  ///
+  /// If no [ExpansionTile] encloses the given context then return null.
+  /// To throw an exception instead, use [of] instead of this function.
+  ///
+  /// See also:
+  ///
+  ///  * [of], a similar function to this one that throws if no [ExpansionTile]
+  ///    encloses the given context. Also includes some sample code in its
+  ///    documentation.
+  static ExpansionTileController? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<_ExpansionTileState>()?._tileController;
   }
 }
 
@@ -405,6 +488,10 @@ class ExpansionTile extends StatefulWidget {
   final ListTileControlAffinity? controlAffinity;
 
   /// If provided, the controller can be used to expand and collapse tiles.
+  ///
+  /// In cases were control over the tile's state is needed from a callback triggered
+  /// by a widget within the tile, [ExpansionTileController.of] may be more convenient
+  /// than supplying a controller.
   final ExpansionTileController? controller;
 
   @override
@@ -430,6 +517,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   late Animation<Color?> _backgroundColor;
 
   bool _isExpanded = false;
+  late ExpansionTileController _tileController;
 
   @override
   void initState() {
@@ -447,17 +535,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       _animationController.value = 1.0;
     }
 
-    if (widget.controller != null) {
-      assert(widget.controller!._state == null);
-      widget.controller!._state = this;
-    }
+    assert(widget.controller?._state == null);
+    _tileController = widget.controller ?? ExpansionTileController();
+    _tileController._state = this;
   }
 
   @override
   void dispose() {
-    if (widget.controller != null) {
-      widget.controller!._state = null;
-    }
+    _tileController._state = null;
     _animationController.dispose();
     super.dispose();
   }
