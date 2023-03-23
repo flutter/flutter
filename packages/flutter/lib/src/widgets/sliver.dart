@@ -13,11 +13,6 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scroll_delegate.dart';
 
-// Examples can assume:
-// late SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
-// abstract class SomeWidget extends StatefulWidget { const SomeWidget({super.key}); }
-// typedef ChildWidget = Placeholder;
-
 /// A base class for sliver that have [KeepAlive] children.
 ///
 /// See also:
