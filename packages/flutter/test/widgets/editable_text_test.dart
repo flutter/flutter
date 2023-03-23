@@ -15532,6 +15532,40 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
     expect(state.buildTextSpan().style!.fontWeight, FontWeight.bold);
   });
+
+  testWidgets('complex characters are treated as single characters in obscure mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.enterText(find.byType(EditableText), '👨‍👩‍👦‍👦');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '👨‍👩‍👦‍👦');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+
+    expect(state.textEditingValue.text, '');
+  });
 }
 
 class UnsettableController extends TextEditingController {
