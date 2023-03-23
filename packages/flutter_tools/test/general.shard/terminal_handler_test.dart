@@ -1423,19 +1423,16 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
         ..isRunningDebug = true
         ..isRunningProfile = false
         ..isRunningRelease = false;
-      break;
     case BuildMode.profile:
       residentRunner
         ..isRunningDebug = false
         ..isRunningProfile = true
         ..isRunningRelease = false;
-      break;
     case BuildMode.release:
       residentRunner
         ..isRunningDebug = false
         ..isRunningProfile = false
         ..isRunningRelease = true;
-      break;
   }
   return TerminalHandler(
     residentRunner,
@@ -1518,7 +1515,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

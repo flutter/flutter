@@ -825,6 +825,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
+            assert(details.controller != null);
             return Scrollbar(
               controller: details.controller,
               child: child,
@@ -864,16 +865,19 @@ class MaterialScrollBehavior extends ScrollBehavior {
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
-            continue glow;
+            return _buildGlowingOverscrollIndicator(context, details, child);
         }
-      glow:
       case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          axisDirection: details.direction,
-          color: Theme.of(context).colorScheme.secondary,
-          child: child,
-        );
+        return _buildGlowingOverscrollIndicator(context, details, child);
     }
+  }
+
+  GlowingOverscrollIndicator _buildGlowingOverscrollIndicator(BuildContext context, ScrollableDetails details, Widget child) {
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: Theme.of(context).colorScheme.secondary,
+      child: child,
+    );
   }
 }
 

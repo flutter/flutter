@@ -425,10 +425,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-        break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
 
@@ -771,7 +769,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)

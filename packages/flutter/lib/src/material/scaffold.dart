@@ -360,14 +360,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_snackBars.isNotEmpty) {
           _snackBarController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         setState(() {
           assert(_snackBarTimer == null);
           // build will create a new timer if necessary to dismiss the snackBar.
         });
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -497,10 +495,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_materialBanners.isNotEmpty) {
           _materialBannerController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -2425,7 +2421,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
-  ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
+  ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
+  ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
   PersistentBottomSheetController<T> showBottomSheet<T>(
     WidgetBuilder builder, {
     Color? backgroundColor,
@@ -2926,7 +2923,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           removeRightPadding: false,
           removeBottomPadding: true,
         );
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

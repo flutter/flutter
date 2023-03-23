@@ -525,14 +525,12 @@ class Border extends BoxBorder {
             case BoxShape.circle:
               assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
-              break;
             case BoxShape.rectangle:
               if (borderRadius != null && borderRadius != BorderRadius.zero) {
                 BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
                 return;
               }
               BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
-              break;
           }
           return;
       }
@@ -870,14 +868,12 @@ class BorderDirectional extends BoxBorder {
             case BoxShape.circle:
               assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
-              break;
             case BoxShape.rectangle:
               if (borderRadius != null && borderRadius != BorderRadius.zero) {
                 BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
                 return;
               }
               BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
-              break;
           }
           return;
       }
@@ -893,11 +889,9 @@ class BorderDirectional extends BoxBorder {
       case TextDirection.rtl:
         left = end;
         right = start;
-        break;
       case TextDirection.ltr:
         left = start;
         right = end;
-        break;
     }
     paintBorder(canvas, rect, top: top, left: left, bottom: bottom, right: right);
   }

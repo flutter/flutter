@@ -423,10 +423,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         );
         assert(minSize.width >= 0.0);
         assert(minSize.height >= 0.0);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
-        break;
     }
 
     return Semantics(

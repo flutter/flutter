@@ -841,12 +841,10 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         isMobile = true;
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         isMobile = false;
-        break;
     }
     int expectedCount = isMobile ? 0 : 1;
 
