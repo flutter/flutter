@@ -236,13 +236,10 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (widget.setup) {
       case Setup.none:
         imageWidget = Container();
-        break;
       case Setup.image:
         imageWidget = Image.memory(base64Decode(_displayP3Logo));
-        break;
       case Setup.canvasSaveLayer:
         imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
-        break;
       case Setup.blur:
         imageWidget = Stack(
           children: <Widget>[
@@ -258,7 +255,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Image.memory(base64Decode(_displayP3Logo))),
           ],
         );
-        break;
     }
 
     return Scaffold(

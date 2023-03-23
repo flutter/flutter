@@ -60,6 +60,7 @@ class BuildWebCommand extends BuildSubCommand {
       },
     );
     usesWebRendererOption();
+    usesWebResourcesCdnFlag();
 
     //
     // JavaScript compilation options

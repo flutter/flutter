@@ -223,7 +223,6 @@ targets:
 
   - name: Linux build_tests_1_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -262,7 +261,6 @@ targets:
 
   - name: Linux build_tests_3_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -345,7 +343,6 @@ targets:
 
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
-    bringup: true # New target: https://github.com/flutter/flutter/pull/115511
     timeout: 60
     properties:
       dependencies: >-
@@ -401,7 +398,6 @@ targets:
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2729,7 +2725,6 @@ targets:
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4041,16 +4036,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_impeller_ios
-
-  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/121231
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
