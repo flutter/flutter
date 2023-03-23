@@ -72,6 +72,11 @@ bool OpacityPeepholePassDelegate::CanElide() {
 // |EntityPassDelgate|
 bool OpacityPeepholePassDelegate::CanCollapseIntoParentPass(
     EntityPass* entity_pass) {
+  if (paint_.color.alpha <= 0.0 || paint_.color.alpha >= 1.0 ||
+      paint_.image_filter.has_value() || paint_.color_filter.has_value()) {
+    return false;
+  }
+
   // Note: determing whether any coverage intersects has quadradic complexity in
   // the number of rectangles, and depending on whether or not we cache at
   // different levels of the entity tree may end up cubic. In the interest of
