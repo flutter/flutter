@@ -1350,15 +1350,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // isEmpty: false, the label is not floating
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 64.0 : 68.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 60.0 + subtextGap));
     expect(tester.getTopLeft(find.text('text')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
     expect(tester.getTopLeft(find.text('label')).dy, 16.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('error')), Offset(12.0, useMaterial3 ? 52.0 : 56.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(788.0, useMaterial3 ? 52.0 : 56.0));
+    expect(tester.getTopLeft(find.text('error')), Offset(12.0, 48.0 + subtextGap));
+    expect(tester.getTopRight(find.text('counter')), Offset(788.0, 48.0 + subtextGap));
   });
 
   testWidgets('InputDecorator counter text, widget, and null', (WidgetTester tester) async {
@@ -3834,7 +3834,7 @@ void main() {
     //   12 - help/error/counter text (font size 12dps)
 
     // Label is floating because isEmpty is false.
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 58.0 + subtextGap));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0 + subtextGap));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
@@ -4023,13 +4023,13 @@ void main() {
     //   12 - bottom padding
     //    8 - below the border padding
     //   12 - help/error/counter text (font size 12dps)
-    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, useMaterial3 ? 72.0 : 76.0));
+    expect(tester.getSize(find.byType(InputDecorator)), Size(800.0, 68.0 + subtextGap));
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('helper')), Offset(0.0, useMaterial3 ? 60.0 : 64.0));
-    expect(tester.getTopRight(find.text('counter')), Offset(800.0, useMaterial3 ? 60.0 : 64.0));
+    expect(tester.getTopLeft(find.text('helper')), Offset(0.0, 56.0 + subtextGap));
+    expect(tester.getTopRight(find.text('counter')), Offset(800.0, 56.0 + subtextGap));
 
     // Verify that the styles were passed along
     expect(tester.widget<Text>(find.text('hint')).style!.color, hintStyle.color);
