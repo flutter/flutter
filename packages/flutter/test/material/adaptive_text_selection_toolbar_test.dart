@@ -16,7 +16,7 @@ void main() {
 
   setUp(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
@@ -57,19 +57,16 @@ void main() {
         expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(DesktopTextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
-        break;
       case TargetPlatform.iOS:
         expect(find.byType(TextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
         expect(find.byType(DesktopTextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
-        break;
       case TargetPlatform.macOS:
         expect(find.byType(TextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(DesktopTextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsOneWidget);
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -77,7 +74,6 @@ void main() {
         expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(DesktopTextSelectionToolbar), findsOneWidget);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),
@@ -158,17 +154,13 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(find.byType(TextSelectionToolbarTextButton), findsOneWidget);
-        break;
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.byType(DesktopTextSelectionToolbarButton), findsOneWidget);
-        break;
       case TargetPlatform.macOS:
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
@@ -207,20 +199,16 @@ void main() {
       case TargetPlatform.fuchsia:
         expect(find.text('Select all'), findsOneWidget);
         expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(4));
-        break;
       case TargetPlatform.iOS:
         expect(find.text('Select All'), findsOneWidget);
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.text('Select all'), findsOneWidget);
         expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(4));
-        break;
       case TargetPlatform.macOS:
         expect(find.text('Select All'), findsOneWidget);
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(4));
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
@@ -291,10 +279,8 @@ void main() {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-          break;
         case TargetPlatform.macOS:
           expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
-          break;
       }
 
       // With text and selection.
@@ -316,11 +302,9 @@ void main() {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
-          break;
       }
     },
       variant: TargetPlatformVariant.all(),
@@ -365,26 +349,22 @@ void main() {
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
           expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-          break;
         case TargetPlatform.iOS:
           expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
           expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-          break;
         case TargetPlatform.macOS:
           expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
           expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
-          break;
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
           expect(find.byType(DesktopTextSelectionToolbarButton), findsOneWidget);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-          break;
       }
     },
       variant: TargetPlatformVariant.all(),

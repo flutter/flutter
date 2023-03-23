@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -51,7 +52,6 @@ String getFlutterRoot() {
   switch (platform.script.scheme) {
     case 'file':
       scriptUri = platform.script;
-      break;
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
       final Match? match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
@@ -59,7 +59,6 @@ String getFlutterRoot() {
         throw invalidScript();
       }
       scriptUri = Uri.parse(match.group(1)!);
-      break;
     default:
       throw invalidScript();
   }
@@ -102,6 +101,18 @@ Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
 
 /// Matcher for [ToolExit]s.
 final TypeMatcher<ToolExit> _isToolExit = isA<ToolExit>();
+
+/// Matcher for functions that throw [UsageException].
+Matcher throwsUsageException({Pattern? message }) {
+  Matcher matcher = _isUsageException;
+  if (message != null) {
+    matcher = allOf(matcher, (UsageException e) => e.message.contains(message));
+  }
+  return throwsA(matcher);
+}
+
+/// Matcher for [UsageException]s.
+final TypeMatcher<UsageException> _isUsageException = isA<UsageException>();
 
 /// Matcher for functions that throw [ProcessException].
 Matcher throwsProcessException({ Pattern? message }) {

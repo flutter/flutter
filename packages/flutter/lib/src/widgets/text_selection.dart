@@ -718,7 +718,7 @@ class TextSelectionOverlay {
       ));
 
       final TextSelection currentSelection = TextSelection.fromPosition(position);
-      _handleSelectionHandleChanged(currentSelection, isEnd: true);
+      _handleSelectionHandleChanged(currentSelection);
       return;
     }
 
@@ -734,7 +734,6 @@ class TextSelectionOverlay {
         if (position.offset <= _selection.start) {
           return; // Don't allow order swapping.
         }
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -746,10 +745,9 @@ class TextSelectionOverlay {
         if (newSelection.baseOffset >= newSelection.extentOffset) {
           return; // Don't allow order swapping.
         }
-        break;
     }
 
-    _handleSelectionHandleChanged(newSelection, isEnd: true);
+    _handleSelectionHandleChanged(newSelection);
 
      _selectionOverlay.updateMagnifier(_buildMagnifier(
       currentTextPosition: newSelection.extent,
@@ -814,7 +812,7 @@ class TextSelectionOverlay {
       ));
 
       final TextSelection currentSelection = TextSelection.fromPosition(position);
-      _handleSelectionHandleChanged(currentSelection, isEnd: false);
+      _handleSelectionHandleChanged(currentSelection);
       return;
     }
 
@@ -830,7 +828,6 @@ class TextSelectionOverlay {
         if (newSelection.extentOffset >= _selection.end) {
           return; // Don't allow order swapping.
         }
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -842,7 +839,6 @@ class TextSelectionOverlay {
         if (newSelection.baseOffset >= newSelection.extentOffset) {
           return; // Don't allow order swapping.
         }
-        break;
     }
 
     _selectionOverlay.updateMagnifier(_buildMagnifier(
@@ -851,7 +847,7 @@ class TextSelectionOverlay {
       renderEditable: renderObject,
     ));
 
-    _handleSelectionHandleChanged(newSelection, isEnd: false);
+    _handleSelectionHandleChanged(newSelection);
   }
 
   void _handleAnyDragEnd(DragEndDetails details) {
@@ -874,13 +870,11 @@ class TextSelectionOverlay {
     }
   }
 
-  void _handleSelectionHandleChanged(TextSelection newSelection, {required bool isEnd}) {
-    final TextPosition textPosition = isEnd ? newSelection.extent : newSelection.base;
+  void _handleSelectionHandleChanged(TextSelection newSelection) {
     selectionDelegate.userUpdateTextEditingValue(
       _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
-    selectionDelegate.bringIntoView(textPosition);
   }
 
   TextSelectionHandleType _chooseType(
@@ -983,13 +977,13 @@ class SelectionOverlay {
   /// since magnifiers may hide themselves. If this info is needed, check
   /// [MagnifierController.shown].
   /// {@endtemplate}
-  void showMagnifier(MagnifierInfo initalMagnifierInfo) {
+  void showMagnifier(MagnifierInfo initialMagnifierInfo) {
     if (_toolbar != null || _contextMenuControllerIsShown) {
       hideToolbar();
     }
 
-    // Start from empty, so we don't utilize any rememnant values.
-    _magnifierInfo.value = initalMagnifierInfo;
+    // Start from empty, so we don't utilize any remnant values.
+    _magnifierInfo.value = initialMagnifierInfo;
 
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
@@ -1164,7 +1158,6 @@ class SelectionOverlay {
         switch(defaultTargetPlatform) {
           case TargetPlatform.android:
             HapticFeedback.selectionClick();
-            break;
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
@@ -2074,7 +2067,6 @@ class TextSelectionGestureDetectorBuilder {
         // then the selection moves to the closest word edge, instead of a
         // precise position.
         renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         if (isShiftPressedValid) {
@@ -2082,7 +2074,6 @@ class TextSelectionGestureDetectorBuilder {
           return;
         }
         renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-        break;
     }
   }
 
@@ -2154,7 +2145,6 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.windows:
           editableText.hideToolbar();
           // On desktop platforms the selection is set on tap down.
-          break;
         case TargetPlatform.android:
           editableText.hideToolbar();
           editableText.showSpellCheckSuggestionsToolbar();
@@ -2163,7 +2153,6 @@ class TextSelectionGestureDetectorBuilder {
             return;
           }
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
         case TargetPlatform.fuchsia:
           editableText.hideToolbar();
           if (isShiftPressedValid) {
@@ -2171,7 +2160,6 @@ class TextSelectionGestureDetectorBuilder {
             return;
           }
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
         case TargetPlatform.iOS:
           if (isShiftPressedValid) {
             // On iOS, a shift-tapped unfocused field expands from 0, not from
@@ -2193,7 +2181,6 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.invertedStylus:
               // Precise devices should place the cursor at a precise position.
               renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-              break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
               // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, the
@@ -2222,9 +2209,7 @@ class TextSelectionGestureDetectorBuilder {
                   editableText.hideToolbar(false);
                 }
               }
-              break;
           }
-          break;
       }
     }
   }
@@ -2259,20 +2244,17 @@ class TextSelectionGestureDetectorBuilder {
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
           );
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-          break;
       }
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
           editableText.showMagnifier(details.globalPosition);
-          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
@@ -2313,7 +2295,6 @@ class TextSelectionGestureDetectorBuilder {
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
           );
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -2323,14 +2304,12 @@ class TextSelectionGestureDetectorBuilder {
             to: details.globalPosition,
             cause: SelectionChangedCause.longPress,
           );
-          break;
       }
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
           editableText.showMagnifier(details.globalPosition);
-          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
@@ -2354,7 +2333,6 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
         editableText.hideMagnifier();
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
@@ -2386,7 +2364,6 @@ class TextSelectionGestureDetectorBuilder {
           editableText.hideToolbar();
           editableText.showToolbar();
         }
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -2395,7 +2372,6 @@ class TextSelectionGestureDetectorBuilder {
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
         }
         editableText.toggleToolbar();
-        break;
     }
   }
 
@@ -2430,7 +2406,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   void onDoubleTapDown(TapDragDownDetails details) {
     if (delegate.selectionEnabled) {
-      renderEditable.selectWord(cause: SelectionChangedCause.tap);
+      renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
       if (shouldShowSelectionToolbar) {
         editableText.showToolbar();
       }
@@ -2471,13 +2447,11 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           _expandSelection(details.globalPosition, SelectionChangedCause.drag);
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           _extendSelection(details.globalPosition, SelectionChangedCause.drag);
-          break;
       }
     } else {
       switch (defaultTargetPlatform) {
@@ -2493,7 +2467,6 @@ class TextSelectionGestureDetectorBuilder {
                 from: details.globalPosition,
                 cause: SelectionChangedCause.drag,
               );
-              break;
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
               // For Android, Fucshia, and iOS platforms, a touch drag
@@ -2504,11 +2477,9 @@ class TextSelectionGestureDetectorBuilder {
                   cause: SelectionChangedCause.drag,
                 );
               }
-              break;
             case null:
               break;
           }
-          break;
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
@@ -2516,7 +2487,6 @@ class TextSelectionGestureDetectorBuilder {
             from: details.globalPosition,
             cause: SelectionChangedCause.drag,
           );
-          break;
       }
     }
   }
@@ -2589,7 +2559,6 @@ class TextSelectionGestureDetectorBuilder {
                   cause: SelectionChangedCause.drag,
                 );
               }
-              break;
             case null:
               break;
           }
@@ -2617,7 +2586,6 @@ class TextSelectionGestureDetectorBuilder {
                   cause: SelectionChangedCause.drag,
                 );
               }
-              break;
             case null:
               break;
           }
@@ -3050,7 +3018,6 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     switch (state) {
       case AppLifecycleState.resumed:
         update();
-        break;
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
@@ -3076,7 +3043,7 @@ enum ClipboardStatus {
   /// waiting to receive the clipboard contents for the first time.
   unknown,
 
-  /// The content on the clipboard is not pastable, such as when it is empty.
+  /// The content on the clipboard is not pasteable, such as when it is empty.
   notPasteable,
 }
 

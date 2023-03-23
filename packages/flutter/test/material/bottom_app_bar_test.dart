@@ -233,6 +233,27 @@ void main() {
     expect(material.color, const Color(0xff0000ff));
   });
 
+  testWidgets('Shadow color is transparent in Material 3', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true,
+        ),
+        home: const Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+          ),
+          bottomNavigationBar: BottomAppBar(
+            color: Color(0xff0000ff),
+          ),
+        ),
+      )
+    );
+
+    final Material material = tester.widget(find.byType(Material).at(1));
+
+    expect(material.shadowColor, Colors.transparent);
+  });
+
   testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

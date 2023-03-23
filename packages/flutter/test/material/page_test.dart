@@ -4,6 +4,7 @@
 
 @Tags(<String>['reduced-test-set'])
 library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
@@ -239,54 +240,45 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when window insets', (WidgetTester tester) async {
-    late Size oldSize;
-    late ui.WindowPadding oldInsets;
-    try {
-      oldSize = tester.binding.window.physicalSize;
-      oldInsets = tester.binding.window.viewInsets;
-      tester.binding.window.physicalSizeTestValue = const Size(1000, 1000);
-      tester.binding.window.viewInsetsTestValue = ui.WindowPadding.zero;
+  testWidgets('test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(1000, 1000);
+    tester.view.viewInsets = FakeViewPadding.zero;
 
-      // Intentionally use nested scaffolds to simulate the view insets being
-      // consumed.
-      final Key key = GlobalKey();
-      await tester.pumpWidget(
-        RepaintBoundary(
-          key: key,
-          child: MaterialApp(
-            onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const Scaffold(body: Scaffold(
-                    body: Material(child: SizedBox.shrink())
-                  ));
-                },
-              );
-            },
-          ),
+    // Intentionally use nested scaffolds to simulate the view insets being
+    // consumed.
+    final Key key = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: MaterialApp(
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return const Scaffold(body: Scaffold(
+                  body: Material(child: SizedBox.shrink())
+                ));
+              },
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
-      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
+    await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.small.png'));
 
-       // Change the view insets
-      tester.binding.window.viewInsetsTestValue = const TestWindowPadding(left: 0, top: 0, right: 0, bottom: 500);
+    // Change the view insets.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500);
 
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
 
-      await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
-    } finally {
-      tester.binding.window.physicalSizeTestValue = oldSize;
-      tester.binding.window.viewInsetsTestValue = oldInsets;
-    }
+    await expectLater(find.byKey(key), matchesGoldenFile('zoom_page_transition.big.png'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
-
 
   testWidgets(
       'test page transition (_ZoomPageTransition) with rasterization disables snapshotting for enter route',
@@ -456,7 +448,7 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
 
-    // Page 2 didn't move
+    // Page 2 didn't move.
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
@@ -618,7 +610,7 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
 
-    // Page 2 didn't move
+    // Page 2 didn't move.
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -798,7 +790,7 @@ void main() {
     );
 
     // Check the basic iOS back-swipe dismiss transition. Dragging the pushed
-    // route halfway across the screen will trigger the iOS dismiss animation
+    // route halfway across the screen will trigger the iOS dismiss animation.
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
@@ -809,7 +801,7 @@ void main() {
     await gesture.moveBy(const Offset(400, 0));
     await gesture.up();
     await tester.pump();
-    expect( // The 'route' route has been dragged to the right, halfway across the screen
+    expect( // The 'route' route has been dragged to the right, halfway across the screen.
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))),
       const Offset(400, 0),
     );
@@ -1043,6 +1035,7 @@ void main() {
     ];
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test should never execute this.
@@ -1061,6 +1054,7 @@ void main() {
 
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test should never execute this.
@@ -1086,6 +1080,7 @@ void main() {
     ];
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test should never execute this.
@@ -1107,6 +1102,7 @@ void main() {
 
     await tester.pumpWidget(
       buildNavigator(
+        view: tester.view,
         pages: myPages,
         onPopPage: (Route<dynamic> route, dynamic result) {
           assert(false); // The test should never execute this.
@@ -1215,11 +1211,12 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 Widget buildNavigator({
   required List<Page<dynamic>> pages,
   required PopPageCallback onPopPage,
+  required ui.FlutterView view,
   GlobalKey<NavigatorState>? key,
   TransitionDelegate<dynamic>? transitionDelegate,
 }) {
   return MediaQuery(
-    data: MediaQueryData.fromView(WidgetsBinding.instance.window),
+    data: MediaQueryData.fromView(view),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -1328,22 +1325,4 @@ class TestDependencies extends StatelessWidget {
       ),
     );
   }
-}
-
-class TestWindowPadding implements ui.WindowPadding {
-  const TestWindowPadding({
-    required this.left,
-    required this.top,
-    required this.right,
-    required this.bottom,
-  });
-
-  @override
-  final double left;
-  @override
-  final double top;
-  @override
-  final double right;
-  @override
-  final double bottom;
 }

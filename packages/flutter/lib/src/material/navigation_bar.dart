@@ -169,7 +169,7 @@ class NavigationBar extends StatelessWidget {
   /// is used. Otherwise, [ColorScheme.secondary] with an opacity of 0.24 is used.
   final Color? indicatorColor;
 
-  /// The shape of the selected inidicator.
+  /// The shape of the selected indicator.
   ///
   /// If null, [NavigationBarThemeData.indicatorShape] is used. If that
   /// is also null and [ThemeData.useMaterial3] is true, [StadiumBorder] is used.
@@ -520,13 +520,10 @@ class _IndicatorInkWell extends InkResponse {
     switch (labelBehavior) {
       case NavigationDestinationLabelBehavior.alwaysShow:
         labelPadding = labelRect.height / 2;
-        break;
       case NavigationDestinationLabelBehavior.onlyShowSelected:
         labelPadding = selected ? labelRect.height / 2 : 0;
-        break;
       case NavigationDestinationLabelBehavior.alwaysHide:
         labelPadding = 0;
-        break;
     }
     final double indicatorOffsetX = referenceBox.size.width / 2;
     final double indicatorOffsetY = referenceBox.size.height / 2 - labelPadding;
@@ -1368,7 +1365,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)

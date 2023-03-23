@@ -214,6 +214,7 @@ class CupertinoTextField extends StatefulWidget {
     super.key,
     this.controller,
     this.focusNode,
+    this.undoController,
     this.decoration = _kDefaultRoundedBorderDecoration,
     this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
@@ -347,6 +348,7 @@ class CupertinoTextField extends StatefulWidget {
     super.key,
     this.controller,
     this.focusNode,
+    this.undoController,
     this.decoration,
     this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
@@ -780,6 +782,9 @@ class CupertinoTextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.dotted,
   );
 
+  /// {@macro flutter.widgets.undoHistory.controller}
+  final UndoHistoryController? undoController;
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -788,6 +793,7 @@ class CupertinoTextField extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
@@ -996,11 +1002,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        if (cause == SelectionChangedCause.longPress
-            || cause == SelectionChangedCause.drag) {
+        if (cause == SelectionChangedCause.longPress) {
           _editableText.bringIntoView(selection.extent);
         }
-        break;
     }
 
     switch (defaultTargetPlatform) {
@@ -1014,7 +1018,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         if (cause == SelectionChangedCause.drag) {
           _editableText.hideToolbar();
         }
-        break;
     }
   }
 
@@ -1181,7 +1184,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
-        break;
 
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -1192,7 +1194,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
     }
 
     final bool enabled = widget.enabled ?? true;
@@ -1278,6 +1279,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           child: EditableText(
             key: editableTextKey,
             controller: controller,
+            undoController: widget.undoController,
             readOnly: widget.readOnly,
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,

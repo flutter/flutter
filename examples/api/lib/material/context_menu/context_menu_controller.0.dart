@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
           },
           // In this case this wraps a big open space in a GestureDetector in
           // order to show the context menu, but it could also wrap a single
-          // wiget like an Image to give it a context menu.
+          // widget like an Image to give it a context menu.
           child: ListView(
             children: <Widget>[
               Container(height: 20.0),

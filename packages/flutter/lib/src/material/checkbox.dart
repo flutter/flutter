@@ -305,7 +305,7 @@ class Checkbox extends StatefulWidget {
   ///
   /// If this property is null then [CheckboxThemeData.shape] of [ThemeData.checkboxTheme]
   /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
-  /// with a circular corner radius of 1.0.
+  /// with a circular corner radius of 1.0 in Material 2, and 2.0 in Material 3.
   final OutlinedBorder? shape;
 
   /// {@template flutter.material.checkbox.side}
@@ -425,10 +425,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-        break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
 
@@ -522,9 +520,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..checkColor = effectiveCheckColor
           ..value = value
           ..previousValue = _previousValue
-          ..shape = widget.shape ?? checkboxTheme.shape ?? const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(1.0)),
-          )
+          ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
           ..side = _resolveSide(widget.side) ?? _resolveSide(checkboxTheme.side),
       ),
     );
@@ -759,6 +755,11 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  OutlinedBorder get shape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+  );
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Checkbox
@@ -768,7 +769,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)
@@ -869,6 +870,11 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  OutlinedBorder get shape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(2.0)),
+  );
 }
 
 // END GENERATED TOKEN PROPERTIES - Checkbox

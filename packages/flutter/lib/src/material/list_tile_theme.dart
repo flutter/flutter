@@ -172,8 +172,8 @@ class ListTileThemeData with Diagnosticable {
 
   /// Linearly interpolate between ListTileThemeData objects.
   static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ListTileThemeData(
       dense: t < 0.5 ? a?.dense : b?.dense,
@@ -480,6 +480,9 @@ class ListTileTheme extends InheritedTheme {
     Color? selectedColor,
     Color? iconColor,
     Color? textColor,
+    TextStyle? titleTextStyle,
+    TextStyle? subtitleTextStyle,
+    TextStyle? leadingAndTrailingTextStyle,
     EdgeInsetsGeometry? contentPadding,
     Color? tileColor,
     Color? selectedTileColor,
@@ -488,6 +491,8 @@ class ListTileTheme extends InheritedTheme {
     double? minVerticalPadding,
     double? minLeadingWidth,
     ListTileTitleAlignment? titleAlignment,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    VisualDensity? visualDensity,
     required Widget child,
   }) {
     return Builder(
@@ -502,6 +507,9 @@ class ListTileTheme extends InheritedTheme {
             selectedColor: selectedColor ?? parent.selectedColor,
             iconColor: iconColor ?? parent.iconColor,
             textColor: textColor ?? parent.textColor,
+            titleTextStyle: titleTextStyle ?? parent.titleTextStyle,
+            subtitleTextStyle: subtitleTextStyle ?? parent.subtitleTextStyle,
+            leadingAndTrailingTextStyle: leadingAndTrailingTextStyle ?? parent.leadingAndTrailingTextStyle,
             contentPadding: contentPadding ?? parent.contentPadding,
             tileColor: tileColor ?? parent.tileColor,
             selectedTileColor: selectedTileColor ?? parent.selectedTileColor,
@@ -510,6 +518,8 @@ class ListTileTheme extends InheritedTheme {
             minVerticalPadding: minVerticalPadding ?? parent.minVerticalPadding,
             minLeadingWidth: minLeadingWidth ?? parent.minLeadingWidth,
             titleAlignment: titleAlignment ?? parent.titleAlignment,
+            mouseCursor: mouseCursor ?? parent.mouseCursor,
+            visualDensity: visualDensity ?? parent.visualDensity,
           ),
           child: child,
         );

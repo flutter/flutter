@@ -303,10 +303,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _positionController.value -= delta;
-          break;
         case TextDirection.ltr:
           _positionController.value += delta;
-          break;
       }
     }
   }
@@ -325,7 +323,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         HapticFeedback.lightImpact();
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -364,7 +361,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             activeColor: activeColor,
             trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
             thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-            // Opacity, lightness, and saturation values were aproximated with
+            // Opacity, lightness, and saturation values were approximated with
             // color pickers on the switches in the macOS settings.
             focusColor: CupertinoDynamicColor.resolve(
               widget.focusColor ??
@@ -609,10 +606,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - currentValue;
-        break;
       case TextDirection.ltr:
         visualPosition = currentValue;
-        break;
     }
 
     final Paint paint = Paint()

@@ -15,6 +15,11 @@ void main() {
     expect(const SwitchThemeData().hashCode, const SwitchThemeData().copyWith().hashCode);
   });
 
+  test('SwitchThemeData lerp special cases', () {
+    const SwitchThemeData data = SwitchThemeData();
+    expect(identical(SwitchThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('SwitchThemeData defaults', () {
     const SwitchThemeData themeData = SwitchThemeData();
     expect(themeData.thumbColor, null);

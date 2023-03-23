@@ -151,7 +151,7 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 class _ZoomPageTransition extends StatelessWidget {
   /// Creates a [_ZoomPageTransition].
   ///
-  /// The [animation] and [secondaryAnimation] argument are required and must
+  /// The [animation] and [secondaryAnimation] arguments are required and must
   /// not be null.
   const _ZoomPageTransition({
     required this.animation,
@@ -196,9 +196,15 @@ class _ZoomPageTransition extends StatelessWidget {
 
   /// Whether the [SnapshotWidget] will be used.
   ///
-  /// Notably, this improves performance by disabling animations on both the outgoing and
-  /// incoming route. This also implies that ink-splashes or similar animations will
-  /// not animate during the transition.
+  /// When this value is true, performance is improved by disabling animations
+  /// on both the outgoing and incoming route. This also implies that ink-splashes
+  /// or similar animations will not animate during the transition.
+  ///
+  /// See also:
+  ///
+  ///  * [TransitionRoute.allowSnapshotting], which defines wether the route
+  ///    transition will prefer to animate a snapshot of the entering and exiting
+  ///    routes.
   final bool allowSnapshotting;
 
   /// The widget below this widget in the tree.
@@ -604,8 +610,35 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
   const ZoomPageTransitionsBuilder({
+    this.allowSnapshotting = true,
     this.allowEnterRouteSnapshotting = true,
   });
+
+  /// Whether zoom page transitions will prefer to animate a snapshot of the entering
+  /// and exiting routes.
+  ///
+  /// If not specified, defaults to true.
+  ///
+  /// When this value is true, zoom page transitions will snapshot the entering and
+  /// exiting routes. These snapshots are then animated in place of the underlying
+  /// widgets to improve performance of the transition.
+  ///
+  /// Generally this means that animations that occur on the entering/exiting route
+  /// while the route animation plays may appear frozen - unless they are a hero
+  /// animation or something that is drawn in a separate overlay.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [MaterialApp] that disables snapshotting for the zoom
+  /// transitions on Android.
+  ///
+  /// ** See code in examples/api/lib/material/page_transitions_theme/page_transitions_theme.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [PageRoute.allowSnapshotting], which enables or disables snapshotting
+  ///    on a per route basis.
+  final bool allowSnapshotting;
 
   /// Whether to enable snapshotting on the entering route during the
   /// transition animation.
@@ -627,7 +660,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      allowSnapshotting: route?.allowSnapshotting ?? true,
+      allowSnapshotting: allowSnapshotting && (route?.allowSnapshotting ?? true),
       allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
       child: child,
     );
@@ -669,7 +702,13 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// and delegates to [buildTransitions].
 ///
 /// If a builder with a matching platform is not found, then the
-/// [FadeUpwardsPageTransitionsBuilder] is used.
+/// [ZoomPageTransitionsBuilder] is used.
+///
+/// {@tool dartpad}
+/// This example shows a [MaterialApp] that defines a custom [PageTransitionsTheme].
+///
+/// ** See code in examples/api/lib/material/page_transitions_theme/page_transitions_theme.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -702,8 +741,9 @@ class PageTransitionsTheme with Diagnosticable {
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the builder for the current [ThemeData.platform]
-  /// or [ZoomPageTransitionsBuilder].
+  /// Delegates to the builder for the current [ThemeData.platform].
+  /// If a builder for the current platform is not found, then the
+  /// [ZoomPageTransitionsBuilder] is used.
   ///
   /// [MaterialPageRoute.buildTransitions] delegates to this method.
   Widget buildTransitions<T>(
@@ -724,8 +764,8 @@ class PageTransitionsTheme with Diagnosticable {
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
-  // Just used to the builders Map to a list with one PageTransitionsBuilder per platform
-  // for the operator == overload.
+  // Map the builders to a list with one PageTransitionsBuilder per platform for
+  // the operator == overload.
   List<PageTransitionsBuilder?> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
     return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
   }
@@ -818,11 +858,9 @@ mixin _ZoomTransitionBase {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         controller.allowSnapshotting = false;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         controller.allowSnapshotting = useSnapshot;
-        break;
     }
   }
 }
@@ -968,7 +1006,9 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
 
   @override
   bool shouldRepaint(covariant _ZoomExitTransitionPainter oldDelegate) {
-    return oldDelegate.reverse != reverse || oldDelegate.fade.value != fade.value || oldDelegate.scale.value != scale.value;
+    return oldDelegate.reverse != reverse
+      || oldDelegate.fade.value != fade.value
+      || oldDelegate.scale.value != scale.value;
   }
 
   @override
