@@ -291,10 +291,8 @@ class _TabLabelBarRenderer extends RenderFlex {
     switch (textDirection!) {
       case TextDirection.rtl:
         xOffsets.insert(0, size.width);
-        break;
       case TextDirection.ltr:
         xOffsets.add(size.width);
-        break;
     }
     onPerformLayout(xOffsets, textDirection!, size.width);
   }
@@ -421,11 +419,9 @@ class _IndicatorPainter extends CustomPainter {
       case TextDirection.rtl:
         tabLeft = _currentTabOffsets![tabIndex + 1];
         tabRight = _currentTabOffsets![tabIndex];
-        break;
       case TextDirection.ltr:
         tabLeft = _currentTabOffsets![tabIndex];
         tabRight = _currentTabOffsets![tabIndex + 1];
-        break;
     }
 
     if (indicatorSize == TabBarIndicatorSize.label) {
@@ -1188,10 +1184,8 @@ class _TabBarState extends State<TabBar> {
       case TextDirection.rtl:
         paddingStart = widget.padding?.resolve(TextDirection.rtl).right ?? 0;
         tabCenter = _tabStripWidth - tabCenter;
-        break;
       case TextDirection.ltr:
         paddingStart = widget.padding?.resolve(TextDirection.ltr).left ?? 0;
-        break;
     }
 
     return clampDouble(tabCenter + paddingStart - viewportWidth / 2.0, minExtent, maxExtent);

@@ -352,7 +352,6 @@ bool debugCheckHasBoundedAxis(Axis axis, BoxConstraints constraints) {
               'horizontal space in which to expand.',
             );
           }
-          break;
         case Axis.horizontal:
           if (!constraints.hasBoundedWidth) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -382,7 +381,6 @@ bool debugCheckHasBoundedAxis(Axis axis, BoxConstraints constraints) {
               'vertical space in which to expand.',
             );
           }
-          break;
       }
     }
     return true;

@@ -185,15 +185,12 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           _end = adjustedPoint;
         }
         result = SelectionUtils.getResultBasedOnRect(renderObjectRect, point);
-        break;
       case SelectionEventType.clear:
         _start = _end = null;
-        break;
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
         _start = Offset.zero;
         _end = Offset.infinite;
-        break;
       case SelectionEventType.granularlyExtendSelection:
         result = SelectionResult.end;
         final GranularlyExtendSelectionEvent extendSelectionEvent = event as GranularlyExtendSelectionEvent;
@@ -218,7 +215,6 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           }
           _start = newOffset;
         }
-        break;
       case SelectionEventType.directionallyExtendSelection:
         result = SelectionResult.end;
         final DirectionallyExtendSelectionEvent extendSelectionEvent = event as DirectionallyExtendSelectionEvent;
@@ -240,7 +236,6 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
             } else {
               newOffset = Offset.infinite;
             }
-            break;
           case SelectionExtendDirection.nextLine:
           case SelectionExtendDirection.forward:
             forward = true;
@@ -254,7 +249,6 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
             } else {
               newOffset = Offset.zero;
             }
-            break;
         }
         if (extendSelectionEvent.isEnd) {
           if (newOffset == _end) {
@@ -267,7 +261,6 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           }
           _start = newOffset;
         }
-        break;
     }
     _updateGeometry();
     return result;

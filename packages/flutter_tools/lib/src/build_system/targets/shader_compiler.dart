@@ -56,7 +56,6 @@ class DevelopmentShaderCompiler {
     switch (platform) {
       case TargetPlatform.ios:
         _shaderTarget = ShaderTarget.impelleriOS;
-        break;
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
@@ -65,7 +64,6 @@ class DevelopmentShaderCompiler {
         _shaderTarget = impellerStatus == ImpellerStatus.enabled
           ? ShaderTarget.impellerAndroid
           : ShaderTarget.sksl;
-        break;
       case TargetPlatform.darwin:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
@@ -75,12 +73,10 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.tester:
         assert(impellerStatus != ImpellerStatus.enabled);
         _shaderTarget = ShaderTarget.sksl;
-        break;
       case TargetPlatform.web_javascript:
         assert(impellerStatus != ImpellerStatus.enabled);
         _shaderTarget = ShaderTarget.sksl;
         _jsonMode = true;
-        break;
       case null:
         return;
     }
