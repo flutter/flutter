@@ -172,6 +172,7 @@ class _TabStyle extends AnimatedWidget {
     required this.unselectedLabelColor,
     required this.labelStyle,
     required this.unselectedLabelStyle,
+    required this.defaults,
     required this.child,
   }) : super(listenable: animation);
 
@@ -181,21 +182,12 @@ class _TabStyle extends AnimatedWidget {
   final bool isPrimary;
   final Color? labelColor;
   final Color? unselectedLabelColor;
+  final TabBarTheme defaults;
   final Widget child;
-
-  TabBarTheme _defaults(BuildContext context) {
-    if (Theme.of(context).useMaterial3) {
-      return isPrimary
-        ? _TabsPrimaryDefaultsM3(context)
-        : _TabsSecondaryDefaultsM3(context);
-    }
-    return _TabsDefaultsM2(context);
-  }
 
   MaterialStateColor _resolveWithLabelColor(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final TabBarTheme defaults = _defaults(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     // labelStyle.color (and tabBarTheme.labelStyle.color) is not considered
@@ -231,7 +223,6 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final TabBarTheme defaults = _defaults(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     final Set<MaterialState> states = isSelected
@@ -1350,7 +1341,7 @@ class _TabBarState extends State<TabBar> {
     widget.onTap?.call(index);
   }
 
-  Widget _buildStyledTab(Widget child, bool isSelected, Animation<double> animation) {
+  Widget _buildStyledTab(Widget child, bool isSelected, Animation<double> animation, TabBarTheme defaults) {
     return _TabStyle(
       animation: animation,
       isSelected: isSelected,
@@ -1359,6 +1350,7 @@ class _TabBarState extends State<TabBar> {
       unselectedLabelColor: widget.unselectedLabelColor,
       labelStyle: widget.labelStyle,
       unselectedLabelStyle: widget.unselectedLabelStyle,
+      defaults: defaults,
       child: child,
     );
   }
@@ -1440,22 +1432,22 @@ class _TabBarState extends State<TabBar> {
         // The user tapped on a tab, the tab controller's animation is running.
         assert(_currentIndex != previousIndex);
         final Animation<double> animation = _ChangeAnimation(_controller!);
-        wrappedTabs[_currentIndex!] = _buildStyledTab(wrappedTabs[_currentIndex!], true, animation);
-        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation);
+        wrappedTabs[_currentIndex!] = _buildStyledTab(wrappedTabs[_currentIndex!], true, animation, _defaults);
+        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, _defaults);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
         final int tabIndex = _currentIndex!;
         final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
-        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
         if (_currentIndex! > 0) {
           final int tabIndex = _currentIndex! - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller!, tabIndex));
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation, _defaults);
         }
         if (_currentIndex! < widget.tabs.length - 1) {
           final int tabIndex = _currentIndex! + 1;
           final Animation<double> nextAnimation = ReverseAnimation(_DragAnimation(_controller!, tabIndex));
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation, _defaults);
         }
       }
     }
@@ -1514,6 +1506,7 @@ class _TabBarState extends State<TabBar> {
         unselectedLabelColor: widget.unselectedLabelColor,
         labelStyle: widget.labelStyle,
         unselectedLabelStyle: widget.unselectedLabelStyle,
+        defaults: _defaults,
         child: _TabLabelBar(
           onPerformLayout: _saveTabOffsets,
           children: wrappedTabs,
