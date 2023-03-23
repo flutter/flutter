@@ -5,20 +5,80 @@
 import Cocoa
 import FlutterMacOS
 
-class MainFlutterWindow: NSWindow {
+class MainFlutterWindow: NSWindow, FlutterStreamHandler, PowerSourceStateChangeDelegate {
+  private let powerSource = PowerSource()
+  private let stateChangeSource = PowerSourceStateChangeHandler()
+  private var eventSink: FlutterEventSink?
+
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController.init()
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
-    // Since the plugin lives in the app itself, registration isn't auto-generated into
-    // RegisterGeneratedPlugins in GeneratedPluginRegistrant.swift, so we register the plugin
-    // manually.
-    BatteryLevelPlugin.register(with: flutterViewController.registrar(forPlugin: "BatteryLevel"))
+    // Register battery method channel.
+    let registrar = flutterViewController.registrar(forPlugin: "BatteryLevel")
+    let batteryChannel = FlutterMethodChannel(
+      name: "samples.flutter.io/battery",
+      binaryMessenger: registrar.messenger)
+    batteryChannel.setMethodCallHandler({ [weak self] (call, result) in
+      switch call.method {
+      case "getBatteryLevel":
+        let level = self?.powerSource.getCurrentCapacity()
+        if level == -1 {
+          result(
+            FlutterError(
+              code: "UNAVAILABLE",
+              message: "Battery info unavailable",
+              details: nil))
+        }
+        result(level)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    })
+
+    // Register charging event channel.
+    let chargingChannel = FlutterEventChannel(
+      name: "samples.flutter.io/charging",
+      binaryMessenger: registrar.messenger)
+    chargingChannel.setStreamHandler(self)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()
   }
+
+  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink)
+    -> FlutterError?
+  {
+    self.eventSink = events
+    self.emitPowerStatusEvent()
+    self.stateChangeSource.delegate = self
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    self.stateChangeSource.delegate = nil
+    self.eventSink = nil
+    return nil
+  }
+
+  func onPowerSourceStateChanged() {
+    self.emitPowerStatusEvent()
+  }
+
+  func emitPowerStatusEvent() {
+    if let sink = self.eventSink {
+      switch self.powerSource.getPowerState() {
+      case .ac:
+        sink("charging")
+      case .battery:
+        sink("discharging")
+      case .unknown:
+        sink("UNAVAILABLE")
+      }
+    }
+  }
+
 }

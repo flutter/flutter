@@ -19,8 +19,7 @@ class PowerSource {
   /// Returns the current power source capacity. Apple-defined power sources will return this value
   /// as a percentage.
   func getCurrentCapacity() -> Int {
-    if !sources.isEmpty {
-      let source = sources[0]
+    if let source = sources.first {
       let description =
         IOPSGetPowerSourceDescription(info, source).takeUnretainedValue() as! [String: AnyObject]
       if let level = description[kIOPSCurrentCapacityKey] as? Int {
