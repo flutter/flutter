@@ -18,6 +18,7 @@
 #define TXT_ASSET_FONT_MANAGER_H_
 
 #include <memory>
+#include <utility>
 
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
@@ -35,7 +36,10 @@ class AssetFontManager : public SkFontMgr {
 
  protected:
   // |SkFontMgr|
-  SkFontStyleSet* onMatchFamily(const char familyName[]) const override;
+  using OnMatchFamilyRet =
+      decltype((std::declval<SkFontMgr>().*
+                (&AssetFontManager::onMatchFamily))(std::declval<char[]>()));
+  OnMatchFamilyRet onMatchFamily(const char familyName[]) const override;
 
   std::unique_ptr<FontAssetProvider> font_provider_;
 
@@ -47,18 +51,33 @@ class AssetFontManager : public SkFontMgr {
   void onGetFamilyName(int index, SkString* familyName) const override;
 
   // |SkFontMgr|
-  SkFontStyleSet* onCreateStyleSet(int index) const override;
+  using OnCreateStyleSetRet = decltype((
+      std::declval<SkFontMgr>().*(&AssetFontManager::onCreateStyleSet))(0));
+  OnCreateStyleSetRet onCreateStyleSet(int index) const override;
 
   // |SkFontMgr|
-  SkTypeface* onMatchFamilyStyle(const char familyName[],
-                                 const SkFontStyle&) const override;
+  using OnMatchFamilyStyleRet = decltype((
+      std::declval<SkFontMgr>().*(&AssetFontManager::onMatchFamilyStyle))(
+      std::declval<char[]>(),
+      std::declval<SkFontStyle>()));
+  OnMatchFamilyStyleRet onMatchFamilyStyle(const char familyName[],
+                                           const SkFontStyle&) const override;
 
   // |SkFontMgr|
-  SkTypeface* onMatchFamilyStyleCharacter(const char familyName[],
-                                          const SkFontStyle&,
-                                          const char* bcp47[],
-                                          int bcp47Count,
-                                          SkUnichar character) const override;
+  using OnMatchFamilyStyleCharacterRet =
+      decltype((std::declval<SkFontMgr>().*
+                (&AssetFontManager::onMatchFamilyStyleCharacter))(
+          std::declval<char[]>(),
+          std::declval<SkFontStyle>(),
+          std::declval<const char*[]>(),
+          0,
+          0));
+  OnMatchFamilyStyleCharacterRet onMatchFamilyStyleCharacter(
+      const char familyName[],
+      const SkFontStyle&,
+      const char* bcp47[],
+      int bcp47Count,
+      SkUnichar character) const override;
 
   // |SkFontMgr|
   sk_sp<SkTypeface> onMakeFromData(sk_sp<SkData>, int ttcIndex) const override;

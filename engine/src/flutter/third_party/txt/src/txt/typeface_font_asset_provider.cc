@@ -104,15 +104,16 @@ void TypefaceFontStyleSet::getStyle(int index,
   }
 }
 
-SkTypeface* TypefaceFontStyleSet::createTypeface(int i) {
+auto TypefaceFontStyleSet::createTypeface(int i) -> CreateTypefaceRet {
   size_t index = i;
   if (index >= typefaces_.size()) {
     return nullptr;
   }
-  return SkRef(typefaces_[index].get());
+  return CreateTypefaceRet(SkRef(typefaces_[index].get()));
 }
 
-SkTypeface* TypefaceFontStyleSet::matchStyle(const SkFontStyle& pattern) {
+auto TypefaceFontStyleSet::matchStyle(const SkFontStyle& pattern)
+    -> MatchStyleRet {
   return matchStyleCSS3(pattern);
 }
 
