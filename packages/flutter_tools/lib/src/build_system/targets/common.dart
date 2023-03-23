@@ -394,10 +394,7 @@ abstract class CopyFlutterAotBundle extends Target {
 }
 
 /// Lipo CLI tool wrapper shared by iOS and macOS builds.
-class Lipo {
-  /// Static only.
-  Lipo._();
-
+abstract final class Lipo {
   /// Create a "fat" binary by combining multiple architecture-specific ones.
   /// `skipMissingInputs` can be changed to `true` to first check whether
   /// the expected input paths exist and ignore the command if they don't.
