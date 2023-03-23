@@ -30,7 +30,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
     )).toList();
   }
 
-  List<Widget> getSuggestions(SearchController controller) {
+  Iterable<Widget> getSuggestions(SearchController controller) {
     final String input = controller.value.text;
     return ColorLabel.values.where((ColorLabel color) => color.label.contains(input))
       .map((ColorLabel filteredColor) =>
