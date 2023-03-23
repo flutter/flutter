@@ -505,7 +505,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool singleWidgetReloads = false,
-    bool serveObservatory = true,
+    bool serveObservatory = false,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
@@ -545,7 +545,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool singleWidgetReloads = false,
-    bool serveObservatory = true,
+    bool serveObservatory = false,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
