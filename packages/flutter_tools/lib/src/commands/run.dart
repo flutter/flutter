@@ -510,6 +510,10 @@ class RunCommand extends RunCommandBase {
       }
       final int? parsed = int.tryParse(arg);
       if (parsed == null) {
+        globals.printError('''
+The value provided for --web-port was not an integer: $arg
+A randomly-chosen available port will be used instead.
+''');
         return;
       }
 
