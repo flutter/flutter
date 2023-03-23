@@ -398,7 +398,6 @@ targets:
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2726,7 +2725,6 @@ targets:
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >

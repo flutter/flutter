@@ -90,6 +90,7 @@ class AttachCommand extends FlutterCommand {
     usesDartDefineOption();
     usesDeviceUserOption();
     addEnableExperimentation(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
     argParser
       ..addOption(
