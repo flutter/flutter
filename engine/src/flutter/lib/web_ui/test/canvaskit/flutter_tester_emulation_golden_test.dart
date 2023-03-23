@@ -21,7 +21,7 @@ void testMain() {
   group('flutter_tester emulation', () {
     setUpCanvasKitTest();
 
-    test('defaults to Ahem font family',
+    test('defaults to FlutterTest font family',
         () async {
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);

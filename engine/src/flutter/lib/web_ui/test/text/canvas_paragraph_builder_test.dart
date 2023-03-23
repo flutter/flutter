@@ -410,9 +410,9 @@ Future<void> testMain() async {
   });
 
   test('various font sizes', () {
-    // Paragraphs and spans force the Ahem font in test mode. We need to trick
-    // them into thinking they are not in test mode, so they use the provided
-    // font family.
+    // Paragraphs and spans force the FlutterTest font in test mode. We need to
+    // trick them into thinking they are not in test mode, so they use the
+    // provided font family.
     debugEmulateFlutterTesterEnvironment = false;
     final EngineParagraphStyle style = EngineParagraphStyle(fontSize: 12.0, fontFamily: 'first');
     final CanvasParagraphBuilder builder = CanvasParagraphBuilder(style);
@@ -491,7 +491,7 @@ Future<void> testMain() async {
   });
 }
 
-const String defaultFontFamily = 'Ahem';
+const String defaultFontFamily = 'FlutterTest';
 const num defaultFontSize = 14;
 
 String paragraphStyle() {

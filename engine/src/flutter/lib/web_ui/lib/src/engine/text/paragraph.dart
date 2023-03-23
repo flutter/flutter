@@ -464,7 +464,7 @@ class EngineTextStyle implements ui.TextStyle {
   final ui.Paint? foreground;
   final List<ui.Shadow>? shadows;
 
-  static final List<String> _testFonts = <String>['Ahem', 'FlutterTest'];
+  static final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
   String get effectiveFontFamily {
     final String fontFamily = this.fontFamily.isEmpty ? FlutterViewEmbedder.defaultFontFamily : this.fontFamily;
     // In the flutter tester environment, we use predictable-size test fonts.

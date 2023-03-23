@@ -143,7 +143,7 @@ Future<void> testMain() async {
 
   test('should handle placeholder-only paragraphs', () {
     final EngineParagraphStyle paragraphStyle = EngineParagraphStyle(
-      fontFamily: 'ahem',
+      fontFamily: 'Ahem',
       fontSize: 10,
       textAlign: ui.TextAlign.center,
     );
@@ -161,7 +161,7 @@ Future<void> testMain() async {
 
   test('correct maxIntrinsicWidth when paragraph ends with placeholder', () {
     final EngineParagraphStyle paragraphStyle = EngineParagraphStyle(
-      fontFamily: 'ahem',
+      fontFamily: 'Ahem',
       fontSize: 10,
       textAlign: ui.TextAlign.center,
     );
@@ -180,7 +180,7 @@ Future<void> testMain() async {
 
   test('handles new line followed by a placeholder', () {
     final EngineParagraphStyle paragraphStyle = EngineParagraphStyle(
-      fontFamily: 'ahem',
+      fontFamily: 'Ahem',
       fontSize: 10,
       textAlign: ui.TextAlign.center,
     );

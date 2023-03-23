@@ -16,7 +16,7 @@ import 'skia_object_cache.dart';
 import 'text_fragmenter.dart';
 import 'util.dart';
 
-final List<String> _testFonts = <String>['Ahem', 'FlutterTest'];
+final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 String? _effectiveFontFamily(String? fontFamily) {
   return ui.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
     ? _testFonts.first

@@ -227,15 +227,15 @@ Future<void> testMain() async {
     expect(paragraph.plainText, 'abcdef');
     final List<DomElement> spans =
         paragraph.toDomElement().querySelectorAll('flt-span').toList();
-    expect(spans[0].style.fontFamily, 'Ahem, $fallback, sans-serif');
+    expect(spans[0].style.fontFamily, 'FlutterTest, $fallback, sans-serif');
     // The nested span here should not set it's family to default sans-serif.
-    expect(spans[1].style.fontFamily, 'Ahem, $fallback, sans-serif');
+    expect(spans[1].style.fontFamily, 'FlutterTest, $fallback, sans-serif');
   },
       // TODO(mdebbar): https://github.com/flutter/flutter/issues/46638
       skip: browserEngine == BrowserEngine.firefox);
 
   test('adds Arial and sans-serif as fallback fonts', () {
-    // Set this to false so it doesn't default to 'Ahem' font.
+    // Set this to false so it doesn't default to the test font.
     debugEmulateFlutterTesterEnvironment = false;
 
     final CanvasParagraph paragraph = plain(EngineParagraphStyle(
@@ -253,7 +253,7 @@ Future<void> testMain() async {
       skip: browserEngine == BrowserEngine.firefox);
 
   test('does not add fallback fonts to generic families', () {
-    // Set this to false so it doesn't default to 'Ahem' font.
+    // Set this to false so it doesn't default to the default test font.
     debugEmulateFlutterTesterEnvironment = false;
 
     final CanvasParagraph paragraph = plain(EngineParagraphStyle(
@@ -268,7 +268,7 @@ Future<void> testMain() async {
   });
 
   test('can set font families that need to be quoted', () {
-    // Set this to false so it doesn't default to 'Ahem' font.
+    // Set this to false so it doesn't default to the default test font.
     debugEmulateFlutterTesterEnvironment = false;
 
     final CanvasParagraph paragraph = plain(EngineParagraphStyle(
@@ -363,7 +363,7 @@ Future<void> testMain() async {
     final bool resetValue = debugEmulateFlutterTesterEnvironment;
     debugEmulateFlutterTesterEnvironment = true;
     tearDownAll(() => debugEmulateFlutterTesterEnvironment = resetValue);
-    const List<String> testFonts = <String>['Ahem', 'FlutterTest'];
+    const List<String> testFonts = <String>['FlutterTest', 'Ahem'];
 
     test('The default test font is used when a non-test fontFamily is specified, or fontFamily is not specified', () {
       final String defaultTestFontFamily = testFonts.first;
