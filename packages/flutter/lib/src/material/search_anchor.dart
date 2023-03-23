@@ -723,7 +723,7 @@ class _ViewContentState extends State<_ViewContent> {
       ?? widget.viewTheme.headerHintStyle
       ?? widget.viewHeaderTextStyle
       ?? widget.viewTheme.headerTextStyle
-      ?? widget.viewDefaults.headerTextStyle;
+      ?? widget.viewDefaults.headerHintStyle;
 
     final Widget viewDivider = DividerTheme(
       data: widget.dividerTheme.copyWith(color: effectiveDividerColor),
