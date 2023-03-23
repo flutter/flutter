@@ -210,7 +210,7 @@ class SearchAnchor extends StatefulWidget {
 
   /// The color and weight of the search view's outline.
   ///
-  /// This value is combined with [shape] to create a shape decorated
+  /// This value is combined with [viewShape] to create a shape decorated
   /// with an outline. This will be ignored if the view is full-screen.
   ///
   /// If null, the value of [SearchViewThemeData.side] will be used. If this is
@@ -219,7 +219,7 @@ class SearchAnchor extends StatefulWidget {
 
   /// The shape of the search view's underlying [Material].
   ///
-  /// This shape is combined with [side] to create a shape decorated
+  /// This shape is combined with [viewSide] to create a shape decorated
   /// with an outline.
   ///
   /// If null, the value of [SearchViewThemeData.shape] will be used.
@@ -233,7 +233,7 @@ class SearchAnchor extends StatefulWidget {
   /// The default text color is [ColorScheme.onSurface].
   final MaterialStateProperty<TextStyle?>? headerTextStyle;
 
-  /// The style to use for the [hintText] on the search view.
+  /// The style to use for the [viewHintText] on the search view.
   ///
   /// If null, the value of [SearchViewThemeData.headerHintStyle] will be used.
   /// If this is also null, the value of [headerTextStyle] will be used. If this is also null,
@@ -864,7 +864,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
 /// A controller to manage a search view created by [SearchAnchor].
 ///
 /// A [SearchController] is used to control a menu after it has been created,
-/// with methods such as [open] and [close]. It can also control the text in the
+/// with methods such as [openView] and [closeView]. It can also control the text in the
 /// input field.
 ///
 /// See also:
