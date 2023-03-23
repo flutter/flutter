@@ -97,7 +97,7 @@ void AssetManagerFontStyleSet::getStyle(int index,
   }
 }
 
-SkTypeface* AssetManagerFontStyleSet::createTypeface(int i) {
+auto AssetManagerFontStyleSet::createTypeface(int i) -> CreateTypefaceRet {
   size_t index = i;
   if (index >= assets_.size()) {
     return nullptr;
@@ -126,10 +126,11 @@ SkTypeface* AssetManagerFontStyleSet::createTypeface(int i) {
     }
   }
 
-  return SkRef(asset.typeface.get());
+  return CreateTypefaceRet(SkRef(asset.typeface.get()));
 }
 
-SkTypeface* AssetManagerFontStyleSet::matchStyle(const SkFontStyle& pattern) {
+auto AssetManagerFontStyleSet::matchStyle(const SkFontStyle& pattern)
+    -> MatchStyleRet {
   return matchStyleCSS3(pattern);
 }
 

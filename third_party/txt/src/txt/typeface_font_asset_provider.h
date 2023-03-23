@@ -42,10 +42,14 @@ class TypefaceFontStyleSet : public SkFontStyleSet {
   void getStyle(int index, SkFontStyle* style, SkString* name) override;
 
   // |SkFontStyleSet|
-  SkTypeface* createTypeface(int index) override;
+  using CreateTypefaceRet =
+      decltype(std::declval<SkFontStyleSet>().createTypeface(0));
+  CreateTypefaceRet createTypeface(int index) override;
 
   // |SkFontStyleSet|
-  SkTypeface* matchStyle(const SkFontStyle& pattern) override;
+  using MatchStyleRet = decltype(std::declval<SkFontStyleSet>().matchStyle(
+      std::declval<SkFontStyle>()));
+  MatchStyleRet matchStyle(const SkFontStyle& pattern) override;
 
  private:
   std::vector<sk_sp<SkTypeface>> typefaces_;

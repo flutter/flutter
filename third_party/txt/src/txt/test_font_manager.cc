@@ -27,7 +27,8 @@ TestFontManager::TestFontManager(
 
 TestFontManager::~TestFontManager() = default;
 
-SkFontStyleSet* TestFontManager::onMatchFamily(const char family_name[]) const {
+auto TestFontManager::onMatchFamily(const char family_name[]) const
+    -> OnMatchFamilyRet {
   // Find the requested name in the list, if not found, default to the first
   // font family in the test font family list.
   std::string requested_name(family_name);

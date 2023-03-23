@@ -34,10 +34,14 @@ class AssetManagerFontStyleSet : public SkFontStyleSet {
   void getStyle(int index, SkFontStyle*, SkString* style) override;
 
   // |SkFontStyleSet|
-  SkTypeface* createTypeface(int index) override;
+  using CreateTypefaceRet =
+      decltype(std::declval<SkFontStyleSet>().createTypeface(0));
+  CreateTypefaceRet createTypeface(int index) override;
 
   // |SkFontStyleSet|
-  SkTypeface* matchStyle(const SkFontStyle& pattern) override;
+  using MatchStyleRet = decltype(std::declval<SkFontStyleSet>().matchStyle(
+      std::declval<SkFontStyle>()));
+  MatchStyleRet matchStyle(const SkFontStyle& pattern) override;
 
  private:
   std::shared_ptr<AssetManager> asset_manager_;
