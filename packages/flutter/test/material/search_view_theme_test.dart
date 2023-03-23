@@ -61,9 +61,9 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData(
       backgroundColor: Color(0xfffffff1),
-      elevation: 3.0,
+      elevation: 3.5,
       surfaceTintColor: Color(0xfffffff3),
-      side: BorderSide(width: 2.0, color: Color(0xfffffff5)),
+      side: BorderSide(width: 2.5, color: Color(0xfffffff5)),
       shape: RoundedRectangleBorder(),
       headerTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 24.0)),
       headerHintStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 16.0)),
@@ -76,9 +76,9 @@ void main() {
         .toList();
 
     expect(description[0], 'backgroundColor: Color(0xfffffff1)');
-    expect(description[1], 'elevation: 3.0');
+    expect(description[1], 'elevation: 3.5');
     expect(description[2], 'surfaceTintColor: Color(0xfffffff3)');
-    expect(description[3], 'side: BorderSide(color: Color(0xfffffff5), width: 2.0)');
+    expect(description[3], 'side: BorderSide(color: Color(0xfffffff5), width: 2.5)');
     expect(description[4], 'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)');
     expect(description[5], 'headerTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 24.0))');
     expect(description[6], 'headerHintStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 16.0))');
