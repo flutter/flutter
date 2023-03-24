@@ -65,8 +65,8 @@ void main() {
       surfaceTintColor: Color(0xfffffff3),
       side: BorderSide(width: 2.5, color: Color(0xfffffff5)),
       shape: RoundedRectangleBorder(),
-      headerTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 24.0)),
-      headerHintStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 16.0)),
+      headerTextStyle: TextStyle(fontSize: 24.0),
+      headerHintStyle: TextStyle(fontSize: 16.0),
       constraints: BoxConstraints(minWidth: 350, minHeight: 240),
     ).debugFillProperties(builder);
 
@@ -91,10 +91,8 @@ void main() {
     const Color surfaceTintColor = Color(0xff000002);
     const BorderSide side = BorderSide(color: Color(0xff000003), width: 2.0);
     const OutlinedBorder shape = RoundedRectangleBorder(side: side, borderRadius: BorderRadius.all(Radius.circular(20.0)));
-    const TextStyle textStyle = TextStyle(color: Color(0xff000004), fontSize: 20.0);
-    const TextStyle hintStyle = TextStyle(color: Color(0xff000005), fontSize: 18.0);
-    const MaterialStateProperty<TextStyle?> headerTextStyle = MaterialStatePropertyAll<TextStyle>(textStyle);
-    const MaterialStateProperty<TextStyle?> headerHintStyle = MaterialStatePropertyAll<TextStyle>(hintStyle);
+    const TextStyle headerTextStyle = TextStyle(color: Color(0xff000004), fontSize: 20.0);
+    const TextStyle headerHintStyle = TextStyle(color: Color(0xff000005), fontSize: 18.0);
     const BoxConstraints constraints = BoxConstraints(minWidth: 250.0, maxWidth: 300.0, minHeight: 450.0);
 
     const SearchViewThemeData searchViewTheme = SearchViewThemeData(
@@ -188,13 +186,13 @@ void main() {
       expect(sizedBox.height, 450.0);
 
       final Text hintText = tester.widget(find.text('hint text'));
-      expect(hintText.style?.color, hintStyle.color);
-      expect(hintText.style?.fontSize, hintStyle.fontSize);
+      expect(hintText.style?.color, headerHintStyle.color);
+      expect(hintText.style?.fontSize, headerHintStyle.fontSize);
 
       await tester.enterText(find.byType(TextField), 'input');
       final EditableText inputText = tester.widget(find.text('input'));
-      expect(inputText.style.color, textStyle.color);
-      expect(inputText.style.fontSize, textStyle.fontSize);
+      expect(inputText.style.color, headerTextStyle.color);
+      expect(inputText.style.fontSize, headerHintStyle.fontSize);
     }
 
     testWidgets('SearchView properties overrides defaults', (WidgetTester tester) async {

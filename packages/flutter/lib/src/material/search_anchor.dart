@@ -28,20 +28,14 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 const int _kOpenViewMilliseconds = 600;
-
 const Duration _kOpenViewDuration = Duration(milliseconds: _kOpenViewMilliseconds);
-
 const Duration _kAnchorFadeDuration = Duration(milliseconds: 150);
-
 const Curve _kViewFadeOnInterval = Interval(0.0, 1/2);
-
 const Curve _kViewIconsFadeOnInterval = Interval(1/6, 2/6);
-
 const Curve _kViewDividerFadeOnInterval = Interval(0.0, 1/6);
-
 const Curve _kViewListFadeOnInterval = Interval(133 / _kOpenViewMilliseconds, 233 / _kOpenViewMilliseconds);
 
-/// Signature for a function that creates a [Widget] that is used to open a search view.
+/// Signature for a function that creates a [Widget] which is used to open a search view.
 ///
 /// The `controller` callback provided to [SearchAnchor.anchorBuilder] can be used
 /// to open the search view and control the editable field on the view.
@@ -59,18 +53,30 @@ typedef SuggestionsBuilder = Iterable<Widget> Function(BuildContext context, Sea
 /// Parameter `suggestions` is the content list that this function wants to lay out.
 typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 
-/// A widget used to open a search view when it is tapped. It also helps to define
-/// the position and size of the search view.
+/// Manages a "search view" route that allows the user to select one of the
+/// suggested completions for a search query.
 ///
-/// When the anchor is tapped, the search view either grows to a specific size, or
-/// grows to fill the entire screen. By default, the search view only shows full screen
-/// on mobile platforms. Use [SearchAnchor.isFullScreen] to override the default setting.
+/// The search view's route can either be shown by creating a [SearchController]
+/// and then calling [SearchController.openView] or by tapping on an anchor.
+/// When the anchor is tapped or [openView] is called, the search view either
+/// grows to a specific size, or grows to fill the entire screen. By default,
+/// the search view only shows full screen on mobile platforms. Use [SearchAnchor.isFullScreen]
+/// to override the default setting.
 ///
 /// The search view is usually opened by a [SearchBar], an [IconButton] or an [Icon].
+/// If [anchorBuilder] returns an Icon, or any un-tappable widgets, we don't have
+/// to explicitly call [SearchController.openView].
 ///
 /// {@tool dartpad}
-/// This example shows how to show a pinned or floating effect for a [SearchAnchor]
-/// on top of the app.
+/// This example shows how to use an IconButton to open a search view in a [SearchAnchor].
+/// It also shows how to use [SearchController] to open or close the search view route.
+///
+/// ** See code in examples/api/lib/material/search_anchor/search_anchor.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to set up a floating (or pinned) AppBar with a
+/// [SearchAnchor] for a title.
 ///
 /// ** See code in examples/api/lib/material/search_anchor/search_anchor.1.dart **
 /// {@end-tool}
@@ -105,19 +111,14 @@ class SearchAnchor extends StatefulWidget {
     required this.suggestionsBuilder,
   });
 
-  /// Create a search anchor which has a [SearchBar] as its default trigger to
-  /// open a search view.
+  /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
   ///
   /// All the barX parameters are used to customize the anchor. Similarly, all the
   /// viewX parameters are used to override the view's defaults.
   ///
-  /// If `viewHintText` is null, the hint text on the view will be the same as
-  /// the `barHintText`. If both are null, neither search bar or search view has
-  /// hint text.
-  ///
   /// {@tool dartpad}
-  /// This example shows how to use a [SearchAnchor.bar] to use a default search
-  /// bar and open the search view by tapping the search bar.
+  /// This example shows how to use a [SearchAnchor.bar] which uses a default search
+  /// bar to open a search view route.
   ///
   /// ** See code in examples/api/lib/material/search_anchor/search_anchor.0.dart **
   /// {@end-tool}
@@ -143,8 +144,8 @@ class SearchAnchor extends StatefulWidget {
     double? viewElevation,
     BorderSide? viewSide,
     OutlinedBorder? viewShape,
-    MaterialStateProperty<TextStyle?>? viewHeaderTextStyle,
-    MaterialStateProperty<TextStyle?>? viewHeaderHintStyle,
+    TextStyle? viewHeaderTextStyle,
+    TextStyle? viewHeaderHintStyle,
     Color? dividerColor,
     BoxConstraints? constraints,
     bool? isFullScreen,
@@ -162,6 +163,9 @@ class SearchAnchor extends StatefulWidget {
 
   /// An optional controller that allows opening and closing of the search view from
   /// other widgets.
+  ///
+  /// If this is null, one internal search controller is created automatically
+  /// and it is used to open the search view when the user taps on the anchor.
   final SearchController? searchController;
 
   /// Optional callback to lay out the content list of the search view.
@@ -169,7 +173,7 @@ class SearchAnchor extends StatefulWidget {
   /// Default view uses a [ListView] with a vertical scroll direction.
   final ViewBuilder? viewBuilder;
 
-  /// An optional widget to display before the text input filed when the search
+  /// An optional widget to display before the text input field when the search
   /// view is open.
   ///
   /// Typically the [viewLeading] widget is an [Icon] or an [IconButton].
@@ -180,12 +184,12 @@ class SearchAnchor extends StatefulWidget {
   /// An optional widget list to display after the text input field when the search
   /// view is open.
   ///
-  /// Typically the [viewTrailing] widget list has up to two widgets.
+  /// Typically the [viewTrailing] widget list only has one or two widgets.
   ///
   /// Defaults to an icon button which clears the text in the input field.
   final Iterable<Widget>? viewTrailing;
 
-  /// Text that suggests what sort of input the field accepts on the view.
+  /// Text that is displayed when the search bar's input field is empty.
   final String? viewHintText;
 
   /// The search view's background fill color.
@@ -231,7 +235,7 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// If null, defaults to the `bodyLarge` text style from the current [Theme].
   /// The default text color is [ColorScheme.onSurface].
-  final MaterialStateProperty<TextStyle?>? headerTextStyle;
+  final TextStyle? headerTextStyle;
 
   /// The style to use for the [viewHintText] on the search view.
   ///
@@ -239,7 +243,7 @@ class SearchAnchor extends StatefulWidget {
   /// If this is also null, the value of [headerTextStyle] will be used. If this is also null,
   /// defaults to the `bodyLarge` text style from the current [Theme]. The default
   /// text color is [ColorScheme.onSurfaceVariant].
-  final MaterialStateProperty<TextStyle?>? headerHintStyle;
+  final TextStyle? headerHintStyle;
 
   /// The color of the divider on the search view.
   ///
@@ -256,10 +260,10 @@ class SearchAnchor extends StatefulWidget {
   /// ```
   final BoxConstraints? viewConstraints;
 
-  /// Called to obtain the anchor which is used to open the search view.
+  /// Called to create a widget which is used to open a search view route.
   ///
-  /// The widget returned by this builder is faded out when the widget is tapped.
-  /// At the same time the search view is faded in.
+  /// The widget returned by this builder is faded out when it is tapped.
+  /// At the same time a search view route is faded in.
   ///
   /// This must not be null.
   final AnchorBuilder anchorBuilder;
@@ -311,7 +315,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       viewHeaderHintStyle: widget.headerHintStyle,
       dividerColor: widget.dividerColor,
       viewConstraints: widget.viewConstraints,
-      showFullScreenView: showFullScreenView(),
+      showFullScreenView: getShowFullScreenView(),
       toggleVisibility: toggleVisibility,
       textDirection: Directionality.of(context),
       viewBuilder: widget.viewBuilder,
@@ -346,7 +350,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
     return _anchorIsVisible;
   }
 
-  bool showFullScreenView() {
+  bool getShowFullScreenView() {
     if (widget.isFullScreen != null) {
       return widget.isFullScreen!;
     }
@@ -411,8 +415,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
-  final MaterialStateProperty<TextStyle?>? viewHeaderTextStyle;
-  final MaterialStateProperty<TextStyle?>? viewHeaderHintStyle;
+  final TextStyle? viewHeaderTextStyle;
+  final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
   final bool showFullScreenView;
@@ -590,8 +594,8 @@ class _ViewContent extends StatefulWidget {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
-  final MaterialStateProperty<TextStyle?>? viewHeaderTextStyle;
-  final MaterialStateProperty<TextStyle?>? viewHeaderHintStyle;
+  final TextStyle? viewHeaderTextStyle;
+  final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
   final bool showFullScreenView;
@@ -719,10 +723,10 @@ class _ViewContentState extends State<_ViewContent> {
       ?? widget.viewTheme.dividerColor
       ?? widget.dividerTheme.color
       ?? widget.viewDefaults.dividerColor!;
-    final MaterialStateProperty<TextStyle?>? effectiveTextStyle = widget.viewHeaderTextStyle
+    final TextStyle? effectiveTextStyle = widget.viewHeaderTextStyle
       ?? widget.viewTheme.headerTextStyle
       ?? widget.viewDefaults.headerTextStyle;
-    final MaterialStateProperty<TextStyle?>? effectiveHintStyle = widget.viewHeaderHintStyle
+    final TextStyle? effectiveHintStyle = widget.viewHeaderHintStyle
       ?? widget.viewTheme.headerHintStyle
       ?? widget.viewHeaderTextStyle
       ?? widget.viewTheme.headerTextStyle
@@ -768,8 +772,8 @@ class _ViewContentState extends State<_ViewContent> {
                         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
                         overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
                         elevation: const MaterialStatePropertyAll<double>(0.0),
-                        textStyle: effectiveTextStyle,
-                        hintStyle: effectiveHintStyle,
+                        textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                        hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
                         controller: _controller,
                         onChanged: (_) {
                           updateSuggestions();
@@ -825,8 +829,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.viewElevation,
     super.viewSide,
     super.viewShape,
-    MaterialStateProperty<TextStyle?>? viewHeaderTextStyle,
-    MaterialStateProperty<TextStyle?>? viewHeaderHintStyle,
+    TextStyle? viewHeaderTextStyle,
+    TextStyle? viewHeaderHintStyle,
     super.dividerColor,
     BoxConstraints? constraints,
     super.isFullScreen,
@@ -834,8 +838,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     required super.suggestionsBuilder
   }) : super(
     viewHintText: viewHintText ?? barHintText,
-    headerTextStyle: viewHeaderTextStyle ?? barTextStyle,
-    headerHintStyle: viewHeaderHintStyle ?? barHintStyle,
+    headerTextStyle: viewHeaderTextStyle,
+    headerHintStyle: viewHeaderHintStyle,
     anchorBuilder: (BuildContext context, SearchController controller) {
       return SearchBar(
         constraints: constraints,
@@ -1307,12 +1311,10 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
     : const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
 
   @override
-  MaterialStateProperty<TextStyle?> get headerTextStyle =>
-    MaterialStatePropertyAll<TextStyle?>(_textTheme.bodyLarge?.copyWith(color: _colors.onSurface));
+  TextStyle? get headerTextStyle => _textTheme.bodyLarge?.copyWith(color: _colors.onSurface);
 
   @override
-  MaterialStateProperty<TextStyle?> get headerHintStyle =>
-    MaterialStatePropertyAll<TextStyle?>(_textTheme.bodyLarge?.copyWith(color: _colors.onSurfaceVariant));
+  TextStyle? get headerHintStyle => _textTheme.bodyLarge?.copyWith(color: _colors.onSurfaceVariant);
 
   @override
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);

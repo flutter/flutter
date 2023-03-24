@@ -1143,7 +1143,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: SearchAnchor(
-          headerTextStyle: MaterialStateProperty.resolveWith<TextStyle?>(_getTextStyle),
+          headerTextStyle: theme.textTheme.bodyLarge?.copyWith(color: Colors.red),
           anchorBuilder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
@@ -1161,24 +1161,8 @@ void main() {
     await tester.enterText(find.byType(SearchBar), 'input text');
     await tester.pumpAndSettle();
 
-    // On hovered.
-    final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    await tester.pump();
     final EditableText inputText = tester.widget(find.text('input text'));
-    expect(inputText.style.color, hoveredColor);
-
-    // On pressed.
-    await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump(); // Start the splash and highlight animations.
-    final EditableText inputTextPressed = tester.widget(find.text('input text'));
-    expect(inputTextPressed.style.color, pressedColor);
-
-    // On focused.
-    await gesture.removePointer();
-    await tester.tap(find.byType(SearchBar));
-    await tester.pumpAndSettle();
-    final EditableText inputTextFocused = tester.widget(find.text('input text'));
-    expect(inputTextFocused.style.color, focusedColor);
+    expect(inputText.style.color, Colors.red);
   });
 
   testWidgets('SearchAnchor respects headerHintStyle property', (WidgetTester tester) async {
@@ -1186,7 +1170,7 @@ void main() {
       home: Material(
         child: SearchAnchor(
           viewHintText: 'hint text',
-          headerHintStyle: MaterialStateProperty.resolveWith<TextStyle?>(_getTextStyle),
+          headerHintStyle: theme.textTheme.bodyLarge?.copyWith(color: Colors.orange),
           anchorBuilder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
@@ -1202,24 +1186,8 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
 
-    // On hovered.
-    final TestGesture gesture = await _pointGestureToSearchBar(tester);
-    await tester.pump();
     final Text inputText = tester.widget(find.text('hint text'));
-    expect(inputText.style?.color, hoveredColor);
-
-    // On pressed.
-    await gesture.down(tester.getCenter(find.byType(SearchBar)));
-    await tester.pump(); // Start the splash and highlight animations.
-    final Text inputTextPressed = tester.widget(find.text('hint text'));
-    expect(inputTextPressed.style?.color, pressedColor);
-
-    // On focused.
-    await gesture.removePointer();
-    await tester.tap(find.byType(SearchBar));
-    await tester.pumpAndSettle();
-    final Text inputTextFocused = tester.widget(find.text('hint text'));
-    expect(inputTextFocused.style?.color, focusedColor);
+    expect(inputText.style?.color, Colors.orange);
   });
 
   testWidgets('SearchAnchor respects dividerColor property', (WidgetTester tester) async {

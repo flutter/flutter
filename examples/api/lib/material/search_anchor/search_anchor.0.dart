@@ -19,7 +19,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
   Color? selectedColorSeed;
   List<ColorLabel> searchHistory = <ColorLabel>[];
 
-  List<Widget> getHistoryList(SearchController controller) {
+  Iterable<Widget> getHistoryList(SearchController controller) {
     return searchHistory.map((ColorLabel color) => ListTile(
       leading: const Icon(Icons.history),
       title: Text(color.label),
@@ -51,7 +51,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
   void handleSelection(ColorLabel selectedColor) {
     setState(() {
       selectedColorSeed = selectedColor.color;
-      if (searchHistory.length == 5) {
+      if (searchHistory.length >= 5) {
         searchHistory.removeLast();
       }
       searchHistory.insert(0, selectedColor);

@@ -39,12 +39,10 @@ class _${blockName}DefaultsM3 extends ${blockName}ThemeData {
     : ${shape('md.comp.search-view.docked.container')};
 
   @override
-  MaterialStateProperty<TextStyle?> get headerTextStyle =>
-    MaterialStatePropertyAll<TextStyle?>(${textStyleWithColor('md.comp.search-view.header.input-text')});
+  TextStyle? get headerTextStyle => ${textStyleWithColor('md.comp.search-view.header.input-text')};
 
   @override
-  MaterialStateProperty<TextStyle?> get headerHintStyle =>
-    MaterialStatePropertyAll<TextStyle?>(${textStyleWithColor('md.comp.search-view.header.supporting-text')});
+  TextStyle? get headerHintStyle => ${textStyleWithColor('md.comp.search-view.header.supporting-text')};
 
   @override
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);

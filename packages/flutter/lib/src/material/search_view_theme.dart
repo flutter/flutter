@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -64,10 +63,10 @@ class SearchViewThemeData with Diagnosticable {
   final OutlinedBorder? shape;
 
   /// Overrides the default value for [SearchAnchor.headerTextStyle].
-  final MaterialStateProperty<TextStyle?>? headerTextStyle;
+  final TextStyle? headerTextStyle;
 
   /// Overrides the default value for [SearchAnchor.headerHintStyle].
-  final MaterialStateProperty<TextStyle?>? headerHintStyle;
+  final TextStyle? headerHintStyle;
 
   /// Overrides the value of size constraints for [SearchAnchor.viewConstraints].
   final BoxConstraints? constraints;
@@ -83,8 +82,8 @@ class SearchViewThemeData with Diagnosticable {
     Color? surfaceTintColor,
     BorderSide? side,
     OutlinedBorder? shape,
-    MaterialStateProperty<TextStyle?>? headerTextStyle,
-    MaterialStateProperty<TextStyle?>? headerHintStyle,
+    TextStyle? headerTextStyle,
+    TextStyle? headerHintStyle,
     BoxConstraints? constraints,
     Color? dividerColor,
   }) {
@@ -112,8 +111,8 @@ class SearchViewThemeData with Diagnosticable {
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       side: _lerpSides(a?.side, b?.side, t),
       shape: OutlinedBorder.lerp(a?.shape, b?.shape, t),
-      headerTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.headerTextStyle, b?.headerTextStyle, t, TextStyle.lerp),
-      headerHintStyle: MaterialStateProperty.lerp<TextStyle?>(a?.headerTextStyle, b?.headerTextStyle, t, TextStyle.lerp),
+      headerTextStyle: TextStyle.lerp(a?.headerTextStyle, b?.headerTextStyle, t),
+      headerHintStyle: TextStyle.lerp(a?.headerTextStyle, b?.headerTextStyle, t),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
       dividerColor: Color.lerp(a?.dividerColor, b?.dividerColor, t),
     );
@@ -160,8 +159,8 @@ class SearchViewThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<Color?>('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide?>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<OutlinedBorder?>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('headerTextStyle', headerTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('headerHintStyle', headerHintStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle?>('headerTextStyle', headerTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle?>('headerHintStyle', headerHintStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DiagnosticsProperty<Color?>('dividerColor', dividerColor, defaultValue: null));
   }

@@ -37,15 +37,11 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                 backgroundColor: Colors.transparent,
                 floating: true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
                 title: SearchAnchor.bar(
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
-                    final List<Widget> suggestions =
-                      List<Widget>.generate(5, (int index) => ListTile(
-                        titleAlignment: ListTileTitleAlignment.center,
-                        title: Text('Initial list item $index'),
-                      ));
-
-                    return suggestions;
-                  },
+                  suggestionsBuilder: (BuildContext context, SearchController controller) =>
+                    List<Widget>.generate(5, (int index) => ListTile(
+                      titleAlignment: ListTileTitleAlignment.center,
+                      title: Text('Initial list item $index'),
+                    ))
                 ),
               ),
               // The listed items below are just for filling the screen
