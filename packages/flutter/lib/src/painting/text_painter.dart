@@ -1083,7 +1083,7 @@ class TextPainter {
 
       // Try to identify the box nearest the offset.  This logic works when
       // there's just one box, and when all boxes have the same direction.
-      // It may not work in bidi text.
+      // It may not work in bidi text: https://github.com/flutter/flutter/issues/123424
       final TextBox box = boxes.last.direction == TextDirection.ltr
           ? boxes.last : boxes.first;
 
@@ -1134,7 +1134,7 @@ class TextPainter {
 
       // Try to identify the box nearest the offset.  This logic works when
       // there's just one box, and when all boxes have the same direction.
-      // It may not work in bidi text.
+      // It may not work in bidi text: https://github.com/flutter/flutter/issues/123424
       final TextBox box = boxes.first.direction == TextDirection.ltr
         ? boxes.first : boxes.last;
 
