@@ -29,13 +29,15 @@ class AnalyzeCommand extends FlutterCommand {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required List<ProjectValidator> allProjectValidators,
+    required bool suppressAnalytics,
   }) : _artifacts = artifacts,
        _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _terminal = terminal,
        _allProjectValidators = allProjectValidators,
-       _platform = platform {
+       _platform = platform,
+       _suppressAnalytics = suppressAnalytics {
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
@@ -109,6 +111,7 @@ class AnalyzeCommand extends FlutterCommand {
   final ProcessManager _processManager;
   final Platform _platform;
   final List<ProjectValidator> _allProjectValidators;
+  final bool _suppressAnalytics;
 
   @override
   String get name => 'analyze';
@@ -181,6 +184,7 @@ class AnalyzeCommand extends FlutterCommand {
         processManager: _processManager,
         terminal: _terminal,
         artifacts: _artifacts,
+        suppressAnalytics: _suppressAnalytics,
       ).analyze();
     } else {
       await AnalyzeOnce(
@@ -194,6 +198,7 @@ class AnalyzeCommand extends FlutterCommand {
         processManager: _processManager,
         terminal: _terminal,
         artifacts: _artifacts,
+        suppressAnalytics: _suppressAnalytics,
       ).analyze();
     }
     return FlutterCommandResult.success();
