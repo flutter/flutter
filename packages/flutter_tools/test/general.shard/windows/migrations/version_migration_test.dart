@@ -93,6 +93,54 @@ void main () {
 
     testWithoutContext('skipped if already migrated', () {
       const String cmakeFileContents =
+        '# Apply the standard set of build settings. This can be removed for applications\n'
+        '# that need different build settings.\n'
+        'apply_standard_settings(\${BINARY_NAME})\n'
+        '\n'
+        '# Add preprocessor definitions for the build version.\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\\"\${FLUTTER_VERSION}\\"")\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=\${FLUTTER_VERSION_MAJOR}")\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=\${FLUTTER_VERSION_MINOR}")\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=\${FLUTTER_VERSION_PATCH}")\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=\${FLUTTER_VERSION_BUILD}")\n'
+        '\n'
+        '# Disable Windows macros that collide with C++ standard library functions.\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "NOMINMAX")\n';
+      const String resourceFileContents =
+        '#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)\n'
+        '#define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD\n'
+        '#else\n'
+        '#define VERSION_AS_NUMBER 1,0,0,0\n'
+        '#endif\n'
+        '\n'
+        '#if defined(FLUTTER_VERSION)\n'
+        '#define VERSION_AS_STRING FLUTTER_VERSION\n'
+        '#else\n'
+        '#define VERSION_AS_STRING "1.0.0"\n'
+        '#endif\n';
+
+      cmakeFile.writeAsStringSync(cmakeFileContents);
+      resourceFile.writeAsStringSync(resourceFileContents);
+
+      final DateTime cmakeUpdatedAt = cmakeFile.lastModifiedSync();
+      final DateTime resourceUpdatedAt = resourceFile.lastModifiedSync();
+
+      final VersionMigration versionMigration = VersionMigration(
+        mockProject,
+        testLogger,
+      );
+      versionMigration.migrate();
+
+      expect(cmakeFile.lastModifiedSync(), cmakeUpdatedAt);
+      expect(cmakeFile.readAsStringSync(), cmakeFileContents);
+      expect(resourceFile.lastModifiedSync(), resourceUpdatedAt);
+      expect(resourceFile.readAsStringSync(), resourceFileContents);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if already migrated (CRLF)', () {
+      const String cmakeFileContents =
         '# Apply the standard set of build settings. This can be removed for applications\r\n'
         '# that need different build settings.\r\n'
         'apply_standard_settings(\${BINARY_NAME})\r\n'
@@ -140,6 +188,68 @@ void main () {
     });
 
     testWithoutContext('migrates project to set version information', () {
+      cmakeFile.writeAsStringSync(
+        '# Apply the standard set of build settings. This can be removed for applications\n'
+        '# that need different build settings.\n'
+        'apply_standard_settings(\${BINARY_NAME})\n'
+        '\n'
+        '# Disable Windows macros that collide with C++ standard library functions.\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "NOMINMAX")\n'
+      );
+      resourceFile.writeAsStringSync(
+        '#ifdef FLUTTER_BUILD_NUMBER\n'
+        '#define VERSION_AS_NUMBER FLUTTER_BUILD_NUMBER\n'
+        '#else\n'
+        '#define VERSION_AS_NUMBER 1,0,0\n'
+        '#endif\n'
+        '\n'
+        '#ifdef FLUTTER_BUILD_NAME\n'
+        '#define VERSION_AS_STRING #FLUTTER_BUILD_NAME\n'
+        '#else\n'
+        '#define VERSION_AS_STRING "1.0.0"\n'
+        '#endif\n'
+      );
+
+      final VersionMigration versionMigration = VersionMigration(
+        mockProject,
+        testLogger,
+      );
+      versionMigration.migrate();
+
+      expect(cmakeFile.readAsStringSync(),
+        '# Apply the standard set of build settings. This can be removed for applications\n'
+        '# that need different build settings.\n'
+        'apply_standard_settings(\${BINARY_NAME})\n'
+        '\n'
+        '# Add preprocessor definitions for the build version.\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\\"\${FLUTTER_VERSION}\\"")\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=\${FLUTTER_VERSION_MAJOR}")\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=\${FLUTTER_VERSION_MINOR}")\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=\${FLUTTER_VERSION_PATCH}")\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=\${FLUTTER_VERSION_BUILD}")\n'
+        '\n'
+        '# Disable Windows macros that collide with C++ standard library functions.\n'
+        'target_compile_definitions(\${BINARY_NAME} PRIVATE "NOMINMAX")\n'
+      );
+      expect(resourceFile.readAsStringSync(),
+        '#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)\n'
+        '#define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD\n'
+        '#else\n'
+        '#define VERSION_AS_NUMBER 1,0,0,0\n'
+        '#endif\n'
+        '\n'
+        '#if defined(FLUTTER_VERSION)\n'
+        '#define VERSION_AS_STRING FLUTTER_VERSION\n'
+        '#else\n'
+        '#define VERSION_AS_STRING "1.0.0"\n'
+        '#endif\n'
+      );
+
+      expect(testLogger.statusText, contains('windows/runner/CMakeLists.txt does not define version information, updating.'));
+      expect(testLogger.statusText, contains('windows/runner/Runner.rc does not define use Flutter version information, updating.'));
+    });
+
+    testWithoutContext('migrates project to set version information (CRLF)', () {
       cmakeFile.writeAsStringSync(
         '# Apply the standard set of build settings. This can be removed for applications\r\n'
         '# that need different build settings.\r\n'
