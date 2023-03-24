@@ -301,6 +301,30 @@ void testMain() {
     expect(actualState['state4']['substate2'], 'string2');
   });
 
+  test('routeInformationUpdated can handle uri',
+      () async {
+    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+      const TestHistoryEntry('initial state', null, '/initial'),
+    ), useSingle: false);
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+
+    // routeInformationUpdated does not
+    final Completer<void> callback = Completer<void>();
+    window.sendPlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(const MethodCall(
+        'routeInformationUpdated',
+        <String, dynamic>{
+          'uri': 'http://myhostname.com/baz?abc=def#fragment',
+        },
+      )),
+      (_) { callback.complete(); },
+    );
+    await callback.future;
+    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(window.browserHistory.urlStrategy!.getPath(), '/baz?abc=def#fragment');
+  });
+
   test('can replace in MultiEntriesBrowserHistory',
       () async {
     await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
