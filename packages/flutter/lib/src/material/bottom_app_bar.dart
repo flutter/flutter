@@ -201,17 +201,19 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child: widget.child,
     );
 
+    child = Material(
+      key: materialKey,
+      type: MaterialType.transparency,
+      child: SafeArea(child: child),
+    );
+
     child = PhysicalShape(
       clipper: clipper,
       elevation: elevation,
       shadowColor: shadowColor,
       color: effectiveColor,
       clipBehavior: widget.clipBehavior,
-      child: Material(
-        key: materialKey,
-        type: MaterialType.transparency,
-        child: SafeArea(child: child),
-      ),
+      child: child,
     );
 
     return SizedBox(height: height, child: child);
