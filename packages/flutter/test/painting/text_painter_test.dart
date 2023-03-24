@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 const bool isCanvasKit =
     bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
-void checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
+void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
   expect(boundaries.first, 0);
   expect(boundaries.last, text.length);
 
@@ -50,6 +50,9 @@ void checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
 ///  * At each character (that is, grapheme cluster) boundary, the caret
 ///    offset equals the width that the text up to that point would have
 ///    if laid out on its own.
+///
+/// If you have a [TextSpan] instead of a plain [String],
+/// see [caretOffsetsForTextSpanLtr].
 void checkCaretOffsetsLtr(String text) {
   final List<int> characterBoundaries = <int>[];
   final CharacterRange range = CharacterRange.at(text, 0);
@@ -60,7 +63,7 @@ void checkCaretOffsetsLtr(String text) {
     }
     range.expandNext();
   }
-  checkCaretOffsetsLtrAt(text, characterBoundaries);
+  _checkCaretOffsetsLtrAt(text, characterBoundaries);
 }
 
 /// Check the caret offsets are accurate for the given single line of LTR text,
@@ -84,10 +87,18 @@ void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
     buffer.write(cluster);
     boundaries.add(buffer.length);
   }
-  checkCaretOffsetsLtrAt(buffer.toString(), boundaries);
+  _checkCaretOffsetsLtrAt(buffer.toString(), boundaries);
 }
 
-List<double> caretOffsetsForTextSpan(TextSpan text) {
+/// Compute the caret offsets for the given single line of LTR text, a [TextSpan].
+///
+/// This lays out the given text as a single line with [TextDirection.ltr] and
+/// returns a full list of caret offsets, one at each code unit boundary.
+/// It also checks that the offset at the very end equals the line's width.
+///
+/// If you have a [String] instead of a nontrivial [TextSpan],
+/// consider using [checkCaretOffsetsLtr] instead.
+List<double> caretOffsetsForTextSpanLtr(TextSpan text) {
   final TextPainter painter = TextPainter()
     ..textDirection = TextDirection.ltr
     ..text = text
@@ -296,13 +307,13 @@ void main() {
     // letters and then an emoji, presumably because they get different fonts.
     // In these tests, our single test font covers both letters and emoji,
     // so we provoke the same effect by adding styles.
-    expect(caretOffsetsForTextSpan(
+    expect(caretOffsetsForTextSpanLtr(
         const TextSpan(children: <TextSpan>[
           TextSpan(text: '👩‍🚀', style: TextStyle()),
           TextSpan(text: ' word', style: TextStyle(fontWeight: FontWeight.bold)),
         ])),
         <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98]);
-    expect(caretOffsetsForTextSpan(
+    expect(caretOffsetsForTextSpanLtr(
         const TextSpan(children: <TextSpan>[
           TextSpan(text: 'word ', style: TextStyle(fontWeight: FontWeight.bold)),
           TextSpan(text: '👩‍🚀', style: TextStyle()),
