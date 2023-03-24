@@ -2119,6 +2119,15 @@ class FakeLeafRenderObject extends RenderBox {
 
 class TestRenderObjectElement extends RenderObjectElement {
   TestRenderObjectElement() : super(Table());
+
+  @override
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+
+  @override
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
 }
 
 class _EmptyWidget extends Widget {

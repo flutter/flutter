@@ -17,6 +17,7 @@ import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
