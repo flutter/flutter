@@ -261,7 +261,7 @@ class SearchAnchor extends StatefulWidget {
   /// ```
   final BoxConstraints? viewConstraints;
 
-  /// Called to create a widget which is used to open a search view route.
+  /// Called to create a widget which can open a search view route when it is tapped.
   ///
   /// The widget returned by this builder is faded out when it is tapped.
   /// At the same time a search view route is faded in.
