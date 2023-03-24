@@ -234,10 +234,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     switch (overflows.length) {
       case 1:
         overflowText = overflows.first;
-        break;
       case 2:
         overflowText = '${overflows.first} and ${overflows.last}';
-        break;
       default:
         overflows[overflows.length - 1] = 'and ${overflows[overflows.length - 1]}';
         overflowText = overflows.join(', ');
