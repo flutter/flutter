@@ -80,7 +80,7 @@ class VersionMigration extends ProjectMigrator {
       originalCmakeContents,
       _cmakeFileBefore,
       _cmakeFileAfter,
-    );;
+    );
     if (originalCmakeContents != newCmakeContents) {
       logger.printStatus('windows/runner/CMakeLists.txt does not define version information, updating.');
       _cmakeFile.writeAsStringSync(newCmakeContents);
