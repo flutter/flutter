@@ -140,7 +140,7 @@ Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType 
   );
   await runCommand(
     _flutter,
-    <String>['build', 'web', '--profile', '-t', target],
+    <String>['build', 'web', '--web-resources-cdn', '--profile', '-t', target],
     workingDirectory: _testAppDirectory,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
