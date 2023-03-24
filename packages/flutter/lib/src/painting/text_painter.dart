@@ -1080,7 +1080,12 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes.last;
+
+      // Try to identify the box nearest the offset.  This logic works when
+      // there's just one box, and when all boxes have the same direction.
+      // It may not work in bidi text.
+      final TextBox box = boxes.last.direction == TextDirection.ltr
+          ? boxes.last : boxes.first;
 
       return prevCodeUnit == NEWLINE_CODE_UNIT
         ? _EmptyLineCaretMetrics(lineVerticalOffset: box.bottom)
@@ -1088,6 +1093,7 @@ class TextPainter {
     }
     return null;
   }
+
   // Get the caret metrics (in logical pixels) based off the near edge of the
   // character downstream from the given string offset.
   _CaretMetrics? _getMetricsFromDownstream(int offset) {
@@ -1125,7 +1131,13 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes.first;
+
+      // Try to identify the box nearest the offset.  This logic works when
+      // there's just one box, and when all boxes have the same direction.
+      // It may not work in bidi text.
+      final TextBox box = boxes.first.direction == TextDirection.ltr
+        ? boxes.first : boxes.last;
+
       return _LineCaretMetrics(offset: Offset(box.start, box.top), writingDirection: box.direction, fullHeight: box.bottom - box.top);
     }
     return null;

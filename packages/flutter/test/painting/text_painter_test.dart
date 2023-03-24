@@ -52,7 +52,7 @@ void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
 ///    if laid out on its own.
 ///
 /// If you have a [TextSpan] instead of a plain [String],
-/// see [caretOffsetsForTextSpanLtr].
+/// see [caretOffsetsForTextSpan].
 void checkCaretOffsetsLtr(String text) {
   final List<int> characterBoundaries = <int>[];
   final CharacterRange range = CharacterRange.at(text, 0);
@@ -90,17 +90,19 @@ void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
   _checkCaretOffsetsLtrAt(buffer.toString(), boundaries);
 }
 
-/// Compute the caret offsets for the given single line of LTR text, a [TextSpan].
+/// Compute the caret offsets for the given single line of text, a [TextSpan].
 ///
-/// This lays out the given text as a single line with [TextDirection.ltr] and
-/// returns a full list of caret offsets, one at each code unit boundary.
-/// It also checks that the offset at the very end equals the line's width.
+/// This lays out the given text as a single line with the given [textDirection]
+/// and returns a full list of caret offsets, one at each code unit boundary.
+///
+/// This also checks that the offset at the very start or very end, if the text
+/// direction is RTL or LTR respectively, equals the line's width.
 ///
 /// If you have a [String] instead of a nontrivial [TextSpan],
 /// consider using [checkCaretOffsetsLtr] instead.
-List<double> caretOffsetsForTextSpanLtr(TextSpan text) {
+List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text) {
   final TextPainter painter = TextPainter()
-    ..textDirection = TextDirection.ltr
+    ..textDirection = textDirection
     ..text = text
     ..layout();
   final int length = text.toPlainText().length;
@@ -108,7 +110,10 @@ List<double> caretOffsetsForTextSpanLtr(TextSpan text) {
     final TextPosition position = ui.TextPosition(offset: offset);
     return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
   });
-  expect(result[length], painter.width);
+  switch (textDirection) {
+    case TextDirection.ltr: expect(result[length], painter.width);
+    case TextDirection.rtl: expect(result[0], painter.width);
+  }
   painter.dispose();
   return result;
 }
@@ -299,7 +304,7 @@ void main() {
     checkCaretOffsetsLtr('प्राप्त वर्णन प्रव्रुति');
   }, skip: true); // https://github.com/flutter/flutter/issues/122478
 
-  test('TextPainter caret emoji test: letters next to emoji, as separate TextBoxes', () {
+  test('TextPainter caret emoji test LTR: letters next to emoji, as separate TextBoxes', () {
     // Regression test for https://github.com/flutter/flutter/issues/122477
     // The trigger for this bug was to have SkParagraph report separate
     // TextBoxes for the emoji and for the characters next to it.
@@ -307,18 +312,38 @@ void main() {
     // letters and then an emoji, presumably because they get different fonts.
     // In these tests, our single test font covers both letters and emoji,
     // so we provoke the same effect by adding styles.
-    expect(caretOffsetsForTextSpanLtr(
+    expect(caretOffsetsForTextSpan(
+        TextDirection.ltr,
         const TextSpan(children: <TextSpan>[
           TextSpan(text: '👩‍🚀', style: TextStyle()),
-          TextSpan(text: ' word', style: TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: ' words', style: TextStyle(fontWeight: FontWeight.bold)),
         ])),
-        <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98]);
-    expect(caretOffsetsForTextSpanLtr(
+        <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98, 112]);
+    expect(caretOffsetsForTextSpan(
+        TextDirection.ltr,
         const TextSpan(children: <TextSpan>[
-          TextSpan(text: 'word ', style: TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: 'words ', style: TextStyle(fontWeight: FontWeight.bold)),
           TextSpan(text: '👩‍🚀', style: TextStyle()),
         ])),
-        <double>[0, 14, 28, 42, 56, 70, 70, 70, 70, 70, 98]);
+        <double>[0, 14, 28, 42, 56, 70, 84, 84, 84, 84, 84, 112]);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret emoji test RTL: letters next to emoji, as separate TextBoxes', () {
+    // Regression test for https://github.com/flutter/flutter/issues/122477
+    expect(caretOffsetsForTextSpan(
+        TextDirection.rtl,
+        const TextSpan(children: <TextSpan>[
+          TextSpan(text: '👩‍🚀', style: TextStyle()),
+          TextSpan(text: ' מילים', style: TextStyle(fontWeight: FontWeight.bold)),
+        ])),
+        <double>[112, 84, 84, 84, 84, 84, 70, 56, 42, 28, 14, 0]);
+    expect(caretOffsetsForTextSpan(
+        TextDirection.rtl,
+        const TextSpan(children: <TextSpan>[
+          TextSpan(text: 'מילים ', style: TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: '👩‍🚀', style: TextStyle()),
+        ])),
+        <double>[112, 98, 84, 70, 56, 42, 28, 28, 28, 28, 28, 0]);
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
   test('TextPainter caret center space test', () {
