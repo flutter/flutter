@@ -281,6 +281,7 @@ targets:
   - name: Linux ci_yaml flutter roller
     recipe: infra/ci_yaml
     timeout: 30
+    bringup: true
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
