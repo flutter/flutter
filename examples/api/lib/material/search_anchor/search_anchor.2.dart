@@ -30,15 +30,16 @@ class _SearchBarAppState extends State<SearchBarApp> {
           children: <Widget>[
             SearchAnchor(
               searchController: controller,
-                anchorBuilder: (BuildContext context, SearchController controller)
-                  => IconButton(
+                anchorBuilder: (BuildContext context, SearchController controller) {
+                  return IconButton(
                     icon: const Icon(Icons.search),
                     onPressed: () {
                       controller.openView();
                     },
-                  ),
-                suggestionsBuilder: (BuildContext context, SearchController controller)
-                  => List<ListTile>.generate(5, (int index) {
+                  );
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  return List<ListTile>.generate(5, (int index) {
                     final String item = 'item $index';
                     return ListTile(
                       title: Text(item),
@@ -48,7 +49,8 @@ class _SearchBarAppState extends State<SearchBarApp> {
                         });
                       },
                     );
-                  }),
+                  });
+                }
               ),
             Center(
               child: controller.text.isEmpty
