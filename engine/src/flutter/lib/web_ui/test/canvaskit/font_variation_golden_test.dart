@@ -56,7 +56,7 @@ void testMain() {
       canvas.drawParagraph(paragraph, const ui.Offset(10, 10));
       final CkPicture picture = recorder.endRecording();
       await matchPictureGolden(
-        'font_variation.jpg',
+        'font_variation.png',
         picture,
         region: ui.Rect.fromLTRB(0, 0, testWidth, paragraph.height + 20),
       );

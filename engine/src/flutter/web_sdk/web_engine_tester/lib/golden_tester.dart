@@ -49,6 +49,9 @@ enum PixelComparison {
 /// [pixelComparison] determines the algorithm used to compare pixels. Uses
 /// fuzzy comparison by default.
 Future<void> matchGoldenFile(String filename, {Rect? region}) async {
+  if (!filename.endsWith('.png')) {
+    throw ArgumentError('Filename must end in .png or SkiaGold will ignore it.');
+  }
   final Map<String, dynamic> serverParams = <String, dynamic>{
     'filename': filename,
     'region': region == null
