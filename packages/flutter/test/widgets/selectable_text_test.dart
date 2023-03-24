@@ -5302,7 +5302,7 @@ void main() {
       await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
       await tester.pump(const Duration(milliseconds: 30));
       await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 30));
 
       final TextSelection selection = TextSelection(
         baseOffset: testValue.indexOf('d'),
