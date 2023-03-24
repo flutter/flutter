@@ -6323,7 +6323,8 @@ abstract class RenderObjectElement extends Element {
   }
 }
 
-/// Deprecated. Will be removed in a future version of Flutter.
+/// Deprecated. Unused in the framework and will be removed in a future version
+/// of Flutter.
 ///
 /// Classes that extend this class can extend [RenderObjectElement] and mixin
 /// [RootElementMixin] instead.
