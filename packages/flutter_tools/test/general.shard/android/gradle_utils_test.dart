@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
@@ -214,7 +213,7 @@ void main() {
     });
 
     testWithoutContext('returns the gradle wrapper version', () async {
-      final String expectedVersion = '7.4.2';
+      const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')
         ..createSync();
       final Directory wrapperDirectory = androidDirectory
@@ -259,7 +258,7 @@ OS:           Mac OS X 13.2.1 aarch64
         ..createSync();
       final ProcessManager processManager = FakeProcessManager.empty()
         ..addCommand(const FakeCommand(
-            command: <String>['gradle', '--version'], stdout: gradleOutput));
+            command: <String>['gradle', gradleVersionFlag], stdout: gradleOutput));
 
       expect(
         await getGradleVersion(

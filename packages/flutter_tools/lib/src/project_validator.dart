@@ -114,16 +114,6 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
       value: _toJsonValue(project.android.isKotlin),
       status: StatusProjectValidator.info,
     ));
-    // TODO REMOVE.
-    final bool validJavaGradleAgpVersions =
-        await project.android.hasValidJavaGradleAgpVersions();
-    result.add(ProjectValidatorResult(
-      name: 'Java/Gradle/Android Gradle Plugin',
-      value: _toJsonValue(validJavaGradleAgpVersions),
-      status: validJavaGradleAgpVersions
-          ? StatusProjectValidator.success
-          : StatusProjectValidator.error,
-    ));
     result.add(ProjectValidatorResult(
       name: 'FlutterProject.ios.isSwift',
       value: _toJsonValue(project.ios.isSwift),
@@ -240,15 +230,7 @@ class GeneralInfoProjectValidator extends ProjectValidator {
       result.add(_materialDesignResult(flutterManifest));
       result.add(_pluginValidatorResult(flutterManifest));
     }
-    final bool validJavaGradleAgpVersions =
-        await project.android.hasValidJavaGradleAgpVersions();
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.android.compatibleJavaGradleAgp',
-      value: validJavaGradleAgpVersions ? 'Java/Gradle/AGP appear compatible' : 'Incompatible Java/Gradle/AGP versions',
-      status: validJavaGradleAgpVersions
-          ? StatusProjectValidator.success
-          : StatusProjectValidator.error,
-    ));
+    result.add(await project.android.validateJavaGradleAgpVersions());
     return result;
   }
 

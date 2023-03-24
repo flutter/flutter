@@ -20,6 +20,7 @@ import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
+import 'project_validator_result.dart';
 import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
@@ -533,10 +534,40 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.isModule || _editableHostAppDirectory.existsSync();
   }
 
+  /// Check if the versions of Java, Gradle and AGP are compatible.
+  ///
+  /// This is expected to be called from
+  /// flutter_tools/lib/src/project_validator.dart.
+  Future<ProjectValidatorResult> validateJavaGradleAgpVersions() async {
+    // Constructing ProjectValidatorResult happens here and not in
+    // flutter_tools/lib/src/project_validator.dart because of the additional
+    // Complexity of variable status values and error string formatting.
+    const String visibleName = 'Java/Gradle/Android Gradle Plugin';
+    final bool validJavaGradleAgpVersions =
+        await hasValidJavaGradleAgpVersions();
+    const String validJavaGradleAgpString =
+        'Java/Gradle/AGP appear compatible.';
+    const String invalidJavaGradleAgpString =
+        'Incompatible Java/Gradle/AGP versions.';
+
+    return ProjectValidatorResult(
+      name: visibleName,
+      value: validJavaGradleAgpVersions
+          ? validJavaGradleAgpString
+          : invalidJavaGradleAgpString,
+      status: validJavaGradleAgpVersions
+          ? StatusProjectValidator.success
+          : StatusProjectValidator.error,
+    );
+  }
+
+  /// Ensures Java Sdk is compatible with the projects gradle version and
+  /// the projects gradle version is compatible with the AGP version used
+  /// in build.gradle.
   Future<bool> hasValidJavaGradleAgpVersions() async {
-    String javaVersion = '11';
-    String gradleVersion = '6.7.1';
-    String agpVersion = '4.2.0';
+    const String javaVersion = '11';
+    const String gradleVersion = '6.7.1';
+    const String agpVersion = '4.2.0';
 
     String? localGradleVersion = await gradle.getGradleVersion(
         hostAppGradleRoot, globals.logger, globals.processManager);

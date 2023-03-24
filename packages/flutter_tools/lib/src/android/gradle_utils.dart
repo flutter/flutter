@@ -46,6 +46,15 @@ const String ndkVersion = '23.1.7779620';
 final RegExp _androidPluginRegExp =
     RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
+// From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
+const String gradleVersionFlag = r'--version';
+// Directory under android/ that gradle uses to store gradle information.
+// Regularly used with [gradleWrapperDirectory] and
+// [gradleWrapperPropertiesFilename].
+const String gradleDirectoryName = 'gradle';
+const String gradleWrapperDirectoryName = 'wrapper';
+const String gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
+
 /// Provides utilities to run a Gradle task, such as finding the Gradle executable
 /// or constructing a Gradle project.
 class GradleUtils {
@@ -99,10 +108,10 @@ class GradleUtils {
     });
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
     // TODO can this share code with getGradleVersion
-    final Directory propertiesDirectory =
-        directory.childDirectory(_fileSystem.path.join('gradle', 'wrapper'));
+    final Directory propertiesDirectory = directory.childDirectory(
+        _fileSystem.path.join(gradleDirectoryName, gradleWrapperDirectoryName));
     final File propertiesFile =
-        propertiesDirectory.childFile('gradle-wrapper.properties');
+        propertiesDirectory.childFile(gradleWrapperPropertiesFilename);
 
     if (propertiesFile.existsSync()) {
       return;
@@ -156,48 +165,86 @@ Future<String?> getGradleVersion(
     Directory directory, Logger logger, ProcessManager processManager) async {
   // TODO make constant to share with other places in this file.
   final File propertiesFile = directory
-      .childDirectory('gradle')
-      .childDirectory('wrapper')
-      .childFile('gradle-wrapper.properties');
+      .childDirectory(gradleDirectoryName)
+      .childDirectory(gradleWrapperDirectoryName)
+      .childFile(gradleWrapperPropertiesFilename);
 
   if (propertiesFile.existsSync()) {
     final String wrapperFileContent = propertiesFile.readAsStringSync();
 
+    // Expected content format (with lines above and below).
+    // Version can have 2 or 3 numbers.
+    // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
     final RegExp distributionUrlRegex = RegExp(r'distributionUrl=.*\.zip');
+
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);
     if (distributionUrl != null) {
-      try {
-        final String gradleVersion =
-            distributionUrl.group(0)!.split('-')[1];
+      // Expected content: 'gradle-7.4.2-all.zip'
+      final String? gradleZip = distributionUrl.group(0);
+      if (gradleZip != null) {
+        final String gradleVersion = gradleZip.split('-')[1];
         return gradleVersion;
-        // ignore: empty_catches
-      } on TypeError {}
+      } else {
+        // Did not find gradle zip url. Likley this is a bug in our parsing.
+        logger.printWarning(_formatParseWarning(wrapperFileContent));
+      }
     } else {
-      // If no distributionUrl treat as if there was no propertiesFile.
+      // If no distributionUrl log then treat as if there was no propertiesFile.
       logger.printTrace(
-          '$propertiesFile does not provide an Gradle version falling back to system gradle');
+          '$propertiesFile does not provide an Gradle version falling back to system gradle.');
     }
   } else {
-     logger.printTrace(
-          '$propertiesFile does not exist falling back to system gradle');
+    // Could not find properties file.
+    logger.printTrace(
+        '$propertiesFile does not exist falling back to system gradle');
   }
   // System installed Gradle version.
   if (processManager.canRun('gradle')) {
     final String gradleVersionVerbose =
-        (await processManager.run(<String>['gradle', r'--version'])).stdout
+        (await processManager.run(<String>['gradle', gradleVersionFlag])).stdout
             as String;
-    // TODO explain regex
+    // Expected format:
+/*
+
+------------------------------------------------------------
+Gradle 7.6
+------------------------------------------------------------
+
+Build time:   2022-11-25 13:35:10 UTC
+Revision:     daece9dbc5b79370cc8e4fd6fe4b2cd400e150a8
+
+Kotlin:       1.7.10
+Groovy:       3.0.13
+Ant:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021
+JVM:          17.0.6 (Homebrew 17.0.6+0)
+OS:           Mac OS X 13.2.1 aarch64
+    */
+    // Observation shows that the version can have 2 or 3 numbers.
+    // Inner parentheticals `(\.\d+)?` denote the optional third value.
+    // Outter parentheticals `Gradle (...)` denote a grouping used to extract
+    // the version number.
     final RegExp gradleVersionRegex = RegExp(r'Gradle (\d+\.\d+(\.\d+)?)');
     final RegExpMatch? version =
         gradleVersionRegex.firstMatch(gradleVersionVerbose);
     if (version == null) {
+      // Most likley a bug in our parse implementation/regex.
+      logger.printWarning(_formatParseWarning(gradleVersionVerbose));
       return null;
     }
     return version.group(1);
   } else {
+    logger.printTrace('Could not run system gradle');
     return null;
   }
+}
+
+String _formatParseWarning(String content) {
+  return 'Could parse gradle version from: \n'
+      '$content \n'
+      'If there is a version please look for an existing bug '
+      'https://github.com/flutter/flutter/issues/'
+      ' and if one does not exist file a new issue.';
 }
 
 /// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
