@@ -9156,7 +9156,7 @@ void main() {
     testWidgets(
       'Can triple tap to select a paragraph on mobile platforms when tapping at a word edge',
       (WidgetTester tester) async {
-        // TODO(Renzo-Olivares): Enable for iOS, currently broken because selection overlay blocks the tapanddraggesturerecognizer.
+        // TODO(Renzo-Olivares): Enable for iOS, currently broken because selection overlay blocks the TextSelectionGestureDetector https://github.com/flutter/flutter/issues/123415.
         final TextEditingController controller = TextEditingController();
         final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 

@@ -2493,10 +2493,8 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           _selectParagraphsInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
-          break;
         case TargetPlatform.linux:
           _selectLinesInRange(from: details.globalPosition, cause: SelectionChangedCause.tap);
-          break;
       }
     }
     if (shouldShowSelectionToolbar) {
