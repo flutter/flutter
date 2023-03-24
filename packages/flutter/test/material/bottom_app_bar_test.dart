@@ -63,7 +63,8 @@ void main() {
       of: find.byType(BottomAppBar),
       matching: find.byWidgetPredicate((Widget widget) {
         // A color layer is probably a [PhysicalShape] or [PhysicalModel],
-        // either backing a non- [Material] or used directly.
+        // either used directly or backing a [Material] (one without
+        // [MaterialType.transparency]).
         return widget is PhysicalShape || widget is PhysicalModel;
       }),
     );
