@@ -1,0 +1,39 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
+
+if (is_mac) {
+  test_fixtures("impeller_golden_tests_fixtures") {
+    fixtures = []
+  }
+
+  impeller_component("impeller_golden_tests") {
+    target_type = "executable"
+
+    testonly = true
+
+    sources = [
+      "golden_digest.cc",
+      "golden_digest.h",
+      "golden_tests.cc",
+      "main.cc",
+      "metal_screenshot.h",
+      "metal_screenshot.mm",
+      "metal_screenshoter.h",
+      "metal_screenshoter.mm",
+      "working_directory.cc",
+      "working_directory.h",
+    ]
+
+    deps = [
+      ":impeller_golden_tests_fixtures",
+      "//flutter/impeller/aiks",
+      "//flutter/impeller/playground",
+      "//flutter/impeller/renderer/backend/metal:metal",
+      "//third_party/googletest:gtest",
+    ]
+  }
+}
