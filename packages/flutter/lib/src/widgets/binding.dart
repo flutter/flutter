@@ -45,7 +45,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
 /// method above with other methods from this class.
-abstract class WidgetsBindingObserver {
+abstract mixin class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
   /// the back button.

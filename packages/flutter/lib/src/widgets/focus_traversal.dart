@@ -444,6 +444,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
         case TraversalEdgeBehavior.closedLoop:
           _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
           return true;
+        // TODO(goderbauer): Remove this hack once exhaustiveness bug is fixed, https://github.com/flutter/flutter/issues/123243.
+        default: // ignore: no_default_cases
+          throw UnsupportedError('unreachable');
       }
     }
     if (!forward && focusedChild == sortedNodes.first) {
@@ -454,6 +457,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
         case TraversalEdgeBehavior.closedLoop:
           _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
           return true;
+        // TODO(goderbauer): Remove this hack once exhaustiveness bug is fixed, https://github.com/flutter/flutter/issues/123243.
+        default: // ignore: no_default_cases
+          throw UnsupportedError('unreachable');
       }
     }
 
@@ -702,10 +708,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     switch (direction) {
       case TraversalDirection.left:
         filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx <= target.left);
-        break;
       case TraversalDirection.right:
         filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx >= target.right);
-        break;
       case TraversalDirection.up:
       case TraversalDirection.down:
         throw ArgumentError('Invalid direction $direction');
@@ -729,10 +733,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     switch (direction) {
       case TraversalDirection.up:
         filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top);
-        break;
       case TraversalDirection.down:
         filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy >= target.bottom);
-        break;
       case TraversalDirection.left:
       case TraversalDirection.right:
         throw ArgumentError('Invalid direction $direction');
@@ -771,11 +773,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           case TraversalDirection.up:
           case TraversalDirection.left:
             alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtStart;
-            break;
           case TraversalDirection.right:
           case TraversalDirection.down:
             alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
-            break;
         }
         _focusAndEnsureVisible(
           lastNode,
@@ -792,15 +792,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
             case TraversalDirection.right:
               // Reset the policy data if we change directions.
               invalidateScopeData(nearestScope);
-              break;
             case TraversalDirection.up:
             case TraversalDirection.down:
               if (popOrInvalidate(direction)) {
                 return true;
               }
-              break;
           }
-          break;
         case TraversalDirection.left:
         case TraversalDirection.right:
           switch (policyData.history.first.direction) {
@@ -809,12 +806,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
               if (popOrInvalidate(direction)) {
                 return true;
               }
-              break;
             case TraversalDirection.up:
             case TraversalDirection.down:
               // Reset the policy data if we change directions.
               invalidateScopeData(nearestScope);
-              break;
           }
       }
     }
@@ -865,14 +860,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
             firstFocus,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           );
-          break;
         case TraversalDirection.right:
         case TraversalDirection.down:
           _focusAndEnsureVisible(
             firstFocus,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
           );
-          break;
       }
       return true;
     }
@@ -908,7 +901,6 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         // closest to the center line horizontally, and if any are the same
         // distance horizontally, pick the closest one of those vertically.
         found = _sortClosestEdgesByDistancePreferHorizontal(focusedChild.rect.center, eligibleNodes).first;
-        break;
       case TraversalDirection.right:
       case TraversalDirection.left:
         Iterable<FocusNode> eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope.traversalDescendants);
@@ -935,7 +927,6 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         // closest to the center line vertically, and if any are the same
         // distance vertically, pick the closest one of those horizontally.
         found = _sortClosestEdgesByDistancePreferVertical(focusedChild.rect.center, eligibleNodes).first;
-        break;
     }
     if (found != null) {
       _pushPolicyData(direction, nearestScope, focusedChild);
@@ -946,14 +937,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
             found,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           );
-          break;
         case TraversalDirection.down:
         case TraversalDirection.right:
           _focusAndEnsureVisible(
             found,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
           );
-          break;
       }
       return true;
     }

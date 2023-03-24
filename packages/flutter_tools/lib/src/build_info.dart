@@ -40,6 +40,7 @@ class BuildInfo {
     this.performanceMeasurementFile,
     this.dartDefineConfigJsonMap,
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
+    this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.packageConfig = PackageConfig.empty,
@@ -52,6 +53,11 @@ class BuildInfo {
        dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
+
+  /// The null safety mode the application should be run in.
+  ///
+  /// If not provided, defaults to [NullSafetyMode.autodetect].
+  final NullSafetyMode nullSafetyMode;
 
   /// Whether the build should subset icon fonts.
   final bool treeShakeIcons;

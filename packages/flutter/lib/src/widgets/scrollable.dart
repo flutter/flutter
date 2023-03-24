@@ -675,7 +675,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
               },
             ),
           };
-          break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
@@ -697,7 +696,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
               },
             ),
           };
-          break;
       }
     }
     _lastCanDrag = value;
@@ -809,7 +807,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         delta = flipAxes
           ? event.scrollDelta.dy
           : event.scrollDelta.dx;
-        break;
       case Axis.vertical:
         delta = flipAxes
           ? event.scrollDelta.dx
@@ -1328,26 +1325,21 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       case SelectionEventType.startEdgeUpdate:
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
         ensureChildUpdated(selectable);
-        break;
       case SelectionEventType.endEdgeUpdate:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         ensureChildUpdated(selectable);
-        break;
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:
         ensureChildUpdated(selectable);
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
-        break;
       case SelectionEventType.clear:
         _selectableEndEdgeUpdateRecords.remove(selectable);
         _selectableStartEdgeUpdateRecords.remove(selectable);
-        break;
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
-        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
