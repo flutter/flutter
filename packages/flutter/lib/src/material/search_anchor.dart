@@ -58,7 +58,7 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 ///
 /// The search view's route can either be shown by creating a [SearchController]
 /// and then calling [SearchController.openView] or by tapping on an anchor.
-/// When the anchor is tapped or [openView] is called, the search view either
+/// When the anchor is tapped or [SearchController.openView] is called, the search view either
 /// grows to a specific size, or grows to fill the entire screen. By default,
 /// the search view only shows full screen on mobile platforms. Use [SearchAnchor.isFullScreen]
 /// to override the default setting.
