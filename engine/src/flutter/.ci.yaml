@@ -380,6 +380,10 @@ targets:
     properties:
       release_build: "true"
       config_name: mac_host_engine
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+        ]
       $flutter/osx_sdk : >-
         { "sdk_version": "14a5294e" }
 

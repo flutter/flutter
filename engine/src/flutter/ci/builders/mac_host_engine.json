@@ -110,6 +110,9 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
+            "dependencies": [
+                {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+            ],
             "gclient_custom_vars": {
                 "download_android_deps": false
             },
@@ -124,13 +127,27 @@
             "ninja": {
                 "config": "host_release",
                 "targets": [
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
+                    "flutter/impeller/golden_tests:impeller_golden_tests",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/tools/font-subset"
                 ]
             },
-            "tests": []
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller golden Tests for host_release",
+                    "parameters": [
+                        "--variant",
+                        "host_release",
+                        "--type",
+                        "impeller-golden"
+                    ],
+                    "script": "flutter/testing/run_tests.py",
+                    "type": "local"
+                }
+            ]
         },
         {
             "archives": [

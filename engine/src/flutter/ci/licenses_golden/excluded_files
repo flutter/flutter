@@ -135,6 +135,14 @@
 ../../../flutter/impeller/geometry/README.md
 ../../../flutter/impeller/geometry/geometry_unittests.cc
 ../../../flutter/impeller/geometry/geometry_unittests.h
+../../../flutter/impeller/golden_tests/README.md
+../../../flutter/impeller/golden_tests_harvester/.dart_tool
+../../../flutter/impeller/golden_tests_harvester/.gitignore
+../../../flutter/impeller/golden_tests_harvester/README.md
+../../../flutter/impeller/golden_tests_harvester/analysis_options.yaml
+../../../flutter/impeller/golden_tests_harvester/pubspec.lock
+../../../flutter/impeller/golden_tests_harvester/pubspec.yaml
+../../../flutter/impeller/golden_tests_harvester/test
 ../../../flutter/impeller/image/README.md
 ../../../flutter/impeller/playground
 ../../../flutter/impeller/renderer/compute_subgroup_unittests.cc

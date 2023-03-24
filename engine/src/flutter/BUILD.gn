@@ -181,9 +181,9 @@ group("unittests") {
     }
 
     if (is_mac) {
-      public_deps +=
-          [ "//flutter/shell/platform/darwin:flutter_channels_unittests" ]
       public_deps += [
+        "//flutter/impeller/golden_tests:impeller_golden_tests",
+        "//flutter/shell/platform/darwin:flutter_channels_unittests",
         "//flutter/third_party/spring_animation:spring_animation_unittests",
       ]
     }

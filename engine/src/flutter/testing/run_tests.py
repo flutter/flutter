@@ -8,16 +8,19 @@
 A top level harness to run all unit-tests in a specific engine build.
 """
 
+from pathlib import Path
+
 import argparse
-import glob
+import csv
 import errno
+import glob
 import multiprocessing
 import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
-import csv
 import xvfb
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -972,6 +975,46 @@ def run_engine_tasks_in_parallel(tasks):
     raise Exception()
 
 
+class DirectoryChange():
+  """
+  A scoped change in the CWD.
+  """
+  old_cwd: str = ''
+  new_cwd: str = ''
+
+  def __init__(self, new_cwd: str):
+    self.new_cwd = new_cwd
+
+  def __enter__(self):
+    self.old_cwd = os.getcwd()
+    os.chdir(self.new_cwd)
+
+  def __exit__(self, exception_type, exception_value, exception_traceback):
+    os.chdir(self.old_cwd)
+
+
+def run_impeller_golden_tests(build_dir: str):
+  """
+  Executes the impeller golden image tests from in the `variant` build.
+  """
+  tests_path: str = os.path.join(build_dir, 'impeller_golden_tests')
+  if not os.path.exists(tests_path):
+    raise Exception(
+        'Cannot find the "impeller_golden_tests" executable in "%s". You may need to build it.'
+        % (build_dir)
+    )
+  harvester_path: Path = Path(SCRIPT_DIR).parent.joinpath('impeller').joinpath(
+      'golden_tests_harvester'
+  )
+  with tempfile.TemporaryDirectory(prefix='impeller_golden') as temp_dir:
+    run_cmd([tests_path, '--working_dir=%s' % temp_dir])
+    with DirectoryChange(harvester_path):
+      run_cmd(['dart', 'pub', 'get'])
+      bin_path = Path('.').joinpath('bin'
+                                   ).joinpath('golden_tests_harvester.dart')
+      run_cmd(['dart', 'run', str(bin_path), temp_dir])
+
+
 def main():
   parser = argparse.ArgumentParser(
       description="""
@@ -980,7 +1023,14 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 """
   )
   all_types = [
-      'engine', 'dart', 'benchmarks', 'java', 'android', 'objc', 'font-subset'
+      'engine',
+      'dart',
+      'benchmarks',
+      'java',
+      'android',
+      'objc',
+      'font-subset',
+      'impeller-golden',
   ]
 
   parser.add_argument(
@@ -1170,6 +1220,9 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
   if ('engine' in types or
       'font-subset' in types) and args.variant not in variants_to_skip:
     run_cmd(['python3', 'test.py'], cwd=FONT_SUBSET_DIR)
+
+  if 'impeller-golden' in types:
+    run_impeller_golden_tests(build_dir)
 
 
 if __name__ == '__main__':
