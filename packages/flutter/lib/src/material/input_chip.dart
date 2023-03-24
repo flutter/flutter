@@ -32,6 +32,7 @@ import 'theme_data.dart';
 ///  * In a [Wrap] widget.
 ///  * In a horizontally scrollable list, like a [ListView] whose
 ///    scrollDirection is [Axis.horizontal].
+// TODO(Piinks): clarify!
 ///
 /// {@tool dartpad}
 /// This example shows how to create [InputChip]s with [onSelected] and

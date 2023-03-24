@@ -157,6 +157,7 @@ class SliverConstraints extends Constraints {
 
   /// The direction in which the [scrollOffset] and [remainingPaintExtent]
   /// increase.
+  // TODO(Piinks): sample code
   final AxisDirection axisDirection;
 
   /// The direction in which the contents of slivers are ordered, relative to
@@ -180,14 +181,15 @@ class SliverConstraints extends Constraints {
   ///
   /// Normally, the absolute zero offset is determined by the viewport's
   /// [RenderViewport.center] and [RenderViewport.anchor] properties.
+  // TODO(Piinks): sample code
   final GrowthDirection growthDirection;
 
   /// The direction in which the user is attempting to scroll, relative to the
   /// [axisDirection] and [growthDirection].
   ///
-  /// For example, if [growthDirection] is [GrowthDirection.reverse] and
+  /// For example, if [growthDirection] is [GrowthDirection.forward] and
   /// [axisDirection] is [AxisDirection.down], then a
-  /// [ScrollDirection.forward] means that the user is scrolling up, in the
+  /// [ScrollDirection.reverse] means that the user is scrolling down, in the
   /// positive [scrollOffset] direction.
   ///
   /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
@@ -198,6 +200,7 @@ class SliverConstraints extends Constraints {
   /// scroll offset. For example, [RenderSliverFloatingPersistentHeader] will
   /// only expand a floating app bar when the [userScrollDirection] is in the
   /// positive scroll offset direction.
+  // TODO(Piinks): sample code
   final ScrollDirection userScrollDirection;
 
   /// The scroll offset, in this sliver's coordinate system, that corresponds to

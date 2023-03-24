@@ -284,6 +284,9 @@ class UserScrollNotification extends ScrollNotification {
   });
 
   /// The direction in which the user is scrolling.
+  /// This is not affected by growth direction! Only correlates with the
+  /// primary axis direction!!
+  // TODO(Piinks): sample code
   final ScrollDirection direction;
 
   @override

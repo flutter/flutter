@@ -826,6 +826,7 @@ class PageView extends StatefulWidget {
   /// The axis along which the page view scrolls.
   ///
   /// Defaults to [Axis.horizontal].
+  // TODO(Piinks): clarify!
   final Axis scrollDirection;
 
   /// Whether the page view scrolls in the reading direction.

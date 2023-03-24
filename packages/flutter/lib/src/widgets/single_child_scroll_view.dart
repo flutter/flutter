@@ -161,6 +161,7 @@ class SingleChildScrollView extends StatelessWidget {
   /// The axis along which the scroll view scrolls.
   ///
   /// Defaults to [Axis.vertical].
+  // TODO(Piinks): clarify!
   final Axis scrollDirection;
 
   /// Whether the scroll view scrolls in the reading direction.

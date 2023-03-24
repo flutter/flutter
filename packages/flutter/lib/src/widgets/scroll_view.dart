@@ -117,6 +117,7 @@ abstract class ScrollView extends StatelessWidget {
   /// The axis along which the scroll view scrolls.
   ///
   /// Defaults to [Axis.vertical].
+  // TODO(Piinks): clarify!
   /// {@endtemplate}
   final Axis scrollDirection;
 

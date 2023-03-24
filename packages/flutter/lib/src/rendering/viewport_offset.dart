@@ -236,6 +236,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// For example, [RenderSliverFloatingPersistentHeader] will only expand a
   /// floating app bar when the [userScrollDirection] is in the positive scroll
   /// offset direction.
+  // TODO(Piinks): sample code
   ScrollDirection get userScrollDirection;
 
   /// Whether a viewport is allowed to change [pixels] implicitly to respond to

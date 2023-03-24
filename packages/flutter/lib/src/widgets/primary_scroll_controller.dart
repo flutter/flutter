@@ -85,6 +85,7 @@ class PrimaryScrollController extends InheritedWidget {
   /// ScrollViews from inheriting the current PrimaryScrollController.
   ///
   /// Defaults to [Axis.vertical].
+  // TODO(Piinks): clarify!
   final Axis? scrollDirection;
 
   /// The [TargetPlatform]s this controller is configured for [ScrollView]s to
