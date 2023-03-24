@@ -485,10 +485,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     switch (Theme.of(context).brightness) {
       case Brightness.light:
         cancelColor = Colors.black54;
-        break;
       case Brightness.dark:
         cancelColor = Colors.white70;
-        break;
     }
 
     final ThemeData themeData = Theme.of(context);
