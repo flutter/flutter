@@ -1,4 +1,4 @@
-Signature: 9590e5a83c41e8513e527bb0c14ff889
+Signature: 210989a7c4f537f36336e6ad3bdb8692
 
 ====================================================================================================
 LIBRARY: etc1
@@ -7714,8 +7714,8 @@ ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.cpp + ../../../third_p
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLTernaryExpression.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLTypeReference.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLVarDeclarations.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkVMDebugTrace.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkVMDebugTrace.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkSLDebugTracePriv.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkSLDebugTracePriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkVMDebugTracePlayer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkVMDebugTracePlayer.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadFunctions.cpp + ../../../third_party/skia/LICENSE
@@ -7939,8 +7939,8 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLTernaryExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLTypeReference.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVarDeclarations.cpp
-FILE: ../../../third_party/skia/src/sksl/tracing/SkVMDebugTrace.cpp
-FILE: ../../../third_party/skia/src/sksl/tracing/SkVMDebugTrace.h
+FILE: ../../../third_party/skia/src/sksl/tracing/SkSLDebugTracePriv.cpp
+FILE: ../../../third_party/skia/src/sksl/tracing/SkSLDebugTracePriv.h
 FILE: ../../../third_party/skia/src/sksl/tracing/SkVMDebugTracePlayer.cpp
 FILE: ../../../third_party/skia/src/sksl/tracing/SkVMDebugTracePlayer.h
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateDeadFunctions.cpp
@@ -8492,9 +8492,6 @@ ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.h + ../../.
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineCodeGenerator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineCodeGenerator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLProgram.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkRPDebugTrace.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkRPDebugTrace.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/tracing/SkSLDebugInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinFunctions.cpp + ../../../third_party/skia/LICENSE
@@ -8717,9 +8714,6 @@ FILE: ../../../third_party/skia/src/sksl/analysis/SkSLProgramUsage.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLRasterPipelineCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLProgram.cpp
-FILE: ../../../third_party/skia/src/sksl/tracing/SkRPDebugTrace.cpp
-FILE: ../../../third_party/skia/src/sksl/tracing/SkRPDebugTrace.h
-FILE: ../../../third_party/skia/src/sksl/tracing/SkSLDebugInfo.h
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLAddConstToVarModifiers.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLEliminateEmptyStatements.cpp
 FILE: ../../../third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinFunctions.cpp
