@@ -77,7 +77,7 @@ class Path {
 
   ~Path();
 
-  size_t GetComponentCount() const;
+  size_t GetComponentCount(std::optional<ComponentType> type = {}) const;
 
   void SetFillType(FillType fill);
 
