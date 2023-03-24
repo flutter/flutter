@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that contains multiple box children that each fills the viewport.
@@ -146,10 +147,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
     switch (constraints.axis) {
       case Axis.horizontal:
         _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
-        break;
       case Axis.vertical:
         _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
-        break;
     }
 
     return;

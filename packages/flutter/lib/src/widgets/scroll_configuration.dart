@@ -194,14 +194,11 @@ class ScrollBehavior {
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
-            return _buildGlowingOverscrollIndicator(details, child);
+            break;
         }
       case TargetPlatform.fuchsia:
-        return _buildGlowingOverscrollIndicator(details, child);
+        break;
     }
-  }
-
-  GlowingOverscrollIndicator _buildGlowingOverscrollIndicator(ScrollableDetails details, Widget child) {
     return GlowingOverscrollIndicator(
       axisDirection: details.direction,
       color: _kDefaultGlowColor,
@@ -382,11 +379,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   String toString() => objectRuntimeType(this, '_WrappedScrollBehavior');
-
-  @override
-  GlowingOverscrollIndicator _buildGlowingOverscrollIndicator(ScrollableDetails details, Widget child) {
-    return delegate._buildGlowingOverscrollIndicator(details, child);
-  }
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.

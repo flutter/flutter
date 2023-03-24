@@ -865,14 +865,11 @@ class MaterialScrollBehavior extends ScrollBehavior {
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
-            return _buildGlowingOverscrollIndicator(context, details, child);
+            break;
         }
       case TargetPlatform.fuchsia:
-        return _buildGlowingOverscrollIndicator(context, details, child);
+        break;
     }
-  }
-
-  GlowingOverscrollIndicator _buildGlowingOverscrollIndicator(BuildContext context, ScrollableDetails details, Widget child) {
     return GlowingOverscrollIndicator(
       axisDirection: details.direction,
       color: Theme.of(context).colorScheme.secondary,

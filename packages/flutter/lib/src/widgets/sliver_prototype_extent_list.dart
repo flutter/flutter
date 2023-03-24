@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that places its box children in a linear array and constrains them
