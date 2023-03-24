@@ -60,7 +60,8 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
         EXPECT_NE(args->custom_task_runners->thread_priority_setter, nullptr);
         EXPECT_EQ(args->custom_dart_entrypoint, nullptr);
         EXPECT_NE(args->vsync_callback, nullptr);
-        EXPECT_NE(args->update_semantics_callback, nullptr);
+        EXPECT_EQ(args->update_semantics_callback, nullptr);
+        EXPECT_NE(args->update_semantics_callback2, nullptr);
         EXPECT_EQ(args->update_semantics_node_callback, nullptr);
         EXPECT_EQ(args->update_semantics_custom_action_callback, nullptr);
 
