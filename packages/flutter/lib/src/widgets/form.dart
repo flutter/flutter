@@ -1,7 +1,12 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
+import 'dart:io' show Platform;
 
+import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'restoration.dart';
@@ -235,8 +240,22 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
+    String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
+      errorMessage += field.errorText ?? '';
+    }
+
+    if(hasError) {
+      final TextDirection directionality = Directionality.of(context);
+      if (Platform.isIOS) {
+        unawaited(Future<void>(() async {
+          await Future<void>.delayed(const Duration(seconds: 1));
+          SemanticsService.announce(errorMessage, directionality);
+        }));
+      } else {
+        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+      }
     }
     return !hasError;
   }
