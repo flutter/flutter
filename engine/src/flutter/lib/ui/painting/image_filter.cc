@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/image_filter.h"
 
+#include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -53,15 +54,18 @@ ImageFilter::~ImageFilter() {}
 void ImageFilter::initBlur(double sigma_x,
                            double sigma_y,
                            DlTileMode tile_mode) {
-  filter_ = DlBlurImageFilter::Make(sigma_x, sigma_y, tile_mode);
+  filter_ = DlBlurImageFilter::Make(SafeNarrow(sigma_x), SafeNarrow(sigma_y),
+                                    tile_mode);
 }
 
 void ImageFilter::initDilate(double radius_x, double radius_y) {
-  filter_ = DlDilateImageFilter::Make(radius_x, radius_y);
+  filter_ =
+      DlDilateImageFilter::Make(SafeNarrow(radius_x), SafeNarrow(radius_y));
 }
 
 void ImageFilter::initErode(double radius_x, double radius_y) {
-  filter_ = DlErodeImageFilter::Make(radius_x, radius_y);
+  filter_ =
+      DlErodeImageFilter::Make(SafeNarrow(radius_x), SafeNarrow(radius_y));
 }
 
 void ImageFilter::initMatrix(const tonic::Float64List& matrix4,

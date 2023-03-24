@@ -84,7 +84,7 @@ struct DlColor {
   bool operator!=(uint32_t const& other) const { return argb != other; }
 
  private:
-  static float toF(uint8_t comp) { return comp * (1.0 / 255); }
+  static float toF(uint8_t comp) { return comp * (1.0f / 255); }
   static uint8_t toC(float fComp) { return round(fComp * 255); }
 };
 

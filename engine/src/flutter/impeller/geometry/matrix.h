@@ -28,11 +28,11 @@ namespace impeller {
 ///             device coordinates must use the following convention:
 ///               * Left-handed coordinate system. Positive rotation is
 ///                 clockwise about axis of rotation.
-///               * Lower left corner is -1.0, -1.0.
-///               * Upper right corner is  1.0,  1.0.
+///               * Lower left corner is -1.0f, -1.0.
+///               * Upper right corner is  1.0f,  1.0.
 ///               * Visible z-space is from 0.0 to 1.0.
 ///                 * This is NOT the same as OpenGL! Be careful.
-///               * NDC origin is at (0.0, 0.0, 0.5).
+///               * NDC origin is at (0.0f, 0.0f, 0.5f).
 struct Matrix {
   union {
     Scalar m[16];
@@ -45,10 +45,10 @@ struct Matrix {
   ///
   constexpr Matrix()
       // clang-format off
-      : vec{ Vector4(1.0,  0.0,  0.0,  0.0),
-             Vector4(0.0,  1.0,  0.0,  0.0),
-             Vector4(0.0,  0.0,  1.0,  0.0),
-             Vector4(0.0,  0.0,  0.0,  1.0)} {}
+      : vec{ Vector4(1.0f,  0.0f,  0.0f,  0.0f),
+             Vector4(0.0f,  1.0f,  0.0f,  0.0f),
+             Vector4(0.0f,  0.0f,  1.0f,  0.0f),
+             Vector4(0.0f,  0.0f,  0.0f,  1.0f)} {}
   // clang-format on
 
   // clang-format off
@@ -93,57 +93,57 @@ struct Matrix {
 
   static constexpr Matrix MakeTranslation(const Vector3& t) {
     // clang-format off
-    return Matrix(1.0, 0.0, 0.0, 0.0,
-                  0.0, 1.0, 0.0, 0.0,
-                  0.0, 0.0, 1.0, 0.0,
-                  t.x, t.y, t.z, 1.0);
+    return Matrix(1.0f, 0.0f, 0.0f, 0.0f,
+                  0.0f, 1.0f, 0.0f, 0.0f,
+                  0.0f, 0.0f, 1.0f, 0.0f,
+                  t.x, t.y, t.z, 1.0f);
     // clang-format on
   }
 
   static constexpr Matrix MakeScale(const Vector3& s) {
     // clang-format off
-    return Matrix(s.x, 0.0, 0.0, 0.0,
-                  0.0, s.y, 0.0, 0.0,
-                  0.0, 0.0, s.z, 0.0,
-                  0.0, 0.0, 0.0, 1.0);
+    return Matrix(s.x, 0.0f, 0.0f, 0.0f,
+                  0.0f, s.y, 0.0f, 0.0f,
+                  0.0f, 0.0f, s.z, 0.0f,
+                  0.0f, 0.0f, 0.0f, 1.0f);
     // clang-format on
   }
 
   static constexpr Matrix MakeScale(const Vector2& s) {
-    return MakeScale(Vector3(s.x, s.y, 1.0));
+    return MakeScale(Vector3(s.x, s.y, 1.0f));
   }
 
   static constexpr Matrix MakeSkew(Scalar sx, Scalar sy) {
     // clang-format off
-    return Matrix(1.0, sy , 0.0, 0.0,
-                  sx , 1.0, 0.0, 0.0,
-                  0.0, 0.0, 1.0, 0.0,
-                  0.0, 0.0, 0.0, 1.0);
+    return Matrix(1.0f, sy , 0.0f, 0.0f,
+                  sx , 1.0f, 0.0f, 0.0f,
+                  0.0f, 0.0f, 1.0f, 0.0f,
+                  0.0f, 0.0f, 0.0f, 1.0f);
     // clang-format on
   }
 
   static Matrix MakeRotation(Quaternion q) {
     // clang-format off
     return Matrix(
-      1.0 - 2.0 * q.y * q.y - 2.0 * q.z * q.z,
-      2.0 * q.x * q.y + 2.0 * q.z * q.w,
-      2.0 * q.x * q.z - 2.0 * q.y * q.w,
-      0.0,
+      1.0f - 2.0f * q.y * q.y  - 2.0f * q.z * q.z,
+      2.0f * q.x  * q.y + 2.0f * q.z  * q.w,
+      2.0f * q.x  * q.z - 2.0f * q.y  * q.w,
+      0.0f,
 
-      2.0 * q.x * q.y - 2.0 * q.z * q.w,
-      1.0 - 2.0 * q.x * q.x - 2.0 * q.z * q.z,
-      2.0 * q.y * q.z + 2.0 * q.x * q.w,
-      0.0,
+      2.0f * q.x  * q.y - 2.0f * q.z  * q.w,
+      1.0f - 2.0f * q.x * q.x  - 2.0f * q.z * q.z,
+      2.0f * q.y  * q.z + 2.0f * q.x  * q.w,
+      0.0f,
 
-      2.0 * q.x * q.z + 2.0 * q.y * q.w,
-      2.0 * q.y * q.z - 2.0 * q.x * q.w,
-      1.0 - 2.0 * q.x * q.x - 2.0 * q.y * q.y,
-      0.0,
+      2.0f * q.x  * q.z + 2.0f * q.y * q.w,
+      2.0f * q.y  * q.z - 2.0f * q.x * q.w,
+      1.0f - 2.0f * q.x * q.x  - 2.0f * q.y * q.y,
+      0.0f,
 
-      0.0,
-      0.0,
-      0.0,
-      1.0);
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f);
     // clang-format on
   }
 
@@ -159,22 +159,22 @@ struct Matrix {
       cosine + cosp * v.x * v.x,
       cosp * v.x * v.y + v.z * sine,
       cosp * v.x * v.z - v.y * sine,
-      0.0,
+      0.0f,
 
       cosp * v.x * v.y - v.z * sine,
       cosine + cosp * v.y * v.y,
       cosp * v.y * v.z + v.x * sine,
-      0.0,
+      0.0f,
 
       cosp * v.x * v.z + v.y * sine,
       cosp * v.y * v.z - v.x * sine,
       cosine + cosp * v.z * v.z,
-      0.0,
+      0.0f,
 
-      0.0,
-      0.0,
-      0.0,
-      1.0);
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f);
     // clang-format on
   }
 
@@ -183,10 +183,10 @@ struct Matrix {
     const Scalar sine = sin(r.radians);
     // clang-format off
     return Matrix(
-      1.0,  0.0,    0.0,    0.0,
-      0.0,  cosine, sine,   0.0,
-      0.0, -sine,   cosine, 0.0,
-      0.0,  0.0,    0.0,    1.0
+      1.0f,  0.0f,    0.0f,    0.0f,
+      0.0f,  cosine,  sine,    0.0f,
+      0.0f, -sine,    cosine,  0.0f,
+      0.0f,  0.0f,    0.0f,    1.0f
     );
     // clang-format on
   }
@@ -197,10 +197,10 @@ struct Matrix {
 
     // clang-format off
     return Matrix(
-      cosine, 0.0, -sine,   0.0,
-      0.0,    1.0,  0.0,    0.0,
-      sine,   0.0,  cosine, 0.0,
-      0.0,    0.0,  0.0,    1.0
+      cosine,  0.0f, -sine,    0.0f,
+      0.0f,    1.0f,  0.0f,    0.0f,
+      sine,    0.0f,  cosine,  0.0f,
+      0.0f,    0.0f,  0.0f,    1.0f
     );
     // clang-format on
   }
@@ -211,10 +211,10 @@ struct Matrix {
 
     // clang-format off
     return Matrix (
-      cosine, sine,   0.0, 0.0,
-      -sine,  cosine, 0.0, 0.0,
-      0.0,    0.0,    1.0, 0.0,
-      0.0,    0.0,    0.0, 1.0
+      cosine, sine,   0.0f, 0.0f,
+      -sine,  cosine, 0.0f, 0.0f,
+      0.0f,    0.0f,    1.0f, 0.0f,
+      0.0f,    0.0f,    0.0f, 1.0
     );
     // clang-format on
   }
@@ -222,10 +222,10 @@ struct Matrix {
   constexpr Matrix Basis() const {
     // clang-format off
     return Matrix(
-      m[0], m[1], m[2],  0.0,
-      m[4], m[5], m[6],  0.0,
-      m[8], m[9], m[10], 0.0,
-      0.0,  0.0,  0.0,   1.0
+      m[0], m[1], m[2],  0.0f,
+      m[4], m[5], m[6],  0.0f,
+      m[8], m[9], m[10], 0.0f,
+      0.0f,  0.0f,  0.0f,   1.0
     );
     // clang-format on
   }
@@ -302,7 +302,7 @@ struct Matrix {
   }
 
   constexpr Scalar GetDirectionScale(Vector3 direction) const {
-    return 1.0 / (this->Basis().Invert() * direction.Normalize()).Length() *
+    return 1.0f / (this->Basis().Invert() * direction.Normalize()).Length() *
            direction.Length();
   }
 
@@ -339,10 +339,10 @@ struct Matrix {
   constexpr bool IsIdentity() const {
     return (
         // clang-format off
-        m[0]  == 1.0 && m[1]  == 0.0 && m[2]  == 0.0 && m[3]  == 0.0 &&
-        m[4]  == 0.0 && m[5]  == 1.0 && m[6]  == 0.0 && m[7]  == 0.0 &&
-        m[8]  == 0.0 && m[9]  == 0.0 && m[10] == 1.0 && m[11] == 0.0 &&
-        m[12] == 0.0 && m[13] == 0.0 && m[14] == 0.0 && m[15] == 1.0
+        m[0]  == 1.0f && m[1]  == 0.0f && m[2]  == 0.0f && m[3]  == 0.0f &&
+        m[4]  == 0.0f && m[5]  == 1.0f && m[6]  == 0.0f && m[7]  == 0.0f &&
+        m[8]  == 0.0f && m[9]  == 0.0f && m[10] == 1.0f && m[11] == 0.0f &&
+        m[12] == 0.0f && m[13] == 0.0f && m[14] == 0.0f && m[15] == 1.0f
         // clang-format on
     );
   }
@@ -443,8 +443,8 @@ struct Matrix {
     // Per assumptions about NDC documented above.
     const auto scale =
         MakeScale({2.0f / static_cast<Scalar>(size.width),
-                   -2.0f / static_cast<Scalar>(size.height), 0.0});
-    const auto translate = MakeTranslation({-1.0, 1.0, 0.5});
+                   -2.0f / static_cast<Scalar>(size.height), 0.0f});
+    const auto translate = MakeTranslation({-1.0f, 1.0f, 0.5f});
     return translate * scale;
   }
 
@@ -452,7 +452,7 @@ struct Matrix {
                                           Scalar aspect_ratio,
                                           Scalar z_near,
                                           Scalar z_far) {
-    Scalar height = std::tan(fov_y.radians * 0.5);
+    Scalar height = std::tan(fov_y.radians * 0.5f);
     Scalar width = height * aspect_ratio;
 
     // clang-format off

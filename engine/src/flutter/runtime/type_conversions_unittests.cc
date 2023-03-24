@@ -147,32 +147,6 @@ TEST_F(TypeConversionsTest, CanConvertListOfInts) {
   event.Wait();
 }
 
-TEST_F(TypeConversionsTest, CanConvertListOfFloatsToListOfDartDoubles) {
-  fml::AutoResetWaitableEvent event;
-  AddNativeCallback(
-      "NotifySuccess", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        auto bool_handle = Dart_GetNativeArgument(args, 0);
-        ASSERT_FALSE(tonic::CheckAndHandleError(bool_handle));
-        ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(bool_handle));
-        event.Signal();
-      }));
-  AddNativeCallback(
-      "NotifyNative", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments) {
-        std::vector<float> items;
-        items.push_back(1.0f);
-        items.push_back(2.0f);
-        items.push_back(3.0f);
-        items.push_back(4.0f);
-        auto items_handle = tonic::ToDart(items);
-        ASSERT_FALSE(tonic::CheckAndHandleError(items_handle));
-        // This will fail on type mismatch.
-        tonic::DartInvokeField(::Dart_RootLibrary(),
-                               "testCanConvertListOfDoubles", {items_handle});
-      }));
-  ASSERT_TRUE(RunWithEntrypoint("trampoline"));
-  event.Wait();
-}
-
 }  // namespace testing
 }  // namespace flutter
 

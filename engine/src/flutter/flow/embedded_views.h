@@ -118,7 +118,7 @@ class Mutator {
     return *filter_mutation_;
   }
   const int& GetAlpha() const { return alpha_; }
-  float GetAlphaFloat() const { return (alpha_ / 255.0); }
+  float GetAlphaFloat() const { return (alpha_ / 255.0f); }
 
   bool operator==(const Mutator& other) const {
     if (type_ != other.type_) {

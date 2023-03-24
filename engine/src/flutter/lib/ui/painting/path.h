@@ -38,50 +38,55 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   int getFillType();
   void setFillType(int fill_type);
 
-  void moveTo(float x, float y);
-  void relativeMoveTo(float x, float y);
-  void lineTo(float x, float y);
-  void relativeLineTo(float x, float y);
-  void quadraticBezierTo(float x1, float y1, float x2, float y2);
-  void relativeQuadraticBezierTo(float x1, float y1, float x2, float y2);
-  void cubicTo(float x1, float y1, float x2, float y2, float x3, float y3);
-  void relativeCubicTo(float x1,
-                       float y1,
-                       float x2,
-                       float y2,
-                       float x3,
-                       float y3);
-  void conicTo(float x1, float y1, float x2, float y2, float w);
-  void relativeConicTo(float x1, float y1, float x2, float y2, float w);
-  void arcTo(float left,
-             float top,
-             float right,
-             float bottom,
-             float startAngle,
-             float sweepAngle,
+  void moveTo(double x, double y);
+  void relativeMoveTo(double x, double y);
+  void lineTo(double x, double y);
+  void relativeLineTo(double x, double y);
+  void quadraticBezierTo(double x1, double y1, double x2, double y2);
+  void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2);
+  void cubicTo(double x1,
+               double y1,
+               double x2,
+               double y2,
+               double x3,
+               double y3);
+  void relativeCubicTo(double x1,
+                       double y1,
+                       double x2,
+                       double y2,
+                       double x3,
+                       double y3);
+  void conicTo(double x1, double y1, double x2, double y2, double w);
+  void relativeConicTo(double x1, double y1, double x2, double y2, double w);
+  void arcTo(double left,
+             double top,
+             double right,
+             double bottom,
+             double startAngle,
+             double sweepAngle,
              bool forceMoveTo);
-  void arcToPoint(float arcEndX,
-                  float arcEndY,
-                  float radiusX,
-                  float radiusY,
-                  float xAxisRotation,
+  void arcToPoint(double arcEndX,
+                  double arcEndY,
+                  double radiusX,
+                  double radiusY,
+                  double xAxisRotation,
                   bool isLargeArc,
                   bool isClockwiseDirection);
-  void relativeArcToPoint(float arcEndDeltaX,
-                          float arcEndDeltaY,
-                          float radiusX,
-                          float radiusY,
-                          float xAxisRotation,
+  void relativeArcToPoint(double arcEndDeltaX,
+                          double arcEndDeltaY,
+                          double radiusX,
+                          double radiusY,
+                          double xAxisRotation,
                           bool isLargeArc,
                           bool isClockwiseDirection);
-  void addRect(float left, float top, float right, float bottom);
-  void addOval(float left, float top, float right, float bottom);
-  void addArc(float left,
-              float top,
-              float right,
-              float bottom,
-              float startAngle,
-              float sweepAngle);
+  void addRect(double left, double top, double right, double bottom);
+  void addOval(double left, double top, double right, double bottom);
+  void addArc(double left,
+              double top,
+              double right,
+              double bottom,
+              double startAngle,
+              double sweepAngle);
   void addPolygon(const tonic::Float32List& points, bool close);
   void addRRect(const RRect& rrect);
   void addPath(CanvasPath* path, double dx, double dy);

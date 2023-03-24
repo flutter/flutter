@@ -249,14 +249,14 @@ class DlBlurImageFilter final : public DlImageFilter {
 
   SkRect* map_local_bounds(const SkRect& input_bounds,
                            SkRect& output_bounds) const override {
-    output_bounds = input_bounds.makeOutset(sigma_x_ * 3, sigma_y_ * 3);
+    output_bounds = input_bounds.makeOutset(sigma_x_ * 3.0f, sigma_y_ * 3.0f);
     return &output_bounds;
   }
 
   SkIRect* map_device_bounds(const SkIRect& input_bounds,
                              const SkMatrix& ctm,
                              SkIRect& output_bounds) const override {
-    return outset_device_bounds(input_bounds, sigma_x_ * 3.0, sigma_y_ * 3.0,
+    return outset_device_bounds(input_bounds, sigma_x_ * 3.0f, sigma_y_ * 3.0f,
                                 ctm, output_bounds);
   }
 
