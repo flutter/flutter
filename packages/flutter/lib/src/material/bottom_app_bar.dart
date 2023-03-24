@@ -119,14 +119,12 @@ class BottomAppBar extends StatefulWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none].
-  ///
-  /// Has no effect if there is no notch; see [shape].
   final Clip clipBehavior;
 
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
   /// notch.
   ///
-  /// Has no effect if there is no notch; see [shape].
+  /// Not used if [shape] is null.
   final double notchMargin;
 
   /// The color used as an overlay on [color] to indicate elevation.
