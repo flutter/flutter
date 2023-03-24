@@ -1742,11 +1742,9 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
       case TextDirection.rtl:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.right;
         fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
-        break;
       case TextDirection.ltr:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.left;
         fabX = startPadding;
-        break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return Offset(fabX, fabY);
