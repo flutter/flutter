@@ -43,14 +43,21 @@ const String minSdkVersion = '16';
 const String targetSdkVersion = '31';
 const String ndkVersion = '23.1.7779620';
 
-final RegExp _androidPluginRegExp =
+// Expected content:
+// "classpath 'com.android.tools.build:gradle:7.3.0'"
+// Parentheticals are use to group which helps with version extraction.
+// "...build:gradle:(...)" where group(1) should be the version string.
+final RegExp _androidGradlePluginRegExp =
     RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';
 // Directory under android/ that gradle uses to store gradle information.
+
 // Regularly used with [gradleWrapperDirectory] and
 // [gradleWrapperPropertiesFilename].
+// Different from the directory of gradle files stored in
+// `_cache.getArtifactDirectory('gradle_wrapper')`
 const String gradleDirectoryName = 'gradle';
 const String gradleWrapperDirectoryName = 'wrapper';
 const String gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
@@ -108,8 +115,9 @@ class GradleUtils {
     });
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
     // TODO can this share code with getGradleVersion
-    final Directory propertiesDirectory = directory.childDirectory(
-        _fileSystem.path.join(gradleDirectoryName, gradleWrapperDirectoryName));
+    final Directory propertiesDirectory = directory
+        .childDirectory(gradleDirectoryName)
+        .childDirectory(gradleWrapperDirectoryName);
     final File propertiesFile =
         propertiesDirectory.childFile(gradleWrapperPropertiesFilename);
 
@@ -145,7 +153,7 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   }
   final String buildFileContent = buildFile.readAsStringSync();
   final Iterable<Match> pluginMatches =
-      _androidPluginRegExp.allMatches(buildFileContent);
+      _androidGradlePluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
     logger.printTrace(
         "$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
@@ -239,6 +247,30 @@ OS:           Mac OS X 13.2.1 aarch64
   }
 }
 
+/// Returns the Android Gradle Plugin (AGP) version that the current project
+/// depends on when found, null otherwise.
+///
+/// The Android plugin version is specified in the [build.gradle] file within
+/// the project's Android directory ([androidDirectory]).
+String? getAgpVersion(Directory androidDirectory, Logger logger) {
+  final File buildFile = androidDirectory.childFile('build.gradle');
+  if (!buildFile.existsSync()) {
+    // TODO should this be a warning?
+    logger.printTrace('Can not find build.gradle in $androidDirectory');
+    return null;
+  }
+  final String buildFileContent = buildFile.readAsStringSync();
+  final Iterable<Match> pluginMatches =
+      _androidGradlePluginRegExp.allMatches(buildFileContent);
+  if (pluginMatches.isEmpty) {
+    logger.printTrace("$buildFile doesn't provide an AGP version");
+    return null;
+  }
+  final String? androidPluginVersion = pluginMatches.first.group(1);
+  logger.printTrace('$buildFile provides AGP version: $androidPluginVersion');
+  return androidPluginVersion;
+}
+
 String _formatParseWarning(String content) {
   return 'Could parse gradle version from: \n'
       '$content \n'
@@ -247,20 +279,152 @@ String _formatParseWarning(String content) {
       ' and if one does not exist file a new issue.';
 }
 
-/// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
+// Validate that Gradle version and AGP are compatible.
+bool validateGradleAndAgp(Logger logger,
+    {required String? gradleV, required String? agpV}) {
+  // Update these when new versions of AGP or Gradle come out.
+  const String maxKnownAgpVersion = '8.1';
+  const String maxKnownGradleVersion = '8.0';
+
+  // TODO are these the correct values we want to support?
+  const String oldestSupportedAgpVersion = '3.3.0';
+  const String oldestSupportedGradleVersion = '4.10.1';
+
+  // Begin Gradle <-> AGP validation.
+  // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+
+  if (gradleV == null || agpV == null) {
+    logger
+        .printTrace('Gradle version or AGP version unknown ($gradleV, $agpV).');
+    return false;
+  }
+
+  // First check if versions are too old.
+  if (_isWithinVersionRange(agpV,
+      min: '0.0', max: oldestSupportedAgpVersion, inclusiveMax: false)) {
+    logger.printTrace('AGP Version: $agpV is too old.');
+    return false;
+  }
+  if (_isWithinVersionRange(gradleV,
+      min: '0.0', max: oldestSupportedGradleVersion, inclusiveMax: false)) {
+    logger.printTrace('Gradle Version: $gradleV is too old.');
+    return false;
+  }
+
+  // Check highest supported version before checking unknown versions.
+  if (_isWithinVersionRange(agpV, min: '8.0', max: maxKnownAgpVersion)) {
+    return _isWithinVersionRange(gradleV,
+        min: '8.0', max: maxKnownGradleVersion);
+  }
+  // Check if versions are newer than the max known versions.
+  if (_isWithinVersionRange(agpV, min: maxKnownGradleVersion, max: '100.100')) {
+    // Assume versions we do not know about are valid but log.
+    final bool validGradle =
+        _isWithinVersionRange(gradleV, min: '8.0', max: '100.00');
+    logger.printTrace('Newer than known AGP version ($agpV), gradle ($gradleV).'
+        '\n Treating as valid configuration.');
+    return validGradle;
+  }
+
+  // Max agp here is a made up version to contain all 7.4 changes.
+  if (_isWithinVersionRange(agpV, min: '7.4', max: '7.5')) {
+    return _isWithinVersionRange(gradleV,
+        min: '7.5', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(agpV,
+      min: '7.3', max: '7.4', inclusiveMax: false)) {
+    return _isWithinVersionRange(gradleV,
+        min: '7.4', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(agpV,
+      min: '7.2', max: '7.3', inclusiveMax: false)) {
+    return _isWithinVersionRange(gradleV,
+        min: '7.3.3', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(agpV,
+      min: '7.1', max: '7.2', inclusiveMax: false)) {
+    return _isWithinVersionRange(gradleV,
+        min: '7.2', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(agpV,
+      min: '7.0', max: '7.1', inclusiveMax: false)) {
+    return _isWithinVersionRange(gradleV,
+        min: '7.0', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(agpV,
+      min: '4.2.0', max: '7.0', inclusiveMax: false)) {
+    return _isWithinVersionRange(gradleV,
+        min: '6.7.1', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(agpV,
+      min: '4.1.0', max: '4.2.0', inclusiveMax: false)) {
+    return _isWithinVersionRange(gradleV,
+        min: '6.5', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(agpV,
+      min: '4.0.0', max: '4.1.0', inclusiveMax: false)) {
+    return _isWithinVersionRange(gradleV,
+        min: '6.1.1', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(
+    agpV,
+    min: '3.6.0',
+    max: '3.6.4',
+  )) {
+    return _isWithinVersionRange(gradleV,
+        min: '5.6.4', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(
+    agpV,
+    min: '3.5.0',
+    max: '3.5.4',
+  )) {
+    return _isWithinVersionRange(gradleV,
+        min: '5.4.1', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(
+    agpV,
+    min: '3.4.0',
+    max: '3.4.3',
+  )) {
+    return _isWithinVersionRange(gradleV,
+        min: '5.1.1', max: maxKnownGradleVersion);
+  }
+  if (_isWithinVersionRange(
+    agpV,
+    min: '3.3.0',
+    max: '3.3.3',
+  )) {
+    return _isWithinVersionRange(gradleV,
+        min: '4.10.1', max: maxKnownGradleVersion);
+  }
+
+  logger.printTrace('Unknown Gradle-Agp compatability');
+  // TODO should we default to true or false here?
+  return true;
+}
+
+/// Returns true if [targetVersion] is within the range [min] and [max]
+/// inclusive by default. Pass [inclusiveMax] = false for less than and
+/// not equal to max.
 bool _isWithinVersionRange(
   String targetVersion, {
   required String min,
   required String max,
+  bool inclusiveMax = true,
 }) {
   final Version? parsedTargetVersion = Version.parse(targetVersion);
   final Version? minVersion = Version.parse(min);
   final Version? maxVersion = Version.parse(max);
-  return minVersion != null &&
-      maxVersion != null &&
+  final bool withinMin = minVersion != null &&
       parsedTargetVersion != null &&
-      parsedTargetVersion >= minVersion &&
-      parsedTargetVersion <= maxVersion;
+      parsedTargetVersion >= minVersion;
+  final bool withinMax = maxVersion != null &&
+      parsedTargetVersion != null &&
+      (inclusiveMax
+          ? parsedTargetVersion <= maxVersion
+          : parsedTargetVersion < maxVersion);
+  return withinMin && withinMax;
 }
 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version

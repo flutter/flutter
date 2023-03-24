@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -258,7 +257,8 @@ OS:           Mac OS X 13.2.1 aarch64
         ..createSync();
       final ProcessManager processManager = FakeProcessManager.empty()
         ..addCommand(const FakeCommand(
-            command: <String>['gradle', gradleVersionFlag], stdout: gradleOutput));
+            command: <String>['gradle', gradleVersionFlag],
+            stdout: gradleOutput));
 
       expect(
         await getGradleVersion(
@@ -269,5 +269,148 @@ OS:           Mac OS X 13.2.1 aarch64
         expectedVersion,
       );
     });
+    testWithoutContext('returns the AGP version when set', () async {
+      const String expectedVersion = '7.3.0';
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      androidDirectory.childFile('build.gradle').writeAsStringSync('''
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:$expectedVersion'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+''');
+
+      expect(
+        getAgpVersion(androidDirectory, BufferLogger.test()),
+        expectedVersion,
+      );
+    });
+    testWithoutContext('returns null when AGP version not set', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      androidDirectory.childFile('build.gradle').writeAsStringSync('''
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+    }
+}
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+''');
+
+      expect(
+        getAgpVersion(androidDirectory, BufferLogger.test()),
+        null,
+      );
+    });
+
+    testWithoutContext('validates gradle/agp versions', () async {
+      final List<GradleAgpTestData> testData = <GradleAgpTestData>[
+        // Values too new *these need to update* when
+        // max known gradle and max known agp versions are updated:
+        // Newer tools version supports max gradle version.
+        GradleAgpTestData(true, agpVersion: '8.2', gradleVersion: '8.0'),
+        // Newer tools version does not even meet current gradle version requiremnts.
+        GradleAgpTestData(false, agpVersion: '8.2', gradleVersion: '7.3'),
+        // Newer tools version requires newer gradle version.
+        GradleAgpTestData(true, agpVersion: '8.3', gradleVersion: '8.1'),
+
+        // Minimims as defined in
+        // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+        GradleAgpTestData(true, agpVersion: '8.1', gradleVersion: '8.0'),
+        GradleAgpTestData(true, agpVersion: '8.0', gradleVersion: '8.0'),
+        GradleAgpTestData(true, agpVersion: '7.4', gradleVersion: '7.5'),
+        GradleAgpTestData(true, agpVersion: '7.3', gradleVersion: '7.4'),
+        GradleAgpTestData(true, agpVersion: '7.2', gradleVersion: '7.3.3'),
+        GradleAgpTestData(true, agpVersion: '7.1', gradleVersion: '7.2'),
+        GradleAgpTestData(true, agpVersion: '7.0', gradleVersion: '7.0'),
+        GradleAgpTestData(true, agpVersion: '4.2.0', gradleVersion: '6.7.1'),
+        GradleAgpTestData(true, agpVersion: '4.1.0', gradleVersion: '6.5'),
+        GradleAgpTestData(true, agpVersion: '4.0.0', gradleVersion: '6.1.1'),
+        GradleAgpTestData(true, agpVersion: '3.6.0', gradleVersion: '5.6.4'),
+        GradleAgpTestData(true, agpVersion: '3.5.0', gradleVersion: '5.4.1'),
+        GradleAgpTestData(true, agpVersion: '3.4.0', gradleVersion: '5.1.1'),
+        GradleAgpTestData(true, agpVersion: '3.3.0', gradleVersion: '4.10.1'),
+        // Values too old:
+        GradleAgpTestData(false, agpVersion: '3.3.0', gradleVersion: '4.9'),
+        GradleAgpTestData(false, agpVersion: '7.3', gradleVersion: '7.2'),
+        GradleAgpTestData(false, agpVersion: '3.0.0', gradleVersion: '7.2'),
+        // Null values:
+        // ignore: avoid_redundant_argument_values
+        GradleAgpTestData(false, agpVersion: null, gradleVersion: '7.2'),
+        // ignore: avoid_redundant_argument_values
+        GradleAgpTestData(false, agpVersion: '3.0.0', gradleVersion: null),
+        // ignore: avoid_redundant_argument_values
+        GradleAgpTestData(false, agpVersion: null, gradleVersion: null),
+        // Middle AGP cases:
+        GradleAgpTestData(true, agpVersion: '8.0.1', gradleVersion: '8.0'),
+        GradleAgpTestData(true, agpVersion: '7.4.1', gradleVersion: '7.5'),
+        GradleAgpTestData(true, agpVersion: '7.3.1', gradleVersion: '7.4'),
+        GradleAgpTestData(true, agpVersion: '7.2.1', gradleVersion: '7.3.3'),
+        GradleAgpTestData(true, agpVersion: '7.1.1', gradleVersion: '7.2'),
+        GradleAgpTestData(true, agpVersion: '7.0.1', gradleVersion: '7.0'),
+        GradleAgpTestData(true, agpVersion: '4.2.1', gradleVersion: '6.7.1'),
+        GradleAgpTestData(true, agpVersion: '4.1.1', gradleVersion: '6.5'),
+        GradleAgpTestData(true, agpVersion: '4.0.1', gradleVersion: '6.1.1'),
+        GradleAgpTestData(true, agpVersion: '3.6.1', gradleVersion: '5.6.4'),
+        GradleAgpTestData(true, agpVersion: '3.5.1', gradleVersion: '5.4.1'),
+        GradleAgpTestData(true, agpVersion: '3.4.1', gradleVersion: '5.1.1'),
+        GradleAgpTestData(true, agpVersion: '3.3.1', gradleVersion: '4.10.1'),
+
+        // Higher gradle cases:
+        GradleAgpTestData(true, agpVersion: '7.4', gradleVersion: '8.0'),
+        GradleAgpTestData(true, agpVersion: '7.3', gradleVersion: '7.5'),
+        GradleAgpTestData(true, agpVersion: '7.2', gradleVersion: '7.4'),
+        GradleAgpTestData(true, agpVersion: '7.1', gradleVersion: '7.3.3'),
+        GradleAgpTestData(true, agpVersion: '7.0', gradleVersion: '7.2'),
+        GradleAgpTestData(true, agpVersion: '4.2.0', gradleVersion: '7.0'),
+        GradleAgpTestData(true, agpVersion: '4.1.0', gradleVersion: '6.7.1'),
+        GradleAgpTestData(true, agpVersion: '4.0.0', gradleVersion: '6.5'),
+        GradleAgpTestData(true, agpVersion: '3.6.0', gradleVersion: '6.1.1'),
+        GradleAgpTestData(true, agpVersion: '3.5.0', gradleVersion: '5.6.4'),
+        GradleAgpTestData(true, agpVersion: '3.4.0', gradleVersion: '5.4.1'),
+        GradleAgpTestData(true, agpVersion: '3.3.0', gradleVersion: '5.1.1'),
+      ];
+      for (final GradleAgpTestData data in testData) {
+        expect(
+          validateGradleAndAgp(
+            BufferLogger.test(),
+            gradleV: data.gradleVersion,
+            agpV: data.agpVersion,
+          ),
+          data.validPair ? isTrue : isFalse,
+          reason: 'G: ${data.gradleVersion}, AGP: ${data.agpVersion}'
+        );
+      }
+    });
+
+    // TODO add test for _isWithinVersionRange
   });
+}
+
+class GradleAgpTestData {
+  GradleAgpTestData(this.validPair, {this.gradleVersion, this.agpVersion});
+  final String? gradleVersion;
+  final String? agpVersion;
+  final bool validPair;
 }

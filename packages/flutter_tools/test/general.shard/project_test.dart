@@ -401,7 +401,8 @@ void main() {
       });
     });
 
-    group('compatibality', () {
+    group('compatibility', () {
+      // TODO improve test.
       _testInMemory('always returns false', () async {
         final FlutterProject project = await someProject();
         expect(await project.android.hasValidJavaGradleAgpVersions(), isFalse);
