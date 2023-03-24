@@ -168,7 +168,8 @@ class SearchAnchor extends StatefulWidget {
   /// and it is used to open the search view when the user taps on the anchor.
   final SearchController? searchController;
 
-  /// Optional callback to lay out the content list of the search view.
+  /// Optional callback to obtain a widget to lay out the suggestion list of the
+  /// search view.
   ///
   /// Default view uses a [ListView] with a vertical scroll direction.
   final ViewBuilder? viewBuilder;
