@@ -1675,7 +1675,7 @@ void _paragraphTests() {
         1,
         3,
         canvasKit.RectHeightStyle.Tight,
-        canvasKit.RectWidthStyle.Max).single;
+        canvasKit.RectWidthStyle.Max).single! as SkRectWithDirection;
     expect(
       rectWithDirection.rect,
       hasLength(4),
@@ -1684,7 +1684,7 @@ void _paragraphTests() {
     expect(paragraph.getLineMetrics(), hasLength(1));
 
     final SkLineMetrics lineMetrics =
-        paragraph.getLineMetrics().single;
+        paragraph.getLineMetrics().cast<SkLineMetrics>().single;
     expectAlmost(lineMetrics.ascent, 55.6);
     expectAlmost(lineMetrics.descent, 14.8);
     expect(lineMetrics.isHardBreak, isTrue);
@@ -1755,7 +1755,7 @@ void _paragraphTests() {
       1,
       canvasKit.RectHeightStyle.Strut,
       canvasKit.RectWidthStyle.Tight,
-    );
+    ).cast<SkRectWithDirection>();
     expect(rects.length, 1);
     final SkRectWithDirection rect = rects.first;
     expect(rect.rect, <double>[0, 0, 13.770000457763672, 75]);
