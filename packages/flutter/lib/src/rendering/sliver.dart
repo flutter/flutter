@@ -26,16 +26,37 @@ import 'viewport_offset.dart';
 /// vertical alphabetical list that is going [AxisDirection.down] with a
 /// [GrowthDirection.reverse] would have the Z at the top (at scroll offset
 /// zero) and the A below it.
+// TODO(Piinks): Add sample code
 ///
-/// The direction in which the scroll offset increases is given by
-/// [applyGrowthDirectionToAxisDirection].
+/// See also:
+///
+///   * [applyGrowthDirectionToAxisDirection], which returns the direction in
+///     which the scroll offset increases.
 enum GrowthDirection {
   /// This sliver's contents are ordered in the same direction as the
-  /// [AxisDirection].
+  /// [AxisDirection]. For example, a vertical alphabetical list that is going
+  /// [AxisDirection.down] with a [GrowthDirection.forward] would have the A at
+  /// the top and the Z at the bottom, with the A adjacent to the origin.
+  ///
+  /// Most scroll views by default are ordered [GrowthDirection.forward].
+  /// Changing the default values of [CustomScrollView.anchor],
+  /// [CustomScrollView.center], or both, can configure a scroll view for
+  /// [GrowthDirection.reverse].
+  // TODO(Piinks): sample code
+  ///
+  /// See also:
+  ///
+  ///   * [applyGrowthDirectionToAxisDirection], which returns the direction in
+  ///     which the scroll offset increases.
   forward,
 
   /// This sliver's contents are ordered in the opposite direction of the
   /// [AxisDirection].
+  ///
+  /// See also:
+  ///
+  ///   * [applyGrowthDirectionToAxisDirection], which returns the direction in
+  ///     which the scroll offset increases.
   reverse,
 }
 
@@ -57,11 +78,12 @@ AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, G
   }
 }
 
-/// Flips the [ScrollDirection] if the [GrowthDirection] is [GrowthDirection.reverse].
+/// Flips the [ScrollDirection] if the [GrowthDirection] is
+/// [GrowthDirection.reverse].
 ///
 /// Specifically, returns `scrollDirection` if `scrollDirection` is
-/// [GrowthDirection.forward], otherwise returns [flipScrollDirection] applied to
-/// `scrollDirection`.
+/// [GrowthDirection.forward], otherwise returns [flipScrollDirection] applied
+/// to `scrollDirection`.
 ///
 /// This function is useful in [RenderSliver] subclasses that are given both an
 /// [ScrollDirection] and a [GrowthDirection] and wish to compute the

@@ -8,28 +8,48 @@ import 'package:flutter/foundation.dart';
 /// The direction of a scroll, relative to the positive scroll offset axis given
 /// by an [AxisDirection] and a [GrowthDirection].
 ///
-/// This contrasts to [GrowthDirection] in that it has a third value, [idle],
-/// for the case where no scroll is occurring.
+/// This is often the opposite of [GrowthDirection], but further contrasts in
+/// that it has a third value, [idle], for the case where no scroll is
+/// occurring.
 ///
 /// This is used by [RenderSliverFloatingPersistentHeader] to only expand when
 /// the user is scrolling in the same direction as the detected scroll offset
 /// change.
+///
+/// See also:
+///
+///  * [AxisDirection], which is a directional version of this enum (with values
+///    like left and right, rather than just horizontal).
+///   * [GrowthDirection], the direction in which slivers and their content are
+///     ordered, relative to the scroll offset axis as specified by
+///     [AxisDirection].
+// TODO(Piinks): sample code
 enum ScrollDirection {
   /// No scrolling is underway.
   idle,
 
-  /// Scrolling is happening in the positive scroll offset direction.
-  ///
-  /// For example, for the [GrowthDirection.forward] part of a vertical
-  /// [AxisDirection.down] list, this means the content is moving up, exposing
-  /// lower content.
-  forward,
-
   /// Scrolling is happening in the negative scroll offset direction.
   ///
   /// For example, for the [GrowthDirection.forward] part of a vertical
-  /// [AxisDirection.down] list, this means the content is moving down, exposing
-  /// earlier content.
+  /// [AxisDirection.down] list, which is the default directional configuration
+  /// of all scroll views, this means the content is going down, exposing
+  /// earlier content as it approaches the zero position.
+  ///
+  /// An anecdote for this most common case is 'forward is toward' the zero
+  /// position.
+  // TODO(Piinks): sample code
+  forward,
+
+  /// Scrolling is happening in the positive scroll offset direction.
+  ///
+  /// For example, for the [GrowthDirection.forward] part of a vertical
+  /// [AxisDirection.down] list, which is the default directional configuration
+  /// of all scroll views, this means the content is moving up, exposing
+  /// lower content.
+  ///
+  /// An anecdote for this most common case is reversing, or backing away, from
+  /// the zero position.
+  // TODO(Piinks): sample code
   reverse,
 }
 
