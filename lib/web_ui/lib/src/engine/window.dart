@@ -191,8 +191,23 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
           return true;
         case 'routeInformationUpdated':
           assert(arguments != null);
+          final String? uriString = arguments!.tryString('uri');
+          final String path;
+          if (uriString != null) {
+            final Uri uri = Uri.parse(uriString);
+            // Need to remove scheme and authority.
+            path = Uri.decodeComponent(
+              Uri(
+                path: uri.path.isEmpty ? '/' : uri.path,
+                queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+                fragment: uri.fragment.isEmpty ? null : uri.fragment,
+              ).toString(),
+            );
+          } else {
+            path = arguments.tryString('location')!;
+          }
           browserHistory.setRouteName(
-            arguments!.tryString('location'),
+            path,
             state: arguments['state'],
             replace: arguments.tryBool('replace') ?? false,
           );
