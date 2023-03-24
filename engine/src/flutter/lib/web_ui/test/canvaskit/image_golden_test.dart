@@ -779,7 +779,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       }
       CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       await matchGoldenFile(
-        'canvaskit_picture_texture_toimage',
+        'canvaskit_picture_texture_toimage.png',
         region: const ui.Rect.fromLTRB(0, 0, 128, 128),
       );
       mandrill.dispose();
