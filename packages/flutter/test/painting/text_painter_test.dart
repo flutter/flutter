@@ -23,7 +23,7 @@ void main() {
     final List<double> prefixWidths = <double>[];
     for (final int boundary in boundaries) {
       painter.text = TextSpan(text: text.substring(0, boundary));
-      painter.layout(maxWidth: 10000);
+      painter.layout();
       prefixWidths.add(painter.width);
     }
 
@@ -92,10 +92,9 @@ void main() {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr
       ..text = text
-      ..layout(maxWidth: 10000);
+      ..layout();
     final int length = text.toPlainText().length;
-    final List<double> result =
-    List<double>.generate(length + 1, (int offset) {
+    final List<double> result = List<double>.generate(length + 1, (int offset) {
       final TextPosition position = ui.TextPosition(offset: offset);
       return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
     });
