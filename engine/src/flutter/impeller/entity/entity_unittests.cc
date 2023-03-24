@@ -2437,6 +2437,10 @@ TEST_P(EntityTest, InheritOpacityTest) {
   // Clips and restores trivially accept opacity.
   ASSERT_TRUE(ClipContents().CanAcceptOpacity(entity));
   ASSERT_TRUE(ClipRestoreContents().CanAcceptOpacity(entity));
+
+  // Runtime effect contents can't accept opacity.
+  auto runtime_effect = std::make_shared<RuntimeEffectContents>();
+  ASSERT_FALSE(runtime_effect->CanAcceptOpacity(entity));
 }
 
 }  // namespace testing

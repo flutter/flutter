@@ -37,6 +37,10 @@ void RuntimeEffectContents::SetTextureInputs(
   texture_inputs_ = std::move(texture_inputs);
 }
 
+bool RuntimeEffectContents::CanAcceptOpacity(const Entity& entity) const {
+  return false;
+}
+
 bool RuntimeEffectContents::Render(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const {
