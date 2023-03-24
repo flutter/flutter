@@ -42,6 +42,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     FlutterProject? flutterProject,
     String? shellPath,
     this.updateGoldens,
+    this.nullAssertions,
     required this.buildInfo,
     required this.webMemoryFS,
     required FileSystem fileSystem,
@@ -91,6 +92,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Logger _logger;
   final Artifacts? _artifacts;
   final bool? updateGoldens;
+  final bool? nullAssertions;
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
@@ -108,6 +110,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     String? shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
+    bool nullAssertions = false,
     required BuildInfo buildInfo,
     required WebMemoryFS webMemoryFS,
     required FileSystem fileSystem,
@@ -142,6 +145,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       logger: logger,
+      nullAssertions: nullAssertions,
       processManager: processManager,
       testTimeRecorder: testTimeRecorder,
     );
@@ -156,6 +160,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     return buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')
       ? WebRendererMode.canvaskit
       : WebRendererMode.html;
+  }
+
+  NullSafetyMode get _nullSafetyMode {
+    return buildInfo.nullSafetyMode == NullSafetyMode.sound
+      ? NullSafetyMode.sound
+      : NullSafetyMode.unsound;
   }
 
   final Configuration _config;
@@ -190,10 +200,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File get _dartSdk => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode]!));
+    _artifacts!.getHostArtifact(kDartSdkJsArtifactMap[_rendererMode]![_nullSafetyMode]!));
 
   File get _dartSdkSourcemaps => _fileSystem.file(
-    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode]!));
+    _artifacts!.getHostArtifact(kDartSdkJsMapArtifactMap[_rendererMode]![_nullSafetyMode]!));
 
   /// The precompiled test javascript.
   File get _testDartJs => _fileSystem.file(_fileSystem.path.join(
@@ -234,6 +244,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       final String leadingPath = request.url.path.split('.dart.bootstrap.js')[0];
       final String generatedFile = '${_fileSystem.path.split(leadingPath).join('_')}.dart.test.dart.js';
       return shelf.Response.ok(generateMainModule(
+        nullAssertions: nullAssertions!,
         nativeNullAssertions: true,
         bootstrapModule: '${_fileSystem.path.basename(leadingPath)}.dart.bootstrap',
         entrypoint: '/$generatedFile'
@@ -378,10 +389,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     switch (extension) {
       case '.js':
         contentType = 'text/javascript';
-        break;
       case '.wasm':
         contentType = 'application/wasm';
-        break;
       default:
         final String error = 'Failed to determine Content-Type for "${request.url.path}".';
         _logger.printError(error);
@@ -787,12 +796,10 @@ class BrowserManager {
           break;
         case 'restart':
           _onRestartController.add(null);
-          break;
         case 'resume':
           if (_pauseCompleter != null) {
             _pauseCompleter!.complete();
           }
-          break;
         default:
         // Unreachable.
           assert(false);

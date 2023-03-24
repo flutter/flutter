@@ -189,6 +189,32 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     debugDisableShadows = disableShadows;
   }
 
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// This property has been deprecated to prepare for Flutter's upcoming
+  /// support for multiple views and multiple windows.
+  ///
+  /// This represents a combination of a [TestPlatformDispatcher] and a singular
+  /// [TestFlutterView]. Platform-specific test values can be set through
+  /// [WidgetTester.platformDispatcher] instead. When testing individual widgets
+  /// or applications using [WidgetTester.pumpWidget], view-specific test values
+  /// can be set through [WidgetTester.view]. If multiple views are defined, the
+  /// appropriate view can be found using [WidgetTester.viewOf] if a sub-view
+  /// is needed.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetTester.platformDispatcher] for changing platform-specific values
+  ///   for testing.
+  /// * [WidgetTester.view] and [WidgetTester.viewOf] for changing view-specific
+  ///   values for testing.
+  /// * [BindingBase.window] for guidance dealing with this property outside of
+  ///   a testing context.
+  @Deprecated(
+    'Use WidgetTester.platformDispatcher or WidgetTester.view instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.9.0-0.1.pre.'
+  )
   @override
   late final TestWindow window;
 
@@ -1788,7 +1814,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           _handleViewNeedsPaint();
         }
         super.handlePointerEvent(event);
-        break;
       case TestBindingEventSource.device:
         if (shouldPropagateDevicePointerEvents) {
           super.handlePointerEvent(event);
@@ -1803,7 +1828,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             () => super.handlePointerEvent(localEvent)
           );
         }
-        break;
     }
   }
 
@@ -1812,7 +1836,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
         super.dispatchEvent(event, hitTestResult);
-        break;
       case TestBindingEventSource.device:
         assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         if (shouldPropagateDevicePointerEvents) {
@@ -1823,7 +1846,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         if (hitTestResult != null) {
           deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
         }
-        break;
     }
   }
 

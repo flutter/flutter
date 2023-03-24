@@ -520,13 +520,10 @@ class _IndicatorInkWell extends InkResponse {
     switch (labelBehavior) {
       case NavigationDestinationLabelBehavior.alwaysShow:
         labelPadding = labelRect.height / 2;
-        break;
       case NavigationDestinationLabelBehavior.onlyShowSelected:
         labelPadding = selected ? labelRect.height / 2 : 0;
-        break;
       case NavigationDestinationLabelBehavior.alwaysHide:
         labelPadding = 0;
-        break;
     }
     final double indicatorOffsetX = referenceBox.size.width / 2;
     final double indicatorOffsetY = referenceBox.size.height / 2 - labelPadding;
