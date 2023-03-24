@@ -1262,7 +1262,7 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 
 /// A delegate for selectables within non-scrolling widgets
 class StaticMultiSelectableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  /// Create a [StaticMultiSelectableSelectionContainerDelegate]
+  /// Creates a [StaticMultiSelectableSelectionContainerDelegate]
   ///
   /// The [selectedContentSeparator] is the string that will be used to separate
   /// the selected text of the children of this delegate.
