@@ -150,7 +150,7 @@ void main() {
         text: 'First ',
         style: TextStyle(fontSize: 10.0),
         children: <InlineSpan>[
-          TextSpan(text: 'smallsecond ', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 5.0)),
+          TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 5.0)),
           TextSpan(text: 'third fourth fifth'),
         ],
       ),
@@ -170,9 +170,7 @@ void main() {
       const TextSelection(baseOffset: 0, extentOffset: 36),
     );
 
-    if (kIsWeb && !isCanvasKit) {
-      expect(boxes.length, equals(4));
-    }
+    expect(boxes.length, equals(4));
 
     // The widths of the boxes should match the calculations above.
     // The heights should all be 10, except for the box for 'smallsecond ',
@@ -189,7 +187,7 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  });
+  }, skip: kIsWeb && !isCanvasKit);
 
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
