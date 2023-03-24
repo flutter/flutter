@@ -416,9 +416,7 @@ bool FlutterWindowsEngine::Stop() {
 
 void FlutterWindowsEngine::SetView(FlutterWindowsView* view) {
   view_ = view;
-  if (view) {
-    InitializeKeyboard();
-  }
+  InitializeKeyboard();
 }
 
 void FlutterWindowsEngine::OnVsync(intptr_t baton) {
