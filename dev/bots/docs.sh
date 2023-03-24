@@ -20,7 +20,7 @@ function generate_docs() {
     # Install and activate dartdoc.
     # When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$DART" pub global activate dartdoc 6.2.0
+    "$DART" pub global activate dartdoc 6.2.1
 
     # Install and activate the snippets tool, which resides in the
     # assets-for-api-docs repo:
