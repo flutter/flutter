@@ -589,6 +589,10 @@ TEST(GeometryTest, SimplePath) {
       .AddCubicComponent({300, 300}, {400, 400}, {500, 500}, {600, 600});
 
   ASSERT_EQ(path.GetComponentCount(), 4u);
+  ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kLinear), 1u);
+  ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kQuadratic), 1u);
+  ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kCubic), 1u);
+  ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kContour), 1u);
 
   path.EnumerateComponents(
       [](size_t index, const LinearPathComponent& linear) {
