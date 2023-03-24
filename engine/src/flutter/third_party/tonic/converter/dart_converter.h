@@ -202,48 +202,39 @@ struct DartConverter<unsigned long long> {
   }
 };
 
-template <typename T>
-struct DartConverterFloatingPoint {
-  using FfiType = T;
+// There is intentionally no DartConverter<float>, to avoid UB when Dart code
+// gives us a double that is greater than the max float or less than -max float.
+template <>
+struct DartConverter<double> {
+  using FfiType = double;
+  static constexpr const char* kFfiRepresentation = "Double";
+  static constexpr const char* kDartRepresentation = "double";
   static constexpr bool kAllowedInLeafCall = true;
 
-  static Dart_Handle ToDart(T val) { return Dart_NewDouble(val); }
+  static Dart_Handle ToDart(double val) { return Dart_NewDouble(val); }
 
-  static void SetReturnValue(Dart_NativeArguments args, T val) {
+  static void SetReturnValue(Dart_NativeArguments args, double val) {
     Dart_SetDoubleReturnValue(args, val);
   }
 
-  static T FromDart(Dart_Handle handle) {
+  static double FromDart(Dart_Handle handle) {
     double result = 0;
     Dart_DoubleValue(handle, &result);
     return result;
   }
 
-  static T FromArguments(Dart_NativeArguments args,
-                         int index,
-                         Dart_Handle& exception) {
+  static double FromArguments(Dart_NativeArguments args,
+                              int index,
+                              Dart_Handle& exception) {
     double result = 0;
     Dart_GetNativeDoubleArgument(args, index, &result);
     return result;
   }
 
-  static T FromFfi(FfiType val) { return val; }
-  static FfiType ToFfi(T val) { return val; }
+  static double FromFfi(FfiType val) { return val; }
+  static FfiType ToFfi(double val) { return val; }
   static bool AllowedInLeafCall() { return kAllowedInLeafCall; }
-};
 
-template <>
-struct DartConverter<float> : public DartConverterFloatingPoint<float> {
-  static constexpr const char* kFfiRepresentation = "Float";
-  static constexpr const char* kDartRepresentation = "double";
-  static const char* GetFfiRepresentation() { return kFfiRepresentation; }
-  static const char* GetDartRepresentation() { return kDartRepresentation; }
-};
-
-template <>
-struct DartConverter<double> : public DartConverterFloatingPoint<double> {
-  static constexpr const char* kFfiRepresentation = "Double";
-  static constexpr const char* kDartRepresentation = "double";
   static const char* GetFfiRepresentation() { return kFfiRepresentation; }
   static const char* GetDartRepresentation() { return kDartRepresentation; }
 };

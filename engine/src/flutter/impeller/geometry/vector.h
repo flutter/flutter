@@ -17,9 +17,9 @@ namespace impeller {
 struct Vector3 {
   union {
     struct {
-      Scalar x = 0.0;
-      Scalar y = 0.0;
-      Scalar z = 0.0;
+      Scalar x = 0.0f;
+      Scalar y = 0.0f;
+      Scalar z = 0.0f;
     };
     Scalar e[3];
   };
@@ -207,10 +207,10 @@ constexpr Vector3 operator/(U s, const Vector3& p) {
 struct Vector4 {
   union {
     struct {
-      Scalar x = 0.0;
-      Scalar y = 0.0;
-      Scalar z = 0.0;
-      Scalar w = 1.0;
+      Scalar x = 0.0f;
+      Scalar y = 0.0f;
+      Scalar z = 0.0f;
+      Scalar w = 1.0f;
     };
     Scalar e[4];
   };
@@ -228,7 +228,7 @@ struct Vector4 {
   constexpr Vector4(const Point& p) : x(p.x), y(p.y) {}
 
   Vector4 Normalize() const {
-    const Scalar inverse = 1.0 / sqrt(x * x + y * y + z * z + w * w);
+    const Scalar inverse = 1.0f / sqrt(x * x + y * y + z * z + w * w);
     return Vector4(x * inverse, y * inverse, z * inverse, w * inverse);
   }
 

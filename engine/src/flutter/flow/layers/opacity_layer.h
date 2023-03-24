@@ -45,7 +45,7 @@ class OpacityLayer : public CacheableContainerLayer {
     children_can_accept_opacity_ = value;
   }
 
-  SkScalar opacity() const { return alpha_ * 1.0 / SK_AlphaOPAQUE; }
+  SkScalar opacity() const { return alpha_ * 1.0f / SK_AlphaOPAQUE; }
 
  private:
   SkAlpha alpha_;

@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/logging.h"
+#include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/color_filter.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/shader.h"
@@ -51,7 +52,7 @@ constexpr uint32_t kBlendModeDefault =
 
 // Must be kept in sync with the default in painting.dart, and also with the
 // default SkPaintDefaults_MiterLimit in Skia (which is not in a public header).
-constexpr double kStrokeMiterLimitDefault = 4.0;
+constexpr float kStrokeMiterLimitDefault = 4.0f;
 
 // Must be kept in sync with the MaskFilter private constants in painting.dart.
 enum MaskFilterType { kNull, kBlur };
@@ -187,7 +188,8 @@ const DlPaint* Paint::paint(DlPaint& paint,
         DlBlurStyle blur_style =
             static_cast<DlBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
         double sigma = float_data[kMaskFilterSigmaIndex];
-        paint.setMaskFilter(DlBlurMaskFilter::Make(blur_style, sigma));
+        paint.setMaskFilter(
+            DlBlurMaskFilter::Make(blur_style, SafeNarrow(sigma)));
         break;
     }
   }
@@ -277,7 +279,7 @@ void Paint::toDlPaint(DlPaint& paint) const {
     case kBlur:
       DlBlurStyle blur_style =
           static_cast<DlBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
-      double sigma = float_data[kMaskFilterSigmaIndex];
+      float sigma = SafeNarrow(float_data[kMaskFilterSigmaIndex]);
       // Make could return a nullptr here if the values are NOP or
       // do not make sense. We could interpret that as if there was
       // no value passed from Dart at all (i.e. don't change the

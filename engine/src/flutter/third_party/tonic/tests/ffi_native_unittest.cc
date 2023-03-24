@@ -188,23 +188,6 @@ TEST_F(FfiNativeTest, SerialiseEchoIntPtr) {
   }
 }
 
-// Call and serialise function with float.
-
-float EchoFloat(float arg) {
-  EXPECT_EQ(arg, 23.0);
-  return arg;
-}
-
-TEST_F(FfiNativeTest, FfiBindingCallEchoFloat) {
-  DoCallThroughTest<void, decltype(&EchoFloat), &EchoFloat>("EchoFloat",
-                                                            "callEchoFloat");
-}
-
-TEST_F(FfiNativeTest, SerialiseEchoFloat) {
-  DoSerialiseTest<void, decltype(&EchoFloat), &EchoFloat>(
-      /*leaf=*/true, "Float", "double", "Float", "double");
-}
-
 // Call and serialise function with double.
 
 double EchoDouble(double arg) {

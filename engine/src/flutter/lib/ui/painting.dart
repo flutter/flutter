@@ -2615,21 +2615,21 @@ class Path extends NativeFieldWrapperClass1 {
   external void _setFillType(int fillType);
 
   /// Starts a new sub-path at the given coordinate.
-  @Native<Void Function(Pointer<Void>, Float, Float)>(symbol: 'Path::moveTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double)>(symbol: 'Path::moveTo', isLeaf: true)
   external void moveTo(double x, double y);
 
   /// Starts a new sub-path at the given offset from the current point.
-  @Native<Void Function(Pointer<Void>, Float, Float)>(symbol: 'Path::relativeMoveTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double)>(symbol: 'Path::relativeMoveTo', isLeaf: true)
   external void relativeMoveTo(double dx, double dy);
 
   /// Adds a straight line segment from the current point to the given
   /// point.
-  @Native<Void Function(Pointer<Void>, Float, Float)>(symbol: 'Path::lineTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double)>(symbol: 'Path::lineTo', isLeaf: true)
   external void lineTo(double x, double y);
 
   /// Adds a straight line segment from the current point to the point
   /// at the given offset from the current point.
-  @Native<Void Function(Pointer<Void>, Float, Float)>(symbol: 'Path::relativeLineTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double)>(symbol: 'Path::relativeLineTo', isLeaf: true)
   external void relativeLineTo(double dx, double dy);
 
   /// Adds a quadratic bezier segment that curves from the current
@@ -2638,14 +2638,14 @@ class Path extends NativeFieldWrapperClass1 {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_quadratic_to.png#gh-light-mode-only)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_quadratic_to_dark.png#gh-dark-mode-only)
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float)>(symbol: 'Path::quadraticBezierTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double)>(symbol: 'Path::quadraticBezierTo', isLeaf: true)
   external void quadraticBezierTo(double x1, double y1, double x2, double y2);
 
   /// Adds a quadratic bezier segment that curves from the current
   /// point to the point at the offset (x2,y2) from the current point,
   /// using the control point at the offset (x1,y1) from the current
   /// point.
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float)>(symbol: 'Path::relativeQuadraticBezierTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double)>(symbol: 'Path::relativeQuadraticBezierTo', isLeaf: true)
   external void relativeQuadraticBezierTo(
       double x1, double y1, double x2, double y2);
 
@@ -2655,14 +2655,14 @@ class Path extends NativeFieldWrapperClass1 {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_cubic_to.png#gh-light-mode-only)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_cubic_to_dark.png#gh-dark-mode-only)
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float, Float, Float)>(symbol: 'Path::cubicTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Double, Double)>(symbol: 'Path::cubicTo', isLeaf: true)
   external void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3);
 
   /// Adds a cubic bezier segment that curves from the current point
   /// to the point at the offset (x3,y3) from the current point, using
   /// the control points at the offsets (x1,y1) and (x2,y2) from the
   /// current point.
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float, Float, Float)>(symbol: 'Path::relativeCubicTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Double, Double)>(symbol: 'Path::relativeCubicTo', isLeaf: true)
   external void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3);
 
   /// Adds a bezier segment that curves from the current point to the
@@ -2673,7 +2673,7 @@ class Path extends NativeFieldWrapperClass1 {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_conic_to.png#gh-light-mode-only)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/path_conic_to_dark.png#gh-dark-mode-only)
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float, Float)>(symbol: 'Path::conicTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Double)>(symbol: 'Path::conicTo', isLeaf: true)
   external void conicTo(double x1, double y1, double x2, double y2, double w);
 
   /// Adds a bezier segment that curves from the current point to the
@@ -2682,7 +2682,7 @@ class Path extends NativeFieldWrapperClass1 {
   /// the weight w. If the weight is greater than 1, then the curve is
   /// a hyperbola; if the weight equals 1, it's a parabola; and if it
   /// is less than 1, it is an ellipse.
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float, Float)>(symbol: 'Path::relativeConicTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Double)>(symbol: 'Path::relativeConicTo', isLeaf: true)
   external void relativeConicTo(double x1, double y1, double x2, double y2, double w);
 
   /// If the `forceMoveTo` argument is false, adds a straight line
@@ -2706,7 +2706,7 @@ class Path extends NativeFieldWrapperClass1 {
     _arcTo(rect.left, rect.top, rect.right, rect.bottom, startAngle, sweepAngle, forceMoveTo);
   }
 
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float, Float, Float, Bool)>(symbol: 'Path::arcTo', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Double, Double, Bool)>(symbol: 'Path::arcTo', isLeaf: true)
   external void _arcTo(double left, double top, double right, double bottom, double startAngle, double sweepAngle, bool forceMoveTo);
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
@@ -2732,7 +2732,7 @@ class Path extends NativeFieldWrapperClass1 {
     _arcToPoint(arcEnd.dx, arcEnd.dy, radius.x, radius.y, rotation, largeArc, clockwise);
   }
 
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float, Float, Bool, Bool)>(symbol: 'Path::arcToPoint', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Double, Bool, Bool)>(symbol: 'Path::arcToPoint', isLeaf: true)
   external void _arcToPoint(double arcEndX, double arcEndY, double radiusX, double radiusY, double rotation, bool largeArc, bool clockwise);
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
@@ -2761,7 +2761,7 @@ class Path extends NativeFieldWrapperClass1 {
     _relativeArcToPoint(arcEndDelta.dx, arcEndDelta.dy, radius.x, radius.y, rotation, largeArc, clockwise);
   }
 
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float, Float, Bool, Bool)>(symbol: 'Path::relativeArcToPoint', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Double, Bool, Bool)>(symbol: 'Path::relativeArcToPoint', isLeaf: true)
   external void _relativeArcToPoint(
       double arcEndX,
       double arcEndY,
@@ -2778,7 +2778,7 @@ class Path extends NativeFieldWrapperClass1 {
     _addRect(rect.left, rect.top, rect.right, rect.bottom);
   }
 
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float)>(symbol: 'Path::addRect', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double)>(symbol: 'Path::addRect', isLeaf: true)
   external void _addRect(double left, double top, double right, double bottom);
 
   /// Adds a new sub-path that consists of a curve that forms the
@@ -2791,7 +2791,7 @@ class Path extends NativeFieldWrapperClass1 {
     _addOval(oval.left, oval.top, oval.right, oval.bottom);
   }
 
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float)>(symbol: 'Path::addOval', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double)>(symbol: 'Path::addOval', isLeaf: true)
   external void _addOval(double left, double top, double right, double bottom);
 
   /// Adds a new sub-path with one arc segment that consists of the arc
@@ -2813,7 +2813,7 @@ class Path extends NativeFieldWrapperClass1 {
     _addArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle);
   }
 
-  @Native<Void Function(Pointer<Void>, Float, Float, Float, Float, Float, Float)>(symbol: 'Path::addArc', isLeaf: true)
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Double, Double)>(symbol: 'Path::addArc', isLeaf: true)
   external void _addArc(double left, double top, double right, double bottom, double startAngle, double sweepAngle);
 
   /// Adds a new sub-path with a sequence of line segments that connect the given
@@ -3203,7 +3203,7 @@ class _PathMeasure extends NativeFieldWrapperClass1 {
     return _length(contourIndex);
   }
 
-  @Native<Float Function(Pointer<Void>, Int32)>(symbol: 'PathMeasure::getLength', isLeaf: true)
+  @Native<Double Function(Pointer<Void>, Int32)>(symbol: 'PathMeasure::getLength', isLeaf: true)
   external double _length(int contourIndex);
 
   Tangent? getTangentForOffset(int contourIndex, double distance) {
@@ -3221,7 +3221,7 @@ class _PathMeasure extends NativeFieldWrapperClass1 {
     }
   }
 
-  @Native<Handle Function(Pointer<Void>, Int32, Float)>(symbol: 'PathMeasure::getPosTan')
+  @Native<Handle Function(Pointer<Void>, Int32, Double)>(symbol: 'PathMeasure::getPosTan')
   external Float32List _getPosTan(int contourIndex, double distance);
 
   Path extractPath(int contourIndex, double start, double end,
@@ -3232,7 +3232,7 @@ class _PathMeasure extends NativeFieldWrapperClass1 {
     return path;
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Int32, Float, Float, Bool)>(symbol: 'PathMeasure::getSegment')
+  @Native<Void Function(Pointer<Void>, Handle, Int32, Double, Double, Bool)>(symbol: 'PathMeasure::getSegment')
   external void _extractPath(Path outPath, int contourIndex, double start, double end, bool startWithMoveTo);
 
   bool isClosed(int contourIndex) {

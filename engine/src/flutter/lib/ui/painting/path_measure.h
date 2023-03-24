@@ -29,12 +29,12 @@ class CanvasPathMeasure : public RefCountedDartWrappable<CanvasPathMeasure> {
                      bool forceClosed);
 
   void setPath(const CanvasPath* path, bool isClosed);
-  float getLength(int contour_index);
-  tonic::Float32List getPosTan(int contour_index, float distance);
+  double getLength(int contour_index);
+  tonic::Float32List getPosTan(int contour_index, double distance);
   void getSegment(Dart_Handle path_handle,
                   int contour_index,
-                  float start_d,
-                  float stop_d,
+                  double start_d,
+                  double stop_d,
                   bool start_with_move_to);
   bool isClosed(int contour_index);
   bool nextContour();
