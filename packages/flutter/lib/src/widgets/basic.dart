@@ -4091,13 +4091,10 @@ class _IndexedStackElement extends MultiChildRenderObjectElement {
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     final int? index = widget.index;
-    if (index == null) {
-      return super.debugVisitOnstageChildren(visitor);
-    } else {
-      final Iterator<Element> onlyOnstageChild = children.skip(index).iterator;
-      if (onlyOnstageChild.moveNext()) {
-        visitor(onlyOnstageChild.current);
-      }
+    // If the index is null, no child is onstage. Otherwise, only the child at
+    // the selected index is.
+    if (index != null && children.isNotEmpty) {
+      visitor(children.elementAt(index));
     }
   }
 }

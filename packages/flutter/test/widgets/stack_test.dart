@@ -485,6 +485,40 @@ void main() {
     expect(tapped, isNull);
   });
 
+  testWidgets('IndexedStack reports hidden children as offstage', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[
+      for (int i = 0; i < 5; i++) Text('child $i'),
+    ];
+
+    Future<void> pumpIndexedStack(int? activeIndex) async{
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: IndexedStack(
+            index: activeIndex,
+            children: children,
+          ),
+        )
+      );
+    }
+
+    final Finder finder = find.byType(Text);
+    final Finder finderIncludingOffstage = find.byType(Text, skipOffstage: false);
+
+    await pumpIndexedStack(null);
+    expect(finder, findsNothing); // IndexedStack with null index shows nothing
+    expect(finderIncludingOffstage, findsNWidgets(5));
+
+    for (int i = 0; i < 5; i++) {
+      await pumpIndexedStack(i);
+
+      expect(finder, findsOneWidget);
+      expect(finderIncludingOffstage, findsNWidgets(5));
+
+      expect(find.text('child $i'), findsOneWidget);
+    }
+  });
+
   testWidgets('Stack clip test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
