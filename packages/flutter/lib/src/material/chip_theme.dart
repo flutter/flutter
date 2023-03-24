@@ -285,7 +285,7 @@ class ChipThemeData with Diagnosticable {
   /// which indicates that the chip is not enabled.
   ///
   /// This property applies to [ActionChip], [ChoiceChip],
-  /// [FilterChip], [InputChip], [RawChip].
+  /// [FilterChip], [InputChip], and [RawChip].
   final Color? disabledColor;
 
   /// Overrides the default for
