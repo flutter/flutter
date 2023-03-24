@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/matrix.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/lib/ui/floating_point.h"
 
 namespace flutter {
 
@@ -23,9 +24,9 @@ SkMatrix ToSkMatrix(const tonic::Float64List& matrix4) {
   for (int i = 0; i < 9; ++i) {
     int matrix4_index = kSkMatrixIndexToMatrix4Index[i];
     if (matrix4_index < matrix4.num_elements()) {
-      sk_matrix[i] = matrix4[matrix4_index];
+      sk_matrix[i] = SafeNarrow(matrix4[matrix4_index]);
     } else {
-      sk_matrix[i] = 0.0;
+      sk_matrix[i] = 0.0f;
     }
   }
   return sk_matrix;

@@ -65,18 +65,6 @@ void callEchoIntPtr() {
   }
 }
 
-// Test helpers for calls with float through Tonic.
-
-@Native<Float Function(Float)>(symbol: 'EchoFloat')
-external double echoFloat(double arg);
-
-@pragma('vm:entry-point')
-void callEchoFloat() {
-  if (echoFloat(23.0) == 23.0) {
-    signalDone();
-  }
-}
-
 // Test helpers for calls with double through Tonic.
 
 @Native<Double Function(Double)>(symbol: 'EchoDouble')

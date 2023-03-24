@@ -115,9 +115,9 @@ sk_sp<SkImage> ImageDecoderSkia::ImageFromCompressedData(
                                       static_cast<int32_t>(target_height)};
 
   auto decode_dimensions = descriptor->get_scaled_dimensions(
-      std::max(static_cast<double>(resized_dimensions.width()) /
+      std::max(static_cast<float>(resized_dimensions.width()) /
                    source_dimensions.width(),
-               static_cast<double>(resized_dimensions.height()) /
+               static_cast<float>(resized_dimensions.height()) /
                    source_dimensions.height()));
 
   // If the codec supports efficient sub-pixel decoding, decoded at a resolution

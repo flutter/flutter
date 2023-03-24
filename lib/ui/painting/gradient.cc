@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/gradient.h"
 
+#include "flutter/lib/ui/floating_point.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -73,9 +74,9 @@ void CanvasGradient::initRadial(double center_x,
   const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeRadial(
-      SkPoint::Make(center_x, center_y), radius, colors.num_elements(),
-      colors_array, color_stops.data(), tile_mode,
-      has_matrix ? &sk_matrix : nullptr);
+      SkPoint::Make(SafeNarrow(center_x), SafeNarrow(center_y)),
+      SafeNarrow(radius), colors.num_elements(), colors_array,
+      color_stops.data(), tile_mode, has_matrix ? &sk_matrix : nullptr);
 }
 
 void CanvasGradient::initSweep(double center_x,
@@ -101,9 +102,11 @@ void CanvasGradient::initSweep(double center_x,
   const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeSweep(
-      SkPoint::Make(center_x, center_y), start_angle * 180.0 / M_PI,
-      end_angle * 180.0 / M_PI, colors.num_elements(), colors_array,
-      color_stops.data(), tile_mode, has_matrix ? &sk_matrix : nullptr);
+      SkPoint::Make(SafeNarrow(center_x), SafeNarrow(center_y)),
+      SafeNarrow(start_angle) * 180.0f / static_cast<float>(M_PI),
+      SafeNarrow(end_angle) * 180.0f / static_cast<float>(M_PI),
+      colors.num_elements(), colors_array, color_stops.data(), tile_mode,
+      has_matrix ? &sk_matrix : nullptr);
 }
 
 void CanvasGradient::initTwoPointConical(double start_x,
@@ -131,10 +134,11 @@ void CanvasGradient::initTwoPointConical(double start_x,
   const DlColor* colors_array = reinterpret_cast<const DlColor*>(colors.data());
 
   dl_shader_ = DlColorSource::MakeConical(
-      SkPoint::Make(start_x, start_y), start_radius,            //
-      SkPoint::Make(end_x, end_y), end_radius,                  //
-      colors.num_elements(), colors_array, color_stops.data(),  //
-      tile_mode, has_matrix ? &sk_matrix : nullptr);
+      SkPoint::Make(SafeNarrow(start_x), SafeNarrow(start_y)),
+      SafeNarrow(start_radius),
+      SkPoint::Make(SafeNarrow(end_x), SafeNarrow(end_y)),
+      SafeNarrow(end_radius), colors.num_elements(), colors_array,
+      color_stops.data(), tile_mode, has_matrix ? &sk_matrix : nullptr);
 }
 
 CanvasGradient::CanvasGradient() = default;
