@@ -126,27 +126,30 @@ void main() {
     final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key!));
 
     // Verify tabOne coordinates.
-    expect(tabOneRect.left, equals(kTabLabelPadding.left));
+    final double tabOneLeft = (tabBar.width
+      - (tabOneRect.width + tabTwoRect.width) - kTabLabelPadding.horizontal) / 2;
+    expect(tabOneRect.left, equals(tabOneLeft));
     expect(tabOneRect.top, equals(kTabLabelPadding.top));
     expect(tabOneRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
     // Verify tabTwo coordinates.
-    expect(tabTwoRect.right, equals(tabBar.width - kTabLabelPadding.right));
+    final double tabTwoRight = tabBar.width
+      - (tabBar.width - (tabOneRect.width + tabTwoRect.width) - kTabLabelPadding.horizontal) / 2;
+    expect(tabTwoRect.right, equals(tabTwoRight));
     expect(tabTwoRect.top, equals(kTabLabelPadding.top));
     expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
     // Verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo.
     expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
 
-    // Verify divider color and indicator color.
+    // Test default divider color.
+    final Divider divider = tester.widget<Divider>(find.byType(Divider));
+    expect(divider.color, equals(theme.colorScheme.surfaceVariant));
+    expect(divider.thickness, 1.0);
+
+    // Test default indicator color.
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(
-      tabBarBox,
-      paints
-        ..line(color: theme.colorScheme.surfaceVariant)
-        // Indicator is a rrect in the primary tab bar.
-        ..rrect(color: theme.colorScheme.primary),
-    );
+    expect(tabBarBox, paints..rrect(color: theme.colorScheme.primary));
   });
 
   testWidgets('Tab bar defaults (secondary)', (WidgetTester tester) async {
@@ -177,27 +180,30 @@ void main() {
     final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key!));
 
     // Verify tabOne coordinates.
-    expect(tabOneRect.left, equals(kTabLabelPadding.left));
+    final double tabOneLeft = (tabBar.width
+      - (tabOneRect.width + tabTwoRect.width) - kTabLabelPadding.horizontal) / 2;
+    expect(tabOneRect.left, equals(tabOneLeft));
     expect(tabOneRect.top, equals(kTabLabelPadding.top));
     expect(tabOneRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
     // Verify tabTwo coordinates.
-    expect(tabTwoRect.right, equals(tabBar.width - kTabLabelPadding.right));
+    final double tabTwoRight = tabBar.width
+      - (tabBar.width - (tabOneRect.width + tabTwoRect.width) - kTabLabelPadding.horizontal) / 2;
+    expect(tabTwoRect.right, equals(tabTwoRight));
     expect(tabTwoRect.top, equals(kTabLabelPadding.top));
     expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
     // Verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo.
     expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
 
-    // Verify divider color and indicator color.
+    // Test default divider color.
+    final Divider divider = tester.widget<Divider>(find.byType(Divider));
+    expect(divider.color, equals(theme.colorScheme.surfaceVariant));
+    expect(divider.thickness, 1.0);
+
+    // Test default indicator color.
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(
-      tabBarBox,
-      paints
-        ..line(color: theme.colorScheme.surfaceVariant)
-        // Indicator is a line in the secondary tab bar.
-        ..line(color: theme.colorScheme.primary),
-    );
+    expect(tabBarBox, paints..line(color: theme.colorScheme.primary));
   });
 
   testWidgets('Tab bar theme overrides label color (selected)', (WidgetTester tester) async {
@@ -378,21 +384,21 @@ void main() {
     expect(iconRenderObject.text.style!.color, equals(unselectedLabelColor));
   });
 
-  testWidgets('Tab bar default tab indicator size', (WidgetTester tester) async {
+  testWidgets('Tab bar default tab indicator size (primary)', (WidgetTester tester) async {
     await tester.pumpWidget(buildTabBar(useMaterial3: true, isScrollable: true));
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar.default.tab_indicator_size.png'),
+      matchesGoldenFile('tab_bar_primary.default.tab_indicator_size.png'),
     );
   });
 
-  testWidgets('Tab bar default tab indicator size', (WidgetTester tester) async {
-    await tester.pumpWidget(buildTabBar(useMaterial3: true, isScrollable: true));
+  testWidgets('Tab bar default tab indicator size (secondary)', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTabBar(secondaryTabBar: true, useMaterial3: true, isScrollable: true));
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar.default.tab_indicator_size.png'),
+      matchesGoldenFile('tab_bar_secondary.default.tab_indicator_size.png'),
     );
   });
 
