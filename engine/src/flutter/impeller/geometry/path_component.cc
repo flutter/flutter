@@ -8,8 +8,6 @@
 
 namespace impeller {
 
-PathComponent::~PathComponent() = default;
-
 /*
  *  Based on: https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Specific_cases
  */
@@ -343,6 +341,54 @@ std::optional<Vector2> CubicPathComponent::GetEndDirection() const {
     return (p2 - p1).Normalize();
   }
   return std::nullopt;
+}
+
+std::optional<Vector2> PathComponentStartDirectionVisitor::operator()(
+    const LinearPathComponent* component) {
+  if (!component) {
+    return std::nullopt;
+  }
+  return component->GetStartDirection();
+}
+
+std::optional<Vector2> PathComponentStartDirectionVisitor::operator()(
+    const QuadraticPathComponent* component) {
+  if (!component) {
+    return std::nullopt;
+  }
+  return component->GetStartDirection();
+}
+
+std::optional<Vector2> PathComponentStartDirectionVisitor::operator()(
+    const CubicPathComponent* component) {
+  if (!component) {
+    return std::nullopt;
+  }
+  return component->GetStartDirection();
+}
+
+std::optional<Vector2> PathComponentEndDirectionVisitor::operator()(
+    const LinearPathComponent* component) {
+  if (!component) {
+    return std::nullopt;
+  }
+  return component->GetEndDirection();
+}
+
+std::optional<Vector2> PathComponentEndDirectionVisitor::operator()(
+    const QuadraticPathComponent* component) {
+  if (!component) {
+    return std::nullopt;
+  }
+  return component->GetEndDirection();
+}
+
+std::optional<Vector2> PathComponentEndDirectionVisitor::operator()(
+    const CubicPathComponent* component) {
+  if (!component) {
+    return std::nullopt;
+  }
+  return component->GetEndDirection();
 }
 
 }  // namespace impeller

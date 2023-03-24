@@ -5,9 +5,9 @@
 #include "impeller/geometry/path.h"
 
 #include <optional>
+#include <variant>
 
 #include "impeller/geometry/path_component.h"
-#include "path_component.h"
 
 namespace impeller {
 
@@ -29,7 +29,19 @@ std::tuple<size_t, size_t> Path::Polyline::GetContourPointBounds(
   return std::make_tuple(start_index, end_index);
 }
 
-size_t Path::GetComponentCount() const {
+size_t Path::GetComponentCount(std::optional<ComponentType> type) const {
+  if (type.has_value()) {
+    switch (type.value()) {
+      case ComponentType::kLinear:
+        return linears_.size();
+      case ComponentType::kQuadratic:
+        return quads_.size();
+      case ComponentType::kCubic:
+        return cubics_.size();
+      case ComponentType::kContour:
+        return contours_.size();
+    }
+  }
   return components_.size();
 }
 
@@ -243,10 +255,9 @@ Path::Polyline Path::CreatePolyline(Scalar scale) const {
     }
   };
 
-  auto get_path_component =
-      [this](size_t component_i) -> std::optional<const PathComponent*> {
+  auto get_path_component = [this](size_t component_i) -> PathComponentVariant {
     if (component_i >= components_.size()) {
-      return std::nullopt;
+      return std::monostate{};
     }
     const auto& component = components_[component_i];
     switch (component.type) {
@@ -257,18 +268,20 @@ Path::Polyline Path::CreatePolyline(Scalar scale) const {
       case ComponentType::kCubic:
         return &cubics_[component.index];
       case ComponentType::kContour:
-        return std::nullopt;
+        return std::monostate{};
     }
   };
 
   auto compute_contour_start_direction =
       [&get_path_component](size_t current_path_component_index) {
         size_t next_component_index = current_path_component_index + 1;
-        while (get_path_component(next_component_index).has_value()) {
-          auto next_component =
-              get_path_component(next_component_index).value();
-          if (next_component->GetStartDirection().has_value()) {
-            return next_component->GetStartDirection().value();
+        while (!std::holds_alternative<std::monostate>(
+            get_path_component(next_component_index))) {
+          auto next_component = get_path_component(next_component_index);
+          auto maybe_vector =
+              std::visit(PathComponentStartDirectionVisitor(), next_component);
+          if (maybe_vector.has_value()) {
+            return maybe_vector.value();
           } else {
             next_component_index++;
           }
@@ -293,11 +306,13 @@ Path::Polyline Path::CreatePolyline(Scalar scale) const {
     contour.end_direction = Vector2(0, 1);
 
     size_t previous_index = previous_path_component_index.value();
-    while (get_path_component(previous_index).has_value()) {
-      auto previous_path_component = get_path_component(previous_index).value();
-      if (previous_path_component->GetEndDirection().has_value()) {
-        contour.end_direction =
-            previous_path_component->GetEndDirection().value();
+    while (!std::holds_alternative<std::monostate>(
+        get_path_component(previous_index))) {
+      auto previous_component = get_path_component(previous_index);
+      auto maybe_vector =
+          std::visit(PathComponentEndDirectionVisitor(), previous_component);
+      if (maybe_vector.has_value()) {
+        contour.end_direction = maybe_vector.value();
         break;
       } else {
         if (previous_index == 0) {
