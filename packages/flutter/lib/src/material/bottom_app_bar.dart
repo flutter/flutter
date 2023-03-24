@@ -196,27 +196,27 @@ class _BottomAppBarState extends State<BottomAppBar> {
       : ElevationOverlay.applyOverlay(context, color, elevation);
     final Color shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
-    Widget child = Padding(
+    final Widget child = Padding(
       padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
       child: widget.child,
     );
 
-    child = Material(
+    final Material material = Material(
       key: materialKey,
       type: MaterialType.transparency,
       child: SafeArea(child: child),
     );
 
-    child = PhysicalShape(
+    final PhysicalShape physicalShape = PhysicalShape(
       clipper: clipper,
       elevation: elevation,
       shadowColor: shadowColor,
       color: effectiveColor,
       clipBehavior: widget.clipBehavior,
-      child: child,
-    );
+      child: material,
+     );
 
-    return SizedBox(height: height, child: child);
+    return SizedBox(height: height, child: physicalShape);
   }
 }
 
