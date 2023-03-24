@@ -254,7 +254,7 @@ void main() {
       return CupertinoApp(
         home: Center(
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return Container(
+            return SizedBox(
               width: 200,
               height: 100,
               child: Row(
