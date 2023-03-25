@@ -150,7 +150,7 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
   }
 
   const auto format = ChooseSurfaceFormat(
-      formats, vk_context.GetDeviceCapabilities().GetDefaultColorFormat());
+      formats, vk_context.GetCapabilities()->GetDefaultColorFormat());
   if (!format.has_value()) {
     VALIDATION_LOG << "Swapchain has no supported formats.";
     return;
@@ -213,19 +213,33 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
     return;
   }
 
+  TextureDescriptor texture_desc;
+  texture_desc.usage =
+      static_cast<decltype(texture_desc.usage)>(TextureUsage::kRenderTarget);
+  texture_desc.storage_mode = StorageMode::kDevicePrivate;
+  texture_desc.format = ToPixelFormat(swapchain_info.imageFormat);
+  texture_desc.size = ISize::MakeWH(swapchain_info.imageExtent.width,
+                                    swapchain_info.imageExtent.height);
+
   std::vector<std::shared_ptr<SwapchainImageVK>> swapchain_images;
   for (const auto& image : images) {
-    auto swapchain_image = std::make_shared<SwapchainImageVK>(
-        vk_context.GetDevice(),                     //
-        image,                                      //
-        ToPixelFormat(swapchain_info.imageFormat),  //
-        ISize::MakeWH(swapchain_info.imageExtent.width,
-                      swapchain_info.imageExtent.height)  //
-    );
+    auto swapchain_image =
+        std::make_shared<SwapchainImageVK>(texture_desc,  // texture descriptor
+                                           vk_context.GetDevice(),  // device
+                                           image                    // image
+        );
     if (!swapchain_image->IsValid()) {
       VALIDATION_LOG << "Could not create swapchain image.";
       return;
     }
+
+    ContextVK::SetDebugName(
+        vk_context.GetDevice(), swapchain_image->GetImage(),
+        "SwapchainImage" + std::to_string(swapchain_images.size()));
+    ContextVK::SetDebugName(
+        vk_context.GetDevice(), swapchain_image->GetImageView(),
+        "SwapchainImageView" + std::to_string(swapchain_images.size()));
+
     swapchain_images.emplace_back(swapchain_image);
   }
 
@@ -314,7 +328,8 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
       nullptr                                // fence
   );
 
-  if (acq_result == vk::Result::eSuboptimalKHR) {
+  if (acq_result == vk::Result::eSuboptimalKHR ||
+      acq_result == vk::Result::eErrorOutOfDateKHR) {
     return AcquireResult{true /* out of date */};
   }
 
@@ -366,24 +381,19 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
 
     auto vk_cmd_buffer =
         CommandBufferVK::Cast(*cmd_buffer).GetEncoder()->GetCommandBuffer();
-    vk::ImageMemoryBarrier image_barrier;
-    image_barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-    image_barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead;
-    image_barrier.image = image->GetVKImage();
-    image_barrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
-    image_barrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
-    image_barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-    image_barrier.subresourceRange.baseMipLevel = 0u;
-    image_barrier.subresourceRange.levelCount = 1u;
-    image_barrier.subresourceRange.baseArrayLayer = 0u;
-    image_barrier.subresourceRange.layerCount = 1u;
-    vk_cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllGraphics,  //
-                                  vk::PipelineStageFlagBits::eAllGraphics,  //
-                                  {},                                       //
-                                  nullptr,                                  //
-                                  nullptr,                                  //
-                                  image_barrier                             //
-    );
+
+    LayoutTransition transition;
+    transition.new_layout = vk::ImageLayout::ePresentSrcKHR;
+    transition.cmd_buffer = vk_cmd_buffer;
+    transition.src_access = vk::AccessFlagBits::eColorAttachmentWrite;
+    transition.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    transition.dst_access = {};
+    transition.dst_stage = vk::PipelineStageFlagBits::eBottomOfPipe;
+
+    if (!image->SetLayout(transition)) {
+      return false;
+    }
+
     if (!cmd_buffer->SubmitCommands()) {
       return false;
     }

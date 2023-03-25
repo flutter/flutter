@@ -29,6 +29,10 @@ void PlaygroundTest::SetUp() {
   SetupWindow();
 }
 
+PlaygroundBackend PlaygroundTest::GetBackend() const {
+  return GetParam();
+}
+
 void PlaygroundTest::TearDown() {
   TeardownWindow();
 }

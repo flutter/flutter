@@ -6,9 +6,11 @@
 
 #include <array>
 #include <cstdint>
+#include <unordered_map>
 #include <vector>
 
-#include "fml/logging.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -18,6 +20,7 @@
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/formats.h"
 #include "impeller/renderer/sampler.h"
 #include "impeller/renderer/shader_types.h"
 #include "vulkan/vulkan_enums.hpp"
@@ -27,21 +30,44 @@ namespace impeller {
 
 static vk::AttachmentDescription CreateAttachmentDescription(
     const Attachment& attachment,
-    AttachmentKind kind,
     bool resolve_texture = false) {
-  const auto& texture = resolve_texture
-                            ? attachment.resolve_texture->GetTextureDescriptor()
-                            : attachment.texture->GetTextureDescriptor();
-  return CreateAttachmentDescription(texture.format,          //
-                                     texture.sample_count,    //
-                                     kind,                    //
-                                     attachment.load_action,  //
-                                     attachment.store_action  //
-  );
+  const auto& texture =
+      resolve_texture ? attachment.resolve_texture : attachment.texture;
+  if (!texture) {
+    return {};
+  }
+  const auto& texture_vk = TextureVK::Cast(*texture);
+  const auto& desc = texture->GetTextureDescriptor();
+  const auto current_layout = texture_vk.GetLayout();
+
+  auto load_action = attachment.load_action;
+  auto store_action = attachment.store_action;
+
+  if (current_layout == vk::ImageLayout::eUndefined) {
+    load_action = LoadAction::kClear;
+  }
+
+  if (desc.storage_mode == StorageMode::kDeviceTransient) {
+    store_action = StoreAction::kDontCare;
+  }
+
+  const auto attachment_desc =
+      CreateAttachmentDescription(desc.format,        //
+                                  desc.sample_count,  //
+                                  load_action,        //
+                                  store_action,       //
+                                  current_layout      //
+      );
+
+  // Instead of transitioning layouts manually using barriers, we are going to
+  // make the subpass perform our transitions.
+  texture_vk.SetLayoutWithoutEncoding(attachment_desc.finalLayout);
+
+  return attachment_desc;
 }
 
-static vk::UniqueRenderPass CreateVKRenderPass(const vk::Device& device,
-                                               const RenderTarget& target) {
+SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
+    const ContextVK& context) const {
   std::vector<vk::AttachmentDescription> attachments;
 
   std::vector<vk::AttachmentReference> color_refs;
@@ -56,39 +82,37 @@ static vk::UniqueRenderPass CreateVKRenderPass(const vk::Device& device,
   //
   // Just initialize all the elements as unused and fill in the valid bind
   // points in the loop below.
-  color_refs.resize(target.GetMaxColorAttacmentBindIndex() + 1u,
+  color_refs.resize(render_target_.GetMaxColorAttacmentBindIndex() + 1u,
                     kUnusedAttachmentReference);
-  resolve_refs.resize(target.GetMaxColorAttacmentBindIndex() + 1u,
+  resolve_refs.resize(render_target_.GetMaxColorAttacmentBindIndex() + 1u,
                       kUnusedAttachmentReference);
 
-  for (const auto& [bind_point, color] : target.GetColorAttachments()) {
+  for (const auto& [bind_point, color] : render_target_.GetColorAttachments()) {
     color_refs[bind_point] =
         vk::AttachmentReference{static_cast<uint32_t>(attachments.size()),
                                 vk::ImageLayout::eColorAttachmentOptimal};
-    attachments.emplace_back(
-        CreateAttachmentDescription(color, AttachmentKind::kColor));
+    attachments.emplace_back(CreateAttachmentDescription(color));
     if (color.resolve_texture) {
       resolve_refs[bind_point] =
           vk::AttachmentReference{static_cast<uint32_t>(attachments.size()),
                                   vk::ImageLayout::eColorAttachmentOptimal};
-      attachments.emplace_back(
-          CreateAttachmentDescription(color, AttachmentKind::kColor, true));
+      attachments.emplace_back(CreateAttachmentDescription(color, true));
     }
   }
 
-  if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
+  if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
     depth_stencil_ref = vk::AttachmentReference{
         static_cast<uint32_t>(attachments.size()),
         vk::ImageLayout::eDepthStencilAttachmentOptimal};
-    attachments.emplace_back(
-        CreateAttachmentDescription(depth.value(), AttachmentKind::kDepth));
-  } else if (auto stencil = target.GetStencilAttachment();
-             stencil.has_value()) {
+    attachments.emplace_back(CreateAttachmentDescription(depth.value()));
+  }
+
+  if (auto stencil = render_target_.GetStencilAttachment();
+      stencil.has_value()) {
     depth_stencil_ref = vk::AttachmentReference{
         static_cast<uint32_t>(attachments.size()),
         vk::ImageLayout::eDepthStencilAttachmentOptimal};
-    attachments.emplace_back(
-        CreateAttachmentDescription(stencil.value(), AttachmentKind::kStencil));
+    attachments.emplace_back(CreateAttachmentDescription(stencil.value()));
   }
 
   vk::SubpassDescription subpass_desc;
@@ -102,25 +126,20 @@ static vk::UniqueRenderPass CreateVKRenderPass(const vk::Device& device,
   render_pass_desc.setPSubpasses(&subpass_desc);
   render_pass_desc.setSubpassCount(1u);
 
-  auto [result, pass] = device.createRenderPassUnique(render_pass_desc);
+  auto [result, pass] =
+      context.GetDevice().createRenderPassUnique(render_pass_desc);
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Failed to create render pass: " << vk::to_string(result);
     return {};
   }
-
-  return std::move(pass);
+  context.SetDebugName(pass.get(), debug_label_.c_str());
+  return MakeSharedVK(std::move(pass));
 }
 
 RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                            const RenderTarget& target,
                            std::weak_ptr<CommandEncoderVK> encoder)
-    : RenderPass(context, target),
-      render_pass_(
-          CreateVKRenderPass(ContextVK::Cast(*context).GetDevice(), target)),
-      encoder_(std::move(encoder)) {
-  if (!render_pass_) {
-    return;
-  }
+    : RenderPass(context, target), encoder_(std::move(encoder)) {
   is_valid_ = true;
 }
 
@@ -131,11 +150,6 @@ bool RenderPassVK::IsValid() const {
 }
 
 void RenderPassVK::OnSetLabel(std::string label) {
-  auto context = GetContext().lock();
-  if (!context) {
-    return;
-  }
-  ContextVK::Cast(*context).SetDebugName(*render_pass_, label.c_str());
   debug_label_ = std::move(label);
 }
 
@@ -146,14 +160,10 @@ static vk::ClearColorValue VKClearValueFromColor(Color color) {
   return value;
 }
 
-static vk::ClearDepthStencilValue VKClearValueFromDepth(Scalar depth) {
+static vk::ClearDepthStencilValue VKClearValueFromDepthStencil(uint32_t stencil,
+                                                               Scalar depth) {
   vk::ClearDepthStencilValue value;
   value.depth = depth;
-  return value;
-}
-
-static vk::ClearDepthStencilValue VKClearValueFromStencil(uint32_t stencil) {
-  vk::ClearDepthStencilValue value;
   value.stencil = stencil;
   return value;
 }
@@ -169,25 +179,30 @@ static std::vector<vk::ClearValue> GetVKClearValues(
     }
   }
 
-  if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
-    clears.emplace_back(VKClearValueFromDepth(depth->clear_depth));
+  const auto& depth = target.GetDepthAttachment();
+  const auto& stencil = target.GetStencilAttachment();
+
+  if (depth.has_value()) {
+    clears.emplace_back(VKClearValueFromDepthStencil(
+        stencil ? stencil->clear_stencil : 0u, depth->clear_depth));
   }
 
-  if (auto stencil = target.GetStencilAttachment(); stencil.has_value()) {
-    clears.emplace_back(VKClearValueFromStencil(stencil->clear_stencil));
+  if (stencil.has_value()) {
+    clears.emplace_back(VKClearValueFromDepthStencil(
+        stencil->clear_stencil, depth ? depth->clear_depth : 0.0f));
   }
 
   return clears;
 }
 
-static vk::UniqueFramebuffer CreateFramebuffer(const vk::Device& device,
-                                               const RenderTarget& target,
-                                               const vk::RenderPass& pass) {
+SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
+    const ContextVK& context,
+    const vk::RenderPass& pass) const {
   vk::FramebufferCreateInfo fb_info;
 
   fb_info.renderPass = pass;
 
-  const auto target_size = target.GetRenderTargetSize();
+  const auto target_size = render_target_.GetRenderTargetSize();
   fb_info.width = target_size.width;
   fb_info.height = target_size.height;
 
@@ -197,7 +212,7 @@ static vk::UniqueFramebuffer CreateFramebuffer(const vk::Device& device,
 
   // This bit must be consistent to ensure compatibility with the pass created
   // earlier. Follow this order: Color attachments, then depth, then stencil.
-  for (const auto& [_, color] : target.GetColorAttachments()) {
+  for (const auto& [_, color] : render_target_.GetColorAttachments()) {
     // The bind point doesn't matter here since that information is present in
     // the render pass.
     attachments.emplace_back(TextureVK::Cast(*color.texture).GetImageView());
@@ -206,64 +221,42 @@ static vk::UniqueFramebuffer CreateFramebuffer(const vk::Device& device,
           TextureVK::Cast(*color.resolve_texture).GetImageView());
     }
   }
-  if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
+  if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
     attachments.emplace_back(TextureVK::Cast(*depth->texture).GetImageView());
   }
-  if (auto stencil = target.GetStencilAttachment(); stencil.has_value()) {
+  if (auto stencil = render_target_.GetStencilAttachment();
+      stencil.has_value()) {
     attachments.emplace_back(TextureVK::Cast(*stencil->texture).GetImageView());
   }
 
   fb_info.setAttachments(attachments);
 
-  auto [result, framebuffer] = device.createFramebufferUnique(fb_info);
+  auto [result, framebuffer] =
+      context.GetDevice().createFramebufferUnique(fb_info);
 
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not create framebuffer: " << vk::to_string(result);
     return {};
   }
 
-  return std::move(framebuffer);
-}
-
-static bool ConfigureRenderTargetAttachmentLayouts(
-    const RenderTarget& target,
-    const vk::CommandBuffer& command_buffer) {
-  for (const auto& [_, color] : target.GetColorAttachments()) {
-    if (!TextureVK::Cast(*color.texture)
-             .SetLayout(vk::ImageLayout::eColorAttachmentOptimal,
-                        command_buffer)) {
-      return false;
-    }
-    if (color.resolve_texture) {
-      if (!TextureVK::Cast(*color.resolve_texture)
-               .SetLayout(vk::ImageLayout::eColorAttachmentOptimal,
-                          command_buffer)) {
-        return false;
-      }
-    }
-  }
-  if (auto depth = target.GetDepthAttachment(); depth.has_value()) {
-    if (!TextureVK::Cast(*depth->texture)
-             .SetLayout(vk::ImageLayout::eDepthAttachmentOptimal,
-                        command_buffer)) {
-      return false;
-    }
-  }
-  if (auto stencil = target.GetStencilAttachment(); stencil.has_value()) {
-    if (!TextureVK::Cast(*stencil->texture)
-             .SetLayout(vk::ImageLayout::eStencilAttachmentOptimal,
-                        command_buffer)) {
-      return false;
-    }
-  }
-  return true;
+  return MakeSharedVK(std::move(framebuffer));
 }
 
 static bool UpdateBindingLayouts(const Bindings& bindings,
                                  const vk::CommandBuffer& buffer) {
+  LayoutTransition transition;
+  transition.cmd_buffer = buffer;
+  transition.src_access = vk::AccessFlagBits::eColorAttachmentWrite |
+                          vk::AccessFlagBits::eTransferWrite;
+  transition.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                         vk::PipelineStageFlagBits::eTransfer;
+  transition.dst_access = vk::AccessFlagBits::eShaderRead;
+  transition.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+
+  transition.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
   for (const auto& [_, texture] : bindings.textures) {
-    if (!TextureVK::Cast(*texture.resource)
-             .SetLayout(vk::ImageLayout::eShaderReadOnlyOptimal, buffer)) {
+    if (!TextureVK::Cast(*texture.resource).SetLayout(transition)) {
       return false;
     }
   }
@@ -286,166 +279,124 @@ static bool UpdateBindingLayouts(const std::vector<Command>& commands,
   return true;
 }
 
-static bool UpdateDescriptorSets(vk::Device device,
-                                 const Bindings& bindings,
-                                 Allocator& allocator,
-                                 vk::DescriptorSet desc_set,
-                                 CommandEncoderVK& encoder) {
+static bool AllocateAndBindDescriptorSets(const ContextVK& context,
+                                          const Command& command,
+                                          CommandEncoderVK& encoder,
+                                          const PipelineVK& pipeline) {
+  auto desc_set =
+      encoder.AllocateDescriptorSet(pipeline.GetDescriptorSetLayout());
+  if (!desc_set) {
+    return false;
+  }
+
+  auto& allocator = *context.GetResourceAllocator();
+
+  std::unordered_map<uint32_t, vk::DescriptorBufferInfo> buffers;
+  std::unordered_map<uint32_t, vk::DescriptorImageInfo> images;
   std::vector<vk::WriteDescriptorSet> writes;
 
-  //----------------------------------------------------------------------------
-  /// Setup buffer descriptors.
-  ///
-  std::vector<vk::DescriptorBufferInfo> buffer_desc;
-  for (const auto& [buffer_index, view] : bindings.buffers) {
-    const auto& buffer_view = view.resource.buffer;
+  auto bind_images = [&encoder,  //
+                      &images,   //
+                      &writes,   //
+                      &desc_set  //
+  ](const Bindings& bindings) -> bool {
+    for (const auto& [index, sampler_handle] : bindings.samplers) {
+      if (bindings.textures.find(index) == bindings.textures.end()) {
+        return false;
+      }
 
-    auto device_buffer = buffer_view->GetDeviceBuffer(allocator);
-    if (!device_buffer) {
-      VALIDATION_LOG << "Failed to get device buffer for vertex binding";
-      return false;
+      auto texture = bindings.textures.at(index).resource;
+      const auto& texture_vk = TextureVK::Cast(*texture);
+      const SamplerVK& sampler = SamplerVK::Cast(*sampler_handle.resource);
+
+      if (!encoder.Track(texture) ||
+          !encoder.Track(sampler.GetSharedSampler())) {
+        return false;
+      }
+
+      const SampledImageSlot& slot = bindings.sampled_images.at(index);
+
+      vk::DescriptorImageInfo image_info;
+      image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+      image_info.sampler = sampler.GetSampler();
+      image_info.imageView = texture_vk.GetImageView();
+
+      vk::WriteDescriptorSet write_set;
+      write_set.dstSet = desc_set.value();
+      write_set.dstBinding = slot.binding;
+      write_set.descriptorCount = 1u;
+      write_set.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+      write_set.pImageInfo = &(images[slot.binding] = image_info);
+
+      writes.push_back(write_set);
     }
 
-    auto buffer = DeviceBufferVK::Cast(*device_buffer).GetVKBufferHandle();
-    if (!buffer) {
-      return false;
-    }
-
-    // Reserved index used for per-vertex data.
-    if (buffer_index == VertexDescriptor::kReservedVertexBufferIndex) {
-      continue;
-    }
-
-    if (!encoder.Track(device_buffer)) {
-      return false;
-    }
-
-    uint32_t offset = view.resource.range.offset;
-
-    vk::DescriptorBufferInfo desc_buffer_info;
-    desc_buffer_info.setBuffer(buffer);
-    desc_buffer_info.setOffset(offset);
-    desc_buffer_info.setRange(view.resource.range.length);
-    buffer_desc.push_back(desc_buffer_info);
-
-    const ShaderUniformSlot& uniform = bindings.uniforms.at(buffer_index);
-
-    vk::WriteDescriptorSet write_set;
-    write_set.setDstSet(desc_set);
-    write_set.setDstBinding(uniform.binding);
-    write_set.setDescriptorCount(1);
-    write_set.setDescriptorType(vk::DescriptorType::eUniformBuffer);
-    write_set.setPBufferInfo(&buffer_desc.back());
-
-    writes.push_back(write_set);
-  }
-
-  //----------------------------------------------------------------------------
-  /// Setup image descriptors.
-  ///
-  std::vector<vk::DescriptorImageInfo> image_descs;
-  for (const auto& [index, sampler_handle] : bindings.samplers) {
-    if (bindings.textures.find(index) == bindings.textures.end()) {
-      VALIDATION_LOG << "Missing texture for sampler: " << index;
-      return false;
-    }
-
-    auto texture = bindings.textures.at(index).resource;
-    if (texture->NeedsMipmapGeneration()) {
-      VALIDATION_LOG
-          << "Texture at binding index " << index
-          << " has a mip count > 1, but the mipmap has not been generated.";
-      return false;
-    }
-    const auto& texture_vk = TextureVK::Cast(*texture);
-    const SamplerVK& sampler = SamplerVK::Cast(*sampler_handle.resource);
-
-    if (!encoder.Track(texture) || !encoder.Track(sampler.GetSharedSampler())) {
-      return false;
-    }
-
-    const SampledImageSlot& slot = bindings.sampled_images.at(index);
-
-    vk::DescriptorImageInfo desc_image_info;
-    desc_image_info.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
-    desc_image_info.setSampler(sampler.GetSamplerVK());
-    desc_image_info.setImageView(texture_vk.GetImageView());
-    image_descs.push_back(desc_image_info);
-
-    vk::WriteDescriptorSet write_set;
-    write_set.setDstSet(desc_set);
-    write_set.setDstBinding(slot.binding);
-    write_set.setDescriptorCount(1);
-    write_set.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
-    write_set.setPImageInfo(&image_descs.back());
-
-    writes.push_back(write_set);
-  }
-
-  if (writes.empty()) {
     return true;
-  }
-  device.updateDescriptorSets(writes, {});
-  return true;
-}
-
-static bool AllocateAndBindDescriptorSets(
-    const ContextVK& context,
-    const Command& command,
-    CommandEncoderVK& encoder,
-    PipelineCreateInfoVK* pipeline_create_info) {
-  auto& allocator = *context.GetResourceAllocator();
-  vk::PipelineLayout pipeline_layout =
-      pipeline_create_info->GetPipelineLayout();
-
-  vk::DescriptorSetAllocateInfo alloc_info;
-  std::array<vk::DescriptorSetLayout, 1> dsls = {
-      pipeline_create_info->GetDescriptorSetLayout(),
   };
 
-  alloc_info.setDescriptorPool(context.GetDescriptorPool());
-  alloc_info.setSetLayouts(dsls);
+  auto bind_buffers = [&allocator,  //
+                       &encoder,    //
+                       &buffers,    //
+                       &writes,     //
+                       &desc_set    //
+  ](const Bindings& bindings) -> bool {
+    for (const auto& [buffer_index, view] : bindings.buffers) {
+      const auto& buffer_view = view.resource.buffer;
 
-  auto [sets_result, sets] =
-      context.GetDevice().allocateDescriptorSetsUnique(alloc_info);
-  if (sets_result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to allocate descriptor sets: "
-                   << vk::to_string(sets_result);
+      auto device_buffer = buffer_view->GetDeviceBuffer(allocator);
+      if (!device_buffer) {
+        VALIDATION_LOG << "Failed to get device buffer for vertex binding";
+        return false;
+      }
+
+      auto buffer = DeviceBufferVK::Cast(*device_buffer).GetBuffer();
+      if (!buffer) {
+        return false;
+      }
+
+      // Reserved index used for per-vertex data.
+      if (buffer_index == VertexDescriptor::kReservedVertexBufferIndex) {
+        continue;
+      }
+
+      if (!encoder.Track(device_buffer)) {
+        return false;
+      }
+
+      uint32_t offset = view.resource.range.offset;
+
+      vk::DescriptorBufferInfo buffer_info;
+      buffer_info.buffer = buffer;
+      buffer_info.offset = offset;
+      buffer_info.range = view.resource.range.length;
+
+      const ShaderUniformSlot& uniform = bindings.uniforms.at(buffer_index);
+
+      vk::WriteDescriptorSet write_set;
+      write_set.dstSet = desc_set.value();
+      write_set.dstBinding = uniform.binding;
+      write_set.descriptorCount = 1u;
+      write_set.descriptorType = vk::DescriptorType::eUniformBuffer;
+      write_set.pBufferInfo = &(buffers[uniform.binding] = buffer_info);
+
+      writes.push_back(write_set);
+    }
+    return true;
+  };
+
+  if (!bind_buffers(command.vertex_bindings) ||
+      !bind_buffers(command.fragment_bindings) ||
+      !bind_images(command.fragment_bindings)) {
     return false;
   }
 
-  const auto set = MakeSharedVK<vk::DescriptorSet>(std::move(sets[0]));
-
-  if (!encoder.Track(set)) {
-    return false;
-  }
-
-  bool update_vertex_descriptors =
-      UpdateDescriptorSets(context.GetDevice(),      //
-                           command.vertex_bindings,  //
-                           allocator,                //
-                           *set,                     //
-                           encoder                   //
-      );
-  if (!update_vertex_descriptors) {
-    return false;
-  }
-  bool update_frag_descriptors =
-      UpdateDescriptorSets(context.GetDevice(),        //
-                           command.fragment_bindings,  //
-                           allocator,                  //
-                           *set,                       //
-                           encoder                     //
-      );
-  if (!update_frag_descriptors) {
-    return false;
-  }
+  context.GetDevice().updateDescriptorSets(writes, {});
 
   encoder.GetCommandBuffer().bindDescriptorSets(
       vk::PipelineBindPoint::eGraphics,  // bind point
-      pipeline_layout,                   // layout
+      pipeline.GetPipelineLayout(),      // layout
       0,                                 // first set
-      {vk::DescriptorSet{*set}},         // sets
+      {vk::DescriptorSet{*desc_set}},    // sets
       nullptr                            // offsets
   );
   return true;
@@ -492,19 +443,18 @@ static bool EncodeCommand(const Context& context,
 
   const auto& cmd_buffer = encoder.GetCommandBuffer();
 
-  auto& pipeline_vk = PipelineVK::Cast(*command.pipeline);
-  PipelineCreateInfoVK* pipeline_create_info = pipeline_vk.GetCreateInfo();
+  const auto& pipeline_vk = PipelineVK::Cast(*command.pipeline);
 
   if (!AllocateAndBindDescriptorSets(ContextVK::Cast(context),  //
                                      command,                   //
                                      encoder,                   //
-                                     pipeline_create_info       //
+                                     pipeline_vk                //
                                      )) {
     return false;
   }
 
   cmd_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                          pipeline_create_info->GetVKPipeline());
+                          pipeline_vk.GetPipeline());
 
   // Set the viewport and scissors.
   SetViewportAndScissor(command, cmd_buffer, target_size);
@@ -538,15 +488,13 @@ static bool EncodeCommand(const Context& context,
   }
 
   // Bind the vertex buffer.
-  auto vertex_buffer_handle =
-      DeviceBufferVK::Cast(*vertex_buffer).GetVKBufferHandle();
+  auto vertex_buffer_handle = DeviceBufferVK::Cast(*vertex_buffer).GetBuffer();
   vk::Buffer vertex_buffers[] = {vertex_buffer_handle};
   vk::DeviceSize vertex_buffer_offsets[] = {vertex_buffer_view.range.offset};
   cmd_buffer.bindVertexBuffers(0u, 1u, vertex_buffers, vertex_buffer_offsets);
 
   // Bind the index buffer.
-  auto index_buffer_handle =
-      DeviceBufferVK::Cast(*index_buffer).GetVKBufferHandle();
+  auto index_buffer_handle = DeviceBufferVK::Cast(*index_buffer).GetBuffer();
   cmd_buffer.bindIndexBuffer(index_buffer_handle,
                              index_buffer_view.range.offset,
                              ToVKIndexType(command.index_type));
@@ -562,22 +510,12 @@ static bool EncodeCommand(const Context& context,
 }
 
 bool RenderPassVK::OnEncodeCommands(const Context& context) const {
+  TRACE_EVENT0("impeller", "RenderPassVK::OnEncodeCommands");
   if (!IsValid()) {
     return false;
   }
 
-  if (commands_.empty()) {
-    return true;
-  }
-
   const auto& vk_context = ContextVK::Cast(context);
-
-  const auto& render_target = GetRenderTarget();
-  if (!render_target.HasColorAttachment(0u)) {
-    VALIDATION_LOG
-        << "Render target doesn't have a color attachment at index 0.";
-    return false;
-  }
 
   auto encoder = encoder_.lock();
   if (!encoder) {
@@ -599,23 +537,35 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
     return false;
   }
 
-  if (!ConfigureRenderTargetAttachmentLayouts(render_target, cmd_buffer)) {
-    VALIDATION_LOG << "Could not complete attachment layout transitions.";
+  render_target_.IterateAllAttachments(
+      [&encoder](const auto& attachment) -> bool {
+        encoder->Track(attachment.texture);
+        encoder->Track(attachment.resolve_texture);
+        return true;
+      });
+
+  const auto& target_size = render_target_.GetRenderTargetSize();
+
+  auto render_pass = CreateVKRenderPass(vk_context);
+  if (!render_pass) {
+    VALIDATION_LOG << "Could not create renderpass.";
     return false;
   }
 
-  const auto& target_size = render_target.GetRenderTargetSize();
-
-  auto framebuffer = MakeSharedVK(
-      CreateFramebuffer(vk_context.GetDevice(), render_target_, *render_pass_));
-  if (!encoder->Track(framebuffer)) {
+  auto framebuffer = CreateVKFramebuffer(vk_context, *render_pass);
+  if (!framebuffer) {
+    VALIDATION_LOG << "Could not create framebuffer.";
     return false;
   }
 
-  auto clear_values = GetVKClearValues(render_target);
+  if (!encoder->Track(framebuffer) || !encoder->Track(render_pass)) {
+    return false;
+  }
+
+  auto clear_values = GetVKClearValues(render_target_);
 
   vk::RenderPassBeginInfo pass_info;
-  pass_info.renderPass = *render_pass_;
+  pass_info.renderPass = *render_pass;
   pass_info.framebuffer = *framebuffer;
   pass_info.renderArea.extent.width = static_cast<uint32_t>(target_size.width);
   pass_info.renderArea.extent.height =
@@ -623,6 +573,7 @@ bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   pass_info.setClearValues(clear_values);
 
   {
+    TRACE_EVENT0("impeller", "EncodeRenderPassCommands");
     cmd_buffer.beginRenderPass(pass_info, vk::SubpassContents::eInline);
 
     fml::ScopedCleanupClosure end_render_pass(

@@ -20,29 +20,18 @@ namespace impeller {
 
 PipelineLibraryVK::PipelineLibraryVK(
     const vk::Device& device,
-    const std::shared_ptr<const fml::Mapping>& pipeline_cache_data,
+    std::shared_ptr<const Capabilities> caps,
+    fml::UniqueFD cache_directory,
     std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner)
-    : worker_task_runner_(std::move(worker_task_runner)) {
-  if (!worker_task_runner_) {
+    : device_(device),
+      pso_cache_(std::make_shared<PipelineCacheVK>(std::move(caps),
+                                                   device,
+                                                   std::move(cache_directory))),
+      worker_task_runner_(std::move(worker_task_runner)) {
+  if (!pso_cache_->IsValid() || !worker_task_runner_) {
     return;
   }
 
-  vk::PipelineCacheCreateInfo cache_info;
-
-  if (pipeline_cache_data) {
-    cache_info.pInitialData = pipeline_cache_data->GetMapping();
-    cache_info.initialDataSize = pipeline_cache_data->GetSize();
-  }
-
-  auto cache = device.createPipelineCacheUnique(cache_info);
-
-  if (cache.result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create pipeline cache.";
-    return;
-  }
-
-  device_ = device;
-  cache_ = std::move(cache.value);
   is_valid_ = true;
 }
 
@@ -51,54 +40,6 @@ PipelineLibraryVK::~PipelineLibraryVK() = default;
 // |PipelineLibrary|
 bool PipelineLibraryVK::IsValid() const {
   return is_valid_;
-}
-
-// |PipelineLibrary|
-PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
-    PipelineDescriptor descriptor) {
-  Lock lock(pipelines_mutex_);
-  if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
-    return found->second;
-  }
-
-  if (!IsValid()) {
-    return {
-        descriptor,
-        RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(nullptr)};
-  }
-
-  auto promise = std::make_shared<
-      std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
-  auto pipeline_future =
-      PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
-  pipelines_[descriptor] = pipeline_future;
-
-  auto weak_this = weak_from_this();
-
-  worker_task_runner_->PostTask([descriptor, weak_this, promise]() {
-    auto thiz = weak_this.lock();
-    if (!thiz) {
-      promise->set_value(nullptr);
-      VALIDATION_LOG << "Pipeline library was collected before the pipeline "
-                        "could be created.";
-      return;
-    }
-    auto pipeline_create_info =
-        PipelineLibraryVK::Cast(thiz.get())->CreatePipeline(descriptor);
-    promise->set_value(std::make_shared<PipelineVK>(
-        weak_this, descriptor, std::move(pipeline_create_info)));
-  });
-
-  return pipeline_future;
-}
-
-// |PipelineLibrary|
-PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
-    ComputePipelineDescriptor descriptor) {
-  auto promise = std::make_shared<
-      std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
-  promise->set_value(nullptr);
-  return {descriptor, promise->get_future()};
 }
 
 //------------------------------------------------------------------------------
@@ -111,27 +52,15 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
 ///
 static vk::AttachmentDescription CreatePlaceholderAttachmentDescription(
     PixelFormat format,
-    SampleCount sample_count,
-    AttachmentKind kind) {
+    SampleCount sample_count) {
   // Load store ops are immaterial for pass compatibility. The right ops will be
   // picked up when the pass associated with framebuffer.
-  return CreateAttachmentDescription(format,                 //
-                                     sample_count,           //
-                                     kind,                   //
-                                     LoadAction::kDontCare,  //
-                                     StoreAction::kDontCare  //
+  return CreateAttachmentDescription(format,                      //
+                                     sample_count,                //
+                                     LoadAction::kDontCare,       //
+                                     StoreAction::kDontCare,      //
+                                     vk::ImageLayout::eUndefined  //
   );
-}
-
-// |PipelineLibrary|
-void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
-    std::shared_ptr<const ShaderFunction> function) {
-  Lock lock(pipelines_mutex_);
-
-  fml::erase_if(pipelines_, [&](auto item) {
-    return item->first.GetEntrypointForStage(function->GetStage())
-        ->IsEqual(*function);
-  });
 }
 
 //----------------------------------------------------------------------------
@@ -141,12 +70,9 @@ void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
 /// sub-passes are compatible. To see the compatibility rules, see the Vulkan
 /// spec:
 /// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/chap8.html#renderpass-compatibility
-/// TODO(106378): Add a format specifier to the ColorAttachmentDescriptor,
-///               StencilAttachmentDescriptor, and, DepthAttachmentDescriptor.
-///               Right now, these are placeholders.
 ///
-vk::UniqueRenderPass PipelineLibraryVK::CreateRenderPass(
-    const PipelineDescriptor& desc) {
+static vk::UniqueRenderPass CreateRenderPass(const vk::Device& device,
+                                             const PipelineDescriptor& desc) {
   std::vector<vk::AttachmentDescription> attachments;
 
   std::vector<vk::AttachmentReference> color_refs;
@@ -161,8 +87,8 @@ vk::UniqueRenderPass PipelineLibraryVK::CreateRenderPass(
     color_refs[bind_point] =
         vk::AttachmentReference{static_cast<uint32_t>(attachments.size()),
                                 vk::ImageLayout::eColorAttachmentOptimal};
-    attachments.emplace_back(CreatePlaceholderAttachmentDescription(
-        color.format, sample_count, AttachmentKind::kColor));
+    attachments.emplace_back(
+        CreatePlaceholderAttachmentDescription(color.format, sample_count));
   }
 
   if (auto depth = desc.GetDepthStencilAttachmentDescriptor();
@@ -171,13 +97,14 @@ vk::UniqueRenderPass PipelineLibraryVK::CreateRenderPass(
         static_cast<uint32_t>(attachments.size()),
         vk::ImageLayout::eDepthStencilAttachmentOptimal};
     attachments.emplace_back(CreatePlaceholderAttachmentDescription(
-        desc.GetDepthPixelFormat(), sample_count, AttachmentKind::kDepth));
-  } else if (desc.HasStencilAttachmentDescriptors()) {
+        desc.GetDepthPixelFormat(), sample_count));
+  }
+  if (desc.HasStencilAttachmentDescriptors()) {
     depth_stencil_ref = vk::AttachmentReference{
         static_cast<uint32_t>(attachments.size()),
         vk::ImageLayout::eDepthStencilAttachmentOptimal};
     attachments.emplace_back(CreatePlaceholderAttachmentDescription(
-        desc.GetStencilPixelFormat(), sample_count, AttachmentKind::kStencil));
+        desc.GetStencilPixelFormat(), sample_count));
   }
 
   vk::SubpassDescription subpass_desc;
@@ -190,7 +117,7 @@ vk::UniqueRenderPass PipelineLibraryVK::CreateRenderPass(
   render_pass_desc.setPSubpasses(&subpass_desc);
   render_pass_desc.setSubpassCount(1u);
 
-  auto [result, pass] = device_.createRenderPassUnique(render_pass_desc);
+  auto [result, pass] = device.createRenderPassUnique(render_pass_desc);
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Failed to create render pass for pipeline '"
                    << desc.GetLabel() << "'. Error: " << vk::to_string(result);
@@ -210,7 +137,7 @@ constexpr vk::FrontFace ToVKFrontFace(WindingOrder order) {
   FML_UNREACHABLE();
 }
 
-std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
+std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
     const PipelineDescriptor& desc) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   vk::GraphicsPipelineCreateInfo pipeline_info;
@@ -298,7 +225,7 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
   blend_state.setAttachments(attachment_blend_state);
   pipeline_info.setPColorBlendState(&blend_state);
 
-  auto render_pass = CreateRenderPass(desc);
+  auto render_pass = CreateRenderPass(device_, desc);
   if (render_pass) {
     pipeline_info.setBasePipelineHandle(VK_NULL_HANDLE);
     pipeline_info.setSubpass(0);
@@ -341,33 +268,31 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
   //----------------------------------------------------------------------------
   /// Pipeline Layout a.k.a the descriptor sets and uniforms.
   ///
-  std::vector<vk::DescriptorSetLayoutBinding> bindings = {};
+  std::vector<vk::DescriptorSetLayoutBinding> desc_bindings;
 
   for (auto layout : desc.GetVertexDescriptor()->GetDescriptorSetLayouts()) {
     auto vk_desc_layout = ToVKDescriptorSetLayoutBinding(layout);
-    bindings.push_back(vk_desc_layout);
+    desc_bindings.push_back(vk_desc_layout);
   }
 
-  vk::DescriptorSetLayoutCreateInfo descriptor_set_create;
-  descriptor_set_create.setBindings(bindings);
+  vk::DescriptorSetLayoutCreateInfo descs_layout_info;
+  descs_layout_info.setBindings(desc_bindings);
 
-  auto descriptor_set_create_res =
-      device_.createDescriptorSetLayoutUnique(descriptor_set_create);
-  if (descriptor_set_create_res.result != vk::Result::eSuccess) {
+  auto [descs_result, descs_layout] =
+      device_.createDescriptorSetLayoutUnique(descs_layout_info);
+  if (descs_result != vk::Result::eSuccess) {
     VALIDATION_LOG << "unable to create uniform descriptors";
     return nullptr;
   }
 
-  vk::UniqueDescriptorSetLayout descriptor_set_layout =
-      std::move(descriptor_set_create_res.value);
-  ContextVK::SetDebugName(device_, descriptor_set_layout.get(),
-                          "Descriptor Set Layout" + desc.GetLabel());
+  ContextVK::SetDebugName(device_, descs_layout.get(),
+                          "Descriptor Set Layout " + desc.GetLabel());
 
   //----------------------------------------------------------------------------
   /// Create the pipeline layout.
   ///
   vk::PipelineLayoutCreateInfo pipeline_layout_info;
-  pipeline_layout_info.setSetLayouts(descriptor_set_layout.get());
+  pipeline_layout_info.setSetLayouts(descs_layout.get());
   auto pipeline_layout =
       device_.createPipelineLayoutUnique(pipeline_layout_info);
   if (pipeline_layout.result != vk::Result::eSuccess) {
@@ -390,25 +315,104 @@ std::unique_ptr<PipelineCreateInfoVK> PipelineLibraryVK::CreatePipeline(
   //----------------------------------------------------------------------------
   /// Finally, all done with the setup info. Create the pipeline itself.
   ///
-
-  // See the note in the header about why this is a reader lock.
-  ReaderLock lock(cache_mutex_);
-  auto pipeline =
-      device_.createGraphicsPipelineUnique(cache_.get(), pipeline_info);
-  if (pipeline.result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create graphics pipeline - " << desc.GetLabel()
-                   << ": " << vk::to_string(pipeline.result);
+  auto pipeline = pso_cache_->CreatePipeline(pipeline_info);
+  if (!pipeline) {
+    VALIDATION_LOG << "Could not create graphics pipeline: " << desc.GetLabel();
     return nullptr;
   }
 
   ContextVK::SetDebugName(device_, *pipeline_layout.value,
-                          "Pipeline Layout" + desc.GetLabel());
-  ContextVK::SetDebugName(device_, *pipeline.value,
-                          "Pipeline" + desc.GetLabel());
+                          "Pipeline Layout " + desc.GetLabel());
+  ContextVK::SetDebugName(device_, *pipeline, "Pipeline " + desc.GetLabel());
 
-  return std::make_unique<PipelineCreateInfoVK>(
-      std::move(pipeline.value), std::move(render_pass),
-      std::move(pipeline_layout.value), std::move(descriptor_set_layout));
+  return std::make_unique<PipelineVK>(weak_from_this(),                  //
+                                      desc,                              //
+                                      std::move(pipeline),               //
+                                      std::move(render_pass),            //
+                                      std::move(pipeline_layout.value),  //
+                                      std::move(descs_layout)            //
+  );
+}
+
+// |PipelineLibrary|
+PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
+    PipelineDescriptor descriptor) {
+  Lock lock(pipelines_mutex_);
+  if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
+    return found->second;
+  }
+
+  if (!IsValid()) {
+    return {
+        descriptor,
+        RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(nullptr)};
+  }
+
+  auto promise = std::make_shared<
+      std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
+  auto pipeline_future =
+      PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
+  pipelines_[descriptor] = pipeline_future;
+
+  auto weak_this = weak_from_this();
+
+  worker_task_runner_->PostTask([descriptor, weak_this, promise]() {
+    auto thiz = weak_this.lock();
+    if (!thiz) {
+      promise->set_value(nullptr);
+      VALIDATION_LOG << "Pipeline library was collected before the pipeline "
+                        "could be created.";
+      return;
+    }
+
+    auto pipeline = PipelineLibraryVK::Cast(*thiz).CreatePipeline(descriptor);
+    if (!pipeline) {
+      promise->set_value(nullptr);
+      VALIDATION_LOG << "Could not create pipeline: " << descriptor.GetLabel();
+      return;
+    }
+
+    promise->set_value(std::move(pipeline));
+  });
+
+  return pipeline_future;
+}
+
+// |PipelineLibrary|
+PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
+    ComputePipelineDescriptor descriptor) {
+  auto promise = std::make_shared<
+      std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
+  promise->set_value(nullptr);
+  return {descriptor, promise->get_future()};
+}
+
+// |PipelineLibrary|
+void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
+    std::shared_ptr<const ShaderFunction> function) {
+  Lock lock(pipelines_mutex_);
+
+  fml::erase_if(pipelines_, [&](auto item) {
+    return item->first.GetEntrypointForStage(function->GetStage())
+        ->IsEqual(*function);
+  });
+}
+
+void PipelineLibraryVK::DidAcquireSurfaceFrame() {
+  if (++frames_acquired_ == 50u) {
+    PersistPipelineCacheToDisk();
+  }
+}
+
+void PipelineLibraryVK::PersistPipelineCacheToDisk() {
+  worker_task_runner_->PostTask(
+      [weak_cache = decltype(pso_cache_)::weak_type(pso_cache_)]() {
+        auto cache = weak_cache.lock();
+        if (!cache) {
+          return;
+        }
+        cache->PersistCacheToDisk();
+      });
 }
 
 }  // namespace impeller

@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <string>
 #include <type_traits>
 
 #include "flutter/fml/hash_combine.h"
@@ -50,6 +51,18 @@ enum class StorageMode {
   ///
   kDeviceTransient,
 };
+
+constexpr const char* StorageModeToString(StorageMode mode) {
+  switch (mode) {
+    case StorageMode::kHostVisible:
+      return "HostVisible";
+    case StorageMode::kDevicePrivate:
+      return "DevicePrivate";
+    case StorageMode::kDeviceTransient:
+      return "DeviceTransient";
+  }
+  FML_UNREACHABLE();
+}
 
 //------------------------------------------------------------------------------
 /// @brief      The Pixel formats supported by Impeller. The naming convention
@@ -163,6 +176,18 @@ enum class TextureType {
   kTextureCube,
 };
 
+constexpr const char* TextureTypeToString(TextureType type) {
+  switch (type) {
+    case TextureType::kTexture2D:
+      return "Texture2D";
+    case TextureType::kTexture2DMultisample:
+      return "Texture2DMultisample";
+    case TextureType::kTextureCube:
+      return "TextureCube";
+  }
+  FML_UNREACHABLE();
+}
+
 constexpr bool IsMultisampleCapable(TextureType type) {
   switch (type) {
     case TextureType::kTexture2D:
@@ -187,6 +212,26 @@ enum class TextureUsage : TextureUsageMask {
   kShaderWrite = 1 << 1,
   kRenderTarget = 1 << 2,
 };
+
+constexpr bool TextureUsageIsRenderTarget(TextureUsageMask mask) {
+  return static_cast<TextureUsageMask>(TextureUsage::kRenderTarget) & mask;
+}
+
+constexpr const char* TextureUsageToString(TextureUsage usage) {
+  switch (usage) {
+    case TextureUsage::kUnknown:
+      return "Unknown";
+    case TextureUsage::kShaderRead:
+      return "ShaderRead";
+    case TextureUsage::kShaderWrite:
+      return "ShaderWrite";
+    case TextureUsage::kRenderTarget:
+      return "RenderTarget";
+  }
+  FML_UNREACHABLE();
+}
+
+std::string TextureUsageMaskToString(TextureUsageMask mask);
 
 enum class TextureIntent {
   kUploadFromHost,

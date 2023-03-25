@@ -220,6 +220,7 @@ bool Main(const fml::CommandLine& command_line) {
       case TargetPlatform::kOpenGLDesktop:
       case TargetPlatform::kRuntimeStageMetal:
       case TargetPlatform::kRuntimeStageGLES:
+      case TargetPlatform::kRuntimeStageVulkan:
       case TargetPlatform::kSkSL:
       case TargetPlatform::kVulkan:
         result_file = switches.sl_file_name;

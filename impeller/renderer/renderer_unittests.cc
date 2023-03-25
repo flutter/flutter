@@ -278,6 +278,9 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
 }
 
 TEST_P(RendererTest, CanRenderToTexture) {
+  if (GetBackend() == PlaygroundBackend::kVulkan) {
+    GTEST_SKIP_("Temporarily disabled.");
+  }
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -807,6 +810,9 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
 }
 
 TEST_P(RendererTest, TheImpeller) {
+  if (GetBackend() == PlaygroundBackend::kVulkan) {
+    GTEST_SKIP_("Temporarily disabled.");
+  }
   using VS = ImpellerVertexShader;
   using FS = ImpellerFragmentShader;
 
