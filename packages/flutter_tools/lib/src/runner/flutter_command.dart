@@ -1445,6 +1445,19 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+    if (argResults!.wasParsed(FlutterOptions.kNullSafety) &&
+        globals.nonNullSafeBuilds == NonNullSafeBuilds.notAllowed) {
+      String optionName = FlutterOptions.kNullSafety;
+      if (argResults![FlutterOptions.kNullSafety] == false) {
+        optionName = 'no-$optionName';
+      }
+      throwToolExit('''
+Could not find an option named "$optionName".
+
+Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.
+''');
+    }
+
     globals.preRunValidator.validate();
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
@@ -1701,3 +1714,12 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
+
+/// Whether the tool should allow non-null safe builds.
+///
+/// The Dart SDK no longer supports non-null safe builds, so this value in the
+/// tool's context should always be [NonNullSafeBuilds.notAllowed].
+enum NonNullSafeBuilds {
+  allowed,
+  notAllowed,
+}
