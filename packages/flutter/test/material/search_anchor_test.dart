@@ -736,7 +736,7 @@ void main() {
               alignment: Alignment.topLeft,
               child: SearchAnchor(
                 viewHintText: 'hint text',
-                anchorBuilder: (BuildContext context, SearchController controller) {
+                builder: (BuildContext context, SearchController controller) {
                   return const Icon(Icons.search);
                 },
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
@@ -795,7 +795,7 @@ void main() {
               child: Align(
                 alignment: Alignment.topLeft,
                 child: SearchAnchor(
-                  anchorBuilder: (BuildContext context, SearchController controller) {
+                  builder: (BuildContext context, SearchController controller) {
                     return const Icon(Icons.search);
                   },
                   suggestionsBuilder: (BuildContext context, SearchController controller) {
@@ -841,7 +841,7 @@ void main() {
                 alignment: Alignment.topLeft,
                 child: SearchAnchor(
                   isFullScreen: true,
-                  anchorBuilder: (BuildContext context, SearchController controller) {
+                  builder: (BuildContext context, SearchController controller) {
                     return const Icon(Icons.search);
                   },
                   suggestionsBuilder: (BuildContext context, SearchController controller) {
@@ -876,7 +876,7 @@ void main() {
         home: Material(
           child: SearchAnchor(
             searchController: controller,
-            anchorBuilder: (BuildContext context, SearchController controller) {
+            builder: (BuildContext context, SearchController controller) {
               return IconButton(icon: const Icon(Icons.search), onPressed: () {
                 controller.openView();
               },);
@@ -907,7 +907,7 @@ void main() {
         home: Material(
           child: SearchAnchor(
             viewBuilder: viewBuilder,
-            anchorBuilder: (BuildContext context, SearchController controller) {
+            builder: (BuildContext context, SearchController controller) {
               return IconButton(icon: const Icon(Icons.search), onPressed: () {
                 controller.openView();
               },);
@@ -942,7 +942,7 @@ void main() {
         home: Material(
           child: SearchAnchor(
             viewLeading: viewLeading,
-            anchorBuilder: (BuildContext context, SearchController controller) {
+            builder: (BuildContext context, SearchController controller) {
               return IconButton(icon: const Icon(Icons.search), onPressed: () {
                 controller.openView();
               },);
@@ -975,7 +975,7 @@ void main() {
         home: Material(
           child: SearchAnchor(
             viewTrailing: viewTrailing,
-            anchorBuilder: (BuildContext context, SearchController controller) {
+            builder: (BuildContext context, SearchController controller) {
               return IconButton(icon: const Icon(Icons.search), onPressed: () {
                 controller.openView();
               },);
@@ -1007,7 +1007,7 @@ void main() {
       home: Material(
         child: SearchAnchor(
           viewHintText: 'hint text',
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1028,7 +1028,7 @@ void main() {
       home: Material(
         child: SearchAnchor(
           viewBackgroundColor: Colors.purple,
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1050,7 +1050,7 @@ void main() {
       home: Material(
         child: SearchAnchor(
           viewElevation: 3.0,
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1072,7 +1072,7 @@ void main() {
       home: Material(
         child: SearchAnchor(
           viewSurfaceTintColor: Colors.purple,
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1096,7 +1096,7 @@ void main() {
         child: SearchAnchor(
           isFullScreen: false,
           viewSide: side,
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1122,7 +1122,7 @@ void main() {
         child: SearchAnchor(
           isFullScreen: false,
           viewShape: shape,
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1144,7 +1144,7 @@ void main() {
       home: Material(
         child: SearchAnchor(
           headerTextStyle: theme.textTheme.bodyLarge?.copyWith(color: Colors.red),
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1171,7 +1171,7 @@ void main() {
         child: SearchAnchor(
           viewHintText: 'hint text',
           headerHintStyle: theme.textTheme.bodyLarge?.copyWith(color: Colors.orange),
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1195,7 +1195,7 @@ void main() {
       home: Material(
         child: SearchAnchor(
           dividerColor: Colors.red,
-          anchorBuilder: (BuildContext context, SearchController controller) {
+          builder: (BuildContext context, SearchController controller) {
             return IconButton(icon: const Icon(Icons.search), onPressed: () {
               controller.openView();
             },);
@@ -1223,7 +1223,7 @@ void main() {
           child: SearchAnchor(
             isFullScreen: false,
             viewConstraints: BoxConstraints.tight(const Size(280.0, 390.0)),
-            anchorBuilder: (BuildContext context, SearchController controller) {
+            builder: (BuildContext context, SearchController controller) {
               return IconButton(icon: const Icon(Icons.search), onPressed: () {
                 controller.openView();
               },);
@@ -1244,15 +1244,15 @@ void main() {
     expect(sizedBox.height, 390.0);
   });
 
-  testWidgets('SearchAnchor respects anchorBuilder property - LTR', (WidgetTester tester) async {
-    Widget buildAnchor({required AnchorBuilder anchorBuilder}) {
+  testWidgets('SearchAnchor respects builder property - LTR', (WidgetTester tester) async {
+    Widget buildAnchor({required SearchAnchorChildBuilder builder}) {
       return MaterialApp(
         home: Material(
           child: Align(
             alignment: Alignment.topCenter,
             child: SearchAnchor(
               isFullScreen: false,
-              anchorBuilder: anchorBuilder,
+              builder: builder,
               suggestionsBuilder: (BuildContext context, SearchController controller) {
                 return <Widget>[];
               },
@@ -1263,7 +1263,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildAnchor(
-      anchorBuilder: (BuildContext context, SearchController controller)
+      builder: (BuildContext context, SearchController controller)
         => const Icon(Icons.search)
     ));
     final Rect anchorRect = tester.getRect(find.byIcon(Icons.search));
@@ -1280,8 +1280,8 @@ void main() {
     expect(searchViewRect.topLeft, anchorRect.topLeft);
   });
 
-  testWidgets('SearchAnchor respects anchorBuilder property - RTL', (WidgetTester tester) async {
-    Widget buildAnchor({required AnchorBuilder anchorBuilder}) {
+  testWidgets('SearchAnchor respects builder property - RTL', (WidgetTester tester) async {
+    Widget buildAnchor({required SearchAnchorChildBuilder builder}) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.rtl,
@@ -1290,7 +1290,7 @@ void main() {
               alignment: Alignment.topCenter,
               child: SearchAnchor(
                 isFullScreen: false,
-                anchorBuilder: anchorBuilder,
+                builder: builder,
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
                   return <Widget>[];
                 },
@@ -1301,7 +1301,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildAnchor(anchorBuilder: (BuildContext context, SearchController controller)
+    await tester.pumpWidget(buildAnchor(builder: (BuildContext context, SearchController controller)
     => const Icon(Icons.search)));
     final Rect anchorRect = tester.getRect(find.byIcon(Icons.search));
     expect(anchorRect.size, const Size(24.0, 24.0));
@@ -1329,7 +1329,7 @@ void main() {
               alignment: Alignment.topCenter,
               child: SearchAnchor(
                 searchController: controller,
-                anchorBuilder: (BuildContext context, SearchController controller) {
+                builder: (BuildContext context, SearchController controller) {
                   return const Icon(Icons.search);
                 },
                 suggestionsBuilder: (BuildContext context, SearchController controller) {

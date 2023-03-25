@@ -116,7 +116,7 @@ void main() {
           if (!useSearchViewProperties) {
             return SearchAnchor(
               viewHintText: 'hint text',
-              anchorBuilder: (BuildContext context, SearchController controller) {
+              builder: (BuildContext context, SearchController controller) {
                 return const Icon(Icons.search);
               },
               suggestionsBuilder: (BuildContext context, SearchController controller) {
@@ -127,7 +127,7 @@ void main() {
           }
           return SearchAnchor(
             viewHintText: 'hint text',
-            anchorBuilder: (BuildContext context, SearchController controller) {
+            builder: (BuildContext context, SearchController controller) {
               return const Icon(Icons.search);
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) {

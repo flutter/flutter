@@ -37,9 +37,9 @@ const Curve _kViewListFadeOnInterval = Interval(133 / _kOpenViewMilliseconds, 23
 
 /// Signature for a function that creates a [Widget] which is used to open a search view.
 ///
-/// The `controller` callback provided to [SearchAnchor.anchorBuilder] can be used
+/// The `controller` callback provided to [SearchAnchor.builder] can be used
 /// to open the search view and control the editable field on the view.
-typedef AnchorBuilder = Widget Function(BuildContext context, SearchController controller);
+typedef SearchAnchorChildBuilder = Widget Function(BuildContext context, SearchController controller);
 
 /// Signature for a function that creates a [Widget] to build the suggestion list
 /// based on the input in the search bar.
@@ -64,7 +64,7 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 /// to override the default setting.
 ///
 /// The search view is usually opened by a [SearchBar], an [IconButton] or an [Icon].
-/// If [anchorBuilder] returns an Icon, or any un-tappable widgets, we don't have
+/// If [builder] returns an Icon, or any un-tappable widgets, we don't have
 /// to explicitly call [SearchController.openView].
 ///
 /// {@tool dartpad}
@@ -89,7 +89,7 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 class SearchAnchor extends StatefulWidget {
   /// Creates a const [SearchAnchor].
   ///
-  /// The [anchorBuilder] and [suggestionsBuilder] arguments are required.
+  /// The [builder] and [suggestionsBuilder] arguments are required.
   const SearchAnchor({
     super.key,
     this.isFullScreen,
@@ -107,7 +107,7 @@ class SearchAnchor extends StatefulWidget {
     this.headerHintStyle,
     this.dividerColor,
     this.viewConstraints,
-    required this.anchorBuilder,
+    required this.builder,
     required this.suggestionsBuilder,
   });
 
@@ -267,7 +267,7 @@ class SearchAnchor extends StatefulWidget {
   /// At the same time a search view route is faded in.
   ///
   /// This must not be null.
-  final AnchorBuilder anchorBuilder;
+  final SearchAnchorChildBuilder builder;
 
   /// Called to get the suggestion list for the search view.
   ///
@@ -376,7 +376,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       duration: _kAnchorFadeDuration,
       child: GestureDetector(
         onTap: _openView,
-        child: widget.anchorBuilder(context, _searchController),
+        child: widget.builder(context, _searchController),
       ),
     );
   }
@@ -841,7 +841,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     viewHintText: viewHintText ?? barHintText,
     headerTextStyle: viewHeaderTextStyle,
     headerHintStyle: viewHeaderHintStyle,
-    anchorBuilder: (BuildContext context, SearchController controller) {
+    builder: (BuildContext context, SearchController controller) {
       return SearchBar(
         constraints: constraints,
         controller: controller,

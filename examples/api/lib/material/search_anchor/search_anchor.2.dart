@@ -30,7 +30,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
           children: <Widget>[
             SearchAnchor(
               searchController: controller,
-                anchorBuilder: (BuildContext context, SearchController controller) {
+                builder: (BuildContext context, SearchController controller) {
                   return IconButton(
                     icon: const Icon(Icons.search),
                     onPressed: () {
