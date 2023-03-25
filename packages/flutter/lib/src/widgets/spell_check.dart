@@ -133,8 +133,10 @@ List<SuggestionSpan> _correctSpellCheckResults(
 
     try {
       // currentSpan was found and can be applied to new text.
+      int newSpanTextEnd = currentSpan.range.end + offset;
       newSpanText = newText.substring(
-          currentSpan.range.start + offset, currentSpan.range.end + offset);
+          currentSpan.range.start + offset, newSpanTextEnd);
+      // bool newSpanTextHasNoTextAppended = newSpanTextEnd == newText.length ? true : newSpanTextEnd+1 == ' ';
       currentSpanValid = true;
     } catch (e) {
       // currentSpan is invalid and needs to be searched for in newText.
