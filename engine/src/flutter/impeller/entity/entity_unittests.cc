@@ -2342,7 +2342,7 @@ TEST_P(EntityTest, YUVToRGBFilter) {
 
 TEST_P(EntityTest, RuntimeEffect) {
   if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("This test only has a Metal fixture at the moment.");
+    GTEST_SKIP_("This backend doesn't support runtime effects.");
   }
 
   auto runtime_stage =

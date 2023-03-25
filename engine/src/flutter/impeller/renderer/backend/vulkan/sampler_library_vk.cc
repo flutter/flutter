@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
 
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 
@@ -51,6 +52,11 @@ std::shared_ptr<const Sampler> SamplerLibraryVK::GetSampler(
   if (!sampler->IsValid()) {
     return nullptr;
   }
+
+  if (!desc.label.empty()) {
+    ContextVK::SetDebugName(device_, sampler->GetSampler(), desc.label.c_str());
+  }
+
   samplers_[desc] = sampler;
   return sampler;
 }

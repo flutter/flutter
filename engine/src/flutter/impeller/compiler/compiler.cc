@@ -144,6 +144,7 @@ static bool EntryPointMustBeNamedMain(TargetPlatform platform) {
     case TargetPlatform::kMetalIOS:
     case TargetPlatform::kVulkan:
     case TargetPlatform::kRuntimeStageMetal:
+    case TargetPlatform::kRuntimeStageVulkan:
       return false;
     case TargetPlatform::kSkSL:
     case TargetPlatform::kOpenGLES:
@@ -162,6 +163,7 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
     case TargetPlatform::kMetalIOS:
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kVulkan:
+    case TargetPlatform::kRuntimeStageVulkan:
       compiler = CreateMSLCompiler(ir, source_options);
       break;
     case TargetPlatform::kUnknown:
@@ -375,6 +377,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
           shaderc_spirv_version::shaderc_spirv_version_1_3);
       break;
     case TargetPlatform::kVulkan:
+    case TargetPlatform::kRuntimeStageVulkan:
       spirv_options.SetOptimizationLevel(
           shaderc_optimization_level::shaderc_optimization_level_performance);
       spirv_options.SetTargetEnvironment(

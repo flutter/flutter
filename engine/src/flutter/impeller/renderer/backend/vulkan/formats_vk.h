@@ -6,7 +6,6 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/descriptor_set_layout.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/shader_types.h"
 #include "vulkan/vulkan_enums.hpp"
@@ -205,6 +204,8 @@ constexpr vk::SampleCountFlagBits ToVKSampleCount(SampleCount sample_count) {
     case SampleCount::kCount4:
       return vk::SampleCountFlagBits::e4;
   }
+
+  FML_UNREACHABLE();
 }
 
 constexpr vk::Filter ToVKSamplerMinMagFilter(MinMagFilter filter) {
@@ -267,7 +268,7 @@ constexpr vk::DescriptorSetLayoutBinding ToVKDescriptorSetLayoutBinding(
     const DescriptorSetLayout& layout) {
   vk::DescriptorSetLayoutBinding binding;
   binding.binding = layout.binding;
-  binding.descriptorCount = layout.descriptor_count;
+  binding.descriptorCount = 1u;
   vk::DescriptorType desc_type = vk::DescriptorType();
   switch (layout.descriptor_type) {
     case DescriptorType::kSampledImage:
@@ -377,14 +378,39 @@ enum class AttachmentKind {
   kColor,
   kDepth,
   kStencil,
+  kDepthStencil,
 };
+
+constexpr AttachmentKind AttachmentKindFromFormat(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kUnknown:
+    case PixelFormat::kA8UNormInt:
+    case PixelFormat::kR8UNormInt:
+    case PixelFormat::kR8G8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
+    case PixelFormat::kB8G8R8A8UNormInt:
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
+    case PixelFormat::kR32G32B32A32Float:
+    case PixelFormat::kR16G16B16A16Float:
+    case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kB10G10R10XRSRGB:
+    case PixelFormat::kB10G10R10A10XR:
+      return AttachmentKind::kColor;
+    case PixelFormat::kS8UInt:
+      return AttachmentKind::kStencil;
+    case PixelFormat::kD32FloatS8UInt:
+      return AttachmentKind::kDepthStencil;
+  }
+  FML_UNREACHABLE();
+}
 
 constexpr vk::AttachmentDescription CreateAttachmentDescription(
     PixelFormat format,
     SampleCount sample_count,
-    AttachmentKind kind,
     LoadAction load_action,
-    StoreAction store_action) {
+    StoreAction store_action,
+    vk::ImageLayout current_layout) {
   vk::AttachmentDescription vk_attachment;
 
   vk_attachment.format = ToVKImageFormat(format);
@@ -397,6 +423,8 @@ constexpr vk::AttachmentDescription CreateAttachmentDescription(
   vk_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
   vk_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 
+  const auto kind = AttachmentKindFromFormat(format);
+
   switch (kind) {
     case AttachmentKind::kColor:
       // If the attachment uses a color format, then loadOp and storeOp are
@@ -405,6 +433,7 @@ constexpr vk::AttachmentDescription CreateAttachmentDescription(
       vk_attachment.storeOp = ToVKAttachmentStoreOp(store_action);
       break;
     case AttachmentKind::kDepth:
+    case AttachmentKind::kDepthStencil:
       // If the format has depth and/or stencil components, loadOp and storeOp
       // apply only to the depth data, while stencilLoadOp and stencilStoreOp
       // define how the stencil data is handled.
@@ -419,13 +448,15 @@ constexpr vk::AttachmentDescription CreateAttachmentDescription(
 
   switch (kind) {
     case AttachmentKind::kColor:
-      vk_attachment.initialLayout = vk_attachment.finalLayout =
-          vk::ImageLayout::eColorAttachmentOptimal;
+      vk_attachment.initialLayout = current_layout;
+      vk_attachment.finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
       break;
     case AttachmentKind::kDepth:
     case AttachmentKind::kStencil:
+    case AttachmentKind::kDepthStencil:
       // Separate depth stencil layouts feature is only available in Vulkan 1.2.
-      vk_attachment.initialLayout = vk_attachment.finalLayout =
+      vk_attachment.initialLayout = current_layout;
+      vk_attachment.finalLayout =
           vk::ImageLayout::eDepthStencilAttachmentOptimal;
       break;
   }
@@ -544,9 +575,66 @@ constexpr uint32_t ToArrayLayerCount(TextureType type) {
   FML_UNREACHABLE();
 }
 
+constexpr vk::ImageViewType ToVKImageViewType(TextureType type) {
+  switch (type) {
+    case TextureType::kTexture2D:
+    case TextureType::kTexture2DMultisample:
+      return vk::ImageViewType::e2D;
+    case TextureType::kTextureCube:
+      return vk::ImageViewType::eCube;
+  }
+  FML_UNREACHABLE();
+}
+
+constexpr vk::ImageCreateFlags ToVKImageCreateFlags(TextureType type) {
+  switch (type) {
+    case TextureType::kTexture2D:
+    case TextureType::kTexture2DMultisample:
+      return {};
+    case TextureType::kTextureCube:
+      return vk::ImageCreateFlagBits::eCubeCompatible;
+  }
+  FML_UNREACHABLE();
+}
+
 vk::PipelineDepthStencilStateCreateInfo ToVKPipelineDepthStencilStateCreateInfo(
     std::optional<DepthAttachmentDescriptor> depth,
     std::optional<StencilAttachmentDescriptor> front,
     std::optional<StencilAttachmentDescriptor> back);
+
+constexpr vk::ImageAspectFlags ToImageAspectFlags(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kUnknown:
+      return {};
+    case PixelFormat::kA8UNormInt:
+    case PixelFormat::kR8UNormInt:
+    case PixelFormat::kR8G8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormInt:
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
+    case PixelFormat::kB8G8R8A8UNormInt:
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
+    case PixelFormat::kR32G32B32A32Float:
+    case PixelFormat::kR16G16B16A16Float:
+    case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kB10G10R10XRSRGB:
+    case PixelFormat::kB10G10R10A10XR:
+      return vk::ImageAspectFlagBits::eColor;
+    case PixelFormat::kS8UInt:
+      return vk::ImageAspectFlagBits::eStencil;
+    case PixelFormat::kD32FloatS8UInt:
+      return vk::ImageAspectFlagBits::eDepth |
+             vk::ImageAspectFlagBits::eStencil;
+  }
+  FML_UNREACHABLE();
+}
+
+struct LayoutTransition {
+  vk::CommandBuffer cmd_buffer = {};
+  vk::ImageLayout new_layout = vk::ImageLayout::eUndefined;
+  vk::PipelineStageFlags src_stage = vk::PipelineStageFlagBits::eNone;
+  vk::AccessFlags src_access = vk::AccessFlagBits::eNone;
+  vk::PipelineStageFlags dst_stage = vk::PipelineStageFlagBits::eNone;
+  vk::AccessFlags dst_access = vk::AccessFlagBits::eNone;
+};
 
 }  // namespace impeller

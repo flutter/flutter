@@ -4,6 +4,7 @@
 
 #include "impeller/playground/backend/vulkan/playground_impl_vk.h"
 
+#include "flutter/fml/paths.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 #define GLFW_INCLUDE_VULKAN
@@ -68,13 +69,15 @@ PlaygroundImplVK::PlaygroundImplVK()
 
   handle_.reset(window);
 
-  auto context = ContextVK::Create(reinterpret_cast<PFN_vkGetInstanceProcAddr>(
-                                       &::glfwGetInstanceProcAddress),    //
-                                   ShaderLibraryMappingsForPlayground(),  //
-                                   nullptr,                               //
-                                   concurrent_loop_->GetTaskRunner(),     //
-                                   "Playground Library"                   //
-  );
+  ContextVK::Settings context_settings;
+  context_settings.proc_address_callback =
+      reinterpret_cast<PFN_vkGetInstanceProcAddr>(
+          &::glfwGetInstanceProcAddress);
+  context_settings.shader_libraries_data = ShaderLibraryMappingsForPlayground();
+  context_settings.cache_directory = fml::paths::GetCachesDirectory();
+  context_settings.worker_task_runner = concurrent_loop_->GetTaskRunner();
+
+  auto context = ContextVK::Create(std::move(context_settings));
 
   if (!context || !context->IsValid()) {
     VALIDATION_LOG << "Could not create Vulkan context in the playground.";

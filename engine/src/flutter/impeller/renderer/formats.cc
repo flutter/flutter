@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/formats.h"
 
+#include <sstream>
+
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/texture.h"
@@ -74,6 +76,29 @@ bool Attachment::IsValid() const {
   }
 
   return true;
+}
+
+std::string TextureUsageMaskToString(TextureUsageMask mask) {
+  std::vector<TextureUsage> usages;
+  if (mask & static_cast<TextureUsageMask>(TextureUsage::kShaderRead)) {
+    usages.push_back(TextureUsage::kShaderRead);
+  }
+  if (mask & static_cast<TextureUsageMask>(TextureUsage::kShaderWrite)) {
+    usages.push_back(TextureUsage::kShaderWrite);
+  }
+  if (mask & static_cast<TextureUsageMask>(TextureUsage::kRenderTarget)) {
+    usages.push_back(TextureUsage::kRenderTarget);
+  }
+  std::stringstream stream;
+  stream << "{ ";
+  for (size_t i = 0; i < usages.size(); i++) {
+    stream << TextureUsageToString(usages[i]);
+    if (i != usages.size() - 1u) {
+      stream << ", ";
+    }
+  }
+  stream << " }";
+  return stream.str();
 }
 
 }  // namespace impeller

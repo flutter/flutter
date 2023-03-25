@@ -48,7 +48,7 @@
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.vert.h"
-#include "impeller/renderer/device_capabilities.h"
+#include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/scene/scene_context.h"
@@ -620,7 +620,7 @@ class ContentContext {
 
   std::shared_ptr<GlyphAtlasContext> GetGlyphAtlasContext() const;
 
-  const IDeviceCapabilities& GetDeviceCapabilities() const;
+  const Capabilities& GetDeviceCapabilities() const;
 
   void SetWireframe(bool wireframe);
 

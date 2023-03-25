@@ -8,8 +8,9 @@
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 
-namespace {
-impeller::PixelFormat InferOffscreenLayerPixelFormat(impeller::PixelFormat pixel_format) {
+namespace flutter {
+
+static impeller::PixelFormat InferOffscreenLayerPixelFormat(impeller::PixelFormat pixel_format) {
   switch (pixel_format) {
     case impeller::PixelFormat::kB10G10R10XR:
       return impeller::PixelFormat::kB10G10R10A10XR;
@@ -17,64 +18,6 @@ impeller::PixelFormat InferOffscreenLayerPixelFormat(impeller::PixelFormat pixel
       return pixel_format;
   }
 }
-}  // namespace
-
-namespace impeller {
-namespace {
-// This appears to be the only safe way to override the
-// GetColorAttachmentPixelFormat method.  It is assumed in the Context that
-// there will be one pixel format for the whole app which is not true.  So, it
-// is unsafe to mutate the Context and you cannot clone the Context at this
-// level since the Context does not safely manage the MTLDevice.
-class CustomColorAttachmentPixelFormatContext final : public Context {
- public:
-  CustomColorAttachmentPixelFormatContext(const std::shared_ptr<Context>& context,
-                                          PixelFormat color_attachment_pixel_format)
-      : context_(context), color_attachment_pixel_format_(color_attachment_pixel_format) {}
-
-  bool IsValid() const override { return context_->IsValid(); }
-
-  std::shared_ptr<Allocator> GetResourceAllocator() const override {
-    return context_->GetResourceAllocator();
-  }
-
-  std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override {
-    return context_->GetShaderLibrary();
-  }
-
-  std::shared_ptr<SamplerLibrary> GetSamplerLibrary() const override {
-    return context_->GetSamplerLibrary();
-  }
-
-  std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const override {
-    return context_->GetPipelineLibrary();
-  }
-
-  std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override {
-    return context_->CreateCommandBuffer();
-  }
-
-  std::shared_ptr<GPUTracer> GetGPUTracer() const override { return context_->GetGPUTracer(); }
-
-  PixelFormat GetColorAttachmentPixelFormat() const override {
-    return color_attachment_pixel_format_;
-  }
-
-  const IDeviceCapabilities& GetDeviceCapabilities() const override {
-    return context_->GetDeviceCapabilities();
-  }
-
- private:
-  std::shared_ptr<Context> context_;
-  PixelFormat color_attachment_pixel_format_;
-};
-}  // namespace
-}  // namespace impeller
-
-namespace flutter {
-
-using impeller::CustomColorAttachmentPixelFormatContext;
-using impeller::FromMTLPixelFormat;
 
 IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(const fml::scoped_nsobject<CAMetalLayer>& layer,
                                                  const std::shared_ptr<IOSContext>& context)
@@ -85,7 +28,8 @@ IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(const fml::scoped_nsobject<CAMe
   if (!impeller_context_) {
     return;
   }
-  is_valid_ = true;
+  is_valid_ = impeller_context_->UpdateOffscreenLayerPixelFormat(
+      InferOffscreenLayerPixelFormat(impeller::FromMTLPixelFormat(layer_.get().pixelFormat)));
 }
 
 // |IOSSurface|
@@ -103,11 +47,8 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 
 // |IOSSurface|
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface(GrDirectContext*) {
-  auto context = std::make_shared<CustomColorAttachmentPixelFormatContext>(
-      impeller_context_,
-      InferOffscreenLayerPixelFormat(FromMTLPixelFormat(layer_.get().pixelFormat)));
-  return std::make_unique<GPUSurfaceMetalImpeller>(this,    //
-                                                   context  //
+  return std::make_unique<GPUSurfaceMetalImpeller>(this,              //
+                                                   impeller_context_  //
   );
 }
 

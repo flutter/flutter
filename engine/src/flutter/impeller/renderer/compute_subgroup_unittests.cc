@@ -39,7 +39,7 @@ TEST_P(ComputeSubgroupTest, HeartCubicsToStrokeVertices) {
 
   auto context = GetContext();
   ASSERT_TRUE(context);
-  ASSERT_TRUE(context->GetDeviceCapabilities().SupportsComputeSubgroups());
+  ASSERT_TRUE(context->GetCapabilities()->SupportsComputeSubgroups());
 
   auto cmd_buffer = context->CreateCommandBuffer();
   auto pass = cmd_buffer->CreateComputePass();
@@ -260,7 +260,7 @@ TEST_P(ComputeSubgroupTest, QuadsToPolyline) {
   using QS = QuadPolylineComputeShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
-  ASSERT_TRUE(context->GetDeviceCapabilities().SupportsComputeSubgroups());
+  ASSERT_TRUE(context->GetCapabilities()->SupportsComputeSubgroups());
 
   auto cmd_buffer = context->CreateCommandBuffer();
   auto pass = cmd_buffer->CreateComputePass();

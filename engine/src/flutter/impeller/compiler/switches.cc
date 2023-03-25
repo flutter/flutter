@@ -25,6 +25,7 @@ static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
     {"sksl", TargetPlatform::kSkSL},
     {"runtime-stage-metal", TargetPlatform::kRuntimeStageMetal},
     {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},
+    {"runtime-stage-vulkan", TargetPlatform::kRuntimeStageVulkan},
 };
 
 static const std::map<std::string, SourceType> kKnownSourceTypes = {

@@ -23,9 +23,10 @@ class ShaderLibraryVK final : public ShaderLibrary {
 
  private:
   friend class ContextVK;
+  const vk::Device device_;
   const UniqueID library_id_;
   mutable RWMutex functions_mutex_;
-  ShaderFunctionMap functions_;
+  ShaderFunctionMap functions_ IPLR_GUARDED_BY(functions_mutex_);
   bool is_valid_ = false;
 
   ShaderLibraryVK(
@@ -35,6 +36,16 @@ class ShaderLibraryVK final : public ShaderLibrary {
   // |ShaderLibrary|
   std::shared_ptr<const ShaderFunction> GetFunction(std::string_view name,
                                                     ShaderStage stage) override;
+
+  // |ShaderLibrary|
+  void RegisterFunction(std::string name,
+                        ShaderStage stage,
+                        std::shared_ptr<fml::Mapping> code,
+                        RegistrationCallback callback) override;
+
+  bool RegisterFunction(const std::string& name,
+                        ShaderStage stage,
+                        const std::shared_ptr<fml::Mapping>& code);
 
   // |ShaderLibrary|
   void UnregisterFunction(std::string name, ShaderStage stage) override;

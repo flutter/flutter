@@ -28,7 +28,7 @@ class AllocatorVK final : public Allocator {
   VmaAllocator allocator_ = {};
   std::weak_ptr<Context> context_;
   vk::Device device_;
-  ISize max_texture_size_ = {4096, 4096};
+  ISize max_texture_size_;
   bool is_valid_ = false;
 
   AllocatorVK(std::weak_ptr<Context> context,

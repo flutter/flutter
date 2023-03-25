@@ -101,13 +101,13 @@ class RenderTarget final {
 
   size_t GetTotalAttachmentCount() const;
 
+  void IterateAllAttachments(
+      const std::function<bool(const Attachment& attachment)>& iterator) const;
+
  private:
   std::map<size_t, ColorAttachment> colors_;
   std::optional<DepthAttachment> depth_;
   std::optional<StencilAttachment> stencil_;
-
-  void IterateAllAttachments(
-      const std::function<bool(const Attachment& attachment)>& iterator) const;
 };
 
 }  // namespace impeller

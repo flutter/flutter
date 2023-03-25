@@ -4,11 +4,15 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/unique_fd.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/base/thread.h"
+#include "impeller/renderer/backend/vulkan/pipeline_cache_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -25,26 +29,23 @@ class PipelineLibraryVK final
   // |PipelineLibrary|
   ~PipelineLibraryVK() override;
 
+  void DidAcquireSurfaceFrame();
+
  private:
   friend ContextVK;
 
   vk::Device device_;
-  // On locking around the pipeline cache: The cache is internally synchronized.
-  // So there is no need to hold a writer lock around its use when pipelines are
-  // being created. The time it takes for implementations to spend within the
-  // critical section of the cache is limited compared to the time it
-  // takes for the "create pipeline" call itself. The writer lock is only
-  // necessary when fetching pipeline cache data for persisting to disk.
-  mutable RWMutex cache_mutex_;
-  vk::UniquePipelineCache cache_ IPLR_GUARDED_BY(cache_mutex_);
+  std::shared_ptr<PipelineCacheVK> pso_cache_;
   std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   Mutex pipelines_mutex_;
   PipelineMap pipelines_ IPLR_GUARDED_BY(pipelines_mutex_);
+  std::atomic_size_t frames_acquired_ = 0u;
   bool is_valid_ = false;
 
   PipelineLibraryVK(
       const vk::Device& device,
-      const std::shared_ptr<const fml::Mapping>& pipeline_cache_data,
+      std::shared_ptr<const Capabilities> caps,
+      fml::UniqueFD cache_directory,
       std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner);
 
   // |PipelineLibrary|
@@ -62,10 +63,9 @@ class PipelineLibraryVK final
   void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) override;
 
-  std::unique_ptr<PipelineCreateInfoVK> CreatePipeline(
-      const PipelineDescriptor& desc);
+  std::unique_ptr<PipelineVK> CreatePipeline(const PipelineDescriptor& desc);
 
-  vk::UniqueRenderPass CreateRenderPass(const PipelineDescriptor& desc);
+  void PersistPipelineCacheToDisk();
 
   FML_DISALLOW_COPY_AND_ASSIGN(PipelineLibraryVK);
 };

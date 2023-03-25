@@ -25,10 +25,14 @@ class SharedObjectVKT : public SharedObjectVK {
 
   explicit SharedObjectVKT(UniqueResource res) : resource_(std::move(res)) {}
 
-  operator Resource() const { return *resource_; }
+  operator Resource() const { return Get(); }
+
+  const Resource& Get() const { return *resource_; }
 
  private:
   UniqueResource resource_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SharedObjectVKT);
 };
 
 template <class T>
@@ -39,5 +43,8 @@ auto MakeSharedVK(
   }
   return std::make_shared<SharedObjectVKT<T>>(std::move(handle));
 }
+
+template <class T>
+using SharedHandleVK = std::shared_ptr<SharedObjectVKT<T>>;
 
 }  // namespace impeller

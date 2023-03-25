@@ -88,6 +88,8 @@ static std::optional<fb::TargetPlatform> ToTargetPlatform(
       return fb::TargetPlatform::kMetal;
     case TargetPlatform::kRuntimeStageGLES:
       return fb::TargetPlatform::kOpenGLES;
+    case TargetPlatform::kRuntimeStageVulkan:
+      return fb::TargetPlatform::kVulkan;
   }
   FML_UNREACHABLE();
 }
@@ -102,11 +104,13 @@ static std::optional<uint32_t> ToJsonTargetPlatform(TargetPlatform platform) {
     case TargetPlatform::kVulkan:
       return std::nullopt;
     case TargetPlatform::kSkSL:
-      return 0;  // fb::TargetPlatform::kSkSL;
+      return static_cast<uint32_t>(fb::TargetPlatform::kSkSL);
     case TargetPlatform::kRuntimeStageMetal:
-      return 1;  // fb::TargetPlatform::kMetal;
+      return static_cast<uint32_t>(fb::TargetPlatform::kMetal);
     case TargetPlatform::kRuntimeStageGLES:
-      return 2;  // fb::TargetPlatform::kOpenGLES;
+      return static_cast<uint32_t>(fb::TargetPlatform::kOpenGLES);
+    case TargetPlatform::kRuntimeStageVulkan:
+      return static_cast<uint32_t>(fb::TargetPlatform::kVulkan);
   }
   FML_UNREACHABLE();
 }

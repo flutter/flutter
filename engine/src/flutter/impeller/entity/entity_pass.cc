@@ -153,7 +153,7 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
   /// changed for the lifetime of the textures.
 
   RenderTarget target;
-  if (context->GetDeviceCapabilities().SupportsOffscreenMSAA()) {
+  if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
     target = RenderTarget::CreateOffscreenMSAA(
         *context,      // context
         size,          // size
@@ -221,8 +221,8 @@ bool EntityPass::Render(ContentContext& renderer,
     command_buffer->SetLabel("EntityPass Root Command Buffer");
 
     if (renderer.GetContext()
-            ->GetDeviceCapabilities()
-            .SupportsTextureToTextureBlits()) {
+            ->GetCapabilities()
+            ->SupportsTextureToTextureBlits()) {
       auto blit_pass = command_buffer->CreateBlitPass();
 
       blit_pass->AddCopy(

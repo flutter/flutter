@@ -10,6 +10,7 @@
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_ptr.h"
+#include "flutter/fml/paths.h"
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan_impeller.h"
 #include "flutter/vulkan/vulkan_native_surface_android.h"
@@ -34,15 +35,13 @@ std::shared_ptr<impeller::Context> CreateImpellerContext(
   PFN_vkGetInstanceProcAddr instance_proc_addr =
       proc_table->NativeGetInstanceProcAddr();
 
-  auto context =
-      impeller::ContextVK::Create(instance_proc_addr,                //
-                                  shader_mappings,                   //
-                                  nullptr,                           //
-                                  concurrent_loop->GetTaskRunner(),  //
-                                  "Android Impeller Vulkan Lib"      //
-      );
+  impeller::ContextVK::Settings settings;
+  settings.proc_address_callback = instance_proc_addr;
+  settings.shader_libraries_data = std::move(shader_mappings);
+  settings.cache_directory = fml::paths::GetCachesDirectory();
+  settings.worker_task_runner = concurrent_loop->GetTaskRunner();
 
-  return context;
+  return impeller::ContextVK::Create(std::move(settings));
 }
 
 AndroidSurfaceVulkanImpeller::AndroidSurfaceVulkanImpeller(
@@ -91,13 +90,11 @@ bool AndroidSurfaceVulkanImpeller::OnScreenSurfaceResize(const SkISize& size) {
 }
 
 bool AndroidSurfaceVulkanImpeller::ResourceContextMakeCurrent() {
-  FML_DLOG(ERROR) << "The vulkan backend does not support resource contexts.";
-  return false;
+  return true;
 }
 
 bool AndroidSurfaceVulkanImpeller::ResourceContextClearCurrent() {
-  FML_DLOG(ERROR) << "The vulkan backend does not support resource contexts.";
-  return false;
+  return true;
 }
 
 bool AndroidSurfaceVulkanImpeller::SetNativeWindow(

@@ -4,12 +4,17 @@
 
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 
+#include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
+#include "impeller/renderer/backend/vulkan/formats_vk.h"
+
 namespace impeller {
 
-TextureVK::TextureVK(TextureDescriptor desc,
-                     std::weak_ptr<Context> context,
+TextureVK::TextureVK(std::weak_ptr<Context> context,
                      std::shared_ptr<TextureSourceVK> source)
-    : Texture(desc), context_(std::move(context)), source_(std::move(source)) {}
+    : Texture(source->GetTextureDescriptor()),
+      context_(std::move(context)),
+      source_(std::move(source)) {}
 
 TextureVK::~TextureVK() = default;
 
@@ -20,6 +25,7 @@ void TextureVK::SetLabel(std::string_view label) {
     return;
   }
   ContextVK::Cast(*context).SetDebugName(GetImage(), label);
+  ContextVK::Cast(*context).SetDebugName(GetImageView(), label);
 }
 
 bool TextureVK::OnSetContents(const uint8_t* contents,
@@ -33,11 +39,74 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
 
   // Out of bounds access.
   if (length != desc.GetByteSizeOfBaseMipLevel()) {
-    VALIDATION_LOG << "illegal to set contents for invalid size";
+    VALIDATION_LOG << "Illegal to set contents for invalid size.";
     return false;
   }
 
-  return source_->SetContents(desc, contents, length, slice);
+  auto context = context_.lock();
+  if (!context) {
+    VALIDATION_LOG << "Context died before setting contents on texture.";
+    return false;
+  }
+
+  auto staging_buffer =
+      context->GetResourceAllocator()->CreateBufferWithCopy(contents, length);
+
+  if (!staging_buffer) {
+    VALIDATION_LOG << "Could not create staging buffer.";
+    return false;
+  }
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+
+  if (!cmd_buffer) {
+    return false;
+  }
+
+  const auto encoder = CommandBufferVK::Cast(*cmd_buffer).GetEncoder();
+
+  if (!encoder->Track(staging_buffer) || !encoder->Track(source_)) {
+    return false;
+  }
+
+  const auto& vk_cmd_buffer = encoder->GetCommandBuffer();
+
+  LayoutTransition transition;
+  transition.cmd_buffer = vk_cmd_buffer;
+  transition.new_layout = vk::ImageLayout::eTransferDstOptimal;
+  transition.src_access = {};
+  transition.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  transition.dst_access = vk::AccessFlagBits::eTransferWrite;
+  transition.dst_stage = vk::PipelineStageFlagBits::eTransfer;
+
+  if (!SetLayout(transition)) {
+    return false;
+  }
+
+  vk::BufferImageCopy copy;
+  copy.bufferOffset = 0u;
+  copy.bufferRowLength = 0u;    // 0u means tightly packed per spec.
+  copy.bufferImageHeight = 0u;  // 0u means tightly packed per spec.
+  copy.imageOffset.x = 0u;
+  copy.imageOffset.y = 0u;
+  copy.imageOffset.z = 0u;
+  copy.imageExtent.width = desc.size.width;
+  copy.imageExtent.height = desc.size.height;
+  copy.imageExtent.depth = 1u;
+  copy.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+  copy.imageSubresource.mipLevel = 0u;
+  copy.imageSubresource.baseArrayLayer = slice;
+  copy.imageSubresource.layerCount = 1u;
+
+  vk_cmd_buffer.copyBufferToImage(
+      DeviceBufferVK::Cast(*staging_buffer).GetBuffer(),  // src buffer
+      GetImage(),                                         // dst image
+      transition.new_layout,                              // dst image layout
+      1u,                                                 // region count
+      &copy                                               // regions
+  );
+
+  return cmd_buffer->SubmitCommands();
 }
 
 bool TextureVK::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
@@ -56,79 +125,29 @@ ISize TextureVK::GetSize() const {
 }
 
 vk::Image TextureVK::GetImage() const {
-  return source_->GetVKImage();
+  return source_->GetImage();
 }
 
 vk::ImageView TextureVK::GetImageView() const {
-  return source_->GetVKImageView();
+  return source_->GetImageView();
 }
 
-static constexpr vk::ImageAspectFlags ToImageAspectFlags(
-    vk::ImageLayout layout) {
-  switch (layout) {
-    case vk::ImageLayout::eColorAttachmentOptimal:
-    case vk::ImageLayout::eShaderReadOnlyOptimal:
-      return vk::ImageAspectFlagBits::eColor;
-    case vk::ImageLayout::eDepthAttachmentOptimal:
-      return vk::ImageAspectFlagBits::eDepth;
-    case vk::ImageLayout::eStencilAttachmentOptimal:
-      return vk::ImageAspectFlagBits::eStencil;
-    default:
-      FML_DLOG(INFO) << "Unknown layout to determine aspect.";
-      return vk::ImageAspectFlagBits::eNone;
-  }
-  FML_UNREACHABLE();
+std::shared_ptr<const TextureSourceVK> TextureVK::GetTextureSource() const {
+  return source_;
 }
 
-vk::ImageLayout TextureVK::GetLayout() const {
-  ReaderLock lock(layout_mutex_);
-  return layout_;
-}
-
-void TextureVK::SetMipmapGenerated() {
-  mipmap_generated_ = true;
+bool TextureVK::SetLayout(const LayoutTransition& transition) const {
+  return source_ ? source_->SetLayout(transition) : false;
 }
 
 vk::ImageLayout TextureVK::SetLayoutWithoutEncoding(
     vk::ImageLayout layout) const {
-  WriterLock lock(layout_mutex_);
-  const auto old_layout = layout_;
-  layout_ = layout;
-  return old_layout;
+  return source_ ? source_->SetLayoutWithoutEncoding(layout)
+                 : vk::ImageLayout::eUndefined;
 }
 
-bool TextureVK::SetLayout(vk::ImageLayout new_layout,
-                          const vk::CommandBuffer& buffer) const {
-  const auto old_layout = SetLayoutWithoutEncoding(new_layout);
-  if (new_layout == old_layout) {
-    return true;
-  }
-
-  vk::ImageMemoryBarrier image_barrier;
-  image_barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite |
-                                vk::AccessFlagBits::eTransferWrite;
-  image_barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead |
-                                vk::AccessFlagBits::eShaderRead;
-  image_barrier.oldLayout = old_layout;
-  image_barrier.newLayout = new_layout;
-  image_barrier.image = GetImage();
-  image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-  image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-  image_barrier.subresourceRange.aspectMask = ToImageAspectFlags(new_layout);
-  image_barrier.subresourceRange.baseMipLevel = 0u;
-  image_barrier.subresourceRange.levelCount = GetTextureDescriptor().mip_count;
-  image_barrier.subresourceRange.baseArrayLayer = 0u;
-  image_barrier.subresourceRange.layerCount = 1u;
-
-  buffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllGraphics,  // src stage
-                         vk::PipelineStageFlagBits::eAllGraphics,  // dst stage
-                         {},            // dependency flags
-                         nullptr,       // memory barriers
-                         nullptr,       // buffer barriers
-                         image_barrier  // image barriers
-  );
-
-  return true;
+vk::ImageLayout TextureVK::GetLayout() const {
+  return source_ ? source_->GetLayout() : vk::ImageLayout::eUndefined;
 }
 
 }  // namespace impeller
