@@ -1318,7 +1318,7 @@ Future<T?> showDialog<T>({
     anchorPoint: anchorPoint,
     traversalEdgeBehavior:
         traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-  )).then((value) {
+  )).then((T? value) {
     /// This will ensure that the callback function to close the dialog
     /// will not be called thus canceling the timer, this is important
     /// for cases where the timer has not worked as it should or the
