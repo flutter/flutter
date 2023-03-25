@@ -381,6 +381,14 @@ abstract final class SystemChrome {
       'SystemChrome.setPreferredOrientations',
       _stringify(orientations),
     );
+    _preferredOrientations = orientations;
+  }
+
+  /// Returns the list of device orientations as they were requested in [setPreferredOrientations].
+  /// 
+  /// Returns null, if the [setPreferredOrientations] was never called.
+  static List<DeviceOrientation>? getPreferredOrientations() {
+    return _preferredOrientations;
   }
 
   /// Specifies the description of the current state of the application as it
@@ -575,4 +583,7 @@ abstract final class SystemChrome {
   @visibleForTesting
   static SystemUiOverlayStyle? get latestStyle => _latestStyle;
   static SystemUiOverlayStyle? _latestStyle;
+
+  /// The last device preferred orientations that were set using [SystemChrome.setSystemUIOverlayStyle].
+  static List<DeviceOrientation>? _preferredOrientations;
 }
