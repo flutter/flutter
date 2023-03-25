@@ -2410,20 +2410,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
-    final bool spellCheckManuallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
+    final bool spellCheckAutomaticallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
     final bool spellCheckServiceIsConfigured = spellCheckService != null || spellCheckService == null && WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
-    if (spellCheckManuallyDisabled || !spellCheckServiceIsConfigured) {
+    if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
       // and if that configuration does not specify a spell check service,
       // a native spell checker must be supported.
       assert(() {
-        if (!spellCheckManuallyDisabled && !spellCheckServiceIsConfigured) {
+        if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
           FlutterError.reportError(
             FlutterErrorDetails(
               exception: FlutterError(
                 'Spell check was enabled with spellCheckConfiguration, but the '
                 'current platform does not have a supported spell check '
-                'service, and none was provided.',
+                'service, and none was provided. Consider disabling spell '
+                'check for this platform or passing a SpellCheckConfiguration '
+                'with a specified spell check service.',
               ),
               library: 'widget library',
               stack: StackTrace.current,
