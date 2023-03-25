@@ -177,7 +177,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
     }
     expect(option.name, isNot(matches(_bannedArgumentNamePattern)), reason: '$_header$target--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)');
     // The flag --sound-null-safety is deprecated
-    if (option.name != FlutterOptions.kNullSafety) {
+    if (option.name != FlutterOptions.kNullSafety && option.name != FlutterOptions.kNullAssertions) {
       expect(option.hide, isFalse, reason: '${_header}Help for $target--${option.name}" is always hidden. $_needHelp');
     }
     expect(option.help, isNotNull, reason: '${_header}Help for $target--${option.name}" has null help. $_needHelp');

@@ -808,10 +808,12 @@ abstract class FlutterCommand extends Command<void> {
 
   void addNullSafetyModeOptions({ required bool hide }) {
     argParser.addFlag(FlutterOptions.kNullSafety,
+      help: 'This flag is deprecated as only null-safe code is supported.',
       defaultsTo: true,
       hide: true,
     );
     argParser.addFlag(FlutterOptions.kNullAssertions,
+      help: 'This flag is deprecated as only null-safe code is supported.',
       hide: true,
     );
   }
