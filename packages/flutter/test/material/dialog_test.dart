@@ -537,6 +537,76 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
   });
 
+  testWidgets('Dialog dismiss automatically', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ElevatedButton(
+              onPressed: null,
+              child: Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Open'));
+
+    showDialog<void>(
+      context: context,
+      duration: const Duration(seconds: 5),
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog Open'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog Open'), findsOneWidget);
+
+    //Wait for the time set in the duration
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+
+    //Confirm that the dialog was closed automatically
+    expect(find.text('Dialog Open'), findsNothing);
+
+    showDialog<void>(
+      context: context,
+      duration: const Duration(seconds: 5),
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog Open 2'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog Open 2'), findsOneWidget);
+
+    // Tap on the barrier, this will dismiss the dialog before the timer ends
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog Open 2'), findsNothing);
+
+    // Wait for the time set in the duration
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+
+    // Confirm that nothing change even after the time set in the duration pass
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog Open 2'), findsNothing);
+    expect(find.text('Open'), findsOneWidget);
+
+  });
+
   testWidgets('Dialog hides underlying semantics tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const String buttonText = 'A button covered by dialog overlay';

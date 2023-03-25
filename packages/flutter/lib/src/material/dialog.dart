@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart' show clampDouble;
@@ -1274,6 +1275,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 Future<T?> showDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
+  Duration? duration,
   bool barrierDismissible = true,
   Color? barrierColor = Colors.black54,
   String? barrierLabel,
@@ -1285,6 +1287,16 @@ Future<T?> showDialog<T>({
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
+  Timer? timer;
+
+  /// This check if there was a duration set by the user, if there was, then
+  /// the timer will call a function to close the dialog automatically
+  /// after the given duration
+  if (duration != null) {
+    timer = Timer(duration, (){
+      Navigator.pop(context);
+    });
+  }
 
   final CapturedThemes themes = InheritedTheme.capture(
     from: context,
@@ -1304,8 +1316,18 @@ Future<T?> showDialog<T>({
     settings: routeSettings,
     themes: themes,
     anchorPoint: anchorPoint,
-    traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-  ));
+    traversalEdgeBehavior:
+        traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+  )).then((value) {
+    /// This will ensure that the callback function to close the dialog
+    /// will not be called thus canceling the timer, this is important
+    /// for cases where the timer has not worked as it should or the
+    /// dialog has been manually closed
+    if(timer != null && timer.isActive){
+      timer.cancel();
+    }
+    return value;
+  });
 }
 
 bool _debugIsActive(BuildContext context) {
