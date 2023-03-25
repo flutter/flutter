@@ -1390,7 +1390,7 @@ abstract class RenderBox extends RenderObject {
         } else {
           debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments!['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments!['intrinsics dimension'] = dimension.name;
         debugTimelineArguments!['intrinsics argument'] = '$argument';
         return true;
       }());

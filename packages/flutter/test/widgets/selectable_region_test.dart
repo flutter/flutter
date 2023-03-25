@@ -378,14 +378,12 @@ void main() {
           log.last,
           isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
         );
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(log, isEmpty);
-        break;
     }
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
@@ -926,6 +924,7 @@ void main() {
           ),
         ),
       );
+
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
       addTearDown(gesture.removePointer);
@@ -1260,12 +1259,10 @@ void main() {
         case TargetPlatform.windows:
           alt = false;
           control = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           alt = true;
           control = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1370,12 +1367,10 @@ void main() {
         case TargetPlatform.windows:
           meta = false;
           alt = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           meta = true;
           alt = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1461,12 +1456,10 @@ void main() {
         case TargetPlatform.windows:
           meta = false;
           alt = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           meta = true;
           alt = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1708,6 +1701,111 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
+  testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
+    List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonItems = selectableRegionState.contextMenuButtonItems;
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    await tester.pump(kLongPressTimeout);
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    expect(buttonItems.length, 2);
+    expect(buttonItems[0].type, ContextMenuButtonType.copy);
+
+    // Press `Copy` item
+    buttonItems[0].onPressed.call();
+
+    final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
+    // In Android copy should clear the selection.
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        expect(regionState.selectionOverlay, isNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
+      case TargetPlatform.iOS:
+        expect(regionState.selectionOverlay, isNotNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(regionState.selectionOverlay, isNotNull);
+    }
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
+    List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonItems = selectableRegionState.contextMenuButtonItems;
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    await tester.pump(kLongPressTimeout);
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    expect(buttonItems.length, 2);
+    expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
+
+    // Press `Select All` item
+    buttonItems[1].onPressed.call();
+
+    final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(regionState.selectionOverlay, isNotNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        // Test doesn't run these platforms.
+        break;
+    }
+
+  },
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia }),
+  );
+
   testWidgets('builds the correct button items', (WidgetTester tester) async {
     Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
     await tester.pumpWidget(
@@ -1885,15 +1983,15 @@ class RenderSelectionSpy extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  SelectionGeometry _value = SelectionGeometry(
+  SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
@@ -1974,15 +2072,15 @@ class RenderSelectAll extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  SelectionGeometry _value = SelectionGeometry(
+  SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,

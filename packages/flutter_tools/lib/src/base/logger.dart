@@ -1065,19 +1065,15 @@ class VerboseLogger extends DelegatingLogger {
         if (stackTrace != null) {
           super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
         }
-        break;
       case _LogType.warning:
         super.printWarning(prefix + terminal.bolden(indentMessage));
-        break;
       case _LogType.status:
         super.printStatus(prefix + terminal.bolden(indentMessage));
-        break;
       case _LogType.trace:
         // This seems wrong, since there is a 'printTrace' to call on the
         // superclass, but it's actually the entire point of this logger: to
         // make things more verbose than they normally would be.
         super.printStatus(prefix + indentMessage);
-        break;
     }
   }
 

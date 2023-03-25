@@ -223,7 +223,6 @@ targets:
 
   - name: Linux build_tests_1_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -262,7 +261,6 @@ targets:
 
   - name: Linux build_tests_3_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -343,6 +341,24 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux engine_dependency_proxy_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: engine_dependency_proxy_test
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux firebase_abstract_method_smoke_test
     recipe: firebaselab/firebaselab
     timeout: 60
@@ -382,7 +398,6 @@ targets:
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2710,7 +2725,6 @@ targets:
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2719,7 +2733,6 @@ targets:
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2957,6 +2970,20 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"}
         ]
       task_name: platform_view_macos__start_up
+
+  - name: Mac platform_channel_sample_test_macos
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: platform_channel_sample_test_macos
 
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
@@ -4023,16 +4050,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_impeller_ios
 
-  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/121231
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
-
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4879,7 +4896,6 @@ targets:
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4964,6 +4980,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "arm64"
 
   - name: Windows flutter_packaging
     recipe: packaging/packaging

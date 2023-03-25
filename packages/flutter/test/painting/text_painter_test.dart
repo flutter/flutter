@@ -8,9 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const bool isCanvasKit =
-    bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-
 void main() {
   test('TextPainter caret test', () {
     final TextPainter painter = TextPainter()
@@ -818,25 +815,25 @@ void main() {
     expect(lines[2].hardBreak, true);
     expect(lines[3].hardBreak, true);
 
-    expect(lines[0].ascent, 11.199999809265137);
-    expect(lines[1].ascent, 11.199999809265137);
-    expect(lines[2].ascent, 11.199999809265137);
-    expect(lines[3].ascent, 11.199999809265137);
+    expect(lines[0].ascent, 10.5);
+    expect(lines[1].ascent, 10.5);
+    expect(lines[2].ascent, 10.5);
+    expect(lines[3].ascent, 10.5);
 
-    expect(lines[0].descent, 2.799999952316284);
-    expect(lines[1].descent, 2.799999952316284);
-    expect(lines[2].descent, 2.799999952316284);
-    expect(lines[3].descent, 2.799999952316284);
+    expect(lines[0].descent, 3.5);
+    expect(lines[1].descent, 3.5);
+    expect(lines[2].descent, 3.5);
+    expect(lines[3].descent, 3.5);
 
-    expect(lines[0].unscaledAscent, 11.199999809265137);
-    expect(lines[1].unscaledAscent, 11.199999809265137);
-    expect(lines[2].unscaledAscent, 11.199999809265137);
-    expect(lines[3].unscaledAscent, 11.199999809265137);
+    expect(lines[0].unscaledAscent, 10.5);
+    expect(lines[1].unscaledAscent, 10.5);
+    expect(lines[2].unscaledAscent, 10.5);
+    expect(lines[3].unscaledAscent, 10.5);
 
-    expect(lines[0].baseline, 11.200000047683716);
-    expect(lines[1].baseline, 25.200000047683716);
-    expect(lines[2].baseline, 39.200000047683716);
-    expect(lines[3].baseline, 53.200000047683716);
+    expect(lines[0].baseline, 10.5);
+    expect(lines[1].baseline, 24.5);
+    expect(lines[2].baseline, 38.5);
+    expect(lines[3].baseline, 52.5);
 
     expect(lines[0].height, 14);
     expect(lines[1].height, 14);
@@ -858,7 +855,7 @@ void main() {
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
     painter.dispose();
-  }, skip: true); // https://github.com/flutter/flutter/issues/62819
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/122066
 
   test('TextPainter caret height and line height', () {
     final TextPainter painter = TextPainter()

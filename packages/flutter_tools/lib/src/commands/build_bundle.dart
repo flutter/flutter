@@ -101,18 +101,15 @@ class BuildBundleCommand extends BuildSubCommand {
         if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
-        break;
       case TargetPlatform.windows_x64:
         if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
-        break;
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
-        break;
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:

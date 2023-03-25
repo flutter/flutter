@@ -2708,28 +2708,22 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
     switch (val) {
       case DismissDirection.down:
         dragGestures[val] = <Offset>[const Offset(0.0, 50.0)]; // drag to bottom gesture
-        break;
       case DismissDirection.up:
         dragGestures[val] = <Offset>[const Offset(0.0, -50.0)]; // drag to top gesture
-        break;
       case DismissDirection.vertical:
         dragGestures[val] = <Offset>[
           const Offset(0.0, 50.0), // drag to bottom gesture
           const Offset(0.0, -50.0), // drag to top gesture
         ];
-        break;
       case DismissDirection.startToEnd:
         dragGestures[val] = <Offset>[Offset(scaffoldWidth, 0.0)]; // drag to right gesture
-        break;
       case DismissDirection.endToStart:
         dragGestures[val] = <Offset>[Offset(-scaffoldWidth, 0.0)]; // drag to left gesture
-        break;
       case DismissDirection.horizontal:
         dragGestures[val] = <Offset>[
           Offset(scaffoldWidth, 0.0), // drag to right gesture
           Offset(-scaffoldWidth, 0.0), // drag to left gesture
         ];
-        break;
       case DismissDirection.none:
         break;
     }

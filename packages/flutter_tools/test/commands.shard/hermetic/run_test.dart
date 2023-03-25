@@ -428,7 +428,7 @@ void main() {
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd56': 'false', 'cd57': 'usb',
+            'cd57': 'usb',
           })
         )));
       }, overrides: <Type, Generator>{
@@ -699,7 +699,6 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -739,7 +738,6 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'usb',
         ));
       }, overrides: <Type, Generator>{
@@ -783,7 +781,6 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
         ));
       }, overrides: <Type, Generator>{
@@ -827,7 +824,6 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
         ));
       }, overrides: <Type, Generator>{
@@ -1025,7 +1021,7 @@ void main() {
     expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
     expect(options.traceSystrace, true);
-    expect(options.enableImpeller, true);
+    expect(options.enableImpeller, ImpellerStatus.enabled);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{

@@ -1135,6 +1135,7 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
+  final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
   final List<ShardRunner> tests = <ShardRunner>[
     for (String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
@@ -1228,6 +1229,10 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebDebugTest('lib/stack_trace.dart'),
     () => _runWebDebugTest('lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
+    () => _runWebDebugTest('lib/web_resources_cdn_test.dart',
+      additionalArguments: <String>[
+        '--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion',
+      ]),
     () => _runWebDebugTest('test/test.dart'),
     () => _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true),
     () => _runWebDebugTest('lib/web_define_loading.dart',
