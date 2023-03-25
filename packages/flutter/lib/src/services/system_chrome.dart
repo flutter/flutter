@@ -385,7 +385,7 @@ abstract final class SystemChrome {
   }
 
   /// Returns the list of device orientations as they were requested in [setPreferredOrientations].
-  /// 
+  ///
   /// Returns null, if the [setPreferredOrientations] was never called.
   static List<DeviceOrientation>? getPreferredOrientations() {
     return _preferredOrientations;

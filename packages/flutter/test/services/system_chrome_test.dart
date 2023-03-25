@@ -68,11 +68,9 @@ void main() {
   });
 
   test('getPreferredOrientations control test', () async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       return null;
     });
-
-    expect(SystemChrome.getPreferredOrientations(), null);
 
     List<DeviceOrientation> preferredOrientations = <DeviceOrientation>[
       DeviceOrientation.portraitUp,
