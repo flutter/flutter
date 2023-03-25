@@ -15136,12 +15136,15 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       // the correct word and select the word edge.
       state.showSpellCheckSuggestionsToolbar();
       await tester.pumpAndSettle();
-      // expect(find.text('sets'), findsOneWidget);
-      // await tester.tap(find.text('sets'));
-      // await tester.pumpAndSettle();
-      // expect(state.currentTextEditingValue.text, equals('sets test test'));
-      // expect(state.currentTextEditingValue.selection.baseOffset, equals(4));
-    });
+      expect(find.text('sets'), findsOneWidget);
+      await tester.tap(find.text('sets'));
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.text, equals('sets test test'));
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(4));
+    },
+    // TODO(camsim99): Test this on Linux when https://github.com/flutter/flutter/issues/44572 is fixed.
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android, TargetPlatform.windows, TargetPlatform.fuchsia }),
+    );
 
     testWidgets('material spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
