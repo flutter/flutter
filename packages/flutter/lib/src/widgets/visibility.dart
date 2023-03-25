@@ -223,10 +223,37 @@ class Visibility extends StatelessWidget {
   /// objects, to be immediately created if [visible] is true).
   final bool maintainInteractivity;
 
+  /// Tells the visibility state of an element in the tree based off its
+  /// ancestor [Visibility] elements.
+  ///
+  /// If there's one or more [Visibility] widgets in the ancestor tree, this
+  /// will return true if and only if all of those widgets have [visible] set
+  /// to true. If there is no [Visibility] widget in the ancestor tree of the
+  /// specified build context, this will return true.
+  ///
+  /// This will register a dependency from the specified context on any
+  /// [Visibility] elements in the ancestor tree, such that if any of their
+  /// visibilities changes, the specified context will be rebuilt.
+  static bool of(BuildContext context) {
+    bool isVisible = true;
+    BuildContext ancestorContext = context;
+    InheritedElement? ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+    while (isVisible && ancestor != null) {
+      final _VisibilityScope scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
+      isVisible = scope.isVisible;
+      ancestor.visitAncestorElements((Element parent) {
+        ancestorContext = parent;
+        return false;
+      });
+      ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+    }
+    return isVisible;
+  }
+
   @override
   Widget build(BuildContext context) {
+    Widget result = child;
     if (maintainSize) {
-      Widget result = child;
       if (!maintainInteractivity) {
         result = IgnorePointer(
           ignoring: !visible,
@@ -234,28 +261,30 @@ class Visibility extends StatelessWidget {
           child: child,
         );
       }
-      return _Visibility(
+      result = _Visibility(
         visible: visible,
         maintainSemantics: maintainSemantics,
         child: result,
       );
-    }
-    assert(!maintainInteractivity);
-    assert(!maintainSemantics);
-    assert(!maintainSize);
-    if (maintainState) {
-      Widget result = child;
-      if (!maintainAnimation) {
-        result = TickerMode(enabled: visible, child: child);
+    } else {
+      assert(!maintainInteractivity);
+      assert(!maintainSemantics);
+      assert(!maintainSize);
+      if (maintainState) {
+        if (!maintainAnimation) {
+          result = TickerMode(enabled: visible, child: child);
+        }
+        result = Offstage(
+          offstage: !visible,
+          child: result,
+        );
+      } else {
+        assert(!maintainAnimation);
+        assert(!maintainState);
+        result = visible ? child : replacement;
       }
-      return Offstage(
-        offstage: !visible,
-        child: result,
-      );
     }
-    assert(!maintainAnimation);
-    assert(!maintainState);
-    return visible ? child : replacement;
+    return _VisibilityScope(isVisible: visible, child: result);
   }
 
   @override
@@ -267,6 +296,18 @@ class Visibility extends StatelessWidget {
     properties.add(FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
     properties.add(FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
     properties.add(FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
+  }
+}
+
+/// Inherited widget that allows descendants to find their visibility status.
+class _VisibilityScope extends InheritedWidget {
+  const _VisibilityScope({required this.isVisible, required super.child});
+
+  final bool isVisible;
+
+  @override
+  bool updateShouldNotify(_VisibilityScope old) {
+    return isVisible != old.isVisible;
   }
 }
 

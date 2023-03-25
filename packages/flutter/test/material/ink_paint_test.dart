@@ -568,6 +568,28 @@ void main() {
         ..circle(x: 50.0, y: 50.0, color: splashColor)
     );
   });
+
+  testWidgets('Ink with isVisible=false does not paint', (WidgetTester tester) async {
+    const Color testColor = Color(0xffff1234);
+    Widget inkWidget({required bool isVisible}) {
+      return Material(
+        child: Visibility.maintain(
+          visible: isVisible,
+          child: Ink(
+            decoration: const BoxDecoration(color: testColor),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(inkWidget(isVisible: true));
+    RenderBox box = tester.renderObject(find.byType(Material));
+    expect(box, paints..rect(color: testColor));
+
+    await tester.pumpWidget(inkWidget(isVisible: false));
+    box = tester.renderObject(find.byType(Material));
+    expect(box, isNot(paints..rect(color: testColor)));
+  });
 }
 
 class _InkRippleFactory extends InteractiveInkFeatureFactory {
