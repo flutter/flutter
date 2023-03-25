@@ -5,31 +5,100 @@
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 
 #include "flutter/fml/closure.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_vk.h"
 
 namespace impeller {
 
+class TrackedObjectsVK {
+ public:
+  explicit TrackedObjectsVK(const vk::Device& device,
+                            const std::shared_ptr<CommandPoolVK>& pool)
+      : desc_pool_(device) {
+    if (!pool) {
+      return;
+    }
+    auto buffer = pool->CreateGraphicsCommandBuffer();
+    if (!buffer) {
+      return;
+    }
+    pool_ = pool;
+    buffer_ = std::move(buffer);
+    is_valid_ = true;
+  }
+
+  ~TrackedObjectsVK() {
+    if (!buffer_) {
+      return;
+    }
+    auto pool = pool_.lock();
+    if (!pool) {
+      VALIDATION_LOG
+          << "Command pool died before a command buffer could be recycled.";
+      return;
+    }
+    pool->CollectGraphicsCommandBuffer(std::move(buffer_));
+  }
+
+  bool IsValid() const { return is_valid_; }
+
+  void Track(std::shared_ptr<SharedObjectVK> object) {
+    if (!object) {
+      return;
+    }
+    tracked_objects_.insert(std::move(object));
+  }
+
+  void Track(std::shared_ptr<const DeviceBuffer> buffer) {
+    if (!buffer) {
+      return;
+    }
+    tracked_buffers_.insert(std::move(buffer));
+  }
+
+  void Track(std::shared_ptr<const TextureSourceVK> texture) {
+    if (!texture) {
+      return;
+    }
+    tracked_textures_.insert(std::move(texture));
+  }
+
+  vk::CommandBuffer GetCommandBuffer() const { return *buffer_; }
+
+  DescriptorPoolVK& GetDescriptorPool() { return desc_pool_; }
+
+ private:
+  DescriptorPoolVK desc_pool_;
+  std::weak_ptr<CommandPoolVK> pool_;
+  vk::UniqueCommandBuffer buffer_;
+  std::set<std::shared_ptr<SharedObjectVK>> tracked_objects_;
+  std::set<std::shared_ptr<const DeviceBuffer>> tracked_buffers_;
+  std::set<std::shared_ptr<const TextureSourceVK>> tracked_textures_;
+  bool is_valid_ = false;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(TrackedObjectsVK);
+};
+
 CommandEncoderVK::CommandEncoderVK(vk::Device device,
                                    vk::Queue queue,
-                                   vk::CommandPool pool) {
-  vk::CommandBufferAllocateInfo alloc_info;
-  alloc_info.commandPool = pool;
-  alloc_info.commandBufferCount = 1u;
-  alloc_info.level = vk::CommandBufferLevel::ePrimary;
-  auto [result, buffers] = device.allocateCommandBuffersUnique(alloc_info);
-  if (result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create command buffer.";
+                                   const std::shared_ptr<CommandPoolVK>& pool,
+                                   std::shared_ptr<FenceWaiterVK> fence_waiter)
+    : fence_waiter_(std::move(fence_waiter)),
+      tracked_objects_(std::make_shared<TrackedObjectsVK>(device, pool)) {
+  if (!fence_waiter_ || !tracked_objects_->IsValid()) {
     return;
   }
   vk::CommandBufferBeginInfo begin_info;
   begin_info.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-  if (buffers[0]->begin(begin_info) != vk::Result::eSuccess) {
+  if (tracked_objects_->GetCommandBuffer().begin(begin_info) !=
+      vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not begin command buffer.";
     return;
   }
   device_ = device;
   queue_ = queue;
-  command_buffer_ = std::move(buffers[0]);
   is_valid_ = true;
 }
 
@@ -47,39 +116,40 @@ bool CommandEncoderVK::Submit() {
   // Success or failure, you only get to submit once.
   fml::ScopedCleanupClosure reset([&]() { Reset(); });
 
-  if (command_buffer_->end() != vk::Result::eSuccess) {
+  InsertDebugMarker("QueueSubmit");
+
+  auto command_buffer = GetCommandBuffer();
+
+  if (command_buffer.end() != vk::Result::eSuccess) {
     return false;
   }
   auto [fence_result, fence] = device_.createFenceUnique({});
   if (fence_result != vk::Result::eSuccess) {
     return false;
   }
+
   vk::SubmitInfo submit_info;
-  submit_info.setCommandBuffers(*command_buffer_);
+  std::vector<vk::CommandBuffer> buffers = {command_buffer};
+  submit_info.setCommandBuffers(buffers);
   if (queue_.submit(submit_info, *fence) != vk::Result::eSuccess) {
     return false;
   }
-  if (device_.waitForFences(
-          *fence,                               // fences
-          true,                                 // wait all
-          std::numeric_limits<uint64_t>::max()  // timeout (ns)
-          ) != vk::Result::eSuccess) {
-    return false;
-  }
 
-  return true;
+  return fence_waiter_->AddFence(
+      std::move(fence), [tracked_objects = std::move(tracked_objects_)] {
+        // Nothing to do, we just drop the tracked objects on the floor.
+      });
 }
 
-const vk::CommandBuffer& CommandEncoderVK::GetCommandBuffer() const {
-  return *command_buffer_;
+vk::CommandBuffer CommandEncoderVK::GetCommandBuffer() const {
+  if (tracked_objects_) {
+    return tracked_objects_->GetCommandBuffer();
+  }
+  return {};
 }
 
 void CommandEncoderVK::Reset() {
-  command_buffer_.reset();
-
-  tracked_objects_.clear();
-  tracked_buffers_.clear();
-  tracked_textures_.clear();
+  tracked_objects_.reset();
 
   queue_ = nullptr;
   device_ = nullptr;
@@ -87,34 +157,85 @@ void CommandEncoderVK::Reset() {
 }
 
 bool CommandEncoderVK::Track(std::shared_ptr<SharedObjectVK> object) {
-  tracked_objects_.push_back(std::move(object));
+  if (!IsValid()) {
+    return false;
+  }
+  tracked_objects_->Track(std::move(object));
   return true;
 }
 
 bool CommandEncoderVK::Track(std::shared_ptr<const DeviceBuffer> buffer) {
-  tracked_buffers_.emplace_back(std::move(buffer));
+  if (!IsValid()) {
+    return false;
+  }
+  tracked_objects_->Track(std::move(buffer));
   return true;
 }
 
-bool CommandEncoderVK::Track(std::shared_ptr<const Texture> texture) {
-  tracked_textures_.emplace_back(std::move(texture));
+bool CommandEncoderVK::Track(std::shared_ptr<const TextureSourceVK> texture) {
+  if (!IsValid()) {
+    return false;
+  }
+  tracked_objects_->Track(std::move(texture));
   return true;
+}
+
+bool CommandEncoderVK::Track(const std::shared_ptr<const Texture>& texture) {
+  if (!IsValid()) {
+    return false;
+  }
+  if (!texture) {
+    return true;
+  }
+  return Track(TextureVK::Cast(*texture).GetTextureSource());
+}
+
+std::optional<vk::DescriptorSet> CommandEncoderVK::AllocateDescriptorSet(
+    const vk::DescriptorSetLayout& layout) {
+  if (!IsValid()) {
+    return std::nullopt;
+  }
+  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSet(layout);
 }
 
 void CommandEncoderVK::PushDebugGroup(const char* label) const {
-  if (!vk::HasValidationLayers() || !command_buffer_) {
+  if (!HasValidationLayers()) {
     return;
   }
   vk::DebugUtilsLabelEXT label_info;
   label_info.pLabelName = label;
-  command_buffer_->beginDebugUtilsLabelEXT(label_info);
+  if (auto command_buffer = GetCommandBuffer()) {
+    command_buffer.beginDebugUtilsLabelEXT(label_info);
+  }
+  if (queue_) {
+    queue_.beginDebugUtilsLabelEXT(label_info);
+  }
 }
 
 void CommandEncoderVK::PopDebugGroup() const {
-  if (!vk::HasValidationLayers() || !command_buffer_) {
+  if (!HasValidationLayers()) {
     return;
   }
-  command_buffer_->endDebugUtilsLabelEXT();
+  if (auto command_buffer = GetCommandBuffer()) {
+    command_buffer.endDebugUtilsLabelEXT();
+  }
+  if (queue_) {
+    queue_.endDebugUtilsLabelEXT();
+  }
+}
+
+void CommandEncoderVK::InsertDebugMarker(const char* label) const {
+  if (!HasValidationLayers()) {
+    return;
+  }
+  vk::DebugUtilsLabelEXT label_info;
+  label_info.pLabelName = label;
+  if (auto command_buffer = GetCommandBuffer()) {
+    command_buffer.insertDebugUtilsLabelEXT(label_info);
+  }
+  if (queue_) {
+    queue_.insertDebugUtilsLabelEXT(label_info);
+  }
 }
 
 }  // namespace impeller

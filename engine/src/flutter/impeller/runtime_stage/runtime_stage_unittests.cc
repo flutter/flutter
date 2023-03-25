@@ -242,13 +242,13 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   ASSERT_TRUE(vertex_descriptor->SetStageInputs(VS::kAllShaderStageInputs));
   desc.SetVertexDescriptor(std::move(vertex_descriptor));
   ColorAttachmentDescriptor color0;
-  color0.format = GetContext()->GetColorAttachmentPixelFormat();
+  color0.format = GetContext()->GetCapabilities()->GetDefaultColorFormat();
   StencilAttachmentDescriptor stencil0;
   stencil0.stencil_compare = CompareFunction::kEqual;
   desc.SetColorAttachmentDescriptor(0u, color0);
   desc.SetStencilAttachmentDescriptors(stencil0);
   const auto stencil_fmt =
-      GetContext()->GetDeviceCapabilities().GetDefaultStencilFormat();
+      GetContext()->GetCapabilities()->GetDefaultStencilFormat();
   desc.SetStencilPixelFormat(stencil_fmt);
   auto pipeline = GetContext()->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_NE(pipeline, nullptr);

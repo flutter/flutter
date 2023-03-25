@@ -9,39 +9,40 @@
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/unique_fd.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/vulkan/pipeline_library_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_library_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_library_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/context.h"
-#include "impeller/renderer/device_capabilities.h"
 #include "impeller/renderer/formats.h"
 #include "impeller/renderer/surface.h"
 
 namespace impeller {
 
-namespace vk {
-
-// TODO(csg): Move this to its own TU for validations.
-constexpr const char* kKhronosValidationLayerName =
-    "VK_LAYER_KHRONOS_validation";
-
 bool HasValidationLayers();
 
-}  // namespace vk
-
 class CommandEncoderVK;
+class DebugReportVK;
+class FenceWaiterVK;
 
 class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
  public:
-  static std::shared_ptr<ContextVK> Create(
-      PFN_vkGetInstanceProcAddr proc_address_callback,
-      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
-      const std::shared_ptr<const fml::Mapping>& pipeline_cache_data,
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
-      const std::string& label);
+  struct Settings {
+    PFN_vkGetInstanceProcAddr proc_address_callback = nullptr;
+    std::vector<std::shared_ptr<fml::Mapping>> shader_libraries_data;
+    fml::UniqueFD cache_directory;
+    std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner;
+
+    Settings() = default;
+
+    Settings(Settings&&) = default;
+  };
+
+  static std::shared_ptr<ContextVK> Create(Settings settings);
 
   // |Context|
   ~ContextVK() override;
@@ -65,10 +66,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override;
 
   // |Context|
-  PixelFormat GetColorAttachmentPixelFormat() const override;
-
-  // |Context|
-  const IDeviceCapabilities& GetDeviceCapabilities() const override;
+  const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
 
   template <typename T>
   bool SetDebugName(T handle, std::string_view label) const {
@@ -79,22 +77,19 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   static bool SetDebugName(vk::Device device,
                            T handle,
                            std::string_view label) {
-    if (!vk::HasValidationLayers()) {
+    if (!HasValidationLayers()) {
       // No-op if validation layers are not enabled.
       return true;
     }
 
-    uint64_t handle_ptr =
-        reinterpret_cast<uint64_t>(static_cast<typename T::NativeType>(handle));
+    auto c_handle = static_cast<typename T::CType>(handle);
 
-    std::string label_str = std::string(label);
-    auto ret = device.setDebugUtilsObjectNameEXT(
-        vk::DebugUtilsObjectNameInfoEXT()
-            .setObjectType(T::objectType)
-            .setObjectHandle(handle_ptr)
-            .setPObjectName(label_str.c_str()));
+    vk::DebugUtilsObjectNameInfoEXT info;
+    info.objectType = T::objectType;
+    info.pObjectName = label.data();
+    info.objectHandle = reinterpret_cast<decltype(info.objectHandle)>(c_handle);
 
-    if (ret != vk::Result::eSuccess) {
+    if (device.setDebugUtilsObjectNameEXT(info) != vk::Result::eSuccess) {
       VALIDATION_LOG << "Unable to set debug name: " << label;
       return false;
     }
@@ -116,16 +111,15 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
 
   vk::Queue GetGraphicsQueue() const;
 
-  vk::CommandPool GetGraphicsCommandPool() const;
-
-  vk::DescriptorPool GetDescriptorPool() const;
+  QueueVK GetGraphicsQueueInfo() const;
 
   vk::PhysicalDevice GetPhysicalDevice() const;
 
+  std::shared_ptr<FenceWaiterVK> GetFenceWaiter() const;
+
  private:
-  std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   vk::UniqueInstance instance_;
-  vk::UniqueDebugUtilsMessengerEXT debug_messenger_;
+  std::unique_ptr<DebugReportVK> debug_report_;
   vk::PhysicalDevice physical_device_;
   vk::UniqueDevice device_;
   std::shared_ptr<Allocator> allocator_;
@@ -135,18 +129,18 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   vk::Queue graphics_queue_ = {};
   vk::Queue compute_queue_ = {};
   vk::Queue transfer_queue_ = {};
+  QueueVK graphics_queue_info_ = {};
+  QueueVK compute_queue_info_ = {};
+  QueueVK transfer_queue_info_ = {};
   std::shared_ptr<SwapchainVK> swapchain_;
-  std::unique_ptr<IDeviceCapabilities> device_capabilities_;
-  vk::UniqueCommandPool graphics_command_pool_;
-  vk::UniqueDescriptorPool descriptor_pool_;
+  std::shared_ptr<const Capabilities> device_capabilities_;
+  std::shared_ptr<FenceWaiterVK> fence_waiter_;
+
   bool is_valid_ = false;
 
-  ContextVK(
-      PFN_vkGetInstanceProcAddr proc_address_callback,
-      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
-      const std::shared_ptr<const fml::Mapping>& pipeline_cache_data,
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
-      const std::string& label);
+  ContextVK();
+
+  void Setup(Settings settings);
 
   std::unique_ptr<CommandEncoderVK> CreateGraphicsCommandEncoder() const;
 

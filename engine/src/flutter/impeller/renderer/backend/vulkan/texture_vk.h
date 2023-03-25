@@ -8,9 +8,9 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
-#include "impeller/base/thread.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/texture.h"
@@ -19,8 +19,7 @@ namespace impeller {
 
 class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
  public:
-  TextureVK(TextureDescriptor desc,
-            std::weak_ptr<Context> context,
+  TextureVK(std::weak_ptr<Context> context,
             std::shared_ptr<TextureSourceVK> source);
 
   // |Texture|
@@ -30,13 +29,13 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   vk::ImageView GetImageView() const;
 
-  bool SetLayout(vk::ImageLayout layout, const vk::CommandBuffer& buffer) const;
+  bool SetLayout(const LayoutTransition& transition) const;
 
   vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout) const;
 
   vk::ImageLayout GetLayout() const;
 
-  void SetMipmapGenerated();
+  std::shared_ptr<const TextureSourceVK> GetTextureSource() const;
 
  private:
   std::weak_ptr<Context> context_;

@@ -157,7 +157,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
 
   result.pass = pass_;
 
-  if (!context_->GetDeviceCapabilities().SupportsReadFromResolve() &&
+  if (!context_->GetCapabilities()->SupportsReadFromResolve() &&
       result.backdrop_texture ==
           result.pass->GetRenderTarget().GetRenderTargetTexture()) {
     VALIDATION_LOG << "EntityPass backdrop restore configuration is not valid "

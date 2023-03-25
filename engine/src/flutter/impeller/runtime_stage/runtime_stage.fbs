@@ -16,6 +16,7 @@ enum TargetPlatform:byte {
   kMetal,
   kOpenGLES,
   kSkSL,
+  kVulkan,
 }
 
 enum UniformDataType:uint32 {

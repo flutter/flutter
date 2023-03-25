@@ -17,7 +17,7 @@ constexpr size_t DefaultUniformAlignment() {
 #elif FML_OS_MACOSX
   return 256u;
 #else
-  return 16u;
+  return 0x40;
 #endif
 }
 
