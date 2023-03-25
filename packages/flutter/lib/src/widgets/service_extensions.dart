@@ -20,6 +20,15 @@ enum WidgetsServiceExtensions {
   ///   registered.
   debugDumpApp,
 
+  /// Name of service extension that, when called, will output a string
+  /// representation of the focus treeto console.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
+  ///   registered.
+  debugDumpFocusTree,
+
   /// Name of service extension that, when called, will overlay a performance
   /// graph on top of this app.
   ///
