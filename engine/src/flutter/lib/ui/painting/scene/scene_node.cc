@@ -100,10 +100,22 @@ std::string SceneNode::initFromAsset(const std::string& asset_name,
 }
 
 static impeller::Matrix ToMatrix(const tonic::Float64List& matrix4) {
-  return impeller::Matrix(matrix4[0], matrix4[1], matrix4[2], matrix4[3],    //
-                          matrix4[4], matrix4[5], matrix4[6], matrix4[7],    //
-                          matrix4[8], matrix4[9], matrix4[10], matrix4[11],  //
-                          matrix4[12], matrix4[13], matrix4[14], matrix4[15]);
+  return impeller::Matrix(static_cast<impeller::Scalar>(matrix4[0]),
+                          static_cast<impeller::Scalar>(matrix4[1]),
+                          static_cast<impeller::Scalar>(matrix4[2]),
+                          static_cast<impeller::Scalar>(matrix4[3]),
+                          static_cast<impeller::Scalar>(matrix4[4]),
+                          static_cast<impeller::Scalar>(matrix4[5]),
+                          static_cast<impeller::Scalar>(matrix4[6]),
+                          static_cast<impeller::Scalar>(matrix4[7]),
+                          static_cast<impeller::Scalar>(matrix4[8]),
+                          static_cast<impeller::Scalar>(matrix4[9]),
+                          static_cast<impeller::Scalar>(matrix4[10]),
+                          static_cast<impeller::Scalar>(matrix4[11]),
+                          static_cast<impeller::Scalar>(matrix4[12]),
+                          static_cast<impeller::Scalar>(matrix4[13]),
+                          static_cast<impeller::Scalar>(matrix4[14]),
+                          static_cast<impeller::Scalar>(matrix4[15]));
 }
 
 void SceneNode::initFromTransform(const tonic::Float64List& matrix4) {
