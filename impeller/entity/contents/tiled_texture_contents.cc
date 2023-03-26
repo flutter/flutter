@@ -109,7 +109,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   FS::FragInfo frag_info;
   frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
   frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
-  frag_info.alpha = GetAlpha();
+  frag_info.alpha = GetOpacity();
 
   Command cmd;
   cmd.label = "TiledTextureFill";

@@ -54,20 +54,20 @@ void TextureContents::SetStencilEnabled(bool enabled) {
   stencil_enabled_ = enabled;
 }
 
-bool TextureContents::CanAcceptOpacity(const Entity& entity) const {
+bool TextureContents::CanInheritOpacity(const Entity& entity) const {
   return true;
 }
 
 void TextureContents::SetInheritedOpacity(Scalar opacity) {
-  opacity_ = opacity_ * opacity;
+  inherited_opacity_ = opacity;
 }
 
 Scalar TextureContents::GetOpacity() const {
-  return opacity_;
+  return opacity_ * inherited_opacity_;
 }
 
 std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
-  if (opacity_ == 0) {
+  if (GetOpacity() == 0) {
     return std::nullopt;
   }
   return rect_.TransformBounds(entity.GetTransformation());
@@ -81,8 +81,9 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
   // Passthrough textures that have simple rectangle paths and complete source
   // rects.
   auto bounds = rect_;
+  auto opacity = GetOpacity();
   if (source_rect_ == Rect::MakeSize(texture_->GetSize()) &&
-      (opacity_ >= 1 - kEhCloseEnough || defer_applying_opacity_)) {
+      (opacity >= 1 - kEhCloseEnough || defer_applying_opacity_)) {
     auto scale = Vector2(bounds.size / Size(texture_->GetSize()));
     return Snapshot{
         .texture = texture_,
@@ -90,7 +91,7 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
                      Matrix::MakeTranslation(bounds.origin) *
                      Matrix::MakeScale(scale),
         .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
-        .opacity = opacity_};
+        .opacity = opacity};
   }
   return Contents::RenderToSnapshot(
       renderer, entity, sampler_descriptor.value_or(sampler_descriptor_));
@@ -136,7 +137,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
 
   FS::FragInfo frag_info;
-  frag_info.alpha = opacity_;
+  frag_info.alpha = GetOpacity();
 
   Command cmd;
   cmd.label = "Texture Fill";

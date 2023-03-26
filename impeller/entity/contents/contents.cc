@@ -95,7 +95,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
   return snapshot;
 }
 
-bool Contents::CanAcceptOpacity(const Entity& entity) const {
+bool Contents::CanInheritOpacity(const Entity& entity) const {
   return false;
 }
 

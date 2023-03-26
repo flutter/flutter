@@ -70,7 +70,7 @@ bool ClipContents::ShouldRender(
   return true;
 }
 
-bool ClipContents::CanAcceptOpacity(const Entity& entity) const {
+bool ClipContents::CanInheritOpacity(const Entity& entity) const {
   return true;
 }
 
@@ -172,7 +172,7 @@ bool ClipRestoreContents::ShouldRender(
   return true;
 }
 
-bool ClipRestoreContents::CanAcceptOpacity(const Entity& entity) const {
+bool ClipRestoreContents::CanInheritOpacity(const Entity& entity) const {
   return true;
 }
 

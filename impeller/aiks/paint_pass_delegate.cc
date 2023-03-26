@@ -97,7 +97,7 @@ bool OpacityPeepholePassDelegate::CanCollapseIntoParentPass(
   auto had_subpass = entity_pass->IterateUntilSubpass(
       [&all_coverages, &all_can_accept](Entity& entity) {
         auto contents = entity.GetContents();
-        if (!contents->CanAcceptOpacity(entity)) {
+        if (!contents->CanInheritOpacity(entity)) {
           all_can_accept = false;
           return false;
         }

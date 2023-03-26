@@ -33,10 +33,10 @@ class SolidColorContents final : public Contents {
 
   void SetColor(Color color);
 
-  const Color& GetColor() const;
+  Color GetColor() const;
 
   // | Contents|
-  bool CanAcceptOpacity(const Entity& entity) const override;
+  bool CanInheritOpacity(const Entity& entity) const override;
 
   // | Contents|
   void SetInheritedOpacity(Scalar opacity) override;
@@ -57,6 +57,7 @@ class SolidColorContents final : public Contents {
   std::shared_ptr<Geometry> geometry_;
 
   Color color_;
+  Scalar inherited_opacity_ = 1.0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SolidColorContents);
 };

@@ -26,7 +26,7 @@ class RuntimeEffectContents final : public ColorSourceContents {
   void SetTextureInputs(std::vector<TextureInput> texture_inputs);
 
   // | Contents|
-  bool CanAcceptOpacity(const Entity& entity) const override;
+  bool CanInheritOpacity(const Entity& entity) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
