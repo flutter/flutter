@@ -7,6 +7,8 @@
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/display_list/display_list_dispatcher.h"
+
+#include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkData.h"
 
 namespace impeller {
@@ -37,6 +39,12 @@ bool DisplayListPlayground::OpenPlaygroundHere(
   }
   return Playground::OpenPlaygroundHere(
       [&context, &callback](RenderTarget& render_target) -> bool {
+        static bool wireframe = false;
+        if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
+          wireframe = !wireframe;
+          context.GetContentContext().SetWireframe(wireframe);
+        }
+
         auto list = callback();
 
         DisplayListDispatcher dispatcher;

@@ -158,7 +158,7 @@ TEST_P(DisplayListTest, CanDrawArc) {
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Start angle", &start_angle, -360, 360);
     ImGui::SliderFloat("Sweep angle", &sweep_angle, -360, 360);
-    ImGui::SliderFloat("Stroke width", &stroke_width, 0, 100);
+    ImGui::SliderFloat("Stroke width", &stroke_width, 0, 300);
     ImGui::Combo("Cap", &selected_cap, cap_names,
                  sizeof(cap_names) / sizeof(char*));
     ImGui::Checkbox("Use center", &use_center);
