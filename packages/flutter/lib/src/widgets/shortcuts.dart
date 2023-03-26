@@ -868,6 +868,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 /// This widget establishes a [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
+/// 
+/// This is similar to but more powerful than the [CallbackShortcuts] widget.
 ///
 /// See the article on [Using Actions and
 /// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
