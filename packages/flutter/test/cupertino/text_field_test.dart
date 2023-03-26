@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// no-shuffle:
-//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
-//   dependencies have been fixed.
-//   https://github.com/flutter/flutter/issues/85160
-//   Fails with "flutter test --test-randomize-ordering-seed=456"
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
 library;
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
@@ -385,6 +380,31 @@ void main() {
       );
     },
   );
+
+  testWidgets('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
+
+    // True
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(autofocus: true),
+      ),
+    );
+    await tester.pump();
+    EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.cursorOpacityAnimates, true);
+
+    // False
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoTextField(autofocus: true, cursorOpacityAnimates: false),
+      ),
+    );
+    await tester.pump();
+    editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.cursorOpacityAnimates, false);
+  });
 
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically',
@@ -2074,13 +2094,11 @@ void main() {
           case TargetPlatform.macOS:
           case TargetPlatform.iOS:
             expect(find.byType(CupertinoButton), findsNWidgets(3));
-            break;
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             expect(find.byType(CupertinoButton), findsNWidgets(4));
-            break;
         }
       }
     },
@@ -2326,13 +2344,11 @@ void main() {
           case TargetPlatform.macOS:
           case TargetPlatform.iOS:
             matchToolbarButtons = findsNWidgets(3);
-            break;
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             matchToolbarButtons = findsNWidgets(4);
-            break;
         }
       }
       expect(find.byType(CupertinoButton), matchToolbarButtons);
@@ -3108,7 +3124,7 @@ void main() {
     );
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
-    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-309.30, epsilon: 1));
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-310.30, epsilon: 1));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms', (WidgetTester tester) async {
@@ -3427,13 +3443,11 @@ void main() {
         case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           matchToolbarButtons = findsNWidgets(3);
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           matchToolbarButtons = findsNWidgets(4);
-          break;
       }
     }
     expect(find.byType(CupertinoButton), matchToolbarButtons);
@@ -4813,7 +4827,7 @@ void main() {
 
     // The ListView has scrolled to keep the TextField and cursor handle
     // visible.
-    expect(scrollController.offset, 25.0);
+    expect(scrollController.offset, 27.0);
   });
 
   testWidgets('disabled state golden', (WidgetTester tester) async {
@@ -4914,14 +4928,12 @@ void main() {
           // On Apple platforms, dragging the base handle makes it the extent.
           expect(controller.selection.baseOffset, testValue.length);
           expect(controller.selection.extentOffset, toOffset);
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(controller.selection.baseOffset, toOffset);
           expect(controller.selection.extentOffset, testValue.length);
-          break;
       }
 
       // The scroll area of text field should not move.
@@ -5003,9 +5015,11 @@ void main() {
 
   group('Text selection toolbar', () {
     testWidgets('Collapsed selection works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       TextEditingController controller;
       EditableTextState state;
       Offset bottomLeftSelectionPosition;
@@ -5183,15 +5197,14 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -5253,15 +5266,14 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       EditableText.debugDeterministicCursor = true;
-      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
-      tester.binding.window.devicePixelRatioTestValue = 1;
       final TextEditingController controller;
       final EditableTextState state;
 
@@ -5327,9 +5339,6 @@ void main() {
           ),
         ),
       );
-
-      tester.binding.window.clearPhysicalSizeTestValue();
-      tester.binding.window.clearDevicePixelRatioTestValue();
     });
 
     // This is a regression test for
@@ -6604,7 +6613,6 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 0);
-        break;
 
       // Other platforms start from the previous selection.
       case TargetPlatform.android:
@@ -6612,7 +6620,6 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 35);
-        break;
     }
     expect(controller.selection.extentOffset, 20);
   }, variant: TargetPlatformVariant.all());
@@ -7083,7 +7090,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -7093,7 +7099,6 @@ void main() {
         expect(find.text('Cut'), findsNothing);
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsOneWidget);
-        break;
     }
 
     // Right click the first word.
@@ -7109,7 +7114,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -7119,7 +7123,6 @@ void main() {
         expect(find.text('Cut'), findsNothing);
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsNothing);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),

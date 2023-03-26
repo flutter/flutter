@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'elevation_overlay.dart';
 import 'material.dart';
@@ -80,8 +81,8 @@ class BottomAppBar extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   ///
-  /// Typically this the child will be a [Row], with the first child
-  /// being an [IconButton] with the [Icons.menu] icon.
+  /// Typically the child will be a [Row] whose first child
+  /// is an [IconButton] with the [Icons.menu] icon.
   final Widget? child;
 
   /// The amount of space to surround the child inside the bounds of the [BottomAppBar].
@@ -293,7 +294,7 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Token database version: v0_162
 
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
-  const _BottomAppBarDefaultsM3(this.context)
+  _BottomAppBarDefaultsM3(this.context)
     : super(
       elevation: 3.0,
       height: 80.0,
@@ -301,15 +302,16 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
     );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color? get color => Theme.of(context).colorScheme.surface;
+  Color? get color => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color get shadowColor => Colors.transparent;
+  Color? get shadowColor => Colors.transparent;
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomAppBar

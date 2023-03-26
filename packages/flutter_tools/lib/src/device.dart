@@ -17,7 +17,6 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
-import 'ios/iproxy.dart';
 import 'project.dart';
 import 'vmservice.dart';
 
@@ -878,6 +877,23 @@ class _NoMemoryInfo implements MemoryInfo {
   Map<String, Object> toJson() => <String, Object>{};
 }
 
+enum ImpellerStatus {
+  platformDefault._(null),
+  enabled._(true),
+  disabled._(false);
+
+  const ImpellerStatus._(this.asBool);
+
+  factory ImpellerStatus.fromBool(bool? b) {
+    if (b == null) {
+      return platformDefault;
+    }
+    return b ? enabled : disabled;
+  }
+
+  final bool? asBool;
+}
+
 class DebuggingOptions {
   DebuggingOptions.enabled(
     this.buildInfo, {
@@ -919,9 +935,9 @@ class DebuggingOptions {
     this.fastStart = false,
     this.nullAssertions = false,
     this.nativeNullAssertions = false,
-    this.enableImpeller = false,
+    this.enableImpeller = ImpellerStatus.platformDefault,
     this.uninstallFirst = false,
-    this.serveObservatory = true,
+    this.serveObservatory = false,
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
    }) : debuggingEnabled = true;
@@ -940,7 +956,7 @@ class DebuggingOptions {
       this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
-      this.enableImpeller = false,
+      this.enableImpeller = ImpellerStatus.platformDefault,
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
@@ -1052,7 +1068,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
-  final bool enableImpeller;
+  final ImpellerStatus enableImpeller;
   final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
@@ -1098,7 +1114,7 @@ class DebuggingOptions {
     String? route,
     Map<String, Object?> platformArgs, {
     bool ipv6 = false,
-    IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.none
+    DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
   }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
@@ -1129,7 +1145,8 @@ class DebuggingOptions {
       if (purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
-      if (enableImpeller) '--enable-impeller',
+      if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
+      if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
@@ -1137,7 +1154,7 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && hostVmServicePort != null)
         '--vm-service-port=$hostVmServicePort',
       // Tell the VM service to listen on all interfaces, don't restrict to the loopback.
-      if (interfaceType == IOSDeviceConnectionInterface.network)
+      if (interfaceType == DeviceConnectionInterface.wireless)
         '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
       if (enableEmbedderApi) '--enable-embedder-api',
     ];
@@ -1183,7 +1200,7 @@ class DebuggingOptions {
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
-    'enableImpeller': enableImpeller,
+    'enableImpeller': enableImpeller.asBool,
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1231,7 +1248,7 @@ class DebuggingOptions {
       fastStart: json['fastStart']! as bool,
       nullAssertions: json['nullAssertions']! as bool,
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
-      enableImpeller: (json['enableImpeller'] as bool?) ?? false,
+      enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,

@@ -89,6 +89,14 @@ class AndroidDevice extends Device {
   final String modelID;
   final String? deviceCodeName;
 
+  @override
+  // Wirelessly paired Android devices should have `adb-tls-connect` in the id.
+  // Source: https://android.googlesource.com/platform/packages/modules/adb/+/f4ba8d73079b99532069dbe888a58167b8723d6c/adb_mdns.h#30
+  DeviceConnectionInterface get connectionInterface =>
+      id.contains('adb-tls-connect')
+          ? DeviceConnectionInterface.wireless
+          : DeviceConnectionInterface.attached;
+
   late final Future<Map<String, String>> _properties = () async {
     Map<String, String> properties = <String, String>{};
 
@@ -544,16 +552,12 @@ class AndroidDevice extends Device {
     switch (devicePlatform) {
       case TargetPlatform.android_arm:
         androidArch = AndroidArch.armeabi_v7a;
-        break;
       case TargetPlatform.android_arm64:
         androidArch = AndroidArch.arm64_v8a;
-        break;
       case TargetPlatform.android_x64:
         androidArch = AndroidArch.x86_64;
-        break;
       case TargetPlatform.android_x86:
         androidArch = AndroidArch.x86;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.darwin:
       case TargetPlatform.fuchsia_arm64:
@@ -652,8 +656,10 @@ class AndroidDevice extends Device {
       ...<String>['--ez', 'cache-sksl', 'true'],
       if (debuggingOptions.purgePersistentCache)
         ...<String>['--ez', 'purge-persistent-cache', 'true'],
-      if (debuggingOptions.enableImpeller)
+      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
         ...<String>['--ez', 'enable-impeller', 'true'],
+      if (debuggingOptions.enableImpeller == ImpellerStatus.disabled)
+        ...<String>['--ez', 'enable-impeller', 'false'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
@@ -939,25 +945,18 @@ AndroidMemoryInfo parseMeminfoDump(String input) {
       switch (key) {
         case AndroidMemoryInfo._kJavaHeapKey:
           androidMemoryInfo.javaHeap = value;
-          break;
         case AndroidMemoryInfo._kNativeHeapKey:
           androidMemoryInfo.nativeHeap = value;
-          break;
         case AndroidMemoryInfo._kCodeKey:
           androidMemoryInfo.code = value;
-          break;
         case AndroidMemoryInfo._kStackKey:
           androidMemoryInfo.stack = value;
-          break;
         case AndroidMemoryInfo._kGraphicsKey:
           androidMemoryInfo.graphics = value;
-          break;
         case AndroidMemoryInfo._kPrivateOtherKey:
           androidMemoryInfo.privateOther = value;
-          break;
         case AndroidMemoryInfo._kSystemKey:
           androidMemoryInfo.system = value;
-          break;
       }
   });
   return androidMemoryInfo;
@@ -1097,6 +1096,11 @@ class AdbLogReader extends DeviceLogReader {
     RegExp(r'^[F]\/[\S^:]+:\s+'),
   ];
 
+  // E/SurfaceSyncer(22636): Failed to find sync for id=9
+  // Some versions of Android spew this out. It is inactionable to the end user
+  // and causes no problems for the application.
+  static final RegExp _surfaceSyncerSpam = RegExp(r'^E/SurfaceSyncer\(\s*\d+\): Failed to find sync for id=\d+');
+
   // 'F/libc(pid): Fatal signal 11'
   static final RegExp _fatalLog = RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
 
@@ -1151,7 +1155,7 @@ class AdbLogReader extends DeviceLogReader {
           }
         }
       } else if (appPid != null && int.parse(logMatch.group(1)!) == appPid) {
-        acceptLine = true;
+        acceptLine = !_surfaceSyncerSpam.hasMatch(line);
 
         if (_fatalLog.hasMatch(line)) {
           // Hit fatal signal, app is now crashing

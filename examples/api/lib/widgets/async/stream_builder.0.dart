@@ -87,7 +87,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       child: Text('Select a lot'),
                     ),
                   ];
-                  break;
                 case ConnectionState.waiting:
                   children = const <Widget>[
                     SizedBox(
@@ -100,7 +99,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       child: Text('Awaiting bids...'),
                     ),
                   ];
-                  break;
                 case ConnectionState.active:
                   children = <Widget>[
                     const Icon(
@@ -113,7 +111,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       child: Text('\$${snapshot.data}'),
                     ),
                   ];
-                  break;
                 case ConnectionState.done:
                   children = <Widget>[
                     const Icon(
@@ -126,7 +123,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       child: Text('\$${snapshot.data} (closed)'),
                     ),
                   ];
-                  break;
               }
             }
 

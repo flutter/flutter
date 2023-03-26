@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -719,7 +718,7 @@ void main() {
         dartEntrypointArgs: <String>['a', 'b'],
         dartFlags: 'c',
         deviceVmServicePort: 1234,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.enabled,
         enableDartProfiling: false,
         enableEmbedderApi: true,
       );
@@ -758,8 +757,8 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
+        enableImpeller: ImpellerStatus.disabled,
         nullAssertions: true,
-        enableImpeller: true,
         deviceVmServicePort: 0,
         hostVmServicePort: 1,
       );
@@ -796,7 +795,7 @@ void main() {
           '--purge-persistent-cache',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
           '--vm-service-port=0',
         ].join(' '),
       );
@@ -832,7 +831,7 @@ void main() {
         EnvironmentType.physical,
         null,
         <String, Object?>{},
-        interfaceType: IOSDeviceConnectionInterface.network,
+        interfaceType: DeviceConnectionInterface.wireless,
       );
 
       expect(
@@ -856,7 +855,7 @@ void main() {
         null,
         <String, Object?>{},
         ipv6: true,
-        interfaceType: IOSDeviceConnectionInterface.network,
+        interfaceType: DeviceConnectionInterface.wireless,
       );
 
       expect(
@@ -875,7 +874,7 @@ void main() {
         BuildInfo.debug,
         traceAllowlist: 'foo',
         cacheSkSL: true,
-        enableImpeller: true,
+        enableImpeller: ImpellerStatus.disabled,
       );
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
@@ -894,7 +893,7 @@ void main() {
           '--cache-sksl',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
         ].join(' '),
       );
     });
@@ -918,8 +917,8 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
+        enableImpeller: ImpellerStatus.disabled,
         nullAssertions: true,
-        enableImpeller: true,
         deviceVmServicePort: 0,
         hostVmServicePort: 1,
       );
@@ -956,7 +955,7 @@ void main() {
           '--purge-persistent-cache',
           '--route=/test',
           '--trace-startup',
-          '--enable-impeller',
+          '--enable-impeller=false',
           '--vm-service-port=1',
         ].join(' '),
       );

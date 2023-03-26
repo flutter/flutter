@@ -101,7 +101,7 @@ dependencies:
     sdk: flutter
 
 environment:
-  sdk: ">=2.0.0-dev.28.0 <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
   flutter: ">=1.5.0"
 ''', flush: true);
 

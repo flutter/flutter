@@ -406,7 +406,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromView(tester.binding.window),
+          data: MediaQueryData.fromView(tester.view),
           child: Navigator(
             initialRoute: '/',
             onGenerateRoute: (RouteSettings settings) {
@@ -728,10 +728,8 @@ void main() {
               buttonBox.localToGlobal(buttonBox.size.bottomRight(Offset.zero)),
               equals(itemBox.localToGlobal(itemBox.size.bottomRight(Offset.zero))),
             );
-            break;
           case TextDirection.ltr:
             expect(buttonBox.localToGlobal(Offset.zero), equals(itemBox.localToGlobal(Offset.zero)));
-            break;
         }
         expect(buttonBox.size.height, equals(itemBox.size.height));
       }
@@ -3167,10 +3165,9 @@ void main() {
     // The default item height is 48.0 pixels and needs two items padding since
     // the menu requires empty space surrounding the menu. Finally, the constraint height
     // is 47.0 pixels for the menu rendering.
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 48.0 * 3 - 1.0);
-    tester.binding.window.devicePixelRatioTestValue = 1;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+    tester.view.physicalSize = const Size(800.0, 48.0 * 3 - 1.0);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
 
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
