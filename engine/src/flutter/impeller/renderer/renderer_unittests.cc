@@ -810,9 +810,6 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
 }
 
 TEST_P(RendererTest, TheImpeller) {
-  if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP_("Temporarily disabled.");
-  }
   using VS = ImpellerVertexShader;
   using FS = ImpellerFragmentShader;
 
