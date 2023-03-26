@@ -84,22 +84,17 @@ PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
 
   if (result == vk::Result::eSuccess) {
     cache_ = std::move(existing_cache);
-    if (cache_info.pInitialData != nullptr) {
-      FML_LOG(INFO) << "Used existing pipeline cache of size: "
-                    << cache_info.initialDataSize << " bytes.";
-    }
   } else {
     // Even though we perform consistency checks because we don't trust the
     // driver, the driver may have additional information that may cause it to
     // reject the cache too.
-    VALIDATION_LOG << "Existing pipeline cache was invalid: "
-                   << vk::to_string(result) << ". Starting with a fresh cache.";
+    FML_LOG(INFO) << "Existing pipeline cache was invalid: "
+                  << vk::to_string(result) << ". Starting with a fresh cache.";
     cache_info.pInitialData = nullptr;
     cache_info.initialDataSize = 0u;
     auto [result2, new_cache] = device_.createPipelineCacheUnique(cache_info);
     if (result2 == vk::Result::eSuccess) {
       cache_ = std::move(new_cache);
-
     } else {
       VALIDATION_LOG << "Could not create new pipeline cache: "
                      << vk::to_string(result2);
@@ -134,6 +129,7 @@ std::shared_ptr<fml::Mapping> PipelineCacheVK::CopyPipelineCacheData() const {
   auto [result, data] = device_.getPipelineCacheData(*cache_);
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not get pipeline cache data to persist.";
+    return nullptr;
   }
   auto shared_data = std::make_shared<std::vector<uint8_t>>();
   std::swap(*shared_data, data);
@@ -160,8 +156,6 @@ void PipelineCacheVK::PersistCacheToDisk() const {
     VALIDATION_LOG << "Could not persist pipeline cache to disk.";
     return;
   }
-  FML_LOG(INFO) << "Persisted pipeline cache of size " << data->GetSize()
-                << " bytes to disk.";
 }
 
 }  // namespace impeller
