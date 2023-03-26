@@ -304,15 +304,18 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
   using VS = TextureFillVertexShader;
   using FS = TextureFillFragmentShader;
 
-  auto texture = texture_.value_or(parent_.GetTexture());
+  auto texture = texture_ ? texture_ : parent_.GetTexture();
+  if (texture == nullptr) {
+    return true;
+  }
+
   std::vector<Rect> texture_coords;
   std::vector<Matrix> transforms;
-  if (subatlas_.has_value()) {
-    auto subatlas = subatlas_.value();
-    texture_coords = use_destination_ ? subatlas->result_texture_coords
-                                      : subatlas->sub_texture_coords;
-    transforms = use_destination_ ? subatlas->result_transforms
-                                  : subatlas->sub_transforms;
+  if (subatlas_) {
+    texture_coords = use_destination_ ? subatlas_->result_texture_coords
+                                      : subatlas_->sub_texture_coords;
+    transforms = use_destination_ ? subatlas_->result_transforms
+                                  : subatlas_->sub_transforms;
   } else {
     texture_coords = parent_.GetTextureCoordinates();
     transforms = parent_.GetTransforms();
