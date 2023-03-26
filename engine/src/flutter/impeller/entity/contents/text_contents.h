@@ -34,7 +34,7 @@ class TextContents final : public Contents {
 
   Color GetColor() const;
 
-  bool CanAcceptOpacity(const Entity& entity) const override;
+  bool CanInheritOpacity(const Entity& entity) const override;
 
   void SetInheritedOpacity(Scalar opacity) override;
 
@@ -56,6 +56,7 @@ class TextContents final : public Contents {
  private:
   TextFrame frame_;
   Color color_;
+  Scalar inherited_opacity_;
   mutable std::shared_ptr<LazyGlyphAtlas> lazy_atlas_;
   Matrix inverse_matrix_;
 

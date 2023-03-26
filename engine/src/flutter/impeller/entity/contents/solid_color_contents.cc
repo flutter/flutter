@@ -20,8 +20,8 @@ void SolidColorContents::SetColor(Color color) {
   color_ = color;
 }
 
-const Color& SolidColorContents::GetColor() const {
-  return color_;
+Color SolidColorContents::GetColor() const {
+  return color_.WithAlpha(color_.alpha * inherited_opacity_);
 }
 
 void SolidColorContents::SetGeometry(std::shared_ptr<Geometry> geometry) {
@@ -29,19 +29,18 @@ void SolidColorContents::SetGeometry(std::shared_ptr<Geometry> geometry) {
 }
 
 // | Contents|
-bool SolidColorContents::CanAcceptOpacity(const Entity& entity) const {
+bool SolidColorContents::CanInheritOpacity(const Entity& entity) const {
   return true;
 }
 
 // | Contents|
 void SolidColorContents::SetInheritedOpacity(Scalar opacity) {
-  auto color = color_;
-  color_ = color.WithAlpha(color.alpha * opacity);
+  inherited_opacity_ = opacity;
 }
 
 std::optional<Rect> SolidColorContents::GetCoverage(
     const Entity& entity) const {
-  if (color_.IsTransparent()) {
+  if (GetColor().IsTransparent()) {
     return std::nullopt;
   }
   if (geometry_ == nullptr) {
@@ -86,7 +85,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   FS::FragInfo frag_info;
-  frag_info.color = color_.Premultiply();
+  frag_info.color = GetColor().Premultiply();
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
   if (!pass.AddCommand(std::move(cmd))) {

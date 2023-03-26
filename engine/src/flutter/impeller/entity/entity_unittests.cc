@@ -2387,8 +2387,10 @@ TEST_P(EntityTest, InheritOpacityTest) {
   // Texture contents can always accept opacity.
   auto texture_contents = std::make_shared<TextureContents>();
   texture_contents->SetOpacity(0.5);
-  ASSERT_TRUE(texture_contents->CanAcceptOpacity(entity));
+  ASSERT_TRUE(texture_contents->CanInheritOpacity(entity));
 
+  texture_contents->SetInheritedOpacity(0.5);
+  ASSERT_EQ(texture_contents->GetOpacity(), 0.25);
   texture_contents->SetInheritedOpacity(0.5);
   ASSERT_EQ(texture_contents->GetOpacity(), 0.25);
 
@@ -2399,8 +2401,10 @@ TEST_P(EntityTest, InheritOpacityTest) {
       Geometry::MakeRect(Rect::MakeLTRB(100, 100, 200, 200)));
   solid_color->SetColor(Color::Blue().WithAlpha(0.5));
 
-  ASSERT_TRUE(solid_color->CanAcceptOpacity(entity));
+  ASSERT_TRUE(solid_color->CanInheritOpacity(entity));
 
+  solid_color->SetInheritedOpacity(0.5);
+  ASSERT_EQ(solid_color->GetColor().alpha, 0.25);
   solid_color->SetInheritedOpacity(0.5);
   ASSERT_EQ(solid_color->GetColor().alpha, 0.25);
 
@@ -2409,12 +2413,14 @@ TEST_P(EntityTest, InheritOpacityTest) {
   auto tiled_texture = std::make_shared<TiledTextureContents>();
   tiled_texture->SetGeometry(
       Geometry::MakeRect(Rect::MakeLTRB(100, 100, 200, 200)));
-  tiled_texture->SetAlpha(0.5);
+  tiled_texture->SetOpacity(0.5);
 
-  ASSERT_TRUE(tiled_texture->CanAcceptOpacity(entity));
+  ASSERT_TRUE(tiled_texture->CanInheritOpacity(entity));
 
   tiled_texture->SetInheritedOpacity(0.5);
-  ASSERT_EQ(tiled_texture->GetAlpha(), 0.25);
+  ASSERT_EQ(tiled_texture->GetOpacity(), 0.25);
+  tiled_texture->SetInheritedOpacity(0.5);
+  ASSERT_EQ(tiled_texture->GetOpacity(), 0.25);
 
   // Text contents can accept opacity if the text frames do not
   // overlap
@@ -2429,18 +2435,20 @@ TEST_P(EntityTest, InheritOpacityTest) {
   text_contents->SetTextFrame(frame);
   text_contents->SetColor(Color::Blue().WithAlpha(0.5));
 
-  ASSERT_TRUE(text_contents->CanAcceptOpacity(entity));
+  ASSERT_TRUE(text_contents->CanInheritOpacity(entity));
 
+  text_contents->SetInheritedOpacity(0.5);
+  ASSERT_EQ(text_contents->GetColor().alpha, 0.25);
   text_contents->SetInheritedOpacity(0.5);
   ASSERT_EQ(text_contents->GetColor().alpha, 0.25);
 
   // Clips and restores trivially accept opacity.
-  ASSERT_TRUE(ClipContents().CanAcceptOpacity(entity));
-  ASSERT_TRUE(ClipRestoreContents().CanAcceptOpacity(entity));
+  ASSERT_TRUE(ClipContents().CanInheritOpacity(entity));
+  ASSERT_TRUE(ClipRestoreContents().CanInheritOpacity(entity));
 
   // Runtime effect contents can't accept opacity.
   auto runtime_effect = std::make_shared<RuntimeEffectContents>();
-  ASSERT_FALSE(runtime_effect->CanAcceptOpacity(entity));
+  ASSERT_FALSE(runtime_effect->CanInheritOpacity(entity));
 }
 
 }  // namespace testing

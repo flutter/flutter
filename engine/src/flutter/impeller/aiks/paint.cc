@@ -31,7 +31,7 @@ std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
     auto& source = color_source.value();
     auto contents = source();
     contents->SetGeometry(std::move(geometry));
-    contents->SetAlpha(color.alpha);
+    contents->SetOpacity(color.alpha);
     return contents;
   }
   auto solid_color = std::make_shared<SolidColorContents>();
@@ -46,7 +46,7 @@ std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
     auto& source = color_source.value();
     auto contents = source();
     contents->SetGeometry(geometry);
-    contents->SetAlpha(color.alpha);
+    contents->SetOpacity(color.alpha);
     return contents;
   }
   auto solid_color = std::make_shared<SolidColorContents>();
