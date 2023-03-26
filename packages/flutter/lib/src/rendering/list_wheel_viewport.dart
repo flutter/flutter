@@ -1037,9 +1037,9 @@ class RenderListWheelViewport
   static bool _debugAssertValidPaintTransform(ListWheelParentData parentData) {
     if (parentData.transform == null) {
       throw FlutterError(
-        'Children paint transform happened to be null. \n'
+        'Child paint transform happened to be null. \n'
         '$RenderListWheelViewport normally paints all of the children it has laid out. \n'
-        'Did you forget to update the $ListWheelParentData.transform during the paint() call?. \n'
+        'Did you forget to update the $ListWheelParentData.transform during the paint() call? \n'
         'If this is intetional, change or remove this assertion accordingly.'
       );
     }
