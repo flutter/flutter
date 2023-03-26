@@ -149,7 +149,8 @@ class StrokePathGeometry : public Geometry {
       std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
                          const Point& position,
                          const Point& offset,
-                         Scalar scale)>;
+                         Scalar scale,
+                         bool reverse)>;
   using JoinProc =
       std::function<void(VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
                          const Point& position,
@@ -188,7 +189,6 @@ class StrokePathGeometry : public Geometry {
   CreateSolidStrokeVertices(const Path& path,
                             Scalar stroke_width,
                             Scalar scaled_miter_limit,
-                            Cap cap,
                             const JoinProc& join_proc,
                             const CapProc& cap_proc,
                             Scalar scale);
