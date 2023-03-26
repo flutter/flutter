@@ -331,33 +331,47 @@ StrokePathGeometry::CapProc StrokePathGeometry::GetCapProc(Cap stroke_cap) {
   switch (stroke_cap) {
     case Cap::kButt:
       cap_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                    const Point& position, const Point& offset, Scalar scale) {
+                    const Point& position, const Point& offset, Scalar scale,
+                    bool reverse) {
+        Point orientation = offset * (reverse ? -1 : 1);
         VS::PerVertexData vtx;
-        vtx.position = position + offset;
+        vtx.position = position + orientation;
         vtx_builder.AppendVertex(vtx);
-        vtx.position = position - offset;
+        vtx.position = position - orientation;
         vtx_builder.AppendVertex(vtx);
       };
       break;
     case Cap::kRound:
       cap_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                    const Point& position, const Point& offset, Scalar scale) {
+                    const Point& position, const Point& offset, Scalar scale,
+                    bool reverse) {
+        Point orientation = offset * (reverse ? -1 : 1);
+
         VS::PerVertexData vtx;
 
         Point forward(offset.y, -offset.x);
         Point forward_normal = forward.Normalize();
 
-        auto arc_points =
-            CubicPathComponent(
-                offset, offset + forward * PathBuilder::kArcApproximationMagic,
-                forward + offset * PathBuilder::kArcApproximationMagic, forward)
-                .CreatePolyline(scale);
+        CubicPathComponent arc;
+        if (reverse) {
+          arc = CubicPathComponent(
+              forward,
+              forward + orientation * PathBuilder::kArcApproximationMagic,
+              orientation + forward * PathBuilder::kArcApproximationMagic,
+              orientation);
+        } else {
+          arc = CubicPathComponent(
+              orientation,
+              orientation + forward * PathBuilder::kArcApproximationMagic,
+              forward + orientation * PathBuilder::kArcApproximationMagic,
+              forward);
+        }
 
-        vtx.position = position + offset;
+        vtx.position = position + orientation;
         vtx_builder.AppendVertex(vtx);
-        vtx.position = position - offset;
+        vtx.position = position - orientation;
         vtx_builder.AppendVertex(vtx);
-        for (const auto& point : arc_points) {
+        for (const auto& point : arc.CreatePolyline(scale)) {
           vtx.position = position + point;
           vtx_builder.AppendVertex(vtx);
           vtx.position = position + (-point).Reflect(forward_normal);
@@ -367,18 +381,21 @@ StrokePathGeometry::CapProc StrokePathGeometry::GetCapProc(Cap stroke_cap) {
       break;
     case Cap::kSquare:
       cap_proc = [](VertexBufferBuilder<VS::PerVertexData>& vtx_builder,
-                    const Point& position, const Point& offset, Scalar scale) {
+                    const Point& position, const Point& offset, Scalar scale,
+                    bool reverse) {
+        Point orientation = offset * (reverse ? -1 : 1);
+
         VS::PerVertexData vtx;
 
         Point forward(offset.y, -offset.x);
 
-        vtx.position = position + offset;
+        vtx.position = position + orientation;
         vtx_builder.AppendVertex(vtx);
-        vtx.position = position - offset;
+        vtx.position = position - orientation;
         vtx_builder.AppendVertex(vtx);
-        vtx.position = position + offset + forward;
+        vtx.position = position + orientation + forward;
         vtx_builder.AppendVertex(vtx);
-        vtx.position = position - offset + forward;
+        vtx.position = position - orientation + forward;
         vtx_builder.AppendVertex(vtx);
       };
       break;
@@ -392,7 +409,6 @@ StrokePathGeometry::CreateSolidStrokeVertices(
     const Path& path,
     Scalar stroke_width,
     Scalar scaled_miter_limit,
-    Cap cap,
     const StrokePathGeometry::JoinProc& join_proc,
     const StrokePathGeometry::CapProc& cap_proc,
     Scalar scale) {
@@ -423,8 +439,8 @@ StrokePathGeometry::CreateSolidStrokeVertices(
     switch (contour_end_point_i - contour_start_point_i) {
       case 1: {
         Point p = polyline.points[contour_start_point_i];
-        cap_proc(vtx_builder, p, {-stroke_width * 0.5f, 0}, scale);
-        cap_proc(vtx_builder, p, {stroke_width * 0.5f, 0}, scale);
+        cap_proc(vtx_builder, p, {-stroke_width * 0.5f, 0}, scale, false);
+        cap_proc(vtx_builder, p, {stroke_width * 0.5f, 0}, scale, false);
         continue;
       }
       case 0:
@@ -461,17 +477,11 @@ StrokePathGeometry::CreateSolidStrokeVertices(
 
     // Generate start cap.
     if (!polyline.contours[contour_i].is_closed) {
-      Vector2 direction;
-      if (cap == Cap::kButt) {
-        direction =
-            Vector2(contour.start_direction.y, -contour.start_direction.x);
-      } else {
-        direction =
-            Vector2(-contour.start_direction.y, contour.start_direction.x);
-      }
-      auto cap_offset = direction * stroke_width * 0.5;
+      auto cap_offset =
+          Vector2(-contour.start_direction.y, contour.start_direction.x) *
+          stroke_width * 0.5;  // Counterclockwise normal
       cap_proc(vtx_builder, polyline.points[contour_start_point_i], cap_offset,
-               scale);
+               scale, true);
     }
 
     // Generate contour geometry.
@@ -500,9 +510,9 @@ StrokePathGeometry::CreateSolidStrokeVertices(
     if (!polyline.contours[contour_i].is_closed) {
       auto cap_offset =
           Vector2(-contour.end_direction.y, contour.end_direction.x) *
-          stroke_width * 0.5;
+          stroke_width * 0.5;  // Clockwise normal
       cap_proc(vtx_builder, polyline.points[contour_end_point_i - 1],
-               cap_offset, scale);
+               cap_offset, scale, false);
     } else {
       join_proc(vtx_builder, polyline.points[contour_start_point_i], offset,
                 contour_first_offset, scaled_miter_limit, scale);
@@ -529,7 +539,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
 
   auto& host_buffer = pass.GetTransientsBuffer();
   auto vertex_builder = CreateSolidStrokeVertices(
-      path_, stroke_width, miter_limit_ * stroke_width_ * 0.5, stroke_cap_,
+      path_, stroke_width, miter_limit_ * stroke_width_ * 0.5,
       GetJoinProc(stroke_join_), GetCapProc(stroke_cap_),
       entity.GetTransformation().GetMaxBasisLength());
 
@@ -561,7 +571,7 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
 
   auto& host_buffer = pass.GetTransientsBuffer();
   auto stroke_builder = CreateSolidStrokeVertices(
-      path_, stroke_width, miter_limit_ * stroke_width_ * 0.5, stroke_cap_,
+      path_, stroke_width, miter_limit_ * stroke_width_ * 0.5,
       GetJoinProc(stroke_join_), GetCapProc(stroke_cap_),
       entity.GetTransformation().GetMaxBasisLength());
 
