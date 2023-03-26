@@ -41,10 +41,22 @@ void SceneShader::Create(Dart_Handle wrapper, Dart_Handle scene_node_handle) {
 
 void SceneShader::SetCameraTransform(const tonic::Float64List& matrix4) {
   camera_transform_ =
-      impeller::Matrix(matrix4[0], matrix4[1], matrix4[2], matrix4[3],    //
-                       matrix4[4], matrix4[5], matrix4[6], matrix4[7],    //
-                       matrix4[8], matrix4[9], matrix4[10], matrix4[11],  //
-                       matrix4[12], matrix4[13], matrix4[14], matrix4[15]);
+      impeller::Matrix(static_cast<impeller::Scalar>(matrix4[0]),
+                       static_cast<impeller::Scalar>(matrix4[1]),
+                       static_cast<impeller::Scalar>(matrix4[2]),
+                       static_cast<impeller::Scalar>(matrix4[3]),
+                       static_cast<impeller::Scalar>(matrix4[4]),
+                       static_cast<impeller::Scalar>(matrix4[5]),
+                       static_cast<impeller::Scalar>(matrix4[6]),
+                       static_cast<impeller::Scalar>(matrix4[7]),
+                       static_cast<impeller::Scalar>(matrix4[8]),
+                       static_cast<impeller::Scalar>(matrix4[9]),
+                       static_cast<impeller::Scalar>(matrix4[10]),
+                       static_cast<impeller::Scalar>(matrix4[11]),
+                       static_cast<impeller::Scalar>(matrix4[12]),
+                       static_cast<impeller::Scalar>(matrix4[13]),
+                       static_cast<impeller::Scalar>(matrix4[14]),
+                       static_cast<impeller::Scalar>(matrix4[15]));
 }
 
 static impeller::Matrix DefaultCameraTransform() {
@@ -52,7 +64,7 @@ static impeller::Matrix DefaultCameraTransform() {
   //              make the DlSceneColorSource camera transform optional and
   //              defer this default (or parameterize the camera instead).
   return impeller::Matrix::MakePerspective(
-             impeller::Degrees(45), impeller::ISize{800, 600}, 0.1, 1000) *
+             impeller::Degrees(45), impeller::ISize{800, 600}, 0.1f, 1000) *
          impeller::Matrix::MakeLookAt({0, 0, -5}, {0, 0, 0}, {0, 1, 0});
 }
 

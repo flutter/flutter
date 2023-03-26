@@ -24,8 +24,8 @@ class Camera {
   Vector3 position_ = Vector3();
   Vector3 target_ = Vector3(0, 0, -1);
   Vector3 up_ = Vector3(0, -1, 0);
-  Scalar z_near_ = 0.1;
-  Scalar z_far_ = 1000;
+  Scalar z_near_ = 0.1f;
+  Scalar z_far_ = 1000.0f;
 
   mutable std::optional<Matrix> transform_;
 };
