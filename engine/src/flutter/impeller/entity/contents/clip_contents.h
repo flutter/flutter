@@ -42,7 +42,7 @@ class ClipContents final : public Contents {
               const Entity& entity,
               RenderPass& pass) const override;
   // |Contents|
-  bool CanAcceptOpacity(const Entity& entity) const override;
+  bool CanInheritOpacity(const Entity& entity) const override;
 
   // |Contents|
   void SetInheritedOpacity(Scalar opacity) override;
@@ -84,7 +84,7 @@ class ClipRestoreContents final : public Contents {
               RenderPass& pass) const override;
 
   // |Contents|
-  bool CanAcceptOpacity(const Entity& entity) const override;
+  bool CanInheritOpacity(const Entity& entity) const override;
 
   // |Contents|
   void SetInheritedOpacity(Scalar opacity) override;

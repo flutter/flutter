@@ -66,7 +66,7 @@ class TextureContents final : public Contents {
               RenderPass& pass) const override;
 
   // |Contents|
-  bool CanAcceptOpacity(const Entity& entity) const override;
+  bool CanInheritOpacity(const Entity& entity) const override;
 
   // |Contents|
   void SetInheritedOpacity(Scalar opacity) override;
@@ -83,6 +83,7 @@ class TextureContents final : public Contents {
   SamplerDescriptor sampler_descriptor_ = {};
   Rect source_rect_;
   Scalar opacity_ = 1.0f;
+  Scalar inherited_opacity_ = 1.0f;
   bool defer_applying_opacity_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextureContents);

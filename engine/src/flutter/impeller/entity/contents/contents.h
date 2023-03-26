@@ -94,7 +94,7 @@ class Contents {
   ///        a way that makes accepting opacity impossible. It is always safe
   ///        to return false, especially if computing overlap would be
   ///        computationally expensive.
-  virtual bool CanAcceptOpacity(const Entity& entity) const;
+  virtual bool CanInheritOpacity(const Entity& entity) const;
 
   /// @brief Inherit the provided opacity.
   ///
