@@ -1271,6 +1271,12 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
   }
 }
 
+/// Recognizes taps along with movement in the horizontal direction.
+///
+/// See also:
+///
+///  * [HorizontalDragGestureRecognizer], for a similar recognizer that only recognizes
+///  horizontal movement.
 class TapAndHorizontalDragGestureRecognizer extends TapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
@@ -1295,8 +1301,14 @@ class TapAndHorizontalDragGestureRecognizer extends TapAndDragGestureRecognizer 
   String get debugDescription => 'tap and horizontal drag';
 }
 
+/// Recognizes taps along with both horizontal and vertical movement.
+///
+/// See also:
+///
+///  * [PanGestureRecognizer], for a similar recognizer that only recognizes
+///  movement.
 class TapAndPanGestureRecognizer extends TapAndDragGestureRecognizer {
-  /// Create a gesture recognizer for tracking movement on a plane.
+  /// Create a gesture recognizer for interactions on a plane.
   TapAndPanGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
