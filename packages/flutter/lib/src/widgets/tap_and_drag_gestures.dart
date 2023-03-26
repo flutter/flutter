@@ -686,7 +686,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
 /// pointer does travel enough distance then the recognizer that entered the arena
 /// first will win. The gesture detected in this case is a drag.
-class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
+abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
@@ -849,9 +849,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   final Set<int> _acceptedActivePointers = <int>{};
 
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
-    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
-  }
+  Offset _getDeltaForDetails(Offset delta);
+  double? _getPrimaryValueFromOffset(Offset value);
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
 
   // Drag updates may require throttling to avoid excessive updating, such as for text layouts in text
   // fields. The frequency of invocations is controlled by the [dragUpdateThrottleFrequency].
@@ -1085,11 +1085,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   void _checkDrag(PointerMoveEvent event) {
     final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+    final Offset movedLocally = _getDeltaForDetails(event.localDelta);
     _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
       transform: localToGlobalTransform,
-      untransformedDelta: event.localDelta,
+      untransformedDelta: movedLocally,
       untransformedEndPosition: event.localPosition
-    ).distance * 1.sign;
+    ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
     if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
       _start = event;
       _dragState = _DragState.accepted;
@@ -1268,4 +1269,50 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _deadlineTimer = null;
     }
   }
+}
+
+class TapAndHorizontalDragGestureRecognizer extends TapAndDragGestureRecognizer {
+  /// Create a gesture recognizer for interactions in the horizontal axis.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
+  TapAndHorizontalDragGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+  });
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
+
+  @override
+  double _getPrimaryValueFromOffset(Offset value) => value.dx;
+
+  @override
+  String get debugDescription => 'tap and horizontal drag';
+}
+
+class TapAndPanGestureRecognizer extends TapAndDragGestureRecognizer {
+  /// Create a gesture recognizer for tracking movement on a plane.
+  TapAndPanGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+  });
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
+    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double? _getPrimaryValueFromOffset(Offset value) => null;
+
+  @override
+  String get debugDescription => 'tap and pan';
 }
