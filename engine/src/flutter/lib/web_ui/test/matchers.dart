@@ -255,53 +255,38 @@ String canonicalizeHtml(
     switch (replacementTag) {
       case 'flt-scene':
         replacementTag = 's';
-        break;
       case 'flt-transform':
         replacementTag = 't';
-        break;
       case 'flt-opacity':
         replacementTag = 'o';
-        break;
       case 'flt-clip':
         final String? clipType = original.attributes['clip-type'];
         switch (clipType) {
           case 'rect':
             replacementTag = 'clip';
-            break;
           case 'rrect':
             replacementTag = 'rclip';
-            break;
           case 'physical-shape':
             replacementTag = 'pshape';
-            break;
           default:
             throw Exception('Unknown clip type: $clipType');
         }
-        break;
       case 'flt-clip-interior':
         replacementTag = 'clip-i';
-        break;
       case 'flt-picture':
         replacementTag = 'pic';
-        break;
       case 'flt-canvas':
         replacementTag = 'c';
-        break;
       case 'flt-dom-canvas':
         replacementTag = 'd';
-        break;
       case 'flt-semantics':
         replacementTag = 'sem';
-        break;
       case 'flt-semantics-container':
         replacementTag = 'sem-c';
-        break;
       case 'flt-semantics-img':
         replacementTag = 'sem-img';
-        break;
       case 'flt-semantics-text-field':
         replacementTag = 'sem-tf';
-        break;
     }
 
     final html_package.Element replacement =

@@ -804,19 +804,16 @@ class BitmapCanvas extends EngineCanvas {
       case ui.BlendMode.clear:
       case ui.BlendMode.dstOut:
         style.position = 'absolute';
-        break;
       case ui.BlendMode.src:
       case ui.BlendMode.srcOver:
         style
           ..position = 'absolute'
           ..backgroundColor = colorToCssString(filterColor)!;
-        break;
       case ui.BlendMode.dst:
       case ui.BlendMode.dstIn:
         style
           ..position = 'absolute'
           ..backgroundImage = "url('${image.imgElement.src}')";
-        break;
       default:
         style
           ..position = 'absolute'

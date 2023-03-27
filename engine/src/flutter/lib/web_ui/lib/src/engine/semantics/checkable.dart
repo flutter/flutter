@@ -62,13 +62,10 @@ class Checkable extends RoleManager {
       switch (_kind) {
         case _CheckableKind.checkbox:
           semanticsObject.setAriaRole('checkbox', true);
-          break;
         case _CheckableKind.radio:
           semanticsObject.setAriaRole('radio', true);
-          break;
         case _CheckableKind.toggle:
           semanticsObject.setAriaRole('switch', true);
-          break;
       }
 
       /// Adding disabled and aria-disabled attribute to notify the assistive
@@ -90,13 +87,10 @@ class Checkable extends RoleManager {
     switch (_kind) {
       case _CheckableKind.checkbox:
         semanticsObject.setAriaRole('checkbox', false);
-        break;
       case _CheckableKind.radio:
         semanticsObject.setAriaRole('radio', false);
-        break;
       case _CheckableKind.toggle:
         semanticsObject.setAriaRole('switch', false);
-        break;
     }
     _removeDisabledAttribute();
   }
