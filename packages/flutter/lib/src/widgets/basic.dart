@@ -4651,7 +4651,7 @@ class Flex extends MultiChildRenderObjectWidget implements _FlexBase {
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     super.children,
-  }): assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
+  }) : assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
 
   @override
   final Axis direction;
