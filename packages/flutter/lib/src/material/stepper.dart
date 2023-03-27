@@ -165,7 +165,7 @@ class Step {
   final bool isActive;
 
   /// Only [StepperType.horizontal], Optional widget that appears under the [title].
-  /// By default, uses the `bodyText1` theme.
+  /// By default, uses the `bodyLarge` theme.
   final Widget? label;
 }
 
@@ -525,18 +525,26 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 padding: const MaterialStatePropertyAll<EdgeInsetsGeometry>(buttonPadding),
                 shape: const MaterialStatePropertyAll<OutlinedBorder>(buttonShape),
               ),
-              child: Text(localizations.continueButtonLabel),
+              child: Text(
+                themeData.useMaterial3
+                  ? localizations.continueButtonLabel
+                  : localizations.continueButtonLabel.toUpperCase()
+              ),
             ),
             Container(
               margin: const EdgeInsetsDirectional.only(start: 8.0),
               child: TextButton(
                 onPressed: widget.onStepCancel,
                 style: TextButton.styleFrom(
-                  primary: cancelColor,
+                  foregroundColor: cancelColor,
                   padding: buttonPadding,
                   shape: buttonShape,
                 ),
-                child: Text(localizations.cancelButtonLabel),
+                child: Text(
+                  themeData.useMaterial3
+                    ? localizations.cancelButtonLabel
+                    : localizations.cancelButtonLabel.toUpperCase()
+                ),
               ),
             ),
           ],
@@ -554,13 +562,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       case StepState.indexed:
       case StepState.editing:
       case StepState.complete:
-        return textTheme.bodyText1!;
+        return textTheme.bodyLarge!;
       case StepState.disabled:
-        return textTheme.bodyText1!.copyWith(
+        return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kDisabledDark : _kDisabledLight,
         );
       case StepState.error:
-        return textTheme.bodyText1!.copyWith(
+        return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kErrorDark : _kErrorLight,
         );
     }
@@ -575,13 +583,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       case StepState.indexed:
       case StepState.editing:
       case StepState.complete:
-        return textTheme.caption!;
+        return textTheme.bodySmall!;
       case StepState.disabled:
-        return textTheme.caption!.copyWith(
+        return textTheme.bodySmall!.copyWith(
           color: _isDark() ? _kDisabledDark : _kDisabledLight,
         );
       case StepState.error:
-        return textTheme.caption!.copyWith(
+        return textTheme.bodySmall!.copyWith(
           color: _isDark() ? _kErrorDark : _kErrorLight,
         );
     }
@@ -596,13 +604,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       case StepState.indexed:
       case StepState.editing:
       case StepState.complete:
-        return textTheme.bodyText1!;
+        return textTheme.bodyLarge!;
       case StepState.disabled:
-        return textTheme.bodyText1!.copyWith(
+        return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kDisabledDark : _kDisabledLight,
         );
       case StepState.error:
-        return textTheme.bodyText1!.copyWith(
+        return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kErrorDark : _kErrorLight,
         );
     }
@@ -641,7 +649,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         child: widget.steps[index].label!,
       );
     }
-    return const SizedBox();
+    return const SizedBox.shrink();
   }
 
   Widget _buildVerticalHeader(int index) {

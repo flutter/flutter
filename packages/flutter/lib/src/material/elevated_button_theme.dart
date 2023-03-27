@@ -8,12 +8,15 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ButtonStyle] that overrides the default appearance of
 /// [ElevatedButton]s when it's used with [ElevatedButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.elevatedButtonTheme].
 ///
 /// The [style]'s properties override [ElevatedButton]'s default style,
-/// i.e.  the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
+/// i.e. the [ButtonStyle] returned by [ElevatedButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///

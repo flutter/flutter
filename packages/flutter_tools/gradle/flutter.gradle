@@ -30,19 +30,20 @@ import org.gradle.util.VersionNumber
 /** For apps only. Provides the flutter extension used in app/build.gradle. */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 31
+    static int compileSdkVersion = 33
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 16
 
     /** Sets the targetSdkVersion used by default in Flutter app projects. */
-    static int targetSdkVersion = 31
+    static int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
-     * Chosen as default version of the AGP version below.
+     * Chosen as default version of the AGP version below as found in
+     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp
      */
-    static String ndkVersion = "21.1.6352462"
+    static String ndkVersion = "23.1.7779620"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -61,7 +62,7 @@ buildscript {
     }
     dependencies {
         /* When bumping, also update ndkVersion above. */
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:7.3.0'
     }
 }
 
@@ -93,6 +94,8 @@ class FlutterPlugin implements Plugin<Project> {
     private static final String ARCH_ARM64      = "arm64-v8a";
     private static final String ARCH_X86        = "x86";
     private static final String ARCH_X86_64     = "x86_64";
+
+    private static final String INTERMEDIATES_DIR = "intermediates";
 
     /** Maps platforms to ABI architectures. */
     private static final Map PLATFORM_ARCH_MAP = [
@@ -142,7 +145,7 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Flutter Docs Website URLs for help messages.
      */
-    private final String kWebsiteDeploymentAndroidBuildConfig = 'https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration'
+    private final String kWebsiteDeploymentAndroidBuildConfig = 'https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration'
 
     @Override
     void apply(Project project) {
@@ -233,6 +236,24 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
+        if (project.hasProperty("multidex-enabled") &&
+            project.property("multidex-enabled").toBoolean()) {
+            String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                "gradle", "flutter_multidex_keepfile.txt")
+            project.android {
+                buildTypes {
+                    release {
+                        multiDexKeepFile project.file(flutterMultidexKeepfile)
+                    }
+                }
+            }
+            project.dependencies {
+                implementation "androidx.multidex:multidex:2.0.1"
+            }
+        }
+        // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
+        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "flutter.gradle.kts")
+
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
         project.android.buildTypes {
@@ -259,38 +280,6 @@ class FlutterPlugin implements Plugin<Project> {
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
                     proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
-                }
-            }
-        }
-
-        if (project.hasProperty("multidex-enabled") &&
-            project.property("multidex-enabled").toBoolean() &&
-            project.android.defaultConfig.minSdkVersion <= 20) {
-            String flutterMultidexKeepfile = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
-                "gradle", "flutter_multidex_keepfile.txt")
-            project.android {
-                defaultConfig {
-                    multiDexEnabled true
-                    manifestPlaceholders = [applicationName: "io.flutter.app.FlutterMultiDexApplication"]
-                }
-                buildTypes {
-                    release {
-                        multiDexKeepFile project.file(flutterMultidexKeepfile)
-                    }
-                }
-            }
-            project.dependencies {
-                implementation "androidx.multidex:multidex:2.0.1"
-            }
-        } else {
-            String baseApplicationName = "android.app.Application"
-            if (project.hasProperty("base-application-name")) {
-                baseApplicationName = project.property("base-application-name")
-            }
-            project.android {
-                defaultConfig {
-                    // Setting to android.app.Application is the same as omitting the attribute.
-                    manifestPlaceholders = [applicationName: baseApplicationName]
                 }
             }
         }
@@ -482,7 +471,7 @@ class FlutterPlugin implements Plugin<Project> {
                             project.logger.error("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n  ...\n}\n")
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
-                            project.logger.error("One or more plugins require a higher Android NDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion ${maxPluginNdkVersion}\n  ...\n}\n")
+                            project.logger.error("One or more plugins require a higher Android NDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion \"${maxPluginNdkVersion}\"\n  ...\n}\n")
                         }
                     }
                 }
@@ -578,7 +567,7 @@ class FlutterPlugin implements Plugin<Project> {
         return []
     }
 
-    private static String toCammelCase(List<String> parts) {
+    private static String toCamelCase(List<String> parts) {
         if (parts.empty) {
             return ""
         }
@@ -743,6 +732,7 @@ class FlutterPlugin implements Plugin<Project> {
         return target
     }
 
+    // TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
     /**
      * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
      * When building APKs, this causes an issue where building release requires the debug JAR,
@@ -752,7 +742,9 @@ class FlutterPlugin implements Plugin<Project> {
      * from the command line.
      *
      * The AGP team said that this issue is fixed in Gradle 7.0, which isn't released at the
-     * time of adding this code. Once released, this can be removed.
+     * time of adding this code. Once released, this can be removed. However, after updating to
+     * AGP/Gradle 7.2.0/7.5, removing this hack still causes build failures. Futher
+     * investigation necessary to remove this.
      *
      * Tested cases:
      * * `./gradlew assembleRelease`
@@ -878,7 +870,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             String variantBuildMode = buildModeFor(variant.buildType)
-            String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
@@ -893,7 +885,7 @@ class FlutterPlugin implements Plugin<Project> {
                 trackWidgetCreation trackWidgetCreationValue
                 targetPlatformValues = targetPlatforms
                 sourceDir getFlutterSourceDirectory()
-                intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
+                intermediateDir project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
@@ -915,7 +907,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name

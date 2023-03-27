@@ -8,28 +8,15 @@
 
 library dart.ui;
 
-/// Annotation used by Flutter's Dart compiler to indicate that an
-/// [Object.toString] override should not be replaced with a supercall.
-///
-/// {@tool snippet}
-/// A sample if using keepToString to prevent replacement by a supercall.
+/// Bla bla bla bla bla bla bla bla bla.
 ///
 /// ```dart
 /// class MyStringBuffer {
-///   error;
+///   error; // error (missing_const_final_var_or_type, always_specify_types)
 ///
-///   StringBuffer _buffer = StringBuffer();
-///
-///   @keepToString
-///   @override
-///   String toString() {
-///     return _buffer.toString();
-///   }
+///   StringBuffer _buffer = StringBuffer(); // error (prefer_final_fields, unused_field)
 /// }
 /// ```
-/// {@end-tool}
-const Object keepToString = _KeepToString();
-
-class _KeepToString {
-  const _KeepToString();
+class Foo {
+  const Foo();
 }

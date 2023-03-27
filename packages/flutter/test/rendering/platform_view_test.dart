@@ -260,6 +260,45 @@ void main() {
       expect(renderBox.debugLayer, isNull);
     });
   });
+<<<<<<< HEAD
+=======
+
+  test('markNeedsPaint does not get called when setting the same viewController', () {
+    FakeAsync().run((FakeAsync async) {
+      final Completer<void> viewCreation = Completer<void>();
+      const MethodChannel channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+        assert(methodCall.method == 'create', 'Unexpected method call');
+        await viewCreation.future;
+        return /*textureId=*/ 0;
+      });
+
+      bool futureCallbackRan = false;
+
+      PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr).then((UiKitViewController viewController) {
+        final RenderUiKitView renderBox = RenderUiKitView(
+          viewController: viewController,
+          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+        );
+
+        layout(renderBox);
+        pumpFrame(phase: EnginePhase.paint);
+        expect(renderBox.debugNeedsPaint, isFalse);
+
+        renderBox.viewController = viewController;
+
+        expect(renderBox.debugNeedsPaint, isFalse);
+
+        futureCallbackRan = true;
+      });
+
+      viewCreation.complete();
+      async.flushMicrotasks();
+      expect(futureCallbackRan, true);
+    });
+  });
+>>>>>>> 90c64ed42ba53a52d18f0cb3b17666c8662ed2a0
 }
 
 ui.PointerData _pointerData(

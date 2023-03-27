@@ -65,6 +65,7 @@ void main() {
     const ScrollPhysics never = NeverScrollableScrollPhysics();
     const ScrollPhysics always = AlwaysScrollableScrollPhysics();
     const ScrollPhysics page = PageScrollPhysics();
+    const ScrollPhysics bounceDesktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
 
     String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
 
@@ -91,6 +92,11 @@ void main() {
     expect(
       types(page.applyTo(bounce.applyTo(clamp.applyTo(never.applyTo(always))))),
       'PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics',
+    );
+
+    expect(
+      bounceDesktop.applyTo(always),
+      (BouncingScrollPhysics x) => x.decelerationRate == ScrollDecelerationRate.fast
     );
   });
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show lerpDouble, WindowPadding;
+import 'dart:ui' as ui show WindowPadding, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
@@ -673,6 +673,27 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.end = 0.0,
     this.bottom = 0.0,
   });
+
+  /// Creates insets with symmetric vertical and horizontal offsets.
+  ///
+  /// This is equivalent to [EdgeInsets.symmetric], since the inset is the same
+  /// with either [TextDirection]. This constructor is just a convenience for
+  /// type compatibility.
+  ///
+  /// {@tool snippet}
+  /// Eight pixel margin above and below, no horizontal margins:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.symmetric(vertical: 8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.symmetric({
+    double horizontal = 0.0,
+    double vertical = 0.0,
+  })  : start = horizontal,
+        end = horizontal,
+        top = vertical,
+        bottom = vertical;
 
   /// Creates insets where all the offsets are `value`.
   ///

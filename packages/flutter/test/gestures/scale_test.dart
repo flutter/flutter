@@ -732,7 +732,7 @@ void main() {
       didEndScale = true;
     };
 
-    final TestPointer pointer1 = TestPointer(2);
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent start = pointer1.panZoomStart(Offset.zero);
     scale.addPointerPanZoom(start);
@@ -836,7 +836,7 @@ void main() {
 
     final TestPointer touchPointer1 = TestPointer(2);
     final TestPointer touchPointer2 = TestPointer(3);
-    final TestPointer panZoomPointer = TestPointer(4);
+    final TestPointer panZoomPointer = TestPointer(4, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent panZoomStart = panZoomPointer.panZoomStart(Offset.zero);
     scale.addPointerPanZoom(panZoomStart);
@@ -985,7 +985,7 @@ void main() {
     drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
     drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
 
-    final TestPointer pointer1 = TestPointer(2);
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent down = pointer1.panZoomStart(const Offset(10.0, 10.0));
     scale.addPointerPanZoom(down);
@@ -1004,7 +1004,7 @@ void main() {
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
-    final TestPointer pointer2 = TestPointer(3);
+    final TestPointer pointer2 = TestPointer(3, PointerDeviceKind.trackpad);
     final PointerPanZoomStartEvent down2 = pointer2.panZoomStart(const Offset(10.0, 20.0));
     scale.addPointerPanZoom(down2);
     drag.addPointerPanZoom(down2);
@@ -1033,7 +1033,7 @@ void main() {
     // TODO(ianh): https://github.com/flutter/flutter/issues/11384
     // In this case, we move fast, so that the scale wins. If we moved slowly,
     // the horizontal drag would win, since it was added first.
-    final TestPointer pointer3 = TestPointer(4);
+    final TestPointer pointer3 = TestPointer(4, PointerDeviceKind.trackpad);
     final PointerPanZoomStartEvent down3 = pointer3.panZoomStart(const Offset(30.0, 30.0));
     scale.addPointerPanZoom(down3);
     drag.addPointerPanZoom(down3);
@@ -1084,7 +1084,7 @@ void main() {
       didEndScale = true;
     };
 
-    final TestPointer pointer1 = TestPointer(2);
+    final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
     final PointerPanZoomStartEvent start = pointer1.panZoomStart(Offset.zero);
     scale.addPointerPanZoom(start);

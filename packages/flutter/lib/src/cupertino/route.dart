@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'dart:ui' show lerpDouble, ImageFilter;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -342,6 +342,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     super.settings,
     this.maintainState = true,
     super.fullscreenDialog,
+    super.allowSnapshotting = true,
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null) {
@@ -371,6 +372,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
+    super.allowSnapshotting = true,
   }) : assert(page != null),
        super(settings: page) {
     assert(opaque);
@@ -417,6 +419,7 @@ class CupertinoPage<T> extends Page<T> {
     this.maintainState = true,
     this.title,
     this.fullscreenDialog = false,
+    this.allowSnapshotting = true,
     super.key,
     super.name,
     super.arguments,
@@ -437,9 +440,12 @@ class CupertinoPage<T> extends Page<T> {
   /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
   final bool fullscreenDialog;
 
+  /// {@macro flutter.widgets.TransitionRoute.allowSnapshotting}
+  final bool allowSnapshotting;
+
   @override
   Route<T> createRoute(BuildContext context) {
-    return _PageBasedCupertinoPageRoute<T>(page: this);
+    return _PageBasedCupertinoPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
   }
 }
 
@@ -914,10 +920,9 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
     this._decoration,
-    VoidCallback? onChange,
+    super.onChange,
   ) : assert(_decoration != null),
-      assert(_decoration._colors == null || _decoration._colors!.length > 1),
-      super(onChange);
+      assert(_decoration._colors == null || _decoration._colors!.length > 1);
 
   final _CupertinoEdgeShadowDecoration _decoration;
 
@@ -1037,10 +1042,10 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   /// A builder that builds the widget tree for the [CupertinoModalPopupRoute].
   ///
-  /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
+  /// The [builder] argument typically builds a [CupertinoActionSheet] widget.
   ///
   /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
-  /// by the `builder` does not share a context with the route it was originally
+  /// by the [builder] does not share a context with the route it was originally
   /// built from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the
   /// widget needs to update dynamically.
   final WidgetBuilder builder;
@@ -1130,7 +1135,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// popup to the [Navigator] furthest from or nearest to the given `context`. It
-/// is `false` by default.
+/// is `true` by default.
 ///
 /// The `semanticsDismissible` argument is used to determine whether the
 /// semantics of the modal barrier are included in the semantics tree.
@@ -1141,7 +1146,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
 /// by the `builder` does not share a context with the location that
-/// `showCupertinoModalPopup` is originally called from. Use a
+/// [showCupertinoModalPopup] is originally called from. Use a
 /// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
 /// update dynamically.
 ///
@@ -1235,7 +1240,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 /// This function takes a `builder` which typically builds a [CupertinoAlertDialog]
 /// widget. Content below the dialog is dimmed with a [ModalBarrier]. The widget
 /// returned by the `builder` does not share a context with the location that
-/// `showCupertinoDialog` is originally called from. Use a [StatefulBuilder] or
+/// [showCupertinoDialog] is originally called from. Use a [StatefulBuilder] or
 /// a custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] for the dialog.

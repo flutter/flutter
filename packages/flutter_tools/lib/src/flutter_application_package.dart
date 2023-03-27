@@ -66,6 +66,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             androidSdk: _androidSdk,
             userMessages: _userMessages,
             fileSystem: _fileSystem,
+            buildInfo: buildInfo,
           );
         }
         return AndroidApk.fromApk(

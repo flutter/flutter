@@ -436,7 +436,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on https://flutter.dev/go/android-project-migration '
+            'the Android embedding v2. Follow the steps on the migration doc above '
             'and re-run this command.'
           );
         }

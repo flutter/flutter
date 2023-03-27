@@ -1853,7 +1853,7 @@ void main() {
     );
   });
 
-  testWidgets('Range Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Range Slider Semantics - ltr', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -1862,7 +1862,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Material(
               child: RangeSlider(
-                values: const RangeValues(10.0, 12.0),
+                values: const RangeValues(10.0, 30.0),
                 max: 100.0,
                 onChanged: (RangeValues v) { },
               ),
@@ -1874,8 +1874,9 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(RangeSlider));
     expect(
-      tester.getSemantics(find.byType(RangeSlider)),
+      semanticsNode,
       matchesSemantics(
         scopesRoute: true,
         children:<Matcher>[
@@ -1888,7 +1889,91 @@ void main() {
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
                 value: '10%',
-                increasedValue: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
+                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    // TODO(tahatesser): This is a workaround for matching
+    // the semantics node rects by avoiding floating point errors.
+    // https://github.com/flutter/flutter/issues/115079
+    // Get semantics node rects.
+    final List<Rect> rects = <Rect>[];
+    semanticsNode.visitChildren((SemanticsNode node) {
+      node.visitChildren((SemanticsNode node) {
+       // Round rect values to avoid floating point errors.
+        rects.add(
+          Rect.fromLTRB(
+            node.rect.left.roundToDouble(),
+            node.rect.top.roundToDouble(),
+            node.rect.right.roundToDouble(),
+            node.rect.bottom.roundToDouble(),
+          ),
+        );
+        return true;
+      });
+      return true;
+    });
+    // Test that the semantics node rect sizes are correct.
+    expect(rects, <Rect>[
+      const Rect.fromLTRB(75.0, 276.0, 123.0, 324.0),
+      const Rect.fromLTRB(226.0, 276.0, 274.0, 324.0)
+    ]);
+  });
+
+  testWidgets('Range Slider Semantics - rtl', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData.light(),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: RangeSlider(
+                values: const RangeValues(10.0, 30.0),
+                max: 100.0,
+                onChanged: (RangeValues v) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(RangeSlider));
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children:<Matcher>[
+          matchesSemantics(
+            children:  <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
                 decreasedValue: '5%',
               ),
               matchesSemantics(
@@ -1897,15 +1982,41 @@ void main() {
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
-                value: '12%',
-                increasedValue: '17%',
-                decreasedValue: '12%',
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
               ),
             ],
           ),
         ],
       ),
     );
+
+    // TODO(tahatesser): This is a workaround for matching
+    // the semantics node rects by avoiding floating point errors.
+    // https://github.com/flutter/flutter/issues/115079
+    // Get semantics node rects.
+    final List<Rect> rects = <Rect>[];
+    semanticsNode.visitChildren((SemanticsNode node) {
+      node.visitChildren((SemanticsNode node) {
+        // Round rect values to avoid floating point errors.
+        rects.add(
+          Rect.fromLTRB(
+            node.rect.left.roundToDouble(),
+            node.rect.top.roundToDouble(),
+            node.rect.right.roundToDouble(),
+            node.rect.bottom.roundToDouble(),
+          ),
+        );
+        return true;
+      });
+      return true;
+    });
+    // Test that the semantics node rect sizes are correct.
+    expect(rects, <Rect>[
+      const Rect.fromLTRB(526.0, 276.0, 574.0, 324.0),
+      const Rect.fromLTRB(677.0, 276.0, 725.0, 324.0)
+    ]);
   });
 
   testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {

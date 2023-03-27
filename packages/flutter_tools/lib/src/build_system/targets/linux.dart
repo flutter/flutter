@@ -15,6 +15,7 @@ import 'assets.dart';
 import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
@@ -143,7 +144,8 @@ abstract class BundleLinuxAssets extends Target {
       targetPlatform: targetPlatform,
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
-      }
+      },
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

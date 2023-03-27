@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -698,7 +700,9 @@ void main() {
   });
 
   test('Semantics id does not repeat', () {
-    final SemanticsOwner owner = SemanticsOwner();
+    final SemanticsOwner owner = SemanticsOwner(
+      onSemanticsUpdate: (SemanticsUpdate update) {},
+    );
     const int expectId = 1400;
     SemanticsNode? nodeToRemove;
     for (int i = 0; i < kMaxFrameworkAccessibilityIdentifier; i++) {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Flutter code sample for [SlottedMultiChildRenderObjectWidgetMixin].
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -11,8 +13,9 @@ enum DiagonalSlot {
   bottomRight,
 }
 
-/// A widget that demonstrates the usage of [SlottedMultiChildRenderObjectWidgetMixin]
-/// by providing slots for two children that will be arranged diagonally.
+/// A widget that demonstrates the usage of
+/// [SlottedMultiChildRenderObjectWidgetMixin] by providing slots for two
+/// children that will be arranged diagonally.
 class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<DiagonalSlot> {
   const Diagonal({
     super.key,
@@ -63,8 +66,9 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
   }
 }
 
-/// A render object that demonstrates the usage of [SlottedContainerRenderObjectMixin]
-/// by providing slots for two children that will be arranged diagonally.
+/// A render object that demonstrates the usage of
+/// [SlottedContainerRenderObjectMixin] by providing slots for two children that
+/// will be arranged diagonally.
 class RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<DiagonalSlot>, DebugOverflowIndicatorMixin {
   RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
 

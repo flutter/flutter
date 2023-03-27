@@ -60,8 +60,9 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   }
 
   // Verify that the durations data is valid.
-  if (durations.keys.isEmpty)
+  if (durations.keys.isEmpty) {
     throw 'no "Start Transition" timeline events found';
+  }
   final Map<String, int> unexpectedValueCounts = <String, int>{};
   durations.forEach((String routeName, List<int> values) {
     if (values.length != 2) {
@@ -83,8 +84,9 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     while (eventIter.moveNext()) {
       final String eventName = eventIter.current['name'] as String;
 
-      if (!<String>['Start Transition', 'Frame'].contains(eventName))
+      if (!<String>['Start Transition', 'Frame'].contains(eventName)) {
         continue;
+      }
 
       final String routeName = eventName == 'Start Transition'
         ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
@@ -114,8 +116,9 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   String? currentDemoCategory;
 
   for (final String demo in demos) {
-    if (kSkippedDemos.contains(demo))
+    if (kSkippedDemos.contains(demo)) {
       continue;
+    }
 
     final String demoName = demo.substring(0, demo.indexOf('@'));
     final String demoCategory = demo.substring(demo.indexOf('@') + 1);
@@ -176,8 +179,9 @@ void main([List<String> args = const <String>[]]) {
 
       // See _handleMessages() in transitions_perf.dart.
       _allDemos = List<String>.from(json.decode(await driver.requestData('demoNames')) as List<dynamic>);
-      if (_allDemos.isEmpty)
+      if (_allDemos.isEmpty) {
         throw 'no demo names found';
+      }
     });
 
     tearDownAll(() async {

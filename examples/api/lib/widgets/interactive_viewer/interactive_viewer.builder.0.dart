@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for InteractiveViewer.builder
+/// Flutter code sample for [InteractiveViewer.builder].
 
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
@@ -36,7 +36,8 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
   static const double _cellWidth = 160.0;
   static const double _cellHeight = 80.0;
 
-  // Returns the axis aligned bounding box for the given Quad, which might not be axis aligned.
+  // Returns the axis aligned bounding box for the given Quad, which might not
+  // be axis aligned.
   Rect axisAlignedBoundingBox(Quad quad) {
     double xMin = quad.point0.x;
     double xMax = quad.point0.x;

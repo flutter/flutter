@@ -13,6 +13,9 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Used with [ListTileTheme] to define default property values for
 /// descendant [ListTile] widgets, as well as classes that build
 /// [ListTile]s, like [CheckboxListTile], [RadioListTile], and

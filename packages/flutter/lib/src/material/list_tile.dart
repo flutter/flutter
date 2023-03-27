@@ -18,10 +18,13 @@ import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// int _act = 1;
+
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
-/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyLarge]
+/// text style, which is a little smaller than the theme's [TextTheme.titleMedium]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -87,88 +90,53 @@ enum ListTileControlAffinity {
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
-/// One ancestor must be a [Material] widget and typically this is
-/// provided by the app's [Scaffold]. The [tileColor],
-/// [selectedTileColor], [focusColor], and [hoverColor] are not
-/// painted by the list tile itself but by the material widget
-/// ancestor. This generally has no effect. However, if an opaque
-/// widget, like `Container(color: Colors.white)`, is included in
-/// between the [ListTile] and its [Material] ancestor, then the
-/// opaque widget will obscure the material widget and its background
-/// [tileColor], etc. If this a problem, one can wrap a [Material]
-/// widget around the list tile, e.g.:
+/// This widget requires a [Material] widget ancestor in the tree to paint
+/// itself on, which is typically provided by the app's [Scaffold].
+/// The [tileColor], [selectedTileColor], [focusColor], and [hoverColor]
+/// are not painted by the [ListTile] itself but by the [Material] widget
+/// ancestor. In this case, one can wrap a [Material] widget around the
+/// [ListTile], e.g.:
 ///
+/// {@tool snippet}
 /// ```dart
 /// Container(
 ///   color: Colors.green,
-///   child: Material(
+///   child: const Material(
 ///     child: ListTile(
-///       title: const Text('ListTile with red background'),
+///       title: Text('ListTile with red background'),
 ///       tileColor: Colors.red,
 ///     ),
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
-/// {@tool snippet}
+/// ## Performance considerations when wrapping [ListTile] with [Material]
 ///
+/// Wrapping a large number of [ListTile]s individually with [Material]s
+/// is expensive. Consider only wrapping the [ListTile]s that require it
+/// or include a common [Material] ancestor where possible.
+///
+/// [ListTile] must be wrapped in a [Material] widget to animate [tileColor],
+/// [selectedTileColor], [focusColor], and [hoverColor] as these colors
+/// are not drawn by the list tile itself but by the material widget ancestor.
+///
+/// {@tool dartpad}
+/// This example showcases how [ListTile] needs to be wrapped in a [Material]
+/// widget to animate colors.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [ListTile]s in [Card]s.
 ///
 /// ![Different variations of ListTile](https://flutter.github.io/assets-for-api-docs/assets/material/list_tile.png)
 ///
-/// ```dart
-/// ListView(
-///   children: const <Widget>[
-///     Card(child: ListTile(title: Text('One-line ListTile'))),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(),
-///         title: Text('One-line with leading widget'),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         title: Text('One-line with trailing widget'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(),
-///         title: Text('One-line with both widgets'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         title: Text('One-line dense ListTile'),
-///         dense: true,
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(size: 56.0),
-///         title: Text('Two-line ListTile'),
-///         subtitle: Text('Here is a second line'),
-///         trailing: Icon(Icons.more_vert),
-///       ),
-///     ),
-///     Card(
-///       child: ListTile(
-///         leading: FlutterLogo(size: 72.0),
-///         title: Text('Three-line ListTile'),
-///         subtitle: Text(
-///           'A sufficiently long subtitle warrants three lines.'
-///         ),
-///         trailing: Icon(Icons.more_vert),
-///         isThreeLine: true,
-///       ),
-///     ),
-///   ],
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/list_tile/list_tile.1.dart **
 /// {@end-tool}
+///
 /// {@tool snippet}
 ///
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
@@ -201,8 +169,6 @@ enum ListTileControlAffinity {
 /// tapped, the whole row has an ink splash effect (see [InkWell]).
 ///
 /// ```dart
-/// int _act = 1;
-/// // ...
 /// ListTile(
 ///   leading: const Icon(Icons.flight_land),
 ///   title: const Text("Trix's airplane"),
@@ -316,10 +282,12 @@ class ListTile extends StatelessWidget {
     this.enabled = true,
     this.onTap,
     this.onLongPress,
+    this.onFocusChange,
     this.mouseCursor,
     this.selected = false,
     this.focusColor,
     this.hoverColor,
+    this.splashColor,
     this.focusNode,
     this.autofocus = false,
     this.tileColor,
@@ -357,14 +325,14 @@ class ListTile extends StatelessWidget {
   /// two lines. For example, you can use [Text.maxLines] to enforce the number
   /// of lines.
   ///
-  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyText2] except
+  /// The subtitle's default [TextStyle] depends on [TextTheme.bodyMedium] except
   /// [TextStyle.color]. The [TextStyle.color] depends on the value of [enabled]
   /// and [selected].
   ///
   /// When [enabled] is false, the text color is set to [ThemeData.disabledColor].
   ///
   /// When [selected] is false, the text color is set to [ListTileTheme.textColor]
-  /// if it's not null and to [TextTheme.caption]'s color if [ListTileTheme.textColor]
+  /// if it's not null and to [TextTheme.bodySmall]'s color if [ListTileTheme.textColor]
   /// is null.
   final Widget? subtitle;
 
@@ -489,6 +457,9 @@ class ListTile extends StatelessWidget {
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback? onLongPress;
 
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
   /// {@template flutter.material.ListTile.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -516,7 +487,7 @@ class ListTile extends StatelessWidget {
   ///
   /// {@tool dartpad}
   /// Here is an example of using a [StatefulWidget] to keep track of the
-  /// selected index, and using that to set the `selected` property on the
+  /// selected index, and using that to set the [selected] property on the
   /// corresponding [ListTile].
   ///
   /// ** See code in examples/api/lib/material/list_tile/list_tile.selected.0.dart **
@@ -529,6 +500,9 @@ class ListTile extends StatelessWidget {
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
+  /// The color of splash for the tile's [Material].
+  final Color? splashColor;
+
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
@@ -538,14 +512,14 @@ class ListTile extends StatelessWidget {
   /// {@template flutter.material.ListTile.tileColor}
   /// Defines the background color of `ListTile` when [selected] is false.
   ///
-  /// When the value is null, the `tileColor` is set to [ListTileTheme.tileColor]
+  /// When the value is null, the [tileColor] is set to [ListTileTheme.tileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
   /// {@endtemplate}
   final Color? tileColor;
 
   /// Defines the background color of `ListTile` when [selected] is true.
   ///
-  /// When the value if null, the `selectedTileColor` is set to [ListTileTheme.selectedTileColor]
+  /// When the value if null, the [selectedTileColor] is set to [ListTileTheme.selectedTileColor]
   /// if it's not null and to [Colors.transparent] if it's null.
   final Color? selectedTileColor;
 
@@ -623,7 +597,13 @@ class ListTile extends StatelessWidget {
       return selectedColor ?? tileTheme.selectedColor ?? theme.listTileTheme.selectedColor ?? theme.colorScheme.primary;
     }
 
-    final Color? color = iconColor ?? tileTheme.iconColor ?? theme.listTileTheme.iconColor;
+    final Color? color = iconColor
+      ?? tileTheme.iconColor
+      ?? theme.listTileTheme.iconColor
+      // If [ThemeData.useMaterial3] is set to true the disabled icon color
+      // will be set to Theme.colorScheme.onSurface(0.38), if false, defaults to null,
+      // as described in: https://m3.material.io/components/icon-buttons/specs.
+      ?? (theme.useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : null);
     if (color != null) {
       return color;
     }
@@ -658,10 +638,10 @@ class ListTile extends StatelessWidget {
     final TextStyle textStyle;
     switch(style ?? tileTheme.style ?? theme.listTileTheme.style ?? ListTileStyle.list) {
       case ListTileStyle.drawer:
-        textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyText1!;
+        textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyLarge!;
         break;
       case ListTileStyle.list:
-        textStyle = theme.useMaterial3 ? theme.textTheme.titleMedium! : theme.textTheme.subtitle1!;
+        textStyle = theme.useMaterial3 ? theme.textTheme.titleMedium! : theme.textTheme.titleMedium!;
         break;
     }
     final Color? color = _textColor(theme, tileTheme, textStyle.color);
@@ -671,11 +651,11 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyText2!;
+    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyMedium!;
     final Color? color = _textColor(
       theme,
       tileTheme,
-      theme.useMaterial3 ? theme.textTheme.bodySmall!.color : theme.textTheme.caption!.color,
+      theme.useMaterial3 ? theme.textTheme.bodySmall!.color : theme.textTheme.bodySmall!.color,
     );
     return _isDenseLayout(theme, tileTheme)
       ? textStyle.copyWith(color: color, fontSize: 12.0)
@@ -683,7 +663,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _trailingAndLeadingTextStyle(ThemeData theme, ListTileThemeData tileTheme) {
-    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyText2!;
+    final TextStyle textStyle = theme.useMaterial3 ? theme.textTheme.bodyMedium! : theme.textTheme.bodyMedium!;
     final Color? color = _textColor(theme, tileTheme, textStyle.color);
     return textStyle.copyWith(color: color);
   }
@@ -762,11 +742,13 @@ class ListTile extends StatelessWidget {
       customBorder: shape ?? tileTheme.shape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
+      onFocusChange: onFocusChange,
       mouseCursor: effectiveMouseCursor,
       canRequestFocus: enabled,
       focusNode: focusNode,
       focusColor: focusColor,
       hoverColor: hoverColor,
+      splashColor: splashColor,
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(

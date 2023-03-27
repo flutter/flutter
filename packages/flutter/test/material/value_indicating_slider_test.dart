@@ -14,37 +14,40 @@ void main() {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
+      useMaterial3: true,
     );
 
     await _pressStartThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_start_text_scale_1_width_0.png'),
+      matchesGoldenFile('slider_m3_start_text_scale_1_width_0.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0.5,
+      useMaterial3: true,
     );
 
     await _pressMiddleThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_middle_text_scale_1_width_0.png'),
+      matchesGoldenFile('slider_m3_middle_text_scale_1_width_0.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 1,
+      useMaterial3: true,
     );
 
     await _pressEndThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_end_text_scale_1_width_0.png'),
+      matchesGoldenFile('slider_m3_end_text_scale_1_width_0.png'),
     );
   });
 
@@ -53,39 +56,42 @@ void main() {
       tester,
       value: 0,
       decimalCount: 5,
+      useMaterial3: true,
     );
 
     await _pressStartThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_start_text_scale_1_width_5.png'),
+      matchesGoldenFile('slider_m3_start_text_scale_1_width_5.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0.5,
       decimalCount: 5,
+      useMaterial3: true,
     );
 
     await _pressMiddleThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_middle_text_scale_1_width_5.png'),
+      matchesGoldenFile('slider_m3_middle_text_scale_1_width_5.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 1,
       decimalCount: 5,
+      useMaterial3: true,
     );
 
     await _pressEndThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_end_text_scale_1_width_5.png'),
+      matchesGoldenFile('slider_m3_end_text_scale_1_width_5.png'),
     );
   });
 
@@ -94,39 +100,42 @@ void main() {
       tester,
       value: 0,
       textScale: 3,
+      useMaterial3: true,
     );
 
     await _pressStartThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_start_text_scale_4_width_0.png'),
+      matchesGoldenFile('slider_m3_start_text_scale_4_width_0.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0.5,
       textScale: 3,
+      useMaterial3: true,
     );
 
     await _pressMiddleThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_middle_text_scale_4_width_0.png'),
+      matchesGoldenFile('slider_m3_middle_text_scale_4_width_0.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 1,
       textScale: 3,
+      useMaterial3: true,
     );
 
     await _pressEndThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_end_text_scale_4_width_0.png'),
+      matchesGoldenFile('slider_m3_end_text_scale_4_width_0.png'),
     );
   });
 
@@ -137,13 +146,14 @@ void main() {
       value: 0,
       textScale: 3,
       decimalCount: 5,
+      useMaterial3: true,
     );
 
     await _pressStartThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_start_text_scale_4_width_5.png'),
+      matchesGoldenFile('slider_m3_start_text_scale_4_width_5.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -151,13 +161,14 @@ void main() {
       value: 0.5,
       textScale: 3,
       decimalCount: 5,
+      useMaterial3: true,
     );
 
     await _pressMiddleThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_middle_text_scale_4_width_5.png'),
+      matchesGoldenFile('slider_m3_middle_text_scale_4_width_5.png'),
     );
 
     await _buildValueIndicatorStaticSlider(
@@ -165,14 +176,185 @@ void main() {
       value: 1,
       textScale: 3,
       decimalCount: 5,
+      useMaterial3: true,
     );
 
     await _pressEndThumb(tester);
 
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('slider_end_text_scale_4_width_5.png'),
+      matchesGoldenFile('slider_m3_end_text_scale_4_width_5.png'),
     );
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('Slider value indicator', (WidgetTester tester) async {
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 0,
+      );
+
+      await _pressStartThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_start_text_scale_1_width_0.png'),
+      );
+
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 0.5,
+      );
+
+      await _pressMiddleThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_middle_text_scale_1_width_0.png'),
+      );
+
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 1,
+      );
+
+      await _pressEndThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_end_text_scale_1_width_0.png'),
+      );
+    });
+
+    testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 0,
+        decimalCount: 5,
+      );
+
+      await _pressStartThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_start_text_scale_1_width_5.png'),
+      );
+
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 0.5,
+        decimalCount: 5,
+      );
+
+      await _pressMiddleThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_middle_text_scale_1_width_5.png'),
+      );
+
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 1,
+        decimalCount: 5,
+      );
+
+      await _pressEndThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_end_text_scale_1_width_5.png'),
+      );
+    });
+
+    testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 0,
+        textScale: 3,
+      );
+
+      await _pressStartThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_start_text_scale_4_width_0.png'),
+      );
+
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 0.5,
+        textScale: 3,
+      );
+
+      await _pressMiddleThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_middle_text_scale_4_width_0.png'),
+      );
+
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 1,
+        textScale: 3,
+      );
+
+      await _pressEndThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_end_text_scale_4_width_0.png'),
+      );
+    });
+
+    testWidgets('Slider value indicator large text scale and wide text',
+        (WidgetTester tester) async {
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 0,
+        textScale: 3,
+        decimalCount: 5,
+      );
+
+      await _pressStartThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_start_text_scale_4_width_5.png'),
+      );
+
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 0.5,
+        textScale: 3,
+        decimalCount: 5,
+      );
+
+      await _pressMiddleThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_middle_text_scale_4_width_5.png'),
+      );
+
+      await _buildValueIndicatorStaticSlider(
+        tester,
+        value: 1,
+        textScale: 3,
+        decimalCount: 5,
+      );
+
+      await _pressEndThumb(tester);
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('slider_end_text_scale_4_width_5.png'),
+      );
+    });
   });
 }
 
@@ -204,9 +386,11 @@ Future<void> _buildValueIndicatorStaticSlider(
   required double value,
   double textScale = 1.0,
   int decimalCount = 0,
+  bool useMaterial3 = false,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(useMaterial3: useMaterial3),
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {

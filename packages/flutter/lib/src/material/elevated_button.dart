@@ -22,7 +22,7 @@ import 'theme_data.dart';
 /// A Material Design "elevated button".
 ///
 /// Use elevated buttons to add dimension to otherwise mostly flat
-/// layouts, e.g.  in long busy lists of content, or in wide
+/// layouts, e.g. in long busy lists of content, or in wide
 /// spaces. Avoid using elevated buttons on already-elevated content
 /// such as dialogs or cards.
 ///
@@ -33,7 +33,7 @@ import 'theme_data.dart';
 /// background is the [ButtonStyle.backgroundColor].
 ///
 /// The elevated button's default style is defined by
-/// [defaultStyleOf].  The style of this elevated button can be
+/// [defaultStyleOf]. The style of this elevated button can be
 /// overridden with its [style] parameter. The style of all elevated
 /// buttons in a subtree can be overridden with the
 /// [ElevatedButtonTheme], and the style of all of the elevated
@@ -54,8 +54,10 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
-///  * [TextButton], a simple flat button without a shadow.
-///  * [OutlinedButton], a [TextButton] with a border outline.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class ElevatedButton extends ButtonStyleButton {
@@ -93,6 +95,7 @@ class ElevatedButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    MaterialStatesController? statesController,
     required Widget icon,
     required Widget label,
   }) = _ElevatedButtonWithIcon;
@@ -100,14 +103,12 @@ class ElevatedButton extends ButtonStyleButton {
   /// A static convenience method that constructs an elevated button
   /// [ButtonStyle] given simple values.
   ///
-  /// The [onPrimary], and [onSurface] colors are used to create a
-  /// [MaterialStateProperty] [ButtonStyle.foregroundColor] value in the same
-  /// way that [defaultStyleOf] uses the [ColorScheme] colors with the same
-  /// names. Specify a value for [onPrimary] to specify the color of the
-  /// button's text and icons as well as the overlay colors used to indicate the
-  /// hover, focus, and pressed states. Use [primary] for the button's background
-  /// fill color and [onSurface] to specify the button's disabled text, icon,
-  /// and fill color.
+  /// The [foregroundColor] and [disabledForegroundColor] colors are used
+  /// to create a [MaterialStateProperty] [ButtonStyle.foregroundColor], and
+  /// a derived [ButtonStyle.overlayColor].
+  ///
+  /// The [backgroundColor] and [disabledBackgroundColor] colors are
+  /// used to create a [MaterialStateProperty] [ButtonStyle.backgroundColor].
   ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
@@ -131,9 +132,26 @@ class ElevatedButton extends ButtonStyleButton {
   ///
   /// ```dart
   /// ElevatedButton(
-  ///   style: ElevatedButton.styleFrom(primary: Colors.green),
-  /// )
+  ///   style: ElevatedButton.styleFrom(foregroundColor: Colors.green),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Jump'),
+  /// ),
   /// ```
+  ///
+  /// And to change the fill color:
+  ///
+  /// ```dart
+  /// ElevatedButton(
+  ///   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+  ///   onPressed: () {
+  ///     // ...
+  ///   },
+  ///   child: const Text('Meow'),
+  /// ),
+  /// ```
+  ///
   static ButtonStyle styleFrom({
     Color? foregroundColor,
     Color? backgroundColor,
@@ -347,7 +365,7 @@ class ElevatedButton extends ButtonStyleButton {
           disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           shadowColor: theme.shadowColor,
           elevation: 2,
-          textStyle: theme.textTheme.button,
+          textStyle: theme.textTheme.labelLarge,
           padding: _scaledPadding(context),
           minimumSize: const Size(64, 36),
           maximumSize: Size.infinite,
@@ -465,6 +483,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     super.focusNode,
     bool? autofocus,
     Clip? clipBehavior,
+    super.statesController,
     required Widget icon,
     required Widget label,
   }) : assert(icon != null),
@@ -513,7 +532,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
+// Token database version: v0_143
 
 class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   _ElevatedButtonDefaultsM3(this.context)
@@ -565,11 +584,11 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color>? get shadowColor =>
-    ButtonStyleButton.allOrNull<Color>(_colors.shadow);
+    MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
   MaterialStateProperty<Color>? get surfaceTintColor =>
-    ButtonStyleButton.allOrNull<Color>(_colors.surfaceTint);
+    MaterialStatePropertyAll<Color>(_colors.surfaceTint);
 
   @override
   MaterialStateProperty<double>? get elevation =>
@@ -591,23 +610,23 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
-    ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
+    MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
   MaterialStateProperty<Size>? get minimumSize =>
-    ButtonStyleButton.allOrNull<Size>(const Size(64.0, 40.0));
+    const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
-    ButtonStyleButton.allOrNull<Size>(Size.infinite);
+    const MaterialStatePropertyAll<Size>(Size.infinite);
 
   // No default side
 
   @override
   MaterialStateProperty<OutlinedBorder>? get shape =>
-    ButtonStyleButton.allOrNull<OutlinedBorder>(const StadiumBorder());
+    const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>

@@ -1242,6 +1242,10 @@ class ArtifactUpdater {
         continue;
       }
       for (Directory directory = file.parent; directory.absolute.path != _tempStorage.absolute.path; directory = directory.parent) {
+        // Handle race condition when the directory is deleted before this step
+        if (!directory.existsSync()) {
+          break;
+        }
         if (directory.listSync().isNotEmpty) {
           break;
         }

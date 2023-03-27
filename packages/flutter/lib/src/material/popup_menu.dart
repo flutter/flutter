@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
@@ -17,6 +18,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'popup_menu_theme.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -37,15 +39,6 @@ const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
 const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
-const double _kDefaultIconSize = 24.0;
-
-/// Used to configure how the [PopupMenuButton] positions its popup menu.
-enum PopupMenuPosition {
-  /// Menu is positioned over the anchor.
-  over,
-  /// Menu is positioned under the anchor.
-  under,
-}
 
 /// A base class for entries in a Material Design popup menu.
 ///
@@ -233,6 +226,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     this.height = kMinInteractiveDimension,
     this.padding,
     this.textStyle,
+    this.labelTextStyle,
     this.mouseCursor,
     required this.child,
   }) : assert(enabled != null),
@@ -268,9 +262,19 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The text style of the popup menu item.
   ///
   /// If this property is null, then [PopupMenuThemeData.textStyle] is used.
-  /// If [PopupMenuThemeData.textStyle] is also null, then [TextTheme.subtitle1]
+  /// If [PopupMenuThemeData.textStyle] is also null, then [TextTheme.titleMedium]
   /// of [ThemeData.textTheme] is used.
   final TextStyle? textStyle;
+
+  /// The label style of the popup menu item.
+  ///
+  /// When [ThemeData.useMaterial3] is true, this styles the text of the popup menu item.
+  ///
+  /// If this property is null, then [PopupMenuThemeData.labelTextStyle] is used.
+  /// If [PopupMenuThemeData.labelTextStyle] is also null, then [TextTheme.labelLarge]
+  /// is used with the [ColorScheme.onSurface] color when popup menu item is enabled and
+  /// the [ColorScheme.onSurface] color with 0.38 opacity when the popup menu item is disabled.
+  final MaterialStateProperty<TextStyle?>? labelTextStyle;
 
   /// {@template flutter.material.popupmenu.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -345,9 +349,20 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1!;
+    final PopupMenuThemeData defaults = theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
+    final Set<MaterialState> states = <MaterialState>{
+      if (!widget.enabled) MaterialState.disabled,
+    };
 
-    if (!widget.enabled) {
+    TextStyle style = theme.useMaterial3
+      ? (widget.labelTextStyle?.resolve(states)
+        ?? popupMenuTheme.labelTextStyle?.resolve(states)!
+        ?? defaults.labelTextStyle!.resolve(states)!)
+      : (widget.textStyle
+        ?? popupMenuTheme.textStyle
+        ?? defaults.textStyle!);
+
+    if (!widget.enabled && !theme.useMaterial3) {
       style = style.copyWith(color: theme.disabledColor);
     }
 
@@ -534,17 +549,21 @@ class _PopupMenu<T> extends StatelessWidget {
     required this.route,
     required this.semanticLabel,
     this.constraints,
+    required this.clipBehavior,
   });
 
   final _PopupMenuRoute<T> route;
   final String? semanticLabel;
   final BoxConstraints? constraints;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
     final double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     final List<Widget> children = <Widget>[];
+    final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
+    final PopupMenuThemeData defaults = theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
 
     for (int i = 0; i < route.items.length; i += 1) {
       final double start = (i + 1) * unit;
@@ -605,10 +624,13 @@ class _PopupMenu<T> extends StatelessWidget {
         return FadeTransition(
           opacity: opacity.animate(route.animation!),
           child: Material(
-            shape: route.shape ?? popupMenuTheme.shape,
-            color: route.color ?? popupMenuTheme.color,
+            shape: route.shape ?? popupMenuTheme.shape ?? defaults.shape,
+            color: route.color ?? popupMenuTheme.color ?? defaults.color,
+            clipBehavior: clipBehavior,
             type: MaterialType.card,
-            elevation: route.elevation ?? popupMenuTheme.elevation ?? 8.0,
+            elevation: route.elevation ?? popupMenuTheme.elevation ?? defaults.elevation!,
+            shadowColor: route.shadowColor ?? popupMenuTheme.shadowColor ?? defaults.shadowColor,
+            surfaceTintColor: route.surfaceTintColor ?? popupMenuTheme.surfaceTintColor ?? defaults.surfaceTintColor,
             child: Align(
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation!),
@@ -763,12 +785,15 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     required this.items,
     this.initialValue,
     this.elevation,
+    this.surfaceTintColor,
+    this.shadowColor,
     required this.barrierLabel,
     this.semanticLabel,
     this.shape,
     this.color,
     required this.capturedThemes,
     this.constraints,
+    required this.clipBehavior,
   }) : itemSizes = List<Size?>.filled(items.length, null);
 
   final RelativeRect position;
@@ -776,11 +801,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final List<Size?> itemSizes;
   final T? initialValue;
   final double? elevation;
+  final Color? surfaceTintColor;
+  final Color? shadowColor;
   final String? semanticLabel;
   final ShapeBorder? shape;
   final Color? color;
   final CapturedThemes capturedThemes;
   final BoxConstraints? constraints;
+  final Clip clipBehavior;
 
   @override
   Animation<double> createAnimation() {
@@ -819,6 +847,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       route: this,
       semanticLabel: semanticLabel,
       constraints: constraints,
+      clipBehavior: clipBehavior,
     );
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return MediaQuery.removePadding(
@@ -896,6 +925,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// label is not provided, it will default to
 /// [MaterialLocalizations.popupMenuLabel].
 ///
+/// The `clipBehavior` argument is used to clip the shape of the menu. Defaults to
+/// [Clip.none].
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -911,11 +943,14 @@ Future<T?> showMenu<T>({
   required List<PopupMenuEntry<T>> items,
   T? initialValue,
   double? elevation,
+  Color? shadowColor,
+  Color? surfaceTintColor,
   String? semanticLabel,
   ShapeBorder? shape,
   Color? color,
   bool useRootNavigator = false,
   BoxConstraints? constraints,
+  Clip clipBehavior = Clip.none,
 }) {
   assert(context != null);
   assert(position != null);
@@ -940,12 +975,15 @@ Future<T?> showMenu<T>({
     items: items,
     initialValue: initialValue,
     elevation: elevation,
+    shadowColor: shadowColor,
+    surfaceTintColor: surfaceTintColor,
     semanticLabel: semanticLabel,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     shape: shape,
     color: color,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     constraints: constraints,
+    clipBehavior: clipBehavior,
   ));
 }
 
@@ -979,10 +1017,17 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// platform).
 ///
 /// {@tool dartpad}
-/// This example shows a menu with four items, selecting between an enum's
-/// values and setting a `_selectedMenu` field based on the selection
+/// This example shows a menu with three items, selecting between an enum's
+/// values and setting a `selectedMenu` field based on the selection.
 ///
-/// ** See code in examples/api/lib/material/popupmenu/popupmenu.0.dart **
+/// ** See code in examples/api/lib/material/popup_menu/popup_menu.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This sample shows the creation of a popup menu, as described in:
+/// https://m3.material.io/components/menus/overview
+///
+/// ** See code in examples/api/lib/material/popup_menu/popup_menu.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -999,10 +1044,13 @@ class PopupMenuButton<T> extends StatefulWidget {
     super.key,
     required this.itemBuilder,
     this.initialValue,
+    this.onOpened,
     this.onSelected,
     this.onCanceled,
     this.tooltip,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.splashRadius,
@@ -1014,7 +1062,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.color,
     this.enableFeedback,
     this.constraints,
-    this.position = PopupMenuPosition.over,
+    this.position,
+    this.clipBehavior = Clip.none,
   }) : assert(itemBuilder != null),
        assert(enabled != null),
        assert(
@@ -1027,6 +1076,9 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// The value of the menu item, if any, that should be highlighted when the menu opens.
   final T? initialValue;
+
+  /// Called when the popup menu is shown.
+  final VoidCallback? onOpened;
 
   /// Called when the user selects a value from the popup menu created by this button.
   ///
@@ -1050,6 +1102,22 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// Defaults to 8, the appropriate elevation for popup menus.
   final double? elevation;
+
+  /// The color used to paint the shadow below the menu.
+  ///
+  /// If null then the ambient [PopupMenuThemeData.shadowColor] is used.
+  /// If that is null too, then the overall theme's [ThemeData.shadowColor]
+  /// (default black) is used.
+  final Color? shadowColor;
+
+  /// The color used as an overlay on [color] to indicate elevation.
+  ///
+  /// If null, [PopupMenuThemeData.surfaceTintColor] is used. If that
+  /// is also null, the default value is [ColorScheme.surfaceTint].
+  ///
+  /// See [Material.surfaceTintColor] for more details on how this
+  /// overlay is applied.
+  final Color? surfaceTintColor;
 
   /// Matches IconButton's 8 dps padding by default. In some cases, notably where
   /// this button appears as the trailing element of a list item, it's useful to be able
@@ -1142,9 +1210,18 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// [offset] is used to change the position of the popup menu relative to the
   /// position set by this parameter.
   ///
-  /// When not set, the position defaults to [PopupMenuPosition.over] which makes the
-  /// popup menu appear directly over the button that was used to create it.
-  final PopupMenuPosition position;
+  /// If this property is `null`, then [PopupMenuThemeData.position] is used. If
+  /// [PopupMenuThemeData.position] is also `null`, then the position defaults
+  /// to [PopupMenuPosition.over] which makes the popup menu appear directly
+  /// over the button that was used to create it.
+  final PopupMenuPosition? position;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// The [clipBehavior] argument is used the clip shape of the menu.
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
 
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
@@ -1167,8 +1244,9 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final PopupMenuPosition popupMenuPosition = widget.position ?? popupMenuTheme.position ?? PopupMenuPosition.over;
     final Offset offset;
-    switch (widget.position) {
+    switch (popupMenuPosition) {
       case PopupMenuPosition.over:
         offset = widget.offset;
         break;
@@ -1186,15 +1264,19 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
+      widget.onOpened?.call();
       showMenu<T?>(
         context: context,
         elevation: widget.elevation ?? popupMenuTheme.elevation,
+        shadowColor: widget.shadowColor ?? popupMenuTheme.shadowColor,
+        surfaceTintColor: widget.surfaceTintColor ?? popupMenuTheme.surfaceTintColor,
         items: items,
         initialValue: widget.initialValue,
         position: position,
         shape: widget.shape ?? popupMenuTheme.shape,
         color: widget.color ?? popupMenuTheme.color,
         constraints: widget.constraints,
+        clipBehavior: widget.clipBehavior,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
@@ -1245,7 +1327,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       splashRadius: widget.splashRadius,
-      iconSize: widget.iconSize ?? iconTheme.size ?? _kDefaultIconSize,
+      iconSize: widget.iconSize ?? iconTheme.size,
+      color: widget.color ?? iconTheme.color,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,
@@ -1272,3 +1355,57 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   @override
   String get debugDescription => 'MaterialStateMouseCursor(PopupMenuItemState)';
 }
+
+class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
+  _PopupMenuDefaultsM2(this.context)
+    : super(elevation: 8.0);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final TextTheme _textTheme = _theme.textTheme;
+
+  @override
+  TextStyle? get textStyle => _textTheme.subtitle1;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - PopupMenu
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_143
+
+class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
+  _PopupMenuDefaultsM3(this.context)
+    : super(elevation: 3.0);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+  late final TextTheme _textTheme = _theme.textTheme;
+
+  @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    final TextStyle style = _textTheme.labelLarge!;
+      if (states.contains(MaterialState.disabled)) {
+        return style.apply(color: _colors.onSurface.withOpacity(0.38));
+      }
+      return style.apply(color: _colors.onSurface);
+    });
+  }
+
+  @override
+  Color? get color => _colors.surface;
+
+  @override
+  Color? get shadowColor => _colors.shadow;
+
+  @override
+  Color? get surfaceTintColor => _colors.surfaceTint;
+
+  @override
+  ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+}
+// END GENERATED TOKEN PROPERTIES - PopupMenu

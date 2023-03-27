@@ -10,7 +10,6 @@ import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
 import 'circle_border.dart';
-import 'edge_insets.dart';
 import 'rounded_rectangle_border.dart';
 
 /// A border that fits a stadium-shaped border (a box with semicircles on the ends)
@@ -31,18 +30,6 @@ class StadiumBorder extends OutlinedBorder {
   const StadiumBorder({ super.side }) : assert(side != null);
 
   @override
-  EdgeInsetsGeometry get dimensions {
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        return EdgeInsets.all(side.width);
-      case StrokeAlign.center:
-        return EdgeInsets.all(side.width / 2);
-      case StrokeAlign.outside:
-        return EdgeInsets.zero;
-    }
-  }
-
-  @override
   ShapeBorder scale(double t) => StadiumBorder(side: side.scale(t));
 
   @override
@@ -54,14 +41,15 @@ class StadiumBorder extends OutlinedBorder {
     if (a is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        circleness: 1.0 - t,
+        circularity: 1.0 - t,
+        eccentricity: a.eccentricity,
       );
     }
     if (a is RoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: a.borderRadius as BorderRadius,
-        rectness: 1.0 - t,
+        borderRadius: a.borderRadius,
+        rectilinearity: 1.0 - t,
       );
     }
     return super.lerpFrom(a, t);
@@ -76,14 +64,15 @@ class StadiumBorder extends OutlinedBorder {
     if (b is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        circleness: t,
+        circularity: t,
+        eccentricity: b.eccentricity,
       );
     }
     if (b is RoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: b.borderRadius as BorderRadius,
-        rectness: t,
+        borderRadius: b.borderRadius,
+        rectilinearity: t,
       );
     }
     return super.lerpTo(b, t);
@@ -98,18 +87,7 @@ class StadiumBorder extends OutlinedBorder {
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     final Radius radius = Radius.circular(rect.shortestSide / 2.0);
     final RRect borderRect = RRect.fromRectAndRadius(rect, radius);
-    final RRect adjustedRect;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        adjustedRect = borderRect.deflate(side.width);
-        break;
-      case StrokeAlign.center:
-        adjustedRect = borderRect.deflate(side.width / 2);
-        break;
-      case StrokeAlign.outside:
-        adjustedRect = borderRect;
-        break;
-    }
+    final RRect adjustedRect = borderRect.deflate(side.strokeInset);
     return Path()
       ..addRRect(adjustedRect);
   }
@@ -122,29 +100,23 @@ class StadiumBorder extends OutlinedBorder {
   }
 
   @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    final Radius radius = Radius.circular(rect.shortestSide / 2.0);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), paint);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Radius radius = Radius.circular(rect.shortestSide / 2.0);
+        final Radius radius = Radius.circular(rect.shortestSide / 2);
         final RRect borderRect = RRect.fromRectAndRadius(rect, radius);
-        final RRect adjustedRect;
-        switch (side.strokeAlign) {
-          case StrokeAlign.inside:
-            adjustedRect = borderRect.deflate(side.width / 2);
-            break;
-          case StrokeAlign.center:
-            adjustedRect = borderRect;
-            break;
-          case StrokeAlign.outside:
-            adjustedRect = borderRect.inflate(side.width /2);
-            break;
-        }
-        canvas.drawRRect(
-          adjustedRect,
-          side.toPaint(),
-        );
+        canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
     }
   }
 
@@ -170,22 +142,20 @@ class StadiumBorder extends OutlinedBorder {
 class _StadiumToCircleBorder extends OutlinedBorder {
   const _StadiumToCircleBorder({
     super.side,
-    this.circleness = 0.0,
+    this.circularity = 0.0,
+    required this.eccentricity,
   }) : assert(side != null),
-       assert(circleness != null);
+       assert(circularity != null);
 
-  final double circleness;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.width);
-  }
+  final double circularity;
+  final double eccentricity;
 
   @override
   ShapeBorder scale(double t) {
     return _StadiumToCircleBorder(
       side: side.scale(t),
-      circleness: t,
+      circularity: t,
+      eccentricity: eccentricity,
     );
   }
 
@@ -195,19 +165,22 @@ class _StadiumToCircleBorder extends OutlinedBorder {
     if (a is StadiumBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        circleness: circleness * t,
+        circularity: circularity * t,
+        eccentricity: eccentricity,
       );
     }
     if (a is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        circleness: circleness + (1.0 - circleness) * (1.0 - t),
+        circularity: circularity + (1.0 - circularity) * (1.0 - t),
+        eccentricity: a.eccentricity,
       );
     }
     if (a is _StadiumToCircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        circleness: ui.lerpDouble(a.circleness, circleness, t)!,
+        circularity: ui.lerpDouble(a.circularity, circularity, t)!,
+        eccentricity: ui.lerpDouble(a.eccentricity, eccentricity, t)!,
       );
     }
     return super.lerpFrom(a, t);
@@ -219,30 +192,34 @@ class _StadiumToCircleBorder extends OutlinedBorder {
     if (b is StadiumBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        circleness: circleness * (1.0 - t),
+        circularity: circularity * (1.0 - t),
+        eccentricity: eccentricity,
       );
     }
     if (b is CircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        circleness: circleness + (1.0 - circleness) * t,
+        circularity: circularity + (1.0 - circularity) * t,
+        eccentricity: b.eccentricity,
       );
     }
     if (b is _StadiumToCircleBorder) {
       return _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        circleness: ui.lerpDouble(circleness, b.circleness, t)!,
+        circularity: ui.lerpDouble(circularity, b.circularity, t)!,
+        eccentricity: ui.lerpDouble(eccentricity, b.eccentricity, t)!,
       );
     }
     return super.lerpTo(b, t);
   }
 
   Rect _adjustRect(Rect rect) {
-    if (circleness == 0.0 || rect.width == rect.height) {
+    if (circularity == 0.0 || rect.width == rect.height) {
       return rect;
     }
     if (rect.width < rect.height) {
-      final double delta = circleness * (rect.height - rect.width) / 2.0;
+      final double partialDelta = (rect.height - rect.width) / 2;
+      final double delta = circularity * partialDelta * (1.0 - eccentricity);
       return Rect.fromLTRB(
         rect.left,
         rect.top + delta,
@@ -250,7 +227,8 @@ class _StadiumToCircleBorder extends OutlinedBorder {
         rect.bottom - delta,
       );
     } else {
-      final double delta = circleness * (rect.width - rect.height) / 2.0;
+      final double partialDelta = (rect.width - rect.height) / 2;
+      final double delta = circularity * partialDelta * (1.0 - eccentricity);
       return Rect.fromLTRB(
         rect.left + delta,
         rect.top,
@@ -261,13 +239,29 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   BorderRadius _adjustBorderRadius(Rect rect) {
-    return BorderRadius.circular(rect.shortestSide / 2.0);
+    final BorderRadius circleRadius = BorderRadius.circular(rect.shortestSide / 2);
+    if (eccentricity != 0.0) {
+      if (rect.width < rect.height) {
+        return BorderRadius.lerp(
+          circleRadius,
+          BorderRadius.all(Radius.elliptical(rect.width / 2, (0.5 + eccentricity / 2) * rect.height / 2)),
+          circularity,
+        )!;
+      } else {
+        return BorderRadius.lerp(
+            circleRadius,
+            BorderRadius.all(Radius.elliptical((0.5 + eccentricity / 2) * rect.width / 2, rect.height / 2)),
+            circularity,
+        )!;
+      }
+    }
+    return circleRadius;
   }
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
-      ..addRRect(_adjustBorderRadius(rect).toRRect(_adjustRect(rect)).deflate(side.width));
+      ..addRRect(_adjustBorderRadius(rect).toRRect(_adjustRect(rect)).deflate(side.strokeInset));
   }
 
   @override
@@ -277,10 +271,19 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   @override
-  _StadiumToCircleBorder copyWith({ BorderSide? side, double? circleness }) {
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    canvas.drawRRect(_adjustBorderRadius(rect).toRRect(_adjustRect(rect)), paint);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
+  _StadiumToCircleBorder copyWith({ BorderSide? side, double? circularity, double? eccentricity }) {
     return _StadiumToCircleBorder(
       side: side ?? this.side,
-      circleness: circleness ?? this.circleness,
+      circularity: circularity ?? this.circularity,
+      eccentricity: eccentricity ?? this.eccentricity,
     );
   }
 
@@ -290,25 +293,8 @@ class _StadiumToCircleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final double width = side.width;
-        if (width == 0.0) {
-          canvas.drawRRect(_adjustBorderRadius(rect).toRRect(_adjustRect(rect)), side.toPaint());
-        } else {
-          final RRect borderRect = _adjustBorderRadius(rect).toRRect(_adjustRect(rect));
-          final RRect adjustedRect;
-          switch (side.strokeAlign) {
-            case StrokeAlign.inside:
-              adjustedRect = borderRect.deflate(width / 2);
-              break;
-            case StrokeAlign.center:
-              adjustedRect = borderRect;
-              break;
-            case StrokeAlign.outside:
-              adjustedRect = borderRect.inflate(width / 2);
-              break;
-          }
-          canvas.drawRRect(adjustedRect, side.toPaint());
-        }
+        final RRect borderRect = _adjustBorderRadius(rect).toRRect(_adjustRect(rect));
+        canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
     }
   }
 
@@ -319,16 +305,18 @@ class _StadiumToCircleBorder extends OutlinedBorder {
     }
     return other is _StadiumToCircleBorder
         && other.side == side
-        && other.circleness == circleness;
+        && other.circularity == circularity;
   }
 
   @override
-  int get hashCode => Object.hash(side, circleness);
+  int get hashCode => Object.hash(side, circularity);
 
   @override
   String toString() {
-    return 'StadiumBorder($side, ${(circleness * 100).toStringAsFixed(1)}% '
-           'of the way to being a CircleBorder)';
+    if (eccentricity != 0.0) {
+      return 'StadiumBorder($side, ${(circularity * 100).toStringAsFixed(1)}% of the way to being a CircleBorder that is ${(eccentricity * 100).toStringAsFixed(1)}% oval)';
+    }
+    return 'StadiumBorder($side, ${(circularity * 100).toStringAsFixed(1)}% of the way to being a CircleBorder)';
   }
 }
 
@@ -337,26 +325,21 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
   const _StadiumToRoundedRectangleBorder({
     super.side,
     this.borderRadius = BorderRadius.zero,
-    this.rectness = 0.0,
+    this.rectilinearity = 0.0,
   }) : assert(side != null),
        assert(borderRadius != null),
-       assert(rectness != null);
+       assert(rectilinearity != null);
 
-  final BorderRadius borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
-  final double rectness;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(side.width);
-  }
+  final double rectilinearity;
 
   @override
   ShapeBorder scale(double t) {
     return _StadiumToRoundedRectangleBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
-      rectness: t,
+      rectilinearity: t,
     );
   }
 
@@ -367,21 +350,21 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: borderRadius,
-        rectness: rectness * t,
+        rectilinearity: rectilinearity * t,
       );
     }
     if (a is RoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: borderRadius,
-        rectness: rectness + (1.0 - rectness) * (1.0 - t),
+        rectilinearity: rectilinearity + (1.0 - rectilinearity) * (1.0 - t),
       );
     }
     if (a is _StadiumToRoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t)!,
-        rectness: ui.lerpDouble(a.rectness, rectness, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
+        rectilinearity: ui.lerpDouble(a.rectilinearity, rectilinearity, t)!,
       );
     }
     return super.lerpFrom(a, t);
@@ -394,49 +377,38 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: borderRadius,
-        rectness: rectness * (1.0 - t),
+        rectilinearity: rectilinearity * (1.0 - t),
       );
     }
     if (b is RoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: borderRadius,
-        rectness: rectness + (1.0 - rectness) * t,
+        rectilinearity: rectilinearity + (1.0 - rectilinearity) * t,
       );
     }
     if (b is _StadiumToRoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t)!,
-        rectness: ui.lerpDouble(rectness, b.rectness, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
+        rectilinearity: ui.lerpDouble(rectilinearity, b.rectilinearity, t)!,
       );
     }
     return super.lerpTo(b, t);
   }
 
-  BorderRadius _adjustBorderRadius(Rect rect) {
-    return BorderRadius.lerp(
+  BorderRadiusGeometry _adjustBorderRadius(Rect rect) {
+    return BorderRadiusGeometry.lerp(
       borderRadius,
       BorderRadius.all(Radius.circular(rect.shortestSide / 2.0)),
-      1.0 - rectness,
+      1.0 - rectilinearity,
     )!;
   }
 
   @override
   Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
-    final RRect borderRect = _adjustBorderRadius(rect).toRRect(rect);
-    final RRect adjustedRect;
-    switch (side.strokeAlign) {
-      case StrokeAlign.inside:
-        adjustedRect = borderRect.deflate(side.width);
-        break;
-      case StrokeAlign.center:
-        adjustedRect = borderRect.deflate(side.width / 2);
-        break;
-      case StrokeAlign.outside:
-        adjustedRect = borderRect;
-        break;
-    }
+    final RRect borderRect = _adjustBorderRadius(rect).resolve(textDirection).toRRect(rect);
+    final RRect adjustedRect = borderRect.deflate(ui.lerpDouble(side.width, 0, side.strokeAlign)!);
     return Path()
       ..addRRect(adjustedRect);
   }
@@ -444,15 +416,28 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
   @override
   Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return Path()
-      ..addRRect(_adjustBorderRadius(rect).toRRect(rect));
+      ..addRRect(_adjustBorderRadius(rect).resolve(textDirection).toRRect(rect));
   }
 
   @override
-  _StadiumToRoundedRectangleBorder copyWith({ BorderSide? side, BorderRadius? borderRadius, double? rectness }) {
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+    final BorderRadiusGeometry adjustedBorderRadius = _adjustBorderRadius(rect);
+    if (adjustedBorderRadius == BorderRadius.zero) {
+      canvas.drawRect(rect, paint);
+    } else {
+      canvas.drawRRect(adjustedBorderRadius.resolve(textDirection).toRRect(rect), paint);
+    }
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
+  @override
+  _StadiumToRoundedRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius, double? rectilinearity }) {
     return _StadiumToRoundedRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
-      rectness: rectness ?? this.rectness,
+      rectilinearity: rectilinearity ?? this.rectilinearity,
     );
   }
 
@@ -462,26 +447,9 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final double width = side.width;
-        if (width == 0.0) {
-          canvas.drawRRect(_adjustBorderRadius(rect).toRRect(rect), side.toPaint());
-        } else {
-          if (side.strokeAlign == StrokeAlign.inside) {
-            final RRect outer = _adjustBorderRadius(rect).toRRect(rect);
-            final RRect inner = outer.deflate(width);
-            final Paint paint = Paint()
-              ..color = side.color;
-            canvas.drawDRRect(outer, inner, paint);
-          } else {
-            final RRect outer;
-            if (side.strokeAlign == StrokeAlign.center) {
-              outer = _adjustBorderRadius(rect).toRRect(rect);
-            } else {
-              outer = _adjustBorderRadius(rect.inflate(width)).toRRect(rect.inflate(width / 2));
-            }
-            canvas.drawRRect(outer, side.toPaint());
-          }
-        }
+        final BorderRadiusGeometry adjustedBorderRadius = _adjustBorderRadius(rect);
+        final RRect borderRect = adjustedBorderRadius.resolve(textDirection).toRRect(rect);
+        canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
     }
   }
 
@@ -493,16 +461,16 @@ class _StadiumToRoundedRectangleBorder extends OutlinedBorder {
     return other is _StadiumToRoundedRectangleBorder
         && other.side == side
         && other.borderRadius == borderRadius
-        && other.rectness == rectness;
+        && other.rectilinearity == rectilinearity;
   }
 
   @override
-  int get hashCode => Object.hash(side, borderRadius, rectness);
+  int get hashCode => Object.hash(side, borderRadius, rectilinearity);
 
   @override
   String toString() {
     return 'StadiumBorder($side, $borderRadius, '
-           '${(rectness * 100).toStringAsFixed(1)}% of the way to being a '
+           '${(rectilinearity * 100).toStringAsFixed(1)}% of the way to being a '
            'RoundedRectangleBorder)';
   }
 }

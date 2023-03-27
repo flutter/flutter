@@ -33,7 +33,7 @@ enum OverflowBarAlignment {
 ///
 /// This widget's width will expand to contain its children and the
 /// specified [spacing] until it overflows. The overflow column will
-/// consume all of the available width.  The [overflowAlignment]
+/// consume all of the available width. The [overflowAlignment]
 /// defines how each child will be aligned within the overflow column
 /// and the [overflowSpacing] defines the gap between each child.
 ///

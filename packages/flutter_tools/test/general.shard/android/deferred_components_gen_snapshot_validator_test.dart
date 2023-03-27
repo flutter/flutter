@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 
@@ -23,21 +22,13 @@ void main() {
 
   Environment createEnvironment() {
     final Map<String, String> defines = <String, String>{ kDeferredComponents: 'true' };
-    final Environment result = Environment(
-      outputDir: fileSystem.directory('/output'),
-      buildDir: fileSystem.directory('/build'),
-      projectDir: fileSystem.directory('/project'),
+    final Environment result = Environment.test(
+      fileSystem.directory('/project'),
       defines: defines,
-      inputs: <String, String>{},
-      cacheDir: fileSystem.directory('/cache'),
-      flutterRootDir: fileSystem.directory('/flutter_root'),
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: FakeProcessManager.any(),
-      platform: FakePlatform(),
-      engineVersion: 'invalidEngineVersion',
-      generateDartPluginRegistry: false,
     );
     return result;
   }

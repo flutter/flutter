@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for InteractiveViewer.constrained
+/// Flutter code sample for [InteractiveViewer.constrained].
 
 import 'package:flutter/material.dart';
 
@@ -34,7 +34,7 @@ class MyStatelessWidget extends StatelessWidget {
     const int columnCount = 6;
 
     return InteractiveViewer(
-      alignPanAxis: true,
+      panAxis: PanAxis.aligned,
       constrained: false,
       scaleEnabled: false,
       child: Table(

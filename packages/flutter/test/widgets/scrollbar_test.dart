@@ -1607,33 +1607,39 @@ void main() {
     pointer.hover(const Offset(798.0, 15.0));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
     await tester.pumpAndSettle();
-    // Scrolling while holding the drag on the scrollbar and still hovered over
-    // the scrollbar should not have changed the scroll offset.
-    expect(pointer.location, const Offset(798.0, 15.0));
-    expect(scrollController.offset, previousOffset);
-    expect(
-      find.byType(RawScrollbar),
-      paints
-        ..rect(
-          rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
-          color: const Color(0x00000000),
-        )
-        ..line(
-          p1: const Offset(794.0, 0.0),
-          p2: const Offset(794.0, 600.0),
-          strokeWidth: 1.0,
-          color: const Color(0x00000000),
-        )
-        ..rect(
-          rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
-          color: const Color(0x66bcbcbc),
-        ),
-    );
+
+    if (!kIsWeb) {
+      // Scrolling while holding the drag on the scrollbar and still hovered over
+      // the scrollbar should not have changed the scroll offset.
+      expect(pointer.location, const Offset(798.0, 15.0));
+      expect(scrollController.offset, previousOffset);
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0),
+            color: const Color(0x00000000),
+          )
+          ..line(
+            p1: const Offset(794.0, 0.0),
+            p2: const Offset(794.0, 600.0),
+            strokeWidth: 1.0,
+            color: const Color(0x00000000),
+          )
+          ..rect(
+            rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 100.0),
+            color: const Color(0x66bcbcbc),
+          ),
+      );
+    } else {
+      expect(pointer.location, const Offset(798.0, 15.0));
+      expect(scrollController.offset, previousOffset + 20.0);
+    }
 
     // Drag is still being held, move pointer to be hovering over another area
     // of the scrollable (not over the scrollbar) and execute another pointer scroll
     pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
-    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -70.0)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -90.0)));
     await tester.pumpAndSettle();
     // Scrolling while holding the drag on the scrollbar changed the offset
     expect(pointer.location, const Offset(400.0, 300.0));
@@ -1779,7 +1785,7 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 590.0))
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
         ..rect(rect: const Rect.fromLTRB(794.0, 10.0, 800.0, 358.0))
     );
   });
@@ -2024,7 +2030,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(600.1));
     await tester.pumpAndSettle();
-    expect(find.byType(RawScrollbar), paints..rect()..rect()); // Show the bar.
+    expect(find.byType(RawScrollbar), paints..rect()); // Show the bar.
 
     await tester.pumpWidget(buildFrame(600.0));
     await tester.pumpAndSettle();
@@ -2612,7 +2618,7 @@ void main() {
     // Go without throw.
   });
 
-  testWidgets('Track offset respects padding', (WidgetTester tester) async {
+  testWidgets('Track offset respects MediaQuery padding', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106834
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -2640,7 +2646,198 @@ void main() {
       find.byType(RawScrollbar),
       paints
         ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 550.0)) // track
-        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 71.0))
+        ..rect(rect: const Rect.fromLTRB(744.0, 50.0, 750.0, 71.0)) // thumb
     ); // thumb
   });
+
+  testWidgets('RawScrollbar.padding replaces MediaQueryData.padding', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+        Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.all(50.0),
+              ),
+              child: RawScrollbar(
+                controller: scrollController,
+                minThumbLength: 21,
+                minOverscrollLength: 8,
+                thumbVisibility: true,
+                padding: const EdgeInsets.all(100),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SizedBox(width: 1000.0, height: 50000.0),
+                ),
+              ),
+            )
+        )
+    );
+    await tester.pumpAndSettle();
+    expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: const Rect.fromLTRB(694.0, 100.0, 700.0, 500.0)) // track
+          ..rect(rect: const Rect.fromLTRB(694.0, 100.0, 700.0, 121.0)) // thumb
+    ); // thumb
+  });
+
+  testWidgets('Scrollbar respect the NeverScrollableScrollPhysics physics', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                physics: NeverScrollableScrollPhysics(),
+                child: SizedBox(width: 4000.0, height: 4000.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+
+    // Tap on the track area below the thumb.
+    await tester.tapAt(const Offset(797.0, 550.0));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+  });
+
+  testWidgets('The thumb should follow the pointer when the scroll metrics changed during dragging', (WidgetTester tester) async {
+    // Regressing test for https://github.com/flutter/flutter/issues/112072
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: CustomScrollView(
+                controller: scrollController,
+                // cacheExtent: double.maxFinite,
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        final double height;
+                        if (index < 10) {
+                          height = 100;
+                        } else {
+                          height = 500;
+                        }
+                        return SizedBox(
+                          height: height,
+                          child: Text('$index'),
+                        );
+                      },
+                      childCount: 100,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Drag the thumb down to scroll down.
+    const double scrollAmount = 100;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 5.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+
+    // The view has scrolled more than it would have by a swipe gesture of the
+    // same distance.
+    expect(scrollController.offset, greaterThan((100.0 * 10 + 500.0 * 90) / 3));
+    expect(
+      find.byType(RawScrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+        ..rect(
+          rect: const Rect.fromLTRB(794.0, 200.0, 800.0, 218.0),
+          color: const Color(0x66BCBCBC),
+        ),
+    );
+  });
+
+  testWidgets('The bar support mouse wheel event', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/109659
+    final ScrollController scrollController = ScrollController();
+    Widget buildFrame() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: const SingleChildScrollView(
+                primary: true,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 1200.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Execute a pointer scroll hover on the scroll bar
+    final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(const Offset(798.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 30.0);
+
+    // Execute a pointer scroll outside the scroll bar
+    pointer.hover(const Offset(198.0, 15.0));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 70.0)));
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 100.0);
+  }, variant: TargetPlatformVariant.all());
 }

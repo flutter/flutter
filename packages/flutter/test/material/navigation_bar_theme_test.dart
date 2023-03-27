@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,7 +51,7 @@ void main() {
     expect(description[1], 'backgroundColor: Color(0x00000099)');
     expect(description[2], 'elevation: 20.0');
     expect(description[3], 'indicatorColor: Color(0x00000098)');
-    expect(description[4], 'indicatorShape: CircleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none))');
+    expect(description[4], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
     expect(description[5], 'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
 
     // Ignore instance address for IconThemeData.
@@ -160,6 +165,48 @@ void main() {
     expect(_barMaterial(tester).color, backgroundColor);
     expect(_barMaterial(tester).elevation, elevation);
     expect(_labelBehavior(tester), labelBehavior);
+  });
+
+  testWidgets('Custom label style renders ink ripple properly', (WidgetTester tester) async {
+    Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
+      return MaterialApp(
+        theme: ThemeData(
+          navigationBarTheme: const NavigationBarThemeData(
+            labelTextStyle: MaterialStatePropertyAll<TextStyle>(
+              TextStyle(fontSize: 25, color: Color(0xff0000ff)),
+            ),
+          ),
+          useMaterial3: true,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: Center(
+            child: NavigationBar(
+              labelBehavior: labelBehavior,
+              destinations: const <Widget>[
+                NavigationDestination(
+                  icon: SizedBox(),
+                  label: 'AC',
+                ),
+                NavigationDestination(
+                  icon: SizedBox(),
+                  label: 'Alarm',
+                ),
+              ],
+              onDestinationSelected: (int i) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(NavigationDestination).last));
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_custom_label_style.png'));
   });
 }
 

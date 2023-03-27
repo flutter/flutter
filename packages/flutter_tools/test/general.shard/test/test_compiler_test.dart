@@ -11,11 +11,13 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
+import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/logging_logger.dart';
 
 final Platform linuxPlatform = FakePlatform(
   environment: <String, String>{},
@@ -33,6 +35,7 @@ final BuildInfo debugBuild = BuildInfo(
 void main() {
   late FakeResidentCompiler residentCompiler;
   late FileSystem fileSystem;
+  late LoggingLogger logger;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -40,6 +43,7 @@ void main() {
     fileSystem.file('test/foo.dart').createSync(recursive: true);
     fileSystem.file('.packages').createSync();
     residentCompiler = FakeResidentCompiler(fileSystem);
+    logger = LoggingLogger();
   });
 
   testUsingContext('TestCompiler reports a dill file when compile is successful', () async {
@@ -90,6 +94,34 @@ void main() {
     Platform: () => linuxPlatform,
     ProcessManager: () => FakeProcessManager.any(),
     Logger: () => BufferLogger.test(),
+  });
+
+
+  testUsingContext('TestCompiler records test timings when provided TestTimeRecorder', () async {
+    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+    final TestTimeRecorder testTimeRecorder = TestTimeRecorder(logger);
+    final FakeTestCompiler testCompiler = FakeTestCompiler(
+      debugBuild,
+      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      residentCompiler,
+      testTimeRecorder: testTimeRecorder,
+    );
+    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart.dill');
+    testTimeRecorder.print();
+
+    // Expect one message for each phase.
+    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
+
+    // As the compile method adds a job to a queue etc we expect at
+    // least one phase to take a non-zero amount of time.
+    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+    expect(logPhaseMessagesNonZero, isNotEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Platform: () => linuxPlatform,
+    ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => logger,
   });
 
   testUsingContext('TestCompiler disposing test compiler shuts down backing compiler', () async {
@@ -171,6 +203,7 @@ class FakeTestCompiler extends TestCompiler {
     super.flutterProject,
     this.residentCompiler, {
       super.precompiledDillPath,
+      super.testTimeRecorder,
     }
   );
 
@@ -200,6 +233,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     FileSystem? fs,
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
+    File? dartPluginRegistrant,
   }) async {
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);

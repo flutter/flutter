@@ -12,6 +12,10 @@ import 'framework.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// FocusNode focusNode = FocusNode();
+
 // BuildContext/Element doesn't have a parent accessor, but it can be simulated
 // with visitAncestorElements. _getAncestor is needed because
 // context.getElementForInheritedWidgetOfExactType will return itself if it
@@ -125,17 +129,24 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///
   /// The `currentNode` argument must not be null.
   ///
-  /// The default implementation returns the [FocusScopeNode.focusedChild], if
-  /// set, on the nearest scope of the `currentNode`, otherwise, returns the
-  /// first node from [sortDescendants], or the given `currentNode` if there are
-  /// no descendants.
+  /// If `ignoreCurrentFocus` is false or not given, this function returns the
+  /// [FocusScopeNode.focusedChild], if set, on the nearest scope of the
+  /// `currentNode`, otherwise, returns the first node from [sortDescendants],
+  /// or the given `currentNode` if there are no descendants.
+  ///
+  /// If `ignoreCurrentFocus` is true, then the algorithm returns the first node
+  /// from [sortDescendants], or the given `currentNode` if there are no
+  /// descendants.
   ///
   /// See also:
   ///
-  ///  * [next], the function that is called to move the focus to the next node.
-  ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
-  ///    function that finds the first focusable widget in a particular direction.
-  FocusNode? findFirstFocus(FocusNode currentNode) => _findInitialFocus(currentNode);
+  /// * [next], the function that is called to move the focus to the next node.
+  /// * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
+  ///   function that finds the first focusable widget in a particular
+  ///   direction.
+  FocusNode? findFirstFocus(FocusNode currentNode, {bool ignoreCurrentFocus = false}) {
+    return _findInitialFocus(currentNode, ignoreCurrentFocus: ignoreCurrentFocus);
+  }
 
   /// Returns the node that should receive focus if focus is traversing
   /// backwards, and there is no current focus.
@@ -146,23 +157,29 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///
   /// The `currentNode` argument must not be null.
   ///
-  /// The default implementation returns the [FocusScopeNode.focusedChild], if
-  /// set, on the nearest scope of the `currentNode`, otherwise, returns the
-  /// last node from [sortDescendants], or the given `currentNode` if there are
-  /// no descendants.
+  /// If `ignoreCurrentFocus` is false or not given, this function returns the
+  /// [FocusScopeNode.focusedChild], if set, on the nearest scope of the
+  /// `currentNode`, otherwise, returns the last node from [sortDescendants],
+  /// or the given `currentNode` if there are no descendants.
+  ///
+  /// If `ignoreCurrentFocus` is true, then the algorithm returns the last node
+  /// from [sortDescendants], or the given `currentNode` if there are no
+  /// descendants.
   ///
   /// See also:
   ///
   ///  * [previous], the function that is called to move the focus to the next node.
   ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
   ///    function that finds the first focusable widget in a particular direction.
-  FocusNode findLastFocus(FocusNode currentNode) => _findInitialFocus(currentNode, fromEnd: true);
+  FocusNode findLastFocus(FocusNode currentNode, {bool ignoreCurrentFocus = false}) {
+    return _findInitialFocus(currentNode, fromEnd: true, ignoreCurrentFocus: ignoreCurrentFocus);
+  }
 
-  FocusNode _findInitialFocus(FocusNode currentNode, {bool fromEnd = false}) {
+  FocusNode _findInitialFocus(FocusNode currentNode, {bool fromEnd = false, bool ignoreCurrentFocus = false}) {
     assert(currentNode != null);
     final FocusScopeNode scope = currentNode.nearestScope!;
     FocusNode? candidate = scope.focusedChild;
-    if (candidate == null && scope.descendants.isNotEmpty) {
+    if (ignoreCurrentFocus || candidate == null && scope.descendants.isNotEmpty) {
       final Iterable<FocusNode> sorted = _sortAllDescendants(scope, currentNode);
       if (sorted.isEmpty) {
         candidate = null;
@@ -196,7 +213,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///
   /// The default implementation does nothing.
   @mustCallSuper
-  @protected
   void invalidateScopeData(FocusScopeNode node) {}
 
   /// This is called whenever the given [node] is re-parented into a new scope,
@@ -607,7 +623,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       // Returns true if successfully popped the history.
       bool popOrInvalidate(TraversalDirection direction) {
         final FocusNode lastNode = policyData.history.removeLast().node;
-        if (Scrollable.of(lastNode.context!) != Scrollable.of(primaryFocus!.context!)) {
+        if (Scrollable.maybeOf(lastNode.context!) != Scrollable.maybeOf(primaryFocus!.context!)) {
           invalidateScopeData(nearestScope);
           return false;
         }
@@ -725,7 +741,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       return true;
     }
     FocusNode? found;
-    final ScrollableState? focusedScrollable = Scrollable.of(focusedChild.context!);
+    final ScrollableState? focusedScrollable = Scrollable.maybeOf(focusedChild.context!);
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
@@ -735,7 +751,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           nearestScope.traversalDescendants,
         );
         if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
-          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.of(node.context!) == focusedScrollable);
+          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.maybeOf(node.context!) == focusedScrollable);
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
           }
@@ -767,7 +783,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       case TraversalDirection.left:
         Iterable<FocusNode>? eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope);
         if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
-          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.of(node.context!) == focusedScrollable);
+          final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes!.where((FocusNode node) => Scrollable.maybeOf(node.context!) == focusedScrollable);
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
           }
@@ -1331,7 +1347,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
         a.order.runtimeType == b.order.runtimeType,
         'When sorting nodes for determining focus order, the order (${a.order}) of '
         "node ${a.node}, isn't the same type as the order (${b.order}) of ${b.node}. "
-        "Incompatible order types can't be compared.  Use a FocusTraversalGroup to group "
+        "Incompatible order types can't be compared. Use a FocusTraversalGroup to group "
         'similar orders together.',
       );
       return a.order.compareTo(b.order);
@@ -1426,7 +1442,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// {@tool dartpad}
 /// This sample shows three rows of buttons, each grouped by a
 /// [FocusTraversalGroup], each with different traversal order policies. Use tab
-/// traversal to see the order they are traversed in.  The first row follows a
+/// traversal to see the order they are traversed in. The first row follows a
 /// numerical order, the second follows a lexical order (ordered to traverse
 /// right to left), and the third ignores the numerical order assigned to it and
 /// traverses in widget order.
@@ -1625,7 +1641,7 @@ class RequestFocusIntent extends Intent {
 /// [Action.invoke] like so:
 ///
 /// ```dart
-/// Actions.invoke(context, const RequestFocusIntent(focusNode));
+/// Actions.invoke(context, RequestFocusIntent(focusNode));
 /// ```
 ///
 /// Where the `focusNode` is the node for which the focus will be requested.
@@ -1720,6 +1736,12 @@ class DirectionalFocusIntent extends Intent {
   ///
   /// Defaults to true.
   final bool ignoreTextFields;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<TraversalDirection>('direction', direction));
+  }
 }
 
 /// An [Action] that moves the focus to the focusable node in the direction

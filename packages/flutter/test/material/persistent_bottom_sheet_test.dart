@@ -22,6 +22,61 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
+  testWidgets('Persistent draggableScrollableSheet localHistoryEntries test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110123
+    Widget buildFrame(Widget? bottomSheet) {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: Text('body')),
+          bottomSheet: bottomSheet,
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: Text('fab'),
+          ),
+        ),
+      );
+    }
+    final Widget draggableScrollableSheet = DraggableScrollableSheet(
+      expand: false,
+      snap: true,
+      initialChildSize: 0.3,
+      minChildSize: 0.3,
+      builder: (_, ScrollController controller) {
+        return ListView.builder(
+          itemExtent: 50.0,
+          itemCount: 50,
+          itemBuilder: (_, int index) => Text('Item $index'),
+          controller: controller,
+        );
+      },
+    );
+
+    await tester.pumpWidget(buildFrame(draggableScrollableSheet));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+
+    await tester.drag(find.text('Item 2'), const Offset(0, -200.0));
+    await tester.pumpAndSettle();
+    // We've started to drag up, we should have a back button now for a11y
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+
+    await tester.fling(find.text('Item 2'), const Offset(0, 200.0), 2000.0);
+    await tester.pumpAndSettle();
+    // BackButton should be hidden
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+
+    // Show the back button again
+    await tester.drag(find.text('Item 2'), const Offset(0, -200.0));
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+
+    // Remove the draggableScrollableSheet should hide the back button
+    await tester.pumpWidget(buildFrame(null));
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/83668
   testWidgets('Scaffold.bottomSheet update test', (WidgetTester tester) async {
     Widget buildFrame(Widget? bottomSheet) {

@@ -7,11 +7,19 @@ import 'framework.dart';
 import 'routes.dart';
 
 /// A modal route that replaces the entire screen.
+///
+/// The [PageRouteBuilder] subclass provides a way to create a [PageRoute] using
+/// callbacks rather than by defining a new class via subclassing.
+///
+/// See also:
+///
+///  * [Route], which documents the meaning of the `T` generic type argument.
 abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
     super.settings,
     this.fullscreenDialog = false,
+    this.allowSnapshotting = true,
   });
 
   /// {@template flutter.widgets.PageRoute.fullscreenDialog}
@@ -23,6 +31,9 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// with the back swipe gesture.
   /// {@endtemplate}
   final bool fullscreenDialog;
+
+  @override
+  final bool allowSnapshotting;
 
   @override
   bool get opaque => true;
@@ -45,6 +56,13 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 ///
 /// Callers must define the [pageBuilder] function which creates the route's
 /// primary contents. To add transitions define the [transitionsBuilder] function.
+///
+/// The `T` generic type argument corresponds to the type argument of the
+/// created [Route] objects.
+///
+/// See also:
+///
+///  * [Route], which documents the meaning of the `T` generic type argument.
 class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that delegates to builder callbacks.
   ///
@@ -62,6 +80,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.barrierLabel,
     this.maintainState = true,
     super.fullscreenDialog,
+    super.allowSnapshotting = true,
   }) : assert(pageBuilder != null),
        assert(transitionsBuilder != null),
        assert(opaque != null),
@@ -81,6 +100,8 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   ///
   /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
   /// {@endtemplate}
+  ///
+  /// The default transition is a jump cut (i.e. no animation).
   final RouteTransitionsBuilder transitionsBuilder;
 
   @override

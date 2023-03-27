@@ -8,6 +8,9 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Asserts that the given context has a [Material] ancestor.
 ///
 /// Used by many Material Design widgets to make sure that they are
@@ -19,6 +22,10 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 /// ```dart
 /// assert(debugCheckHasMaterial(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This method can be expensive (it walks the element tree).
 ///
@@ -63,6 +70,10 @@ bool debugCheckHasMaterial(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasMaterialLocalizations(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This function has the side-effect of establishing an inheritance
 /// relationship with the nearest [Localizations] widget (see
@@ -109,6 +120,10 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
 /// assert(debugCheckHasScaffold(context));
 /// ```
 ///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
+///
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
@@ -141,6 +156,10 @@ bool debugCheckHasScaffold(BuildContext context) {
 /// ```dart
 /// assert(debugCheckHasScaffoldMessenger(context));
 /// ```
+///
+/// Always place this before any early returns, so that the invariant is checked
+/// in all cases. This prevents bugs from hiding until a particular codepath is
+/// hit.
 ///
 /// This method can be expensive (it walks the element tree).
 ///

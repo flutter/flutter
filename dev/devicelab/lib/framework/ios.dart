@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'host_agent.dart';
-import 'task_result.dart';
 import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
@@ -46,49 +45,6 @@ Future<String?> minPhoneOSVersion(String pathToBinary) async {
     }
   });
   return minVersion;
-}
-
-Future<bool> containsBitcode(String pathToBinary) async {
-  // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
-  final String loadCommands = await eval('otool', <String>[
-    '-l',
-    '-arch',
-    'arm64',
-    pathToBinary,
-  ]);
-  if (!loadCommands.contains('__LLVM')) {
-    return false;
-  }
-  // Presence of the section may mean a bitcode marker was embedded (size=1), but there is no content.
-  if (!loadCommands.contains('size 0x0000000000000001')) {
-    return true;
-  }
-  // Check the false positives: size=1 wasn't referencing the __LLVM section.
-
-  bool emptyBitcodeMarkerFound = false;
-  //  Section
-  //  sectname __bundle
-  //  segname __LLVM
-  //  addr 0x003c4000
-  //  size 0x0042b633
-  //  offset 3932160
-  //  ...
-  final List<String> lines = LineSplitter.split(loadCommands).toList();
-  lines.asMap().forEach((int index, String line) {
-    if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
-      emptyBitcodeMarkerFound |= lines
-        .skip(index - 1)
-        .take(4)
-        .any((String line) => line.contains(' size 0x0000000000000001'));
-    }
-  });
-  return !emptyBitcodeMarkerFound;
-}
-
-Future<void> checkContainsBitcode(String pathToBinary) async {
-  if (!await containsBitcode(pathToBinary)) {
-    throw TaskResult.failure('Expected bitcode in $pathToBinary');
-  }
 }
 
 /// Creates and boots a new simulator, passes the new simulator's identifier to
@@ -236,6 +192,7 @@ Future<bool> runXcodeTests({
           <String>[
             '-r',
             '-9',
+            '-q',
             zipPath,
             path.basename(xcresultBundle.path),
           ],

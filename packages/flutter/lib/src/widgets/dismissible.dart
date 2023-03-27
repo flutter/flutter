@@ -323,6 +323,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   Size? _sizePriorToCollapse;
   bool _dismissThresholdReached = false;
 
+  final GlobalKey _contentKey = GlobalKey();
+
   @override
   bool get wantKeepAlive => (_moveController?.isAnimating ?? false) || (_resizeController?.isAnimating ?? false);
 
@@ -668,7 +670,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
     Widget content = SlideTransition(
       position: _moveAnimation,
-      child: widget.child,
+      child: KeyedSubtree(key: _contentKey, child: widget.child),
     );
 
     if (background != null) {

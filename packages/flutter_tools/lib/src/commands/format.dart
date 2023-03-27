@@ -33,6 +33,17 @@ class FormatCommand extends FlutterCommand {
   String get invocation => '${runner?.executableName} $name <one or more paths>';
 
   @override
+  final bool deprecated = true;
+
+  @override
+  String get deprecationWarning {
+    return '${globals.logger.terminal.warningMark} The "format" command is '
+           'deprecated and will be removed in a future version of Flutter. '
+           'Please use the "dart format" sub-command instead, which takes all '
+           'of the same command-line arguments as "flutter format".\n';
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final String dartBinary = globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path;
     final List<String> command = <String>[

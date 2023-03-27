@@ -228,7 +228,7 @@ void main() {
   });
 
   testWithoutContext('can launch x86_64 Chrome on ARM macOS', () async {
-    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64);
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -267,7 +267,7 @@ void main() {
   });
 
   testWithoutContext('can launch ARM Chrome natively on ARM macOS when installed', () async {
-    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm);
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64);
     final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,

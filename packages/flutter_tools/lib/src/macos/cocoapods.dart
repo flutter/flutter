@@ -362,7 +362,7 @@ class CocoaPods {
         emphasis: true,
       );
     } else if ((stderr.contains('ffi_c.bundle') || stderr.contains('/ffi/')) &&
-        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // https://github.com/flutter/flutter/issues/70796
       UsageEvent(
         'pod-install-failure',

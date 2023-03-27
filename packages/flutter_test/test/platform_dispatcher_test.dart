@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Locale, AccessibilityFeatures, Brightness, PlatformDispatcher;
+import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, PlatformDispatcher;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';

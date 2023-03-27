@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui show Codec, ImmutableBuffer;
-import 'dart:ui' show Size, Locale, TextDirection;
+import 'dart:ui' show Locale, Size, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'
-  if (dart.library.html) '_network_image_web.dart' as network_image;
+  if (dart.library.js_util) '_network_image_web.dart' as network_image;
 import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
@@ -223,7 +223,7 @@ typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buf
 ///      image is decoded and ready to display, or when an error occurs.
 ///   2. Obtain the key for the image using [obtainKey].
 ///      Calling this method can throw exceptions into the zone asynchronously
-///      or into the callstack synchronously. To handle that, an error handler
+///      or into the call stack synchronously. To handle that, an error handler
 ///      is created that catches both synchronous and asynchronous errors, to
 ///      make sure errors can be routed to the correct consumers.
 ///      The error handler is passed on to [resolveStreamForKey] and the
@@ -991,17 +991,23 @@ class FileImage extends ImageProvider<FileImage> {
   Future<ui.Codec> _loadAsync(FileImage key, DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
     assert(key == this);
 
-    final Uint8List bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0) {
+    // TODO(jonahwilliams): making this sync caused test failures that seem to
+    // indicate that we can fail to call evict unless at least one await has
+    // occurred in the test.
+    // https://github.com/flutter/flutter/issues/113044
+    final int lengthInBytes = await file.length();
+    if (lengthInBytes == 0) {
       // The file may become available later.
       PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
-
     if (decode != null) {
-      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+      if (file.runtimeType == File) {
+        return decode(await ui.ImmutableBuffer.fromFilePath(file.path));
+      }
+      return decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
     }
-    return decodeDeprecated!(bytes);
+    return decodeDeprecated!(await file.readAsBytes());
   }
 
   @override
@@ -1162,11 +1168,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// bundled, the app has to specify which ones to include. For instance a
 /// package named `fancy_backgrounds` could have:
 ///
-/// ```
-/// lib/backgrounds/background1.png
-/// lib/backgrounds/background2.png
-/// lib/backgrounds/background3.png
-/// ```
+///     lib/backgrounds/background1.png
+///     lib/backgrounds/background2.png
+///     lib/backgrounds/background3.png
 ///
 /// To include, say the first image, the `pubspec.yaml` of the app should specify
 /// it in the `assets` section:

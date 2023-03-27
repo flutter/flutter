@@ -1,0 +1,12 @@
+{
+  "version": "v0_143",
+
+  "md.comp.badge.color": "error",
+  "md.comp.badge.large.color": "error",
+  "md.comp.badge.large.label-text.color": "onError",
+  "md.comp.badge.large.label-text.text-style": "labelSmall",
+  "md.comp.badge.large.shape": "md.sys.shape.corner.full",
+  "md.comp.badge.large.size": 16.0,
+  "md.comp.badge.shape": "md.sys.shape.corner.full",
+  "md.comp.badge.size": 6.0
+}

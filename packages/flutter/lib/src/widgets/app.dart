@@ -13,6 +13,7 @@ import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'default_text_editing_shortcuts.dart';
+import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -26,11 +27,15 @@ import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';
+import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
+
+// Examples can assume:
+// late Widget myWidget;
 
 /// The signature of [WidgetsApp.localeListResolutionCallback].
 ///
@@ -273,12 +278,12 @@ class WidgetsApp extends StatefulWidget {
   /// ```
   ///
   /// It is possible to specify both [home] and [routes], but only if [routes] does
-  ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
+  ///  _not_ contain an entry for `'/'`. Conversely, if [home] is omitted, [routes]
   /// _must_ contain an entry for `'/'`.
   ///
   /// If [home] or [routes] are not null, the routing implementation needs to know how
   /// appropriately build [PageRoute]s. This can be achieved by supplying the
-  /// [pageRouteBuilder] parameter.  The [pageRouteBuilder] is used by [MaterialApp]
+  /// [pageRouteBuilder] parameter. The [pageRouteBuilder] is used by [MaterialApp]
   /// and [CupertinoApp] to create [MaterialPageRoute]s and [CupertinoPageRoute],
   /// respectively.
   ///
@@ -290,17 +295,23 @@ class WidgetsApp extends StatefulWidget {
   /// [onGenerateRoute] and [onUnknownRoute] parameters. These parameters correspond
   /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
   /// and [builder] are null, or if they fail to create a requested route,
-  /// [onGenerateRoute] will be invoked.  If that fails, [onUnknownRoute] will be invoked.
+  /// [onGenerateRoute] will be invoked. If that fails, [onUnknownRoute] will be invoked.
   ///
-  /// The [pageRouteBuilder] will create a [PageRoute] that wraps newly built routes.
+  /// The [pageRouteBuilder] is called to create a [PageRoute] that wraps newly built routes.
   /// If the [builder] is non-null and the [onGenerateRoute] argument is null, then the
-  /// [builder] will not be provided only with the context and the child widget, whereas
-  /// the [pageRouteBuilder] will be provided with [RouteSettings]. If [onGenerateRoute]
-  /// is not provided, [navigatorKey], [onUnknownRoute], [navigatorObservers], and
-  /// [initialRoute] must have their default values, as they will have no effect.
+  /// [builder] will be provided only with the context and the child widget, whereas
+  /// the [pageRouteBuilder] will be provided with [RouteSettings]; in that configuration,
+  /// the [navigatorKey], [onUnknownRoute], [navigatorObservers], and
+  /// [initialRoute] properties must have their default values, as they will have no effect.
   ///
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows a basic Flutter application using [WidgetsApp].
+  ///
+  /// ** See code in examples/api/lib/widgets/app/widgets_app.widgets_app.0.dart **
+  /// {@end-tool}
   WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
     super.key,
     this.navigatorKey,
@@ -526,8 +537,23 @@ class WidgetsApp extends StatefulWidget {
   /// The [PageRoute] generator callback used when the app is navigated to a
   /// named route.
   ///
+  /// A [PageRoute] represents the page in a [Navigator], so that it can
+  /// correctly animate between pages, and to represent the "return value" of
+  /// a route (e.g. which button a user selected in a modal dialog).
+  ///
   /// This callback can be used, for example, to specify that a [MaterialPageRoute]
   /// or a [CupertinoPageRoute] should be used for building page transitions.
+  ///
+  /// The [PageRouteFactory] type is generic, meaning the provided function must
+  /// itself be generic. For example (with special emphasis on the `<T>` at the
+  /// start of the closure):
+  ///
+  /// ```dart
+  /// pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) => PageRouteBuilder<T>(
+  ///   settings: settings,
+  ///   pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => builder(context),
+  /// ),
+  /// ```
   final PageRouteFactory? pageRouteBuilder;
 
   /// {@template flutter.widgets.widgetsApp.routeInformationParser}
@@ -946,7 +972,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// ```dart
   /// // Full Chinese support for CN, TW, and HK
-  /// supportedLocales: [
+  /// supportedLocales: <Locale>[
   ///   const Locale.fromSubtags(languageCode: 'zh'), // generic Chinese 'zh'
   ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'), // generic simplified Chinese 'zh_Hans'
   ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'), // generic traditional Chinese 'zh_Hant'
@@ -1600,19 +1626,23 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       );
     } else if (_usesNavigator) {
       assert(_navigator != null);
-      routing = Navigator(
-        restorationScopeId: 'nav',
-        key: _navigator,
-        initialRoute: _initialRouteName,
-        onGenerateRoute: _onGenerateRoute,
-        onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
-          ? Navigator.defaultGenerateInitialRoutes
-          : (NavigatorState navigator, String initialRouteName) {
-            return widget.onGenerateInitialRoutes!(initialRouteName);
-          },
-        onUnknownRoute: _onUnknownRoute,
-        observers: widget.navigatorObservers!,
-        reportsRouteUpdateToEngine: true,
+      routing = FocusScope(
+        debugLabel: 'Navigator Scope',
+        autofocus: true,
+        child: Navigator(
+          restorationScopeId: 'nav',
+          key: _navigator,
+          initialRoute: _initialRouteName,
+          onGenerateRoute: _onGenerateRoute,
+          onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+            ? Navigator.defaultGenerateInitialRoutes
+            : (NavigatorState navigator, String initialRouteName) {
+              return widget.onGenerateInitialRoutes!(initialRouteName);
+            },
+          onUnknownRoute: _onUnknownRoute,
+          observers: widget.navigatorObservers!,
+          reportsRouteUpdateToEngine: true,
+        ),
       );
     } else if (_usesRouterWithConfig) {
       routing = Router<Object>.withConfig(
@@ -1737,11 +1767,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           // fall through to the defaultShortcuts.
           child: DefaultTextEditingShortcuts(
             child: Actions(
-              actions: widget.actions ?? WidgetsApp.defaultActions,
+              actions: widget.actions ?? <Type, Action<Intent>>{
+                ...WidgetsApp.defaultActions,
+                ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
+              },
               child: FocusTraversalGroup(
                 policy: ReadingOrderTraversalPolicy(),
-                child: ShortcutRegistrar(
-                  child: child,
+                child: TapRegionSurface(
+                  child: ShortcutRegistrar(
+                    child: child,
+                  ),
                 ),
               ),
             ),

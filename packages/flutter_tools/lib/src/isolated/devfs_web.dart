@@ -27,6 +27,7 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/targets/shader_compiler.dart';
 import '../build_system/targets/web.dart';
 import '../bundle_builder.dart';
 import '../cache.dart';
@@ -51,18 +52,18 @@ typedef DwdsLauncher = Future<Dwds> Function({
   required LoadStrategy loadStrategy,
   required bool enableDebugging,
   ExpressionCompiler? expressionCompiler,
-  bool? enableDebugExtension,
-  String? hostname,
-  bool? useSseForDebugProxy,
-  bool? useSseForDebugBackend,
-  bool? useSseForInjectedClient,
+  bool enableDebugExtension,
+  String hostname,
+  bool useSseForDebugProxy,
+  bool useSseForDebugBackend,
+  bool useSseForInjectedClient,
   UrlEncoder? urlEncoder,
-  bool? spawnDds,
-  bool? enableDevtoolsLaunch,
+  bool spawnDds,
+  bool enableDevtoolsLaunch,
   DevtoolsLauncher? devtoolsLauncher,
-  bool? launchDevToolsInNewWindow,
+  bool launchDevToolsInNewWindow,
   SdkConfigurationProvider? sdkConfigurationProvider,
-  bool? emitDebugEvents,
+  bool emitDebugEvents,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -82,11 +83,11 @@ const String _kDefaultIndex = '''
 /// This is only used in development mode.
 class WebExpressionCompiler implements ExpressionCompiler {
   WebExpressionCompiler(this._generator, {
-    required FileSystem? fileSystem,
+    required FileSystem fileSystem,
   }) : _fileSystem = fileSystem;
 
   final ResidentCompiler _generator;
-  final FileSystem? _fileSystem;
+  final FileSystem _fileSystem;
 
   @override
   Future<ExpressionCompilationResult> compileExpressionToJs(
@@ -105,7 +106,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
 
     if (compilerOutput != null && compilerOutput.outputFilename != null) {
       final String content = utf8.decode(
-          _fileSystem!.file(compilerOutput.outputFilename).readAsBytesSync());
+          _fileSystem.file(compilerOutput.outputFilename).readAsBytesSync());
       return ExpressionCompilationResult(
           content, compilerOutput.errorCount > 0);
     }
@@ -295,6 +296,7 @@ class WebAssetServer implements AssetReader {
       loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
+        PackageUriMapper(packageConfig),
         digestProvider,
         server.basePath!,
       ).strategy,
@@ -624,6 +626,12 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
+typedef VmServiceFactory = Future<vm_service.VmService> Function(
+  Uri, {
+  CompressionOptions compression,
+  required Logger logger,
+});
+
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
   /// Create a new [WebDevFS] instance.
@@ -676,15 +684,26 @@ class WebDevFS implements DevFS {
   @override
   bool hasSetAssetDirectory = false;
 
+  @override
+  bool didUpdateFontManifest = false;
+
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
 
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
-  Future<ConnectionResult?> connect(bool useDebugExtension) {
+  Future<ConnectionResult?> connect(
+    bool useDebugExtension, {
+    @visibleForTesting
+    VmServiceFactory vmServiceFactory = createVmServiceDelegate,
+  }) {
     final Completer<ConnectionResult> firstConnection =
         Completer<ConnectionResult>();
+    // Note there is an asynchronous gap between this being set to true and
+    // [firstConnection] completing; thus test the boolean to determine if
+    // the current connection is the first.
+    bool foundFirstConnection = false;
     _connectedApps =
         dwds.connectedApps.listen((AppConnection appConnection) async {
       try {
@@ -692,10 +711,11 @@ class WebDevFS implements DevFS {
             ? await (_cachedExtensionFuture ??=
                 dwds.extensionDebugConnections.stream.first)
             : await dwds.debugConnection(appConnection);
-        if (firstConnection.isCompleted) {
+        if (foundFirstConnection) {
           appConnection.runMain();
         } else {
-          final vm_service.VmService vmService = await createVmServiceDelegate(
+          foundFirstConnection = true;
+          final vm_service.VmService vmService = await vmServiceFactory(
             Uri.parse(debugConnection.uri),
             logger: globals.logger,
           );
@@ -709,7 +729,8 @@ class WebDevFS implements DevFS {
       }
     }, onError: (Object error, StackTrace stackTrace) {
       globals.printError(
-          'Unknown error while waiting for debug connection:$error\n$stackTrace');
+        'Unknown error while waiting for debug connection:$error\n$stackTrace',
+      );
       if (!firstConnection.isCompleted) {
         firstConnection.completeError(error, stackTrace);
       }
@@ -752,6 +773,7 @@ class WebDevFS implements DevFS {
       nullSafetyMode,
       testMode: testMode,
     );
+
     final int selectedPort = webAssetServer.selectedPort;
     if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
       webAssetServer.webRenderer = WebRendererMode.autoDetect;
@@ -792,6 +814,7 @@ class WebDevFS implements DevFS {
     required List<Uri> invalidatedFiles,
     required PackageConfig packageConfig,
     required String dillOutputPath,
+    required DevelopmentShaderCompiler shaderCompiler,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -799,6 +822,7 @@ class WebDevFS implements DevFS {
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String? projectRootPath,
+    File? dartPluginRegistrant,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -844,6 +868,7 @@ class WebDevFS implements DevFS {
           globals.fs.directory(getAssetBuildDirectory()),
           bundle.entries,
           bundle.entryKinds,
+          targetPlatform: TargetPlatform.web_javascript,
         );
       }
     }
@@ -866,6 +891,7 @@ class WebDevFS implements DevFS {
       packageConfig: packageConfig,
       projectRootPath: projectRootPath,
       fs: globals.fs,
+      dartPluginRegistrant: dartPluginRegistrant,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport();
@@ -921,6 +947,9 @@ class WebDevFS implements DevFS {
   void resetLastCompiled() {
     // Not used for web compilation.
   }
+
+  @override
+  Set<String> get shaderPathsToEvict => <String>{};
 }
 
 class ReleaseAssetServer {

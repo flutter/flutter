@@ -29,20 +29,29 @@ class BottomSheetThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.bottomSheetTheme].
   const BottomSheetThemeData({
     this.backgroundColor,
+    this.surfaceTintColor,
     this.elevation,
     this.modalBackgroundColor,
+    this.modalBarrierColor,
     this.modalElevation,
     this.shape,
     this.clipBehavior,
     this.constraints,
   });
 
-  /// Default value for [BottomSheet.backgroundColor].
+  /// Overrides the default value for [BottomSheet.backgroundColor].
   ///
   /// If null, [BottomSheet] defaults to [Material]'s default.
   final Color? backgroundColor;
 
-  /// Default value for [BottomSheet.elevation].
+  /// Overrides the default value for surfaceTintColor.
+  ///
+  /// If null, [BottomSheet] will not display an overlay color.
+  ///
+  /// See [Material.surfaceTintColor] for more details.
+  final Color? surfaceTintColor;
+
+  /// Overrides the default value for [BottomSheet.elevation].
   ///
   /// {@macro flutter.material.material.elevation}
   ///
@@ -53,17 +62,21 @@ class BottomSheetThemeData with Diagnosticable {
   /// as a modal bottom sheet.
   final Color? modalBackgroundColor;
 
+  /// Overrides the default value for barrier color when the Bottom sheet is presented as
+  /// a modal bottom sheet.
+  final Color? modalBarrierColor;
+
   /// Value for [BottomSheet.elevation] when the Bottom sheet is presented as a
   /// modal bottom sheet.
   final double? modalElevation;
 
-  /// Default value for [BottomSheet.shape].
+  /// Overrides the default value for [BottomSheet.shape].
   ///
   /// If null, no overriding shape is specified for [BottomSheet], so the
   /// [BottomSheet] is rectangular.
   final ShapeBorder? shape;
 
-  /// Default value for [BottomSheet.clipBehavior].
+  /// Overrides the default value for [BottomSheet.clipBehavior].
   ///
   /// If null, [BottomSheet] uses [Clip.none].
   final Clip? clipBehavior;
@@ -77,8 +90,10 @@ class BottomSheetThemeData with Diagnosticable {
   /// new values.
   BottomSheetThemeData copyWith({
     Color? backgroundColor,
+    Color? surfaceTintColor,
     double? elevation,
     Color? modalBackgroundColor,
+    Color? modalBarrierColor,
     double? modalElevation,
     ShapeBorder? shape,
     Clip? clipBehavior,
@@ -86,8 +101,10 @@ class BottomSheetThemeData with Diagnosticable {
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       elevation: elevation ?? this.elevation,
       modalBackgroundColor: modalBackgroundColor ?? this.modalBackgroundColor,
+      modalBarrierColor: modalBarrierColor ?? this.modalBarrierColor,
       modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
       clipBehavior: clipBehavior ?? this.clipBehavior,
@@ -107,8 +124,10 @@ class BottomSheetThemeData with Diagnosticable {
     }
     return BottomSheetThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       modalBackgroundColor: Color.lerp(a?.modalBackgroundColor, b?.modalBackgroundColor, t),
+      modalBarrierColor: Color.lerp(a?.modalBarrierColor, b?.modalBarrierColor, t),
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
@@ -119,8 +138,10 @@ class BottomSheetThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
     backgroundColor,
+    surfaceTintColor,
     elevation,
     modalBackgroundColor,
+    modalBarrierColor,
     modalElevation,
     shape,
     clipBehavior,
@@ -137,8 +158,10 @@ class BottomSheetThemeData with Diagnosticable {
     }
     return other is BottomSheetThemeData
         && other.backgroundColor == backgroundColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.elevation == elevation
         && other.modalBackgroundColor == modalBackgroundColor
+        && other.modalBarrierColor == modalBarrierColor
         && other.modalElevation == modalElevation
         && other.shape == shape
         && other.clipBehavior == clipBehavior
@@ -149,8 +172,10 @@ class BottomSheetThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('modalBackgroundColor', modalBackgroundColor, defaultValue: null));
+    properties.add(ColorProperty('modalBarrierColor', modalBarrierColor, defaultValue: null));
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));

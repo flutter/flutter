@@ -1,0 +1,845 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are from the Widgets library. *
+#   For fixes to
+#     * Actions: fix_actions.yaml
+#     * BuildContext: fix_build_context.yaml
+#     * Element: fix_element.yaml
+#     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/87839
+  - title: "Migrate to 'disallowIndicator'"
+    date: 2021-08-06
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'disallowGlow'
+      inClass: 'OverscrollIndicatorNotification'
+    changes:
+      - kind: 'rename'
+        newName: 'disallowIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'overflow'
+      inClass: 'Stack'
+    changes:
+      - kind: 'rename'
+        newName: 'clipBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/66305
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-09-22
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'Stack'
+    oneOf:
+      - if: "overflow == 'Overflow.clip'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.hardEdge'
+              requiredIf: "overflow == 'Overflow.clip'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+      - if: "overflow == 'Overflow.visible'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.none'
+              requiredIf: "overflow == 'Overflow.visible'"
+          - kind: 'removeParameter'
+            name: 'overflow'
+    variables:
+      overflow:
+        kind: 'fragment'
+        value: 'arguments[overflow]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/45941
+  - title: "Rename to 'deferFirstFrame'"
+    date: 2020-12-23
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'deferFirstFrameReport'
+      inClass: 'WidgetsBinding'
+    changes:
+      - kind: 'rename'
+        newName: 'deferFirstFrame'
+
+  # Changes made in https://github.com/flutter/flutter/pull/45941
+  - title: "Rename to 'allowFirstFrame'"
+    date: 2020-12-23
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'allowFirstFrameReport'
+      inClass: 'WidgetsBinding'
+    changes:
+      - kind: 'rename'
+        newName: 'allowFirstFrame'
+
+  # Changes made in https://github.com/flutter/flutter/pull/44189
+  - title: "Rename to 'dependOnInheritedElement'"
+    date: 2020-12-23
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'inheritFromElement'
+      inClass: 'StatefulElement'
+    changes:
+      - kind: 'rename'
+        newName: 'dependOnInheritedElement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: "Migrate to 'autovalidateMode'"
+    date: 2020-09-02
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'autovalidate'
+      inClass: 'Form'
+    changes:
+      - kind: 'rename'
+        newName: 'autovalidateMode'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: "Migrate to 'autovalidateMode'"
+    date: 2020-09-02
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'Form'
+    oneOf:
+      - if: "autovalidate == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutovalidateMode.always'
+              requiredIf: "autovalidate == 'true'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+      - if: "autovalidate == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutovalidateMode.disabled'
+              requiredIf: "autovalidate == 'false'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+    variables:
+      autovalidate:
+        kind: 'fragment'
+        value: 'arguments[autovalidate]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: "Migrate to 'autovalidateMode'"
+    date: 2020-09-02
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'autovalidate'
+      inClass: 'FormField'
+    changes:
+      - kind: 'rename'
+        newName: 'autovalidateMode'
+
+  # Changes made in https://github.com/flutter/flutter/pull/61648
+  - title: "Migrate to 'autovalidateMode'"
+    date: 2020-09-02
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'FormField'
+    oneOf:
+      - if: "autovalidate == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutovalidateMode.always'
+              requiredIf: "autovalidate == 'true'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+      - if: "autovalidate == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'autovalidateMode'
+            style: optional_named
+            argumentValue:
+              expression: 'AutovalidateMode.disabled'
+              requiredIf: "autovalidate == 'false'"
+          - kind: 'removeParameter'
+            name: 'autovalidate'
+    variables:
+      autovalidate:
+        kind: 'fragment'
+        value: 'arguments[autovalidate]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/70726.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Navigator'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68736.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'MediaQuery'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68925.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'SliverAnimatedList'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68925.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'AnimatedList'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68921.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Shortcuts'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68917.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Focus'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68917.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'FocusTraversalGroup'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68917.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'FocusTraversalOrder'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68911.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'localeOf'
+      inClass: 'Localizations'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeLocaleOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/68910.
+  - title: "Migrate from 'nullOk'"
+    date: 2021-01-27
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'of'
+      inClass: 'Router'
+    oneOf:
+      - if: "nullOk == 'true'"
+        changes:
+          - kind: 'rename'
+            newName: 'maybeOf'
+          - kind: 'removeParameter'
+            name: 'nullOk'
+      - if: "nullOk == 'false'"
+        changes:
+          - kind: 'removeParameter'
+            name: 'nullOk'
+    variables:
+      nullOk:
+        kind: 'fragment'
+        value: 'arguments[nullOk]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/59127
+  - title: "Migrate to 'label'"
+    date: 2020-07-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'title'
+      inClass: 'BottomNavigationBarItem'
+    changes:
+      - kind: 'rename'
+        newName: 'label'
+
+  # Changes made in https://github.com/flutter/flutter/pull/59127
+  - title: "Migrate to 'label'"
+    date: 2020-07-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'BottomNavigationBarItem'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'title'
+        newName: 'label'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'dragAnchor'
+      inClass: 'Draggable'
+    changes:
+      - kind: 'rename'
+        newName: 'dragAnchorStrategy'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'Draggable'
+    oneOf:
+      - if: "dragAnchor == 'DragAnchor.child'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'childDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.child'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+      - if: "dragAnchor == 'DragAnchor.pointer'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'pointerDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.pointer'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+    variables:
+      dragAnchor:
+        kind: 'fragment'
+        value: 'arguments[dragAnchor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'dragAnchor'
+      inClass: 'LongPressDraggable'
+    changes:
+      - kind: 'rename'
+        newName: 'dragAnchorStrategy'
+
+  # Changes made in https://github.com/flutter/flutter/pull/79160
+  - title: "Migrate to 'dragAnchorStrategy'"
+    date: 2021-04-05
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'LongPressDraggable'
+    oneOf:
+      - if: "dragAnchor == 'DragAnchor.child'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'childDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.child'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+      - if: "dragAnchor == 'DragAnchor.pointer'"
+        changes:
+          - kind: 'addParameter'
+            index: 9
+            name: 'dragAnchorStrategy'
+            style: optional_named
+            argumentValue:
+              expression: 'pointerDragAnchorStrategy'
+              requiredIf: "dragAnchor == 'DragAnchor.pointer'"
+          - kind: 'removeParameter'
+            name: 'dragAnchor'
+    variables:
+      dragAnchor:
+        kind: 'fragment'
+        value: 'arguments[dragAnchor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'RenderObjectToWidgetElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SliverMultiBoxAdaptorElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'SingleChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'MultiChildRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'ListWheelElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'removeRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'removeChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'removeRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'moveRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'moveChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'moveRenderObjectChild'
+
+  # Changes made in https://github.com/flutter/flutter/pull/64254
+  - title: "Migrate to 'insertRenderObjectChild'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'insertChildRenderObject'
+      inClass: 'LeafRenderObjectElement'
+    changes:
+      - kind: 'rename'
+        newName: 'insertRenderObjectChild'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'clipToSize'
+      inClass: 'ListWheelViewport'
+    changes:
+    - kind: 'rename'
+      newName: 'clipBehavior'
+
+  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  - title: "Migrate to 'clipBehavior'"
+    date: 2020-08-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'ListWheelViewport'
+    oneOf:
+    - if: "clipToSize == 'true'"
+      changes:
+      - kind: 'addParameter'
+        index: 13
+        name: 'clipBehavior'
+        style: optional_named
+        argumentValue:
+          expression: 'Clip.hardEdge'
+          requiredIf: "clipToSize == 'true'"
+      - kind: 'removeParameter'
+        name: 'clipToSize'
+    - if: "clipToSize == 'false'"
+      changes:
+      - kind: 'addParameter'
+        index: 13
+        name: 'clipBehavior'
+        style: optional_named
+        argumentValue:
+          expression: 'Clip.none'
+          requiredIf: "clipToSize == 'false'"
+      - kind: 'removeParameter'
+        name: 'clipToSize'
+    variables:
+      clipToSize:
+        kind: 'fragment'
+        value: 'arguments[clipToSize]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'isAlwaysShown'
+      inClass: 'RawScrollbar'
+    changes:
+      - kind: 'rename'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/96957
+  - title: "Migrate to 'thumbVisibility'"
+    date: 2022-01-20
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'RawScrollbar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'isAlwaysShown'
+        newName: 'thumbVisibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/100381
+  - title: "Migrate 'TextSelectionOverlay.fadeDuration' to SelectionOverlay.fadeDuration"
+    date: 2022-03-18
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'fadeDuration'
+      inClass: 'TextSelectionOverlay'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+          field: 'fadeDuration'
+          inClass: 'SelectionOverlay'
+
+  # Changes made in https://github.com/flutter/flutter/pull/78588
+  - title: "Migrate to 'buildOverscrollIndicator'"
+    date: 2021-03-18
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'buildViewportChrome'
+      inClass: 'ScrollBehavior'
+    changes:
+    - kind: 'rename'
+      newName: 'buildOverscrollIndicator'
+
+# Before adding a new fix: read instructions at the top of this file.

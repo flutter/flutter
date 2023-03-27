@@ -54,6 +54,7 @@ void main() {
     const Key defaultKey = PageStorageKey<String>('default');
 
     final Key tileKey = UniqueKey();
+    const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -69,6 +70,7 @@ void main() {
                 initiallyExpanded: true,
                 title: const Text('Expanded'),
                 backgroundColor: Colors.red,
+                clipBehavior: clipBehavior,
                 children: <Widget>[
                   ListTile(
                     key: tileKey,
@@ -109,15 +111,18 @@ void main() {
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
     expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
 
-    BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
-    expect(expandedContainerDecoration.color, Colors.red);
-    expect(expandedContainerDecoration.border!.top.color, dividerColor);
-    expect(expandedContainerDecoration.border!.bottom.color, dividerColor);
+    // expansionTile should have Clip.antiAlias as clipBehavior
+    expect(getContainer(expandedKey).clipBehavior, clipBehavior);
 
-    BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
+    ShapeDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as ShapeDecoration;
+    expect(expandedContainerDecoration.color, Colors.red);
+    expect((expandedContainerDecoration.shape as Border).top.color, dividerColor);
+    expect((expandedContainerDecoration.shape as Border).bottom.color, dividerColor);
+
+    ShapeDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
-    expect(collapsedContainerDecoration.border!.top.color, Colors.transparent);
-    expect(collapsedContainerDecoration.border!.bottom.color, Colors.transparent);
+    expect((collapsedContainerDecoration.shape as Border).top.color, Colors.transparent);
+    expect((collapsedContainerDecoration.shape as Border).bottom.color, Colors.transparent);
 
     await tester.tap(find.text('Expanded'));
     await tester.tap(find.text('Collapsed'));
@@ -127,11 +132,10 @@ void main() {
 
     // Pump to the middle of the animation for expansion.
     await tester.pump(const Duration(milliseconds: 100));
-    final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
+    final ShapeDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
-    // Opacity should change but color component should remain the same.
-    expect(collapsingContainerDecoration.border!.top.color, const Color(0x15333333));
-    expect(collapsingContainerDecoration.border!.bottom.color, const Color(0x15333333));
+    expect((collapsingContainerDecoration.shape as Border).top.color, const Color(0x15222222));
+    expect((collapsingContainerDecoration.shape as Border).bottom.color, const Color(0x15222222));
 
     // Pump all the way to the end now.
     await tester.pump(const Duration(seconds: 1));
@@ -141,16 +145,16 @@ void main() {
     expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
 
     // Expanded should be collapsed now.
-    expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
+    expandedContainerDecoration = getContainer(expandedKey).decoration! as ShapeDecoration;
     expect(expandedContainerDecoration.color, Colors.transparent);
-    expect(expandedContainerDecoration.border!.top.color, Colors.transparent);
-    expect(expandedContainerDecoration.border!.bottom.color, Colors.transparent);
+    expect((expandedContainerDecoration.shape as Border).top.color, Colors.transparent);
+    expect((expandedContainerDecoration.shape as Border).bottom.color, Colors.transparent);
 
     // Collapsed should be expanded now.
-    collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
+    collapsedContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
-    expect(collapsedContainerDecoration.border!.top.color, dividerColor);
-    expect(collapsedContainerDecoration.border!.bottom.color, dividerColor);
+    expect((collapsedContainerDecoration.shape as Border).top.color, dividerColor);
+    expect((collapsedContainerDecoration.shape as Border).bottom.color, dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
@@ -164,7 +168,7 @@ void main() {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSwatch().copyWith(primary: foregroundColor),
           unselectedWidgetColor: unselectedWidgetColor,
-          textTheme: const TextTheme(subtitle1: TextStyle(color: headerColor)),
+          textTheme: const TextTheme(titleMedium: TextStyle(color: headerColor)),
         ),
         home: Material(
           child: SingleChildScrollView(
@@ -500,22 +504,22 @@ void main() {
       ),
     ));
 
-    BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
+    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
       of: find.byKey(expansionTileKey),
       matching: find.byType(Container),
-    )).decoration! as BoxDecoration;
+    )).decoration! as ShapeDecoration;
 
-    expect(boxDecoration.color, collapsedBackgroundColor);
+    expect(shapeDecoration.color, collapsedBackgroundColor);
 
     await tester.tap(find.text('Title'));
     await tester.pumpAndSettle();
 
-    boxDecoration =  tester.firstWidget<Container>(find.descendant(
+    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
       of: find.byKey(expansionTileKey),
       matching: find.byType(Container),
-    )).decoration! as BoxDecoration;
+    )).decoration! as ShapeDecoration;
 
-    expect(boxDecoration.color, backgroundColor);
+    expect(shapeDecoration.color, backgroundColor);
   });
 
   testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
@@ -553,6 +557,54 @@ void main() {
 
     expect(getIconColor(), iconColor);
     expect(getTextColor(), textColor);
+  });
+
+  testWidgets('ExpansionTile Border', (WidgetTester tester) async {
+    const Key expansionTileKey = PageStorageKey<String>('expansionTile');
+
+    const Border collapsedShape = Border(
+      top: BorderSide(color: Colors.blue),
+      bottom: BorderSide(color: Colors.green)
+    );
+    final Border shape = Border.all(color: Colors.red);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              ExpansionTile(
+                key: expansionTileKey,
+                title: const Text('ExpansionTile'),
+                collapsedShape: collapsedShape,
+                shape: shape,
+                children: const <Widget>[
+                  ListTile(
+                    title: Text('0'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    Container getContainer(Key key) => tester.firstWidget(find.descendant(
+      of: find.byKey(key),
+      matching: find.byType(Container),
+    ));
+
+    // expansionTile should be Collapsed now.
+    ShapeDecoration expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
+    expect(expandedContainerDecoration.shape, collapsedShape);
+
+    await tester.tap(find.text('ExpansionTile'));
+    await tester.pumpAndSettle();
+
+    // expansionTile should be Expanded now.
+    expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
+    expect(expandedContainerDecoration.shape, shape);
   });
 
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {

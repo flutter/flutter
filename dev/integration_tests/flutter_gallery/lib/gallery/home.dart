@@ -79,7 +79,7 @@ class _CategoryItem extends StatelessWidget {
               child: Text(
                 category!.name,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.subtitle1!.copyWith(
+                style: theme.textTheme.titleMedium!.copyWith(
                   fontFamily: 'GoogleSans',
                   color: isDark ? Colors.white : _kFlutterBlue,
                 ),
@@ -206,14 +206,14 @@ class _DemoItem extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     demo!.title,
-                    style: theme.textTheme.subtitle1!.copyWith(
+                    style: theme.textTheme.titleMedium!.copyWith(
                       color: isDark ? Colors.white : const Color(0xFF202124),
                     ),
                   ),
                   if (demo!.subtitle != null)
                     Text(
                       demo!.subtitle!,
-                      style: theme.textTheme.bodyText2!.copyWith(
+                      style: theme.textTheme.bodyMedium!.copyWith(
                         color: isDark ? Colors.white : const Color(0xFF60646B)
                       ),
                     ),

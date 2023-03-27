@@ -10,6 +10,17 @@ import 'package:flutter/widgets.dart';
 import 'material_state.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
+/// Used to configure how the [PopupMenuButton] positions its popup menu.
+enum PopupMenuPosition {
+  /// Menu is positioned over the anchor.
+  over,
+  /// Menu is positioned under the anchor.
+  under,
+}
+
 /// Defines the visual properties of the routes used to display popup menus
 /// as well as [PopupMenuItem] and [PopupMenuDivider] widgets.
 ///
@@ -37,9 +48,13 @@ class PopupMenuThemeData with Diagnosticable {
     this.color,
     this.shape,
     this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
     this.textStyle,
+    this.labelTextStyle,
     this.enableFeedback,
     this.mouseCursor,
+    this.position,
   });
 
   /// The background color of the popup menu.
@@ -51,8 +66,18 @@ class PopupMenuThemeData with Diagnosticable {
   /// The elevation of the popup menu.
   final double? elevation;
 
+  /// The color used to paint shadow below the popup menu.
+  final Color? shadowColor;
+
+  /// The color used as an overlay on [color] of the popup menu.
+  final Color? surfaceTintColor;
+
   /// The text style of items in the popup menu.
   final TextStyle? textStyle;
+
+  /// You can use this to specify a different style of the label
+  /// when the popup menu item is enabled and disabled.
+  final MaterialStateProperty<TextStyle?>? labelTextStyle;
 
   /// If specified, defines the feedback property for [PopupMenuButton].
   ///
@@ -64,23 +89,37 @@ class PopupMenuThemeData with Diagnosticable {
   /// If specified, overrides the default value of [PopupMenuItem.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
+  /// Whether the popup menu is positioned over or under the popup menu button.
+  ///
+  /// When not set, the position defaults to [PopupMenuPosition.over] which makes the
+  /// popup menu appear directly over the button that was used to create it.
+  final PopupMenuPosition? position;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
     Color? color,
     ShapeBorder? shape,
     double? elevation,
+    Color? shadowColor,
+    Color? surfaceTintColor,
     TextStyle? textStyle,
+    MaterialStateProperty<TextStyle?>? labelTextStyle,
     bool? enableFeedback,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
+    PopupMenuPosition? position,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
       shape: shape ?? this.shape,
       elevation: elevation ?? this.elevation,
+      shadowColor: shadowColor ?? this.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? this.surfaceTintColor,
       textStyle: textStyle ?? this.textStyle,
+      labelTextStyle: labelTextStyle ?? this.labelTextStyle,
       enableFeedback: enableFeedback ?? this.enableFeedback,
       mouseCursor: mouseCursor ?? this.mouseCursor,
+      position: position ?? this.position,
     );
   }
 
@@ -98,9 +137,13 @@ class PopupMenuThemeData with Diagnosticable {
       color: Color.lerp(a?.color, b?.color, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
+      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.labelTextStyle, b?.labelTextStyle, t, TextStyle.lerp),
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
+      position: t < 0.5 ? a?.position : b?.position,
     );
   }
 
@@ -109,9 +152,13 @@ class PopupMenuThemeData with Diagnosticable {
     color,
     shape,
     elevation,
+    shadowColor,
+    surfaceTintColor,
     textStyle,
+    labelTextStyle,
     enableFeedback,
     mouseCursor,
+    position,
   );
 
   @override
@@ -123,12 +170,16 @@ class PopupMenuThemeData with Diagnosticable {
       return false;
     }
     return other is PopupMenuThemeData
-        && other.elevation == elevation
         && other.color == color
         && other.shape == shape
+        && other.elevation == elevation
+        && other.shadowColor == shadowColor
+        && other.surfaceTintColor == surfaceTintColor
         && other.textStyle == textStyle
+        && other.labelTextStyle == labelTextStyle
         && other.enableFeedback == enableFeedback
-        && other.mouseCursor == mouseCursor;
+        && other.mouseCursor == mouseCursor
+        && other.position == position;
   }
 
   @override
@@ -137,9 +188,13 @@ class PopupMenuThemeData with Diagnosticable {
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
+    properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('labelTextStyle', labelTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
+    properties.add(EnumProperty<PopupMenuPosition?>('position', position, defaultValue: null));
   }
 }
 

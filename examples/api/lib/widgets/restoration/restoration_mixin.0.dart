@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for RestorationMixin
+/// Flutter code sample for [RestorationMixin].
 
 import 'package:flutter/material.dart';
 
@@ -82,7 +82,7 @@ class _RestorableCounterState extends State<RestorableCounter>
             ),
             Text(
               '${_counter.value}',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),

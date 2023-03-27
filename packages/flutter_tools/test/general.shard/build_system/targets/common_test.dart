@@ -465,84 +465,10 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('AotAssemblyProfile with bitcode sends correct argument to snapshotter', () async {
-    iosEnvironment.defines[kIosArchs] = 'arm64';
-    iosEnvironment.defines[kBitcodeFlag] = 'true';
-    iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-    final String build = iosEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
-      FakeCommand(command: <String>[
-        // This path is not known by the cache due to the iOS gen_snapshot split.
-        'Artifact.genSnapshot.TargetPlatform.ios.profile_arm64',
-        '--deterministic',
-        kAssemblyAot,
-        '--assembly=$build/arm64/snapshot_assembly.S',
-        '--strip',
-        '$build/app.dill',
-      ]),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'cc',
-        '-arch',
-        'arm64',
-        '-miphoneos-version-min=11.0',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
-        // Contains bitcode flag.
-        '-fembed-bitcode',
-        '-c',
-        '$build/arm64/snapshot_assembly.S',
-        '-o',
-        '$build/arm64/snapshot_assembly.o',
-      ]),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'clang',
-        '-arch',
-        'arm64',
-        '-miphoneos-version-min=11.0',
-        '-isysroot',
-        'path/to/iPhoneOS.sdk',
-        '-dynamiclib',
-        '-Xlinker',
-        '-rpath',
-        '-Xlinker',
-        '@executable_path/Frameworks',
-        '-Xlinker',
-        '-rpath',
-        '-Xlinker',
-        '@loader_path/Frameworks',
-        '-install_name',
-        '@rpath/App.framework/App',
-        // Contains bitcode flag.
-        '-fembed-bitcode',
-        '-o',
-        '$build/arm64/App.framework/App',
-        '$build/arm64/snapshot_assembly.o',
-      ]),
-      FakeCommand(command: <String>[
-        'lipo',
-        '$build/arm64/App.framework/App',
-        '-create',
-        '-output',
-        '$build/App.framework/App',
-      ]),
-    ]);
-
-    await const AotAssemblyProfile().build(iosEnvironment);
-
-    expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{
-    Platform: () => macPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
-
   testUsingContext('AotAssemblyRelease configures gen_snapshot with code size directory', () async {
     iosEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
     iosEnvironment.defines[kIosArchs] = 'arm64';
     iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-    iosEnvironment.defines[kBitcodeFlag] = 'true';
     final String build = iosEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -553,7 +479,6 @@ void main() {
         '--trace-precompiler-to=code_size_1/trace.arm64.json',
         kAssemblyAot,
         '--assembly=$build/arm64/snapshot_assembly.S',
-        '--strip',
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
@@ -564,8 +489,6 @@ void main() {
         '-miphoneos-version-min=11.0',
         '-isysroot',
         'path/to/iPhoneOS.sdk',
-        // Contains bitcode flag.
-        '-fembed-bitcode',
         '-c',
         '$build/arm64/snapshot_assembly.S',
         '-o',
@@ -590,11 +513,24 @@ void main() {
         '@loader_path/Frameworks',
         '-install_name',
         '@rpath/App.framework/App',
-        // Contains bitcode flag.
-        '-fembed-bitcode',
         '-o',
         '$build/arm64/App.framework/App',
         '$build/arm64/snapshot_assembly.o',
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'dsymutil',
+        '-o',
+        '$build/arm64/App.framework.dSYM',
+        '$build/arm64/App.framework/App',
+      ]),
+      FakeCommand(command: <String>[
+        'xcrun',
+        'strip',
+        '-x',
+        '$build/arm64/App.framework/App',
+        '-o',
+        '$build/arm64/App.framework/App',
       ]),
       FakeCommand(command: <String>[
         'lipo',

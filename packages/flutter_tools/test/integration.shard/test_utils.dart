@@ -99,3 +99,31 @@ Future<void> pollForServiceExtensionValue<T>({
     " attempts responded with '$continuePollingValue'.",
   );
 }
+
+class AppleTestUtils {
+  // static only
+  AppleTestUtils._();
+
+  static const List<String> requiredSymbols = <String>[
+    '_kDartIsolateSnapshotData',
+    '_kDartIsolateSnapshotInstructions',
+    '_kDartVmSnapshotData',
+    '_kDartVmSnapshotInstructions'
+  ];
+
+  static List<String> getExportedSymbols(String dwarfPath) {
+    final ProcessResult nm = processManager.runSync(
+      <String>[
+        'nm',
+        '--debug-syms',  // nm docs: 'Show all symbols, even debugger only'
+        '--defined-only',
+        '--just-symbol-name',
+        dwarfPath,
+        '-arch',
+        'arm64',
+      ],
+    );
+    final String nmOutput = (nm.stdout as String).trim();
+    return nmOutput.isEmpty ? const <String>[] : nmOutput.split('\n');
+  }
+}

@@ -392,13 +392,19 @@ class BorderRadius extends BorderRadiusGeometry {
   Radius get _bottomEnd => Radius.zero;
 
   /// Creates an [RRect] from the current border radius and a [Rect].
+  ///
+  /// If any of the radii have negative values in x or y, those values will be
+  /// clamped to zero in order to produce a valid [RRect].
   RRect toRRect(Rect rect) {
+    // Because the current radii could be negative, we must clamp them before
+    // converting them to an RRect to be rendered, since negative radii on
+    // RRects don't make sense.
     return RRect.fromRectAndCorners(
       rect,
-      topLeft: topLeft,
-      topRight: topRight,
-      bottomLeft: bottomLeft,
-      bottomRight: bottomRight,
+      topLeft: topLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight: topRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft: bottomLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight: bottomRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
     );
   }
 

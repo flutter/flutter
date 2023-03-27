@@ -21,7 +21,8 @@ enum CupertinoUserInterfaceLevelData {
 }
 
 /// Establishes a subtree in which [CupertinoUserInterfaceLevel.of] resolves to
-/// the given data.
+/// the given visual elevation from the [CupertinoUserInterfaceLevelData]. This
+/// can be used to apply style differences based on a widget's elevation.
 ///
 /// Querying the current elevation status using [CupertinoUserInterfaceLevel.of]
 /// will cause your widget to rebuild automatically whenever the

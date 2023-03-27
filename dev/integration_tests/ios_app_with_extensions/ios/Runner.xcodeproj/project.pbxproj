@@ -727,6 +727,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				IBSC_MODULE = watch_Extension;
 				INFOPLIST_FILE = watch/Info.plist;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.extensionTest;
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -757,6 +758,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				IBSC_MODULE = watch_Extension;
 				INFOPLIST_FILE = watch/Info.plist;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.extensionTest;
 				MARKETING_VERSION = 1.0.0;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = "";
@@ -785,6 +787,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				IBSC_MODULE = watch_Extension;
 				INFOPLIST_FILE = watch/Info.plist;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.extensionTest;
 				MARKETING_VERSION = 1.0.0;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = "";

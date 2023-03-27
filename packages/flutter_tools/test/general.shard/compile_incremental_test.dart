@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
@@ -21,6 +22,7 @@ import '../src/fakes.dart';
 void main() {
   late ResidentCompiler generator;
   late ResidentCompiler generatorWithScheme;
+  late ResidentCompiler generatorWithPlatformDillAndLibrariesSpec;
   late MemoryIOSink frontendServerStdIn;
   late BufferLogger testLogger;
   late StdoutHandler generatorStdoutHandler;
@@ -35,7 +37,6 @@ void main() {
     'sdkroot/',
     '--incremental',
     '--target=flutter',
-    '--debugger-module-names',
     '--experimental-emit-debug-metadata',
     '--output-dill',
     '/build/',
@@ -75,6 +76,18 @@ void main() {
       fileSystemScheme: 'scheme',
       fileSystem: MemoryFileSystem.test(),
       stdoutHandler: generatorWithSchemeStdoutHandler,
+    );
+    generatorWithPlatformDillAndLibrariesSpec = DefaultResidentCompiler(
+      'sdkroot',
+      buildMode: BuildMode.debug,
+      logger: testLogger,
+      processManager: fakeProcessManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      stdoutHandler: generatorStdoutHandler,
+      platformDill: '/foo/platform.dill',
+      librariesSpec: '/bar/libraries.json',
     );
   });
 
@@ -393,6 +406,69 @@ void main() {
       'line1\nline2\n'
       'line2\nline3\n'
     ));
+  });
+
+  testWithoutContext('incremental compile with dartPluginRegistrant', () async {
+    fakeProcessManager.addCommand(FakeCommand(
+      command: const <String>[
+        ...frontendServerCommand,
+        '--filesystem-root',
+        '/foo/bar/fizz',
+        '--filesystem-scheme',
+        'scheme',
+        '--source',
+        'some/dir/plugin_registrant.dart',
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=some/dir/plugin_registrant.dart',
+        '--verbosity=error',
+      ],
+      stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+      stdin: frontendServerStdIn,
+    ));
+
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final File dartPluginRegistrant = fs.file('some/dir/plugin_registrant.dart')..createSync(recursive: true);
+    final CompilerOutput? output = await generatorWithScheme.recompile(
+      Uri.parse('file:///foo/bar/fizz/main.dart'),
+        null /* invalidatedFiles */,
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      fs: fs,
+      projectRootPath: '',
+      checkDartPluginRegistry: true,
+      dartPluginRegistrant: dartPluginRegistrant,
+    );
+    expect(frontendServerStdIn.getAndClear(), 'compile scheme:///main.dart\n');
+    expect(testLogger.errorText, equals('line1\nline2\n'));
+    expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('compile does not pass libraries-spec when using a platform dill', () async {
+    fakeProcessManager.addCommand(FakeCommand(
+      command: const <String>[
+        ...frontendServerCommand,
+        '--platform',
+        '/foo/platform.dill',
+        '--verbosity=error'
+      ],
+      stdout: 'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0',
+      stdin: frontendServerStdIn,
+    ));
+
+    final CompilerOutput? output = await generatorWithPlatformDillAndLibrariesSpec.recompile(
+      Uri.parse('/path/to/main.dart'),
+        null /* invalidatedFiles */,
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      fs: MemoryFileSystem(),
+      projectRootPath: '',
+    );
+    expect(frontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+    expect(testLogger.errorText, equals('line1\nline2\n'));
+    expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 }
 
