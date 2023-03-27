@@ -36,10 +36,7 @@ class AssetFontManager : public SkFontMgr {
 
  protected:
   // |SkFontMgr|
-  using OnMatchFamilyRet =
-      decltype((std::declval<SkFontMgr>().*
-                (&AssetFontManager::onMatchFamily))(std::declval<char[]>()));
-  OnMatchFamilyRet onMatchFamily(const char familyName[]) const override;
+  sk_sp<SkFontStyleSet> onMatchFamily(const char familyName[]) const override;
 
   std::unique_ptr<FontAssetProvider> font_provider_;
 
@@ -51,28 +48,14 @@ class AssetFontManager : public SkFontMgr {
   void onGetFamilyName(int index, SkString* familyName) const override;
 
   // |SkFontMgr|
-  using OnCreateStyleSetRet = decltype((
-      std::declval<SkFontMgr>().*(&AssetFontManager::onCreateStyleSet))(0));
-  OnCreateStyleSetRet onCreateStyleSet(int index) const override;
+  sk_sp<SkFontStyleSet> onCreateStyleSet(int index) const override;
 
   // |SkFontMgr|
-  using OnMatchFamilyStyleRet = decltype((
-      std::declval<SkFontMgr>().*(&AssetFontManager::onMatchFamilyStyle))(
-      std::declval<char[]>(),
-      std::declval<SkFontStyle>()));
-  OnMatchFamilyStyleRet onMatchFamilyStyle(const char familyName[],
-                                           const SkFontStyle&) const override;
+  sk_sp<SkTypeface> onMatchFamilyStyle(const char familyName[],
+                                       const SkFontStyle&) const override;
 
   // |SkFontMgr|
-  using OnMatchFamilyStyleCharacterRet =
-      decltype((std::declval<SkFontMgr>().*
-                (&AssetFontManager::onMatchFamilyStyleCharacter))(
-          std::declval<char[]>(),
-          std::declval<SkFontStyle>(),
-          std::declval<const char*[]>(),
-          0,
-          0));
-  OnMatchFamilyStyleCharacterRet onMatchFamilyStyleCharacter(
+  sk_sp<SkTypeface> onMatchFamilyStyleCharacter(
       const char familyName[],
       const SkFontStyle&,
       const char* bcp47[],
