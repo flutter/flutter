@@ -1,0 +1,51 @@
+// buildscript {
+//     repositories {
+//         google()
+//         mavenCentral()
+//     }
+    
+//     dependencies {
+//         /** When bumping, also update ndkVersion above, as well as the Android Gradle Plugin
+//          * version in ../lib/src/android/gradle_utils.dart.
+//          */
+//         classpath 'com.android.tools.build:gradle:7.3.0'
+//     }
+// }
+
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs += ['.']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+group = 'dev.flutter'
+version = '1.0.0'
+
+gradlePlugin {
+    // Define the plugin
+    plugins {
+        customPlugin {
+            id = 'dev.flutter.flutter-gradle-plugin'
+            implementationClass = 'FlutterPlugin'
+        }
+    }
+}
+
+dependencies {
+    compileOnly("com.android.tools.build:gradle:7.2.2")
+}
+
+tasks.withType(Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

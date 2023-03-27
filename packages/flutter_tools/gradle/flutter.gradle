@@ -59,18 +59,18 @@ class FlutterExtension {
     String target
 }
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        /** When bumping, also update ndkVersion above, as well as the Android Gradle Plugin
-         * version in ../lib/src/android/gradle_utils.dart.
-         */
-        classpath 'com.android.tools.build:gradle:7.3.0'
-    }
-}
+// buildscript {
+//     repositories {
+//         google()
+//         mavenCentral()
+//     }
+//     dependencies {
+//         /** When bumping, also update ndkVersion above, as well as the Android Gradle Plugin
+//          * version in ../lib/src/android/gradle_utils.dart.
+//          */
+//         classpath 'com.android.tools.build:gradle:7.3.0'
+//     }
+// }
 
 /**
  * Some apps don't set default compile options.
@@ -84,7 +84,8 @@ android {
     }
 }
 
-apply plugin: FlutterPlugin
+logger.lifecycle("HERE, before apply")
+// apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
     private static final String DEFAULT_MAVEN_HOST = "https://storage.googleapis.com";
