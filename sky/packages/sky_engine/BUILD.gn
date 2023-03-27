@@ -8,7 +8,6 @@ import("//flutter/lib/ui/dart_ui.gni")
 import("//third_party/dart/sdk/lib/_http/http_sources.gni")
 import(
     "//third_party/dart/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
-import("//third_party/dart/sdk/lib/_internal/js_shared/js_types_sources.gni")
 import("//third_party/dart/sdk/lib/async/async_sources.gni")
 import("//third_party/dart/sdk/lib/collection/collection_sources.gni")
 import("//third_party/dart/sdk/lib/convert/convert_sources.gni")
@@ -19,7 +18,6 @@ import("//third_party/dart/sdk/lib/html/html_sources.gni")
 import("//third_party/dart/sdk/lib/internal/internal_sources.gni")
 import("//third_party/dart/sdk/lib/io/io_sources.gni")
 import("//third_party/dart/sdk/lib/isolate/isolate_sources.gni")
-import("//third_party/dart/sdk/lib/js/js_annotations_sources.gni")
 import("//third_party/dart/sdk/lib/js/js_sources.gni")
 import("//third_party/dart/sdk/lib/js_interop/js_interop_sources.gni")
 import("//third_party/dart/sdk/lib/js_util/js_util_sources.gni")
@@ -86,19 +84,6 @@ copy("_interceptors") {
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/_interceptors/{{source_file_part}}",
   ]
-}
-
-copy("_js_annotations") {
-  lib_path = rebase_path("js", "", dart_sdk_lib_path)
-  sources = rebase_path(js_annotations_sdk_sources, "", lib_path)
-  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/_js_annotations/{{source_file_part}}" ]
-}
-
-copy("_js_types") {
-  lib_path = rebase_path("_internal/js_shared", "", dart_sdk_lib_path)
-  sources = rebase_path(js_types_sdk_sources, "", lib_path)
-  outputs =
-      [ "$root_gen_dir/dart-pkg/sky_engine/lib/_js_types/{{source_file_part}}" ]
 }
 
 copy("internal") {
@@ -195,8 +180,6 @@ group("copy_dart_sdk") {
   deps = [
     ":_http",
     ":_interceptors",
-    ":_js_annotations",
-    ":_js_types",
     ":async",
     ":collection",
     ":convert",
@@ -247,10 +230,6 @@ generated_file("_embedder_yaml") {
     "  # public API, e.g. List being Iterable by virtue of implementing",
     "  # EfficientLengthIterable. Not including this library yields analysis errors.",
     "  \"dart:_internal\": \"internal/internal.dart\"",
-    "  # The _js_annotations library is also needed for the same reasons as _internal.",
-    "  \"dart:_js_annotations\": \"_js_annotations/_js_annotations.dart\"",
-    "  # The _js_types library is also needed for the same reasons as _internal.",
-    "  \"dart:_js_types\": \"_js_types/js_types.dart\"",
     "  \"dart:nativewrappers\": \"_empty.dart\"",
   ]
 }
