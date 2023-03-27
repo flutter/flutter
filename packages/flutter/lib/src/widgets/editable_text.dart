@@ -4687,7 +4687,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         composingRegionOutOfRange,
         widget.style,
         _spellCheckConfiguration.misspelledTextStyle!,
-        spellCheckResults!
+        spellCheckResults!,
       );
     }
 

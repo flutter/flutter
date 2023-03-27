@@ -148,7 +148,7 @@ List<SuggestionSpan> _correctSpellCheckResults(
       // (resultsText), so apply it to new text by adding it to the list of
       // corrected results.
       searchStart = currentSpan.range.end + offset;
-      int actualEnd = newText.substring(searchStart) == ' ' ? searchStart : searchStart + 1; // TODO(camsim99): fix this to actually extend where needed.
+      int actualEnd = newText.substring(searchStart) == ' ' ? searchStart : searchStart + 1; // TODO(camsim99): fix this to actually extend where needed with regex -- jk i think the right way is to actually not go here if it's not exact
       adjustedSpan = SuggestionSpan(
           TextRange(
               start: currentSpan.range.start + offset, end: actualEnd),
