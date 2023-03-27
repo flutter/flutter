@@ -35,7 +35,6 @@
                 "fuchsia.net.name.Lookup",
                 "fuchsia.posix.socket.Provider",
                 "fuchsia.sysmem.Allocator",
-                "fuchsia.timezone.Timezone", // Copied from vulkan/client.shard.cml.
                 "fuchsia.tracing.provider.Registry", // Copied from vulkan/client.shard.cml.
                 "fuchsia.ui.composition.Allocator",
                 "fuchsia.ui.composition.Flatland",
