@@ -924,10 +924,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       switch (widget.axis) {
         case Axis.horizontal:
           selectedContentSeparator = ' ';
-          break;
         case Axis.vertical:
           selectedContentSeparator = '\n';
-          break;
       }
 
       result = _ScrollableSelectionHandler(
