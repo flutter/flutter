@@ -84,9 +84,6 @@ android {
     }
 }
 
-logger.lifecycle("HERE, before apply")
-// apply plugin: FlutterPlugin
-
 class FlutterPlugin implements Plugin<Project> {
     private static final String DEFAULT_MAVEN_HOST = "https://storage.googleapis.com";
 
@@ -156,7 +153,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        logger.lifecycle("applying flutter gradle plugin")
+        logger.lifecycle("FlutterPlugin.apply()")
         this.project = project
 
         def rootProject = project.rootProject
