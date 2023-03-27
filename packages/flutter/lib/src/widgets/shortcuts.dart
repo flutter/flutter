@@ -870,6 +870,11 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 /// [Intent].
 /// 
 /// This is similar to but more powerful than the [CallbackShortcuts] widget.
+/// Unlike [CallbackShortcuts], this widget separates key bindings and their
+/// implementations. This separation allows [Shortcuts] to have key bindings
+/// that adapt to the focused context. For example, the desired action for a
+/// deletion intent may be to delete a character in a text input, or to delete
+/// a file in a file menu.
 ///
 /// See the article on [Using Actions and
 /// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
