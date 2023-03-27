@@ -29,6 +29,8 @@ gradlePlugin {
 }
 
 dependencies {
+    // When bumping, also update ndkVersion in FlutterExtension, as well as the
+    // Android Gradle Plugin version in ../lib/src/android/gradle_utils.dart.
     compileOnly("com.android.tools.build:gradle:7.2.2")
 }
 
