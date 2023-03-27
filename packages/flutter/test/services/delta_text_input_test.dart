@@ -304,11 +304,6 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
-  void focus() {
-    latestMethodCall = 'focus';
-  }
-
-  @override
   void unfocus() {
     latestMethodCall = 'unfocus';
   }

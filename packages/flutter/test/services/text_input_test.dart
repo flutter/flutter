@@ -1066,11 +1066,6 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void focus() {
-    latestMethodCall = 'focus';
-  }
-
-  @override
   void unfocus() {
     latestMethodCall = 'unfocus';
   }

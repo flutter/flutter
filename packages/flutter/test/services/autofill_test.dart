@@ -173,11 +173,6 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void focus() {
-    latestMethodCall = 'focus';
-  }
-
-  @override
   void unfocus() {
     latestMethodCall = 'unfocus';
   }

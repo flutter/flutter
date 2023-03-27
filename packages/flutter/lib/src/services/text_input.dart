@@ -1178,12 +1178,6 @@ mixin TextInputClient {
   /// from `DefaultKeyBinding.Dict`.
   void performSelector(String selectorName) {}
 
-  /// Request client to focus.
-  ///
-  /// For example, when open text input from platform, this method will be called to update the
-  /// focus state in framework side.
-  void focus() {}
-
   /// Request client to unfocus.
   ///
   /// For example, when closes text input from platform (eg: Some third party keyboard can close
@@ -1901,8 +1895,6 @@ class TextInput {
         _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();
-      case 'TextInputClient.focus':
-        _currentConnection!._client.focus();
       case 'TextInputClient.unfocus':
         _currentConnection!._client.unfocus();
       default:
