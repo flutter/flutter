@@ -21,7 +21,7 @@ version = '1.0.0'
 gradlePlugin {
     // Define the plugin
     plugins {
-        customPlugin {
+        blahblah {
             id = 'dev.flutter.flutter-gradle-plugin'
             implementationClass = 'FlutterPlugin'
         }
@@ -33,5 +33,5 @@ dependencies {
 }
 
 tasks.withType(Jar) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.WARN
 }
