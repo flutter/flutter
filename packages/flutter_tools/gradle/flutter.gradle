@@ -156,6 +156,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        logger.lifecycle("applying flutter gradle plugin")
         this.project = project
 
         def rootProject = project.rootProject
