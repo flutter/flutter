@@ -4965,6 +4965,26 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return false;
     }
     assert(lastEntry.route._navigator == this);
+
+    // TODO(justinmc): When the deprecated willPop method is removed, delete
+    // this code and use only popEnabled, below.
+    final RoutePopDisposition willPopDisposition = await lastEntry.route.willPop();
+    if (!mounted) {
+      // Forget about this pop, we were disposed in the meantime.
+      return true;
+    }
+    if (willPopDisposition == RoutePopDisposition.doNotPop) {
+      return true;
+    }
+    final _RouteEntry? newLastEntry = _history.cast<_RouteEntry?>().lastWhere(
+      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
+      orElse: () => null,
+    );
+    if (lastEntry != newLastEntry) {
+      // Forget about this pop, something happened to our history in the meantime.
+      return true;
+    }
+
     final RoutePopDisposition disposition = lastEntry.route.popEnabled();
     switch (disposition) {
       case RoutePopDisposition.bubble:
@@ -4981,30 +5001,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         lastEntry.route.onPop();
         return true;
     }
-    /*
-    final RoutePopDisposition disposition = await lastEntry.route.willPop(); // this is asynchronous
-    if (!mounted) {
-      // Forget about this pop, we were disposed in the meantime.
-      return true;
-    }
-    final _RouteEntry? newLastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
-    if (lastEntry != newLastEntry) {
-      // Forget about this pop, something happened to our history in the meantime.
-      return true;
-    }
-    switch (disposition) {
-      case RoutePopDisposition.bubble:
-        return false;
-      case RoutePopDisposition.pop:
-        pop(result);
-        return true;
-      case RoutePopDisposition.doNotPop:
-        return true;
-    }
-    */
   }
 
   /// Pop the top-most route off the navigator.
