@@ -816,6 +816,91 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     );
   });
 
+  testWidgets('InkWell splash customBorder can be updated', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/121626.
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    Widget boilerplate(BorderRadius borderRadius) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: MouseRegion(
+                child: InkWell(
+                  focusNode: focusNode,
+                  customBorder: RoundedRectangleBorder(borderRadius: borderRadius),
+                  onTap: () { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 200)); // Unconfirmed splash is well underway.
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 2)); // Splash and highlight.
+
+    const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
+    Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          expectedClipRect,
+          const Radius.circular(20),
+      ));
+
+    // Check that the splash and the highlight are correctly clipped.
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect.inflate(20.0),
+          sampleSize: 100,
+        ))
+        ..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect.inflate(20.0),
+          sampleSize: 100,
+        )),
+    );
+
+    await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
+    await tester.pumpAndSettle();
+    expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          expectedClipRect,
+          const Radius.circular(40),
+      ));
+
+    // Check that the splash and the highlight are correctly clipped.
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect.inflate(20.0),
+          sampleSize: 100,
+        ))
+        ..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect.inflate(20.0),
+          sampleSize: 100,
+        )),
+    );
+
+    await gesture.up();
+  });
+
   testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
