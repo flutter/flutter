@@ -145,6 +145,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     this.value,
     required this.animationValue,
     required this.textDirection,
+    required this.indicatorBorderRadius,
   });
 
   final Color backgroundColor;
@@ -152,6 +153,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   final double? value;
   final double animationValue;
   final TextDirection textDirection;
+  final BorderRadius indicatorBorderRadius;
 
   // The indeterminate progress animation displays two lines whose leading (head)
   // and trailing (tail) endpoints are defined by the following four curves.
@@ -181,7 +183,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     final Paint paint = Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.fill;
-    canvas.drawRect(Offset.zero & size, paint);
 
     paint.color = valueColor;
 
@@ -197,7 +198,27 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         case TextDirection.ltr:
           left = x;
       }
-      canvas.drawRect(Offset(left, 0.0) & Size(width, size.height), paint);
+
+      final Rect rect = Offset(left, 0.0) & Size(width, size.height);
+      if (indicatorBorderRadius != BorderRadius.zero) {
+        // When the indicator has a value, we override the start border radius
+        // to be zero, so that the radius is only applied to the trailing edge
+        // of the indicator.
+        final BorderRadius borderRadius;
+        if (value == null || indicatorBorderRadius == BorderRadius.zero) {
+          borderRadius = indicatorBorderRadius;
+        } else {
+          switch (textDirection) {
+            case TextDirection.rtl:
+              borderRadius = indicatorBorderRadius.copyWith(topRight: Radius.zero, bottomRight: Radius.zero);
+            case TextDirection.ltr:
+              borderRadius = indicatorBorderRadius.copyWith(topLeft: Radius.zero, bottomLeft: Radius.zero);
+          }
+        }
+        canvas.drawRRect(borderRadius.toRRect(rect), paint);
+      } else {
+        canvas.drawRect(rect, paint);
+      }
     }
 
     if (value != null) {
@@ -220,7 +241,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         || oldPainter.valueColor != valueColor
         || oldPainter.value != value
         || oldPainter.animationValue != animationValue
-        || oldPainter.textDirection != textDirection;
+        || oldPainter.textDirection != textDirection
+        || oldPainter.indicatorBorderRadius != indicatorBorderRadius;
   }
 }
 
@@ -279,6 +301,8 @@ class LinearProgressIndicator extends ProgressIndicator {
     this.minHeight,
     super.semanticsLabel,
     super.semanticsValue,
+    this.shape = const RoundedRectangleBorder(),
+    this.indicatorBorderRadius = BorderRadius.zero,
   }) : assert(minHeight == null || minHeight > 0);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
@@ -300,6 +324,21 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// it will use 4dp.
   /// {@endtemplate}
   final double? minHeight;
+
+  /// The physical shape of the widget, as well as its border.
+  ///
+  /// By default it is [RoundedRectangleBorder], which produces a rectangular
+  /// widget without a border.
+  ///
+  /// See also:
+  ///
+  ///  * [StadiumBorder], which produces a rounded rectangle with semi-circular ends.
+  final ShapeBorder shape;
+
+  /// The border radius of the indicator.
+  ///
+  /// By default it is [BorderRadius.zero], which produces a rectangular indicator.
+  final BorderRadius indicatorBorderRadius;
 
   @override
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
@@ -352,6 +391,11 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: ShapeDecoration(
+          color: trackColor,
+          shape: widget.shape,
+        ),
         constraints: BoxConstraints(
           minWidth: double.infinity,
           minHeight: minHeight,
@@ -363,6 +407,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
             value: widget.value, // may be null
             animationValue: animationValue, // ignored if widget.value is not null
             textDirection: textDirection,
+            indicatorBorderRadius: widget.indicatorBorderRadius,
           ),
         ),
       ),
