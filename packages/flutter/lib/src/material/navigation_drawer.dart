@@ -328,7 +328,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
           child: InkWell(
             highlightColor: Colors.transparent,
             onTap: info.onTap,
-            borderRadius: const BorderRadius.all(Radius.circular(28.0)),
+            customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
             child: Stack(
               alignment: Alignment.center,
               children: <Widget>[
