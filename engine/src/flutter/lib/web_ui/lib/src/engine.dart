@@ -12,7 +12,7 @@
 // The code that performs the transformations lives in:
 //
 //  - https://github.com/flutter/engine/blob/main/web_sdk/sdk_rewriter.dart
-
+// ignore: unnecessary_library_directive
 library engine;
 
 export 'engine/alarm_clock.dart';

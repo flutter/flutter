@@ -4,7 +4,6 @@
 
 // ignore_for_file: avoid_print
 
-library flutter_frontend_server;
 
 import 'dart:async';
 import 'dart:io' hide FileSystemEntity;

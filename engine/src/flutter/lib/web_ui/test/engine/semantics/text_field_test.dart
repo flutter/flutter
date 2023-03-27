@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('chrome || safari || firefox')
+library;
+
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';

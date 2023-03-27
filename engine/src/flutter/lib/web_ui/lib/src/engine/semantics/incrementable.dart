@@ -80,10 +80,8 @@ class Incrementable extends RoleManager {
       case GestureMode.browserGestures:
         _enableBrowserGestureHandling();
         _updateInputValues();
-        break;
       case GestureMode.pointerEvents:
         _disableBrowserGestureHandling();
-        break;
     }
   }
 

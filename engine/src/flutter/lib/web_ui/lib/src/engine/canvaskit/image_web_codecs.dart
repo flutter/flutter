@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Uses the `ImageDecoder` class supplied by the browser.
-///
-/// See also:
-///
-///  * `image_wasm_codecs.dart`, which uses codecs supplied by the CanvasKit WASM bundle.
+// Uses the `ImageDecoder` class supplied by the browser.
+//
+// See also:
+//
+//  * `image_wasm_codecs.dart`, which uses codecs supplied by the CanvasKit WASM bundle.
 
 import 'dart:async';
 import 'dart:convert' show base64;

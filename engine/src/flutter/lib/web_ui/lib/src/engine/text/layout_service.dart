@@ -210,7 +210,6 @@ class TextLayoutService {
         case LineBreakType.opportunity:
           minIntrinsicWidth = math.max(minIntrinsicWidth, runningMinIntrinsicWidth);
           runningMinIntrinsicWidth = 0;
-          break;
 
         case LineBreakType.mandatory:
         case LineBreakType.endOfText:
@@ -218,7 +217,6 @@ class TextLayoutService {
           maxIntrinsicWidth = math.max(maxIntrinsicWidth, runningMaxIntrinsicWidth);
           runningMinIntrinsicWidth = 0;
           runningMaxIntrinsicWidth = 0;
-          break;
       }
     }
   }
@@ -640,14 +638,12 @@ class LineBuilder {
         // `descent` enough to fit the placeholder.
         ascent = this.ascent;
         descent = placeholder.height - this.ascent;
-        break;
 
       case ui.PlaceholderAlignment.bottom:
         // The opposite of `top`. The `descent` is the same, but we extend the
         // `ascent`.
         ascent = placeholder.height - this.descent;
         descent = this.descent;
-        break;
 
       case ui.PlaceholderAlignment.middle:
         final double textMidPoint = height / 2;
@@ -655,22 +651,18 @@ class LineBuilder {
         final double diff = placeholderMidPoint - textMidPoint;
         ascent = this.ascent + diff;
         descent = this.descent + diff;
-        break;
 
       case ui.PlaceholderAlignment.aboveBaseline:
         ascent = placeholder.height;
         descent = 0.0;
-        break;
 
       case ui.PlaceholderAlignment.belowBaseline:
         ascent = 0.0;
         descent = placeholder.height;
-        break;
 
       case ui.PlaceholderAlignment.baseline:
         ascent = placeholder.baselineOffset;
         descent = placeholder.height - ascent;
-        break;
     }
 
     // Update the metrics of the fragment to reflect the calculated ascent and

@@ -532,16 +532,12 @@ class PathRef {
       switch (verbs[i]) {
         case SPath.kLineVerb:
           mask |= SPath.kLineSegmentMask;
-          break;
         case SPath.kQuadVerb:
           mask |= SPath.kQuadSegmentMask;
-          break;
         case SPath.kConicVerb:
           mask |= SPath.kConicSegmentMask;
-          break;
         case SPath.kCubicVerb:
           mask |= SPath.kCubicSegmentMask;
-          break;
         default:
           break;
       }
@@ -641,32 +637,25 @@ class PathRef {
     switch (verb) {
       case SPath.kMoveVerb:
         pCnt = 1;
-        break;
       case SPath.kLineVerb:
         mask = SPath.kLineSegmentMask;
         pCnt = 1;
-        break;
       case SPath.kQuadVerb:
         mask = SPath.kQuadSegmentMask;
         pCnt = 2;
-        break;
       case SPath.kConicVerb:
         mask = SPath.kConicSegmentMask;
         pCnt = 2;
-        break;
       case SPath.kCubicVerb:
         mask = SPath.kCubicSegmentMask;
         pCnt = 3;
-        break;
       case SPath.kCloseVerb:
         pCnt = 0;
-        break;
       case SPath.kDoneVerb:
         if (assertionsEnabled) {
           throw Exception('growForVerb called for kDone');
         }
         pCnt = 0;
-        break;
       default:
         if (assertionsEnabled) {
           throw Exception('default is not reached');
@@ -708,32 +697,25 @@ class PathRef {
     switch (verb) {
       case SPath.kMoveVerb:
         pCnt = numVbs;
-        break;
       case SPath.kLineVerb:
         mask = SPath.kLineSegmentMask;
         pCnt = numVbs;
-        break;
       case SPath.kQuadVerb:
         mask = SPath.kQuadSegmentMask;
         pCnt = 2 * numVbs;
-        break;
       case SPath.kConicVerb:
         mask = SPath.kConicSegmentMask;
         pCnt = 2 * numVbs;
-        break;
       case SPath.kCubicVerb:
         mask = SPath.kCubicSegmentMask;
         pCnt = 3 * numVbs;
-        break;
       case SPath.kCloseVerb:
         pCnt = 0;
-        break;
       case SPath.kDoneVerb:
         if (assertionsEnabled) {
           throw Exception('growForVerb called for kDone');
         }
         pCnt = 0;
-        break;
       default:
         if (assertionsEnabled) {
           throw Exception('default is not reached');
@@ -999,29 +981,23 @@ class PathRefIterator {
       case SPath.kMoveVerb:
         iterIndex = _pointIndex;
         _pointIndex += 2;
-        break;
       case SPath.kLineVerb:
         iterIndex = _pointIndex - 2;
         _pointIndex += 2;
-        break;
       case SPath.kConicVerb:
         _conicWeightIndex++;
         iterIndex = _pointIndex - 2;
         _pointIndex += 4;
-        break;
       case SPath.kQuadVerb:
         iterIndex = _pointIndex - 2;
         _pointIndex += 4;
-        break;
       case SPath.kCubicVerb:
         iterIndex = _pointIndex - 2;
         _pointIndex += 6;
-        break;
       case SPath.kCloseVerb:
         break;
       case SPath.kDoneVerb:
         assert(_verbIndex == pathRef.countVerbs());
-        break;
       default:
         throw FormatException('Unsupport Path verb $verb');
     }
@@ -1040,13 +1016,11 @@ class PathRefIterator {
       case SPath.kMoveVerb:
         outPts[0] = points[pointIndex++];
         outPts[1] = points[pointIndex++];
-        break;
       case SPath.kLineVerb:
         outPts[0] = points[pointIndex - 2];
         outPts[1] = points[pointIndex - 1];
         outPts[2] = points[pointIndex++];
         outPts[3] = points[pointIndex++];
-        break;
       case SPath.kConicVerb:
         _conicWeightIndex++;
         outPts[0] = points[pointIndex - 2];
@@ -1055,7 +1029,6 @@ class PathRefIterator {
         outPts[3] = points[pointIndex++];
         outPts[4] = points[pointIndex++];
         outPts[5] = points[pointIndex++];
-        break;
       case SPath.kQuadVerb:
         outPts[0] = points[pointIndex - 2];
         outPts[1] = points[pointIndex - 1];
@@ -1063,7 +1036,6 @@ class PathRefIterator {
         outPts[3] = points[pointIndex++];
         outPts[4] = points[pointIndex++];
         outPts[5] = points[pointIndex++];
-        break;
       case SPath.kCubicVerb:
         outPts[0] = points[pointIndex - 2];
         outPts[1] = points[pointIndex - 1];
@@ -1073,12 +1045,10 @@ class PathRefIterator {
         outPts[5] = points[pointIndex++];
         outPts[6] = points[pointIndex++];
         outPts[7] = points[pointIndex++];
-        break;
       case SPath.kCloseVerb:
         break;
       case SPath.kDoneVerb:
         assert(_verbIndex == pathRef.countVerbs());
-        break;
       default:
         throw FormatException('Unsupport Path verb $verb');
     }

@@ -113,19 +113,15 @@ void testMain() {
         switch (index % 13) {
           case 0:
             path.lineTo(nonFinitePts[i].dx, nonFinitePts[i].dy);
-            break;
           case 1:
             path.quadraticBezierTo(nonFinitePts[i].dx, nonFinitePts[i].dy,
                 nonFinitePts[i].dx, nonFinitePts[i].dy);
-            break;
           case 2:
             path.quadraticBezierTo(nonFinitePts[i].dx, nonFinitePts[i].dy,
                 axisAlignedPts[f].dx, axisAlignedPts[f].dy);
-            break;
           case 3:
             path.quadraticBezierTo(axisAlignedPts[f].dx, axisAlignedPts[f].dy,
                 nonFinitePts[i].dx, nonFinitePts[i].dy);
-            break;
           case 4:
             path.cubicTo(
                 nonFinitePts[i].dx,
@@ -134,7 +130,6 @@ void testMain() {
                 axisAlignedPts[f].dy,
                 axisAlignedPts[f].dx,
                 axisAlignedPts[f].dy);
-            break;
           case 5:
             path.cubicTo(
                 axisAlignedPts[f].dx,
@@ -143,7 +138,6 @@ void testMain() {
                 nonFinitePts[i].dy,
                 axisAlignedPts[f].dx,
                 axisAlignedPts[f].dy);
-            break;
           case 6:
             path.cubicTo(
                 axisAlignedPts[f].dx,
@@ -152,7 +146,6 @@ void testMain() {
                 axisAlignedPts[f].dy,
                 nonFinitePts[i].dx,
                 nonFinitePts[i].dy);
-            break;
           case 7:
             path.cubicTo(
                 nonFinitePts[i].dx,
@@ -161,7 +154,6 @@ void testMain() {
                 nonFinitePts[i].dy,
                 axisAlignedPts[f].dx,
                 axisAlignedPts[f].dy);
-            break;
           case 8:
             path.cubicTo(
                 nonFinitePts[i].dx,
@@ -170,7 +162,6 @@ void testMain() {
                 axisAlignedPts[f].dy,
                 nonFinitePts[i].dx,
                 nonFinitePts[i].dy);
-            break;
           case 9:
             path.cubicTo(
                 axisAlignedPts[f].dx,
@@ -179,7 +170,6 @@ void testMain() {
                 nonFinitePts[i].dy,
                 nonFinitePts[i].dx,
                 nonFinitePts[i].dy);
-            break;
           case 10:
             path.cubicTo(
                 nonFinitePts[i].dx,
@@ -188,7 +178,6 @@ void testMain() {
                 nonFinitePts[i].dy,
                 nonFinitePts[i].dx,
                 nonFinitePts[i].dy);
-            break;
           case 11:
             path.cubicTo(
                 nonFinitePts[i].dx,
@@ -197,10 +186,8 @@ void testMain() {
                 axisAlignedPts[f].dy,
                 axisAlignedPts[g].dx,
                 axisAlignedPts[g].dy);
-            break;
           case 12:
             path.moveTo(nonFinitePts[i].dx, nonFinitePts[i].dy);
-            break;
         }
         expect(path.convexityType, SPathConvexityType.kUnknown);
       }
@@ -213,22 +200,17 @@ void testMain() {
         switch (curveSelect) {
           case 0:
             path.moveTo(axisAlignedPts[f].dx, axisAlignedPts[f].dy);
-            break;
           case 1:
             path.lineTo(axisAlignedPts[f].dx, axisAlignedPts[f].dy);
-            break;
           case 2:
             path.quadraticBezierTo(axisAlignedPts[f].dx, axisAlignedPts[f].dy,
                 axisAlignedPts[f].dx, axisAlignedPts[f].dy);
-            break;
           case 3:
             path.quadraticBezierTo(axisAlignedPts[f].dx, axisAlignedPts[f].dy,
                 axisAlignedPts[g].dx, axisAlignedPts[g].dy);
-            break;
           case 4:
             path.quadraticBezierTo(axisAlignedPts[g].dx, axisAlignedPts[g].dy,
                 axisAlignedPts[f].dx, axisAlignedPts[f].dy);
-            break;
           case 5:
             path.cubicTo(
                 axisAlignedPts[f].dx,
@@ -237,7 +219,6 @@ void testMain() {
                 axisAlignedPts[f].dy,
                 axisAlignedPts[f].dx,
                 axisAlignedPts[f].dy);
-            break;
           case 6:
             path.cubicTo(
                 axisAlignedPts[f].dx,
@@ -246,7 +227,6 @@ void testMain() {
                 axisAlignedPts[f].dy,
                 axisAlignedPts[g].dx,
                 axisAlignedPts[g].dy);
-            break;
           case 7:
             path.cubicTo(
                 axisAlignedPts[f].dx,
@@ -255,7 +235,6 @@ void testMain() {
                 axisAlignedPts[g].dy,
                 axisAlignedPts[f].dx,
                 axisAlignedPts[f].dy);
-            break;
           case 8:
             path.cubicTo(
                 axisAlignedPts[f].dx,
@@ -264,7 +243,6 @@ void testMain() {
                 axisAlignedPts[g].dy,
                 axisAlignedPts[g].dx,
                 axisAlignedPts[g].dy);
-            break;
           case 9:
             path.cubicTo(
                 axisAlignedPts[g].dx,
@@ -273,7 +251,6 @@ void testMain() {
                 axisAlignedPts[f].dy,
                 axisAlignedPts[f].dx,
                 axisAlignedPts[f].dy);
-            break;
           case 10:
             path.cubicTo(
                 axisAlignedPts[g].dx,
@@ -282,7 +259,6 @@ void testMain() {
                 axisAlignedPts[f].dy,
                 axisAlignedPts[g].dx,
                 axisAlignedPts[g].dy);
-            break;
         }
         if (curveSelect != 7 && curveSelect != 10) {
           final int result = path.convexityType;

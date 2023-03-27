@@ -214,10 +214,8 @@ class CanvasParagraph implements ui.Paragraph {
     switch (position.affinity) {
       case ui.TextAffinity.upstream:
         characterPosition = position.offset - 1;
-        break;
       case ui.TextAffinity.downstream:
         characterPosition = position.offset;
-        break;
     }
     final int start = WordBreaker.prevBreakIndex(plainText, characterPosition + 1);
     final int end = WordBreaker.nextBreakIndex(plainText, characterPosition);

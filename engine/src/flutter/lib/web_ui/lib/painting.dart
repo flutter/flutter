@@ -559,10 +559,8 @@ Future<Codec> createBmp(
   switch (format) {
     case PixelFormat.bgra8888:
       swapRedBlue = true;
-      break;
     case PixelFormat.rgba8888:
       swapRedBlue = false;
-      break;
   }
 
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.

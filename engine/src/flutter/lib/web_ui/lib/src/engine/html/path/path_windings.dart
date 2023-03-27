@@ -41,16 +41,12 @@ class PathWinding {
           break;
         case SPath.kLineVerb:
           _computeLineWinding();
-          break;
         case SPath.kQuadVerb:
           _computeQuadWinding();
-          break;
         case SPath.kConicVerb:
           _computeConicWinding(pathRef.conicWeights![iter.conicWeightIndex]);
-          break;
         case SPath.kCubicVerb:
           _computeCubicWinding();
-          break;
       }
     }
   }

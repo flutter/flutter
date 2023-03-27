@@ -170,10 +170,8 @@ class UnicodePropertyLookup<P> {
       switch (range.compare(value)) {
         case _ComparisonResult.higher:
           min = mid + 1;
-          break;
         case _ComparisonResult.lower:
           max = mid;
-          break;
         case _ComparisonResult.inside:
           return mid;
       }
