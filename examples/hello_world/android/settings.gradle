@@ -6,6 +6,27 @@
 // To update all the settings.gradle files in the Flutter repo,
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
+pluginManagement {
+    def localProperties = new Properties()
+    def localPropertiesFile = file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.withReader("UTF-8") { reader ->
+            localProperties.load(reader)
+        }
+    }
+
+    def flutterRoot = localProperties.getProperty("flutter.sdk")
+    if (flutterRoot == null) {
+        throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+    }
+
+    includeBuild("$flutterRoot/packages/flutter_tools/gradle")
+
+    plugins {
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    }
+}
+
 include ':app'
 
 enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
