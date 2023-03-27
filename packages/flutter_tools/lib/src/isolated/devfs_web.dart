@@ -42,7 +42,6 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
-import 'sdk_web_configuration.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   required AssetReader assetReader,
@@ -61,10 +60,9 @@ typedef DwdsLauncher = Future<Dwds> Function({
   bool enableDevtoolsLaunch,
   DevtoolsLauncher? devtoolsLauncher,
   bool launchDevToolsInNewWindow,
-  SdkConfigurationProvider sdkConfigurationProvider,
   bool emitDebugEvents,
   bool isInternalBuild,
-  bool isFlutterApp,
+  Future<bool> Function()? isFlutterApp,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -181,7 +179,7 @@ class WebAssetServer implements AssetReader {
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
     String hostname,
-    int? port,
+    int port,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -205,7 +203,7 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
+        httpServer = await HttpServer.bind(address, port);
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -301,7 +299,6 @@ class WebAssetServer implements AssetReader {
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
-      sdkConfigurationProvider: SdkWebConfigurationProvider(globals.artifacts!),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -419,6 +416,18 @@ class WebAssetServer implements AssetReader {
 
     File file = _resolveDartFile(requestPath);
 
+    if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
+      final String canvasKitPath = globals.artifacts!.getArtifactPath(
+        Artifact.canvasKitPath,
+        platform: TargetPlatform.web_javascript,
+      );
+      final Uri potential = globals.fs
+          .directory(canvasKitPath)
+          .uri
+          .resolve(requestPath.replaceFirst('canvaskit/', ''));
+      file = globals.fs.file(potential);
+    }
+
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
@@ -440,7 +449,8 @@ class WebAssetServer implements AssetReader {
     if (!file.existsSync()) {
       // Paths starting with these prefixes should've been resolved above.
       if (requestPath.startsWith('assets/') ||
-          requestPath.startsWith('packages/')) {
+          requestPath.startsWith('packages/') ||
+          requestPath.startsWith('canvaskit/')) {
         return shelf.Response.notFound('');
       }
       return _serveIndex();
@@ -628,7 +638,7 @@ class WebDevFS implements DevFS {
   /// server.
   WebDevFS({
     required this.hostname,
-    required int? port,
+    required int port,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -661,7 +671,7 @@ class WebDevFS implements DevFS {
   final ChromiumLauncher? chromiumLauncher;
   final bool nullAssertions;
   final bool nativeNullAssertions;
-  final int? _port;
+  final int _port;
   final NullSafetyMode nullSafetyMode;
 
   late WebAssetServer webAssetServer;
@@ -828,7 +838,10 @@ class WebDevFS implements DevFS {
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
-      webAssetServer.writeFile('flutter.js', flutter_js.generateFlutterJsFile());
+      final String fileGeneratorsPath = globals.artifacts!
+          .getArtifactPath(Artifact.flutterToolsFileGenerators);
+      webAssetServer.writeFile(
+          'flutter.js', flutter_js.generateFlutterJsFile(fileGeneratorsPath));
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -1031,7 +1044,7 @@ void log(logging.LogRecord event) {
   if (event.level >= logging.Level.SEVERE) {
     globals.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {
-    // Note: Temporary fix for https://github.com/flutter/flutter/issues/109792
+    // Temporary fix for https://github.com/flutter/flutter/issues/109792
     // TODO(annagrin): Remove the condition after the bogus warning is
     // removed in dwds: https://github.com/dart-lang/webdev/issues/1722
     if (!event.message.contains('No module for')) {

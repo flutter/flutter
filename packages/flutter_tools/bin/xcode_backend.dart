@@ -49,20 +49,17 @@ class Context {
     switch (subCommand) {
       case 'build':
         buildApp();
-        break;
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
       case 'embed':
         embedFlutterFrameworks();
-        break;
       case 'embed_and_thin':
         // Thinning is handled during the bundle asset assemble build target, so just embed.
         embedFlutterFrameworks();
-        break;
-      case 'test_observatory_bonjour_service':
+      case 'test_vm_service_bonjour_service':
         // Exposed for integration testing only.
-        addObservatoryBonjourService();
+        addVmServiceBonjourService();
     }
   }
 
@@ -220,11 +217,11 @@ class Context {
       ],
     );
 
-    addObservatoryBonjourService();
+    addVmServiceBonjourService();
   }
 
-  // Add the observatory publisher Bonjour service to the produced app bundle Info.plist.
-  void addObservatoryBonjourService() {
+  // Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
+  void addVmServiceBonjourService() {
     final String buildMode = parseFlutterBuildMode();
 
     // Debug and profile only.
@@ -239,13 +236,13 @@ class Context {
       // The file will be present on re-run.
       echo(
         '${environment['INFOPLIST_PATH'] ?? ''} does not exist. Skipping '
-        '_dartobservatory._tcp NSBonjourServices insertion. Try re-building to '
+        '_dartVmService._tcp NSBonjourServices insertion. Try re-building to '
         'enable "flutter attach".');
       return;
     }
 
     // If there are already NSBonjourServices specified by the app (uncommon),
-    // insert the observatory service name to the existing list.
+    // insert the vmService service name to the existing list.
     ProcessResult result = runSync(
       'plutil',
       <String>[
@@ -265,19 +262,19 @@ class Context {
           '-insert',
           'NSBonjourServices.0',
           '-string',
-          '_dartobservatory._tcp',
+          '_dartVmService._tcp',
           builtProductsPlist,
         ],
       );
     } else {
-      // Otherwise, add the NSBonjourServices key and observatory service name.
+      // Otherwise, add the NSBonjourServices key and vmService service name.
       runSync(
         'plutil',
         <String>[
           '-insert',
           'NSBonjourServices',
           '-json',
-          '["_dartobservatory._tcp"]',
+          '["_dartVmService._tcp"]',
           builtProductsPlist,
         ],
       );

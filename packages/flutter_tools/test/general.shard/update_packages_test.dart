@@ -17,7 +17,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: '>=2.2.2 <4.0.0'
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -51,7 +51,7 @@ description: A dummy pubspec with no dependencies
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 ''';
 
 const String kInvalidGitPubspec = '''
@@ -60,7 +60,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -109,6 +109,7 @@ void main() {
         'url_launcher_android',
         'archive',
         'path_provider_android',
+        'flutter_plugin_android_lifecycle',
       ]),
     );
   });

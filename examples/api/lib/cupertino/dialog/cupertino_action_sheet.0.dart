@@ -33,7 +33,7 @@ class ActionSheetExample extends StatelessWidget {
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
             /// This parameter indicates the action would be a default
-            /// defualt behavior, turns the action's text to bold text.
+            /// default behavior, turns the action's text to bold text.
             isDefaultAction: true,
             onPressed: () {
               Navigator.pop(context);

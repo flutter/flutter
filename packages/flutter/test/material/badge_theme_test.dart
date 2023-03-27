@@ -14,6 +14,12 @@ void main() {
     expect(const BadgeThemeData().hashCode, const BadgeThemeData().copyWith().hashCode);
   });
 
+  test('BadgeThemeData lerp special cases', () {
+    expect(BadgeThemeData.lerp(null, null, 0), const BadgeThemeData());
+    const BadgeThemeData data = BadgeThemeData();
+    expect(identical(BadgeThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('BadgeThemeData defaults', () {
     const BadgeThemeData themeData = BadgeThemeData();
     expect(themeData.backgroundColor, null);

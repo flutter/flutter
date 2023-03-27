@@ -164,6 +164,7 @@ Future<DateTime?> showDatePicker({
   String? fieldLabelText,
   TextInputType? keyboardType,
   Offset? anchorPoint,
+  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange
 }) async {
   initialDate = DateUtils.dateOnly(initialDate);
   firstDate = DateUtils.dateOnly(firstDate);
@@ -202,6 +203,7 @@ Future<DateTime?> showDatePicker({
     fieldHintText: fieldHintText,
     fieldLabelText: fieldLabelText,
     keyboardType: keyboardType,
+    onDatePickerModeChange: onDatePickerModeChange,
   );
 
   if (textDirection != null) {
@@ -259,6 +261,7 @@ class DatePickerDialog extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.restorationId,
+    this.onDatePickerModeChange
   }) : initialDate = DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
@@ -337,9 +340,11 @@ class DatePickerDialog extends StatefulWidget {
   /// string. For example, 'Month, Day, Year' for en_US.
   final String? fieldLabelText;
 
+  /// {@template flutter.material.datePickerDialog}
   /// The keyboard type of the [TextField].
   ///
   /// If this is null, it will default to [TextInputType.datetime]
+  /// {@endtemplate}
   final TextInputType? keyboardType;
 
   /// Restoration ID to save and restore the state of the [DatePickerDialog].
@@ -355,6 +360,15 @@ class DatePickerDialog extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+
+  /// Called when the [DatePickerDialog] is toggled between
+  /// [DatePickerEntryMode.calendar],[DatePickerEntryMode.input].
+  ///
+  /// An example of how this callback might be used is an app that saves the
+  /// user's preferred entry mode and uses it to initialize the
+  /// `initialEntryMode` parameter the next time the date picker is shown.
+  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -394,21 +408,26 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     Navigator.pop(context);
   }
 
+  void _handleOnDatePickerModeChange() {
+    if (widget.onDatePickerModeChange != null) {
+      widget.onDatePickerModeChange!(_entryMode.value);
+    }
+  }
+
   void _handleEntryModeToggle() {
     setState(() {
       switch (_entryMode.value) {
         case DatePickerEntryMode.calendar:
           _autovalidateMode.value = AutovalidateMode.disabled;
           _entryMode.value = DatePickerEntryMode.input;
-          break;
+          _handleOnDatePickerModeChange();
         case DatePickerEntryMode.input:
           _formKey.currentState!.save();
           _entryMode.value = DatePickerEntryMode.calendar;
-          break;
+           _handleOnDatePickerModeChange();
         case DatePickerEntryMode.calendarOnly:
         case DatePickerEntryMode.inputOnly:
           assert(false, 'Can not change entry mode from _entryMode');
-          break;
       }
     });
   }
@@ -467,7 +486,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           color: headerForegroundColor,
         )
       // Material2 has support for landscape and the current M3 spec doesn't
-      // address this layout, so handling it seperately here.
+      // address this layout, so handling it separately here.
       : (orientation == Orientation.landscape
         ? textTheme.headlineSmall?.copyWith(color: headerForegroundColor)
         : textTheme.headlineMedium?.copyWith(color: headerForegroundColor));
@@ -555,12 +574,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           tooltip: localizations.inputDateModeButtonLabel,
           onPressed: _handleEntryModeToggle,
         );
-        break;
 
       case DatePickerEntryMode.calendarOnly:
         picker = calendarDatePicker();
         entryModeButton = null;
-        break;
 
       case DatePickerEntryMode.input:
         picker = inputDatePicker();
@@ -570,12 +587,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           tooltip: localizations.calendarModeButtonLabel,
           onPressed: _handleEntryModeToggle,
         );
-        break;
 
       case DatePickerEntryMode.inputOnly:
         picker = inputDatePicker();
         entryModeButton = null;
-        break;
     }
 
     final Widget header = _DatePickerHeader(
@@ -971,6 +986,7 @@ Future<DateTimeRange?> showDateRangePicker({
   TextDirection? textDirection,
   TransitionBuilder? builder,
   Offset? anchorPoint,
+  TextInputType keyboardType = TextInputType.datetime,
 }) async {
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
@@ -1019,6 +1035,7 @@ Future<DateTimeRange?> showDateRangePicker({
     fieldEndHintText: fieldEndHintText,
     fieldStartLabelText: fieldStartLabelText,
     fieldEndLabelText: fieldEndLabelText,
+    keyboardType: keyboardType,
   );
 
   if (textDirection != null) {
@@ -1105,6 +1122,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.fieldEndHintText,
     this.fieldStartLabelText,
     this.fieldEndLabelText,
+    this.keyboardType = TextInputType.datetime,
     this.restorationId,
   });
 
@@ -1211,6 +1229,9 @@ class DateRangePickerDialog extends StatefulWidget {
   /// is used.
   final String? fieldEndLabelText;
 
+  /// {@macro flutter.material.datePickerDialog}
+  final TextInputType keyboardType;
+
   /// Restoration ID to save and restore the state of the [DateRangePickerDialog].
   ///
   /// If it is non-null, the date range picker will persist and restore the
@@ -1275,7 +1296,6 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         case DatePickerEntryMode.calendar:
           _autoValidate.value = false;
           _entryMode.value = DatePickerEntryMode.input;
-          break;
 
         case DatePickerEntryMode.input:
         // Validate the range dates
@@ -1294,12 +1314,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
             _selectedEnd.value = null;
           }
           _entryMode.value = DatePickerEntryMode.calendar;
-          break;
 
         case DatePickerEntryMode.calendarOnly:
         case DatePickerEntryMode.inputOnly:
           assert(false, 'Can not change entry mode from $_entryMode');
-          break;
       }
     });
   }
@@ -1373,7 +1391,6 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         shadowColor = datePickerTheme.rangePickerShadowColor ?? defaults.rangePickerShadowColor!;
         surfaceTintColor = datePickerTheme.rangePickerSurfaceTintColor ?? defaults.rangePickerSurfaceTintColor!;
         shape = datePickerTheme.rangePickerShape ?? defaults.rangePickerShape;
-        break;
 
       case DatePickerEntryMode.input:
       case DatePickerEntryMode.inputOnly:
@@ -1407,6 +1424,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                   fieldEndHintText: widget.fieldEndHintText,
                   fieldStartLabelText: widget.fieldStartLabelText,
                   fieldEndLabelText: widget.fieldEndLabelText,
+                  keyboardType: widget.keyboardType,
                 ),
                 const Spacer(),
               ],
@@ -1448,7 +1466,6 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           : datePickerTheme.shape ?? dialogTheme.shape ?? defaults.shape;
 
         insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0);
-        break;
     }
 
     return Dialog(
@@ -1737,7 +1754,6 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         HapticFeedback.vibrate();
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
@@ -2260,11 +2276,9 @@ class _MonthItemState extends State<_MonthItem> {
           case TraversalDirection.up:
           case TraversalDirection.left:
             policy = ScrollPositionAlignmentPolicy.keepVisibleAtStart;
-            break;
           case TraversalDirection.right:
           case TraversalDirection.down:
             policy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
-            break;
         }
         Scrollable.ensureVisible(primaryFocus!.context!,
           duration: _monthScrollDuration,
@@ -2580,19 +2594,16 @@ class _HighlightPainter extends CustomPainter {
           textDirection == TextDirection.ltr ? rectRight : rectLeft,
           paint,
         );
-        break;
       case _HighlightPainterStyle.highlightLeading:
         canvas.drawRect(
           textDirection == TextDirection.ltr ? rectLeft : rectRight,
           paint,
         );
-        break;
       case _HighlightPainterStyle.highlightAll:
         canvas.drawRect(
           Rect.fromLTWH(0, 0, size.width, size.height),
           paint,
         );
-        break;
       case _HighlightPainterStyle.none:
         break;
     }
@@ -2753,6 +2764,7 @@ class _InputDateRangePicker extends StatefulWidget {
     this.fieldEndLabelText,
     this.autofocus = false,
     this.autovalidate = false,
+    this.keyboardType = TextInputType.datetime,
   }) : initialStartDate = initialStartDate == null ? null : DateUtils.dateOnly(initialStartDate),
        initialEndDate = initialEndDate == null ? null : DateUtils.dateOnly(initialEndDate),
        firstDate = DateUtils.dateOnly(firstDate),
@@ -2807,10 +2819,13 @@ class _InputDateRangePicker extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
-  /// If true, this the date fields will validate and update their error text
+  /// If true, the date fields will validate and update their error text
   /// immediately after every change. Otherwise, you must call
   /// [_InputDateRangePickerState.validate] to validate.
   final bool autovalidate;
+
+  /// {@macro flutter.material.datePickerDialog}
+  final TextInputType keyboardType;
 
   @override
   _InputDateRangePickerState createState() => _InputDateRangePickerState();
@@ -2952,7 +2967,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
               labelText: widget.fieldStartLabelText ?? localizations.dateRangeStartLabel,
               errorText: _startErrorText,
             ),
-            keyboardType: TextInputType.datetime,
+            keyboardType: widget.keyboardType,
             onChanged: _handleStartChanged,
             autofocus: widget.autofocus,
           ),
@@ -2968,7 +2983,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
               labelText: widget.fieldEndLabelText ?? localizations.dateRangeEndLabel,
               errorText: _endErrorText,
             ),
-            keyboardType: TextInputType.datetime,
+            keyboardType: widget.keyboardType,
             onChanged: _handleEndChanged,
           ),
         ),

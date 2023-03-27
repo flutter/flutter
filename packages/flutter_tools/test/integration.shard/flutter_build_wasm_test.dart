@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/features.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -33,18 +34,24 @@ void main() {
   });
 
   test('building web with --wasm produces expected files', () async {
-    final ProcessResult result = processManager.runSync(<String>[
-      flutterBin,
-      'build',
-      'web',
-      '--wasm',
-    ], workingDirectory: exampleAppDir.path);
+    final ProcessResult result = processManager.runSync(
+      <String>[
+        flutterBin,
+        'build',
+        'web',
+        '--wasm',
+      ],
+      workingDirectory: exampleAppDir.path,
+      environment: <String, String>{
+        flutterWebWasm.environmentOverride!: 'true'
+      },
+    );
     expect(result.exitCode, 0);
 
     final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
       exampleAppDir.path,
       'build',
-      'web_wasm'
+      'web_wasm',
     ));
     for (final String filename in const <String>[
       'flutter.js',

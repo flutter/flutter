@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -332,6 +333,138 @@ void main() {
     );
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
+
+  testWidgets('Text color is correctly resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
+    debugBrightnessOverride = Brightness.dark;
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Text('Hello'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('Hello'));
+    final CupertinoDynamicColor textColor = paragraph.text.style!.color! as CupertinoDynamicColor;
+
+    // App with non-null brightness, so resolving color
+    // doesn't depend on the MediaQuery.platformBrightness.
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    // We expect the string representations of the colors to have darkColor indicated (*) as effective color.
+    // (color = Color(0xff000000), *darkColor = Color(0xffffffff)*, resolved by: Builder)
+    expect(textColor.toString(), CupertinoColors.label.resolveFrom(capturedContext).toString());
+
+    debugBrightnessOverride = null;
+  });
+
+  testWidgets('Cursor color is resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
+    debugBrightnessOverride = Brightness.dark;
+
+    RenderEditable findRenderEditable(WidgetTester tester) {
+      final RenderObject root = tester.renderObject(find.byType(EditableText));
+      expect(root, isNotNull);
+
+      RenderEditable? renderEditable;
+      void recursiveFinder(RenderObject child) {
+        if (child is RenderEditable) {
+          renderEditable = child;
+          return;
+        }
+        child.visitChildren(recursiveFinder);
+      }
+
+      root.visitChildren(recursiveFinder);
+      expect(renderEditable, isNotNull);
+      return renderEditable!;
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          primaryColor: CupertinoColors.activeOrange,
+        ),
+        home: CupertinoPageScaffold(
+          child: Builder(
+            builder: (BuildContext context) {
+              return EditableText(
+                backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor!,
+                cursorColor: DefaultSelectionStyle.of(context).cursorColor!,
+                controller: TextEditingController(),
+                focusNode: FocusNode(),
+                style: const TextStyle(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable editableText = findRenderEditable(tester);
+    final Color cursorColor = editableText.cursorColor!;
+
+    // Cursor color should be equal to the dark variant of the primary color.
+    // Alpha value needs to be 0, because cursor is not visible by default.
+    expect(cursorColor, CupertinoColors.activeOrange.darkColor.withAlpha(0));
+
+    debugBrightnessOverride = null;
+  });
+
+  testWidgets('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
+    const ScrollBehavior defaultBehavior = CupertinoScrollBehavior();
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(ScrollConfiguration(
+      // Avoid the default ones here.
+      behavior: const CupertinoScrollBehavior().copyWith(scrollbars: false),
+      child: SingleChildScrollView(
+        child: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+            return Container(height: 1000.0);
+          },
+        ),
+      ),
+    ));
+
+    const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
+    final Widget child = Container();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Does not throw if we aren't using it.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(
+          () {
+            defaultBehavior.buildScrollbar(capturedContext, child, details);
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+                'description', contains('details.controller != null')),
+          ),
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
 }
 
 class MockScrollBehavior extends ScrollBehavior {

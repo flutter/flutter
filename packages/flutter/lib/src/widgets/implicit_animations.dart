@@ -185,7 +185,7 @@ class Matrix4Tween extends Tween<Matrix4> {
     end!.decompose(endTranslation, endRotation, endScale);
     final Vector3 lerpTranslation =
         beginTranslation * (1.0 - t) + endTranslation * t;
-    // TODO(alangardner): Implement slerp for constant rotation
+    // TODO(alangardner): Implement lerp for constant rotation
     final Quaternion lerpRotation =
         (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
     final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;
@@ -368,7 +368,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       switch (status) {
         case AnimationStatus.completed:
           widget.onEnd?.call();
-          break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:
         case AnimationStatus.reverse:
@@ -1681,7 +1680,7 @@ class _AnimatedSlideState extends ImplicitlyAnimatedWidgetState<AnimatedSlide> {
 ///  * [AnimatedSwitcher], for fading between many children in sequence.
 ///  * [FadeTransition], an explicitly animated version of this widget, where
 ///    an [Animation] is provided by the caller instead of being built in.
-///  * [SliverAnimatedOpacity], for automatically transitioning a sliver's
+///  * [SliverAnimatedOpacity], for automatically transitioning a _sliver's_
 ///    opacity over a given duration whenever the given opacity changes.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.

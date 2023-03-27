@@ -176,7 +176,7 @@ class _CriticalSolution implements _SpringSolution {
   ) {
     final double r = -spring.damping / (2.0 * spring.mass);
     final double c1 = distance;
-    final double c2 = velocity / (r * distance);
+    final double c2 = velocity - (r * distance);
     return _CriticalSolution.withArgs(r, c1, c2);
   }
 

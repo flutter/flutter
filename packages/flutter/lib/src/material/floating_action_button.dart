@@ -559,13 +559,10 @@ class FloatingActionButton extends StatelessWidget {
     switch(_floatingActionButtonType) {
       case _FloatingActionButtonType.regular:
         sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? defaults.sizeConstraints!;
-        break;
       case _FloatingActionButtonType.small:
         sizeConstraints = floatingActionButtonTheme.smallSizeConstraints ?? defaults.smallSizeConstraints!;
-        break;
       case _FloatingActionButtonType.large:
         sizeConstraints = floatingActionButtonTheme.largeSizeConstraints ?? defaults.largeSizeConstraints!;
-        break;
       case _FloatingActionButtonType.extended:
         sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? defaults.extendedSizeConstraints!;
         final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
@@ -588,7 +585,6 @@ class FloatingActionButton extends StatelessWidget {
             ),
           ),
         );
-        break;
     }
 
     Widget result = RawMaterialButton(
@@ -793,7 +789,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)

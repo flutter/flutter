@@ -19,7 +19,7 @@ void main() {
 
   group('parse service', () {
     const String badOutput = 'No uri here';
-    const String sampleOutput = 'An Observatory debugger and profiler on '
+    const String sampleOutput = 'A Dart VM Service on '
       'Pixel 3 XL is available at: http://127.0.0.1:9090/LpjUpsdEjqI=/';
 
     test('uri', () {

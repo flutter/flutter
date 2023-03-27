@@ -116,13 +116,10 @@ class Scribble {
     switch (method) {
       case 'Scribble.showToolbar':
         client.showToolbar();
-        break;
       case 'Scribble.insertTextPlaceholder':
         client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-        break;
       case 'Scribble.removeTextPlaceholder':
         client.removeTextPlaceholder();
-        break;
       default:
         throw MissingPluginException();
     }

@@ -37,6 +37,7 @@ void main() {
           terminal: globals.terminal,
           processManager: globals.processManager,
           allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
+          suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -73,6 +74,7 @@ void main() {
         allProjectValidators: <ProjectValidator>[
           PubDependenciesProjectValidator(globals.processManager),
         ],
+        suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -107,7 +109,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testUsingContext('analyze --suggesions --machine produces expected values', () async {
+    testUsingContext('analyze --suggestions --machine produces expected values', () async {
       final ProcessResult result = await globals.processManager.run(<String>['flutter', 'analyze', '--suggestions', '--machine'], workingDirectory: tempDir.childDirectory('test_project').path);
 
       expect(result.stdout is String, true);
