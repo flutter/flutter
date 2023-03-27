@@ -489,7 +489,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         final double endWidth = math.max(effectiveConstraints.minWidth, math.min(anchorRect.width, viewEdgeToScreenEdge));
         final Size endSize = Size(endWidth, endHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (anchorRect.topLeft & endSize);
-        break;
+        return;
       case TextDirection.rtl:
         final double viewEdgeToScreenEdge = anchorRect.right;
         final double endWidth = math.max(effectiveConstraints.minWidth, math.min(anchorRect.width, viewEdgeToScreenEdge));
@@ -656,7 +656,7 @@ class _ViewContentState extends State<_ViewContent> {
           case TextDirection.ltr:
             final Offset updatedPosition = anchorRect.topLeft;
             _viewRect = updatedPosition & updatedViewSize;
-            break;
+            return;
           case TextDirection.rtl:
             final Offset topLeft = Offset(math.max(anchorRect.right - updatedViewSize.width, 0.0), anchorRect.top);
             _viewRect = topLeft & updatedViewSize;
