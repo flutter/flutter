@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -2265,6 +2267,166 @@ void main() {
           Rect.fromLTRB(-28.0, 0.0, 80.0, 48.0),
           Rect.fromLTRB(-206.0, 0.0, -28.0, 48.0),
           Rect.fromLTRB(0.0, 104.0, 214.0, 152.0)
+        ]),
+      );
+    });
+
+    testWidgets('constrained menus show up in the right place with offset in LTR', (WidgetTester tester) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: MenuAnchor(
+                    menuChildren: const [
+                      SubmenuButton(
+                        alignmentOffset: const Offset(10, 0),
+                        menuChildren: [
+                          SubmenuButton(
+                            menuChildren: [
+                              SubmenuButton(
+                                alignmentOffset: const Offset(10, 0),
+
+                                menuChildren: [
+                                  SubmenuButton(
+                                    menuChildren: [
+
+                                    ],
+                                    child: Text("SubMenuButton4"),
+                                  ),
+
+                                ],
+                                child: Text("SubMenuButton3"),
+                              ),
+                            ],
+                            child: Text("SubMenuButton2"),
+                          ),
+                        ],
+                        child: Text("SubMenuButton1"),
+                      ),
+                    ],
+                    builder: (context, controller, child) {
+                      return FilledButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: Text("Tap me"),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton1'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton2'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton3'));
+      await tester.pump();
+
+      expect(find.byType(SubmenuButton), findsNWidgets(4));
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(0.0, 48.0, 256.0, 112.0),
+          Rect.fromLTRB(266.0, 48.0, 522.0, 112.0),
+          Rect.fromLTRB(522.0, 48.0, 778.0, 112.0),
+          Rect.fromLTRB(256.0, 48.0, 512.0, 112.0),
+        ]),
+      );
+    });
+
+    testWidgets('constrained menus show up in the right place with offset in RTL', (WidgetTester tester) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Directionality(
+                textDirection: TextDirection.rtl,
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: MenuAnchor(
+                    menuChildren: const [
+                      SubmenuButton(
+                        alignmentOffset: const Offset(10, 0),
+                        menuChildren: [
+                          SubmenuButton(
+                            menuChildren: [
+                              SubmenuButton(
+                                alignmentOffset: const Offset(10, 0),
+
+                                menuChildren: [
+                                  SubmenuButton(
+                                    menuChildren: [
+
+                                    ],
+                                    child: Text("SubMenuButton4"),
+                                  ),
+
+                                ],
+                                child: Text("SubMenuButton3"),
+                              ),
+                            ],
+                            child: Text("SubMenuButton2"),
+                          ),
+                        ],
+                        child: Text("SubMenuButton1"),
+                      ),
+                    ],
+                    builder: (context, controller, child) {
+                      return FilledButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: Text("Tap me"),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton1'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton2'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton3'));
+      await tester.pump();
+
+      expect(find.byType(SubmenuButton), findsNWidgets(4));
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(544.0, 48.0, 800.0, 112.0),
+          Rect.fromLTRB(278.0, 48.0, 534.0, 112.0),
+          Rect.fromLTRB(22.0, 48.0, 278.0, 112.0),
+          Rect.fromLTRB(288.0, 48.0, 544.0, 112.0),
         ]),
       );
     });
