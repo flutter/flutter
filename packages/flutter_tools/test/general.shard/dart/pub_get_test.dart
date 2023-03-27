@@ -887,8 +887,8 @@ exit code: 66
     const FakeCommand dartPreloadCommand = FakeCommand(
       command: <String>[
         'bin/cache/dart-sdk/bin/dart',
-        '--suppress-analytics',
         'pub',
+        '--suppress-analytics',
         'cache',
         'preload',
         '.pub-preload-cache/a.tar.gz',
