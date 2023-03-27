@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window;
+import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window; // ignore: deprecated_member_use
 
 // Before adding any more dart:ui imports, please read the README.
 
@@ -20,7 +21,7 @@ import 'platform.dart';
 import 'print.dart';
 import 'service_extensions.dart';
 
-export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow;
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow; // ignore: deprecated_member_use
 
 export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
@@ -170,35 +171,48 @@ abstract class BindingBase {
   ///  * [DebugReassembleConfig], which describes the configuration.
   static DebugReassembleConfig? debugReassembleConfig;
 
-  /// The main window to which this binding is bound.
+  /// Deprecated. Will be removed in a future version of Flutter.
   ///
-  /// A number of additional bindings are defined as extensions of
-  /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
-  /// [WidgetsBinding]. Each of these bindings define behaviors that interact
-  /// with a [ui.SingletonFlutterWindow].
+  /// This property has been deprecated to prepare for Flutter's upcoming
+  /// support for multiple views and multiple windows.
   ///
-  /// Each of these other bindings could individually access a
-  /// [ui.SingletonFlutterWindow] statically, but that would preclude the
-  /// ability to test its behaviors with a fake window for verification
-  /// purposes. Therefore, [BindingBase] exposes this
-  /// [ui.SingletonFlutterWindow] for use by other bindings. A subclass of
-  /// [BindingBase], such as [TestWidgetsFlutterBinding], can override this
-  /// accessor to return a different [ui.SingletonFlutterWindow] implementation,
-  /// such as a [TestWindow].
+  /// It represents the main view for applications where there is only one
+  /// view, such as applications designed for single-display mobile devices.
+  /// If the embedder supports multiple views, it points to the first view
+  /// created which is assumed to be the main view. It throws if no view has
+  /// been created yet or if the first view has been removed again.
   ///
-  /// The [window] is a singleton meant for use by applications that only have a
-  /// single main window. In addition to the properties of [ui.FlutterView],
-  /// [window] provides access to platform-specific properties and callbacks
-  /// available on the [platformDispatcher].
+  /// The following options exists to migrate code that relies on accessing
+  /// this deprecated property:
   ///
-  /// For applications designed for more than one main window, prefer using the
-  /// [platformDispatcher] to access available views via
-  /// [ui.PlatformDispatcher.views].
+  /// If a [BuildContext] is available, consider looking up the current
+  /// [FlutterView] associated with that context via [View.of]. It gives access
+  /// to the same functionality as this deprecated property. However, the
+  /// platform-specific functionality has moved to the [PlatformDispatcher],
+  /// which may be accessed from the view returned by [View.of] via
+  /// [FlutterView.platformDispatcher]. Using [View.of] with a [BuildContext] is
+  /// the preferred option to migrate away from this deprecated [window]
+  /// property.
   ///
-  /// However, multiple window support is not yet implemented, so currently this
-  /// provides access to the one and only window.
-  // TODO(gspencergoog): remove the preceding note once multi-window support is
-  // active.
+  /// If no context is available to look up a [FlutterView], the
+  /// [platformDispatcher] exposed by this binding can be used directly for
+  /// platform-specific functionality. It also maintains a list of all available
+  /// [FlutterView]s in [PlatformDispatcher.views] to access view-specific
+  /// functionality without a context.
+  ///
+  /// See also:
+  ///
+  /// * [View.of] to access view-specific functionality on the [FlutterView]
+  ///   associated with the provided [BuildContext].
+  /// * [FlutterView.platformDispatcher] to access platform-specific
+  ///   functionality from a given [FlutterView].
+  /// * [platformDispatcher] on this binding to access the [PlatformDispatcher],
+  ///   which provides platform-specific functionality.
+  @Deprecated(
+    'Look up the current FlutterView from the context via View.of(context) or consult the PlatformDispatcher directly instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
   ui.SingletonFlutterWindow get window => ui.window;
 
   /// The [ui.PlatformDispatcher] to which this binding is bound.
@@ -265,6 +279,7 @@ abstract class BindingBase {
     assert(_debugInitializedType == null);
     assert(() {
       _debugInitializedType = runtimeType;
+      _debugBindingZone = Zone.current;
       return true;
     }());
   }
@@ -319,7 +334,7 @@ abstract class BindingBase {
           ),
           ErrorHint(
             'It is also possible that $T does not implement "initInstances()" to assign a value to "instance". See the '
-            'documentation of the BaseBinding class for more details.',
+            'documentation of the BindingBase class for more details.',
           ),
           ErrorHint(
             'The binding that was initialized was of the type "$_debugInitializedType". '
@@ -399,6 +414,95 @@ abstract class BindingBase {
     return _debugInitializedType;
   }
 
+  Zone? _debugBindingZone;
+
+  /// Whether [debugCheckZone] should throw (true) or just report the error (false).
+  ///
+  /// Setting this to true makes it easier to catch cases where the zones are
+  /// misconfigured, by allowing debuggers to stop at the point of error.
+  ///
+  /// Currently this defaults to false, to avoid suddenly breaking applications
+  /// that are affected by this check but appear to be working today. Applications
+  /// are encouraged to resolve any issues that cause the [debugCheckZone] message
+  /// to appear, as even if they appear to be working today, they are likely to be
+  /// hiding hard-to-find bugs, and are more brittle (likely to collect bugs in
+  /// the future).
+  ///
+  /// To silence the message displayed by [debugCheckZone], ensure that the same
+  /// zone is used when calling `ensureInitialized()` as when calling the framework
+  /// in any other context (e.g. via [runApp]).
+  static bool debugZoneErrorsAreFatal = false;
+
+  /// Checks that the current [Zone] is the same as that which was used
+  /// to initialize the binding.
+  ///
+  /// If the current zone ([Zone.current]) is not the zone that was active when
+  /// the binding was initialized, then this method generates a [FlutterError]
+  /// exception with detailed information. The exception is either thrown
+  /// directly, or reported via [FlutterError.reportError], depending on the
+  /// value of [BindingBase.debugZoneErrorsAreFatal].
+  ///
+  /// To silence the message displayed by [debugCheckZone], ensure that the same
+  /// zone is used when calling `ensureInitialized()` as when calling the
+  /// framework in any other context (e.g. via [runApp]). For example, consider
+  /// keeping a reference to the zone used to initialize the binding, and using
+  /// [Zone.run] to use it again when calling into the framework.
+  ///
+  /// ## Usage
+  ///
+  /// The binding is considered initialized once [BindingBase.initInstances] has
+  /// run; if this is called before then, it will throw an [AssertionError].
+  ///
+  /// The `entryPoint` parameter is the name of the API that is checking the
+  /// zones are consistent, for example, `'runApp'`.
+  ///
+  /// This function always returns true (if it does not throw). It is expected
+  /// to be invoked via the binding instance, e.g.:
+  ///
+  /// ```dart
+  /// void startup() {
+  ///   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  ///   assert(binding.debugCheckZone('startup'));
+  ///   // ...
+  /// }
+  /// ```
+  ///
+  /// If the binding expects to be used with multiple zones, it should override
+  /// this method to return true always without throwing. (For example, the
+  /// bindings used with [flutter_test] do this as they make heavy use of zones
+  /// to drive the framework with an artificial clock and to catch errors and
+  /// report them as test failures.)
+  bool debugCheckZone(String entryPoint) {
+    assert(() {
+      assert(_debugBindingZone != null, 'debugCheckZone can only be used after the binding is fully initialized.');
+      if (Zone.current != _debugBindingZone) {
+        final Error message = FlutterError(
+          'Zone mismatch.\n'
+          'The Flutter bindings were initialized in a different zone than is now being used. '
+          'This will likely cause confusion and bugs as any zone-specific configuration will '
+          'inconsistently use the configuration of the original binding initialization zone '
+          'or this zone based on hard-to-predict factors such as which zone was active when '
+          'a particular callback was set.\n'
+          'It is important to use the same zone when calling `ensureInitialized` on the binding '
+          'as when calling `$entryPoint` later.\n'
+          'To make this ${ debugZoneErrorsAreFatal ? 'error non-fatal' : 'warning fatal' }, '
+          'set BindingBase.debugZoneErrorsAreFatal to ${!debugZoneErrorsAreFatal} before the '
+          'bindings are initialized (i.e. as the first statement in `void main() { }`).',
+        );
+        if (debugZoneErrorsAreFatal) {
+          throw message;
+        }
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: message,
+          stack: StackTrace.current,
+          context: ErrorDescription('during $entryPoint'),
+        ));
+      }
+      return true;
+    }());
+    return true;
+  }
+
   /// Called when the binding is initialized, to register service
   /// extensions.
   ///
@@ -462,22 +566,16 @@ abstract class BindingBase {
             switch (parameters['value']) {
               case 'android':
                 debugDefaultTargetPlatformOverride = TargetPlatform.android;
-                break;
               case 'fuchsia':
                 debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-                break;
               case 'iOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-                break;
               case 'linux':
                 debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-                break;
               case 'macOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-                break;
               case 'windows':
                 debugDefaultTargetPlatformOverride = TargetPlatform.windows;
-                break;
               case 'default':
               default:
                 debugDefaultTargetPlatformOverride = null;
@@ -503,10 +601,8 @@ abstract class BindingBase {
             switch (parameters['value']) {
               case 'Brightness.light':
                 debugBrightnessOverride = ui.Brightness.light;
-                break;
               case 'Brightness.dark':
                 debugBrightnessOverride = ui.Brightness.dark;
-                break;
               default:
                 debugBrightnessOverride = null;
             }

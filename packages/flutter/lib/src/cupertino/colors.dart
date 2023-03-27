@@ -37,11 +37,7 @@ import 'theme.dart';
 /// ### Background Colors
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_background_colors.png)
 ///
-class CupertinoColors {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  CupertinoColors._();
-
+abstract final class CupertinoColors {
   /// iOS 13's default blue color. Used to indicate active elements such as
   /// buttons, selected tabs and your own chat bubbles.
   ///
@@ -1041,20 +1037,15 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
         switch (level) {
           case CupertinoUserInterfaceLevelData.base:
             resolved = isHighContrastEnabled ? highContrastColor : color;
-            break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? highContrastElevatedColor : elevatedColor;
-            break;
         }
-        break;
       case Brightness.dark:
         switch (level) {
           case CupertinoUserInterfaceLevelData.base:
             resolved = isHighContrastEnabled ? darkHighContrastColor : darkColor;
-            break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? darkHighContrastElevatedColor : darkElevatedColor;
-            break;
         }
     }
 

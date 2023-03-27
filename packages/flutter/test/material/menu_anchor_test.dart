@@ -1872,7 +1872,6 @@ void main() {
           expect(mnemonic2.data, equals('Alt+C'));
           mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('Meta+D'));
-          break;
         case TargetPlatform.windows:
           mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
           expect(mnemonic0.data, equals('Ctrl+A'));
@@ -1882,7 +1881,6 @@ void main() {
           expect(mnemonic2.data, equals('Alt+C'));
           mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('Win+D'));
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
@@ -1893,7 +1891,6 @@ void main() {
           expect(mnemonic2.data, equals('⌥ C'));
           mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('⌘ D'));
-          break;
       }
 
       await tester.pumpWidget(
@@ -2576,7 +2573,6 @@ void main() {
           expectedAlt = 'Alt';
           expectedShift = 'Shift';
           expectedSeparator = '+';
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           expectedCtrl = '⌃';
@@ -2584,7 +2580,6 @@ void main() {
           expectedAlt = '⌥';
           expectedShift = '⇧';
           expectedSeparator = ' ';
-          break;
       }
 
       const SingleActivator allModifiers = SingleActivator(

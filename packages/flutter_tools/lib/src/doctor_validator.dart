@@ -120,17 +120,14 @@ class GroupedValidator extends DoctorValidator {
           if (mergedType == ValidationType.missing) {
             mergedType = ValidationType.partial;
           }
-          break;
         case ValidationType.notAvailable:
         case ValidationType.partial:
           mergedType = ValidationType.partial;
-          break;
         case ValidationType.crash:
         case ValidationType.missing:
           if (mergedType == ValidationType.success) {
             mergedType = ValidationType.partial;
           }
-          break;
       }
       mergedMessages.addAll(result.messages);
     }
