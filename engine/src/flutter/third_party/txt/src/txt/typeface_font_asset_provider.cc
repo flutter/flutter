@@ -37,14 +37,13 @@ std::string TypefaceFontAssetProvider::GetFamilyName(int index) const {
 }
 
 // |FontAssetProvider|
-SkFontStyleSet* TypefaceFontAssetProvider::MatchFamily(
+sk_sp<SkFontStyleSet> TypefaceFontAssetProvider::MatchFamily(
     const std::string& family_name) {
   auto found = registered_families_.find(CanonicalFamilyName(family_name));
   if (found == registered_families_.end()) {
     return nullptr;
   }
-  sk_sp<TypefaceFontStyleSet> font_style_set = found->second;
-  return font_style_set.release();
+  return found->second;
 }
 
 void TypefaceFontAssetProvider::RegisterTypeface(sk_sp<SkTypeface> typeface) {
@@ -104,16 +103,15 @@ void TypefaceFontStyleSet::getStyle(int index,
   }
 }
 
-auto TypefaceFontStyleSet::createTypeface(int i) -> CreateTypefaceRet {
+sk_sp<SkTypeface> TypefaceFontStyleSet::createTypeface(int i) {
   size_t index = i;
   if (index >= typefaces_.size()) {
     return nullptr;
   }
-  return CreateTypefaceRet(SkRef(typefaces_[index].get()));
+  return typefaces_[index];
 }
 
-auto TypefaceFontStyleSet::matchStyle(const SkFontStyle& pattern)
-    -> MatchStyleRet {
+sk_sp<SkTypeface> TypefaceFontStyleSet::matchStyle(const SkFontStyle& pattern) {
   return matchStyleCSS3(pattern);
 }
 
