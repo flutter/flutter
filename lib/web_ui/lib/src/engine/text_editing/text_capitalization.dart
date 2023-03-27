@@ -69,10 +69,13 @@ class TextCapitalizationConfig {
         } else {
           autocapitalize = 'words';
         }
+        break;
       case TextCapitalization.characters:
         autocapitalize = 'characters';
+        break;
       case TextCapitalization.sentences:
         autocapitalize = 'sentences';
+        break;
       case TextCapitalization.none:
       default:
         autocapitalize = 'off';

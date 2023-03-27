@@ -258,13 +258,16 @@ class _PathContourMeasure {
         final double toX = (points[2] * stopT) + (points[0] * (1.0 - stopT));
         final double toY = (points[3] * stopT) + (points[1] * (1.0 - stopT));
         path.lineTo(toX, toY);
+        break;
       case SPath.kCubicVerb:
         chopCubicBetweenT(points, startT, stopT, _buffer);
         path.cubicTo(_buffer[2], _buffer[3], _buffer[4], _buffer[5], _buffer[6],
             _buffer[7]);
+        break;
       case SPath.kQuadVerb:
         _chopQuadBetweenT(points, startT, stopT, _buffer);
         path.quadraticBezierTo(_buffer[2], _buffer[3], _buffer[4], _buffer[5]);
+        break;
       case SPath.kConicVerb:
         // Implement this once we start writing out conic segments.
         throw UnimplementedError();
@@ -306,9 +309,11 @@ class _PathContourMeasure {
       switch (verb) {
         case SPath.kMoveVerb:
           haveSeenMoveTo = true;
+          break;
         case SPath.kLineVerb:
           assert(haveSeenMoveTo);
           lineToHandler(points[0], points[1], points[2], points[3]);
+          break;
         case SPath.kCubicVerb:
           assert(haveSeenMoveTo);
           // Compute cubic curve distance.
@@ -325,6 +330,7 @@ class _PathContourMeasure {
               0,
               _kMaxTValue,
               _segments);
+          break;
         case SPath.kConicVerb:
           assert(haveSeenMoveTo);
           final double w = iter.conicWeight;
@@ -344,11 +350,13 @@ class _PathContourMeasure {
             startX = p2x;
             startY = p2y;
           }
+          break;
         case SPath.kQuadVerb:
           assert(haveSeenMoveTo);
           // Compute quad curve distance.
           distance = _computeQuadSegments(points[0], points[1], points[2],
               points[3], points[4], points[5], distance, 0, _kMaxTValue);
+          break;
         case SPath.kCloseVerb:
           _contourLength = distance;
           return iter.pathVerbIndex;

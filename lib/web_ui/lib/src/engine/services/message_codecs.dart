@@ -378,14 +378,19 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     switch (type) {
       case _valueNull:
         result = null;
+        break;
       case _valueTrue:
         result = true;
+        break;
       case _valueFalse:
         result = false;
+        break;
       case _valueInt32:
         result = buffer.getInt32();
+        break;
       case _valueInt64:
         result = buffer.getInt64();
+        break;
       case _valueLargeInt:
         // Flutter Engine APIs to use large ints have been deprecated on
         // 2018-01-09 and will be made unavailable.
@@ -393,35 +398,44 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         final int length = readSize(buffer);
         final String hex = utf8.decoder.convert(buffer.getUint8List(length));
         result = int.parse(hex, radix: 16);
+        break;
       case _valueFloat64:
         result = buffer.getFloat64();
+        break;
       case _valueString:
         final int length = readSize(buffer);
         result = utf8.decoder.convert(buffer.getUint8List(length));
+        break;
       case _valueUint8List:
         final int length = readSize(buffer);
         result = buffer.getUint8List(length);
+        break;
       case _valueInt32List:
         final int length = readSize(buffer);
         result = buffer.getInt32List(length);
+        break;
       case _valueInt64List:
         final int length = readSize(buffer);
         result = buffer.getInt64List(length);
+        break;
       case _valueFloat64List:
         final int length = readSize(buffer);
         result = buffer.getFloat64List(length);
+        break;
       case _valueList:
         final int length = readSize(buffer);
         result = <dynamic>[];
         for (int i = 0; i < length; i++) {
           result.add(readValue(buffer));
         }
+        break;
       case _valueMap:
         final int length = readSize(buffer);
         result = <dynamic, dynamic>{};
         for (int i = 0; i < length; i++) {
           result[readValue(buffer)] = readValue(buffer);
         }
+        break;
       default:
         throw const FormatException('Message corrupted');
     }

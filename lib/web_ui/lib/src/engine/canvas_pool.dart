@@ -592,6 +592,7 @@ class CanvasPool extends _SaveStackTracking {
           ctx.arc(x, y, radius, 0, 2.0 * math.pi);
           ctx.fill();
         }
+        break;
       case ui.PointMode.lines:
         ctx.beginPath();
         for (int i = 0; i < (len - 2); i += 4) {
@@ -599,6 +600,7 @@ class CanvasPool extends _SaveStackTracking {
           ctx.lineTo(points[i + 2] + offsetX, points[i + 3] + offsetY);
           ctx.stroke();
         }
+        break;
       case ui.PointMode.polygon:
         ctx.beginPath();
         ctx.moveTo(points[0] + offsetX, points[1] + offsetY);
@@ -606,6 +608,7 @@ class CanvasPool extends _SaveStackTracking {
           ctx.lineTo(points[i] + offsetX, points[i + 1] + offsetY);
         }
         ctx.stroke();
+        break;
     }
   }
 
@@ -622,12 +625,16 @@ class CanvasPool extends _SaveStackTracking {
       switch (verb) {
         case SPath.kMoveVerb:
           ctx.moveTo(p[0], p[1]);
+          break;
         case SPath.kLineVerb:
           ctx.lineTo(p[2], p[3]);
+          break;
         case SPath.kCubicVerb:
           ctx.bezierCurveTo(p[2], p[3], p[4], p[5], p[6], p[7]);
+          break;
         case SPath.kQuadVerb:
           ctx.quadraticCurveTo(p[2], p[3], p[4], p[5]);
+          break;
         case SPath.kConicVerb:
           final double w = iter.conicWeight;
           final Conic conic = Conic(p[0], p[1], p[2], p[3], p[4], p[5], w);
@@ -640,8 +647,10 @@ class CanvasPool extends _SaveStackTracking {
             final double p2y = points[i + 1].dy;
             ctx.quadraticCurveTo(p1x, p1y, p2x, p2y);
           }
+          break;
         case SPath.kCloseVerb:
           ctx.closePath();
+          break;
         default:
           throw UnimplementedError('Unknown path verb $verb');
       }
@@ -674,14 +683,18 @@ class CanvasPool extends _SaveStackTracking {
       switch (verb) {
         case SPath.kMoveVerb:
           ctx.moveTo(p[0] + offsetX, p[1] + offsetY);
+          break;
         case SPath.kLineVerb:
           ctx.lineTo(p[2] + offsetX, p[3] + offsetY);
+          break;
         case SPath.kCubicVerb:
           ctx.bezierCurveTo(p[2] + offsetX, p[3] + offsetY,
               p[4] + offsetX, p[5] + offsetY, p[6] + offsetX, p[7] + offsetY);
+          break;
         case SPath.kQuadVerb:
           ctx.quadraticCurveTo(p[2] + offsetX, p[3] + offsetY,
               p[4] + offsetX, p[5] + offsetY);
+          break;
         case SPath.kConicVerb:
           final double w = iter.conicWeight;
           final Conic conic = Conic(p[0], p[1], p[2], p[3], p[4], p[5], w);
@@ -695,8 +708,10 @@ class CanvasPool extends _SaveStackTracking {
             ctx.quadraticCurveTo(p1x + offsetX, p1y + offsetY,
                 p2x + offsetX, p2y + offsetY);
           }
+          break;
         case SPath.kCloseVerb:
           ctx.closePath();
+          break;
         default:
           throw UnimplementedError('Unknown path verb $verb');
       }

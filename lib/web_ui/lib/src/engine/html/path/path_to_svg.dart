@@ -21,14 +21,18 @@ String pathToSvg(PathRef pathRef, {double offsetX = 0, double offsetY = 0}) {
     switch (verb) {
       case SPath.kMoveVerb:
         buffer.write('M ${outPts[0] + offsetX} ${outPts[1] + offsetY}');
+        break;
       case SPath.kLineVerb:
         buffer.write('L ${outPts[2] + offsetX} ${outPts[3] + offsetY}');
+        break;
       case SPath.kCubicVerb:
         buffer.write('C ${outPts[2] + offsetX} ${outPts[3] + offsetY} '
             '${outPts[4] + offsetX} ${outPts[5] + offsetY} ${outPts[6] + offsetX} ${outPts[7] + offsetY}');
+        break;
       case SPath.kQuadVerb:
         buffer.write('Q ${outPts[2] + offsetX} ${outPts[3] + offsetY} '
             '${outPts[4] + offsetX} ${outPts[5] + offsetY}');
+        break;
       case SPath.kConicVerb:
         final double w = iter.conicWeight;
         final Conic conic = Conic(outPts[0], outPts[1], outPts[2], outPts[3],
@@ -43,8 +47,10 @@ String pathToSvg(PathRef pathRef, {double offsetX = 0, double offsetY = 0}) {
           buffer.write('Q ${p1x + offsetX} ${p1y + offsetY} '
               '${p2x + offsetX} ${p2y + offsetY}');
         }
+        break;
       case SPath.kCloseVerb:
         buffer.write('Z');
+        break;
       default:
         throw UnimplementedError('Unknown path verb $verb');
     }

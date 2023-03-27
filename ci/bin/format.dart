@@ -968,10 +968,13 @@ Future<int> main(List<String> arguments) async {
     switch (type) {
       case MessageType.message:
         stderr.writeln(message);
+        break;
       case MessageType.error:
         stderr.writeln('ERROR: $message');
+        break;
       case MessageType.warning:
         stderr.writeln('WARNING: $message');
+        break;
     }
   }
 

@@ -2048,6 +2048,7 @@ class TextEditingChannel {
           clientId: call.arguments[0] as int,
           configuration: InputConfiguration.fromFrameworkMessage(call.arguments[1] as Map<String, dynamic>),
         );
+        break;
 
       case 'TextInput.updateConfig':
         // Set configuration eagerly because it contains data about the text
@@ -2057,6 +2058,7 @@ class TextEditingChannel {
           call.arguments as Map<String, dynamic>
         );
         command = const TextInputUpdateConfig();
+        break;
 
       case 'TextInput.setEditingState':
         command = TextInputSetEditingState(
@@ -2064,9 +2066,11 @@ class TextEditingChannel {
             call.arguments as Map<String, dynamic>
           ),
         );
+        break;
 
       case 'TextInput.show':
         command = const TextInputShow();
+        break;
 
       case 'TextInput.setEditableSizeAndTransform':
         command = TextInputSetEditableSizeAndTransform(
@@ -2074,6 +2078,7 @@ class TextEditingChannel {
             call.arguments as Map<String, dynamic>
           ),
         );
+        break;
 
       case 'TextInput.setStyle':
         command = TextInputSetStyle(
@@ -2081,29 +2086,36 @@ class TextEditingChannel {
             call.arguments as Map<String, dynamic>,
           ),
         );
+        break;
 
       case 'TextInput.clearClient':
         command = const TextInputClearClient();
+        break;
 
       case 'TextInput.hide':
         command = const TextInputHide();
+        break;
 
       case 'TextInput.requestAutofill':
         // There's no API to request autofill on the web. Instead we let the
         // browser show autofill options automatically, if available. We
         // therefore simply ignore this message.
         command = const TextInputRequestAutofill();
+        break;
 
       case 'TextInput.finishAutofillContext':
         command = TextInputFinishAutofillContext(
           saveForm: call.arguments as bool,
         );
+        break;
 
       case 'TextInput.setMarkedTextRect':
         command = const TextInputSetMarkedTextRect();
+        break;
 
       case 'TextInput.setCaretRect':
         command = const TextInputSetCaretRect();
+        break;
 
       default:
         EnginePlatformDispatcher.instance.replyToPlatformMessage(callback, null);
