@@ -897,8 +897,8 @@ exit code: 66
     final FakeCommand dartPubGetCommand = FakeCommand(
         command: const <String>[
           'bin/cache/dart-sdk/bin/dart',
-          '--no-analytics',
           'pub',
+          '--suppress-analytics',
           '--directory',
           '.',
           'get',
