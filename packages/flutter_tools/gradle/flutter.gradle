@@ -140,7 +140,6 @@ class FlutterPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.logger.lifecycle("FlutterPlugin.apply()")
         this.project = project
 
         def rootProject = project.rootProject
