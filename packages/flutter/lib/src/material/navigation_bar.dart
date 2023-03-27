@@ -414,7 +414,7 @@ class NavigationDestination extends StatelessWidget {
 /// animation value of 0 is unselected and 1 is selected.
 ///
 /// See [NavigationDestination] for an example.
-class _NavigationDestinationBuilder extends StatelessWidget {
+class _NavigationDestinationBuilder extends StatefulWidget {
   /// Builds a destination (icon + label) to use in a Material 3 [NavigationBar].
   const _NavigationDestinationBuilder({
     required this.buildIcon,
@@ -460,30 +460,33 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   final String? tooltip;
 
   @override
+  State<_NavigationDestinationBuilder> createState() => _NavigationDestinationBuilderState();
+}
+
+class _NavigationDestinationBuilderState extends State<_NavigationDestinationBuilder> {
+  final GlobalKey iconKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
-    final GlobalKey labelKey = GlobalKey();
 
-    final bool selected = info.selectedIndex == info.index;
     return _NavigationBarDestinationSemantics(
       child: _NavigationBarDestinationTooltip(
-        message: tooltip ?? label,
+        message: widget.tooltip ?? widget.label,
         child: _IndicatorInkWell(
-          key: UniqueKey(),
-          labelKey: labelKey,
+          iconKey: iconKey,
           labelBehavior: info.labelBehavior,
-          selected: selected,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
           onTap: info.onTap,
           child: Row(
             children: <Widget>[
               Expanded(
                 child: _NavigationBarDestinationLayout(
-                  icon: buildIcon(context),
-                  labelKey: labelKey,
-                  label: buildLabel(context),
+                  icon: widget.buildIcon(context),
+                  iconKey: iconKey,
+                  label: widget.buildLabel(context),
                 ),
               ),
             ],
@@ -496,10 +499,8 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 
 class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
-    super.key,
-    required this.labelKey,
+    required this.iconKey,
     required this.labelBehavior,
-    required this.selected,
     super.customBorder,
     super.onTap,
     super.child,
@@ -508,32 +509,15 @@ class _IndicatorInkWell extends InkResponse {
     highlightColor: Colors.transparent,
   );
 
-  final GlobalKey labelKey;
+  final GlobalKey iconKey;
   final NavigationDestinationLabelBehavior labelBehavior;
-  final bool selected;
 
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
-    final RenderBox labelBox = labelKey.currentContext!.findRenderObject()! as RenderBox;
-    final Rect labelRect = labelBox.localToGlobal(Offset.zero) & labelBox.size;
-    final double labelPadding;
-    switch (labelBehavior) {
-      case NavigationDestinationLabelBehavior.alwaysShow:
-        labelPadding = labelRect.height / 2;
-      case NavigationDestinationLabelBehavior.onlyShowSelected:
-        labelPadding = selected ? labelRect.height / 2 : 0;
-      case NavigationDestinationLabelBehavior.alwaysHide:
-        labelPadding = 0;
-    }
-    final double indicatorOffsetX = referenceBox.size.width / 2;
-    final double indicatorOffsetY = referenceBox.size.height / 2 - labelPadding;
-
     return () {
-      return Rect.fromCenter(
-        center: Offset(indicatorOffsetX, indicatorOffsetY),
-        width: _kIndicatorWidth,
-        height: _kIndicatorHeight,
-      );
+      final RenderBox iconBox = iconKey.currentContext!.findRenderObject()! as RenderBox;
+      final Rect iconRect = iconBox.localToGlobal(Offset.zero) & iconBox.size;
+      return referenceBox.globalToLocal(iconRect.topLeft) & iconBox.size;
     };
   }
 }
@@ -774,7 +758,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// 3 [NavigationBar].
   const _NavigationBarDestinationLayout({
     required this.icon,
-    required this.labelKey,
+    required this.iconKey,
     required this.label,
   });
 
@@ -783,10 +767,10 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// See [NavigationDestination.icon].
   final Widget icon;
 
-  /// The global key for the label of this destination.
+  /// The global key for the icon of this destination.
   ///
-  /// This is used to determine the position of the label relative to the icon.
-  final GlobalKey labelKey;
+  /// This is used to determine the position of the icon.
+  final GlobalKey iconKey;
 
   /// The label widget that sits below the icon.
   ///
@@ -796,7 +780,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// See [NavigationDestination.label].
   final Widget label;
 
-  static final Key _iconKey = UniqueKey();
+  static final Key _labelKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -810,7 +794,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
             LayoutId(
               id: _NavigationDestinationLayoutDelegate.iconId,
               child: RepaintBoundary(
-                key: _iconKey,
+                key: iconKey,
                 child: icon,
               ),
             ),
@@ -820,7 +804,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
                 alwaysIncludeSemantics: true,
                 opacity: animation,
                 child: RepaintBoundary(
-                  key: labelKey,
+                  key: _labelKey,
                   child: label,
                 ),
               ),
