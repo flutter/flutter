@@ -171,6 +171,16 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   void performSelector(String selectorName) {
     latestMethodCall = 'performSelector';
   }
+
+  @override
+  void focus() {
+    latestMethodCall = 'focus';
+  }
+
+  @override
+  void unfocus() {
+    latestMethodCall = 'unfocus';
+  }
 }
 
 class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {

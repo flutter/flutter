@@ -302,4 +302,14 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
     latestMethodCall = 'didChangeInputControl';
   }
+
+  @override
+  void focus() {
+    latestMethodCall = 'focus';
+  }
+
+  @override
+  void unfocus() {
+    latestMethodCall = 'unfocus';
+  }
 }

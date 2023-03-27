@@ -4072,6 +4072,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
+  void focus() {
+    if (widget.focusNode.canRequestFocus) {
+      widget.focusNode.requestFocus();
+    }
+  }
+
+  @override
+  void unfocus() {
+    widget.focusNode.unfocus();
+  }
+
+  @override
   String get autofillId => 'EditableText-$hashCode';
 
   @override

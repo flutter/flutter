@@ -1064,6 +1064,16 @@ class FakeTextInputClient with TextInputClient {
     latestMethodCall = 'performSelector';
     performedSelectors.add(selectorName);
   }
+
+  @override
+  void focus() {
+    latestMethodCall = 'focus';
+  }
+
+  @override
+  void unfocus() {
+    latestMethodCall = 'unfocus';
+  }
 }
 
 class FakeTextInputControl with TextInputControl {
