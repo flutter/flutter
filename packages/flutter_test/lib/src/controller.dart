@@ -252,19 +252,17 @@ abstract class WidgetController {
   /// The [TestFlutterView] provided by default when testing with
   /// [WidgetTester.pumpWidget].
   ///
-  /// If the test requires multiple views, it will need to use [viewOf] instead
-  /// to ensure that the view related to the widget being evaluated is the one
-  /// that gets updated.
+  /// If the test uses multiple views, this will return the view that is painted
+  /// into by [WidgetTester.pumpWidget]. If a different view needs to be
+  /// accessed use [viewOf] to ensure that the view related to the widget being
+  /// evaluated is the one that gets updated.
   ///
   /// See also:
   ///
   ///   * [viewOf], which can find a [TestFlutterView] related to a given finder.
   ///     This is how to modify view properties for testing when dealing with
   ///     multiple views.
-  TestFlutterView get view {
-    assert(platformDispatcher.views.length == 1, 'When testing with multiple views, use `viewOf` instead.');
-    return platformDispatcher.views.single;
-  }
+  TestFlutterView get view => platformDispatcher.implicitView!;
 
   /// Provides access to a [SemanticsController] for testing anything related to
   /// the [Semantics] tree.
@@ -381,7 +379,7 @@ abstract class WidgetController {
   /// using [Iterator.moveNext].
   Iterable<Element> get allElements {
     TestAsyncUtils.guardSync();
-    return collectAllElementsFrom(binding.renderViewElement!, skipOffstage: false);
+    return collectAllElementsFrom(binding.rootElement!, skipOffstage: false);
   }
 
   /// The matching element in the widget tree.
@@ -1601,16 +1599,12 @@ abstract class WidgetController {
       switch (widget<Scrollable>(scrollable!).axisDirection) {
         case AxisDirection.up:
           moveStep = Offset(0, delta);
-          break;
         case AxisDirection.down:
           moveStep = Offset(0, -delta);
-          break;
         case AxisDirection.left:
           moveStep = Offset(delta, 0);
-          break;
         case AxisDirection.right:
           moveStep = Offset(-delta, 0);
-          break;
       }
       await dragUntilVisible(
         finder,
