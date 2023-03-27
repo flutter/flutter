@@ -111,6 +111,44 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
+  testWidgets('Focus state will be correct when unfocus message sent from platform',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            child: EditableText(
+              autofocus: true,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(focusNode.hasFocus, isTrue);
+
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        const MethodCall(
+          'TextInputClient.unfocus',
+          <dynamic>[1],
+        ),
+      ),
+      (ByteData? data) {
+        /* response from framework is discarded */
+      },
+    );
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119628
     addTearDown(tester.view.reset);
