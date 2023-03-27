@@ -78,7 +78,7 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 
   // Verify that the dumps are pretty.
   final String routeName = demo.routeName;
-  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement!.toStringDeep());
+  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.rootElement!.toStringDeep());
   verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance.renderView.toStringDeep());
   verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? '');
 

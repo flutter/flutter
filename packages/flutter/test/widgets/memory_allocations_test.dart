@@ -58,7 +58,7 @@ class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class _TestElement extends RootRenderObjectElement{
+class _TestElement extends RenderObjectElement with RootElementMixin {
   _TestElement(): super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {

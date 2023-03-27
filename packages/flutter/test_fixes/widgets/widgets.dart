@@ -12,6 +12,9 @@ void main() {
   Object object;
   TickerProvider vsync;
 
+  // Changes made in https://github.com/flutter/flutter/pull/123352
+  WidgetsBinding.instance.renderViewElement;
+
   // Changes made in https://github.com/flutter/flutter/pull/119647
   MediaQueryData.fromWindow(View.of(context));
 

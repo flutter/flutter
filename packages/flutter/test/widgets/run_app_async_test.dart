@@ -50,9 +50,9 @@ void main() {
         ),
       );
       // Rendering tree is not built synchronously.
-      expect(WidgetsBinding.instance.renderViewElement, isNull);
+      expect(WidgetsBinding.instance.rootElement, isNull);
       fakeAsync.flushTimers();
-      expect(WidgetsBinding.instance.renderViewElement, isNotNull);
+      expect(WidgetsBinding.instance.rootElement, isNotNull);
     });
   });
 }
