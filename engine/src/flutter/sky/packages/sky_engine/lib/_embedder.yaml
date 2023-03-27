@@ -25,8 +25,4 @@ embedded_libs:
   # public API, e.g. List being Iterable by virtue of implementing
   # EfficientLengthIterable. Not including this library yields analysis errors.
   "dart:_internal": "../../../../../third_party/dart/sdk/lib/internal/internal.dart"
-  # The _js_annotations library is also needed for the same reasons as _internal.
-  "dart:_js_annotations": "../../../../../third_party/dart/sdk/lib/js/_js_annotations.dart"
-  # The _js_types library is also needed for the same reasons as _internal.
-  "dart:_js_types": "../../../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_types.dart"
   "dart:nativewrappers": "_empty.dart"
