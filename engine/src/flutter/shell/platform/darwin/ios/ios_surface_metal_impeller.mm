@@ -28,8 +28,7 @@ IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(const fml::scoped_nsobject<CAMe
   if (!impeller_context_) {
     return;
   }
-  is_valid_ = impeller_context_->UpdateOffscreenLayerPixelFormat(
-      InferOffscreenLayerPixelFormat(impeller::FromMTLPixelFormat(layer_.get().pixelFormat)));
+  is_valid_ = true;
 }
 
 // |IOSSurface|
@@ -47,6 +46,8 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 
 // |IOSSurface|
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface(GrDirectContext*) {
+  impeller_context_->UpdateOffscreenLayerPixelFormat(
+      InferOffscreenLayerPixelFormat(impeller::FromMTLPixelFormat(layer_.get().pixelFormat)));
   return std::make_unique<GPUSurfaceMetalImpeller>(this,              //
                                                    impeller_context_  //
   );
