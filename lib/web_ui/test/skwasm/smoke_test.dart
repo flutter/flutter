@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('chrome || safari || firefox')
+library;
 
 import 'dart:async';
 

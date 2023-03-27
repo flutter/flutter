@@ -1135,24 +1135,18 @@ class SurfacePath implements ui.Path {
             } else {
               moveTo(outPts[0], outPts[1]);
             }
-            break;
           case SPath.kLineVerb:
             lineTo(outPts[2], outPts[3]);
-            break;
           case SPath.kQuadVerb:
             _quadTo(outPts[2], outPts[3], outPts[4], outPts[5]);
-            break;
           case SPath.kConicVerb:
             conicTo(
                 outPts[2], outPts[3], outPts[4], outPts[5], iter.conicWeight);
-            break;
           case SPath.kCubicVerb:
             cubicTo(outPts[2], outPts[3], outPts[4], outPts[5], outPts[6],
                 outPts[7]);
-            break;
           case SPath.kCloseVerb:
             close();
-            break;
         }
         firstVerb = false;
       }
@@ -1248,19 +1242,14 @@ class SurfacePath implements ui.Path {
           break;
         case SPath.kLineVerb:
           tangentLine(buffer, x, y, tangents);
-          break;
         case SPath.kQuadVerb:
           tangentQuad(buffer, x, y, tangents);
-          break;
         case SPath.kConicVerb:
           tangentConic(buffer, x, y, iter.conicWeight, tangents);
-          break;
         case SPath.kCubicVerb:
           tangentCubic(buffer, x, y, tangents);
-          break;
         case SPath.kDoneVerb:
           done = true;
-          break;
       }
       if (tangents.length > oldCount) {
         final int last = tangents.length - 1;
@@ -1392,19 +1381,14 @@ class SurfacePath implements ui.Path {
           }
           state.setMovePt(pts[0], pts[1]);
           count = 0;
-          break;
         case SPath.kLineVerb:
           count = 1;
-          break;
         case SPath.kQuadVerb:
           count = 2;
-          break;
         case SPath.kConicVerb:
           count = 2;
-          break;
         case SPath.kCubicVerb:
           count = 3;
-          break;
         case SPath.kCloseVerb:
           if (!state.close()) {
             if (!state.isFinite) {
@@ -1413,7 +1397,6 @@ class SurfacePath implements ui.Path {
             return _setComputedConvexity(SPathConvexityType.kConcave);
           }
           count = 0;
-          break;
         default:
           return _setComputedConvexity(SPathConvexityType.kConcave);
       }
@@ -1479,11 +1462,9 @@ class SurfacePath implements ui.Path {
         case SPath.kMoveVerb:
           minX = maxX = points[pIndex];
           minY = maxY = points[pIndex + 1];
-          break;
         case SPath.kLineVerb:
           minX = maxX = points[pIndex + 2];
           minY = maxY = points[pIndex + 3];
-          break;
         case SPath.kQuadVerb:
           quadBounds ??= QuadBounds();
           quadBounds.calculateBounds(points, pIndex);
@@ -1491,7 +1472,6 @@ class SurfacePath implements ui.Path {
           minY = quadBounds.minY;
           maxX = quadBounds.maxX;
           maxY = quadBounds.maxY;
-          break;
         case SPath.kConicVerb:
           conicBounds ??= ConicBounds();
           conicBounds.calculateBounds(points, iter.conicWeight, pIndex);
@@ -1499,7 +1479,6 @@ class SurfacePath implements ui.Path {
           minY = conicBounds.minY;
           maxX = conicBounds.maxX;
           maxY = conicBounds.maxY;
-          break;
         case SPath.kCubicVerb:
           cubicBounds ??= CubicBounds();
           cubicBounds.calculateBounds(points, pIndex);
@@ -1507,7 +1486,6 @@ class SurfacePath implements ui.Path {
           minY = cubicBounds.minY;
           maxX = cubicBounds.maxX;
           maxY = cubicBounds.maxY;
-          break;
       }
       if (!ltrbInitialized) {
         left = minX;
@@ -1591,26 +1569,20 @@ class SurfacePath implements ui.Path {
         switch (verb) {
           case SPath.kMoveVerb:
             sb.write('MoveTo(${points[pIndex]}, ${points[pIndex + 1]})');
-            break;
           case SPath.kLineVerb:
             sb.write('LineTo(${points[pIndex + 2]}, ${points[pIndex + 3]})');
-            break;
           case SPath.kQuadVerb:
             sb.write('Quad(${points[pIndex + 2]}, ${points[pIndex + 3]},'
                 ' ${points[pIndex + 3]}, ${points[pIndex + 4]})');
-            break;
           case SPath.kConicVerb:
             sb.write('Conic(${points[pIndex + 2]}, ${points[pIndex + 3]},'
                 ' ${points[pIndex + 3]}, ${points[pIndex + 4]}, w = ${iter.conicWeight})');
-            break;
           case SPath.kCubicVerb:
             sb.write('Cubic(${points[pIndex + 2]}, ${points[pIndex + 3]},'
                 ' ${points[pIndex + 3]}, ${points[pIndex + 4]}, '
                 ' ${points[pIndex + 5]}, ${points[pIndex + 6]})');
-            break;
           case SPath.kCloseVerb:
             sb.write('Close()');
-            break;
         }
         if (iter.peek() != SPath.kDoneVerb) {
           sb.write(' ');

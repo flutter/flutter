@@ -524,13 +524,13 @@ class FileSystemDirectory extends IoNode implements Directory {
         final io.File fileEntity = entity as io.File;
         if (fileEntity.lengthSync() > 0) {
           switch (identifyFile(fileEntity.path, () => _readBytes(fileEntity))) {
-            case FileType.binary: yield FileSystemFile(fileEntity); break;
-            case FileType.zip: yield FileSystemZipFile(fileEntity); break;
-            case FileType.tar: yield FileSystemTarFile(fileEntity); break;
-            case FileType.gz: yield FileSystemGZipFile(fileEntity); break;
-            case FileType.bzip2: yield FileSystemBZip2File(fileEntity); break;
-            case FileType.text: yield FileSystemUTF8TextFile(fileEntity); break;
-            case FileType.latin1Text: yield FileSystemLatin1TextFile(fileEntity); break;
+            case FileType.binary: yield FileSystemFile(fileEntity);
+            case FileType.zip: yield FileSystemZipFile(fileEntity);
+            case FileType.tar: yield FileSystemTarFile(fileEntity);
+            case FileType.gz: yield FileSystemGZipFile(fileEntity);
+            case FileType.bzip2: yield FileSystemBZip2File(fileEntity);
+            case FileType.text: yield FileSystemUTF8TextFile(fileEntity);
+            case FileType.latin1Text: yield FileSystemLatin1TextFile(fileEntity);
             case FileType.notPartOfBuild: break; // ignore this file
           }
         }
@@ -618,13 +618,13 @@ class ArchiveDirectory extends IoNode implements Directory {
       if (entry.size > 0) {
         final String entryFullName = '$fullName/${path.basename(entry.name)}';
         switch (identifyFile(entry.name, () => entry.content as List<int>)) {
-          case FileType.binary: _files.add(ArchiveFile(entryFullName, entry)); break;
-          case FileType.zip: _files.add(ArchiveZipFile(entryFullName, entry)); break;
-          case FileType.tar: _files.add(ArchiveTarFile(entryFullName, entry)); break;
-          case FileType.gz: _files.add(ArchiveGZipFile(entryFullName, entry)); break;
-          case FileType.bzip2: _files.add(ArchiveBZip2File(entryFullName, entry)); break;
-          case FileType.text: _files.add(ArchiveUTF8TextFile(entryFullName, entry)); break;
-          case FileType.latin1Text: _files.add(ArchiveLatin1TextFile(entryFullName, entry)); break;
+          case FileType.binary: _files.add(ArchiveFile(entryFullName, entry));
+          case FileType.zip: _files.add(ArchiveZipFile(entryFullName, entry));
+          case FileType.tar: _files.add(ArchiveTarFile(entryFullName, entry));
+          case FileType.gz: _files.add(ArchiveGZipFile(entryFullName, entry));
+          case FileType.bzip2: _files.add(ArchiveBZip2File(entryFullName, entry));
+          case FileType.text: _files.add(ArchiveUTF8TextFile(entryFullName, entry));
+          case FileType.latin1Text: _files.add(ArchiveLatin1TextFile(entryFullName, entry));
           case FileType.notPartOfBuild: break; // ignore this file
         }
       }

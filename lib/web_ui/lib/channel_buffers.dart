@@ -199,7 +199,6 @@ class ChannelBuffers {
           }
           index += 1;
           resize(channelName, data.getUint32(index, Endian.host));
-          break;
         case 'overflow':
           if (bytes[index] != 0x0C) {
             throw Exception("Invalid arguments for 'overflow' method sent to $kControlChannelName (arguments must be a two-element list, channel name and flag state)");
@@ -224,7 +223,6 @@ class ChannelBuffers {
             throw Exception("Invalid arguments for 'overflow' method sent to $kControlChannelName (second argument must be a boolean)");
           }
           allowOverflow(channelName, bytes[index] == 0x01);
-          break;
         default:
           throw Exception("Unrecognized method '$methodName' sent to $kControlChannelName");
       }

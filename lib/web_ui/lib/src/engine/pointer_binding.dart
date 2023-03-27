@@ -437,11 +437,9 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         _defaultScrollLineHeight ??= _computeDefaultScrollLineHeight();
         deltaX *= _defaultScrollLineHeight!;
         deltaY *= _defaultScrollLineHeight!;
-        break;
       case domDeltaPage:
         deltaX *= ui.window.physicalSize.width;
         deltaY *= ui.window.physicalSize.height;
-        break;
       case domDeltaPixel:
         if (operatingSystem == OperatingSystem.macOs && (isSafari || isFirefox)) {
           // Safari and Firefox seem to report delta in logical pixels while
@@ -449,7 +447,6 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
           deltaX *= ui.window.devicePixelRatio;
           deltaY *= ui.window.devicePixelRatio;
         }
-        break;
       default:
         break;
     }

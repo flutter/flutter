@@ -110,12 +110,10 @@ void main() {
             break;
           case kCloseCode:
             receivePort.close();
-            break;
           case kDeletedCode:
             expect(IsolateNameServer.lookupPortByName(portName), isNull);
             // Test is done, close the last ReceivePort.
             testReceivePort.close();
-            break;
           case kErrorCode:
             throw message;
           default:
