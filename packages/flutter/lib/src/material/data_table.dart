@@ -44,6 +44,7 @@ class DataColumn {
     this.tooltip,
     this.numeric = false,
     this.onSort,
+    this.mouseCursor,
   });
 
   /// The column heading.
@@ -85,6 +86,20 @@ class DataColumn {
   final DataColumnSortCallback? onSort;
 
   bool get _debugInteractive => onSort != null;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// heading row.
+  ///
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///
+  /// If this is null, then the value of [DataTableThemeData.headingCellCursor]
+  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
 }
 
 /// Row configuration and cell data for a [DataTable].
@@ -106,6 +121,7 @@ class DataRow {
     this.onSelectChanged,
     this.onLongPress,
     this.color,
+    this.mouseCursor,
     required this.cells,
   });
 
@@ -119,6 +135,7 @@ class DataRow {
     this.onSelectChanged,
     this.onLongPress,
     this.color,
+    this.mouseCursor,
     required this.cells,
   }) : key = ValueKey<int?>(index);
 
@@ -204,6 +221,20 @@ class DataRow {
   ///    match a component's state:
   ///    <https://material.io/design/interaction/states.html#anatomy>.
   final MaterialStateProperty<Color?>? color;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// data row.
+  ///
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.selected].
+  ///
+  /// If this is null, then the value of [DataTableThemeData.dataRowCursor]
+  /// is used. If that's null, then [MaterialStateMouseCursor.clickable] is used.
+  ///
+  /// See also:
+  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
   bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
 }
@@ -738,6 +769,7 @@ class DataTable extends StatelessWidget {
     required ValueChanged<bool?>? onCheckboxChanged,
     required MaterialStateProperty<Color?>? overlayColor,
     required bool tristate,
+    MouseCursor? rowMouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
     final double effectiveHorizontalMargin = horizontalMargin
@@ -769,6 +801,7 @@ class DataTable extends StatelessWidget {
       contents = TableRowInkWell(
         onTap: onRowTap,
         overlayColor: overlayColor,
+        mouseCursor: rowMouseCursor,
         child: contents,
       );
     }
@@ -788,6 +821,7 @@ class DataTable extends StatelessWidget {
     required bool sorted,
     required bool ascending,
     required MaterialStateProperty<Color?>? overlayColor,
+    required MouseCursor? mouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
@@ -838,6 +872,7 @@ class DataTable extends StatelessWidget {
     label = InkWell(
       onTap: onSort,
       overlayColor: overlayColor,
+      mouseCursor: mouseCursor,
       child: label,
     );
     return label;
@@ -858,6 +893,7 @@ class DataTable extends StatelessWidget {
     required GestureTapCancelCallback? onTapCancel,
     required MaterialStateProperty<Color?>? overlayColor,
     required GestureLongPressCallback? onRowLongPress,
+    required MouseCursor? mouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
@@ -912,6 +948,7 @@ class DataTable extends StatelessWidget {
         onTap: onSelectChanged,
         onLongPress: onRowLongPress,
         overlayColor: overlayColor,
+        mouseCursor: mouseCursor,
         child: label,
       );
     }
@@ -1014,12 +1051,17 @@ class DataTable extends StatelessWidget {
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
+        final Set<MaterialState> states = <MaterialState>{
+          if (row.selected)
+            MaterialState.selected,
+        };
         tableRows[rowIndex].children[0] = _buildCheckbox(
           context: context,
           checked: row.selected,
           onRowTap: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           onCheckboxChanged: row.onSelectChanged,
           overlayColor: row.color ?? effectiveDataRowColor,
+          rowMouseCursor: row.mouseCursor?.resolve(states) ?? dataTableTheme.dataRowCursor?.resolve(states),
           tristate: false,
         );
         rowIndex += 1;
@@ -1057,6 +1099,10 @@ class DataTable extends StatelessWidget {
       } else {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
+      final Set<MaterialState> headerStates = <MaterialState>{
+        if (column.onSort == null)
+          MaterialState.disabled,
+      };
       tableRows[0].children[displayColumnIndex] = _buildHeadingCell(
         context: context,
         padding: padding,
@@ -1067,9 +1113,14 @@ class DataTable extends StatelessWidget {
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
+        mouseCursor: column.mouseCursor?.resolve(headerStates) ?? dataTableTheme.headingCellCursor?.resolve(headerStates),
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
+        final Set<MaterialState> states = <MaterialState>{
+          if (row.selected)
+            MaterialState.selected,
+        };
         final DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
           context: context,
@@ -1086,6 +1137,7 @@ class DataTable extends StatelessWidget {
           onSelectChanged: row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
           onRowLongPress: row.onLongPress,
+          mouseCursor: row.mouseCursor?.resolve(states) ?? dataTableTheme.dataRowCursor?.resolve(states),
         );
         rowIndex += 1;
       }
@@ -1138,6 +1190,7 @@ class TableRowInkWell extends InkResponse {
     super.onLongPress,
     super.onHighlightChanged,
     super.overlayColor,
+    super.mouseCursor,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
