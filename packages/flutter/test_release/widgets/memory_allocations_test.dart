@@ -55,7 +55,7 @@ class _TestRenderObject extends RenderObject {
   Rect get semanticBounds => throw UnimplementedError();
 }
 
-class _TestElement extends RootRenderObjectElement{
+class _TestElement extends RenderObjectElement with RootElementMixin {
   _TestElement(): super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {
