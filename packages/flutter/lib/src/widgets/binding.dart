@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AccessibilityFeatures, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
+import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -41,12 +41,11 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// lifecycle messages. See [didChangeAppLifecycleState].
 ///
 /// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
-///
 /// {@end-tool}
 ///
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
 /// method above with other methods from this class.
-abstract class WidgetsBindingObserver {
+abstract mixin class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
   /// the back button.
@@ -227,6 +226,21 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [SystemChannels.lifecycle].
   void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  /// Called when a request is received from the system to exit the application.
+  ///
+  /// If any observer responds with [AppExitResponse.cancel], it will cancel the
+  /// exit. All observers will be asked before exiting.
+  ///
+  /// {@macro flutter.services.binding.ServicesBinding.requestAppExit}
+  ///
+  /// See also:
+  ///
+  /// * [ServicesBinding.exitApplication] for a function to call that will request
+  ///   that the application exits.
+  Future<AppExitResponse> didRequestAppExit() async {
+    return AppExitResponse.exit;
+  }
 
   /// Called when the system is running low on memory.
   ///
@@ -525,6 +539,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
+
+  @override
+  Future<AppExitResponse> handleRequestAppExit() async {
+    bool didCancel = false;
+    for (final WidgetsBindingObserver observer in _observers) {
+      if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
+        didCancel = true;
+        // Don't early return. For the case where someone is just using the
+        // observer to know when exit happens, we want to call all the
+        // observers, even if we already know we're going to cancel.
+      }
+    }
+    return didCancel ? AppExitResponse.cancel : AppExitResponse.exit;
+  }
 
   @override
   void handleMetricsChanged() {

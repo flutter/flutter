@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(goderbauer): Delete these tests when the deprecated window property is removed.
+// ignore_for_file: deprecated_member_use
+
 import 'dart:ui' as ui show window;
 import 'dart:ui';
 

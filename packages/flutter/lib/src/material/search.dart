@@ -544,13 +544,11 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           key: const ValueKey<_SearchBody>(_SearchBody.suggestions),
           child: widget.delegate.buildSuggestions(context),
         );
-        break;
       case _SearchBody.results:
         body = KeyedSubtree(
           key: const ValueKey<_SearchBody>(_SearchBody.results),
           child: widget.delegate.buildResults(context),
         );
-        break;
       case null:
         break;
     }
@@ -560,7 +558,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         routeName = '';
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

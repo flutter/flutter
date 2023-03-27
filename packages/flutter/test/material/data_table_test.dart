@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
@@ -1748,11 +1749,7 @@ void main() {
     );
     expect(
       find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
-      paints
-        ..path(color: borderColor)
-        ..path(color: borderColor)
-        ..path(color: borderColor)
-        ..path(color: borderColor),
+      paints..drrect(color: borderColor),
     );
     expect(
       tester.getTopLeft(find.byType(Table)),
@@ -2072,4 +2069,169 @@ void main() {
     expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0), throwsA(predicate((AssertionError e) =>
       e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
   });
+
+  testWidgets('Heading cell cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            sortColumnIndex: 0,
+            columns: <DataColumn>[
+              // This column can be sorted.
+              DataColumn(
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.disabled)) {
+                    return SystemMouseCursors.forbidden;
+                  }
+                  return SystemMouseCursors.copy;
+                }),
+
+                onSort: (int columnIndex, bool ascending) {},
+                label: const Text('A'),
+              ),
+              // This column cannot be sorted.
+              DataColumn(
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.disabled)) {
+                    return SystemMouseCursors.forbidden;
+                  }
+                  return SystemMouseCursors.copy;
+                }),
+                label: const Text('B'),
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(Text('Data 1')),
+                  DataCell(Text('Data 2')),
+                ],
+              ),
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(Text('Data 3')),
+                  DataCell(Text('Data 4')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('A')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
+
+    await gesture.moveTo(tester.getCenter(find.text('B')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+  });
+
+  testWidgets('DataRow cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            sortColumnIndex: 0,
+            columns: <DataColumn>[
+              DataColumn(
+                label: const Text('A'),
+                onSort: (int columnIndex, bool ascending) {},
+              ),
+              const DataColumn(label: Text('B')),
+            ],
+            rows: <DataRow>[
+              // This row can be selected.
+              DataRow(
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return SystemMouseCursors.copy;
+                  }
+                  return SystemMouseCursors.forbidden;
+                }),
+                onSelectChanged: (bool? selected) {},
+                cells: const <DataCell>[
+                  DataCell(Text('Data 1')),
+                  DataCell(Text('Data 2')),
+                ],
+              ),
+              // This row is selected.
+              DataRow(
+                selected: true,
+                onSelectChanged: (bool? selected) {},
+                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return SystemMouseCursors.copy;
+                  }
+                  return SystemMouseCursors.forbidden;
+                }),
+                cells: const <DataCell>[
+                  DataCell(Text('Data 3')),
+                  DataCell(Text('Data 4')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('Data 1')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+
+    await gesture.moveTo(tester.getCenter(find.text('Data 3')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
+  });
+
+  testWidgets("DataRow cursor doesn't update checkbox cursor", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            sortColumnIndex: 0,
+            columns: <DataColumn>[
+              DataColumn(
+                label: const Text('A'),
+                onSort: (int columnIndex, bool ascending) {},
+              ),
+              const DataColumn(label: Text('B')),
+            ],
+            rows: <DataRow>[
+              DataRow(
+                onSelectChanged: (bool? selected) {},
+                mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy),
+                cells: const <DataCell>[
+                  DataCell(Text('Data')),
+                  DataCell(Text('Data 2')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox).last));
+    await tester.pump();
+
+    // Test that the checkbox cursor is not changed.
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    await gesture.moveTo(tester.getCenter(find.text('Data')));
+    await tester.pump();
+
+    // Test that cursor is updated for the row.
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
+  });
+
 }

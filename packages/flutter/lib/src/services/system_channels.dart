@@ -10,11 +10,7 @@ import 'platform_channel.dart';
 export 'platform_channel.dart' show BasicMessageChannel, MethodChannel;
 
 /// Platform channels used by the Flutter system.
-class SystemChannels {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemChannels._();
-
+abstract final class SystemChannels {
   /// A JSON [MethodChannel] for navigation.
   ///
   /// The following incoming methods are defined for this channel (registered
@@ -120,6 +116,11 @@ class SystemChannels {
   ///  * `SystemNavigator.pop`: Tells the operating system to close the
   ///    application, or the closest equivalent. See [SystemNavigator.pop].
   ///
+  ///  * `System.exitApplication`: Tells the engine to send a request back to
+  ///    the application to request an application exit (using
+  ///    `System.requestAppExit` below), and if it is not canceled, to terminate
+  ///    the application using the platform UI toolkit's termination API.
+  ///
   /// The following incoming methods are defined for this channel (registered
   /// using [MethodChannel.setMethodCallHandler]):
   ///
@@ -128,6 +129,9 @@ class SystemChannels {
   ///    through [SystemChrome.setEnabledSystemUIMode]. See
   ///    [SystemChrome.setSystemUIChangeCallback] to respond to this change in
   ///    application state.
+  ///
+  ///  * `System.requestAppExit`: The application has requested that it be
+  ///    terminated. See [ServicesBinding.exitApplication].
   ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).

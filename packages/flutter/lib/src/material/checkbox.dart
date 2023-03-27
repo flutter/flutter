@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'checkbox_theme.dart';
 import 'color_scheme.dart';
@@ -17,6 +17,8 @@ import 'toggleable.dart';
 // Examples can assume:
 // bool _throwShotAway = false;
 // late StateSetter setState;
+
+enum _CheckboxType { material, adaptive }
 
 /// A Material Design checkbox.
 ///
@@ -88,7 +90,47 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
-  }) : assert(tristate || value != null);
+  }) : _checkboxType = _CheckboxType.material,
+       assert(tristate || value != null);
+
+  /// Creates an adaptive [Checkbox] based on whether the target platform is iOS
+  /// or macOS, following Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  ///
+  /// On iOS and macOS, this constructor creates a [CupertinoCheckbox], which has
+  /// matching functionality and presentation as Material checkboxes, and are the
+  /// graphics expected on iOS. On other platforms, this creates a Material
+  /// design [Checkbox].
+  ///
+  /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
+  /// [mouseCursor], [hoverColor], [overlayColor], [splashRadius],
+  /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
+  /// [side] will still affect the [CupertinoCheckbox] and should be handled if
+  /// native fidelity is important.
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  const Checkbox.adaptive({
+    super.key,
+    required this.value,
+    this.tristate = false,
+    required this.onChanged,
+    this.mouseCursor,
+    this.activeColor,
+    this.fillColor,
+    this.checkColor,
+    this.focusColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashRadius,
+    this.materialTapTargetSize,
+    this.visualDensity,
+    this.focusNode,
+    this.autofocus = false,
+    this.shape,
+    this.side,
+    this.isError = false,
+  }) : _checkboxType = _CheckboxType.adaptive,
+       assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
   ///
@@ -347,6 +389,8 @@ class Checkbox extends StatefulWidget {
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
+  final _CheckboxType _checkboxType;
+
   @override
   State<Checkbox> createState() => _CheckboxState();
 }
@@ -410,6 +454,35 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   @override
   Widget build(BuildContext context) {
+    switch (widget._checkboxType) {
+      case _CheckboxType.material:
+        break;
+
+      case _CheckboxType.adaptive:
+        final ThemeData theme = Theme.of(context);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return CupertinoCheckbox(
+              value: value,
+              tristate: tristate,
+              onChanged: onChanged,
+              activeColor: widget.activeColor,
+              checkColor: widget.checkColor,
+              focusColor: widget.focusColor,
+              focusNode: widget.focusNode,
+              autofocus: widget.autofocus,
+              side: widget.side,
+              shape: widget.shape,
+            );
+        }
+    }
+
     assert(debugCheckHasMaterial(context));
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
     final CheckboxThemeData defaults = Theme.of(context).useMaterial3
@@ -425,10 +498,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     switch (effectiveMaterialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-        break;
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
 

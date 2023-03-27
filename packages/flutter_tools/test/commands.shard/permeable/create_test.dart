@@ -1950,14 +1950,14 @@ void main() {
       await runner.run(<String>['create', '--pub', projectDir.path]);
       final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[2].contains('pub') && !c.contains('--offline')
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline')
       )));
 
       // Run pub offline.
       loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[2].contains('pub') && c.contains('--offline')
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline'),
       )));
     },
     overrides: <Type, Generator>{
@@ -2762,7 +2762,7 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('newly created plugin has min flutter sdk version as 2.5.0', () async {
+  testUsingContext('newly created plugin has min flutter sdk version as 3.3.0', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2771,8 +2771,54 @@ void main() {
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
     final Map<String, VersionConstraint?> env = pubspec.environment!;
-    expect(env['flutter']!.allows(Version(2, 5, 0)), true);
-    expect(env['flutter']!.allows(Version(2, 4, 9)), false);
+    expect(env['flutter']!.allows(Version(3, 3, 0)), true);
+    expect(env['flutter']!.allows(Version(3, 2, 9)), false);
+  });
+
+  testUsingContext('newly created iOS plugins has min iOS version of 11.0', () async {
+    Cache.flutterRoot = '../..';
+    final String flutterToolsAbsolutePath = globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+    );
+    final List<String> iosPluginTemplates = <String>[
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin',
+        'ios-objc.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin',
+        'ios-swift.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin_ffi',
+        'ios.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+    ];
+
+    for (final String templatePath in iosPluginTemplates) {
+      final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
+      expect(rawTemplate, contains("s.platform = :ios, '11.0'"));
+    }
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=ios', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'),
+        exists);
+    final String rawPodSpec = await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
+    expect(rawPodSpec, contains("s.platform = :ios, '11.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {
