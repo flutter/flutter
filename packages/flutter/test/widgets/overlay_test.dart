@@ -1105,7 +1105,6 @@ void main() {
         switch(clip) {
           case Clip.none:
             expect(renderObject.describeApproximatePaintClip(child), null);
-            break;
           case Clip.hardEdge:
           case Clip.antiAlias:
           case Clip.antiAliasWithSaveLayer:
@@ -1113,7 +1112,6 @@ void main() {
               renderObject.describeApproximatePaintClip(child),
               const Rect.fromLTRB(0, 0, 800, 600),
             );
-            break;
         }
       });
       expect(visited, true);

@@ -495,7 +495,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         case AnimationStatus.completed:
         case AnimationStatus.dismissed:
           _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
-          break;
         case AnimationStatus.forward:
         case AnimationStatus.reverse:
           break;
@@ -527,11 +526,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     switch (status) {
       case AnimationStatus.forward:
         _ensureHistoryEntry();
-        break;
       case AnimationStatus.reverse:
         _historyEntry?.remove();
         _historyEntry = null;
-        break;
       case AnimationStatus.dismissed:
         break;
       case AnimationStatus.completed:
@@ -581,15 +578,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         break;
       case DrawerAlignment.end:
         delta = -delta;
-        break;
     }
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.value -= delta;
-        break;
       case TextDirection.ltr:
         _controller.value += delta;
-        break;
     }
 
     final bool opened = _controller.value > 0.5;
@@ -610,17 +604,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           break;
         case DrawerAlignment.end:
           visualVelocity = -visualVelocity;
-          break;
       }
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
           widget.drawerCallback?.call(visualVelocity < 0.0);
-          break;
         case TextDirection.ltr:
           _controller.fling(velocity: visualVelocity);
           widget.drawerCallback?.call(visualVelocity > 0.0);
-          break;
       }
     } else if (_controller.value < 0.5) {
       close();
@@ -682,12 +673,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         isDesktop = false;
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         isDesktop = true;
-        break;
     }
 
     double? dragAreaWidth = widget.edgeDragWidth;
@@ -697,11 +686,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.left : padding.right);
-          break;
         case TextDirection.rtl:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.right : padding.left);
-          break;
       }
     }
 
@@ -727,14 +714,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       switch (Theme.of(context).platform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           platformHasBackButton = false;
-          break;
       }
 
       final Widget child = _DrawerControllerScope(

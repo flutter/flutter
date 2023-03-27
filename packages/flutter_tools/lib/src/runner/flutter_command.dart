@@ -125,6 +125,7 @@ class FlutterOptions {
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebRendererFlag = 'web-renderer';
+  static const String kWebResourcesCdnFlag = 'web-resources-cdn';
 }
 
 /// flutter command categories for usage.
@@ -473,7 +474,6 @@ abstract class FlutterCommand extends Command<void> {
   void addServeObservatoryOptions({required bool verboseHelp}) {
     argParser.addFlag('serve-observatory',
       hide: !verboseHelp,
-      defaultsTo: true,
       help: 'Serve the legacy Observatory developer tooling through the VM service.',
     );
   }
@@ -665,6 +665,14 @@ abstract class FlutterCommand extends Command<void> {
         'canvaskit': 'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.',
         'auto': 'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
       }
+    );
+  }
+
+  void usesWebResourcesCdnFlag() {
+    argParser.addFlag(
+      FlutterOptions.kWebResourcesCdnFlag,
+      defaultsTo: true,
+      help: 'Use Web static resources hosted on a CDN.',
     );
   }
 
@@ -1043,11 +1051,13 @@ abstract class FlutterCommand extends Command<void> {
 
   void addEnableImpellerFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-impeller',
-        negatable: false,
         hide: !verboseHelp,
-        help: 'Whether to enable the experimental Impeller rendering engine. '
-              'Impeller is currently only supported on iOS and Android. This flag will '
-              'be ignored when targeting other platforms.',
+        defaultsTo: null,
+        help: 'Whether to enable the Impeller rendering engine. '
+              'Impeller is the default renderer on iOS. On Android, Impeller '
+              'is available but not the default. This flag will cause Impeller '
+              'to be used on Android. On other platforms, this flag will be '
+              'ignored.',
     );
   }
 
@@ -1203,6 +1213,15 @@ abstract class FlutterCommand extends Command<void> {
         webRenderer = mappedMode;
       }
       dartDefines = updateDartDefines(dartDefines, webRenderer);
+    }
+
+    if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
+      final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
+      if (boolArg(FlutterOptions.kWebResourcesCdnFlag) && !hasLocalWebSdk) {
+        if (!dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
+          dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
+        }
+      }
     }
 
     return BuildInfo(buildMode,

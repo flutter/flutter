@@ -70,6 +70,7 @@ void main() {
         processManager: processManager,
         terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
       );
       runner = createTestCommandRunner(command);
 
@@ -95,6 +96,7 @@ void main() {
               '--disable-server-feature-search',
               '--sdk',
               'Artifact.engineDartSdkPath',
+              '--suppress-analytics',
             ],
             exitCode: SIGABRT,
             stderr: stderr,
