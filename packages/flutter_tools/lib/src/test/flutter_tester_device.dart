@@ -185,7 +185,7 @@ class FlutterTesterTestDevice extends TestDevice {
         logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
         if (debuggingOptions.serveObservatory) {
           try {
-            await vmservice.callMethodWrapper('_serveObservatory');
+            await vmService.callMethodWrapper('_serveObservatory');
           } on vm_service.RPCError {
             logger.printWarning('Unable to enable Observatory');
           }
