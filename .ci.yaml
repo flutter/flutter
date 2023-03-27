@@ -2733,7 +2733,6 @@ targets:
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2971,6 +2970,20 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"}
         ]
       task_name: platform_view_macos__start_up
+
+  - name: Mac platform_channel_sample_test_macos
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: platform_channel_sample_test_macos
 
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
@@ -4883,7 +4896,6 @@ targets:
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
