@@ -40,34 +40,33 @@ void AssetFontManager::onGetFamilyName(int index, SkString* familyName) const {
   familyName->set(font_provider_->GetFamilyName(index).c_str());
 }
 
-auto AssetFontManager::onCreateStyleSet(int index) const
-    -> OnCreateStyleSetRet {
+sk_sp<SkFontStyleSet> AssetFontManager::onCreateStyleSet(int index) const {
   FML_DCHECK(false);
   return nullptr;
 }
 
-auto AssetFontManager::onMatchFamily(const char family_name_string[]) const
-    -> OnMatchFamilyRet {
+sk_sp<SkFontStyleSet> AssetFontManager::onMatchFamily(
+    const char family_name_string[]) const {
   std::string family_name(family_name_string);
-  return OnMatchFamilyRet(font_provider_->MatchFamily(family_name));
+  return font_provider_->MatchFamily(family_name);
 }
 
-auto AssetFontManager::onMatchFamilyStyle(const char familyName[],
-                                          const SkFontStyle& style) const
-    -> OnMatchFamilyStyleRet {
-  SkFontStyleSet* font_style_set =
+sk_sp<SkTypeface> AssetFontManager::onMatchFamilyStyle(
+    const char familyName[],
+    const SkFontStyle& style) const {
+  sk_sp<SkFontStyleSet> font_style_set =
       font_provider_->MatchFamily(std::string(familyName));
   if (font_style_set == nullptr)
     return nullptr;
   return font_style_set->matchStyle(style);
 }
 
-auto AssetFontManager::onMatchFamilyStyleCharacter(const char familyName[],
-                                                   const SkFontStyle&,
-                                                   const char* bcp47[],
-                                                   int bcp47Count,
-                                                   SkUnichar character) const
-    -> OnMatchFamilyStyleCharacterRet {
+sk_sp<SkTypeface> AssetFontManager::onMatchFamilyStyleCharacter(
+    const char familyName[],
+    const SkFontStyle&,
+    const char* bcp47[],
+    int bcp47Count,
+    SkUnichar character) const {
   return nullptr;
 }
 

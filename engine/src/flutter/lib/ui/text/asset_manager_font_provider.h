@@ -78,7 +78,7 @@ class AssetManagerFontProvider : public txt::FontAssetProvider {
   std::string GetFamilyName(int index) const override;
 
   // |FontAssetProvider|
-  SkFontStyleSet* MatchFamily(const std::string& family_name) override;
+  sk_sp<SkFontStyleSet> MatchFamily(const std::string& family_name) override;
 
  private:
   std::shared_ptr<AssetManager> asset_manager_;
