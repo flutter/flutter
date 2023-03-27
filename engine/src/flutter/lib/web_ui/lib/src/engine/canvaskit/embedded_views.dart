@@ -302,6 +302,7 @@ class HtmlViewEmbedder {
           headTransform = mutator.matrix!.multiplied(headTransform);
           head.style.transform =
               float64ListToCssTransform(headTransform.storage);
+          break;
         case MutatorType.clipRect:
         case MutatorType.clipRRect:
         case MutatorType.clipPath:
@@ -358,8 +359,10 @@ class HtmlViewEmbedder {
           }
           _resetAnchor(clipView);
           head = clipView;
+          break;
         case MutatorType.opacity:
           embeddedOpacity *= mutator.alphaFloat;
+          break;
       }
     }
 

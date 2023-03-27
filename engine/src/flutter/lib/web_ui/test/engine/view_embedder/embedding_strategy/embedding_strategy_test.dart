@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('browser')
-library;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';

@@ -327,14 +327,17 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       case 'click':
         final DomMouseEvent click = event as DomMouseEvent;
         activationPoint = click.offset;
+        break;
       case 'touchstart':
       case 'touchend':
         final DomTouchEvent touchEvent = event as DomTouchEvent;
         activationPoint = touchEvent.changedTouches.first.client;
+        break;
       case 'pointerdown':
       case 'pointerup':
         final DomPointerEvent touch = event as DomPointerEvent;
         activationPoint = touch.client;
+        break;
       default:
         // The event is not relevant, forward to framework as normal.
         return true;

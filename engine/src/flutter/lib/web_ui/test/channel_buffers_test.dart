@@ -126,10 +126,13 @@ void testMain() {
       switch (counter) {
         case 0:
           expect(drainedData, equals(two));
+          break;
         case 1:
           expect(drainedData, equals(three));
+          break;
         case 2:
           expect(drainedData, equals(four));
+          break;
       }
       counter += 1;
       return Future<void>.value();

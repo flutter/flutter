@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('chrome || firefox')
-library;
 
 import 'dart:async';
 import 'dart:js_interop';

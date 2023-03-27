@@ -299,19 +299,24 @@ class ClangTidy {
       switch (action) {
         case LintAction.skipNoLint:
           _outSink.writeln('🔷 ignoring $relativePath (FLUTTER_NOLINT)');
+          break;
         case LintAction.failMalformedNoLint:
           _errSink.writeln('❌ malformed opt-out $relativePath');
           _errSink.writeln(
             '   Required format: // FLUTTER_NOLINT: $issueUrlPrefix/ISSUE_ID',
           );
           sawMalformed = true;
+          break;
         case LintAction.lint:
           _outSink.writeln('🔶 linting $relativePath');
           jobs.add(command.createLintJob(options));
+          break;
         case LintAction.skipThirdParty:
           _outSink.writeln('🔷 ignoring $relativePath (third_party)');
+          break;
         case LintAction.skipMissing:
           _outSink.writeln('🔷 ignoring $relativePath (missing)');
+          break;
       }
     }
     return _ComputeJobsResult(jobs, sawMalformed);

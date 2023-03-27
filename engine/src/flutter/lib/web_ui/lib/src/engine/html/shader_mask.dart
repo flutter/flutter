@@ -132,6 +132,7 @@ class PersistedShaderMask extends PersistedContainerSurface
           // Since we don't have a size, we can't use background color.
           // Use svg filter srcIn instead.
           blendModeTemp = ui.BlendMode.srcIn;
+          break;
         case ui.BlendMode.src:
         case ui.BlendMode.dstOver:
         case ui.BlendMode.srcIn:
@@ -187,19 +188,25 @@ SvgFilter svgMaskFilterFromImageAndBlendMode(
   switch (blendMode) {
     case ui.BlendMode.src:
       svgFilter = _srcImageToSvg(imageUrl, width, height);
+      break;
     case ui.BlendMode.srcIn:
     case ui.BlendMode.srcATop:
       svgFilter = _srcInImageToSvg(imageUrl, width, height);
+      break;
     case ui.BlendMode.srcOut:
       svgFilter = _srcOutImageToSvg(imageUrl, width, height);
+      break;
     case ui.BlendMode.xor:
       svgFilter = _xorImageToSvg(imageUrl, width, height);
+      break;
     case ui.BlendMode.plus:
       // Porter duff source + destination.
       svgFilter = _compositeImageToSvg(imageUrl, 0, 1, 1, 0, width, height);
+      break;
     case ui.BlendMode.modulate:
       // Porter duff source * destination but preserves alpha.
       svgFilter = _modulateImageToSvg(imageUrl, width, height);
+      break;
     case ui.BlendMode.overlay:
       // Since overlay is the same as hard-light by swapping layers,
       // pass hard-light blend function.
@@ -210,6 +217,7 @@ SvgFilter svgMaskFilterFromImageAndBlendMode(
         height,
         swapLayers: true,
       );
+      break;
     // Several of the filters below (although supported) do not render the
     // same (close but not exact) as native flutter when used as blend mode
     // for a background-image with a background color. They only look
@@ -237,6 +245,7 @@ SvgFilter svgMaskFilterFromImageAndBlendMode(
     case ui.BlendMode.exclusion:
       svgFilter = _blendImageToSvg(
           imageUrl, blendModeToSvgEnum(blendMode)!, width, height);
+      break;
     case ui.BlendMode.dst:
     case ui.BlendMode.dstATop:
     case ui.BlendMode.dstIn:

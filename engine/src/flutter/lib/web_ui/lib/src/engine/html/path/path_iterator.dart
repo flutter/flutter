@@ -153,6 +153,7 @@ class PathIterator {
         _lastPointX = _moveToX;
         _lastPointY = _moveToY;
         _needClose = _forceClose;
+        break;
       case SPath.kLineVerb:
         final ui.Offset start = _constructMoveTo();
         final double offsetX = pathRef.points[_pointIndex++];
@@ -163,6 +164,7 @@ class PathIterator {
         outPts[3] = offsetY;
         _lastPointX = offsetX;
         _lastPointY = offsetY;
+        break;
       case SPath.kConicVerb:
         _conicWeightIndex++;
         final ui.Offset start = _constructMoveTo();
@@ -172,6 +174,7 @@ class PathIterator {
         outPts[3] = pathRef.points[_pointIndex++];
         _lastPointX = outPts[4] = pathRef.points[_pointIndex++];
         _lastPointY = outPts[5] = pathRef.points[_pointIndex++];
+        break;
       case SPath.kQuadVerb:
         final ui.Offset start = _constructMoveTo();
         outPts[0] = start.dx;
@@ -180,6 +183,7 @@ class PathIterator {
         outPts[3] = pathRef.points[_pointIndex++];
         _lastPointX = outPts[4] = pathRef.points[_pointIndex++];
         _lastPointY = outPts[5] = pathRef.points[_pointIndex++];
+        break;
       case SPath.kCubicVerb:
         final ui.Offset start = _constructMoveTo();
         outPts[0] = start.dx;
@@ -190,6 +194,7 @@ class PathIterator {
         outPts[5] = pathRef.points[_pointIndex++];
         _lastPointX = outPts[6] = pathRef.points[_pointIndex++];
         _lastPointY = outPts[7] = pathRef.points[_pointIndex++];
+        break;
       case SPath.kCloseVerb:
         verb = _autoClose(outPts);
         if (verb == SPath.kLineVerb) {
@@ -201,8 +206,10 @@ class PathIterator {
         }
         _lastPointX = _moveToX;
         _lastPointY = _moveToY;
+        break;
       case SPath.kDoneVerb:
         assert(_verbIndex == pathRef.countVerbs());
+        break;
       default:
         throw FormatException('Unsupport Path verb $verb');
     }

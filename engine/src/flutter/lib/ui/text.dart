@@ -2831,8 +2831,10 @@ class Paragraph extends NativeFieldWrapperClass1 {
     switch (position.affinity) {
       case TextAffinity.upstream:
         characterPosition = position.offset - 1;
+        break;
       case TextAffinity.downstream:
         characterPosition = position.offset;
+        break;
     }
     final List<int> boundary = _getWordBoundary(characterPosition);
     return TextRange(start: boundary[0], end: boundary[1]);
