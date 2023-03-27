@@ -211,9 +211,15 @@ bool EntityPass::Render(ContentContext& renderer,
     auto offscreen_target =
         CreateRenderTarget(renderer, render_target.GetRenderTargetSize(), true);
 
-    if (!OnRender(
-            renderer, offscreen_target.GetRenderTarget().GetRenderTargetSize(),
-            offscreen_target, Point(), Point(), 0, stencil_coverage_stack)) {
+    if (!OnRender(renderer,  // renderer
+                  offscreen_target.GetRenderTarget()
+                      .GetRenderTargetSize(),  // root_pass_size
+                  offscreen_target,            // pass_target
+                  Point(),                     // global_pass_position
+                  Point(),                     // local_pass_position
+                  0,                           // pass_depth
+                  stencil_coverage_stack       // stencil_coverage_stack
+                  )) {
       return false;
     }
 
@@ -267,8 +273,14 @@ bool EntityPass::Render(ContentContext& renderer,
       render_target,
       renderer.GetDeviceCapabilities().SupportsReadFromResolve());
 
-  return OnRender(renderer, render_target.GetRenderTargetSize(), pass_target,
-                  Point(), Point(), 0, stencil_coverage_stack);
+  return OnRender(                          //
+      renderer,                             // renderer
+      render_target.GetRenderTargetSize(),  // root_pass_size
+      pass_target,                          // pass_target
+      Point(),                              // global_pass_position
+      Point(),                              // local_pass_position
+      0,                                    // pass_depth
+      stencil_coverage_stack);              // stencil_coverage_stack
 }
 
 EntityPass::EntityResult EntityPass::GetEntityForElement(
@@ -276,7 +288,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     ContentContext& renderer,
     InlinePassContext& pass_context,
     ISize root_pass_size,
-    Point position,
+    Point global_pass_position,
     uint32_t pass_depth,
     StencilCoverageStack& stencil_coverage_stack,
     size_t stencil_depth_floor) const {
@@ -288,12 +300,12 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 
   if (const auto& entity = std::get_if<Entity>(&element)) {
     element_entity = *entity;
-    if (!position.IsZero()) {
+    if (!global_pass_position.IsZero()) {
       // If the pass image is going to be rendered with a non-zero position,
       // apply the negative translation to entity copies before rendering them
       // so that they'll end up rendering to the correct on-screen position.
       element_entity.SetTransformation(
-          Matrix::MakeTranslation(Vector3(-position)) *
+          Matrix::MakeTranslation(Vector3(-global_pass_position)) *
           element_entity.GetTransformation());
     }
   }
@@ -313,10 +325,18 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     if (!subpass->backdrop_filter_proc_.has_value() &&
         subpass->delegate_->CanCollapseIntoParentPass(subpass)) {
       // Directly render into the parent target and move on.
-      if (!subpass->OnRender(renderer, root_pass_size,
-                             pass_context.GetPassTarget(), position, position,
-                             pass_depth, stencil_coverage_stack, stencil_depth_,
-                             nullptr, pass_context.GetRenderPass(pass_depth))) {
+      if (!subpass->OnRender(
+              renderer,                      // renderer
+              root_pass_size,                // root_pass_size
+              pass_context.GetPassTarget(),  // pass_target
+              global_pass_position,          // global_pass_position
+              Point(),                       // local_pass_position
+              pass_depth,                    // pass_depth
+              stencil_coverage_stack,        // stencil_coverage_stack
+              stencil_depth_,                // stencil_depth_floor
+              nullptr,                       // backdrop_filter_contents
+              pass_context.GetRenderPass(pass_depth)  // collapsed_parent_pass
+              )) {
         return EntityPass::EntityResult::Failure();
       }
       return EntityPass::EntityResult::Skip();
@@ -340,14 +360,15 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     auto subpass_coverage =
         GetSubpassCoverage(*subpass, Rect::MakeSize(root_pass_size));
     if (subpass->cover_whole_screen_) {
-      subpass_coverage = Rect(position, Size(pass_context.GetPassTarget()
-                                                 .GetRenderTarget()
-                                                 .GetRenderTargetSize()));
+      subpass_coverage =
+          Rect(global_pass_position, Size(pass_context.GetPassTarget()
+                                              .GetRenderTarget()
+                                              .GetRenderTargetSize()));
     }
     if (backdrop_filter_contents) {
       auto backdrop_coverage = backdrop_filter_contents->GetCoverage(Entity{});
       if (backdrop_coverage.has_value()) {
-        backdrop_coverage->origin += position;
+        backdrop_coverage->origin += global_pass_position;
 
         subpass_coverage =
             subpass_coverage.has_value()
@@ -379,7 +400,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     auto offscreen_texture_contents =
         subpass->delegate_->CreateContentsForSubpassTarget(
             subpass_texture,
-            Matrix::MakeTranslation(Vector3{-position}) * subpass->xformation_);
+            Matrix::MakeTranslation(Vector3{-global_pass_position}) *
+                subpass->xformation_);
 
     if (!offscreen_texture_contents) {
       // This is an error because the subpass delegate said the pass couldn't
@@ -395,18 +417,25 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 
     // Stencil textures aren't shared between EntityPasses (as much of the
     // time they are transient).
-    if (!subpass->OnRender(renderer, root_pass_size, subpass_target,
-                           subpass_coverage->origin, position, ++pass_depth,
-                           stencil_coverage_stack, subpass->stencil_depth_,
-                           backdrop_filter_contents)) {
+    if (!subpass->OnRender(renderer,                  // renderer
+                           root_pass_size,            // root_pass_size
+                           subpass_target,            // pass_target
+                           subpass_coverage->origin,  // global_pass_position
+                           subpass_coverage->origin -
+                               global_pass_position,  // local_pass_position
+                           ++pass_depth,              // pass_depth
+                           stencil_coverage_stack,    // stencil_coverage_stack
+                           subpass->stencil_depth_,   // stencil_depth_floor
+                           backdrop_filter_contents  // backdrop_filter_contents
+                           )) {
       return EntityPass::EntityResult::Failure();
     }
 
     element_entity.SetContents(std::move(offscreen_texture_contents));
     element_entity.SetStencilDepth(subpass->stencil_depth_);
     element_entity.SetBlendMode(subpass->blend_mode_);
-    element_entity.SetTransformation(
-        Matrix::MakeTranslation(Vector3(subpass_coverage->origin - position)));
+    element_entity.SetTransformation(Matrix::MakeTranslation(
+        Vector3(subpass_coverage->origin - global_pass_position)));
   } else {
     FML_UNREACHABLE();
   }
@@ -417,8 +446,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 bool EntityPass::OnRender(ContentContext& renderer,
                           ISize root_pass_size,
                           EntityPassTarget& pass_target,
-                          Point position,
-                          Point parent_position,
+                          Point global_pass_position,
+                          Point local_pass_position,
                           uint32_t pass_depth,
                           StencilCoverageStack& stencil_coverage_stack,
                           size_t stencil_depth_floor,
@@ -437,7 +466,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
 
   auto render_element = [&stencil_depth_floor, &pass_context, &pass_depth,
                          &renderer, &stencil_coverage_stack,
-                         &position](Entity& element_entity) {
+                         &global_pass_position](Entity& element_entity) {
     auto result = pass_context.GetRenderPass(pass_depth);
 
     if (!result.pass) {
@@ -469,7 +498,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
     if (current_stencil_coverage.has_value()) {
       // Entity transforms are relative to the current pass position, so we need
       // to check stencil coverage in the same space.
-      current_stencil_coverage->origin -= position;
+      current_stencil_coverage->origin -= global_pass_position;
     }
 
     if (!element_entity.ShouldRender(current_stencil_coverage)) {
@@ -479,7 +508,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
     auto stencil_coverage =
         element_entity.GetStencilCoverage(current_stencil_coverage);
     if (stencil_coverage.coverage.has_value()) {
-      stencil_coverage.coverage->origin += position;
+      stencil_coverage.coverage->origin += global_pass_position;
     }
 
     switch (stencil_coverage.type) {
@@ -517,7 +546,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
                 : std::nullopt;
         if (restore_coverage.has_value()) {
           // Make the coverage rectangle relative to the current pass.
-          restore_coverage->origin -= position;
+          restore_coverage->origin -= global_pass_position;
         }
         stencil_coverage_stack.resize(restoration_depth + 1);
 
@@ -549,16 +578,22 @@ bool EntityPass::OnRender(ContentContext& renderer,
     Entity backdrop_entity;
     backdrop_entity.SetContents(std::move(backdrop_filter_contents));
     backdrop_entity.SetTransformation(
-        Matrix::MakeTranslation(Vector3(parent_position - position)));
+        Matrix::MakeTranslation(Vector3(local_pass_position)));
     backdrop_entity.SetStencilDepth(stencil_depth_floor);
 
     render_element(backdrop_entity);
   }
 
   for (const auto& element : elements_) {
-    EntityResult result = GetEntityForElement(
-        element, renderer, pass_context, root_pass_size, position, pass_depth,
-        stencil_coverage_stack, stencil_depth_floor);
+    EntityResult result =
+        GetEntityForElement(element,                 // element
+                            renderer,                // renderer
+                            pass_context,            // pass_context
+                            root_pass_size,          // root_pass_size
+                            global_pass_position,    // global_pass_position
+                            pass_depth,              // pass_depth
+                            stencil_coverage_stack,  // stencil_coverage_stack
+                            stencil_depth_floor);    // stencil_depth_floor
 
     switch (result.status) {
       case EntityResult::kSuccess:
