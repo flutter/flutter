@@ -484,6 +484,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             // CanvasKit vs HTML before invoking this method.
             replyToPlatformMessage(
                 callback, codec.encodeSuccessEnvelope(<bool>[true]));
+            break;
         }
         return;
 
@@ -540,6 +541,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             ClipboardMessageHandler().getDataMethodCall(callback);
             return;
         }
+        break;
 
       // Dispatched by the bindings to delay service worker initialization.
       case 'flutter/service_worker':

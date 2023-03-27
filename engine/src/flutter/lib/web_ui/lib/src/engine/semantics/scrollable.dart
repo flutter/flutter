@@ -209,6 +209,7 @@ class Scrollable extends RoleManager {
           assert(semanticsObject.isHorizontalScrollContainer);
           element.style.overflowX = 'scroll';
         }
+        break;
       case GestureMode.pointerEvents:
         // We use "hidden" instead of "scroll" so that the browser does
         // not "steal" pointer events. Flutter gesture recognizers need
@@ -219,6 +220,7 @@ class Scrollable extends RoleManager {
           assert(semanticsObject.isHorizontalScrollContainer);
           element.style.overflowX = 'hidden';
         }
+        break;
     }
   }
 

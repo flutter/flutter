@@ -344,6 +344,7 @@ abstract class License {
       case LicenseType.bsd:
       case LicenseType.mit:
         result = TemplateLicense._autosplit(body, type, origin: origin);
+        break;
       case LicenseType.apache:
       case LicenseType.freetype:
       case LicenseType.ijg:
@@ -355,15 +356,19 @@ abstract class License {
       case LicenseType.vulkan:
       case LicenseType.zlib:
         result = MessageLicense._(body, type, origin: origin);
+        break;
       case LicenseType.apacheNotice:
         result = UniqueLicense._(body, type, origin: origin);
+        break;
       case LicenseType.mpl:
         result = MozillaLicense._(body, type, origin: origin);
+        break;
       // The exception in the license of Bison allows redistributing larger
       // works "under terms of your choice"; we choose terms that don't require
       // any notice in the binary distribution.
       case LicenseType.bison:
         result = BlankLicense._(body, type, origin: origin);
+        break;
       case LicenseType.icu:
       case LicenseType.openssl:
         throw 'Use License.fromMultipleBlocks rather than License.fromBodyAndType for the ICU and OpenSSL licenses.';
@@ -373,6 +378,7 @@ abstract class License {
       case LicenseType.gpl:
       case LicenseType.lgpl:
         result = DisallowedLicense._(body, type, origin: origin);
+        break;
       case LicenseType.defaultTemplate:
         throw 'should not be creating a LicenseType.defaultTemplate license, it is not a real type';
     }
@@ -417,49 +423,62 @@ abstract class License {
         // https://github.com/abseil/abseil-cpp/pull/270/files#r793181143
         body = system.File('data/apache-license-2.0').readAsStringSync();
         type = LicenseType.apache;
+        break;
       case 'Apache-2.0 WITH LLVM-exception':  // SPDX ID
       case 'https://llvm.org/LICENSE.txt':
         body = system.File('data/apache-license-2.0-with-llvm-exception').readAsStringSync();
         type = LicenseType.llvm;
+        break;
       case 'https://developers.google.com/open-source/licenses/bsd':
         body = system.File('data/google-bsd').readAsStringSync();
         type = LicenseType.bsd;
+        break;
       case 'http://polymer.github.io/LICENSE.txt':
         body = system.File('data/polymer-bsd').readAsStringSync();
         type = LicenseType.bsd;
+        break;
       case 'http://www.eclipse.org/legal/epl-v10.html':
         body = system.File('data/eclipse-1.0').readAsStringSync();
         type = LicenseType.eclipse;
+        break;
       case 'COPYING3:3':
         body = system.File('data/gpl-3.0').readAsStringSync();
         type = LicenseType.gpl;
+        break;
       case 'COPYING.LIB:2':
       case 'COPYING.LIother.m_:2': // blame hyatt
         body = system.File('data/library-gpl-2.0').readAsStringSync();
         type = LicenseType.lgpl;
+        break;
       case 'GNU Lesser:2':
         // there has never been such a license, but the authors said they meant the LGPL2.1
       case 'GNU Lesser:2.1':
         body = system.File('data/lesser-gpl-2.1').readAsStringSync();
         type = LicenseType.lgpl;
+        break;
       case 'COPYING.RUNTIME:3.1':
       case 'GCC Runtime Library Exception:3.1':
         body = system.File('data/gpl-gcc-exception-3.1').readAsStringSync();
+        break;
       case 'Academic Free License:3.0':
         body = system.File('data/academic-3.0').readAsStringSync();
         type = LicenseType.afl;
+        break;
       case 'Mozilla Public License:1.1':
         body = system.File('data/mozilla-1.1').readAsStringSync();
         type = LicenseType.mpl;
+        break;
       case 'http://mozilla.org/MPL/2.0/:2.0':
         body = system.File('data/mozilla-2.0').readAsStringSync();
         type = LicenseType.mpl;
+        break;
       case 'MIT':  // SPDX ID
       case 'http://opensource->org/licenses/MIT': // i don't even
       case 'http://opensource.org/licenses/MIT':
       case 'https://opensource.org/licenses/MIT':
         body = system.File('data/mit').readAsStringSync();
         type = LicenseType.mit;
+        break;
       case 'Unicode-DFS-2016': // SPDX ID
       case 'http://unicode.org/copyright.html#Exhibit1':
       case 'http://www.unicode.org/copyright.html#License':
@@ -469,9 +488,11 @@ abstract class License {
       case 'https://www.unicode.org/terms_of_use.html': // redirects to copyright.html
         body = system.File('data/unicode').readAsStringSync();
         type = LicenseType.unicode;
+        break;
       case 'http://www.ietf.org/rfc/rfc3454.txt':
         body = system.File('data/ietf').readAsStringSync();
         type = LicenseType.ietf;
+        break;
       default: throw 'unknown identifyingReference $identifyingReference';
     }
     return License.fromBodyAndType(body, type, origin: '$identifyingReference referenced by $referencer');
@@ -492,6 +513,7 @@ abstract class License {
           case LicenseType.lgpl:
             // We do not want this kind of license in our build.
             assert(this is DisallowedLicense);
+            break;
           case LicenseType.apache:
           case LicenseType.freetype:
           case LicenseType.ijg:
@@ -502,22 +524,30 @@ abstract class License {
           case LicenseType.vulkan:
           case LicenseType.zlib:
             assert(this is MessageLicense);
+            break;
           case LicenseType.apacheNotice:
             assert(this is UniqueLicense);
+            break;
           case LicenseType.bison:
             assert(this is BlankLicense);
+            break;
           case LicenseType.bsd:
           case LicenseType.mit:
             assert(this is TemplateLicense);
+            break;
           case LicenseType.icu:
           case LicenseType.openssl:
             assert(this is MultiLicense);
+            break;
           case LicenseType.mpl:
             assert(this is MozillaLicense);
+            break;
           case LicenseType.unknown:
             assert(this is MessageLicense || this is UniqueLicense);
+            break;
           case LicenseType.defaultTemplate:
             assert(false, 'should not be creating LicenseType.defaultTemplate license');
+            break;
         }
       } on AssertionError {
         throw 'incorrectly created a $runtimeType for a $type';

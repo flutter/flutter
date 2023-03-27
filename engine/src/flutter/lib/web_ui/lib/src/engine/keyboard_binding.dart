@@ -500,12 +500,15 @@ class KeyboardConverter {
       case ui.KeyEventType.down:
         assert(lastLogicalRecord == null);
         nextLogicalRecord = logicalKey();
+        break;
       case ui.KeyEventType.up:
         assert(lastLogicalRecord != null);
         nextLogicalRecord = null;
+        break;
       case ui.KeyEventType.repeat:
         assert(lastLogicalRecord != null);
         nextLogicalRecord = lastLogicalRecord;
+        break;
     }
     if (nextLogicalRecord == null) {
       _pressingRecords.remove(physicalKey);

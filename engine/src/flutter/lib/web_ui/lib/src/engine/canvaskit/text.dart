@@ -115,8 +115,10 @@ class CkParagraphStyle implements ui.ParagraphStyle {
         break;
       case ui.TextLeadingDistribution.even:
         skStrutStyle.halfLeading = true;
+        break;
       case ui.TextLeadingDistribution.proportional:
         skStrutStyle.halfLeading = false;
+        break;
     }
 
     if (style._leading != null) {
@@ -418,8 +420,10 @@ class CkTextStyle implements ui.TextStyle {
         break;
       case ui.TextLeadingDistribution.even:
         properties.halfLeading = true;
+        break;
       case ui.TextLeadingDistribution.proportional:
         properties.halfLeading = false;
+        break;
     }
 
     if (locale != null) {
@@ -600,12 +604,16 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
         switch (command.type) {
           case _ParagraphCommandType.addText:
             builder.addText(command.text!);
+            break;
           case _ParagraphCommandType.pop:
             builder.pop();
+            break;
           case _ParagraphCommandType.pushStyle:
             builder.pushStyle(command.style!);
+            break;
           case _ParagraphCommandType.addPlaceholder:
             builder._addPlaceholder(command.placeholderStyle!);
+            break;
         }
       }
       paragraph = builder._buildSkParagraph();
@@ -778,8 +786,10 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
     switch (position.affinity) {
       case ui.TextAffinity.upstream:
         characterPosition = position.offset - 1;
+        break;
       case ui.TextAffinity.downstream:
         characterPosition = position.offset;
+        break;
     }
     final SkTextRange skRange = paragraph.getWordBoundary(characterPosition.toDouble());
     return ui.TextRange(start: skRange.start.toInt(), end: skRange.end.toInt());

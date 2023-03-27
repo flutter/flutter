@@ -281,6 +281,7 @@ class RecordingCanvas {
     switch (clipOp) {
       case ui.ClipOp.intersect:
         _paintBounds.clipRect(rect, command);
+        break;
       case ui.ClipOp.difference:
         // Since this refers to inverse, can't shrink paintBounds.
         break;
