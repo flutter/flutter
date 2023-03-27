@@ -13,20 +13,21 @@ import 'toggleable.dart';
 // late SingingCharacter? _character;
 // late StateSetter setState;
 
+const Size _size = Size(18.0, 18.0);
 const double _kOuterRadius = 7.0;
 const double _kInnerRadius = 2.975;
 
-// The relative values needed to transform a color to it's equivilant focus
+// The relative values needed to transform a color to its equivilant focus
 // outline color.
 const double _kCupertinoFocusColorOpacity = 0.80;
 const double _kCupertinoFocusColorBrightness = 0.69;
 const double _kCupertinoFocusColorSaturation = 0.835;
 
-/// A macOS style radio button.
+/// A macOS-style radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
-/// button in a group is selected, the other radio buttons in the group cease to
-/// be selected. The values are of type `T`, the type parameter of the
+/// button in a group is selected, the other radio buttons in the group are
+/// deselected. The values are of type `T`, the type parameter of the
 /// [CupertinoRadio] class. Enums are commonly used for this purpose.
 ///
 /// The radio button itself does not maintain any state. Instead, selecting the
@@ -48,7 +49,7 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// This causes the buttons to rebuild with the updated `groupValue`, and
 /// therefore the selection of the second button.
 ///
-/// ** See code in examples/api/lib/cupertino/radio/radio.0.dart **
+/// ** See code in examples/api/lib/cupertino/radio/cupertino_radio.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -59,12 +60,6 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 ///  * <https://developer.apple.com/design/human-interface-guidelines/components/selection-and-input/toggles/>
 class CupertinoRadio<T> extends StatefulWidget {
   /// Creates a macOS-styled radio button.
-  ///
-  /// The radio button itself does not maintain any state. Instead, when the
-  /// radio button is selected, the widget calls the [onChanged] callback. Most
-  /// widgets that use a radio button will listen for the [onChanged] callback
-  /// and rebuild the radio button with a new [groupValue] to update the visual
-  /// appearance of the radio button.
   ///
   /// The following arguments are required:
   ///
@@ -86,6 +81,9 @@ class CupertinoRadio<T> extends StatefulWidget {
   });
 
   /// The value represented by this radio button.
+  ///
+  /// If this equals the [groupValue], then this radio button will appear
+  /// selected.
   final T value;
 
   /// The currently selected value for a group of radio buttons.
@@ -94,11 +92,11 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// [groupValue].
   final T? groupValue;
 
-  /// Called when the user selects this radio button.
+  /// Called when the user selects this [CupertinoRadio] button.
   ///
-  /// The radio button passes [value] as a parameter to this callback. The radio
-  /// button does not actually change state until the parent widget rebuilds the
-  /// radio button with the new [groupValue].
+  /// The radio button passes [value] as a parameter to this callback. It does
+  /// not actually change state until the parent widget rebuilds the radio
+  /// button with a new [groupValue].
   ///
   /// If null, the radio button will be displayed as disabled.
   ///
@@ -143,7 +141,7 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// This example shows how to enable deselecting a radio button by setting the
   /// [toggleable] attribute.
   ///
-  /// ** See code in examples/api/lib/cupertino/radio/radio.toggleable.0.dart **
+  /// ** See code in examples/api/lib/cupertino/radio/cupertino_radio.toggleable.0.dart **
   /// {@end-tool}
   final bool toggleable;
 
@@ -162,7 +160,7 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// Defaults to [CupertinoColors.white].
   final Color? fillColor;
 
-  /// The color for the radio's border shadow when it has the input focus.
+  /// The color for the radio's border when it has the input focus.
   ///
   /// If null, then a paler form of the [activeColor] will be used.
   final Color? focusColor;
@@ -217,8 +215,6 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    const Size size = Size(18.0, 18.0);
-
     final Color effectiveActiveColor = widget.activeColor
       ?? CupertinoColors.activeBlue;
     final Color effectiveInactiveColor = widget.inactiveColor
@@ -243,7 +239,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         onFocusChange: onFocusChange,
-        size: size,
+        size: _size,
         painter: _painter
           ..focusColor = effectiveFocusOverlayColor
           ..downPosition = downPosition

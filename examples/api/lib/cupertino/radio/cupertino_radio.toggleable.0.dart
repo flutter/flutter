@@ -2,27 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoRadio.toggleable].
-
 import 'package:flutter/cupertino.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [CupertinoRadio.toggleable].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const CupertinoRadioApp());
 
-  static const String _title = 'Flutter Code Sample';
+class CupertinoRadioApp extends StatelessWidget {
+  const CupertinoRadioApp({super.key});
+
+  static const String _title = 'CuptertinoRadio Toggleable Example';
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
       home: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           middle: Text(_title),
         ),
         child: SafeArea(
-          child: MyStatefulWidget(),
+          child: CupertinoRadioExample(),
         ),
       ),
     );
@@ -31,14 +30,14 @@ class MyApp extends StatelessWidget {
 
 enum SingingCharacter { mulligan, hamilton }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class CupertinoRadioExample extends StatefulWidget {
+  const CupertinoRadioExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<CupertinoRadioExample> createState() => _CupertinoRadioExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
   SingingCharacter? _character = SingingCharacter.mulligan;
 
   @override
