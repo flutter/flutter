@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
@@ -176,12 +174,11 @@ class FlutterTesterTestDevice extends TestDevice {
         }
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
-        final Future<FlutterVmService> localVmService = connectToVmService(
+        final FlutterVmService vmService = await connectToVmServiceImpl(
           forwardingUri!,
           compileExpression: compileExpression,
           logger: logger,
         );
-        final vmService = await localVmService;
         logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
         if (debuggingOptions.serveObservatory) {
           try {
@@ -257,6 +254,20 @@ class FlutterTesterTestDevice extends TestDevice {
       enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
       ipv6: host!.type == InternetAddressType.IPv6,
       uriConverter: uriConverter,
+    );
+  }
+
+  @visibleForTesting
+  @protected
+  Future<FlutterVmService> connectToVmServiceImpl(
+    Uri httpUri, {
+    CompileExpression? compileExpression,
+    required Logger logger,
+  }) async {
+    return await connectToVmService(
+      httpUri,
+      compileExpression: compileExpression,
+      logger: logger,
     );
   }
 
