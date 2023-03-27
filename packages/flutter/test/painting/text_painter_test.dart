@@ -75,7 +75,7 @@ void checkCaretOffsetsLtr(String text) {
 /// element should be a valid character range in the concatenated string.
 ///
 /// Consider using [checkCaretOffsetsLtr] instead of this function.  If that
-/// doesn't pass, you may have an instance of https://github.com/flutter/flutter/issues/122478 .
+/// doesn't pass, you may have an instance of <https://github.com/flutter/flutter/issues/122478>.
 void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
   final StringBuffer buffer = StringBuffer();
   final List<int> boundaries = <int>[];

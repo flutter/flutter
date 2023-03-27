@@ -1256,7 +1256,7 @@ class TextPainter {
 
   /// Returns a list of rects that bound the given selection.
   ///
-  /// The [selection] must be a valid range (with [TextSelection.isValid] true.)
+  /// The [selection] must be a valid range (with [TextSelection.isValid] true).
   ///
   /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
   /// the shape of the [TextBox]s. These properties default to
