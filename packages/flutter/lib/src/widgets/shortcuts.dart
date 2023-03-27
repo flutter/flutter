@@ -868,7 +868,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 /// This widget establishes a [ShortcutManager] to be used by its descendants
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
-/// 
+///
 /// This is similar to but more powerful than the [CallbackShortcuts] widget.
 /// Unlike [CallbackShortcuts], this widget separates key bindings and their
 /// implementations. This separation allows [Shortcuts] to have key bindings
