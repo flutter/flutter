@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -2279,34 +2277,31 @@ void main() {
                 child: Align(
                   alignment: Alignment.topLeft,
                   child: MenuAnchor(
-                    menuChildren: const [
+                    menuChildren: const <Widget> [
                       SubmenuButton(
-                        alignmentOffset: const Offset(10, 0),
-                        menuChildren: [
+                        alignmentOffset: Offset(10, 0),
+                        menuChildren: <Widget> [
                           SubmenuButton(
-                            menuChildren: [
+                            menuChildren: <Widget> [
                               SubmenuButton(
-                                alignmentOffset: const Offset(10, 0),
-
-                                menuChildren: [
+                                alignmentOffset: Offset(10, 0),
+                                menuChildren: <Widget> [
                                   SubmenuButton(
-                                    menuChildren: [
-
+                                    menuChildren: <Widget> [
                                     ],
-                                    child: Text("SubMenuButton4"),
+                                    child: Text('SubMenuButton4'),
                                   ),
-
                                 ],
-                                child: Text("SubMenuButton3"),
+                                child: Text('SubMenuButton3'),
                               ),
                             ],
-                            child: Text("SubMenuButton2"),
+                            child: Text('SubMenuButton2'),
                           ),
                         ],
-                        child: Text("SubMenuButton1"),
+                        child: Text('SubMenuButton1'),
                       ),
                     ],
-                    builder: (context, controller, child) {
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
                       return FilledButton(
                         onPressed: () {
                           if (controller.isOpen) {
@@ -2315,7 +2310,7 @@ void main() {
                             controller.open();
                           }
                         },
-                        child: Text("Tap me"),
+                        child: const Text('Tap me'),
                       );
                     },
                   ),
@@ -2359,34 +2354,31 @@ void main() {
                 child: Align(
                   alignment: Alignment.topRight,
                   child: MenuAnchor(
-                    menuChildren: const [
+                    menuChildren: const <Widget> [
                       SubmenuButton(
-                        alignmentOffset: const Offset(10, 0),
-                        menuChildren: [
+                        alignmentOffset: Offset(10, 0),
+                        menuChildren: <Widget> [
                           SubmenuButton(
-                            menuChildren: [
+                            menuChildren: <Widget> [
                               SubmenuButton(
-                                alignmentOffset: const Offset(10, 0),
-
-                                menuChildren: [
+                                alignmentOffset: Offset(10, 0),
+                                menuChildren: <Widget> [
                                   SubmenuButton(
-                                    menuChildren: [
-
+                                    menuChildren: <Widget> [
                                     ],
-                                    child: Text("SubMenuButton4"),
+                                    child: Text('SubMenuButton4'),
                                   ),
-
                                 ],
-                                child: Text("SubMenuButton3"),
+                                child: Text('SubMenuButton3'),
                               ),
                             ],
-                            child: Text("SubMenuButton2"),
+                            child: Text('SubMenuButton2'),
                           ),
                         ],
-                        child: Text("SubMenuButton1"),
+                        child: Text('SubMenuButton1'),
                       ),
                     ],
-                    builder: (context, controller, child) {
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
                       return FilledButton(
                         onPressed: () {
                           if (controller.isOpen) {
@@ -2395,7 +2387,7 @@ void main() {
                             controller.open();
                           }
                         },
-                        child: Text("Tap me"),
+                        child: const Text('Tap me'),
                       );
                     },
                   ),
