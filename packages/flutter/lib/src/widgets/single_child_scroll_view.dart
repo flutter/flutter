@@ -611,22 +611,18 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
         mainAxisExtent = size.height;
         leadingScrollOffset = contentSize.height - bounds.bottom;
         targetMainAxisExtent = bounds.height;
-        break;
       case AxisDirection.right:
         mainAxisExtent = size.width;
         leadingScrollOffset = bounds.left;
         targetMainAxisExtent = bounds.width;
-        break;
       case AxisDirection.down:
         mainAxisExtent = size.height;
         leadingScrollOffset = bounds.top;
         targetMainAxisExtent = bounds.height;
-        break;
       case AxisDirection.left:
         mainAxisExtent = size.width;
         leadingScrollOffset = contentSize.width - bounds.right;
         targetMainAxisExtent = bounds.width;
-        break;
     }
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;

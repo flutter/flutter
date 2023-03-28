@@ -902,10 +902,8 @@ void main() {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(find.byType(CupertinoScrollbar), findsNothing);
-        break;
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoScrollbar), findsOneWidget);
-        break;
       case null:
         break;
     }
@@ -962,10 +960,8 @@ void main() {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(find.byType(CupertinoScrollbar), findsNothing);
-        break;
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoScrollbar), findsOneWidget);
-        break;
       case null:
         break;
     }

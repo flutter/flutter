@@ -463,10 +463,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   void _handleScroll() {
-    // If an ancestor scrolls, and we're a top level or root anchor, then close
-    // the menus. Don't just close it on *any* scroll, since we want to be able
-    // to scroll menus themselves if they're too big for the view.
-    if (_isTopLevel || _isRoot) {
+    // If an ancestor scrolls, and we're a root anchor, then close the menus.
+    // Don't just close it on *any* scroll, since we want to be able to scroll
+    // menus themselves if they're too big for the view.
+    if (_isRoot) {
       _root._close();
     }
   }
@@ -1262,13 +1262,10 @@ class CheckboxMenuButton extends StatelessWidget {
         switch (value) {
           case false:
             onChanged!.call(true);
-            break;
           case true:
             onChanged!.call(tristate ? null : false);
-            break;
           case null:
             onChanged!.call(false);
-            break;
         }
       },
       onHover: onHover,
@@ -1805,15 +1802,11 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         switch (Directionality.of(context)) {
           case TextDirection.rtl:
             menuPaddingOffset += Offset(menuPadding.right, 0);
-            break;
           case TextDirection.ltr:
             menuPaddingOffset += Offset(-menuPadding.left, 0);
-            break;
         }
-        break;
       case Axis.vertical:
         menuPaddingOffset += Offset(0, -menuPadding.top);
-        break;
     }
 
     return MenuAnchor(
@@ -2021,14 +2014,12 @@ class _LocalizedShortcutLabeler {
       case TargetPlatform.macOS:
         // Use "⌃ ⇧ A" style on macOS and iOS.
         keySeparator = ' ';
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         // Use "Ctrl+Shift+A" style.
         keySeparator = '+';
-        break;
     }
     if (serialized.trigger != null) {
       final List<String> modifiers = <String>[];
@@ -2316,7 +2307,6 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
             if (_moveToParent(anchor)) {
               return;
             }
-            break;
           case Axis.vertical:
             if (firstItemIsFocused) {
               if (_moveToParent(anchor)) {
@@ -2326,23 +2316,18 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
             if (_moveToPrevious(anchor)) {
               return;
             }
-            break;
         }
-        break;
       case TraversalDirection.down:
         switch (orientation) {
           case Axis.horizontal:
             if (_moveToSubmenu(anchor)) {
               return;
             }
-            break;
           case Axis.vertical:
             if (_moveToNext(anchor)) {
               return;
             }
-            break;
         }
-        break;
       case TraversalDirection.left:
         switch (orientation) {
           case Axis.horizontal:
@@ -2351,14 +2336,11 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                 if (_moveToNext(anchor)) {
                   return;
                 }
-                break;
               case TextDirection.ltr:
                 if (_moveToPrevious(anchor)) {
                   return;
                 }
-                break;
             }
-            break;
           case Axis.vertical:
             switch (Directionality.of(context)) {
               case TextDirection.rtl:
@@ -2371,14 +2353,12 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                     return;
                   }
                 }
-                break;
               case TextDirection.ltr:
                 switch (anchor._parent!._orientation) {
                   case Axis.horizontal:
                     if (_moveToPreviousTopLevel(anchor)) {
                       return;
                     }
-                    break;
                   case Axis.vertical:
                     if (buttonIsFocused) {
                       if (_moveToPreviousTopLevel(anchor)) {
@@ -2389,13 +2369,9 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                         return;
                       }
                     }
-                    break;
                 }
-                break;
             }
-            break;
         }
-        break;
       case TraversalDirection.right:
         switch (orientation) {
           case Axis.horizontal:
@@ -2404,14 +2380,11 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                 if (_moveToPrevious(anchor)) {
                   return;
                 }
-                break;
               case TextDirection.ltr:
                 if (_moveToNext(anchor)) {
                   return;
                 }
-                break;
             }
-            break;
           case Axis.vertical:
             switch (Directionality.of(context)) {
               case TextDirection.rtl:
@@ -2420,14 +2393,11 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                     if (_moveToPreviousTopLevel(anchor)) {
                       return;
                     }
-                    break;
                   case Axis.vertical:
                     if (_moveToParent(anchor)) {
                       return;
                     }
-                    break;
                 }
-                break;
               case TextDirection.ltr:
                 if (buttonIsFocused) {
                   if (_moveToSubmenu(anchor)) {
@@ -2438,11 +2408,8 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                     return;
                   }
                 }
-                break;
             }
-            break;
         }
-        break;
     }
     super.invoke(intent);
   }
@@ -3113,10 +3080,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         switch (textDirection) {
           case TextDirection.rtl:
             directionalOffset = Offset(-alignmentOffset.dx, alignmentOffset.dy);
-            break;
           case TextDirection.ltr:
             directionalOffset = alignmentOffset;
-            break;
         }
       } else {
         directionalOffset = alignmentOffset;
@@ -3127,7 +3092,6 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           x -= childSize.width;
-          break;
         case TextDirection.ltr:
           break;
       }
@@ -3158,7 +3122,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.left;
         } else {
-          final double newX = anchorRect.right;
+          final double newX = anchorRect.right + alignmentOffset.dx;
           if (!offRightSide(newX)) {
             x = newX;
           } else {
@@ -3169,7 +3133,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.right - childSize.width;
         } else {
-          final double newX = anchorRect.left - childSize.width;
+          final double newX = anchorRect.left - childSize.width - alignmentOffset.dx;
           if (!offLeftSide(newX)) {
             x = newX;
           } else {
@@ -3274,11 +3238,9 @@ class _MenuPanelState extends State<_MenuPanel> {
       case Axis.horizontal:
         themeStyle = MenuBarTheme.of(context).style;
         defaultStyle = _MenuBarDefaultsM3(context);
-        break;
       case Axis.vertical:
         themeStyle = MenuTheme.of(context).style;
         defaultStyle = _MenuDefaultsM3(context);
-        break;
     }
     final MenuStyle? widgetStyle = widget.menuStyle;
 
@@ -3422,11 +3384,9 @@ class _Submenu extends StatelessWidget {
       case Axis.horizontal:
         themeStyle = MenuBarTheme.of(context).style;
         defaultStyle = _MenuBarDefaultsM3(context);
-        break;
       case Axis.vertical:
         themeStyle = MenuTheme.of(context).style;
         defaultStyle = _MenuDefaultsM3(context);
-        break;
     }
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
       return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
@@ -3585,7 +3545,7 @@ bool _platformSupportsAccelerators() {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
@@ -3756,7 +3716,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle {
-    return MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
+    return MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.bodyLarge);
   }
 
   @override

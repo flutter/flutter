@@ -22,8 +22,6 @@ SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
 SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
-SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
-
 SET dart=%dart_sdk_path%\bin\dart.exe
 
 REM Ensure that bin/cache exists.
@@ -154,7 +152,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade... 1>&2
-        "%dart%" --no-analytics pub upgrade
+        "%dart%" pub upgrade --suppress-analytics
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left) 1>&2
         timeout /t 5 /nobreak 2>NUL

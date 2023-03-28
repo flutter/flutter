@@ -182,17 +182,44 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
+  TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: PlatformDispatcher.instance,
+  ) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
 
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// This property has been deprecated to prepare for Flutter's upcoming
+  /// support for multiple views and multiple windows.
+  ///
+  /// This represents a combination of a [TestPlatformDispatcher] and a singular
+  /// [TestFlutterView]. Platform-specific test values can be set through
+  /// [WidgetTester.platformDispatcher] instead. When testing individual widgets
+  /// or applications using [WidgetTester.pumpWidget], view-specific test values
+  /// can be set through [WidgetTester.view]. If multiple views are defined, the
+  /// appropriate view can be found using [WidgetTester.viewOf] if a sub-view
+  /// is needed.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetTester.platformDispatcher] for changing platform-specific values
+  ///   for testing.
+  /// * [WidgetTester.view] and [WidgetTester.viewOf] for changing view-specific
+  ///   values for testing.
+  /// * [BindingBase.window] for guidance dealing with this property outside of
+  ///   a testing context.
+  @Deprecated(
+    'Use WidgetTester.platformDispatcher or WidgetTester.view instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.9.0-0.1.pre.'
+  )
   @override
-  TestWindow get window => _window;
-  final TestWindow _window;
+  late final TestWindow window;
 
   @override
-  TestPlatformDispatcher get platformDispatcher => _window.platformDispatcher;
+  final TestPlatformDispatcher platformDispatcher;
 
   @override
   TestRestorationManager get restorationManager {
@@ -346,6 +373,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
+    // This is intialized here because it's needed for the `super.initInstances`
+    // call. It can't be handled as a ctor initializer because it's dependent
+    // on `platformDispatcher`. It can't be handled in the ctor itself because
+    // the base class ctor is called first and calls `initInstances`.
+    window = TestWindow.fromPlatformDispatcher(platformDispatcher: platformDispatcher);
+
     super.initInstances();
     _instance = this;
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
@@ -360,6 +393,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.
+  }
+
+  @override
+  bool debugCheckZone(String entryPoint) {
+    // We skip all the zone checks in tests because the test framework makes heavy use
+    // of zones and so the zones never quite match the way the framework expects.
+    return true;
   }
 
   /// Whether there is currently a test executing.
@@ -478,8 +518,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -807,9 +848,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     };
     FlutterError.demangleStackTrace = (StackTrace stack) {
       // package:stack_trace uses ZoneSpecification.errorCallback to add useful
-      // information to stack traces, in this case the Trace and Chain classes
-      // can be present. Because these StackTrace implementations do not follow
-      // the format the framework expects, we covert them to a vm trace here.
+      // information to stack traces, meaning Trace and Chain classes can be
+      // present. Because these StackTrace implementations do not follow the
+      // format the framework expects, we convert them to a vm trace here.
       if (stack is stack_trace.Trace) {
         return stack.vmTrace;
       }
@@ -867,7 +908,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // directly called again.
       DiagnosticsNode treeDump;
       try {
-        treeDump = renderViewElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
+        treeDump = rootElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
         // We try to stringify the tree dump here (though we immediately discard the result) because
         // we want to make sure that if it can't be serialised, we replace it with a message that
         // says the tree could not be serialised. Otherwise, the real exception might get obscured
@@ -1331,7 +1372,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(inTest);
     try {
       debugBuildingDirtyElements = true;
-      buildOwner!.buildScope(renderViewElement!);
+      buildOwner!.buildScope(rootElement!);
       if (_phase != EnginePhase.build) {
         pipelineOwner.flushLayout();
         if (_phase != EnginePhase.layout) {
@@ -1723,7 +1764,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
-      window: window,
+      window: platformDispatcher.implicitView!,
     );
     renderView.prepareInitialFrame();
   }
@@ -1773,7 +1814,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           _handleViewNeedsPaint();
         }
         super.handlePointerEvent(event);
-        break;
       case TestBindingEventSource.device:
         if (shouldPropagateDevicePointerEvents) {
           super.handlePointerEvent(event);
@@ -1788,7 +1828,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             () => super.handlePointerEvent(localEvent)
           );
         }
-        break;
     }
   }
 
@@ -1797,7 +1836,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
         super.dispatchEvent(event, hitTestResult);
-        break;
       case TestBindingEventSource.device:
         assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         if (shouldPropagateDevicePointerEvents) {
@@ -1808,7 +1846,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         if (hitTestResult != null) {
           deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
         }
-        break;
     }
   }
 
@@ -1912,9 +1949,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return TestViewConfiguration(
+    return TestViewConfiguration.fromView(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      window: window,
+      view: platformDispatcher.implicitView!,
     );
   }
 
@@ -1938,20 +1975,31 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
 /// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
-  /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
+  /// Deprecated. Will be removed in a future version of Flutter.
   ///
-  /// If a [window] instance is not provided it defaults to [ui.window].
+  /// This property has been deprecated to prepare for Flutter's upcoming
+  /// support for multiple views and multiple windows.
+  ///
+  /// Use [TestViewConfiguration.fromView] instead.
+  @Deprecated(
+    'Use TestViewConfiguration.fromView instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
   factory TestViewConfiguration({
     Size size = _kDefaultTestViewportSize,
     ui.FlutterView? window,
   }) {
-    return TestViewConfiguration._(size, window ?? ui.window);
+    return TestViewConfiguration.fromView(size: size, view: window ?? ui.window);
   }
 
-  TestViewConfiguration._(Size size, ui.FlutterView window)
-    : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
-      _hitTestMatrix = _getMatrix(size, 1.0, window),
-      super(size: size, devicePixelRatio: window.devicePixelRatio);
+  /// Creates a [TestViewConfiguration] with the given size and view.
+  ///
+  /// The [size] defaults to 800x600.
+  TestViewConfiguration.fromView({required ui.FlutterView view, super.size = _kDefaultTestViewportSize})
+      : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
+        _hitTestMatrix = _getMatrix(size, 1.0, view),
+        super(devicePixelRatio: view.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;

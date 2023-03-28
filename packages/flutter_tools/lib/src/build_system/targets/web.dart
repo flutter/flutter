@@ -211,6 +211,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot, platform: TargetPlatform.web_javascript),
       '--platform-binaries=$platformBinariesPath',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
+      '--invoker=flutter_tool',
       if (nativeNullAssertions)
         '--native-null-assertions',
       if (buildMode == BuildMode.profile)
@@ -294,6 +295,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final Artifacts artifacts = globals.artifacts!;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
+    final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.path;
 
@@ -318,10 +320,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
       dartSdkRoot,
       '--libraries-spec',
       artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path,
+      '--depfile=${depFile.path}',
 
       environment.buildDir.childFile('main.dart').path, // dartfile
       outputWasmFile.path,
     ];
+    globals.printTrace('compiling dart code to wasm with command "${compilationArgs.join(' ')}"');
     final ProcessResult compileResult = await globals.processManager.run(compilationArgs);
     if (compileResult.exitCode != 0) {
       throw Exception(_collectOutput(compileResult));
@@ -333,6 +337,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
 
   @override
   String get name => 'dart2wasm';
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2wasm.d',
+  ];
 
   @override
   List<Source> get outputs => const <Source>[

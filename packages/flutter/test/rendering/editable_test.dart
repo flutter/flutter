@@ -77,7 +77,6 @@ void main() {
             selection: const TextSelection(baseOffset: 0, extentOffset: 0),
             clipBehavior: clip!,
           );
-          break;
         case null:
           editable = RenderEditable(
             text: TextSpan(text: longString),
@@ -88,7 +87,6 @@ void main() {
             textSelectionDelegate: _FakeEditableTextState(),
             selection: const TextSelection(baseOffset: 0, extentOffset: 0),
           );
-          break;
       }
       layout(editable, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       context.paintChild(editable, Offset.zero);
@@ -192,7 +190,7 @@ void main() {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
         text: '12345',
       ),
       startHandleLayerLink: LayerLink(),
@@ -227,7 +225,6 @@ void main() {
         ' ╘═╦══ text ═══\n'
         '   ║ TextSpan:\n'
         '   ║   inherit: true\n'
-        '   ║   family: Ahem\n'
         '   ║   size: 10.0\n'
         '   ║   height: 1.0x\n'
         '   ║   "12345"\n'
@@ -243,7 +240,7 @@ void main() {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
         text: 'A',
       ),
       startHandleLayerLink: LayerLink(),
@@ -278,9 +275,7 @@ void main() {
       textSelectionDelegate: delegate,
       text: const TextSpan(
         text: 'test',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -384,8 +379,8 @@ void main() {
 
     editable.text = const TextSpan(
       children: <TextSpan>[
-        TextSpan(text: 'abc', style: TextStyle(fontSize: 12, fontFamily: 'Ahem')),
-        TextSpan(text: 'def', style: TextStyle(fontSize: 10, fontFamily: 'Ahem')),
+        TextSpan(text: 'abc', style: TextStyle(fontSize: 12)),
+        TextSpan(text: 'def', style: TextStyle(fontSize: 10)),
       ],
     );
     expect(editable.plainText, 'abcdef');
@@ -407,9 +402,7 @@ void main() {
       textSelectionDelegate: delegate,
       text: const TextSpan(
         text: '中文测试文本是否正确',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(fontSize: 10.0, fontFamily: 'FlutterTest'),
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -483,7 +476,7 @@ void main() {
       text: const TextSpan(
         text: 'test',
         style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+          height: 1.0, fontSize: 10.0,
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -523,9 +516,7 @@ void main() {
       textSelectionDelegate: delegate,
       text: const TextSpan(
         text: 'test',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -579,9 +570,7 @@ void main() {
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
         text: text,
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       selection: const TextSelection.collapsed(
         offset: 4,
@@ -663,9 +652,7 @@ void main() {
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
         text: text,
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       selection: const TextSelection.collapsed(
         offset: 4,
@@ -702,9 +689,7 @@ void main() {
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
         text: text,
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       selection: const TextSelection.collapsed(
         offset: 4,
@@ -741,9 +726,7 @@ void main() {
       endHandleLayerLink: LayerLink(),
       text: const TextSpan(
         text: text,
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       selection: const TextSelection.collapsed(
         offset: 4,
@@ -775,9 +758,7 @@ void main() {
       textSelectionDelegate: delegate,
       text: const TextSpan(
         text: text,
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -797,7 +778,7 @@ void main() {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
         text: 'ABCDEFG',
       ),
       startHandleLayerLink: LayerLink(),
@@ -836,7 +817,7 @@ void main() {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
         text: '12345',
       ),
       textDirection: TextDirection.ltr,
@@ -964,8 +945,8 @@ void main() {
     });
 
     test('more than 1 run on the same line', () {
-      const TextStyle tinyText = TextStyle(fontSize: 1, fontFamily: 'Ahem');
-      const TextStyle normalText = TextStyle(fontSize: 10, fontFamily: 'Ahem');
+      const TextStyle tinyText = TextStyle(fontSize: 1);
+      const TextStyle normalText = TextStyle(fontSize: 10);
       editable.text = TextSpan(
         children: <TextSpan>[
           const TextSpan(text: 'A', style: tinyText),
@@ -996,7 +977,6 @@ void main() {
         style: TextStyle(
           height: 1.0,
           fontSize: 10.0,
-          fontFamily: 'Ahem',
         ),
       ),
       startHandleLayerLink: LayerLink(),
@@ -1198,7 +1178,7 @@ void main() {
         final TextSelectionDelegate delegate = _FakeEditableTextState();
         final RenderEditable editable = RenderEditable(
           text: const TextSpan(
-            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            style: TextStyle(height: 1.0, fontSize: 10.0),
             children: <InlineSpan>[
               TextSpan(text: 'A'),
               TextSpan(text: 'B'),
@@ -1240,7 +1220,7 @@ void main() {
         final TextSelectionDelegate delegate = _FakeEditableTextState();
         final RenderEditable editable = RenderEditable(
           text: const TextSpan(
-            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            style: TextStyle(height: 1.0, fontSize: 10.0),
             children: <InlineSpan>[
               TextSpan(text: 'A'),
               TextSpan(text: 'B\n'),
@@ -1291,7 +1271,7 @@ void main() {
         final TextSelectionDelegate delegate = _FakeEditableTextState();
         final RenderEditable editable = RenderEditable(
           text: const TextSpan(
-            style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+            style: TextStyle(height: 1.0, fontSize: 10.0),
             children: <InlineSpan>[
               TextSpan(text: 'A'),
               TextSpan(text: 'B'),
@@ -1345,9 +1325,7 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: TextSpan(
-          style: const TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
+          style: const TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             const TextSpan(text: 'test'),
             WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
@@ -1387,9 +1365,7 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: TextSpan(
-          style: const TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
+          style: const TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             const TextSpan(text: 'test'),
             WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
@@ -1431,9 +1407,7 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
+          style: TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
             WidgetSpan(child: Text('b')),
@@ -1481,9 +1455,7 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
+          style: TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
             WidgetSpan(child: Text('b')),
@@ -1538,9 +1510,7 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
+          style: TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
             WidgetSpan(child: Text('a')),
@@ -1596,9 +1566,7 @@ void main() {
         startHandleLayerLink: LayerLink(),
         endHandleLayerLink: LayerLink(),
         text: const TextSpan(
-          style: TextStyle(
-            height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-          ),
+          style: TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
             WidgetSpan(child: Text('a')),
@@ -1631,7 +1599,7 @@ void main() {
       ];
       final RenderEditable editable = RenderEditable(
         text: const TextSpan(
-          style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+          style: TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             TextSpan(text: 'test'),
             WidgetSpan(child: Text('a')),
@@ -1705,7 +1673,7 @@ void main() {
     const BoxConstraints constraints = BoxConstraints(minWidth: 100, maxWidth: 500);
     final RenderEditable editable = RenderEditable(
       text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
         text: 'A',
       ),
       startHandleLayerLink: LayerLink(),
@@ -1743,9 +1711,7 @@ void main() {
       textSelectionDelegate: delegate,
       text: const TextSpan(
         text: 'test',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       maxLines: 3,
       startHandleLayerLink: LayerLink(),

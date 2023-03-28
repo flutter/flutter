@@ -2875,7 +2875,7 @@ class _BoxEdge implements Comparable<_BoxEdge> {
 /// nodes that share the same [SemanticsNode] parent.
 ///
 /// The [nodes] are sorted among each other separately from other nodes.
-class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
+class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
   _SemanticsSortGroup({
     required this.startOffset,
     required this.textDirection,
@@ -4741,10 +4741,8 @@ AttributedString _concatAttributedString({
     switch (otherTextDirection) {
       case TextDirection.rtl:
         otherAttributedString = AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF);
-        break;
       case TextDirection.ltr:
         otherAttributedString = AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF);
-        break;
     }
   }
   if (thisAttributedString.string.isEmpty) {
