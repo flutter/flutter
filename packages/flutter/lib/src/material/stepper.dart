@@ -379,11 +379,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Color _connectorColor(bool isActive) {
-    final ColorScheme colorSchema = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Set<MaterialState> states = <MaterialState>{
       if (isActive) MaterialState.selected else MaterialState.disabled,
     };
-    return widget.connectorColor?.resolve(states) ?? (isActive ?colorSchema.primary:Colors.grey.shade400);
+    return widget.connectorColor?.resolve(states) ?? (isActive ?colorScheme.primary:Colors.grey.shade400);
   }
 
   Widget _buildLine(bool visible, bool isActive) {
