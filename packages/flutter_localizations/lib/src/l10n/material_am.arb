@@ -66,7 +66,7 @@
   "dateRangeEndDateSemanticLabel": "የማብቂያ ቀን $fullDate",
   "invalidDateFormatLabel": "ልክ ያልሆነ ቅርጸት።",
   "invalidDateRangeLabel": "ልክ ያልኾነ ክልል።",
-  "dateOutOfRangeLabel": "ከክልል ውጪ።",
+  "dateOutOfRangeLabel": "ከክልል ውጭ።",
   "saveButtonLabel": "አስቀምጥ",
   "datePickerHelpText": "ቀን ይምረጡ",
   "dateRangePickerHelpText": "ክልል ይምረጡ",
@@ -78,7 +78,7 @@
   "timePickerMinuteLabel": "ደቂቃ",
   "invalidTimeLabel": "የሚሠራ ሰዓት ያስገቡ",
   "dialModeButtonLabel": "ወደ መደወያ መራጭ ሁነታ ቀይር",
-  "inputTimeModeButtonLabel": "ወደ ጽሑፍ ግቤት ሁነታ ቀይር",
+  "inputTimeModeButtonLabel": "ወደ ጽሁፍ ግቤት ሁነታ ቀይር",
   "licensesPackageDetailTextZero": "No licenses",
   "licensesPackageDetailTextOne": "1 ፈቃድ",
   "licensesPackageDetailTextOther": "$licenseCount ፈቃዶች",
@@ -129,9 +129,9 @@
   "keyboardKeyMetaMacOs": "ትዕዛዝ",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "የምናሌ አሞሌ ምናሌ",
-  "currentDateLabel": "Date of today",
-  "scrimLabel": "Scrim",
-  "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "Close $modalRouteName",
-  "keyboardKeyShift": "Shift"
+  "currentDateLabel": "ዛሬ",
+  "scrimLabel": "ገዳቢ",
+  "bottomSheetLabel": "የግርጌ ሉህ",
+  "scrimOnTapHint": "$modalRouteContentNameን ዝጋ",
+  "keyboardKeyShift": "ቀያይር"
 }

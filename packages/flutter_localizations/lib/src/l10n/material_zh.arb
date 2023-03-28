@@ -130,9 +130,9 @@
   "keyboardKeyMetaMacOs": "⌘",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "菜单栏的菜单",
-  "currentDateLabel": "Date of today",
-  "scrimLabel": "Scrim",
-  "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "Close $modalRouteName",
+  "currentDateLabel": "今天",
+  "scrimLabel": "纱罩",
+  "bottomSheetLabel": "底部动作条",
+  "scrimOnTapHint": "关闭 $modalRouteContentName",
   "keyboardKeyShift": "Shift"
 }
