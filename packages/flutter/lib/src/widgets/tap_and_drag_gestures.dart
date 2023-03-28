@@ -841,6 +841,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
   PointerEvent? _start;
   late OffsetPair _initialPosition;
   late double _globalDistanceMoved;
+  late double _globalDistanceMovedAllAxes;
   OffsetPair? _correctedPosition;
 
   // For drag update throttle.
@@ -851,7 +852,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
 
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
 
   // Drag updates may require throttling to avoid excessive updating, such as for text layouts in text
   // fields. The frequency of invocations is controlled by the [dragUpdateThrottleFrequency].
@@ -898,6 +899,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
       super.addAllowedPointer(event);
       _primaryPointer = event.pointer;
       _globalDistanceMoved = 0.0;
+      _globalDistanceMovedAllAxes = 0.0;
       _dragState = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
       _deadlineTimer = Timer(_deadline, () => _didExceedDeadlineWithEvent(event));
@@ -1091,7 +1093,13 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
       untransformedDelta: movedLocally,
       untransformedEndPosition: event.localPosition
     ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-    if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop) || (_wonArenaForPrimaryPointer && _pastSlopTolerance)) {
+    _globalDistanceMovedAllAxes += PointerEvent.transformDeltaViaPositions(
+      transform: localToGlobalTransform,
+      untransformedDelta: event.localDelta,
+      untransformedEndPosition: event.localPosition
+    ).distance * 1.sign;
+    if (_hasSufficientGlobalDistanceToAccept(event.kind)
+        || (_wonArenaForPrimaryPointer && _globalDistanceMovedAllAxes.abs() > computePanSlop(event.kind, gestureSettings))) {
       _start = event;
       _dragState = _DragState.accepted;
       resolve(GestureDisposition.accepted);
@@ -1287,7 +1295,7 @@ class TapAndHorizontalDragGestureRecognizer extends TapAndDragGestureRecognizer 
   });
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
     return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
 
@@ -1315,7 +1323,7 @@ class TapAndPanGestureRecognizer extends TapAndDragGestureRecognizer {
   });
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
     return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
   }
 
