@@ -177,7 +177,7 @@ void main() {
     // framework, excluding any that are for the widget inspector
     // (see widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions).
-    const int serviceExtensionCount = 37;
+    const int serviceExtensionCount = 38;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
 
@@ -215,6 +215,19 @@ void main() {
 
     expect(result, <String, dynamic>{
       'data': matches('TestServiceExtensionsBinding - DEBUG MODE\n<no tree currently mounted>'),
+    });
+  });
+
+  test('Service extensions - debugDumpFocusTree', () async {
+    final Map<String, dynamic> result = await binding.testExtension(WidgetsServiceExtensions.debugDumpFocusTree.name, <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
+        r'^'
+        r'FocusManager#[0-9a-f]{5}\n'
+        r' └─rootScope: FocusScopeNode#[0-9a-f]{5}\(Root Focus Scope\)\n'
+        r'$',
+      ),
     });
   });
 
