@@ -397,6 +397,7 @@ vk::Device ContextVK::GetDevice() const {
 }
 
 std::unique_ptr<Surface> ContextVK::AcquireNextSurface() {
+  TRACE_EVENT0("impeller", __FUNCTION__);
   auto surface = swapchain_ ? swapchain_->AcquireNextDrawable() : nullptr;
   if (surface && pipeline_library_) {
     pipeline_library_->DidAcquireSurfaceFrame();
