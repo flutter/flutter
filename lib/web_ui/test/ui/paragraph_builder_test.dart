@@ -6,12 +6,14 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
+import 'utils.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  await webOnlyInitializePlatform();
+  await setUpUiTest();
 
   test('Should be able to build and layout a paragraph', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
@@ -22,14 +24,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 800.0));
     expect(paragraph.width, isNonZero);
     expect(paragraph.height, isNonZero);
-  });
-
-  test('pushStyle should not segfault after build()', () {
-    final ParagraphBuilder paragraphBuilder =
-        ParagraphBuilder(ParagraphStyle());
-    paragraphBuilder.build();
-    paragraphBuilder.pushStyle(TextStyle());
-  });
+  }, skip: isSkwasm);
 
   test('the presence of foreground style should not throw', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
@@ -39,5 +34,5 @@ Future<void> testMain() async {
     builder.addText('hi');
 
     expect(() => builder.build(), returnsNormally);
-  });
+  }, skip: isSkwasm);
 }

@@ -12,7 +12,6 @@ import 'clean.dart';
 import 'exceptions.dart';
 import 'generate_fallback_font_data.dart';
 import 'licenses.dart';
-import 'run.dart';
 import 'test_runner.dart';
 import 'utils.dart';
 
@@ -25,7 +24,6 @@ CommandRunner<bool> runner = CommandRunner<bool>(
   ..addCommand(CleanCommand())
   ..addCommand(GenerateFallbackFontDataCommand())
   ..addCommand(LicensesCommand())
-  ..addCommand(RunCommand())
   ..addCommand(TestCommand());
 
 Future<void> main(List<String> rawArgs) async {

@@ -292,31 +292,6 @@ targets:
       release_build: "true"
       config_name: linux_web_engine
 
-  - name: Linux Web Engine
-    recipe: engine/web_engine
-    properties:
-      add_recipes_cq: "true"
-      cores: "32"
-      gcs_goldens_bucket: flutter_logs
-      gclient_variables: >-
-        {"download_emsdk": true}
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:111.0"},
-          {"dependency": "firefox", "version": "version:106.0"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      no_goma: "true"
-    timeout: 60
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - lib/web_ui/**
-      - web_sdk/**
-      - tools/**
-      - ci/**
-      - flutter_frontend_server/**
-
   - name: Linux Web Framework tests
     recipe: engine/web_engine_framework
     enabled_branches:
@@ -448,28 +423,6 @@ targets:
       ios_debug: "true"
     timeout: 60
 
-  - name: Mac Web Engine
-    recipe: engine/web_engine
-    properties:
-      add_recipes_cq: "true"
-      gcs_goldens_bucket: flutter_logs
-      gclient_variables: >-
-        {"download_emsdk": true}
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
-        ]
-      no_goma: "true"
-    timeout: 60
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - lib/web_ui/**
-      - web_sdk/**
-      - tools/**
-      - ci/**
-      - flutter_frontend_server/**
-
   - name: Mac mac_ios_engine
     recipe: engine_v2/engine_v2
     timeout: 60
@@ -529,24 +482,6 @@ targets:
     properties:
       add_recipes_cq: "true"
     timeout: 75
-
-  - name: Windows Web Engine
-    recipe: engine/web_engine
-    properties:
-      gclient_variables: >-
-        {"download_emsdk": true}
-      gcs_goldens_bucket: flutter_logs
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:111.0"}
-        ]
-      no_goma: "true"
-    timeout: 60
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - lib/web_ui/**
-      - web_sdk/**
 
   - name: Mac iOS Engine Profile
     recipe: engine/engine

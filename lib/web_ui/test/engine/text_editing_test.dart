@@ -21,7 +21,7 @@ import 'package:ui/src/engine/text_editing/text_editing.dart';
 import 'package:ui/src/engine/util.dart';
 import 'package:ui/src/engine/vector_math.dart';
 
-import 'spy.dart';
+import '../common/spy.dart';
 
 /// The `keyCode` of the "Enter" key.
 const int _kReturnKeyCode = 13;

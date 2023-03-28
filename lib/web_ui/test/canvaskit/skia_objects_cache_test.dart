@@ -12,8 +12,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import '../matchers.dart';
-import '../spy.dart';
+import '../common/matchers.dart';
+import '../common/spy.dart';
 import 'common.dart';
 
 void main() {

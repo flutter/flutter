@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 
-import '../matchers.dart';
+import '../common/matchers.dart';
 import 'screenshot.dart';
 
 void main() {
