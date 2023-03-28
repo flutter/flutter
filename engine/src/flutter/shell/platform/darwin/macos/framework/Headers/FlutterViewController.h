@@ -131,7 +131,7 @@ FLUTTER_DARWIN_EXPORT
  *
  * class MainFlutterWindow: NSWindow {
  *   override func awakeFromNib() {
- *     let flutterViewController = FlutterViewController.init()
+ *     let flutterViewController = FlutterViewController()
  *
  *     // The background color of the window and `FlutterViewController`
  *     // are retained separately.
