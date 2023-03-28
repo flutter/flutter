@@ -278,7 +278,7 @@ class FlutterTesterTestDevice extends TestDevice {
       return;
     }
     await _devToolsLauncher?.ready;
-    logger.printTrace('test $id: DevTools is being served at ${devToolsServerAddress?.uri}');
+    logger.printTrace('test $id: DevTools is being served at ${devToolsServerAddress.uri}');
     
     // Notify the DDS instance that there's a DevTools instance available so it can correctly
     // redirect DevTools related requests.
