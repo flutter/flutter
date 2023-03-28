@@ -313,6 +313,7 @@ void main() {
       '   The ancestors of this widget were:\n'
       '     TextButtonTheme\n'
       '     Padding\n'
+      '     Flex\n'
       '     Row\n'
       '     Wrap\n'
       '     Padding\n'
