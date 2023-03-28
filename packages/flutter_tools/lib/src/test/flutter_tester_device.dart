@@ -272,20 +272,23 @@ class FlutterTesterTestDevice extends TestDevice {
     _devToolsLauncher = DevtoolsLauncher.instance;
     logger.printTrace('test $id: Serving DevTools...');
     final DevToolsServerAddress? devToolsServerAddress = await _devToolsLauncher?.serve();
+
+    if (devToolsServerAddress == null) {
+      logger.printTrace('test $id: Failed to start DevTools');
+      return;
+    }
     await _devToolsLauncher?.ready;
     logger.printTrace('test $id: DevTools is being served at ${devToolsServerAddress?.uri}');
+    
+    // Notify the DDS instance that there's a DevTools instance available so it can correctly
+    // redirect DevTools related requests.
+    dds?.setExternalDevToolsUri(devToolsServerAddress.uri!);
 
-    if (devToolsServerAddress != null) {
-      // Notify the DDS instance that there's a DevTools instance available so it can correctly
-      // redirect DevTools related requests.
-      dds?.setExternalDevToolsUri(devToolsServerAddress.uri!);
-
-      final Uri devToolsUri = devToolsServerAddress.uri!.replace(
-        // Use query instead of queryParameters to avoid unnecessary encoding.
-        query: 'uri=$forwardingUri',
-      );
-      logger.printStatus('The Flutter DevTools debugger and profiler is available at: $devToolsUri');
-    }
+    final Uri devToolsUri = devToolsServerAddress.uri!.replace(
+      // Use query instead of queryParameters to avoid unnecessary encoding.
+      query: 'uri=$forwardingUri',
+    );
+    logger.printStatus('The Flutter DevTools debugger and profiler is available at: $devToolsUri');
   }
 
   /// Binds an [HttpServer] serving from `host` on `port`.
