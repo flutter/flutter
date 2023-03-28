@@ -619,12 +619,10 @@ void main() {
             startsWith('A RenderConstraintsTransformBox overflowed'),
             reason: 'for clip = $clip',
           );
-          break;
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           expect(tester.takeException(), isNull, reason: 'for clip = $clip');
-          break;
       }
     }
   });

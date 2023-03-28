@@ -337,19 +337,14 @@ mixin CommandHandlerFactory {
     switch (getOffsetCommand.offsetType) {
       case OffsetType.topLeft:
         localPoint = Offset.zero;
-        break;
       case OffsetType.topRight:
         localPoint = box.size.topRight(Offset.zero);
-        break;
       case OffsetType.bottomLeft:
         localPoint = box.size.bottomLeft(Offset.zero);
-        break;
       case OffsetType.bottomRight:
         localPoint = box.size.bottomRight(Offset.zero);
-        break;
       case OffsetType.center:
         localPoint = box.size.center(Offset.zero);
-        break;
     }
     final Offset globalPoint = box.localToGlobal(localPoint);
     return GetOffsetResult(dx: globalPoint.dx, dy: globalPoint.dy);
@@ -363,10 +358,8 @@ mixin CommandHandlerFactory {
     switch (diagnosticsCommand.diagnosticsType) {
       case DiagnosticsType.renderObject:
         diagnosticsNode = element.renderObject!.toDiagnosticsNode();
-        break;
       case DiagnosticsType.widget:
         diagnosticsNode = element.toDiagnosticsNode();
-        break;
     }
     return DiagnosticsTreeResult(diagnosticsNode.toJsonMap(DiagnosticsSerializationDelegate(
       subtreeDepth: diagnosticsCommand.subtreeDepth,

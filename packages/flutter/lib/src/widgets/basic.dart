@@ -15,6 +15,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'visibility.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -252,7 +253,12 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
-/// an [AnimatedOpacity] or a [FadeTransition] instead.
+/// one of these alternative widgets instead:
+///
+///  * [AnimatedOpacity], which uses an animation internally to efficiently
+///    animate opacity.
+///  * [FadeTransition], which uses a provided animation to efficiently animate
+///    opacity.
 ///
 /// ## Transparent image
 ///
@@ -294,12 +300,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
-///  * [AnimatedOpacity], which uses an animation internally to efficiently
-///    animate opacity.
-///  * [FadeTransition], which uses a provided animation to efficiently animate
-///    opacity.
-///  * [Image], which can directly provide a partially transparent image with
-///    much less performance hit.
+///  * [SliverOpacity], the sliver version of this widget.
 class Opacity extends SingleChildRenderObjectWidget {
   /// Creates a widget that makes its child partially transparent.
   ///
@@ -600,8 +601,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// a child, they attempt to size themselves to the [size], which defaults to
 /// [Size.zero]. [size] must not be null.
 ///
-/// [isComplex] and [willChange] are hints to the compositor's raster cache
-/// and must not be null.
+/// [isComplex] and [willChange] are hints to the compositor's raster cache.
 ///
 /// {@tool snippet}
 ///
@@ -662,8 +662,8 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// The compositor contains a raster cache that holds bitmaps of layers in
   /// order to avoid the cost of repeatedly rendering those layers on each
   /// frame. If this flag is not set, then the compositor will apply its own
-  /// heuristics to decide whether the this layer is complex enough to benefit
-  /// from caching.
+  /// heuristics to decide whether the layer containing this widget is complex
+  /// enough to benefit from caching.
   ///
   /// This flag can't be set to true if both [painter] and [foregroundPainter]
   /// are null because this flag will be ignored in such case.
@@ -671,6 +671,11 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 
   /// Whether the raster cache should be told that this painting is likely
   /// to change in the next frame.
+  ///
+  /// This hint tells the compositor not to cache the layer containing this
+  /// widget because the cache will not be used in the future. If this hint is
+  /// not set, the compositor will apply its own heuristics to decide whether
+  /// the layer is likely to be reused in the future.
   ///
   /// This flag can't be set to true if both [painter] and [foregroundPainter]
   /// are null because this flag will be ignored in such case.
@@ -1920,9 +1925,10 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [EdgeInsets], the class that is used to describe the padding dimensions.
 ///  * [AnimatedPadding], which animates changes in [padding] over a given
 ///    duration.
-///  * [EdgeInsets], the class that is used to describe the padding dimensions.
+///  * [SliverPadding], the sliver equivalent of this widget.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Padding extends SingleChildRenderObjectWidget {
   /// Creates a widget that insets its child.
@@ -1976,13 +1982,6 @@ class Padding extends SingleChildRenderObjectWidget {
 /// dimension and the size factor. For example if widthFactor is 2.0 then
 /// the width of this widget will always be twice its child's width.
 ///
-/// ## How it works
-///
-/// The [alignment] property describes a point in the `child`'s coordinate system
-/// and a different point in the coordinate system of this widget. The [Align]
-/// widget positions the `child` such that both points are lined up on top of
-/// each other.
-///
 /// {@tool snippet}
 /// The [Align] widget in this example uses one of the defined constants from
 /// [Alignment], [Alignment.topRight]. This places the [FlutterLogo] in the top
@@ -2007,15 +2006,27 @@ class Padding extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## How it works
+///
+/// The [alignment] property describes a point in the `child`'s coordinate system
+/// and a different point in the coordinate system of this widget. The [Align]
+/// widget positions the `child` such that both points are lined up on top of
+/// each other.
+///
 /// {@tool snippet}
-/// The [Alignment] used in the following example defines a single point:
+/// The [Alignment] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo]/2 + width of [FlutterLogo]/2, 0.6 * height
-///   of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0).
+///     of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0) in the
+///     coordinate system of the [FlutterLogo].
+///   * (0.2 * width of [Align]/2 + width of [Align]/2, 0.6 * height
+///     of [Align]/2 + height of [Align]/2) = (72.0, 96.0) in the
+///     coordinate system of the [Align] widget (blue area).
 ///
-/// The [Alignment] class uses a coordinate system with an origin in the center
-/// of the [Container], as shown with the [Icon] above. [Align] will place the
-/// [FlutterLogo] at (36.0, 48.0) according to this coordinate system.
+/// The [Align] widget positions the [FlutterLogo] such that the two points are on
+/// top of each other. In this example, the top left of the [FlutterLogo] will
+/// be placed at (72.0, 96.0) - (36.0, 48.0) = (36.0, 48.0) from the top left of
+/// the [Align] widget.
 ///
 /// ![A blue square container with the Flutter logo positioned according to the
 /// Alignment specified above. A point is marked at the center of the container
@@ -2042,9 +2053,9 @@ class Padding extends SingleChildRenderObjectWidget {
 /// The [FractionalOffset] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo], 0.6 * height of [FlutterLogo]) = (12.0, 36.0)
-///     in the coordinate system of the blue container.
+///     in the coordinate system of the [FlutterLogo].
 ///   * (0.2 * width of [Align], 0.6 * height of [Align]) = (24.0, 72.0) in the
-///     coordinate system of the [Align] widget.
+///     coordinate system of the [Align] widget (blue area).
 ///
 /// The [Align] widget positions the [FlutterLogo] such that the two points are on
 /// top of each other. In this example, the top left of the [FlutterLogo] will
@@ -3216,6 +3227,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///  * [Visibility], which can hide a child more efficiently (albeit less
 ///    subtly).
 ///  * [TickerMode], which can be used to disable animations in a subtree.
+///  * [SliverOffstage], the sliver version of this widget.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
@@ -3267,55 +3279,71 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 
 /// A widget that attempts to size the child to a specific aspect ratio.
 ///
-/// The widget first tries the largest width permitted by the layout
-/// constraints. The height of the widget is determined by applying the
-/// given aspect ratio to the width, expressed as a ratio of width to height.
+/// The aspect ratio is expressed as a ratio of width to height. For example, a
+/// 16:9 width:height aspect ratio would have a value of 16.0/9.0.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=XcnP3_mO_Ms}
 ///
-/// For example, a 16:9 width:height aspect ratio would have a value of
-/// 16.0/9.0. If the maximum width is infinite, the initial width is determined
-/// by applying the aspect ratio to the maximum height.
+/// The [AspectRatio] widget uses a finite iterative process to compute the
+/// appropriate constraints for the child, and then lays the child out a single
+/// time with those constraints. This iterative process is efficient and does
+/// not require multiple layout passes.
+///
+/// The widget first tries the largest width permitted by the layout
+/// constraints, and determines the height of the widget by applying the given
+/// aspect ratio to the width, expressed as a ratio of width to height.
+///
+/// If the maximum width is infinite, the initial width is determined
+/// by applying the aspect ratio to the maximum height instead.
+///
+/// The widget then examines if the computed dimensions are compatible with the
+/// parent's constraints; if not, the dimensions are recomputed a second time,
+/// taking those constraints into account.
+///
+/// If the widget does not find a feasible size after consulting each
+/// constraint, the widget will eventually select a size for the child that
+/// meets the layout constraints but fails to meet the aspect ratio constraints.
 ///
 /// {@tool dartpad}
-/// This examples shows how AspectRatio sets width when its parent's width
-/// constraint is infinite. Since its parent's allowed height is a fixed value,
-/// the actual width is determined via the given AspectRatio.
+/// This examples shows how [AspectRatio] sets the width when its parent's width
+/// constraint is infinite. Since the parent's allowed height is a fixed value,
+/// the actual width is determined via the given [aspectRatio].
 ///
-/// Since the height is fixed at 100.0 in this example and the aspect ratio is
-/// set to 16 / 9, the width should then be 100.0 / 9 * 16.
+/// In this example, the height is fixed at 100.0 and the aspect ratio is set to
+/// 16 / 9, making the width 100.0 / 9 * 16.
 ///
 /// ** See code in examples/api/lib/widgets/basic/aspect_ratio.0.dart **
 /// {@end-tool}
 ///
-/// Now consider a second example, this time with an aspect ratio of 2.0 and
-/// layout constraints that require the width to be between 0.0 and 100.0 and
-/// the height to be between 0.0 and 100.0. We'll select a width of 100.0 (the
-/// biggest allowed) and a height of 50.0 (to match the aspect ratio).
-///
 /// {@tool dartpad}
-///
+/// This second example uses an aspect ratio of 2.0, and layout constraints that
+/// require the width to be between 0.0 and 100.0, and the height to be between
+/// 0.0 and 100.0. The widget selects a width of 100.0 (the biggest allowed) and
+/// a height of 50.0 (to match the aspect ratio).
 ///
 /// ** See code in examples/api/lib/widgets/basic/aspect_ratio.1.dart **
 /// {@end-tool}
 ///
-/// In that same situation, if the aspect ratio is 0.5, we'll also select a
-/// width of 100.0 (still the biggest allowed) and we'll attempt to use a height
-/// of 200.0. Unfortunately, that violates the constraints because the child can
-/// be at most 100.0 pixels tall. The widget will then take that value
-/// and apply the aspect ratio again to obtain a width of 50.0. That width is
-/// permitted by the constraints and the child receives a width of 50.0 and a
-/// height of 100.0. If the width were not permitted, the widget would
-/// continue iterating through the constraints. If the widget does not
-/// find a feasible size after consulting each constraint, the widget
-/// will eventually select a size for the child that meets the layout
-/// constraints but fails to meet the aspect ratio constraints.
-///
 /// {@tool dartpad}
-///
+/// This third example is similar to the second, but with the aspect ratio set
+/// to 0.5. The widget still selects a width of 100.0 (the biggest allowed), and
+/// attempts to use a height of 200.0. Unfortunately, that violates the
+/// constraints because the child can be at most 100.0 pixels tall. The widget
+/// will then take that value and apply the aspect ratio again to obtain a width
+/// of 50.0. That width is permitted by the constraints and the child receives a
+/// width of 50.0 and a height of 100.0. If the width were not permitted, the
+/// widget would continue iterating through the constraints.
 ///
 /// ** See code in examples/api/lib/widgets/basic/aspect_ratio.2.dart **
 /// {@end-tool}
+///
+/// ## Setting the aspect ratio in unconstrained situations
+///
+/// When using a widget such as [FittedBox], the constraints are unbounded. This
+/// results in [AspectRatio] being unable to find a suitable set of constraints
+/// to apply. In that situation, consider explicitly setting a size using
+/// [SizedBox] instead of setting the aspect ratio using [AspectRatio]. The size
+/// is then scaled appropriately by the [FittedBox].
 ///
 /// See also:
 ///
@@ -3531,6 +3559,8 @@ class Baseline extends SingleChildRenderObjectWidget {
 /// is a basic sliver that creates a bridge back to one of the usual box-based
 /// widgets.
 ///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
+///
 /// Rather than using multiple [SliverToBoxAdapter] widgets to display multiple
 /// box widgets in a [CustomScrollView], consider using [SliverList],
 /// [SliverFixedExtentList], [SliverPrototypeExtentList], or [SliverGrid],
@@ -3569,6 +3599,7 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [CustomScrollView], which displays a scrollable list of slivers.
+///  * [Padding], the box version of this widget.
 class SliverPadding extends SingleChildRenderObjectWidget {
   /// Creates a sliver that applies padding on each side of another sliver.
   ///
@@ -3937,12 +3968,80 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 ///  * [Stack], for more details about stacks.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class IndexedStack extends Stack {
+class IndexedStack extends StatelessWidget {
   /// Creates a [Stack] widget that paints a single child.
   ///
   /// The [index] argument must not be null.
   const IndexedStack({
     super.key,
+    this.alignment = AlignmentDirectional.topStart,
+    this.textDirection,
+    this.clipBehavior = Clip.hardEdge,
+    this.sizing = StackFit.loose,
+    this.index = 0,
+    this.children = const <Widget>[],
+  });
+
+  /// How to align the non-positioned and partially-positioned children in the
+  /// stack.
+  ///
+  /// Defaults to [AlignmentDirectional.topStart].
+  ///
+  /// See [Stack.alignment] for more information.
+  final AlignmentGeometry alignment;
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection? textDirection;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  /// How to size the non-positioned children in the stack.
+  ///
+  /// Defaults to [StackFit.loose].
+  ///
+  /// See [Stack.fit] for more information.
+  final StackFit sizing;
+
+  /// The index of the child to show.
+  ///
+  /// If this is null, none of the children will be shown.
+  final int? index;
+
+  /// The child widgets of the stack.
+  ///
+  /// Only the child at index [index] will be shown.
+  ///
+  /// See [Stack.children] for more information.
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
+      return Visibility.maintain(
+        visible: i == index,
+        child: children[i],
+      );
+    });
+    return _RawIndexedStack(
+      alignment: alignment,
+      textDirection: textDirection,
+      clipBehavior: clipBehavior,
+      sizing: sizing,
+      index: index,
+      children: wrappedChildren,
+    );
+  }
+}
+
+/// The render object widget that backs [IndexedStack].
+class _RawIndexedStack extends Stack {
+  /// Creates a [Stack] widget that paints a single child.
+  const _RawIndexedStack({
     super.alignment,
     super.textDirection,
     super.clipBehavior,
@@ -3959,7 +4058,7 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     return RenderIndexedStack(
       index: index,
-      fit:fit,
+      fit: fit,
       clipBehavior: clipBehavior,
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
@@ -4116,11 +4215,9 @@ class Positioned extends ParentDataWidget<StackParentData> {
       case TextDirection.rtl:
         left = end;
         right = start;
-        break;
       case TextDirection.ltr:
         left = start;
         right = end;
-        break;
     }
     return Positioned(
       key: key,
@@ -6640,6 +6737,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
 ///    events but is itself visible to hit testing.
+///  * [SliverIgnorePointer], the sliver version of this widget.
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
   ///
