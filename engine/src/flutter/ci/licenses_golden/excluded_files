@@ -2737,6 +2737,7 @@
 ../../../third_party/skia/modules/skunicode/BUILD.bazel
 ../../../third_party/skia/modules/skunicode/include/BUILD.bazel
 ../../../third_party/skia/modules/skunicode/src/BUILD.bazel
+../../../third_party/skia/modules/skunicode/tests
 ../../../third_party/skia/modules/svg/include/BUILD.bazel
 ../../../third_party/skia/modules/svg/src/BUILD.bazel
 ../../../third_party/skia/modules/svg/tests
@@ -2778,9 +2779,11 @@
 ../../../third_party/skia/src/gpu/ganesh/glsl/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/gradients/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/gradients/README.md
+../../../third_party/skia/src/gpu/ganesh/image/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/mock/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/mtl/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/ops/BUILD.bazel
+../../../third_party/skia/src/gpu/ganesh/surface/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/tessellate/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/text/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/vk/BUILD.bazel
