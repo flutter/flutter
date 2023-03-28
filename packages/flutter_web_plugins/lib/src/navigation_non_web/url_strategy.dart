@@ -7,11 +7,6 @@ import 'dart:ui' as ui;
 
 import '../navigation_common/platform_location.dart';
 
-/// Signature of an html event listener.
-///
-/// We have to redefine it because non-web platforms can't import dart:html.
-typedef EventListener = dynamic Function(Object event);
-
 /// Represents and reads route state from the browser's URL.
 ///
 /// By default, the [HashUrlStrategy] subclass is used if the app doesn't
