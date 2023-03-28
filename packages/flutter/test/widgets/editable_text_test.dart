@@ -15085,11 +15085,13 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         from: Offset.zero,
         cause: SelectionChangedCause.tap,
       );
+
       await tester.pumpAndSettle();
-      expect(state.showSpellCheckSuggestionsToolbar(), true);
+      // Toolbar will only show on non-web platforms.
+      expect(state.showSpellCheckSuggestionsToolbar(), !kIsWeb);
       await tester.pumpAndSettle();
 
-      final Matcher matcher = kIsWeb ? findsNothing : findsOneWidget;
+      const Matcher matcher = kIsWeb ? findsNothing : findsOneWidget;
       expect(find.text('test'), matcher);
       expect(find.text('sets'), matcher);
       expect(find.text('set'), matcher);
