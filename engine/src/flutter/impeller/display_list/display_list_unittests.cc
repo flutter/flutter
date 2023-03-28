@@ -679,10 +679,6 @@ TEST_P(DisplayListTest, SaveLayerWithBlendFiltersAndAlphaDrawCorrectly) {
 }
 
 TEST_P(DisplayListTest, CanDrawBackdropFilter) {
-  if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP_("Temporarily disabled.");
-  }
-
   auto texture = CreateTextureForFixture("embarcadero.jpg");
 
   auto callback = [&]() {
