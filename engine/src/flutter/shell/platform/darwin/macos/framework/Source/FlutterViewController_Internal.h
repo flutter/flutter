@@ -52,7 +52,7 @@
  * Notify from the framework that the semantics for this view needs to be
  * updated.
  */
-- (void)updateSemantics:(nonnull const FlutterSemanticsUpdate*)update;
+- (void)updateSemantics:(nonnull const FlutterSemanticsUpdate2*)update;
 
 @end
 
