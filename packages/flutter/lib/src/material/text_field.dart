@@ -132,7 +132,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ## Obscured Input
 ///
 /// {@tool dartpad}
-/// This example shows how to create a [TextField] that will obscured input. The
+/// This example shows how to create a [TextField] that will obscure input. The
 /// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
 /// and adds a label.
 ///
