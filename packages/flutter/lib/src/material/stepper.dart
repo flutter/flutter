@@ -380,12 +380,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Color _connectorColor(bool isActive) {
     final ColorScheme colorSchema = Theme.of(context).colorScheme;
-    if(widget.connectorColor == null) {
-      return isActive ? colorSchema.primary : Colors.grey.shade400;
-    }
-    return widget.connectorColor!.resolve(<MaterialState>{
-      if (isActive) MaterialState.selected else MaterialState.disabled
-    });
+    final Set<MaterialState> states = <MaterialState>{
+      if (isActive) MaterialState.selected else MaterialState.disabled,
+    };
+    return widget.connectorColor?.resolve(states) ?? (isActive ?colorSchema.primary:Colors.grey.shade400);
   }
 
   Widget _buildLine(bool visible, bool isActive) {
@@ -424,14 +422,19 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Color _circleColor(int index) {
+    final bool isActive = widget.steps[index].isActive;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    if (widget.connectorColor != null) {
-      return _connectorColor(widget.steps[index].isActive);
-    }
-    if (!_isDark()) {
-      return widget.steps[index].isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.38);
+    final Set<MaterialState> states = <MaterialState>{
+      if (isActive) MaterialState.selected else MaterialState.disabled,
+    };
+    if(widget.connectorColor?.resolve(states) != null) {
+      return widget.connectorColor!.resolve(states);
     } else {
-      return widget.steps[index].isActive ? colorScheme.secondary : colorScheme.background;
+      if (!_isDark()) {
+        return widget.steps[index].isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.38);
+      } else {
+        return widget.steps[index].isActive ? colorScheme.secondary : colorScheme.background;
+      }
     }
   }
 
