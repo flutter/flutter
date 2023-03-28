@@ -1288,6 +1288,7 @@ ORIGIN: ../../../flutter/impeller/geometry/constants.h + ../../../flutter/LICENS
 ORIGIN: ../../../flutter/impeller/geometry/geometry_benchmarks.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/gradient.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/gradient.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/geometry/half.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/matrix.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/matrix.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/matrix_decomposition.cc + ../../../flutter/LICENSE
@@ -3851,6 +3852,7 @@ FILE: ../../../flutter/impeller/geometry/constants.h
 FILE: ../../../flutter/impeller/geometry/geometry_benchmarks.cc
 FILE: ../../../flutter/impeller/geometry/gradient.cc
 FILE: ../../../flutter/impeller/geometry/gradient.h
+FILE: ../../../flutter/impeller/geometry/half.h
 FILE: ../../../flutter/impeller/geometry/matrix.cc
 FILE: ../../../flutter/impeller/geometry/matrix.h
 FILE: ../../../flutter/impeller/geometry/matrix_decomposition.cc
