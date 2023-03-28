@@ -23,6 +23,7 @@ class RenderTarget final {
     StorageMode storage_mode;
     LoadAction load_action;
     StoreAction store_action;
+    Color clear_color;
   };
 
   struct AttachmentConfigMSAA {
@@ -30,23 +31,27 @@ class RenderTarget final {
     StorageMode resolve_storage_mode;
     LoadAction load_action;
     StoreAction store_action;
+    Color clear_color;
   };
 
   static constexpr AttachmentConfig kDefaultColorAttachmentConfig = {
       .storage_mode = StorageMode::kDevicePrivate,
       .load_action = LoadAction::kClear,
-      .store_action = StoreAction::kStore};
+      .store_action = StoreAction::kStore,
+      .clear_color = Color::BlackTransparent()};
 
   static constexpr AttachmentConfigMSAA kDefaultColorAttachmentConfigMSAA = {
       .storage_mode = StorageMode::kDeviceTransient,
       .resolve_storage_mode = StorageMode::kDevicePrivate,
       .load_action = LoadAction::kClear,
-      .store_action = StoreAction::kMultisampleResolve};
+      .store_action = StoreAction::kMultisampleResolve,
+      .clear_color = Color::BlackTransparent()};
 
   static constexpr AttachmentConfig kDefaultStencilAttachmentConfig = {
       .storage_mode = StorageMode::kDeviceTransient,
       .load_action = LoadAction::kClear,
-      .store_action = StoreAction::kDontCare};
+      .store_action = StoreAction::kDontCare,
+      .clear_color = Color::BlackTransparent()};
 
   static RenderTarget CreateOffscreen(
       const Context& context,
