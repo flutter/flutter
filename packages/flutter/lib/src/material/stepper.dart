@@ -208,7 +208,7 @@ class Stepper extends StatefulWidget {
     this.elevation,
     this.margin,
     this.connectorColor,
-    this.connectorThickness = 1.0,
+    this.connectorThickness,
   }) : assert(0 <= currentStep && currentStep < steps.length);
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
@@ -390,7 +390,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildLine(bool visible, bool isActive) {
     return Container(
-      width: visible ? widget.connectorThickness : 0.0,
+      width: visible ? widget.connectorThickness ?? 1.0 : 0.0,
       height: 16.0,
       color: _connectorColor(isActive),
     );
@@ -673,6 +673,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalHeader(int index) {
+    final bool isActive = widget.steps[index].isActive;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
@@ -681,9 +682,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             children: <Widget>[
               // Line parts are always added in order for the ink splash to
               // flood the tips of the connector lines.
-              _buildLine(!_isFirst(index), widget.steps[index].isActive),
+              _buildLine(!_isFirst(index), isActive),
               _buildIcon(index),
-              _buildLine(!_isLast(index), widget.steps[index].isActive),
+              _buildLine(!_isLast(index), isActive),
             ],
           ),
           Expanded(
@@ -708,7 +709,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             width: 24.0,
             child: Center(
               child: SizedBox(
-                width: widget.connectorThickness,
+                width: widget.connectorThickness ?? 1.0,
                 child: Container(
                   color: _connectorColor(widget.steps[index].isActive),
                 ),
@@ -805,7 +806,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             child: Container(
               key: Key('line$i'),
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              height: widget.connectorThickness,
+              height: widget.connectorThickness ?? 1.0,
               color: _connectorColor(widget.steps[i+1].isActive),
             ),
           ),
