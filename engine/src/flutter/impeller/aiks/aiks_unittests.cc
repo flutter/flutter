@@ -1823,10 +1823,6 @@ TEST_P(AiksTest, SiblingSaveLayerBoundsAreRespected) {
 }
 
 TEST_P(AiksTest, CanRenderClippedLayers) {
-  if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP_("Temporarily disabled.");
-  }
-
   Canvas canvas;
 
   canvas.DrawPaint({.color = Color::White()});
