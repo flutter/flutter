@@ -106,7 +106,7 @@ class ControlsDetails {
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 typedef ControlsWidgetBuilder = Widget Function(BuildContext context, ControlsDetails details);
 
-/// A builder that creates the icon widget for the step given [stepIndex], and
+/// A builder that creates the icon widget a [Step] given [stepIndex], and
 /// [stepState].
 typedef StepIconBuilder = Widget? Function(int stepIndex, StepState stepState);
 
@@ -313,8 +313,8 @@ class Stepper extends StatefulWidget {
 
   /// Callback for creating custom icons for the [steps].
   ///
-  /// In case of overriding icon for [StepState.error], please return
-  /// the widget having size of 14 pixels or less to avoid overflow.
+  /// When overriding icon for [StepState.error], please return
+  /// a widget whose width and height are 14 pixels or less to avoid overflow.
   ///
   /// If null, the default icons will be used for respective [StepState].
   final StepIconBuilder? stepIconBuilder;
@@ -386,12 +386,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Widget _buildCircleChild(int index, bool oldState) {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
-    if(widget.stepIconBuilder != null) {
-      final Widget? icon = widget.stepIconBuilder!(index, state);
-      if(icon != null) {
-        return icon;
-      }
-    }
+final Widget? icon = widget.stepIconBuilder?.call(index, state);
+if (icon != null) {
+  return icon;
+}
     switch (state) {
       case StepState.indexed:
       case StepState.disabled:

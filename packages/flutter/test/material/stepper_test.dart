@@ -1266,7 +1266,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         home: Material(
           child: Stepper(
             stepIconBuilder: (int index, StepState state) {
-              if(state == StepState.complete) {
+              if (state == StepState.complete) {
                 return const FlutterLogo(size: 18);
               }
               return null;
