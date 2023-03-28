@@ -28,6 +28,7 @@ import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_devtools_handler.dart';
@@ -254,15 +255,38 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       return await asyncGuard(() async {
+        Future<int> getPort() async {
+          if (debuggingOptions.port == null) {
+            return globals.os.findFreePort();
+          }
+
+          final int? port = int.tryParse(debuggingOptions.port ?? '');
+
+          if (port == null) {
+            logger.printError('''
+Received a non-integer value for port: ${debuggingOptions.port}
+A randomly-chosen available port will be used instead.
+''');
+            return globals.os.findFreePort();
+          }
+
+          if (port < 0 || port > 65535) {
+            throwToolExit('''
+Invalid port: ${debuggingOptions.port}
+Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
+    ''');
+          }
+
+          return port;
+        }
+
         final ExpressionCompiler? expressionCompiler =
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
               : null;
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
-          port: debuggingOptions.port != null
-            ? int.tryParse(debuggingOptions.port!)
-            : null,
+          port: await getPort(),
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -274,6 +298,8 @@ class ResidentWebRunner extends ResidentRunner {
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
+          nullAssertions: debuggingOptions.nullAssertions,
+          nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
         final Uri url = await device!.devFS!.create();
@@ -601,6 +627,16 @@ class ResidentWebRunner extends ResidentRunner {
           ..writeAsStringSync(websocketUri.toString());
       }
       _logger.printStatus('Debug service listening on $websocketUri');
+      if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+        _logger.printStatus('');
+        _logger.printStatus(
+          'Running without sound null safety ⚠️',
+          emphasis: true,
+        );
+        _logger.printStatus(
+          'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
+        );
+      }
     }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));

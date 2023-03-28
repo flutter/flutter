@@ -381,6 +381,7 @@ void main() {
       '--trace-skia',
       '--trace-systrace',
       '--verbose-system-logs',
+      '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
       '--trace-systrace',
@@ -396,8 +397,9 @@ void main() {
     expect(options.traceSkia, true);
     expect(options.traceSystrace, true);
     expect(options.verboseSystemLogs, true);
+    expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
-    expect(options.enableImpeller, true);
+    expect(options.enableImpeller, ImpellerStatus.enabled);
     expect(options.traceSystrace, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);

@@ -41,10 +41,8 @@ class IOCallbackManager implements CallbackManager {
                   data: testRunner.reportData,
                 ).toJson(),
         };
-        break;
       case 'get_health':
         response = <String, String>{'status': 'ok'};
-        break;
       default:
         throw UnimplementedError('$command is not implemented');
     }
@@ -109,7 +107,6 @@ class IOCallbackManager implements CallbackManager {
     switch (call.method) {
       case 'scheduleFrame':
         PlatformDispatcher.instance.scheduleFrame();
-        break;
     }
     return null;
   }

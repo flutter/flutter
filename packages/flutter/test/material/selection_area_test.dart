@@ -28,17 +28,13 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(region.selectionControls, materialTextSelectionHandleControls);
-        break;
       case TargetPlatform.iOS:
         expect(region.selectionControls, cupertinoTextSelectionHandleControls);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(region.selectionControls, desktopTextSelectionHandleControls);
-        break;
       case TargetPlatform.macOS:
         expect(region.selectionControls, cupertinoDesktopTextSelectionHandleControls);
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 
@@ -133,4 +129,53 @@ void main() {
     expect(content, isNotNull);
     expect(content!.plainText, 'How');
   });
+
+  testWidgets('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/119314
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.only(top: 64),
+            child: Column(
+              children: <Widget>[
+                const Text('How are you?'),
+                SelectionArea(
+                  focusNode: FocusNode(),
+                  child: const Text('Good, and you?'),
+                ),
+                const Text('Fine, thank you.'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    final List<TextBox> boxes = paragraph2.getBoxesForSelection(paragraph2.selections[0]);
+    expect(boxes.length, 1);
+    // There is a selection now.
+    // We check the presence of the copy button to make sure the selection toolbar
+    // is showing.
+    expect(find.text('Copy'), findsOneWidget);
+
+    // This is the position of the selection handle displayed at the end.
+    final Offset handlePos = paragraph2.localToGlobal(boxes[0].toRect().bottomRight);
+    await gesture.down(handlePos);
+    await gesture.moveTo(textOffsetToPosition(paragraph2, 11) + Offset(0, paragraph2.size.height / 2));
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pump();
+
+    // After lifting the finger up, the selection toolbar should be showing again.
+    expect(find.text('Copy'), findsOneWidget);
+  },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended]
+  );
 }
