@@ -643,6 +643,16 @@ class FlutterVmService {
     return response?['data']?.toString() ?? '';
   }
 
+  Future<String> flutterDebugDumpFocusTree({
+    required String isolateId,
+  }) async {
+    final Map<String, Object?>? response = await invokeFlutterExtensionRpcRaw(
+      'ext.flutter.debugDumpFocusTree',
+      isolateId: isolateId,
+    );
+    return response?['data']?.toString() ?? '';
+  }
+
   Future<String> flutterDebugDumpSemanticsTreeInTraversalOrder({
     required String isolateId,
   }) async {

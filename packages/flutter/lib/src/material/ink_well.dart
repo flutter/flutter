@@ -41,8 +41,10 @@ abstract class InteractiveInkFeature extends InkFeature {
     required super.controller,
     required super.referenceBox,
     required Color color,
+    ShapeBorder? customBorder,
     super.onRemoved,
-  }) : _color = color;
+  }) : _color = color,
+       _customBorder = customBorder;
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
@@ -64,6 +66,17 @@ abstract class InteractiveInkFeature extends InkFeature {
       return;
     }
     _color = value;
+    controller.markNeedsPaint();
+  }
+
+  /// The ink's optional custom border.
+  ShapeBorder? get customBorder => _customBorder;
+  ShapeBorder? _customBorder;
+  set customBorder(ShapeBorder? value) {
+    if (value == _customBorder) {
+      return;
+    }
+    _customBorder = value;
     controller.markNeedsPaint();
   }
 
@@ -854,10 +867,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       }
       initStatesController();
     }
-    if (widget.customBorder != oldWidget.customBorder ||
-        widget.radius != oldWidget.radius ||
-        widget.borderRadius != oldWidget.borderRadius ||
-        widget.highlightShape != oldWidget.highlightShape) {
+    if (widget.radius != oldWidget.radius ||
+        widget.highlightShape != oldWidget.highlightShape ||
+        widget.borderRadius != oldWidget.borderRadius) {
       final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
       if (hoverHighlight != null) {
         hoverHighlight.dispose();
@@ -868,6 +880,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         focusHighlight.dispose();
         // Do not call updateFocusHighlights() here because it is called below
       }
+    }
+    if (widget.customBorder != oldWidget.customBorder) {
+      _updateHighlightsAndSplashes();
     }
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
@@ -986,7 +1001,23 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  InteractiveInkFeature _createInkFeature(Offset globalPosition) {
+  void _updateHighlightsAndSplashes() {
+    for (final InkHighlight? highlight in _highlights.values) {
+      if (highlight != null) {
+        highlight.customBorder = widget.customBorder;
+      }
+    }
+    if (_currentSplash != null) {
+      _currentSplash!.customBorder = widget.customBorder;
+    }
+    if (_splashes != null && _splashes!.isNotEmpty) {
+      for (final InteractiveInkFeature inkFeature in _splashes!) {
+        inkFeature.customBorder = widget.customBorder;
+      }
+    }
+  }
+
+  InteractiveInkFeature _createSplash(Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
@@ -1103,7 +1134,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       globalPosition = details!.globalPosition;
     }
     statesController.update(MaterialState.pressed, true); // ... before creating the splash
-    final InteractiveInkFeature splash = _createInkFeature(globalPosition);
+    final InteractiveInkFeature splash = _createSplash(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes!.add(splash);
     _currentSplash?.cancel();

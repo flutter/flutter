@@ -856,7 +856,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   @override
   void moveRenderObjectChild(RenderObject child, _AlertDialogSections oldSlot, _AlertDialogSections newSlot) {
     if (!allowMoveRenderObjectChild) {
-      super.moveRenderObjectChild(child, oldSlot, newSlot);
+      assert(false);
       return;
     }
 

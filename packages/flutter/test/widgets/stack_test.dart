@@ -308,6 +308,41 @@ void main() {
     expect(itemsTapped, <int>[2]);
   });
 
+  testWidgets('IndexedStack sets non-selected indexes to visible=false', (WidgetTester tester) async {
+    Widget buildStack({required int itemCount, required int? selectedIndex}) {
+      final List<Widget> children = List<Widget>.generate(itemCount, (int i) {
+        return _ShowVisibility(index: i);
+      });
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(
+          index: selectedIndex,
+          children: children,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: null));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 0));
+    expect(find.text('index 0 is visible ? true', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 1));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? true', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 2));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? true', skipOffstage: false), findsOneWidget);
+  });
+
   testWidgets('Can set width and height', (WidgetTester tester) async {
     const Key key = Key('container');
 
@@ -865,4 +900,15 @@ void main() {
       'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)',
     ]);
   });
+}
+
+class _ShowVisibility extends StatelessWidget {
+  const _ShowVisibility({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('index $index is visible ? ${Visibility.of(context)}');
+  }
 }
