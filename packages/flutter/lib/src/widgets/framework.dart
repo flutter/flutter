@@ -2499,7 +2499,7 @@ abstract class BuildContext {
 /// Additional build owners can be built to manage off-screen widget trees.
 ///
 /// To assign a build owner to a tree, use the
-/// [RootRenderObjectElement.assignOwner] method on the root element of the
+/// [RootElementMixin.assignOwner] method on the root element of the
 /// widget tree.
 ///
 /// {@tool dartpad}
@@ -6323,14 +6323,29 @@ abstract class RenderObjectElement extends Element {
   }
 }
 
-/// The element at the root of the tree.
+/// Deprecated. Unused in the framework and will be removed in a future version
+/// of Flutter.
+///
+/// Classes that extend this class can extend [RenderObjectElement] and mixin
+/// [RootElementMixin] instead.
+@Deprecated(
+  'Use RootElementMixin instead. '
+  'This feature was deprecated after v3.9.0-16.0.pre.'
+)
+abstract class RootRenderObjectElement extends RenderObjectElement with RootElementMixin {
+  /// Initializes fields for subclasses.
+  @Deprecated(
+    'Use RootElementMixin instead. '
+    'This feature was deprecated after v3.9.0-16.0.pre.'
+  )
+  RootRenderObjectElement(super.widget);
+}
+
+/// Mixin for the element at the root of the tree.
 ///
 /// Only root elements may have their owner set explicitly. All other
 /// elements inherit their owner from their parent.
-abstract class RootRenderObjectElement extends RenderObjectElement {
-  /// Initializes fields for subclasses.
-  RootRenderObjectElement(super.widget);
-
+mixin RootElementMixin on Element {
   /// Set the owner of the element. The owner will be propagated to all the
   /// descendants of this element.
   ///
