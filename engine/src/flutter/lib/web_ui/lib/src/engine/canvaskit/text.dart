@@ -629,8 +629,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
         _minIntrinsicWidth = paragraph.getMinIntrinsicWidth();
         _width = paragraph.getMaxWidth();
         _boxesForPlaceholders =
-            skRectsToTextBoxes(
-                paragraph.getRectsForPlaceholders().cast<SkRectWithDirection>());
+            skRectsToTextBoxes(paragraph.getRectsForPlaceholders());
       } catch (e) {
         printWarning('CanvasKit threw an exception while laying '
             'out the paragraph. The font was "${_paragraphStyle._fontFamily}". '
@@ -736,7 +735,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
       end.toDouble(),
       toSkRectHeightStyle(boxHeightStyle),
       toSkRectWidthStyle(boxWidthStyle),
-    ).cast<SkRectWithDirection>();
+    );
 
     return skRectsToTextBoxes(skRects);
   }
@@ -800,8 +799,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
-    final List<SkLineMetrics> metrics =
-        paragraph.getLineMetrics().cast<SkLineMetrics>();
+    final List<SkLineMetrics> metrics = paragraph.getLineMetrics();
     final int offset = position.offset;
     for (final SkLineMetrics metric in metrics) {
       if (offset >= metric.startIndex && offset <= metric.endIndex) {
@@ -814,8 +812,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   @override
   List<ui.LineMetrics> computeLineMetrics() {
     final SkParagraph paragraph = _ensureInitialized(_lastLayoutConstraints!);
-    final List<SkLineMetrics> skLineMetrics =
-        paragraph.getLineMetrics().cast<SkLineMetrics>();
+    final List<SkLineMetrics> skLineMetrics = paragraph.getLineMetrics();
     final List<ui.LineMetrics> result = <ui.LineMetrics>[];
     for (final SkLineMetrics metric in skLineMetrics) {
       result.add(CkLineMetrics._(metric));
