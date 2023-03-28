@@ -2,32 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
-
 import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
 
 // TODO(justinmc): Change name to match popEnabled  more?
 // TODO(justinmc): Document that this can't be set at the time of onPopCallback. Too late.
-/// Registers a callback to veto attempts by the user to dismiss the enclosing
-/// [ModalRoute].
+/// Manages system back gestures.
+///
+/// [popEnabled] can be used to disable system back gestures, while [onPop]
+/// reports when they occur.
 ///
 /// {@tool dartpad}
-/// Whenever the back button is pressed, you will get a callback at [onWillPop],
-/// which returns a [Future]. If the [Future] returns true, the screen is
-/// popped.
+/// This sample demonstrates how to use this widget to properly handle system
+/// back gestures when using nested [Navigator]s.
 ///
-/// ** See code in examples/api/lib/widgets/will_pop_scope/will_pop_scope.0.dart **
+/// ** See code in examples/api/lib/widgets/can_pop_scope/nested_navigators.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [ModalRoute.addScopedWillPopCallback] and [ModalRoute.removeScopedWillPopCallback],
-///    which this widget uses to register and unregister [onWillPop].
-///  * [Form], which provides an `onWillPop` callback that enables the form
-///    to veto a `pop` initiated by the app's back button.
-///
+///  * [ModalRoute.registerCanPopScope] and [ModalRoute.unregisterCanPopScope],
+///    which this widget uses to integrate with Flutter's navigation system.
+///  * [Form.popEnabled] and [Form.onPop], which use this widget internally.
 class CanPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
