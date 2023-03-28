@@ -106,7 +106,7 @@ class ControlsDetails {
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 typedef ControlsWidgetBuilder = Widget Function(BuildContext context, ControlsDetails details);
 
-/// A builder that creates the icon widget a [Step] given [stepIndex], and
+/// A builder that creates the icon widget for the [Step] at [stepIndex], given
 /// [stepState].
 typedef StepIconBuilder = Widget? Function(int stepIndex, StepState stepState);
 
@@ -386,10 +386,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Widget _buildCircleChild(int index, bool oldState) {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
-final Widget? icon = widget.stepIconBuilder?.call(index, state);
-if (icon != null) {
-  return icon;
-}
+    final Widget? icon = widget.stepIconBuilder?.call(index, state);
+    if (icon != null) {
+      return icon;
+    }
     switch (state) {
       case StepState.indexed:
       case StepState.disabled:
