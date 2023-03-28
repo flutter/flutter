@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "HH:mm",
   "remainingTextFieldCharacterCountMany": "$remainingCount nod ar ôl",
   "licensesPackageDetailTextTwo": "$licenseCount drwydded",
   "licensesPackageDetailTextFew": "$licenseCount trwydded",
