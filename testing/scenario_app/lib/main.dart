@@ -38,7 +38,6 @@ void _handleDriverMessage(Map<String, dynamic> call) {
     case 'set_scenario':
       assert(call['args'] != null);
       loadScenario(call['args'] as Map<String, dynamic>, _view);
-    break;
     default:
       throw 'Unimplemented method: $methodName.';
   }
@@ -55,11 +54,9 @@ Future<void> _handlePlatformMessage(
   switch (name) {
     case 'driver':
       _handleDriverMessage(json.decode(utf8.decode(data!.buffer.asUint8List())) as Map<String, dynamic>);
-    break;
     case 'write_timeline':
       final String timelineData = await _getTimelineData();
       callback!(Uint8List.fromList(utf8.encode(timelineData)).buffer.asByteData());
-    break;
     default:
       currentScenario?.onPlatformMessage(name, data, callback);
   }

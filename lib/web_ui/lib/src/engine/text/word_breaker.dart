@@ -5,11 +5,11 @@
 import '../util.dart';
 import 'word_break_properties.dart';
 
-class _FindBreakDirection {
-  const _FindBreakDirection({required this.step});
+enum _FindBreakDirection {
+  forward(step: 1),
+  backward(step: -1);
 
-  static const _FindBreakDirection forward = _FindBreakDirection(step: 1);
-  static const _FindBreakDirection backward = _FindBreakDirection(step: -1);
+  const _FindBreakDirection({required this.step});
 
   final int step;
 }
