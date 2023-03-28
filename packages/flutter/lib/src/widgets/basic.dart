@@ -15,6 +15,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'visibility.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -3962,12 +3963,80 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 ///  * [Stack], for more details about stacks.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class IndexedStack extends Stack {
+class IndexedStack extends StatelessWidget {
   /// Creates a [Stack] widget that paints a single child.
   ///
   /// The [index] argument must not be null.
   const IndexedStack({
     super.key,
+    this.alignment = AlignmentDirectional.topStart,
+    this.textDirection,
+    this.clipBehavior = Clip.hardEdge,
+    this.sizing = StackFit.loose,
+    this.index = 0,
+    this.children = const <Widget>[],
+  });
+
+  /// How to align the non-positioned and partially-positioned children in the
+  /// stack.
+  ///
+  /// Defaults to [AlignmentDirectional.topStart].
+  ///
+  /// See [Stack.alignment] for more information.
+  final AlignmentGeometry alignment;
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection? textDirection;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  /// How to size the non-positioned children in the stack.
+  ///
+  /// Defaults to [StackFit.loose].
+  ///
+  /// See [Stack.fit] for more information.
+  final StackFit sizing;
+
+  /// The index of the child to show.
+  ///
+  /// If this is null, none of the children will be shown.
+  final int? index;
+
+  /// The child widgets of the stack.
+  ///
+  /// Only the child at index [index] will be shown.
+  ///
+  /// See [Stack.children] for more information.
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
+      return Visibility.maintain(
+        visible: i == index,
+        child: children[i],
+      );
+    });
+    return _RawIndexedStack(
+      alignment: alignment,
+      textDirection: textDirection,
+      clipBehavior: clipBehavior,
+      sizing: sizing,
+      index: index,
+      children: wrappedChildren,
+    );
+  }
+}
+
+/// The render object widget that backs [IndexedStack].
+class _RawIndexedStack extends Stack {
+  /// Creates a [Stack] widget that paints a single child.
+  const _RawIndexedStack({
     super.alignment,
     super.textDirection,
     super.clipBehavior,
@@ -3984,7 +4053,7 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     return RenderIndexedStack(
       index: index,
-      fit:fit,
+      fit: fit,
       clipBehavior: clipBehavior,
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
