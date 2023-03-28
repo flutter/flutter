@@ -385,6 +385,7 @@ void main() {
         '-dynamiclib',
         '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
         '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name', '@rpath/App.framework/App',
         '-o',
         environment.buildDir
@@ -417,6 +418,7 @@ void main() {
         '-dynamiclib',
         '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
         '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name', '@rpath/App.framework/App',
         '-o',
         environment.buildDir
@@ -474,6 +476,7 @@ void main() {
         'xcrun', 'clang', '-arch', 'arm64', '-dynamiclib', '-Xlinker', '-rpath',
         '-Xlinker', '@executable_path/Frameworks', '-Xlinker', '-rpath',
         '-Xlinker', '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name', '@rpath/App.framework/App',
         '-o', environment.buildDir.childFile('arm64/App.framework/App').path,
         environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
@@ -482,6 +485,7 @@ void main() {
         'xcrun', 'clang', '-arch', 'x86_64', '-dynamiclib', '-Xlinker', '-rpath',
         '-Xlinker', '@executable_path/Frameworks', '-Xlinker', '-rpath',
         '-Xlinker', '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name', '@rpath/App.framework/App',
         '-o', environment.buildDir.childFile('x86_64/App.framework/App').path,
         environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
