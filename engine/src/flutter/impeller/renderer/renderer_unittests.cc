@@ -278,9 +278,6 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
 }
 
 TEST_P(RendererTest, CanRenderToTexture) {
-  if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP_("Temporarily disabled.");
-  }
   using VS = BoxFadeVertexShader;
   using FS = BoxFadeFragmentShader;
   auto context = GetContext();
@@ -312,9 +309,9 @@ TEST_P(RendererTest, CanRenderToTexture) {
   ASSERT_TRUE(bridge && boston);
   auto sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
-
   std::shared_ptr<RenderPass> r2t_pass;
-
+  auto cmd_buffer = context->CreateCommandBuffer();
+  ASSERT_TRUE(cmd_buffer);
   {
     ColorAttachment color0;
     color0.load_action = LoadAction::kClear;
@@ -352,7 +349,6 @@ TEST_P(RendererTest, CanRenderToTexture) {
     RenderTarget r2t_desc;
     r2t_desc.SetColorAttachment(color0, 0u);
     r2t_desc.SetStencilAttachment(stencil0);
-    auto cmd_buffer = context->CreateCommandBuffer();
     r2t_pass = cmd_buffer->CreateRenderPass(r2t_desc);
     ASSERT_TRUE(r2t_pass && r2t_pass->IsValid());
   }

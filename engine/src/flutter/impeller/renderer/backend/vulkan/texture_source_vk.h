@@ -18,11 +18,6 @@ class TextureSourceVK {
 
   const TextureDescriptor& GetTextureDescriptor() const;
 
-  virtual bool SetContents(const TextureDescriptor& desc,
-                           const uint8_t* contents,
-                           size_t length,
-                           size_t slice);
-
   virtual vk::Image GetImage() const = 0;
 
   virtual vk::ImageView GetImageView() const = 0;
