@@ -379,10 +379,9 @@ TEST_P(RendererTest, CanRenderToTexture) {
   ASSERT_TRUE(r2t_pass->EncodeCommands());
 }
 
-#if IMPELLER_ENABLE_METAL
 TEST_P(RendererTest, CanRenderInstanced) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("Instancing is only supported on Metal.");
+  if (GetParam() == PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP_("Instancing is not supported on OpenGL.");
   }
   using VS = InstancedDrawVertexShader;
   using FS = InstancedDrawFragmentShader;
@@ -444,7 +443,6 @@ TEST_P(RendererTest, CanRenderInstanced) {
     return true;
   }));
 }
-#endif  // IMPELLER_ENABLE_METAL
 
 TEST_P(RendererTest, CanBlitTextureToTexture) {
   auto context = GetContext();
@@ -967,8 +965,8 @@ TEST_P(RendererTest, InactiveUniforms) {
 }
 
 TEST_P(RendererTest, CanCreateCPUBackedTexture) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("CPU backed textures only supported on Metal right now.");
+  if (GetParam() == PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP_("CPU backed textures are not supported on OpenGLES.");
   }
 
   auto context = GetContext();
