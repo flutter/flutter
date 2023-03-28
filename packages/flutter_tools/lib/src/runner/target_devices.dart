@@ -97,7 +97,7 @@ class TargetDevices {
     );
   }
 
-  void startPollingWirelessDeviceDiscoverers({
+  void startExtendedWirelessDeviceDiscovery({
     Duration? deviceDiscoveryTimeout,
   }) {}
 
@@ -355,11 +355,11 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   late final TargetDeviceSelection deviceSelection = TargetDeviceSelection(_logger);
 
   @override
-  void startPollingWirelessDeviceDiscoverers({
+  void startExtendedWirelessDeviceDiscovery({
     Duration? deviceDiscoveryTimeout,
   }) {
     if (deviceDiscoveryTimeout == null) {
-      _wirelessDevicesRefresh ??= _deviceManager.refreshWirelessDeviceDiscoverers(
+      _wirelessDevicesRefresh ??= _deviceManager.refreshExtendedWirelessDeviceDiscoverers(
         timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
       );
     }
@@ -369,7 +369,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   Future<List<Device>> _getRefreshedWirelessDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    startPollingWirelessDeviceDiscoverers();
+    startExtendedWirelessDeviceDiscovery();
     return () async {
       await _wirelessDevicesRefresh;
       return _deviceManager.getDevices(
@@ -437,9 +437,9 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       );
     }
 
-    final Future<List<Device>> futureWirelessDevices = _getRefreshedWirelessDevices(
-      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
-    );
+    // Start polling for wireless devices that need longer to load if it hasn't
+    // already been started.
+    startExtendedWirelessDeviceDiscovery();
 
     if (_deviceManager.hasSpecifiedDeviceId) {
       // Get devices matching the specified device regardless of whether they
@@ -467,6 +467,13 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 
     final List<Device> attachedDevices = await _getAttachedDevices(
       supportFilter: _defaultSupportFilter(includeDevicesUnsupportedByProject),
+    );
+
+    // _getRefreshedWirelessDevices must be run after _getAttachedDevices is
+    // finished to prevent non-iOS discoverers from running simultaneously.
+    // `AndroidDevices` may error if run simultaneously.
+    final Future<List<Device>> futureWirelessDevices = _getRefreshedWirelessDevices(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
 
     if (attachedDevices.isEmpty) {

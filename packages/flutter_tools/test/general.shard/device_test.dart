@@ -142,7 +142,7 @@ void main() {
 
     testWithoutContext('getAllDevices caches', () async {
       final FakePollingDeviceDiscovery notSupportedDiscoverer = FakePollingDeviceDiscovery();
-      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(supportsWirelessDevices: true);
+      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(requiresExtendedWirelessDeviceDiscovery: true);
 
       final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final FakeDevice wirelessDevice = FakeDevice('Wireless device', 'wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
@@ -171,7 +171,7 @@ void main() {
 
     testWithoutContext('refreshAllDevices does not cache', () async {
       final FakePollingDeviceDiscovery notSupportedDiscoverer = FakePollingDeviceDiscovery();
-      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(supportsWirelessDevices: true);
+      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(requiresExtendedWirelessDeviceDiscovery: true);
 
       final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final FakeDevice wirelessDevice = FakeDevice('Wireless device', 'wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
@@ -198,33 +198,35 @@ void main() {
       expect(await deviceManager.refreshAllDevices(), <Device>[attachedDevice, newAttachedDevice, wirelessDevice, newWirelessDevice]);
     });
 
-    testWithoutContext('refreshWirelessDeviceDiscoverers only refreshes discoverers that support wireless', () async {
-      final FakePollingDeviceDiscovery notSupportedDiscoverer = FakePollingDeviceDiscovery();
-      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(supportsWirelessDevices: true);
+    testWithoutContext('refreshExtendedWirelessDeviceDiscoverers only refreshes discoverers that require extended time', () async {
+      final FakePollingDeviceDiscovery normalDiscoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery extendedDiscoverer = FakePollingDeviceDiscovery(requiresExtendedWirelessDeviceDiscovery: true);
 
       final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final FakeDevice wirelessDevice = FakeDevice('Wireless device', 'wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
 
-      notSupportedDiscoverer.addDevice(attachedDevice);
-      supportedDiscoverer.addDevice(wirelessDevice);
+      normalDiscoverer.addDevice(attachedDevice);
+      extendedDiscoverer.addDevice(wirelessDevice);
 
       final TestDeviceManager deviceManager = TestDeviceManager(
         <Device>[],
         logger: BufferLogger.test(),
         deviceDiscoveryOverrides: <DeviceDiscovery>[
-          notSupportedDiscoverer,
-          supportedDiscoverer,
+          normalDiscoverer,
+          extendedDiscoverer,
         ],
       );
-      expect(await deviceManager.refreshWirelessDeviceDiscoverers(), <Device>[attachedDevice, wirelessDevice]);
+      await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
+      expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
 
       final FakeDevice newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
-      notSupportedDiscoverer.addDevice(newAttachedDevice);
+      normalDiscoverer.addDevice(newAttachedDevice);
 
       final FakeDevice newWirelessDevice = FakeDevice('New wireless device', 'new-wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
-      supportedDiscoverer.addDevice(newWirelessDevice);
+      extendedDiscoverer.addDevice(newWirelessDevice);
 
-      expect(await deviceManager.refreshWirelessDeviceDiscoverers(), <Device>[attachedDevice, wirelessDevice, newWirelessDevice]);
+      await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
+      expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice, newWirelessDevice]);
     });
   });
 

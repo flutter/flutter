@@ -219,7 +219,7 @@ class FakeDeviceManager implements DeviceManager {
   }) async => filteredDevices(filter);
 
   @override
-  Future<List<Device>> refreshWirelessDeviceDiscoverers({
+  Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
   }) async => filteredDevices(filter);

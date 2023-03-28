@@ -645,7 +645,7 @@ class _FakeDeviceManager extends DeviceManager {
   }) => getAllDevices(filter: filter);
 
   @override
-  Future<List<Device>> refreshWirelessDeviceDiscoverers({
+  Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
   }) => getAllDevices(filter: filter);

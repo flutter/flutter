@@ -195,7 +195,7 @@ class FakeDeviceJsonData {
 
 class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   FakePollingDeviceDiscovery({
-    this.supportsWirelessDevices = false,
+    this.requiresExtendedWirelessDeviceDiscovery = false,
   })  : super('mock');
 
   final List<Device> _devices = <Device>[];
@@ -217,7 +217,7 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   bool get canListAnything => true;
 
   @override
-  bool supportsWirelessDevices;
+  bool requiresExtendedWirelessDeviceDiscovery;
 
   void addDevice(Device device) {
     _devices.add(device);

@@ -236,27 +236,20 @@ abstract class DeviceManager {
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
   }
 
-  /// Returns a list of devices filtered by [filter]. Discards existing cache
-  /// of discoverers that support wireless devices.
+  /// Discard existing cache of discoverers that are known to take longer to
+  /// discover wireless devices.
   ///
-  /// If [filter] is not provided, a default filter that requires devices to be
-  /// connected will be used.
-  ///
-  /// Search for devices to populate the cache for no longer than [timeout].
-  Future<List<Device>> refreshWirelessDeviceDiscoverers({
+  /// Then, search for devices for those discoverers to populate the cache for
+  /// no longer than [timeout].
+  Future<void> refreshExtendedWirelessDeviceDiscoverers({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
   }) async {
-    filter ??= DeviceDiscoveryFilter();
-    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+    await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
-        if (discoverer.supportsWirelessDevices)
-          discoverer.discoverDevices(filter: filter, timeout: timeout)
-        else
-          discoverer.devices(filter: filter)
+        if (discoverer.requiresExtendedWirelessDeviceDiscovery)
+          discoverer.discoverDevices(timeout: timeout)
     ]);
-
-    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.
@@ -462,8 +455,9 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
-  /// Whether this device discovery is known to return wireless devices.
-  bool get supportsWirelessDevices => false;
+  /// Whether this device discovery is known to take longer to discover
+  /// wireless devices.
+  bool get requiresExtendedWirelessDeviceDiscovery => false;
 
   /// Return all connected devices, cached on subsequent calls.
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter});

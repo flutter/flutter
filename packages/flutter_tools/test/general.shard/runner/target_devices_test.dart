@@ -962,7 +962,6 @@ Unable to locate a development device; please run 'flutter doctor' for informati
 
       expect(logger.statusText, equals(''));
       expect(devices, <Device>[attachedUnsupportedForProjectIOSDevice]);
-      expect(deviceManager.iosDiscoverer.devicesCalled, 2);
       expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
       expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
     });
@@ -1199,16 +1198,13 @@ If you would like your app to run on fuchsia or ios, consider running `flutter c
       });
 
       group('with device not specified', () {
-        testUsingContext('when single non-ephemeral attached device', () async {
-          deviceManager.iosDiscoverer.deviceList = <Device>[nonEphemeralDevice];
+        testUsingContext('when single ephemeral attached device', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1];
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
-          expect(logger.statusText, equals('''
-Checking for wireless devices...
-'''));
-          expect(devices, <Device>[nonEphemeralDevice]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
+          expect(logger.statusText, equals(''));
+          expect(devices, <Device>[attachedIOSDevice1]);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
         });
@@ -1235,7 +1231,6 @@ No devices found yet. Checking for wireless devices...
 
           expect(logger.statusText, equals(''));
           expect(devices, <Device>[attachedIOSDevice1]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
         });
@@ -1329,7 +1324,6 @@ Checking for wireless devices...
 
           expect(logger.statusText, equals(''));
           expect(devices, <Device>[exactMatchAttachedIOSDevice]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
@@ -1342,7 +1336,6 @@ Checking for wireless devices...
 
           expect(logger.statusText, equals(''));
           expect(devices, <Device>[exactMatchUnsupportedByProjectDevice]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
@@ -1355,7 +1348,6 @@ Checking for wireless devices...
 
           expect(logger.statusText, equals(''));
           expect(devices, <Device>[exactMatchAttachedIOSDevice]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
@@ -1374,7 +1366,7 @@ Waiting for target-device to connect...
           expect(devices, <Device>[exactMatchWirelessDevice]);
           expect(devices?.first.isConnected, true);
           expect(devices?.first.connectionInterface, DeviceConnectionInterface.wireless);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 1);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isTrue);
@@ -1393,7 +1385,7 @@ Waiting for target-device-1 to connect...
           expect(devices, <Device>[partialMatchWirelessDevice]);
           expect(devices?.first.isConnected, true);
           expect(devices?.first.connectionInterface, DeviceConnectionInterface.wireless);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 1);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isTrue);
@@ -1407,7 +1399,6 @@ Waiting for target-device-1 to connect...
 
           expect(logger.statusText, equals(''));
           expect(devices, <Device>[exactMatchAttachedIOSDevice]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
@@ -1436,7 +1427,6 @@ Checking for wireless devices...
 
           expect(logger.statusText, equals(''));
           expect(devices, <Device>[attachedIOSDevice1]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
@@ -1467,7 +1457,6 @@ Checking for wireless devices...
 
           expect(logger.statusText, equals(''));
           expect(devices, <Device>[nonEphemeralDevice]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
         });

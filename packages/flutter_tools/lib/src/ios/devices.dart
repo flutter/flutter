@@ -57,7 +57,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _iosWorkflow.canListDevices;
 
   @override
-  bool get supportsWirelessDevices => true;
+  bool get requiresExtendedWirelessDeviceDiscovery => true;
 
   StreamSubscription<Map<XCDeviceEvent, String>>? _observedDeviceEventsSubscription;
 

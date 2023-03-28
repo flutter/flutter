@@ -226,10 +226,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
       return;
     }
 
-    final Future<List<Device>>? futureWirelessDevices = _deviceManager?.refreshWirelessDeviceDiscoverers(
-      filter: DeviceDiscoveryFilter(
-        deviceConnectionInterface: DeviceConnectionInterface.wireless,
-      ),
+    final Future<void>? extendedWirelessDiscovery = _deviceManager?.refreshExtendedWirelessDeviceDiscoverers(
       timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
     );
 
@@ -260,7 +257,11 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
     numLinesToClear += 1;
 
     final Status waitingStatus = _logger.startSpinner();
-    final List<Device> wirelessDevices = await futureWirelessDevices ?? <Device>[];
+    await extendedWirelessDiscovery;
+    List<Device> wirelessDevices = <Device>[];
+    if (deviceManager != null) {
+      wirelessDevices = await _getWirelessDevices(deviceManager);
+    }
     waitingStatus.stop();
 
     final Terminal terminal = _logger.terminal;

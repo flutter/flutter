@@ -1472,7 +1472,7 @@ abstract class FlutterCommand extends Command<void> {
 
     if (refreshWirelessDevices) {
       // Loading wireless devices takes longer so start it early.
-      _targetDevices.startPollingWirelessDeviceDiscoverers(
+      _targetDevices.startExtendedWirelessDeviceDiscovery(
         deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       );
     }
