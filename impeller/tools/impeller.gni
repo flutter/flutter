@@ -305,6 +305,10 @@ template("impellerc") {
       args += [ "--metal-version=$metal_version" ]
     }
 
+    if (defined(invoker.use_half_textures) && invoker.use_half_textures) {
+      args += [ "--use-half-textures" ]
+    }
+
     if (json) {
       args += [ "--json" ]
     }
@@ -403,6 +407,11 @@ template("_impeller_shaders_metal") {
     metal_version = invoker.metal_version
   }
 
+  use_half_textures = false
+  if (defined(invoker.use_half_textures) && invoker.use_half_textures) {
+    use_half_textures = invoker.use_half_textures
+  }
+
   shaders_base_name = string_join("",
                                   [
                                     invoker.name,
@@ -413,6 +422,7 @@ template("_impeller_shaders_metal") {
     shaders = invoker.shaders
     metal_version = metal_version
     sl_file_extension = "metal"
+    use_half_textures = use_half_textures
     shader_target_flag = ""
     defines = [ "IMPELLER_TARGET_METAL" ]
     if (is_ios) {
@@ -666,12 +676,26 @@ template("_impeller_shaders_vk") {
 #
 #    The SPIR-V version required by the shaders.
 #
+# @param[options] use_half_textures
+#
+#    Whether the metal shader is using half-precision textures and requires
+#    openGL semantics when compilig SPIR-V.
+#
 template("impeller_shaders") {
   metal_version = "1.2"
   if (defined(invoker.metal_version)) {
     metal_version = invoker.metal_version
   }
-  not_needed([ "metal_version" ])
+
+  use_half_textures = false
+  if (defined(invoker.use_half_textures) && invoker.use_half_textures) {
+    use_half_textures = true
+  }
+
+  not_needed([
+               "metal_version",
+               "use_half_textures",
+             ])
 
   enable_opengles = impeller_enable_opengles
   if (defined(invoker.enable_opengles)) {
@@ -685,6 +709,7 @@ template("impeller_shaders") {
       name = invoker.name
       shaders = invoker.shaders
       metal_version = metal_version
+      use_half_textures = use_half_textures
     }
   }
 
