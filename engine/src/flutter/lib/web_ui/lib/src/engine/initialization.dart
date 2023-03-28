@@ -211,7 +211,7 @@ Future<void> initializeEngineServices({
     }
   };
 
-  assetManager ??= const AssetManager();
+  assetManager ??= AssetManager(assetBase: configuration.assetBase);
   _setAssetManager(assetManager);
 
   Future<void> initializeRendererCallback () async => renderer.initialize();
