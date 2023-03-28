@@ -1,0 +1,4 @@
+# Specifies the version of CanvasKit to use for Flutter Web apps.
+#
+# See `lib/web_ui/README.md` for how to update this file.
+canvaskit_version: "0.38.0"
