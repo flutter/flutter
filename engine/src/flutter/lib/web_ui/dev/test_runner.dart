@@ -10,9 +10,15 @@ import 'package:path/path.dart' as path;
 
 import 'package:watcher/src/watch_event.dart';
 
+import 'environment.dart';
+import 'exceptions.dart';
+import 'felt_config.dart';
+import 'generate_builder_json.dart';
 import 'pipeline.dart';
-import 'steps/compile_tests_step.dart';
-import 'steps/run_tests_step.dart';
+import 'steps/compile_bundle_step.dart';
+import 'steps/copy_artifacts_step.dart';
+import 'steps/run_suite_step.dart';
+import 'suite_filter.dart';
 import 'utils.dart';
 
 /// Runs tests.
@@ -26,22 +32,54 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
             'running the code.',
       )
       ..addFlag(
+        'verbose',
+        abbr: 'v',
+        help: 'Enable verbose output.'
+      )
+      ..addFlag(
         'watch',
         abbr: 'w',
         help: 'Run in watch mode so the tests re-run whenever a change is '
             'made.',
       )
       ..addFlag(
-        'use-system-flutter',
-        help: 'integration tests are using flutter repository for various tasks'
-            ', such as flutter drive, flutter pub get. If this flag is set, felt '
-            'will use flutter command without cloning the repository. This flag '
-            'can save internet bandwidth. However use with caution. Note that '
-            'since flutter repo is always synced to youngest commit older than '
-            'the engine commit for the tests running in CI, the tests results '
-            "won't be consistent with CIs when this flag is set. flutter "
-            'command should be set in the PATH for this flag to be useful.'
-            'This flag can also be used to test local Flutter changes.')
+        'list',
+        help:
+            'Lists the bundles that would be compiled and the suites that '
+            'will be run as part of this invocation, without actually '
+            'compiling or running them.'
+      )
+      ..addFlag(
+        'generate-builder-json',
+        help:
+            'Generates JSON for the engine_v2 builders to build and copy all'
+            'artifacts, compile all test bundles, and run all test suites on'
+            'all platforms.'
+      )
+      ..addFlag(
+        'compile',
+        help:
+            'Compile test bundles. If this is specified on its own, we will '
+            'only compile and not run the suites.'
+      )
+      ..addFlag(
+        'run',
+        help:
+            'Run test suites. If this is specified on its own, we will only '
+            'run the suites and not compile the bundles.'
+      )
+      ..addFlag(
+        'copy-artifacts',
+        help:
+            'Copy artifacts needed for test suites. If this is specified on '
+            'its own, we will only copy the artifacts and not compile or run'
+            'the tests bundles or suites.'
+      )
+      ..addFlag(
+        'profile',
+        help:
+            'Use artifacts from the profile build instead of release.'
+      )
       ..addFlag(
         'require-skia-gold',
         help:
@@ -55,11 +93,29 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
             '.dart_tool/goldens. Use this option to bulk-update all screenshots, '
             'for example, when a new browser version affects pixels.',
       )
-      ..addOption(
+      ..addMultiOption(
         'browser',
-        defaultsTo: 'chrome',
-        help: 'An option to choose a browser to run the tests. By default '
-              'tests run in Chrome.',
+        help: 'Filter test suites by browser.',
+      )
+      ..addMultiOption(
+        'compiler',
+        help: 'Filter test suites by compiler.',
+      )
+      ..addMultiOption(
+        'renderer',
+        help: 'Filter test suites by renderer.',
+      )
+      ..addMultiOption(
+        'canvaskit-variant',
+        help: 'Filter test suites by CanvasKit variant.',
+      )
+      ..addMultiOption(
+        'suite',
+        help: 'Filter test suites by suite name.',
+      )
+      ..addMultiOption(
+        'bundle',
+        help: 'Filter test suites by bundle name.',
       )
       ..addFlag(
         'fail-early',
@@ -77,11 +133,6 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       ..addFlag(
         'wasm',
         help: 'Whether the test we are running are compiled to webassembly.'
-      )
-      ..addFlag(
-        'use-local-canvaskit',
-        help: 'Optional. Whether or not to use the locally built version of '
-              'CanvasKit in the tests.',
       );
   }
 
@@ -93,9 +144,9 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
 
   bool get isWatchMode => boolArg('watch');
 
-  bool get failEarly => boolArg('fail-early');
+  bool get isList => boolArg('list');
 
-  bool get isWasm => boolArg('wasm');
+  bool get failEarly => boolArg('fail-early');
 
   /// Whether to start the browser in debug mode.
   ///
@@ -103,17 +154,10 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   /// you set breakpoints or inspect the code.
   bool get isDebug => boolArg('debug');
 
-  /// Paths to targets to run, e.g. a single test.
-  List<String> get targets => argResults!.rest;
+  bool get isVerbose => boolArg('verbose');
 
   /// The target test files to run.
-  List<FilePath> get targetFiles => targets.map((String t) => FilePath.fromCwd(t)).toList();
-
-  /// Whether all tests should run.
-  bool get runAllTests => targets.isEmpty;
-
-  /// The name of the browser to run tests in.
-  String get browserName => stringArg('browser');
+  List<FilePath> get targetFiles => argResults!.rest.map((String t) => FilePath.fromCwd(t)).toList();
 
   /// When running screenshot tests, require Skia Gold to be available and
   /// reachable.
@@ -126,31 +170,219 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   /// Path to a CanvasKit build. Overrides the default CanvasKit.
   String? get overridePathToCanvasKit => argResults!['canvaskit-path'] as String?;
 
-  /// Whether or not to use the locally built version of CanvasKit.
-  bool get useLocalCanvasKit => boolArg('use-local-canvaskit');
+  final FeltConfig config = FeltConfig.fromFile(
+    path.join(environment.webUiTestDir.path, 'felt_config.yaml')
+  );
+
+  BrowserSuiteFilter? makeBrowserFilter() {
+    final List<String>? browserArgs = argResults!['browser'] as List<String>?;
+    if (browserArgs == null || browserArgs.isEmpty) {
+      return null;
+    }
+    final Set<BrowserName> browserNames = Set<BrowserName>.from(browserArgs.map((String arg) => BrowserName.values.byName(arg)));
+    return BrowserSuiteFilter(allowList: browserNames);
+  }
+
+  CompilerFilter? makeCompilerFilter() {
+    final List<String>? compilerArgs = argResults!['compiler'] as List<String>?;
+    if (compilerArgs == null || compilerArgs.isEmpty) {
+      return null;
+    }
+    final Set<Compiler> compilers = Set<Compiler>.from(compilerArgs.map((String arg) => Compiler.values.byName(arg)));
+    return CompilerFilter(allowList: compilers);
+  }
+
+  RendererFilter? makeRendererFilter() {
+    final List<String>? rendererArgs = argResults!['renderer'] as List<String>?;
+    if (rendererArgs == null || rendererArgs.isEmpty) {
+      return null;
+    }
+    final Set<Renderer> renderers = Set<Renderer>.from(rendererArgs.map((String arg) => Renderer.values.byName(arg)));
+    return RendererFilter(allowList: renderers);
+  }
+
+  CanvasKitVariantFilter? makeCanvasKitVariantFilter() {
+    final List<String>? variantArgs = argResults!['canvaskit-variant'] as List<String>?;
+    if (variantArgs == null || variantArgs.isEmpty) {
+      return null;
+    }
+    final Set<CanvasKitVariant> variants = Set<CanvasKitVariant>.from(variantArgs.map((String arg) => CanvasKitVariant.values.byName(arg)));
+    return CanvasKitVariantFilter(allowList: variants);
+  }
+
+  SuiteNameFilter? makeSuiteNameFilter() {
+    final List<String>? suiteNameArgs = argResults!['suite'] as List<String>?;
+    if (suiteNameArgs == null || suiteNameArgs.isEmpty) {
+      return null;
+    }
+
+    final Iterable<String> allSuiteNames = config.testSuites.map((TestSuite suite) => suite.name);
+    for (final String suiteName in suiteNameArgs) {
+      if (!allSuiteNames.contains(suiteName)) {
+        throw ToolExit('No suite found named $suiteName');
+      }
+    }
+    return SuiteNameFilter(allowList: Set<String>.from(suiteNameArgs));
+  }
+
+  BundleNameFilter? makeBundleNameFilter() {
+    final List<String>? bundleNameArgs = argResults!['bundle'] as List<String>?;
+    if (bundleNameArgs == null || bundleNameArgs.isEmpty) {
+      return null;
+    }
+
+    final Iterable<String> allBundleNames = config.testSuites.map(
+      (TestSuite suite) => suite.testBundle.name
+    );
+    for (final String bundleName in bundleNameArgs) {
+      if (!allBundleNames.contains(bundleName)) {
+        throw ToolExit('No bundle found named $bundleName');
+      }
+    }
+    return BundleNameFilter(allowList: Set<String>.from(bundleNameArgs));
+  }
+
+  FileFilter? makeFileFilter() {
+    final List<FilePath> tests = targetFiles;
+    if (tests.isEmpty) {
+      return null;
+    }
+    final Set<String> bundleNames = <String>{};
+    for (final FilePath testPath in tests) {
+      if (!io.File(testPath.absolute).existsSync()) {
+        throw ToolExit('Test path not found: $testPath');
+      }
+      bool bundleFound = false;
+      for (final TestBundle bundle in config.testBundles) {
+        final String testSetPath = getTestSetDirectory(bundle.testSet).path;
+        if (path.isWithin(testSetPath, testPath.absolute)) {
+          bundleFound = true;
+          bundleNames.add(bundle.name);
+        }
+      }
+      if (!bundleFound) {
+        throw ToolExit('Test path not in any known test bundle: $testPath');
+      }
+    }
+    return FileFilter(allowList: bundleNames);
+  }
+
+  List<SuiteFilter> get suiteFilters {
+    final BrowserSuiteFilter? browserFilter = makeBrowserFilter();
+    final CompilerFilter? compilerFilter = makeCompilerFilter();
+    final RendererFilter? rendererFilter = makeRendererFilter();
+    final CanvasKitVariantFilter? canvaskitVariantFilter = makeCanvasKitVariantFilter();
+    final SuiteNameFilter? suiteNameFilter = makeSuiteNameFilter();
+    final BundleNameFilter? bundleNameFilter = makeBundleNameFilter();
+    final FileFilter? fileFilter = makeFileFilter();
+    return <SuiteFilter>[
+      PlatformBrowserFilter(),
+      if (browserFilter != null) browserFilter,
+      if (compilerFilter != null) compilerFilter,
+      if (rendererFilter != null) rendererFilter,
+      if (canvaskitVariantFilter != null) canvaskitVariantFilter,
+      if (suiteNameFilter != null) suiteNameFilter,
+      if (bundleNameFilter != null) bundleNameFilter,
+      if (fileFilter != null) fileFilter,
+    ];
+  }
+
+  List<TestSuite> _filterTestSuites() {
+    if (isVerbose) {
+      print('Filtering suites...');
+    }
+    final List<SuiteFilter> filters = suiteFilters;
+    final List<TestSuite> filteredSuites = config.testSuites.where((TestSuite suite) {
+      for (final SuiteFilter filter in filters) {
+        final SuiteFilterResult result = filter.filterSuite(suite);
+        if (!result.isAccepted) {
+          if (isVerbose) {
+            print('  ${suite.name.ansiCyan} rejected for reason: ${result.rejectReason}');
+          }
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+    return filteredSuites;
+  }
+
+  List<TestBundle> _filterBundlesForSuites(List<TestSuite> suites) {
+    final Set<TestBundle> seenBundles =
+      Set<TestBundle>.from(suites.map((TestSuite suite) => suite.testBundle));
+    return config.testBundles.where((TestBundle bundle) => seenBundles.contains(bundle)).toList();
+  }
+
+  ArtifactDependencies _artifactsForSuites(List<TestSuite> suites) {
+    return suites.fold(ArtifactDependencies.none(),
+      (ArtifactDependencies deps, TestSuite suite) => deps | suite.artifactDependencies);
+  }
 
   @override
   Future<bool> run() async {
-    final List<FilePath> testFiles = runAllTests
-          ? findAllTests()
-          : targetFiles;
+    final List<TestSuite> filteredSuites = _filterTestSuites();
+    final List<TestBundle> bundles = _filterBundlesForSuites(filteredSuites);
+    final ArtifactDependencies artifacts = _artifactsForSuites(filteredSuites);
+    if (boolArg('generate-builder-json')) {
+      print(generateBuilderJson(config));
+      return true;
+    }
+    if (isList || isVerbose) {
+      print('Suites:');
+      for (final TestSuite suite in filteredSuites) {
+        print('  ${suite.name.ansiCyan}');
+      }
+      print('Bundles:');
+      for (final TestBundle bundle in bundles) {
+        print('  ${bundle.name.ansiMagenta}');
+      }
+      print('Artifacts:');
+      if (artifacts.canvasKit) {
+        print('  canvaskit'.ansiYellow);
+      }
+      if (artifacts.canvasKitChromium) {
+        print('  canvaskit_chromium'.ansiYellow);
+      }
+      if (artifacts.skwasm) {
+        print('  skwasm'.ansiYellow);
+      }
+    }
+    if (isList) {
+      return true;
+    }
 
+    bool shouldRun = boolArg('run');
+    bool shouldCompile = boolArg('compile');
+    bool shouldCopyArtifacts = boolArg('copy-artifacts');
+    if (!shouldRun && !shouldCompile && !shouldCopyArtifacts) {
+      // If none of these is specified, we should assume we need to do all of them.
+      shouldRun = true;
+      shouldCompile = true;
+      shouldCopyArtifacts = true;
+    }
+
+    final Set<FilePath>? testFiles = targetFiles.isEmpty ? null : Set<FilePath>.from(targetFiles);
     final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
       if (isWatchMode) ClearTerminalScreenStep(),
-      CompileTestsStep(
-        testFiles: testFiles,
-        useLocalCanvasKit: useLocalCanvasKit,
-        isWasm: isWasm
-      ),
-      RunTestsStep(
-        browserName: browserName,
-        testFiles: testFiles,
-        isDebug: isDebug,
-        isWasm: isWasm,
-        doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
-        requireSkiaGold: requireSkiaGold,
-        overridePathToCanvasKit: overridePathToCanvasKit,
-      ),
+      if (shouldCopyArtifacts) CopyArtifactsStep(artifacts, isProfile: boolArg('profile')),
+      if (shouldCompile)
+        for (final TestBundle bundle in bundles)
+          CompileBundleStep(
+            bundle: bundle,
+            isVerbose: isVerbose,
+            testFiles: testFiles,
+          ),
+      if (shouldRun)
+        for (final TestSuite suite in filteredSuites)
+          RunSuiteStep(
+            suite,
+            isDebug: isDebug,
+            isVerbose: isVerbose,
+            doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
+            requireSkiaGold: requireSkiaGold,
+            overridePathToCanvasKit: overridePathToCanvasKit,
+            testFiles: testFiles,
+          ),
     ]);
 
     try {

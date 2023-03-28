@@ -57,7 +57,7 @@ window.onload = async function () {
     const isSkwasm = link.hasAttribute('skwasm');
     const imports = isSkwasm ? new Promise((resolve) => {
       const skwasmScript = document.createElement('script');
-      skwasmScript.src = '/skwasm/skwasm.js';
+      skwasmScript.src = '/canvaskit/skwasm.js';
 
       document.body.appendChild(skwasmScript);
       skwasmScript.addEventListener('load', async () => {

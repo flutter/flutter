@@ -24,6 +24,7 @@ Future<String> compareImage(
   String filename,
   SkiaGoldClient? skiaClient, {
   required bool isCanvaskitTest,
+  required bool verbose,
 }) async {
   if (skiaClient == null) {
     return 'OK';
@@ -69,12 +70,13 @@ Future<String> compareImage(
     // At the moment, we don't support local screenshot testing because we use
     // Skia Gold to handle our screenshots and diffing. In the future, we might
     // implement local screenshot testing if there's a need.
-    print('Screenshot generated: file://$screenshotPath'); // ignore: avoid_print
     return 'OK';
   }
 
   // TODO(mdebbar): Use the Gold tool to locally diff the golden.
-
+  if (verbose) {
+    print('Screenshot generated: file://$screenshotPath'); // ignore: avoid_print
+  }
   return 'OK';
 }
 

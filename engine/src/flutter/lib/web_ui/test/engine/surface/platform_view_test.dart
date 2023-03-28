@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import '../../matchers.dart';
+import '../../common/matchers.dart';
 
 const MethodCodec codec = StandardMethodCodec();
 final EngineSingletonFlutterWindow window = EngineSingletonFlutterWindow(0, EnginePlatformDispatcher.instance);
