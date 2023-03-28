@@ -15,6 +15,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'divider.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -360,7 +361,6 @@ class _IndicatorPainter extends CustomPainter {
     required _IndicatorPainter? old,
     required this.indicatorPadding,
     required this.labelPaddings,
-    this.dividerColor,
   }) : super(repaint: controller.animation) {
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
@@ -372,7 +372,6 @@ class _IndicatorPainter extends CustomPainter {
   final TabBarIndicatorSize? indicatorSize;
   final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
-  final Color? dividerColor;
   final List<EdgeInsetsGeometry> labelPaddings;
 
   // _currentTabOffsets and _currentTextDirection are set each time TabBar
@@ -465,10 +464,6 @@ class _IndicatorPainter extends CustomPainter {
       size: _currentRect!.size,
       textDirection: _currentTextDirection,
     );
-    if (dividerColor != null) {
-      final Paint dividerPaint = Paint()..color = dividerColor!..strokeWidth = 1;
-      canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), dividerPaint);
-    }
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
@@ -682,6 +677,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.indicator,
     this.indicatorSize,
     this.dividerColor,
+    this.dividerHeight,
     this.labelColor,
     this.labelStyle,
     this.labelPadding,
@@ -731,6 +727,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.indicator,
     this.indicatorSize,
     this.dividerColor,
+    this.dividerHeight,
     this.labelColor,
     this.labelStyle,
     this.labelPadding,
@@ -848,6 +845,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// color is used. If that is null and [ThemeData.useMaterial3] is true,
   /// [ColorScheme.surfaceVariant] will be used, otherwise divider will not be drawn.
   final Color? dividerColor;
+
+  /// The height of the divider.
+  ///
+  /// If null and [ThemeData.useMaterial3] is true, [TabBarTheme.dividerHeight]
+  /// is used. If that is null and [ThemeData.useMaterial3] is true, 1.0 will be used.
+  /// Otherwise divider will not be drawn.
+  final double? dividerHeight;
 
   /// The color of selected tab labels.
   ///
@@ -1096,7 +1100,7 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
-  Decoration _getIndicator() {
+  Decoration _getIndicator(TabBarIndicatorSize indicatorSize) {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
@@ -1130,17 +1134,24 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
     }
 
-    return UnderlineTabIndicator(
-      borderRadius: theme.useMaterial3 && widget._isPrimary
+    if (theme.useMaterial3 && widget._isPrimary && indicatorSize == TabBarIndicatorSize.label) {
+      return UnderlineTabIndicator(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(3.0),
+          topRight: Radius.circular(3.0),
+        ),
+        borderSide: BorderSide(
         // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
         // when `preferredSize`and `indicatorWeight` are updated to support Material 3
         // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
         // https://github.com/flutter/flutter/issues/116136
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(3.0),
-            topRight: Radius.circular(3.0),
-          )
-        : null,
+          width: widget.indicatorWeight,
+          color: color,
+        ),
+      );
+    }
+
+    return UnderlineTabIndicator(
       borderSide: BorderSide(
         width: widget.indicatorWeight,
         color: color,
@@ -1185,17 +1196,18 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _initIndicatorPainter() {
-    final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarIndicatorSize indicatorSize = widget.indicatorSize
+      ?? tabBarTheme.indicatorSize
+      ?? _defaults.indicatorSize!;
 
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
-      indicator: _getIndicator(),
-      indicatorSize: widget.indicatorSize ?? tabBarTheme.indicatorSize ?? _defaults.indicatorSize!,
+      indicator: _getIndicator(indicatorSize),
+      indicatorSize: indicatorSize,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
-      dividerColor: theme.useMaterial3 ? widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor : null,
       labelPaddings: _labelPaddings,
     );
   }
@@ -1390,6 +1402,7 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
+    final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
@@ -1532,6 +1545,24 @@ class _TabBarState extends State<TabBar> {
       tabBar = Padding(
         padding: widget.padding!,
         child: tabBar,
+      );
+    }
+
+    if (theme.useMaterial3) {
+      tabBar = Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          Container(
+            height: widget.preferredSize.height,
+            alignment: Alignment.bottomCenter,
+            child: Divider(
+              height: 0,
+              thickness: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight,
+              color: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor,
+            ),
+          ),
+          tabBar,
+        ],
       );
     }
 
@@ -2069,6 +2100,9 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
+  double? get dividerHeight => 1.0;
+
+  @override
   Color? get dividerColor => _colors.surfaceVariant;
 
   @override
@@ -2128,6 +2162,9 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
 
   @override
   Color? get dividerColor => _colors.surfaceVariant;
+
+  @override
+  double? get dividerHeight => 1.0;
 
   @override
   Color? get indicatorColor => _colors.primary;
