@@ -69,13 +69,28 @@ class VersionMigration extends ProjectMigrator {
 
   @override
   void migrate() {
+    // Skip this migration if the affected files do not exist. This indicates
+    // the app has done non-trivial changes to its runner and this migration
+    // might not work as expected if applied.
     if (!_cmakeFile.existsSync()) {
-      logger.printTrace('windows/runner/CMakeLists.txt file not found, skipping version migration');
+      logger.printTrace('''
+windows/runner/CMakeLists.txt file not found, skipping version migration.
+
+This indicates non-trivial changes have been made to the Windows runner in the
+"windows" folder. If needed, you can reset the Windows runner by deleting the
+"windows" folder and then using the "flutter create --platforms=windows ." command.
+''');
       return;
     }
 
     if (!_resourceFile.existsSync()) {
-      logger.printTrace('windows/runner/Runner.rc file not found, skipping version migration');
+      logger.printTrace('''
+windows/runner/Runner.rc file not found, skipping version migration.
+
+This indicates non-trivial changes have been made to the Windows runner in the
+"windows" folder. If needed, you can reset the Windows runner by deleting the
+"windows" folder and then using the "flutter create --platforms=windows ." command.
+''');
       return;
     }
 
