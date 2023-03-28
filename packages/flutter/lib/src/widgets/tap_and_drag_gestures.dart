@@ -1091,7 +1091,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
       untransformedDelta: movedLocally,
       untransformedEndPosition: event.localPosition
     ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-    if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
+    if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop) || (_wonArenaForPrimaryPointer && _pastSlopTolerance)) {
       _start = event;
       _dragState = _DragState.accepted;
       resolve(GestureDisposition.accepted);
