@@ -108,7 +108,7 @@ typedef ControlsWidgetBuilder = Widget Function(BuildContext context, ControlsDe
 
 /// A builder that creates the icon widget for the step given [stepIndex], and
 /// [stepState].
-typedef StepIconBuilder = Widget Function(int stepIndex, StepState stepState);
+typedef StepIconBuilder = Widget? Function(int stepIndex, StepState stepState);
 
 const TextStyle _kStepStyle = TextStyle(
   fontSize: 12.0,
@@ -313,7 +313,9 @@ class Stepper extends StatefulWidget {
 
   /// Callback for creating custom icons for the [steps].
   ///
-  /// The callback is called for all the [StepState] except for [StepState.error].
+  /// In case of overriding icon for [StepState.error], please return
+  /// the widget having size of 14 pixels or less to avoid overflow.
+  ///
   /// If null, the default icons will be used for respective [StepState].
   final StepIconBuilder? stepIconBuilder;
 
@@ -384,8 +386,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Widget _buildCircleChild(int index, bool oldState) {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
-    if(widget.stepIconBuilder != null && state != StepState.error) {
-      return widget.stepIconBuilder!(index, state);
+    if(widget.stepIconBuilder != null) {
+      final Widget? icon = widget.stepIconBuilder!(index, state);
+      if(icon != null) {
+        return icon;
+      }
     }
     switch (state) {
       case StepState.indexed:

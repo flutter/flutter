@@ -1269,7 +1269,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
               if(state == StepState.complete) {
                 return const FlutterLogo(size: 18);
               }
-              return const Icon(Icons.star, size: 18);
             },
             steps: const <Step>[
               Step(
@@ -1293,9 +1292,11 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       ),
     );
 
-
+    /// Finds the overridden widget for StepState.complete
     expect(find.byType(FlutterLogo), findsOneWidget);
-    expect(find.byIcon(Icons.star), findsOneWidget);
+
+    /// StepState.editing and StepState.error should have a default icon
+    expect(find.byIcon(Icons.edit), findsOneWidget);
     expect(find.text('!'), findsOneWidget);
   });
 
