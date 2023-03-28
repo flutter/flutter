@@ -128,12 +128,17 @@ class ListenableFutureBuilder<T extends Listenable> extends StatefulWidget {
     required this.listenable,
     required this.builder,
     this.child,
+    this.disposeListenable,
     super.key,
   });
 
   /// Instantiates the [Future] whose return value you depend on in order to build.
   /// This should perform initialization logic for the [Listenable] and return it
   final Future<T> Function() listenable;
+
+  /// Provides an opportunity to dispose of the [Listenable] when the
+  /// [_ListenableFutureBuilderState] is disposed.
+  final Future<T> Function(T listenable)? disposeListenable;
 
   /// A [AsyncListenableBuilder] which builds a widget depending on the
   /// [Listenable] such as a [ChangeNotifier]
@@ -168,7 +173,6 @@ class _ListenableFutureBuilderState<T extends Listenable>
   late AsyncSnapshot<T> _snapshot;
 
   ///Use this to access the last snapshot that was passed to the builder
-  @visibleForTesting
   AsyncSnapshot<T> get lastSnapshot => _snapshot;
 
   @override
@@ -189,6 +193,7 @@ class _ListenableFutureBuilderState<T extends Listenable>
     _unsubscribe();
     _snapshot = AsyncSnapshot<T>.nothing();
     super.dispose();
+    widget.disposeListenable?.call(_snapshot.data!);
   }
 
   void _handleChange() => setState(() {});
