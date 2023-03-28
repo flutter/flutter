@@ -100,13 +100,8 @@ class SpellCheckConfiguration {
 
 // Methods for displaying spell check results:
 
-/// Adjusts spell check results to correspond to [newText] if the only results
-/// that the handler has access to are the [results] corresponding to
-/// [resultsText].
-///
-/// Used in the case where the request for the spell check results of the
-/// [newText] is lagging in order to avoid display of incorrect results.
-List<SuggestionSpan> _correctSpellCheckResults(
+
+  List<SuggestionSpan> _correctSpellCheckResults(
     String newText, String resultsText, List<SuggestionSpan> results) {
   final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
 
@@ -121,66 +116,178 @@ List<SuggestionSpan> _correctSpellCheckResults(
   bool currentSpanValid = false;
   RegExp regex;
 
+  bool oneCorrectionAllowed = false;
+
   // Assumes that the order of spans has not been jumbled for optimization
   // purposes, and will only search since the previously found span.
   int searchStart = 0;
+  print("---------------------------------------------------------");
 
   while (spanPointer < results.length) {
     // Try finding SuggestionSpan from old results (currentSpan) in new text.
     currentSpan = results[spanPointer];
     currentSpanText =
         resultsText.substring(currentSpan.range.start, currentSpan.range.end);
+    
+    int newSpanTextEnd = currentSpan.range.end + offset;
+    regex = RegExp('\\b$currentSpanText\\b');
+    foundIndex = newText.substring(searchStart).indexOf(regex);
+    print('found index: $foundIndex');
+    bool currentSpanFoundExactly = foundIndex == (searchStart);
+    bool currentSpanFoundElsewhere = foundIndex >= 0;
+    
+    print('current span: ${currentSpan.range}');
 
-    try {
-      // currentSpan was found and can be applied to new text.
-      int newSpanTextEnd = currentSpan.range.end + offset;
-      newSpanText = newText.substring(
-          currentSpan.range.start + offset, newSpanTextEnd);
-      // bool newSpanTextHasNoTextAppended = newSpanTextEnd == newText.length ? true : newSpanTextEnd+1 == ' ';
-      currentSpanValid = true;
-    } catch (e) {
-      // currentSpan is invalid and needs to be searched for in newText.
-      currentSpanValid = false;
-    }
-
-    if (currentSpanValid && newSpanText == currentSpanText) {
+    if (oneCorrectionAllowed || currentSpanFoundExactly) {
       // currentSpan was found at the same index in new text and old text
       // (resultsText), so apply it to new text by adding it to the list of
       // corrected results.
       searchStart = currentSpan.range.end + offset;
-      int actualEnd = newText.substring(searchStart) == ' ' ? searchStart : searchStart + 1; // TODO(camsim99): fix this to actually extend where needed with regex -- jk i think the right way is to actually not go here if it's not exact
+      print('search start: $searchStart');
       adjustedSpan = SuggestionSpan(
           TextRange(
-              start: currentSpan.range.start + offset, end: actualEnd),
+              start: currentSpan.range.start + offset, end: searchStart),
           currentSpan.suggestions
       );
-        print('adjusted span 1: ${adjustedSpan.range}');
+      print('adjusted span 1: ${adjustedSpan.range}');
+      correctedSpellCheckResults.add(adjustedSpan);       
+    } else if (currentSpanFoundElsewhere) {
+      // Word was pushed forward but not modified
+      // foundIndex += searchStart;
+      spanLength = currentSpan.range.end - currentSpan.range.start;
+      searchStart = foundIndex + spanLength;
+      adjustedSpan = SuggestionSpan(
+          TextRange(start: searchStart, end: searchStart + spanLength),
+          currentSpan.suggestions
+      );
+      // Todo: ensure word waas pushed forward.
+      offset = foundIndex - currentSpan.range.start;
+
+      print('adjusted span 2: ${adjustedSpan.range}');
       correctedSpellCheckResults.add(adjustedSpan);
+      oneCorrectionAllowed = true;
     } else {
-      // Search for currentSpan in new text and if found, apply it to new text
-      // by adding it to the list of corrected results.
-      regex = RegExp('\\b$currentSpanText\\b');
-      foundIndex = newText.substring(searchStart).indexOf(regex);
+      oneCorrectionAllowed = true;
+      // Find out if word was modified by extension
+      regex = RegExp('\s$currentSpanText');
+      print('search start: $searchStart');
+      int fI1 = newText.substring(searchStart).indexOf(regex);
+      print('fI1: $fI1');
 
-      if (foundIndex >= 0) {
-        foundIndex += searchStart;
+      if (fI1 >= 0) {
+        // Word was extended
+        regex = RegExp('\s');
         spanLength = currentSpan.range.end - currentSpan.range.start;
-        searchStart = foundIndex + spanLength;
-        adjustedSpan = SuggestionSpan(
-            TextRange(start: foundIndex, end: searchStart),
+        int fI3 = newText.substring(fI1 + spanLength).indexOf(regex);
+        
+        if (fI3 >= 0) {
+          // Word not at end of string
+          searchStart = fI3 + 1;
+          adjustedSpan = SuggestionSpan(
+            TextRange(start: fI1, end: searchStart),
             currentSpan.suggestions
-        );
-        offset = foundIndex - currentSpan.range.start;
-
-        print('adjusted span 2: ${adjustedSpan.range}');
+          );
+        print('adjusted span 3: ${adjustedSpan.range}');
         correctedSpellCheckResults.add(adjustedSpan);
+        offset = searchStart - currentSpan.range.end;    
+        } else {
+          // Word at end of string
+            adjustedSpan = SuggestionSpan(
+            TextRange(start: fI1, end: newText.length),
+            currentSpan.suggestions
+          );
+          print('adjusted span 4: ${adjustedSpan.range}');
+                correctedSpellCheckResults.add(adjustedSpan);
+        }
       }
     }
+
     spanPointer++;
   }
-
+  print("---------------------------------------------------------");
   return correctedSpellCheckResults;
-}
+  }
+
+/// Adjusts spell check results to correspond to [newText] if the only results
+/// that the handler has access to are the [results] corresponding to
+/// [resultsText].
+///
+/// Used in the case where the request for the spell check results of the
+/// [newText] is lagging in order to avoid display of incorrect results.
+// List<SuggestionSpan> _correctSpellCheckResults(
+//     String newText, String resultsText, List<SuggestionSpan> results) {
+//   final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
+
+//   int spanPointer = 0;
+//   int offset = 0;
+//   int foundIndex;
+//   int spanLength;
+//   SuggestionSpan currentSpan;
+//   SuggestionSpan adjustedSpan;
+//   String currentSpanText;
+//   String newSpanText = '';
+//   bool currentSpanValid = false;
+//   RegExp regex;
+
+//   // Assumes that the order of spans has not been jumbled for optimization
+//   // purposes, and will only search since the previously found span.
+//   int searchStart = 0;
+
+//   while (spanPointer < results.length) {
+//     // Try finding SuggestionSpan from old results (currentSpan) in new text.
+//     currentSpan = results[spanPointer];
+//     currentSpanText =
+//         resultsText.substring(currentSpan.range.start, currentSpan.range.end);
+
+//     try {
+//       // currentSpan was found and can be applied to new text.
+//       int newSpanTextEnd = currentSpan.range.end + offset;
+//       newSpanText = newText.substring(
+//           currentSpan.range.start + offset, newSpanTextEnd);
+//       currentSpanValid = true;
+//     } catch (e) {
+//       // currentSpan is invalid and needs to be searched for in newText.
+//       currentSpanValid = false;
+//     }
+
+//     if (currentSpanValid && newSpanText == currentSpanText) {
+//       // currentSpan was found at the same index in new text and old text
+//       // (resultsText), so apply it to new text by adding it to the list of
+//       // corrected results.
+//       searchStart = currentSpan.range.end + offset;
+//       int actualEnd = newText.substring(searchStart) == ' ' ? searchStart : searchStart + 1;
+//       adjustedSpan = SuggestionSpan(
+//           TextRange(
+//               start: currentSpan.range.start + offset, end: actualEnd),
+//           currentSpan.suggestions
+//       );
+//       print('adjusted span 1: ${adjustedSpan.range}');
+//       correctedSpellCheckResults.add(adjustedSpan);
+//     } else {
+//       // Search for currentSpan in new text and if found, apply it to new text
+//       // by adding it to the list of corrected results.
+//       regex = RegExp('\\b$currentSpanText\\b');
+//       foundIndex = newText.substring(searchStart).indexOf(regex);
+
+//       if (foundIndex >= 0) {
+//         foundIndex += searchStart;
+//         spanLength = currentSpan.range.end - currentSpan.range.start;
+//         searchStart = foundIndex + spanLength;
+//         adjustedSpan = SuggestionSpan(
+//             TextRange(start: foundIndex, end: searchStart),
+//             currentSpan.suggestions
+//         );
+//         offset = foundIndex - currentSpan.range.start;
+
+//         print('adjusted span 2: ${adjustedSpan.range}');
+//         correctedSpellCheckResults.add(adjustedSpan);
+//       }
+//     }
+//     spanPointer++;
+//   }
+
+//   return correctedSpellCheckResults;
+// }
 
 /// Builds the [TextSpan] tree given the current state of the text input and
 /// spell check results.
@@ -203,7 +310,6 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
   final String spellCheckResultsText = spellCheckResults.spellCheckedText;
 
   if (spellCheckResultsText != value.text) {
-    print('CORRECTING SPELL CHECK RESULTS AS EXPECTED');
     spellCheckResultsSpans = _correctSpellCheckResults(
         value.text, spellCheckResultsText, spellCheckResultsSpans);
   }
@@ -293,9 +399,6 @@ List<TextSpan> _buildSubtreesWithoutComposingRegion(
         endIndex =
             currSpan.range.end < text.length ? currSpan.range.end : text.length;
         cursorInCurrSpan = currSpan.range.start <= cursorIndex && currSpan.range.end >= cursorIndex;
-        print('curr span start: ${currSpan.range.start}');
-        print('curr span end: ${currSpan.range.end}');
-        print('cursor in curr span: $cursorInCurrSpan');
         tsTreeChildren.add(
           TextSpan(
             style: cursorInCurrSpan
