@@ -12,9 +12,13 @@ enum PowerState {
 }
 
 /// A convenience wrapper for an IOKit power source.
-class PowerSource {
+final class PowerSource {
   let info = IOPSCopyPowerSourcesInfo().takeRetainedValue()
-  lazy var sources = IOPSCopyPowerSourcesList(info).takeRetainedValue() as Array
+  let sources: Array<CFTypeRef>
+
+  init() {
+    sources = IOPSCopyPowerSourcesList(info).takeRetainedValue() as Array
+  }
 
   func hasBattery() -> Bool {
     return !sources.isEmpty
@@ -22,7 +26,7 @@ class PowerSource {
 
   /// Returns the current power source capacity. Apple-defined power sources will return this value
   /// as a percentage.
-  func getCurrentCapacity() -> Int {
+  func getCurrentCapacity() -> Int? {
     if let source = sources.first {
       let description =
         IOPSGetPowerSourceDescription(info, source).takeUnretainedValue() as! [String: AnyObject]
@@ -30,7 +34,7 @@ class PowerSource {
         return level
       }
     }
-    return -1
+    return nil
   }
 
   /// Returns whether the device is drawing battery power or connected to an external power source.
@@ -54,11 +58,11 @@ class PowerSource {
 }
 
 protocol PowerSourceStateChangeDelegate: AnyObject {
-  func onPowerSourceStateChanged()
+  func didChangePowerSourceState()
 }
 
 /// A listener for system power source state change events. Notifies the delegate on each event.
-class PowerSourceStateChangeHandler {
+final class PowerSourceStateChangeHandler {
   private var runLoopSource: CFRunLoopSource?
   weak var delegate: PowerSourceStateChangeDelegate?
 
@@ -66,10 +70,10 @@ class PowerSourceStateChangeHandler {
     let context = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
     self.runLoopSource = IOPSNotificationCreateRunLoopSource(
       { (context: UnsafeMutableRawPointer?) in
-        let weakSelf = Unmanaged<PowerSourceStateChangeHandler>.fromOpaque(
+        let unownedSelf = Unmanaged<PowerSourceStateChangeHandler>.fromOpaque(
           UnsafeRawPointer(context!)
         ).takeUnretainedValue()
-        weakSelf.delegate?.onPowerSourceStateChanged()
+        unownedSelf.delegate?.didChangePowerSourceState()
       }, context
     ).takeRetainedValue()
     CFRunLoopAddSource(CFRunLoopGetCurrent(), self.runLoopSource, .defaultMode)
