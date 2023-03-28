@@ -69,7 +69,7 @@ String generateArbBasedLocalizationSubclasses({
   ConstructorGenerator? generateConstructorForCountrySubClass,
   required String factoryName,
   required String factoryDeclaration,
-  required bool factoryIsConst,
+  required bool callsFactoryWithConst,
   required String factoryArguments,
   required String supportedLanguagesConstant,
   required String supportedLanguagesDocMacro,
@@ -281,7 +281,7 @@ $factoryDeclaration
     if (languageToLocales[language]!.length == 1) {
       output.writeln('''
     case '$language':
-      return ${factoryIsConst ? 'const ': ''}$generatedClassPrefix${languageToLocales[language]![0].camelCase()}($factoryArguments);''');
+      return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${languageToLocales[language]![0].camelCase()}($factoryArguments);''');
     } else if (!languageToScriptCodes.containsKey(language)) { // Does not distinguish between scripts. Switch on countryCode directly.
       output.writeln('''
     case '$language': {
@@ -294,11 +294,11 @@ $factoryDeclaration
         final String countryCode = locale.countryCode!;
         output.writeln('''
         case '$countryCode':
-          return ${factoryIsConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
+          return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
       }
       output.writeln('''
       }
-      return ${factoryIsConst ? 'const ': ''}$generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
+      return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
     }''');
     } else { // Language has scriptCode, add additional switch logic.
       bool hasCountryCode = false;
@@ -327,7 +327,7 @@ $factoryDeclaration
             final String countryCode = locale.countryCode!;
             output.writeln('''
             case '$countryCode':
-              return ${factoryIsConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
+              return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
           }
         }
         // Return a fallback locale that matches scriptCode, but not countryCode.
@@ -339,7 +339,7 @@ $factoryDeclaration
           }''');
           }
           output.writeln('''
-          return ${factoryIsConst ? 'const ': ''}$generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
+          return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
         }''');
         } else {
           // Not Explicitly defined, fallback to first locale with the same language and
@@ -353,7 +353,7 @@ $factoryDeclaration
           }''');
             }
             output.writeln('''
-          return ${factoryIsConst ? 'const ': ''}$generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
+          return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
         }''');
             break;
           }
@@ -375,13 +375,13 @@ $factoryDeclaration
           final String countryCode = locale.countryCode!;
           output.writeln('''
         case '$countryCode':
-          return ${factoryIsConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
+          return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
         }
         output.writeln('''
       }''');
       }
       output.writeln('''
-      return ${factoryIsConst ? 'const ': ''}$generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
+      return ${callsFactoryWithConst ? 'const ': ''}$generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
     }''');
     }
   }
@@ -602,7 +602,7 @@ void main(List<String> rawArgs) {
         generateConstructorForCountrySubClass: generateWidgetsConstructorForCountrySubclass,
         factoryName: widgetsFactoryName,
         factoryDeclaration: widgetsFactoryDeclaration,
-        factoryIsConst: true,
+        callsFactoryWithConst: true,
         factoryArguments: widgetsFactoryArguments,
         supportedLanguagesConstant: widgetsSupportedLanguagesConstant,
         supportedLanguagesDocMacro: widgetsSupportedLanguagesDocMacro,
@@ -618,7 +618,7 @@ void main(List<String> rawArgs) {
         generateConstructor: generateMaterialConstructor,
         factoryName: materialFactoryName,
         factoryDeclaration: materialFactoryDeclaration,
-        factoryIsConst: false,
+        callsFactoryWithConst: false,
         factoryArguments: materialFactoryArguments,
         supportedLanguagesConstant: materialSupportedLanguagesConstant,
         supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
@@ -634,7 +634,7 @@ void main(List<String> rawArgs) {
         generateConstructor: generateCupertinoConstructor,
         factoryName: cupertinoFactoryName,
         factoryDeclaration: cupertinoFactoryDeclaration,
-        factoryIsConst: false,
+        callsFactoryWithConst: false,
         factoryArguments: cupertinoFactoryArguments,
         supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
         supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
