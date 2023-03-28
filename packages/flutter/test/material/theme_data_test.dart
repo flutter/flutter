@@ -787,6 +787,7 @@ void main() {
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
       searchBarTheme: const SearchBarThemeData(),
+      searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: sliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
@@ -906,6 +907,7 @@ void main() {
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
       searchBarTheme: const SearchBarThemeData(),
+      searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: otherSliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
@@ -1010,6 +1012,7 @@ void main() {
       progressIndicatorTheme: otherTheme.progressIndicatorTheme,
       radioTheme: otherTheme.radioTheme,
       searchBarTheme: otherTheme.searchBarTheme,
+      searchViewTheme: otherTheme.searchViewTheme,
       sliderTheme: otherTheme.sliderTheme,
       snackBarTheme: otherTheme.snackBarTheme,
       switchTheme: otherTheme.switchTheme,
@@ -1111,6 +1114,7 @@ void main() {
     expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
     expect(themeDataCopy.radioTheme, equals(otherTheme.radioTheme));
     expect(themeDataCopy.searchBarTheme, equals(otherTheme.searchBarTheme));
+    expect(themeDataCopy.searchViewTheme, equals(otherTheme.searchViewTheme));
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.snackBarTheme, equals(otherTheme.snackBarTheme));
     expect(themeDataCopy.switchTheme, equals(otherTheme.switchTheme));
@@ -1249,6 +1253,7 @@ void main() {
       'progressIndicatorTheme',
       'radioTheme',
       'searchBarTheme',
+      'searchViewTheme',
       'segmentedButtonTheme',
       'sliderTheme',
       'snackBarTheme',

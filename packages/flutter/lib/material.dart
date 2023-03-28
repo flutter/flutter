@@ -154,6 +154,7 @@ export 'src/material/scrollbar_theme.dart';
 export 'src/material/search.dart';
 export 'src/material/search_anchor.dart';
 export 'src/material/search_bar_theme.dart';
+export 'src/material/search_view_theme.dart';
 export 'src/material/segmented_button.dart';
 export 'src/material/segmented_button_theme.dart';
 export 'src/material/selectable_text.dart';
