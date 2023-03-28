@@ -3332,7 +3332,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     if (widget.crossAxisUnconstrained) {
       menuPanel = UnconstrainedBox(
         constrainedAxis: widget.orientation,
-        clipBehavior: widget.clipBehavior,
+        clipBehavior: Clip.hardEdge,
         alignment: AlignmentDirectional.centerStart,
         child: menuPanel,
       );
