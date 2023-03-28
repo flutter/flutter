@@ -64,13 +64,10 @@ class PrerollContext {
       switch (m.type) {
         case MutatorType.clipRect:
           clipRect = m.rect!;
-          break;
         case MutatorType.clipRRect:
           clipRect = m.rrect!.outerRect;
-          break;
         case MutatorType.clipPath:
           clipRect = m.path!.getBounds();
-          break;
         default:
           continue;
       }
@@ -527,14 +524,11 @@ class PhysicalShapeEngineLayer extends ContainerLayer
     switch (_clipBehavior) {
       case ui.Clip.hardEdge:
         paintContext.internalNodesCanvas.clipPath(_path, false);
-        break;
       case ui.Clip.antiAlias:
         paintContext.internalNodesCanvas.clipPath(_path, true);
-        break;
       case ui.Clip.antiAliasWithSaveLayer:
         paintContext.internalNodesCanvas.clipPath(_path, true);
         paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
-        break;
       case ui.Clip.none:
         break;
     }

@@ -444,7 +444,6 @@ String _writeSharedGradientShader(ShaderBuilder builder, ShaderMethod method,
     case ui.TileMode.clamp:
       method.addStatement('float tiled_st = clamp(st, 0.0, 1.0);');
       probeName = 'tiled_st';
-      break;
     case ui.TileMode.decal:
       break;
     case ui.TileMode.repeated:
@@ -453,13 +452,11 @@ String _writeSharedGradientShader(ShaderBuilder builder, ShaderMethod method,
       // pattern center is at origin.
       method.addStatement('float tiled_st = fract(st);');
       probeName = 'tiled_st';
-      break;
     case ui.TileMode.mirror:
       method.addStatement('float t_1 = (st - 1.0);');
       method.addStatement(
           'float tiled_st = abs((t_1 - 2.0 * floor(t_1 * 0.5)) - 1.0);');
       probeName = 'tiled_st';
-      break;
   }
   writeUnrolledBinarySearch(method, 0, gradient.thresholdCount - 1,
       probe: probeName,
@@ -812,7 +809,6 @@ class ModeHtmlColorFilter extends EngineHtmlColorFilter {
         // Since we don't have a size, we can't use background color.
         // Use svg filter srcIn instead.
         blendMode = ui.BlendMode.srcIn;
-        break;
       case ui.BlendMode.dstOver:
       case ui.BlendMode.srcIn:
       case ui.BlendMode.srcATop:
