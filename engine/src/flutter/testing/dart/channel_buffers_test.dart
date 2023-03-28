@@ -111,13 +111,10 @@ void main() {
       switch (counter) {
         case 0:
           expect(drainedData, equals(two));
-          break;
         case 1:
           expect(drainedData, equals(three));
-          break;
         case 2:
           expect(drainedData, equals(four));
-          break;
       }
       counter += 1;
     });

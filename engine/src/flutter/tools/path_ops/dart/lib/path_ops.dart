@@ -171,16 +171,12 @@ class Path implements PathProxy {
       switch (verb) {
         case PathVerb.moveTo:
           proxy.moveTo(points[index++], points[index++]);
-          break;
         case PathVerb.lineTo:
           proxy.lineTo(points[index++], points[index++]);
-          break;
         case PathVerb._quadTo:
           assert(false);
-          break;
         case PathVerb._conicTo:
           assert(false);
-          break;
         case PathVerb.cubicTo:
           proxy.cubicTo(
             points[index++],
@@ -190,10 +186,8 @@ class Path implements PathProxy {
             points[index++],
             points[index++],
           );
-          break;
         case PathVerb.close:
           proxy.close();
-          break;
       }
     }
     assert(index == points.length);

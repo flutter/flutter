@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!safari')
 // TODO(mdebbar): https://github.com/flutter/flutter/issues/51169
+@TestOn('!safari')
+library;
 
 import 'dart:async';
 

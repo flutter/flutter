@@ -132,17 +132,13 @@ class ShaderBuilder {
     switch (variable.storage) {
       case ShaderStorageQualifier.kConst:
         _buffer.write('const ');
-        break;
       case ShaderStorageQualifier.kAttribute:
         _buffer.write(isWebGl2 ? 'in '
             : _isFragmentShader ? 'varying ' : 'attribute ');
-        break;
       case ShaderStorageQualifier.kUniform:
         _buffer.write('uniform ');
-        break;
       case ShaderStorageQualifier.kVarying:
         _buffer.write(isWebGl2 ? 'out ' : 'varying ');
-        break;
     }
     _buffer.write('${typeToString(variable.dataType)} ${variable.name}');
     if (variable.storage == ShaderStorageQualifier.kConst) {
@@ -277,17 +273,14 @@ class ShaderMethod {
     switch(tileMode) {
       case ui.TileMode.repeated:
         addStatement('float $destination = fract($source);');
-        break;
       case ui.TileMode.mirror:
         addStatement('float $destination = ($source - 1.0);');
         addStatement(
             '$destination = '
             'abs(($destination - 2.0 * floor($destination * 0.5)) - 1.0);');
-        break;
       case ui.TileMode.clamp:
       case ui.TileMode.decal:
         addStatement('float $destination = $source;');
-        break;
     }
   }
 

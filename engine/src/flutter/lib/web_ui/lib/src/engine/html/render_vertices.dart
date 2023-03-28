@@ -466,10 +466,8 @@ class _WebGlRenderer implements GlRenderer {
         switch (triangleVertexIndex) {
           case 0:
             ctx.moveTo(dx, dy);
-            break;
           case 1:
             ctx.lineTo(dx, dy);
-            break;
           case 2:
             ctx.lineTo(dx, dy);
             ctx.closePath();

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('browser')
+library;
 
 import 'package:js/js_util.dart' as js_util;
 

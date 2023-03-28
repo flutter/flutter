@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// The web_sdk/sdk_rewriter.dart uses this directive.
+// ignore: unnecessary_library_directive
 library skwasm_impl;
 
 export 'skwasm_impl/canvas.dart';
