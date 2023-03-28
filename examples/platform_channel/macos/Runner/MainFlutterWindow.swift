@@ -11,7 +11,7 @@ class MainFlutterWindow: NSWindow, FlutterStreamHandler, PowerSourceStateChangeD
   private var eventSink: FlutterEventSink?
 
   override func awakeFromNib() {
-    let flutterViewController = FlutterViewController.init()
+    let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
