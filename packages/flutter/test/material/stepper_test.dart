@@ -1269,6 +1269,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
               if(state == StepState.complete) {
                 return const FlutterLogo(size: 18);
               }
+              return null;
             },
             steps: const <Step>[
               Step(
