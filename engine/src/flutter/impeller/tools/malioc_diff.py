@@ -278,6 +278,10 @@ def main(argv):
 
   changed = False
   for filename, shaders in before_json.items():
+    if filename not in after_json.keys():
+      print('Shader "{}" has been removed.'.format(filename))
+      changed = True
+      continue
     for core, before_shader in shaders.items():
       if core not in after_json[filename].keys():
         continue
@@ -287,14 +291,15 @@ def main(argv):
 
   for filename, shaders in after_json.items():
     if filename not in before_json:
-      print('Shader {} is new.'.format(filename))
+      print('Shader "{}" is new.'.format(filename))
       changed = True
 
   if changed:
     print(
-        'There are new shaders, or performance changes to existing shaders. '
-        'The golden file must be updated after a build of android_debug_unopt '
-        'using the --malioc-path flag to the flutter/tools/gn script.\n\n'
+        'There are new shaders, shaders have been removed, or performance '
+        'changes to existing shaders. The golden file must be updated after a '
+        'build of android_debug_unopt using the --malioc-path flag to the '
+        'flutter/tools/gn script.\n\n'
         '$ ./flutter/impeller/tools/malioc_diff.py --before {} --after {} --update'
         .format(args.before, args.after)
     )
