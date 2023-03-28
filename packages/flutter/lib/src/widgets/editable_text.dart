@@ -3964,7 +3964,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool showSpellCheckSuggestionsToolbar() {
     // Spell check suggestions toolbars are intended to be shown on non-web
     // platforms. Additionally, the Cupertino style toolbar can't be drawn on
-    // the web with the HTML renderer.
+    // the web with the HTML renderer due to
+    // https://github.com/flutter/flutter/issues/44572.
     final bool platformNotSupported = kIsWeb && BrowserContextMenu.enabled;
     if (!spellCheckEnabled
         || platformNotSupported
