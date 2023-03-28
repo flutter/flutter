@@ -883,9 +883,9 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
         _placeholderCount = 0,
         _placeholderScales = <double>[],
         _styleStack = <CkTextStyle>[],
-        _paragraphBuilder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
+        _paragraphBuilder = canvasKit.ParagraphBuilder.MakeFromFontProvider(
           style.skParagraphStyle,
-          CanvasKitRenderer.instance.fontCollection.skFontCollection,
+          CanvasKitRenderer.instance.fontCollection.fontProvider,
         ) {
     _styleStack.add(_style.getTextStyle());
   }
