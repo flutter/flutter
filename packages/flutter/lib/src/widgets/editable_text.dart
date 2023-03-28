@@ -3948,7 +3948,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Shows toolbar with spell check suggestions of misspelled words that are
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
+    // Spell check suggestions toolbars are intended to be shown on non-web
+    // platforms. Additionally, the Cupertino style toolbar can't be drawn on
+    // the web with the HTML renderer.
+    final bool platformNotSupported = kIsWeb && BrowserContextMenu.enabled;
     if (!spellCheckEnabled
+        || platformNotSupported
         || widget.readOnly
         || _selectionOverlay == null
         || !_spellCheckResultsReceived) {
