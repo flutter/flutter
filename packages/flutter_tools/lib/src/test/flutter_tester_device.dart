@@ -263,8 +263,8 @@ class FlutterTesterTestDevice extends TestDevice {
     Uri httpUri, {
     CompileExpression? compileExpression,
     required Logger logger,
-  }) async {
-    return await connectToVmService(
+  }) {
+    return connectToVmService(
       httpUri,
       compileExpression: compileExpression,
       logger: logger,
