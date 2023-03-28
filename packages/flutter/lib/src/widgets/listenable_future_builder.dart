@@ -191,9 +191,12 @@ class _ListenableFutureBuilderState<T extends Listenable>
   @override
   void dispose() {
     _unsubscribe();
+    if(_snapshot.data!=null)
+    {
+      widget.disposeListenable?.call(_snapshot.data!);
+    }
     _snapshot = AsyncSnapshot<T>.nothing();
     super.dispose();
-    widget.disposeListenable?.call(_snapshot.data!);
   }
 
   void _handleChange() => setState(() {});

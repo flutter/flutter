@@ -207,4 +207,42 @@ void main() {
     expect(snapshot.data, isNull);
     expect(snapshot.connectionState, ConnectionState.none);
   });
+
+  testWidgets('Dispose calls disposeListenable when the widget is disposed',
+      (WidgetTester tester) async {
+    // Create a ValueNotifier to be used in the test
+    final ValueNotifier<int> valueNotifier = ValueNotifier<int>(0);
+    bool disposeListenableCalled = false;
+
+    // Define the disposeListenable function
+    Future<ValueNotifier<int>> disposeListenable(
+        ValueNotifier<int> listenable) {
+      disposeListenableCalled = true;
+      return Future< ValueNotifier<int>>.value(listenable);
+    }
+
+    // Define a simple widget tree with the ListenableFutureBuilder
+    final MaterialApp app = MaterialApp(
+      home: ListenableFutureBuilder<ValueNotifier<int>>(
+        listenable: () async => valueNotifier,
+        builder: (BuildContext context, Widget? child,
+            AsyncSnapshot<ValueNotifier<int>> listenableSnapshot) {
+          return const Text('Test');
+        },
+        disposeListenable: disposeListenable,
+      ),
+    );
+
+    // Pump the widget
+    await tester.pumpWidget(app);
+
+    // Wait for the async operation to complete
+    await tester.pumpAndSettle();
+
+    // Trigger a rebuild and dispose of the widget
+    await tester.pumpWidget(const SizedBox());
+
+    // Check if disposeListenable was called
+    expect(disposeListenableCalled, true);
+  });
 }
