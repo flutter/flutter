@@ -139,7 +139,6 @@ void main() {
   });
 
   testWidgets('Should announce error text when validate returns error', (WidgetTester tester) async {
-
     // Arrange.
     final List<Map<String, Object>> semanticAnnouncementLog = <Map<String, Object>>[];
     SystemChannels.accessibility.setMockMessageHandler(
@@ -147,7 +146,6 @@ void main() {
           .add((mockMessage as Map<Object?, Object?>).cast()),
     );
     addTearDown(semanticAnnouncementLog.clear);
-
 
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     await tester.pumpWidget(
@@ -194,7 +192,6 @@ void main() {
         },
       ],
     );
-
   });
 
   testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
