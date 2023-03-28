@@ -58,11 +58,4 @@ bool TextureSourceVK::SetLayout(const LayoutTransition& transition) const {
   return true;
 }
 
-bool TextureSourceVK::SetContents(const TextureDescriptor& desc,
-                                  const uint8_t* contents,
-                                  size_t length,
-                                  size_t slice) {
-  return false;
-}
-
 }  // namespace impeller

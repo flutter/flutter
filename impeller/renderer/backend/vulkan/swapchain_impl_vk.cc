@@ -29,7 +29,7 @@ struct FrameSynchronizer {
     if (acquire_res.result != vk::Result::eSuccess ||
         render_res.result != vk::Result::eSuccess ||
         present_res.result != vk::Result::eSuccess) {
-      VALIDATION_LOG << "Could not create synchornizer.";
+      VALIDATION_LOG << "Could not create synchronizer.";
       return;
     }
     acquire = std::move(acquire_res.value);
@@ -41,14 +41,18 @@ struct FrameSynchronizer {
   ~FrameSynchronizer() = default;
 
   bool WaitForFence(const vk::Device& device) {
-    if (device.waitForFences(
+    if (auto result = device.waitForFences(
             *acquire,                             // fence
             true,                                 // wait all
             std::numeric_limits<uint64_t>::max()  // timeout (ns)
-            ) != vk::Result::eSuccess) {
+        );
+        result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Fence wait failed: " << vk::to_string(result);
       return false;
     }
-    if (device.resetFences(*acquire) != vk::Result::eSuccess) {
+    if (auto result = device.resetFences(*acquire);
+        result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
       return false;
     }
     return true;
