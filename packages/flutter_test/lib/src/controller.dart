@@ -379,7 +379,7 @@ abstract class WidgetController {
   /// using [Iterator.moveNext].
   Iterable<Element> get allElements {
     TestAsyncUtils.guardSync();
-    return collectAllElementsFrom(binding.renderViewElement!, skipOffstage: false);
+    return collectAllElementsFrom(binding.rootElement!, skipOffstage: false);
   }
 
   /// The matching element in the widget tree.

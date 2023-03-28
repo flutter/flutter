@@ -23,6 +23,17 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/123352
+  - title: "Migrate to 'rootElement'"
+    date: 2023-03-13
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'renderViewElement'
+      inClass: 'WidgetsBinding'
+    changes:
+      - kind: 'rename'
+        newName: 'rootElement'
+
   # Changes made in https://github.com/flutter/flutter/pull/122555
   - title: "Migrate to 'decorationClipBehavior'"
     date: 2023-03-13
