@@ -34,7 +34,7 @@ void main() {
   test('Clipboard.getData throws if text is missing', () async {
     mockClipboard.clipboardData = <String, dynamic>{};
 
-    expectLater(() => Clipboard.getData(Clipboard.kTextPlain), throwsA(isA<TypeError>()));
+    expect(() => Clipboard.getData(Clipboard.kTextPlain), throwsA(isA<TypeError>()));
   });
 
   test('Clipboard.getData throws if text is null', () async {
@@ -42,7 +42,7 @@ void main() {
       'text': null,
     };
 
-    expectLater(() => Clipboard.getData(Clipboard.kTextPlain), throwsA(isA<TypeError>()));
+    expect(() => Clipboard.getData(Clipboard.kTextPlain), throwsA(isA<TypeError>()));
   });
 
   test('Clipboard.setData sets text', () async {
