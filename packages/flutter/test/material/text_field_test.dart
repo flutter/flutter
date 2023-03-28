@@ -802,10 +802,10 @@ void main() {
 
   testWidgets('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const TextField(
-          ),
+      overlay(
+        child: const TextField(
         ),
+      ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -816,11 +816,11 @@ void main() {
 
   testWidgets('cursor has expected radius value', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const TextField(
-            cursorRadius: Radius.circular(3.0),
-          ),
+      overlay(
+        child: const TextField(
+          cursorRadius: Radius.circular(3.0),
         ),
+      ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -831,8 +831,7 @@ void main() {
   testWidgets('clipBehavior has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-        ),
+        child: const TextField(),
       ),
     );
 

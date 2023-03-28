@@ -138,6 +138,65 @@ void main() {
     await checkErrorText('');
   });
 
+  testWidgets('Should announce error text when validate returns error', (WidgetTester tester) async {
+
+    // Arrange.
+    final List<Map<String, Object>> semanticAnnouncementLog = <Map<String, Object>>[];
+    SystemChannels.accessibility.setMockMessageHandler(
+      (dynamic mockMessage) async => semanticAnnouncementLog
+          .add((mockMessage as Map<Object?, Object?>).cast()),
+    );
+    addTearDown(semanticAnnouncementLog.clear);
+
+
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: TextFormField(
+                    validator: (_)=> 'error',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    formKey.currentState!.reset();
+    await tester.enterText(find.byType(TextFormField), '');
+    await tester.pump();
+
+    // Manually validate.
+    expect(find.text('error'), findsNothing);
+    formKey.currentState!.validate();
+    await tester.pump();
+    expect(find.text('error'), findsOneWidget);
+
+    // Assert.
+    expect(
+      semanticAnnouncementLog,
+      <Map<String, Object>>[
+        <String, Object>{
+          'type': 'announce',
+          'data': <String, Object>{
+            'message': 'error',
+            'textDirection': TextDirection.ltr.index,
+            'assertiveness': 1,
+          },
+        },
+      ],
+    );
+
+  });
+
   testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
