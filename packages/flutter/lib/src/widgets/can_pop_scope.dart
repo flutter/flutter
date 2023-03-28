@@ -45,10 +45,15 @@ class CanPopScope extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  // TODO(justinmc): Should this be didPop?
+  // TODO(justinmc): Should this be called onPopped?
   // TODO(justinmc): Document exactly when this is called. Currently after pop.
+  /// {@template flutter.widgets.CanPopScope.onPop}
+  /// Called immediately after a route has been popped from the current
+  /// navigation stack.
+  /// {@endtemplate}
   final VoidCallback? onPop;
 
+  /// {@template flutter.widgets.CanPopScope.popEnabled}
   /// When false, blocks the current route from being popped.
   ///
   /// This includes the root route, where upon popping, the Flutter app would
@@ -62,6 +67,7 @@ class CanPopScope extends StatefulWidget {
   /// interaction before committing to popping the route. For example,
   /// [Android's predictive back](https://developer.android.com/guide/navigation/predictive-back-gesture)
   /// feature will not animate at all when this boolean is true.
+  /// {@endtemplate}
   final bool popEnabled;
 
   @override

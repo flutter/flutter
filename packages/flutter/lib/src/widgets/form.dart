@@ -139,10 +139,36 @@ class Form extends StatefulWidget {
   )
   final WillPopCallback? onWillPop;
 
-  // TODO(justinmc): Document
+  /// {@macro flutter.widgets.CanPopScope.popEnabled}
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use this parameter to show a confirmation
+  /// dialog when a navigation pop would cause form data to be lost.
+  ///
+  /// ** See code in examples/api/lib/widgets/can_pop_scope/confirmation_dialog.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [onPop], which also comes from [CanPopScope] and is often used in
+  ///    conjunction with this parameter.
+  ///  * [CanPopScope.popEnabled], which is what [Form] delegates to internally.
   final bool? popEnabled;
 
-  // TODO(justinmc): Document
+  /// {@macro flutter.widgets.CanPopScope.onPop}
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use this parameter to show a confirmation
+  /// dialog when a navigation pop would cause form data to be lost.
+  ///
+  /// ** See code in examples/api/lib/widgets/can_pop_scope/confirmation_dialog.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [popEnabled], which also comes from [CanPopScope] and is often used in
+  ///    conjunction with this parameter.
+  ///  * [CanPopScope.onPop], which is what [Form] delegates to internally.
   final VoidCallback? onPop;
 
   /// Called when one of the form fields changes.
