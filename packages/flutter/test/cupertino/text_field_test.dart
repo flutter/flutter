@@ -1591,6 +1591,7 @@ void main() {
         home: Column(
           children: <Widget>[
             CupertinoTextField(
+              autofocus: true,
               controller: controller,
               toolbarOptions: const ToolbarOptions(copy: true),
             ),
@@ -1598,6 +1599,9 @@ void main() {
         ),
       ),
     );
+
+    // This extra pump is so autofocus can propagate to renderEditable.
+    await tester.pump();
 
     // Long press to put the cursor after the "w".
     const int index = 3;
@@ -2060,11 +2064,15 @@ void main() {
         CupertinoApp(
           home: Center(
             child: CupertinoTextField(
+              autofocus: true,
               controller: controller,
             ),
           ),
         ),
       );
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       // Long press to put the cursor after the "w".
       const int index = 3;
@@ -2830,11 +2838,15 @@ void main() {
         CupertinoApp(
           home: Center(
             child: CupertinoTextField(
+              autofocus: true,
               controller: controller,
             ),
           ),
         ),
       );
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
@@ -2870,11 +2882,15 @@ void main() {
         CupertinoApp(
           home: Center(
             child: CupertinoTextField(
+              autofocus: true,
               controller: controller,
             ),
           ),
         ),
       );
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'
 
@@ -2971,7 +2987,7 @@ void main() {
   );
 
   testWidgets(
-    'long press drag moves the cursor under the drag and shows toolbar on lift on Apple platforms',
+    'long press drag on a focused TextField moves the cursor under the drag and shows toolbar on lift on Apple platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -2980,11 +2996,15 @@ void main() {
         CupertinoApp(
           home: Center(
             child: CupertinoTextField(
+              autofocus: true,
               controller: controller,
             ),
           ),
         ),
       );
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
@@ -3135,11 +3155,15 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTextField(
+            autofocus: true,
             controller: controller,
           ),
         ),
       ),
     );
+
+    // This extra pump is so autofocus can propagate to renderEditable.
+    await tester.pump();
 
     final RenderEditable renderEditable = tester.renderObject<RenderEditable>(
       find.byElementPredicate((Element element) => element.renderObject is RenderEditable).last,
@@ -3289,11 +3313,15 @@ void main() {
         CupertinoApp(
           home: Center(
             child: CupertinoTextField(
+              autofocus: true,
               controller: controller,
             ),
           ),
         ),
       );
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       // Use a position higher than wPos to avoid tapping the context menu on
       // desktop.
@@ -7313,6 +7341,7 @@ void main() {
               child: Column(
                 children: <Widget>[
                   CupertinoTextField(
+                    autofocus: true,
                     key: const Key('field0'),
                     controller: controller,
                     style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
@@ -7328,6 +7357,9 @@ void main() {
         ),
       ),
     );
+
+    // This extra pump is so autofocus can propagate to renderEditable.
+    await tester.pump();
 
     final Offset textFieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
@@ -7363,6 +7395,7 @@ void main() {
               child: Column(
                 children: <Widget>[
                   CupertinoTextField(
+                    autofocus: true,
                     key: const Key('field0'),
                     controller: controller,
                     style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
@@ -7377,6 +7410,9 @@ void main() {
         ),
       ),
     );
+
+    // This extra pump is so autofocus can propagate to renderEditable.
+    await tester.pump();
 
     final Offset textFieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
