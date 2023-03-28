@@ -10850,7 +10850,7 @@ void main() {
           ),
         ),
       );
-      
+
       // This extra pump is so autofocus can propogate to renderEditable.
       await tester.pump();
 
