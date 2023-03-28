@@ -111,51 +111,34 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
-  group('Focus state will be correct when message sent from platform', () {
-    int client = 1;
-    testWidgets(
-      'Will unfocus when unfocus message sent from platform',
-      (WidgetTester tester) async {
-        final FocusNode node = FocusNode();
-        await tester.pumpWidget(
-          MediaQuery(
-            data: const MediaQueryData(),
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: FocusScope(
-                node: focusScopeNode,
-                child: EditableText(
-                  autofocus: true,
-                  backgroundCursorColor: Colors.grey,
-                  controller: controller,
-                  focusNode: node,
-                  style: textStyle,
-                  cursorColor: cursorColor,
-                ),
+  testWidgets('Can unfoucs correctly', (WidgetTester tester) async {
+      final FocusNode node = FocusNode();
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              child: EditableText(
+                autofocus: true,
+                backgroundCursorColor: Colors.grey,
+                controller: controller,
+                focusNode: node,
+                style: textStyle,
+                cursorColor: cursorColor,
               ),
             ),
           ),
-        );
-        expect(node.hasFocus, isTrue);
-
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage(
-          SystemChannels.textInput.name,
-          SystemChannels.textInput.codec.encodeMethodCall(
-            MethodCall(
-              'TextInputClient.unfocus',
-              <dynamic>[client],
-            ),
-          ),
-          (ByteData? data) {
-            /* response from framework is discarded */
-          },
-        );
-        client++;
-        expect(node.hasFocus, isFalse);
-      },
-    );
-  });
+        ),
+      );
+      expect(node.hasFocus, isTrue);
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.unfocus();
+      await tester.pump();
+      expect(node.hasFocus, isFalse);
+    },
+  );
 
   testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119628

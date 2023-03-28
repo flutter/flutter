@@ -657,6 +657,24 @@ void main() {
 
       expect(client.latestMethodCall, 'showToolbar');
     });
+
+    test('TextInputClient unfocus method is called', () async {
+      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+      expect(client.latestMethodCall, isEmpty);
+
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[1],
+        'method': 'TextInputClient.unfocus',
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+      expect(client.latestMethodCall, 'unfocus');
+    });
   });
 
   group('Scribble interactions', () {
