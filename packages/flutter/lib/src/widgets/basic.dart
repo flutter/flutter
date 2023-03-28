@@ -1982,13 +1982,6 @@ class Padding extends SingleChildRenderObjectWidget {
 /// dimension and the size factor. For example if widthFactor is 2.0 then
 /// the width of this widget will always be twice its child's width.
 ///
-/// ## How it works
-///
-/// The [alignment] property describes a point in the `child`'s coordinate system
-/// and a different point in the coordinate system of this widget. The [Align]
-/// widget positions the `child` such that both points are lined up on top of
-/// each other.
-///
 /// {@tool snippet}
 /// The [Align] widget in this example uses one of the defined constants from
 /// [Alignment], [Alignment.topRight]. This places the [FlutterLogo] in the top
@@ -2013,15 +2006,27 @@ class Padding extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## How it works
+///
+/// The [alignment] property describes a point in the `child`'s coordinate system
+/// and a different point in the coordinate system of this widget. The [Align]
+/// widget positions the `child` such that both points are lined up on top of
+/// each other.
+///
 /// {@tool snippet}
-/// The [Alignment] used in the following example defines a single point:
+/// The [Alignment] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo]/2 + width of [FlutterLogo]/2, 0.6 * height
-///   of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0).
+///     of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0) in the
+///     coordinate system of the [FlutterLogo].
+///   * (0.2 * width of [Align]/2 + width of [Align]/2, 0.6 * height
+///     of [Align]/2 + height of [Align]/2) = (72.0, 96.0) in the
+///     coordinate system of the [Align] widget (blue area).
 ///
-/// The [Alignment] class uses a coordinate system with an origin in the center
-/// of the [Container], as shown with the [Icon] above. [Align] will place the
-/// [FlutterLogo] at (36.0, 48.0) according to this coordinate system.
+/// The [Align] widget positions the [FlutterLogo] such that the two points are on
+/// top of each other. In this example, the top left of the [FlutterLogo] will
+/// be placed at (72.0, 96.0) - (36.0, 48.0) = (36.0, 48.0) from the top left of
+/// the [Align] widget.
 ///
 /// ![A blue square container with the Flutter logo positioned according to the
 /// Alignment specified above. A point is marked at the center of the container
@@ -2048,9 +2053,9 @@ class Padding extends SingleChildRenderObjectWidget {
 /// The [FractionalOffset] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo], 0.6 * height of [FlutterLogo]) = (12.0, 36.0)
-///     in the coordinate system of the blue container.
+///     in the coordinate system of the [FlutterLogo].
 ///   * (0.2 * width of [Align], 0.6 * height of [Align]) = (24.0, 72.0) in the
-///     coordinate system of the [Align] widget.
+///     coordinate system of the [Align] widget (blue area).
 ///
 /// The [Align] widget positions the [FlutterLogo] such that the two points are on
 /// top of each other. In this example, the top left of the [FlutterLogo] will
