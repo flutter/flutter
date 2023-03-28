@@ -246,15 +246,13 @@ class Visibility extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget result = child;
     if (maintainSize) {
-      Widget result = child;
-      result = IgnorePointer(
-        ignoring: !visible && !maintainInteractivity,
-        child: result,
-      );
       result = _Visibility(
         visible: visible,
         maintainSemantics: maintainSemantics,
-        child: result,
+        child: IgnorePointer(
+          ignoring: !visible && !maintainInteractivity,
+          child: result,
+        ),
       );
     } else {
       assert(!maintainInteractivity);
@@ -262,7 +260,7 @@ class Visibility extends StatelessWidget {
       assert(!maintainSize);
       if (maintainState) {
         if (!maintainAnimation) {
-          result = TickerMode(enabled: visible, child: child);
+          result = TickerMode(enabled: visible, child: result);
         }
         result = Offstage(
           offstage: !visible,
