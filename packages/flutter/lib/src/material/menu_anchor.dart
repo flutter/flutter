@@ -127,7 +127,7 @@ class MenuAnchor extends StatefulWidget {
     this.childFocusNode,
     this.style,
     this.alignmentOffset = Offset.zero,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     this.anchorTapClosesMenu = false,
     this.onOpen,
     this.onClose,
@@ -183,7 +183,7 @@ class MenuAnchor extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// Whether the menus will be closed if the anchor area is tapped.
@@ -3312,7 +3312,7 @@ class _MenuPanelState extends State<_MenuPanel> {
         shadowColor: shadowColor,
         surfaceTintColor: surfaceTintColor,
         type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
-        clipBehavior: Clip.hardEdge,
+        clipBehavior: widget.clipBehavior,
         child: Padding(
           padding: resolvedPadding,
           child: SingleChildScrollView(
@@ -3332,7 +3332,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     if (widget.crossAxisUnconstrained) {
       menuPanel = UnconstrainedBox(
         constrainedAxis: widget.orientation,
-        clipBehavior: Clip.hardEdge,
+        clipBehavior: widget.clipBehavior,
         alignment: AlignmentDirectional.centerStart,
         child: menuPanel,
       );
