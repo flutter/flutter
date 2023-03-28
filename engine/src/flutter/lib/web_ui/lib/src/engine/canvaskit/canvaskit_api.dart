@@ -113,7 +113,6 @@ extension CanvasKitExtension on CanvasKit {
 
   external SkFontMgrNamespace get FontMgr;
   external TypefaceFontProviderNamespace get TypefaceFontProvider;
-  external FontCollectionNamespace get FontCollection;
   external SkTypefaceFactory get Typeface;
   external double GetWebGLContext(
       DomCanvasElement canvas, SkWebGLContextOptions options);
@@ -1867,9 +1866,9 @@ extension SkPictureExtension on SkPicture {
 class SkParagraphBuilderNamespace {}
 
 extension SkParagraphBuilderNamespaceExtension on SkParagraphBuilderNamespace {
-  external SkParagraphBuilder MakeFromFontCollection(
+  external SkParagraphBuilder MakeFromFontProvider(
     SkParagraphStyle paragraphStyle,
-    SkFontCollection? fontCollection,
+    TypefaceFontProvider? fontManager,
   );
 
   bool RequiresClientICU() {
@@ -2166,21 +2165,11 @@ extension SkFontMgrExtension on SkFontMgr {
 @JS('window.flutterCanvasKit.TypefaceFontProvider')
 @staticInterop
 class TypefaceFontProvider extends SkFontMgr {
+  external factory TypefaceFontProvider();
 }
 
 extension TypefaceFontProviderExtension on TypefaceFontProvider {
   external void registerFont(Uint8List font, String family);
-}
-
-@JS()
-@anonymous
-@staticInterop
-class SkFontCollection {}
-
-extension SkFontCollectionExtension on SkFontCollection {
-  external void enableFontFallback();
-  external void setDefaultFontManager(TypefaceFontProvider? fontManager);
-  external void delete();
 }
 
 @JS()
@@ -2301,14 +2290,6 @@ class TypefaceFontProviderNamespace {}
 
 extension TypefaceFontProviderNamespaceExtension on TypefaceFontProviderNamespace {
   external TypefaceFontProvider Make();
-}
-
-@JS()
-@staticInterop
-class FontCollectionNamespace{}
-
-extension FontCollectionNamespaceExtension on FontCollectionNamespace {
-  external SkFontCollection Make();
 }
 
 @JS()

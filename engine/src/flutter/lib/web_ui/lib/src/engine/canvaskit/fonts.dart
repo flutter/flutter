@@ -48,20 +48,15 @@ class SkiaFontCollection implements FlutterFontCollection {
   final Map<String, List<SkFont>> familyToFontMap = <String, List<SkFont>>{};
 
   void _registerWithFontProvider() {
-    if (_fontProvider != null) {
-      _fontProvider!.delete();
-      _fontProvider = null;
-      skFontCollection?.delete();
-      skFontCollection = null;
+    if (fontProvider != null) {
+      fontProvider!.delete();
+      fontProvider = null;
     }
-    _fontProvider = canvasKit.TypefaceFontProvider.Make();
-    skFontCollection = canvasKit.FontCollection.Make();
-    skFontCollection!.enableFontFallback();
-    skFontCollection!.setDefaultFontManager(_fontProvider);
+    fontProvider = canvasKit.TypefaceFontProvider.Make();
     familyToFontMap.clear();
 
     for (final RegisteredFont font in _registeredFonts) {
-      _fontProvider!.registerFont(font.bytes, font.family);
+      fontProvider!.registerFont(font.bytes, font.family);
       familyToFontMap
           .putIfAbsent(font.family, () => <SkFont>[])
           .add(SkFont(font.typeface));
@@ -69,7 +64,7 @@ class SkiaFontCollection implements FlutterFontCollection {
 
     for (final RegisteredFont font
         in FontFallbackData.instance.registeredFallbackFonts) {
-      _fontProvider!.registerFont(font.bytes, font.family);
+      fontProvider!.registerFont(font.bytes, font.family);
       familyToFontMap
           .putIfAbsent(font.family, () => <SkFont>[])
           .add(SkFont(font.typeface));
@@ -235,8 +230,7 @@ class SkiaFontCollection implements FlutterFontCollection {
     return actualFamily;
   }
 
-  TypefaceFontProvider? _fontProvider;
-  SkFontCollection? skFontCollection;
+  TypefaceFontProvider? fontProvider;
 
   @override
   void clear() {}
