@@ -5,22 +5,6 @@
 import Cocoa
 import FlutterMacOS
 
-enum ChannelName {
-  static let battery = "samples.flutter.io/battery"
-  static let charging = "samples.flutter.io/charging"
-}
-
-enum BatteryState {
-  static let charging = "charging"
-  static let discharging = "discharging"
-  static let unavailable = "UNAVAILABLE"
-}
-
-enum ErrorCode {
-  static let noBattery = "NO_BATTERY"
-  static let unavailable = "UNAVAILABLE"
-}
-
 class MainFlutterWindow: NSWindow {
   private let powerSource = PowerSource()
   private let stateChangeHandler = PowerSourceStateChangeHandler()
@@ -36,7 +20,7 @@ class MainFlutterWindow: NSWindow {
     // Register battery method channel.
     let registrar = flutterViewController.registrar(forPlugin: "BatteryLevel")
     let batteryChannel = FlutterMethodChannel(
-      name: ChannelName.battery,
+      name: "samples.flutter.io/battery",
       binaryMessenger: registrar.messenger)
     batteryChannel.setMethodCallHandler { [powerSource = self.powerSource] (call, result) in
       switch call.method {
@@ -44,7 +28,7 @@ class MainFlutterWindow: NSWindow {
         guard powerSource.hasBattery() else {
           result(
             FlutterError(
-              code: ErrorCode.noBattery,
+              code: "NO_BATTERY",
               message: "Device does not have a battery",
               details: nil))
           return
@@ -52,7 +36,7 @@ class MainFlutterWindow: NSWindow {
         guard let level = powerSource.getCurrentCapacity() else {
           result(
             FlutterError(
-              code: ErrorCode.unavailable,
+              code: "UNAVAILABLE",
               message: "Battery info unavailable",
               details: nil))
           return
@@ -65,7 +49,7 @@ class MainFlutterWindow: NSWindow {
 
     // Register charging event channel.
     let chargingChannel = FlutterEventChannel(
-      name: ChannelName.charging,
+      name: "samples.flutter.io/charging",
       binaryMessenger: registrar.messenger)
     chargingChannel.setStreamHandler(self)
 
@@ -79,11 +63,11 @@ class MainFlutterWindow: NSWindow {
     if let sink = self.eventSink {
       switch self.powerSource.getPowerState() {
       case .ac:
-        sink(BatteryState.charging)
+        sink("charging")
       case .battery:
-        sink(BatteryState.discharging)
+        sink("discharging")
       case .unknown:
-        sink(BatteryState.unavailable)
+        sink("UNAVAILABLE")
       }
     }
   }
