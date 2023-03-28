@@ -6,52 +6,56 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../cmake_project.dart';
 
-const String _cmakeFileBefore =
-'# Apply the standard set of build settings. This can be removed for applications\n'
-'# that need different build settings.\n'
-'apply_standard_settings(\${BINARY_NAME})\n'
-'\n'
-'# Disable Windows macros that collide with C++ standard library functions.\n'
-'target_compile_definitions(\${BINARY_NAME} PRIVATE "NOMINMAX")\n';
-const String _cmakeFileAfter =
-'# Apply the standard set of build settings. This can be removed for applications\n'
-'# that need different build settings.\n'
-'apply_standard_settings(\${BINARY_NAME})\n'
-'\n'
-'# Add preprocessor definitions for the build version.\n'
-'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\\"\${FLUTTER_VERSION}\\"")\n'
-'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=\${FLUTTER_VERSION_MAJOR}")\n'
-'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=\${FLUTTER_VERSION_MINOR}")\n'
-'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=\${FLUTTER_VERSION_PATCH}")\n'
-'target_compile_definitions(\${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=\${FLUTTER_VERSION_BUILD}")\n'
-'\n'
-'# Disable Windows macros that collide with C++ standard library functions.\n'
-'target_compile_definitions(\${BINARY_NAME} PRIVATE "NOMINMAX")\n';
+const String _cmakeFileBefore = r'''
+# Apply the standard set of build settings. This can be removed for applications
+# that need different build settings.
+apply_standard_settings(${BINARY_NAME})
 
-const String _resourceFileBefore =
-'#ifdef FLUTTER_BUILD_NUMBER\n'
-'#define VERSION_AS_NUMBER FLUTTER_BUILD_NUMBER\n'
-'#else\n'
-'#define VERSION_AS_NUMBER 1,0,0\n'
-'#endif\n'
-'\n'
-'#ifdef FLUTTER_BUILD_NAME\n'
-'#define VERSION_AS_STRING #FLUTTER_BUILD_NAME\n'
-'#else\n'
-'#define VERSION_AS_STRING "1.0.0"\n'
-'#endif\n';
-const String _resourceFileAfter =
-'#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)\n'
-'#define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD\n'
-'#else\n'
-'#define VERSION_AS_NUMBER 1,0,0,0\n'
-'#endif\n'
-'\n'
-'#if defined(FLUTTER_VERSION)\n'
-'#define VERSION_AS_STRING FLUTTER_VERSION\n'
-'#else\n'
-'#define VERSION_AS_STRING "1.0.0"\n'
-'#endif\n';
+# Disable Windows macros that collide with C++ standard library functions.
+target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
+''';
+const String _cmakeFileAfter = r'''
+# Apply the standard set of build settings. This can be removed for applications
+# that need different build settings.
+apply_standard_settings(${BINARY_NAME})
+
+# Add preprocessor definitions for the build version.
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"${FLUTTER_VERSION}\"")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=${FLUTTER_VERSION_MAJOR}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=${FLUTTER_VERSION_MINOR}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=${FLUTTER_VERSION_PATCH}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTTER_VERSION_BUILD}")
+
+# Disable Windows macros that collide with C++ standard library functions.
+target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
+''';
+
+const String _resourceFileBefore = '''
+#ifdef FLUTTER_BUILD_NUMBER
+#define VERSION_AS_NUMBER FLUTTER_BUILD_NUMBER
+#else
+#define VERSION_AS_NUMBER 1,0,0
+#endif
+
+#ifdef FLUTTER_BUILD_NAME
+#define VERSION_AS_STRING #FLUTTER_BUILD_NAME
+#else
+#define VERSION_AS_STRING "1.0.0"
+#endif
+''';
+const String _resourceFileAfter = '''
+#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)
+#define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD
+#else
+#define VERSION_AS_NUMBER 1,0,0,0
+#endif
+
+#if defined(FLUTTER_VERSION)
+#define VERSION_AS_STRING FLUTTER_VERSION
+#else
+#define VERSION_AS_STRING "1.0.0"
+#endif
+''';
 
 // Flutter should set the Windows app's version information.
 // See https://github.com/flutter/flutter/issues/73652.
