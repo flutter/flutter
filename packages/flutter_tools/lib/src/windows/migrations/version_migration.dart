@@ -57,8 +57,9 @@ const String _resourceFileAfter = '''
 #endif
 ''';
 
-// Flutter should set the Windows app's version information.
-// See https://github.com/flutter/flutter/issues/73652.
+/// Migrates Windows apps to set Flutter's version information.
+///
+/// See https://github.com/flutter/flutter/issues/73652.
 class VersionMigration extends ProjectMigrator {
   VersionMigration(WindowsProject project, super.logger)
     : _cmakeFile = project.runnerCmakeFile, _resourceFile = project.runnerResourceFile;
@@ -80,7 +81,7 @@ class VersionMigration extends ProjectMigrator {
 
     // Migrate the windows/runner/CMakeLists.txt file.
     final String originalCmakeContents = _cmakeFile.readAsStringSync();
-    final String newCmakeContents = _replaceFirstWindows(
+    final String newCmakeContents = _replaceFirst(
       originalCmakeContents,
       _cmakeFileBefore,
       _cmakeFileAfter,
@@ -92,7 +93,7 @@ class VersionMigration extends ProjectMigrator {
 
     // Migrate the windows/runner/Runner.rc file.
     final String originalResourceFileContents = _resourceFile.readAsStringSync();
-    final String newResourceFileContents = _replaceFirstWindows(
+    final String newResourceFileContents = _replaceFirst(
       originalResourceFileContents,
       _resourceFileBefore,
       _resourceFileAfter,
@@ -106,13 +107,26 @@ class VersionMigration extends ProjectMigrator {
   }
 }
 
-String _replaceFirstWindows(String originalContents, String before, String after) {
-  // The Windows template uses LF line endings. However, users that have git
-  // autocrlf enabled will have CRLF line endings. Migrate both scenarios.
+  /// Creates a new string with the first occurrence of [before] replaced by
+  /// [after].
+  ///
+  /// If the [originalContents] uses CRLF line endings, the [before] and [after]
+  /// will be converted to CRLF line endings before the replacement is made.
+  /// This is necessary for users that have git autocrlf enabled.
+  ///
+  /// Example:
+  /// ```dart
+  /// 'a\n'.replaceFirst('a\n', 'b\n'); // 'b\n'
+  /// 'a\r\n'.replaceFirst('a\n', 'b\n'); // 'b\r\n'
+  /// ```
+String _replaceFirst(String originalContents, String before, String after) {
+  final String result = originalContents.replaceFirst(before, after);
+  if (result != originalContents) {
+    return result;
+  }
+
   final String beforeCrlf = before.replaceAll('\n', '\r\n');
   final String afterCrlf = after.replaceAll('\n', '\r\n');
 
-  return originalContents
-    .replaceFirst(before, after)
-    .replaceFirst(beforeCrlf, afterCrlf);
+  return originalContents.replaceFirst(beforeCrlf, afterCrlf);
 }
