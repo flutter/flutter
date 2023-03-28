@@ -45,15 +45,16 @@ class Form extends StatefulWidget {
     super.key,
     required this.child,
     this.popEnabled,
+    this.onPop,
     @Deprecated(
-      'Use popEnabled instead. '
+      'Use popEnabled and/or onPop instead. '
       'This feature was deprecated after v3.9.0-0.0.pre.',
     )
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       assert(popEnabled == null || onWillPop == null, 'onWillPop is deprecated; use popEnabled only.');
+       assert((onPop == null && popEnabled == null) || onWillPop == null, 'onWillPop is deprecated; use popEnabled and/or onPop.');
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -138,7 +139,11 @@ class Form extends StatefulWidget {
   )
   final WillPopCallback? onWillPop;
 
+  // TODO(justinmc): Document
   final bool? popEnabled;
+
+  // TODO(justinmc): Document
+  final VoidCallback? onPop;
 
   /// Called when one of the form fields changes.
   ///
@@ -209,6 +214,7 @@ class FormState extends State<Form> {
     if (widget.popEnabled != null) {
       return CanPopScope(
         popEnabled: widget.popEnabled!,
+        onPop: widget.onPop,
         child: _FormScope(
           formState: this,
           generation: _generation,
