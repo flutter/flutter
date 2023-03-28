@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -248,7 +249,7 @@ class FormState extends State<Form> {
 
     if(hasError) {
       final TextDirection directionality = Directionality.of(context);
-      if (Platform.isIOS) {
+      if (!kIsWeb && Platform.isIOS) {
         unawaited(Future<void>(() async {
           await Future<void>.delayed(const Duration(seconds: 1));
           SemanticsService.announce(errorMessage, directionality);
