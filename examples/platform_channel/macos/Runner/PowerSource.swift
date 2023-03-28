@@ -13,8 +13,12 @@ enum PowerState {
 
 /// A convenience wrapper for an IOKit power source.
 final class PowerSource {
-  private let info = IOPSCopyPowerSourcesInfo().takeRetainedValue()
-  private lazy var sources = IOPSCopyPowerSourcesList(info).takeRetainedValue() as Array
+  let info = IOPSCopyPowerSourcesInfo().takeRetainedValue()
+  let sources: Array<CFTypeRef>
+
+  init() {
+    sources = IOPSCopyPowerSourcesList(info).takeRetainedValue() as Array
+  }
 
   func hasBattery() -> Bool {
     return !sources.isEmpty
