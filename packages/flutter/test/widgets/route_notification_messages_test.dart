@@ -63,7 +63,7 @@ void main() {
       isMethodCall('selectSingleEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/',
+          'uri': '/',
           'state': null,
           'replace': false,
         },
@@ -81,7 +81,7 @@ void main() {
       isMethodCall(
         'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/A',
+          'uri': '/A',
           'state': null,
           'replace': false,
         },
@@ -99,7 +99,7 @@ void main() {
       isMethodCall(
         'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/',
+          'uri': '/',
           'state': null,
           'replace': false,
         },
@@ -173,7 +173,7 @@ void main() {
       isMethodCall('selectSingleEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/',
+          'uri': '/',
           'state': null,
           'replace': false,
         },
@@ -191,7 +191,7 @@ void main() {
       isMethodCall(
         'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/A',
+          'uri': '/A',
           'state': null,
           'replace': false,
         },
@@ -209,7 +209,7 @@ void main() {
       isMethodCall(
         'routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/B',
+          'uri': '/B',
           'state': null,
           'replace': false,
         },
@@ -246,7 +246,7 @@ void main() {
       isMethodCall('selectSingleEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated',
         arguments: <String, dynamic>{
-          'location': '/home',
+          'uri': '/home',
           'state': null,
           'replace': false,
         },
@@ -289,7 +289,7 @@ void main() {
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
-        'location': 'initial',
+        'uri': 'initial',
         'state': null,
         'replace': false,
       }),
@@ -308,7 +308,7 @@ void main() {
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
       isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{
-        'location': 'update',
+        'uri': 'update',
         'state': 'state',
         'replace': false,
       }),

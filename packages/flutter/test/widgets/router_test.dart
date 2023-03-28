@@ -842,28 +842,28 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     // Implicit reporting pushes new history entry if the location changes.
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': true, 'replace': false }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'a', 'state': true, 'replace': false }),
     ]);
     log.clear();
     provider.routerReportsNewRouteInformation(RouteInformation(uri: Uri.parse('a'), state: false));
     // Since the location is the same, the provider sends replaces message.
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'a', 'state': false, 'replace': true }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'a', 'state': false, 'replace': true }),
     ]);
 
     log.clear();
     provider.routerReportsNewRouteInformation(RouteInformation(uri: Uri.parse('b'), state: false), type: RouteInformationReportingType.neglect);
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'b', 'state': false, 'replace': true }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'b', 'state': false, 'replace': true }),
     ]);
 
     log.clear();
     provider.routerReportsNewRouteInformation(RouteInformation(uri: Uri.parse('b'), state: false), type: RouteInformationReportingType.navigate);
     expect(log, <Object>[
       isMethodCall('selectMultiEntryHistory', arguments: null),
-      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'location': 'b', 'state': false, 'replace': false }),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'b', 'state': false, 'replace': false }),
     ]);
   });
 

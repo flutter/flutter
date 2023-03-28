@@ -45,7 +45,6 @@ class RouteInformation {
   const RouteInformation({
     @Deprecated(
       'Pass Uri.parse(location) to uri parameter instead. '
-      'This parameter is superseded by the uri parameter. '
       'This feature was deprecated after v3.8.0-3.0.pre.'
     )
     String? location,
@@ -61,7 +60,6 @@ class RouteInformation {
   /// slashes in between. ex: `/`, `/path`, `/path/to/the/app`.
   @Deprecated(
     'Use uri instead. '
-    'This getter is superseded by the uri getter. '
     'This feature was deprecated after v3.8.0-3.0.pre.'
   )
   String get location {
@@ -1476,7 +1474,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
        _valueInEngine.uri == routeInformation.uri);
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
-      location: routeInformation.uri.toString(),
+      uri: routeInformation.uri,
       state: routeInformation.state,
       replace: replace,
     );
