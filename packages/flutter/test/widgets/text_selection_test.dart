@@ -20,6 +20,7 @@ void main() {
   late int singleTapCancelCount;
   late int singleLongTapStartCount;
   late int doubleTapDownCount;
+  late int tripleTapDownCount;
   late int forcePressStartCount;
   late int forcePressEndCount;
   late int dragStartCount;
@@ -32,6 +33,7 @@ void main() {
   void handleSingleTapCancel() { singleTapCancelCount++; }
   void handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
   void handleDoubleTapDown(TapDragDownDetails details) { doubleTapDownCount++; }
+  void handleTripleTapDown(TapDragDownDetails details) { tripleTapDownCount++; }
   void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
   void handleDragSelectionStart(TapDragStartDetails details) { dragStartCount++; }
@@ -44,6 +46,7 @@ void main() {
     singleTapCancelCount = 0;
     singleLongTapStartCount = 0;
     doubleTapDownCount = 0;
+    tripleTapDownCount = 0;
     forcePressStartCount = 0;
     forcePressEndCount = 0;
     dragStartCount = 0;
@@ -60,6 +63,7 @@ void main() {
         onSingleTapCancel: handleSingleTapCancel,
         onSingleLongTapStart: handleSingleLongTapStart,
         onDoubleTapDown: handleDoubleTapDown,
+        onTripleTapDown: handleTripleTapDown,
         onForcePressStart: handleForcePressStart,
         onForcePressEnd: handleForcePressEnd,
         onDragSelectionStart: handleDragSelectionStart,
@@ -115,7 +119,7 @@ void main() {
     expect(tapCount, 6);
   });
 
-  testWidgets('in a series of rapid taps, onTapDown and onDoubleTapDown alternate', (WidgetTester tester) async {
+  testWidgets('in a series of rapid taps, onTapDown, onDoubleTapDown, and onTripleTapDown alternate', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
@@ -126,20 +130,29 @@ void main() {
     expect(doubleTapDownCount, 1);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
+    expect(singleTapUpCount, 1);
+    expect(doubleTapDownCount, 1);
+    expect(tripleTapDownCount, 1);
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
     expect(singleTapUpCount, 2);
     expect(doubleTapDownCount, 1);
+    expect(tripleTapDownCount, 1);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
     expect(singleTapUpCount, 2);
     expect(doubleTapDownCount, 2);
+    expect(tripleTapDownCount, 1);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(singleTapUpCount, 3);
+    expect(singleTapUpCount, 2);
     expect(doubleTapDownCount, 2);
+    expect(tripleTapDownCount, 2);
     await tester.tapAt(const Offset(200, 200));
     expect(singleTapUpCount, 3);
-    expect(doubleTapDownCount, 3);
-    expect(tapCount, 6);
+    expect(doubleTapDownCount, 2);
+    expect(tripleTapDownCount, 2);
+    expect(tapCount, 7);
   });
 
   testWidgets('quick tap-tap-hold is a double tap down', (WidgetTester tester) async {
