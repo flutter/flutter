@@ -803,8 +803,7 @@ void main() {
   testWidgets('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-        ),
+        child: const TextField(),
       ),
     );
 

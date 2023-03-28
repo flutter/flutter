@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -140,13 +141,6 @@ void main() {
 
   testWidgets('Should announce error text when validate returns error', (WidgetTester tester) async {
     // Arrange.
-    final List<Map<String, Object>> semanticAnnouncementLog = <Map<String, Object>>[];
-    SystemChannels.accessibility.setMockMessageHandler(
-      (dynamic mockMessage) async => semanticAnnouncementLog
-          .add((mockMessage as Map<Object?, Object?>).cast()),
-    );
-    addTearDown(semanticAnnouncementLog.clear);
-
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -179,19 +173,11 @@ void main() {
     expect(find.text('error'), findsOneWidget);
 
     // Assert.
-    expect(
-      semanticAnnouncementLog,
-      <Map<String, Object>>[
-        <String, Object>{
-          'type': 'announce',
-          'data': <String, Object>{
-            'message': 'error',
-            'textDirection': TextDirection.ltr.index,
-            'assertiveness': 1,
-          },
-        },
-      ],
-    );
+    final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
+    expect(announcement.message, 'error');
+    expect(announcement.textDirection, TextDirection.ltr);
+    expect(announcement.assertiveness, Assertiveness.assertive);
+
   });
 
   testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
