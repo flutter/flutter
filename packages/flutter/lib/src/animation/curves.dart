@@ -1353,11 +1353,7 @@ class ElasticInOutCurve extends Curve {
 ///
 ///  * [Curve], the interface implemented by the constants available from the
 ///    [Curves] class.
-class Curves {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Curves._();
-
+abstract final class Curves {
   /// A linear animation curve.
   ///
   /// This is the identity map over the unit interval: its [Curve.transform]

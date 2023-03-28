@@ -49,7 +49,6 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
     switch (textDirection) {
       case TextDirection.rtl:
         childPosition += Offset(size.width, 0);
-        break;
       case TextDirection.ltr:
         break;
     }
@@ -66,11 +65,9 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
         case TextDirection.rtl:
           positionChild(color, childPosition - Offset(currentSize.width, 0));
           childPosition += Offset(-currentSize.width, currentSize.height - overlap);
-          break;
         case TextDirection.ltr:
           positionChild(color, childPosition);
           childPosition += Offset(currentSize.width, currentSize.height - overlap);
-          break;
       }
     }
   }

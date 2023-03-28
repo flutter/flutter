@@ -915,10 +915,8 @@ class TextPainter {
           // the paragraph's width needs to be as close to the width of its
           // longest line as possible.
           newWidth = _applyFloatingPointHack(_paragraph!.longestLine);
-          break;
         case TextWidthBasis.parent:
           newWidth = maxIntrinsicWidth;
-          break;
       }
       newWidth = clampDouble(newWidth, minWidth, maxWidth);
       if (newWidth != _applyFloatingPointHack(_paragraph!.width)) {
@@ -1046,6 +1044,7 @@ class TextPainter {
   // Get the caret metrics (in logical pixels) based off the near edge of the
   // character upstream from the given string offset.
   _CaretMetrics? _getMetricsFromUpstream(int offset) {
+    assert(offset >= 0);
     final int plainTextLength = plainText.length;
     if (plainTextLength == 0 || offset > plainTextLength) {
       return null;
@@ -1063,7 +1062,7 @@ class TextPainter {
       final int prevRuneOffset = offset - graphemeClusterLength;
       // Use BoxHeightStyle.strut to ensure that the caret's height fits within
       // the line's height and is consistent throughout the line.
-      boxes = _paragraph!.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
+      boxes = _paragraph!.getBoxesForRange(max(0, prevRuneOffset), offset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
@@ -1081,7 +1080,12 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes.first;
+
+      // Try to identify the box nearest the offset.  This logic works when
+      // there's just one box, and when all boxes have the same direction.
+      // It may not work in bidi text: https://github.com/flutter/flutter/issues/123424
+      final TextBox box = boxes.last.direction == TextDirection.ltr
+          ? boxes.last : boxes.first;
 
       return prevCodeUnit == NEWLINE_CODE_UNIT
         ? _EmptyLineCaretMetrics(lineVerticalOffset: box.bottom)
@@ -1089,11 +1093,13 @@ class TextPainter {
     }
     return null;
   }
+
   // Get the caret metrics (in logical pixels) based off the near edge of the
   // character downstream from the given string offset.
   _CaretMetrics? _getMetricsFromDownstream(int offset) {
+    assert(offset >= 0);
     final int plainTextLength = plainText.length;
-    if (plainTextLength == 0 || offset < 0) {
+    if (plainTextLength == 0) {
       return null;
     }
     // We cap the offset at the final index of plain text.
@@ -1125,7 +1131,13 @@ class TextPainter {
         graphemeClusterLength *= 2;
         continue;
       }
-      final TextBox box = boxes.last;
+
+      // Try to identify the box nearest the offset.  This logic works when
+      // there's just one box, and when all boxes have the same direction.
+      // It may not work in bidi text: https://github.com/flutter/flutter/issues/123424
+      final TextBox box = boxes.first.direction == TextDirection.ltr
+        ? boxes.first : boxes.last;
+
       return _LineCaretMetrics(offset: Offset(box.start, box.top), writingDirection: box.direction, fullHeight: box.bottom - box.top);
     }
     return null;
@@ -1161,7 +1173,13 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
-    final _CaretMetrics caretMetrics = _computeCaretMetrics(position);
+    final _CaretMetrics caretMetrics;
+    if (position.offset < 0) {
+      // TODO(LongCatIsLooong): make this case impossible; see https://github.com/flutter/flutter/issues/79495
+      caretMetrics = const _EmptyLineCaretMetrics(lineVerticalOffset: 0);
+    } else {
+      caretMetrics = _computeCaretMetrics(position);
+    }
 
     if (caretMetrics is _EmptyLineCaretMetrics) {
       final double paintOffsetAlignment = _computePaintOffsetFraction(textAlign, textDirection!);
@@ -1176,10 +1194,8 @@ class TextPainter {
     switch ((caretMetrics as _LineCaretMetrics).writingDirection) {
       case TextDirection.rtl:
         offset = Offset(caretMetrics.offset.dx - caretPrototype.width, caretMetrics.offset.dy);
-        break;
       case TextDirection.ltr:
         offset = caretMetrics.offset;
-        break;
     }
     // If offset.dx is outside of the advertised content area, then the associated
     // glyph cluster belongs to a trailing newline character. Ideally the behavior
@@ -1196,6 +1212,10 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+    if (position.offset < 0) {
+      // TODO(LongCatIsLooong): make this case impossible; see https://github.com/flutter/flutter/issues/79495
+      return null;
+    }
     final _CaretMetrics caretMetrics = _computeCaretMetrics(position);
     return caretMetrics is _LineCaretMetrics ? caretMetrics.fullHeight : null;
   }
@@ -1236,10 +1256,11 @@ class TextPainter {
 
   /// Returns a list of rects that bound the given selection.
   ///
+  /// The [selection] must be a valid range (with [TextSelection.isValid] true).
+  ///
   /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
   /// the shape of the [TextBox]s. These properties default to
-  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
-  /// must not be null.
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively.
   ///
   /// A given selection might have more than one rect if this text painter
   /// contains bidirectional text because logically contiguous text might not be
@@ -1257,6 +1278,7 @@ class TextPainter {
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     assert(_debugAssertTextLayoutIsValid);
+    assert(selection.isValid);
     return _paragraph!.getBoxesForRange(
       selection.start,
       selection.end,

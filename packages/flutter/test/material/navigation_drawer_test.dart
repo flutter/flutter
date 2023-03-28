@@ -349,12 +349,16 @@ void main() {
     // Test default indicator color and shape.
     expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
     expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+    // Test that InkWell for hover, focus and pressed use default shape.
+    expect(_getInkWell(tester)?.customBorder, const StadiumBorder());
 
     await tester.pumpWidget(buildNavigationDrawer(indicatorColor: color, indicatorShape: shape));
 
     // Test custom indicator color and shape.
     expect(_getIndicatorDecoration(tester)?.color, color);
     expect(_getIndicatorDecoration(tester)?.shape, shape);
+    // Test that InkWell for hover, focus and pressed use custom shape.
+    expect(_getInkWell(tester)?.customBorder, shape);
   });
 }
 
@@ -373,6 +377,13 @@ Material _getMaterial(WidgetTester tester) {
   return tester.firstWidget<Material>(
     find.descendant(
         of: find.byType(NavigationDrawer), matching: find.byType(Material)),
+  );
+}
+
+InkWell? _getInkWell(WidgetTester tester) {
+  return tester.firstWidget<InkWell>(
+    find.descendant(
+        of: find.byType(NavigationDrawer), matching: find.byType(InkWell)),
   );
 }
 

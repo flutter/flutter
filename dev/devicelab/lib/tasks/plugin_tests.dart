@@ -262,7 +262,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
         ) != 0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
-        break;
       case 'ios':
         await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
           if (!await runXcodeTests(
@@ -275,7 +274,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
             throw TaskResult.failure('Platform unit tests failed');
           }
         });
-        break;
       case 'linux':
         if (await exec(
           path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_test'),
@@ -284,7 +282,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
         ) != 0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
-        break;
       case 'macos':
         if (!await runXcodeTests(
           platformDirectory: path.join(rootPath, 'macos'),
@@ -295,7 +292,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
         )) {
           throw TaskResult.failure('Platform unit tests failed');
         }
-        break;
       case 'windows':
         if (await exec(
           path.join(rootPath, 'build', 'windows', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
@@ -304,7 +300,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
         ) != 0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
-        break;
     }
   }
 
@@ -346,7 +341,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '9.0'"
+        ? "s.platform = :ios, '11.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
