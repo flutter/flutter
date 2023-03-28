@@ -8,7 +8,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
-import '../spy.dart';
+import '../common/spy.dart';
 
 @JS('window._flutter_internal_on_benchmark')
 external set _onBenchmark (JSAny? object);

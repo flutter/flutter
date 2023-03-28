@@ -12,12 +12,15 @@ import 'package:path/path.dart' as path;
 
 import 'environment.dart';
 import 'exceptions.dart';
+import 'felt_config.dart';
 
 class FilePath {
   FilePath.fromCwd(String relativePath)
       : _absolutePath = path.absolute(relativePath);
   FilePath.fromWebUi(String relativePath)
       : _absolutePath = path.join(environment.webUiRootDir.path, relativePath);
+  FilePath.fromTestSet(TestSet testSet, String relativePath)
+      : _absolutePath = path.join(getTestSetDirectory(testSet).path, relativePath);
 
   final String _absolutePath;
 
@@ -368,82 +371,43 @@ Future<void> cleanup() async {
   }
 }
 
-/// Scans the test/ directory for test files and returns them.
-List<FilePath> findAllTests() {
-  return environment.webUiTestDir
-      .listSync(recursive: true)
-      .whereType<io.File>()
-      .where((io.File f) => f.path.endsWith('_test.dart'))
-      .map<FilePath>((io.File f) => FilePath.fromWebUi(
-          path.relative(f.path, from: environment.webUiRootDir.path)))
-      .toList();
+io.Directory getTestSetDirectory(TestSet testSet) {
+  return io.Directory(
+    path.join(
+      environment.webUiTestDir.path,
+      testSet.directory,
+    )
+  );
 }
 
-/// The renderer used to run the test.
-enum Renderer {
-  html,
-  canvasKit,
-  skwasm,
+io.Directory getBundleBuildDirectory(TestBundle bundle) {
+  return io.Directory(
+    path.join(
+      environment.webUiBuildDir.path,
+      'test_bundles',
+      bundle.name,
+    )
+  );
 }
 
-/// The `FilePath`s for all the tests, organized by renderer.
-class TestsByRenderer {
-  TestsByRenderer(this.htmlTests, this.canvasKitTests, this.skwasmTests);
+extension AnsiColors on String {
+  static bool shouldEscape = io.stdout.hasTerminal && io.stdout.supportsAnsiEscapes;
 
-  /// Tests which should be run with the HTML renderer.
-  final List<FilePath> htmlTests;
+  static const String _noColorCode = '\u001b[39m';
 
-  /// Tests which should be run with the CanvasKit renderer.
-  final List<FilePath> canvasKitTests;
+  String _wrapText(String prefix, String suffix) => shouldEscape
+    ? '$prefix$this$suffix' : this;
 
-  /// Tests which should be run with the Skwasm renderer.
-  final List<FilePath> skwasmTests;
+  String _colorText(String colorCode) => _wrapText(colorCode, _noColorCode);
 
-  /// The total number of targets to compile.
-  ///
-  /// The number of uiTests is doubled since they are compiled twice: once for
-  /// the HTML renderer and once for the CanvasKit renderer.
-  int get numTargetsToCompile => htmlTests.length + canvasKitTests.length + skwasmTests.length;
-}
+  String get ansiBlack => _colorText('\u001b[30m');
+  String get ansiRed => _colorText('\u001b[31m');
+  String get ansiGreen => _colorText('\u001b[32m');
+  String get ansiYellow => _colorText('\u001b[33m');
+  String get ansiBlue => _colorText('\u001b[34m');
+  String get ansiMagenta => _colorText('\u001b[35m');
+  String get ansiCyan => _colorText('\u001b[36m');
+  String get ansiWhite => _colorText('\u001b[37m');
 
-/// Given a list of test files, organizes them by which renderer should run them.
-TestsByRenderer sortTestsByRenderer(List<FilePath> testFiles, bool forWasm) {
-  final List<FilePath> htmlTargets = <FilePath>[];
-  final List<FilePath> canvasKitTargets = <FilePath>[];
-  final List<FilePath> skwasmTargets = <FilePath>[];
-  final String canvasKitTestDirectory =
-      path.join(environment.webUiTestDir.path, 'canvaskit');
-  final String skwasmTestDirectory =
-      path.join(environment.webUiTestDir.path, 'skwasm');
-  final String uiTestDirectory =
-      path.join(environment.webUiTestDir.path, 'ui');
-  for (final FilePath testFile in testFiles) {
-    if (path.isWithin(canvasKitTestDirectory, testFile.absolute)) {
-      canvasKitTargets.add(testFile);
-    } else if (path.isWithin(skwasmTestDirectory, testFile.absolute)) {
-      skwasmTargets.add(testFile);
-    } else if (path.isWithin(uiTestDirectory, testFile.absolute)) {
-      htmlTargets.add(testFile);
-      canvasKitTargets.add(testFile);
-      if (forWasm) {
-        // Only add these tests in wasm mode, since JS mode has a stub renderer.
-        skwasmTargets.add(testFile);
-      }
-    } else {
-      htmlTargets.add(testFile);
-    }
-  }
-  return TestsByRenderer(htmlTargets, canvasKitTargets, skwasmTargets);
-}
-
-/// The build directory to compile a test into given the renderer.
-String getBuildDirForRenderer(Renderer renderer) {
-  switch (renderer) {
-    case Renderer.html:
-      return 'html_tests';
-    case Renderer.canvasKit:
-      return 'canvaskit_tests';
-    case Renderer.skwasm:
-      return 'skwasm_tests';
-  }
+  String get ansiBold => _wrapText('\u001b[1m', '\u001b[0m');
 }

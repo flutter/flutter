@@ -14,7 +14,7 @@ import 'package:ui/src/engine/util.dart';
 import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../matchers.dart';
+import '../../common/matchers.dart';
 
 /// Gets the DOM host where the Flutter app is being rendered.
 ///

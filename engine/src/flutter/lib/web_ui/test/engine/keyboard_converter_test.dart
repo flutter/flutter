@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'keyboard_test_common.dart';
+import '../common/keyboard_test_common.dart';
 
 const int kLocationStandard = 0;
 const int kLocationLeft = 1;

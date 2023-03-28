@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'mock_engine_canvas.dart';
+import '../common/mock_engine_canvas.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

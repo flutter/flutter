@@ -11,7 +11,7 @@ import 'package:ui/src/engine.dart' hide ColorSpace;
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../matchers.dart';
+import '../common/matchers.dart';
 import 'screenshot.dart';
 
 void main() {

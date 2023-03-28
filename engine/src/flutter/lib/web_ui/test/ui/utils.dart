@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/skwasm/skwasm_stub.dart' if (dart.library.ffi) 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
 import '../canvaskit/common.dart';
 
 /// Initializes the renderer for this test.
-void setUpUiTest() {
-  if (renderer is CanvasKitRenderer) {
+Future<void> setUpUiTest() async {
+  if (isCanvasKit) {
     setUpCanvasKitTest();
+  } else if (isHtml) {
+    await initializeEngine();
   }
 }
 
@@ -18,3 +21,5 @@ bool get isCanvasKit => renderer is CanvasKitRenderer;
 
 /// Returns [true] if this test is running in the HTML renderer.
 bool get isHtml => renderer is HtmlRenderer;
+
+bool get isSkwasm => renderer is SkwasmRenderer;

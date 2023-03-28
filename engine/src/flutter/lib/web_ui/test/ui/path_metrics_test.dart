@@ -8,7 +8,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
-import '../matchers.dart';
+import '../common/matchers.dart';
 import 'utils.dart';
 
 const double kTolerance = 0.1;
@@ -17,8 +17,8 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() {
-  setUpUiTest();
+Future<void> testMain() async {
+  await setUpUiTest();
   group('PathMetric length', () {
     test('empty path', () {
       final Path path = Path();

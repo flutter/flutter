@@ -13,7 +13,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../matchers.dart';
+import '../common/matchers.dart';
 import 'common.dart';
 import 'test_data.dart';
 

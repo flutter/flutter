@@ -10,8 +10,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
 
-import 'engine/history_test.dart';
-import 'matchers.dart';
+import '../common/matchers.dart';
+import 'history_test.dart';
 
 const MethodCodec codec = JSONMethodCodec();
 

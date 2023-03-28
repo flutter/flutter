@@ -11,6 +11,7 @@ import 'browser_lock.dart';
 import 'chrome.dart';
 import 'edge.dart';
 import 'environment.dart';
+import 'felt_config.dart';
 import 'firefox.dart';
 import 'safari_macos.dart';
 
@@ -261,16 +262,15 @@ const List<String> kAllBrowserNames = <String>[
 /// Creates an environment for a browser.
 ///
 /// The [browserName] matches the browser name passed as the `--browser` option.
-BrowserEnvironment getBrowserEnvironment(String browserName, { required bool enableWasmGC }) {
+BrowserEnvironment getBrowserEnvironment(BrowserName browserName, { required bool enableWasmGC }) {
   switch (browserName) {
-    case kChrome:
+    case BrowserName.chrome:
       return ChromeEnvironment(enableWasmGC);
-    case kEdge:
+    case BrowserName.edge:
       return EdgeEnvironment();
-    case kFirefox:
+    case BrowserName.firefox:
       return FirefoxEnvironment();
-    case kSafari:
+    case BrowserName.safari:
       return SafariMacOsEnvironment();
   }
-  throw UnsupportedError('Browser $browserName is not supported.');
 }

@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide window;
 
-import 'matchers.dart';
+import '../common/matchers.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

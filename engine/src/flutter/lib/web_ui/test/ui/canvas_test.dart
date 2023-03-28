@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../matchers.dart';
+import '../common/matchers.dart';
 import 'utils.dart';
 
 void main() {
@@ -18,7 +18,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUiTest();
+  await setUpUiTest();
 
   final bool deviceClipRoundsOut = renderer is! HtmlRenderer;
   runCanvasTests(deviceClipRoundsOut: deviceClipRoundsOut);

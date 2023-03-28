@@ -10,7 +10,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../../matchers.dart';
+import '../../common/matchers.dart';
 
 const ui.Rect region = ui.Rect.fromLTWH(0, 0, 500, 100);
 

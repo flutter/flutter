@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../keyboard_converter_test.dart';
+import 'keyboard_converter_test.dart';
 
 const int _kNoButtonChange = -1;
 const PointerSupportDetector _defaultSupportDetector = PointerSupportDetector();

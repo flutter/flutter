@@ -12,8 +12,8 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-void testMain() {
-  setUpUiTest();
+Future<void> testMain() async {
+  await setUpUiTest();
   test('RRect.contains()', () {
     final RRect rrect = RRect.fromRectAndCorners(
         const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
