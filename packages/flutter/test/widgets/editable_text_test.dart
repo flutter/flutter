@@ -111,42 +111,50 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
-  testWidgets('Focus state will be correct when unfocus message sent from platform',
+  group('Focus state will be correct when message sent from platform', () {
+    int client = 1;
+    testWidgets(
+      'Will unfocus when unfocus message sent from platform',
       (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FocusScope(
-            node: focusScopeNode,
-            child: EditableText(
-              autofocus: true,
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
+        final FocusNode node = FocusNode();
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                child: EditableText(
+                  autofocus: true,
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: node,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    );
-    expect(focusNode.hasFocus, isTrue);
+        );
+        expect(node.hasFocus, isTrue);
 
-    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
-        const MethodCall(
-          'TextInputClient.unfocus',
-          <dynamic>[1],
-        ),
-      ),
-      (ByteData? data) {
-        /* response from framework is discarded */
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage(
+          SystemChannels.textInput.name,
+          SystemChannels.textInput.codec.encodeMethodCall(
+            MethodCall(
+              'TextInputClient.unfocus',
+              <dynamic>[client],
+            ),
+          ),
+          (ByteData? data) {
+            /* response from framework is discarded */
+          },
+        );
+        client++;
+        expect(node.hasFocus, isFalse);
       },
     );
-    expect(focusNode.hasFocus, isFalse);
   });
 
   testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
