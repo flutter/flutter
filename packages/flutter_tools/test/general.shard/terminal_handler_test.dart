@@ -400,6 +400,52 @@ void main() {
       await terminalHandler.processTerminalInput('L');
     });
 
+    testWithoutContext('f - debugDumpFocusTree', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'FOCUS TREE',
+          }
+        ),
+      ]);
+      await terminalHandler.processTerminalInput('f');
+
+      expect(terminalHandler.logger.statusText, contains('FOCUS TREE'));
+    });
+
+    testWithoutContext('f - debugDumpLayerTree with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'FOCUS TREE',
+          }
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('f');
+
+      expect(terminalHandler.logger.statusText, contains('FOCUS TREE'));
+    });
+
+    testWithoutContext('f - debugDumpFocusTree with service protocol and profile mode is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], buildMode: BuildMode.profile);
+      await terminalHandler.processTerminalInput('f');
+    });
+
+    testWithoutContext('f - debugDumpFocusTree without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('f');
+    });
+
     testWithoutContext('o,O - debugTogglePlatform', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         // Request 1.
