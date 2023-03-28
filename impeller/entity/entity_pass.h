@@ -77,14 +77,18 @@ class EntityPass {
   /// @return Returns whether a subpass was encountered.
   bool IterateUntilSubpass(const std::function<bool(Entity&)>& iterator);
 
-  /// @brief Return the number of entities on this pass.
-  size_t GetEntityCount() const;
+  /// @brief Return the number of elements on this pass.
+  size_t GetElementCount() const;
 
   void SetTransformation(Matrix xformation);
 
   void SetStencilDepth(size_t stencil_depth);
 
   void SetBlendMode(BlendMode blend_mode);
+
+  void SetClearColor(Color clear_color);
+
+  Color GetClearColor() const;
 
   void SetBackdropFilter(std::optional<BackdropFilterProc> proc);
 
@@ -204,6 +208,7 @@ class EntityPass {
   size_t stencil_depth_ = 0u;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool cover_whole_screen_ = false;
+  Color clear_color_ = Color::BlackTransparent();
 
   /// These values are incremented whenever something is added to the pass that
   /// requires reading from the backdrop texture. Currently, this can happen in

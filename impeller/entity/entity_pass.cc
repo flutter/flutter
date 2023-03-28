@@ -144,7 +144,8 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
 
 static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
                                            ISize size,
-                                           bool readable) {
+                                           bool readable,
+                                           const Color& clear_color) {
   auto context = renderer.GetContext();
 
   /// All of the load/store actions are managed by `InlinePassContext` when
@@ -163,7 +164,7 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
             .resolve_storage_mode = StorageMode::kDevicePrivate,
             .load_action = LoadAction::kDontCare,
             .store_action = StoreAction::kMultisampleResolve,
-        },  // color_attachment_config
+            .clear_color = clear_color},  // color_attachment_config
         RenderTarget::AttachmentConfig{
             .storage_mode = readable ? StorageMode::kDevicePrivate
                                      : StorageMode::kDeviceTransient,
@@ -203,13 +204,18 @@ uint32_t EntityPass::GetTotalPassReads(ContentContext& renderer) const {
 
 bool EntityPass::Render(ContentContext& renderer,
                         const RenderTarget& render_target) const {
+  if (render_target.GetColorAttachments().empty()) {
+    VALIDATION_LOG << "The root RenderTarget must have a color attachment.";
+    return false;
+  }
+
   StencilCoverageStack stencil_coverage_stack = {StencilCoverageLayer{
       .coverage = Rect::MakeSize(render_target.GetRenderTargetSize()),
       .stencil_depth = 0}};
 
   if (GetTotalPassReads(renderer) > 0) {
-    auto offscreen_target =
-        CreateRenderTarget(renderer, render_target.GetRenderTargetSize(), true);
+    auto offscreen_target = CreateRenderTarget(
+        renderer, render_target.GetRenderTargetSize(), true, clear_color_);
 
     if (!OnRender(renderer,  // renderer
                   offscreen_target.GetRenderTarget()
@@ -269,18 +275,25 @@ bool EntityPass::Render(ContentContext& renderer,
     return true;
   }
 
+  // Set up the clear color of the root pass.
+  auto color0 = render_target.GetColorAttachments().find(0)->second;
+  color0.clear_color = clear_color_;
+
+  auto root_render_target = render_target;
+  root_render_target.SetColorAttachment(color0, 0);
+
   EntityPassTarget pass_target(
-      render_target,
+      root_render_target,
       renderer.GetDeviceCapabilities().SupportsReadFromResolve());
 
-  return OnRender(                          //
-      renderer,                             // renderer
-      render_target.GetRenderTargetSize(),  // root_pass_size
-      pass_target,                          // pass_target
-      Point(),                              // global_pass_position
-      Point(),                              // local_pass_position
-      0,                                    // pass_depth
-      stencil_coverage_stack);              // stencil_coverage_stack
+  return OnRender(                               //
+      renderer,                                  // renderer
+      root_render_target.GetRenderTargetSize(),  // root_pass_size
+      pass_target,                               // pass_target
+      Point(),                                   // global_pass_position
+      Point(),                                   // local_pass_position
+      0,                                         // pass_depth
+      stencil_coverage_stack);                   // stencil_coverage_stack
 }
 
 EntityPass::EntityResult EntityPass::GetEntityForElement(
@@ -386,9 +399,10 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
         subpass_coverage->Intersection(Rect::MakeSize(root_pass_size));
 
     auto subpass_target =
-        CreateRenderTarget(renderer,                       //
-                           ISize(subpass_coverage->size),  //
-                           subpass->GetTotalPassReads(renderer) > 0);
+        CreateRenderTarget(renderer,                                  //
+                           ISize(subpass_coverage->size),             //
+                           subpass->GetTotalPassReads(renderer) > 0,  //
+                           clear_color_);
 
     auto subpass_texture =
         subpass_target.GetRenderTarget().GetRenderTargetTexture();
@@ -701,7 +715,7 @@ bool EntityPass::IterateUntilSubpass(
   return false;
 }
 
-size_t EntityPass::GetEntityCount() const {
+size_t EntityPass::GetElementCount() const {
   return elements_.size();
 }
 
@@ -737,6 +751,14 @@ void EntityPass::SetStencilDepth(size_t stencil_depth) {
 void EntityPass::SetBlendMode(BlendMode blend_mode) {
   blend_mode_ = blend_mode;
   cover_whole_screen_ = Entity::IsBlendModeDestructive(blend_mode);
+}
+
+void EntityPass::SetClearColor(Color clear_color) {
+  clear_color_ = clear_color;
+}
+
+Color EntityPass::GetClearColor() const {
+  return clear_color_;
 }
 
 void EntityPass::SetBackdropFilter(std::optional<BackdropFilterProc> proc) {
