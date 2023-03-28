@@ -2660,7 +2660,7 @@ void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
     final Object? exportsAccessor = js_util.jsify(<String, dynamic>{
       'get': allowInterop(() {
         if (domDocument.currentScript == canvasKitScript) {
-          return objectConstructor;
+          return js_util.callConstructor(objectConstructor, null);
         } else {
           return _flutterWebCachedExports;
         }
@@ -2677,7 +2677,7 @@ void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
     final Object? moduleAccessor = js_util.jsify(<String, dynamic>{
       'get': allowInterop(() {
         if (domDocument.currentScript == canvasKitScript) {
-          return objectConstructor;
+          return js_util.callConstructor(objectConstructor, null);
         } else {
           return _flutterWebCachedModule;
         }
