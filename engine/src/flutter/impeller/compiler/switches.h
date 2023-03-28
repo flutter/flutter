@@ -19,23 +19,24 @@ namespace compiler {
 
 struct Switches {
   TargetPlatform target_platform = TargetPlatform::kUnknown;
-  std::shared_ptr<fml::UniqueFD> working_directory;
-  std::vector<IncludeDir> include_directories;
-  std::string source_file_name;
-  SourceType input_type;
-  std::string sl_file_name;
-  bool iplr;
-  std::string spirv_file_name;
-  std::string reflection_json_name;
-  std::string reflection_header_name;
-  std::string reflection_cc_name;
-  std::string depfile_path;
-  std::vector<std::string> defines;
-  bool json_format;
+  std::shared_ptr<fml::UniqueFD> working_directory = nullptr;
+  std::vector<IncludeDir> include_directories = {};
+  std::string source_file_name = "";
+  SourceType input_type = SourceType::kUnknown;
+  std::string sl_file_name = "";
+  bool iplr = false;
+  std::string spirv_file_name = "";
+  std::string reflection_json_name = "";
+  std::string reflection_header_name = "";
+  std::string reflection_cc_name = "";
+  std::string depfile_path = "";
+  std::vector<std::string> defines = {};
+  bool json_format = false;
   SourceLanguage source_language = SourceLanguage::kUnknown;
-  uint32_t gles_language_version;
-  std::string metal_version;
-  std::string entry_point;
+  uint32_t gles_language_version = 0;
+  std::string metal_version = "";
+  std::string entry_point = "";
+  bool use_half_textures = false;
 
   Switches();
 

@@ -72,8 +72,8 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << "[optional] --depfile=<depfile_path>" << std::endl;
   stream << "[optional] --gles-language-verision=<number>" << std::endl;
   stream << "[optional] --json" << std::endl;
-  stream << "[optional] --remap-samplers (force metal sampler index to match "
-            "declared order)"
+  stream << "[optional] --use-half-textures (force openGL semantics when "
+            "targeting metal)"
          << std::endl;
 }
 
@@ -135,7 +135,8 @@ Switches::Switches(const fml::CommandLine& command_line)
       metal_version(
           command_line.GetOptionValueWithDefault("metal-version", "1.2")),
       entry_point(
-          command_line.GetOptionValueWithDefault("entry-point", "main")) {
+          command_line.GetOptionValueWithDefault("entry-point", "main")),
+      use_half_textures(command_line.HasOption("use-half-textures")) {
   auto language =
       command_line.GetOptionValueWithDefault("source-language", "glsl");
   std::transform(language.begin(), language.end(), language.begin(),

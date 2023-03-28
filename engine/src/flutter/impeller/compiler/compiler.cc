@@ -366,6 +366,22 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   switch (source_options.target_platform) {
     case TargetPlatform::kMetalDesktop:
     case TargetPlatform::kMetalIOS:
+      spirv_options.SetOptimizationLevel(
+          shaderc_optimization_level::shaderc_optimization_level_performance);
+      if (source_options.use_half_textures) {
+        spirv_options.SetTargetEnvironment(
+            shaderc_target_env::shaderc_target_env_opengl,
+            shaderc_env_version::shaderc_env_version_opengl_4_5);
+        spirv_options.SetTargetSpirv(
+            shaderc_spirv_version::shaderc_spirv_version_1_0);
+      } else {
+        spirv_options.SetTargetEnvironment(
+            shaderc_target_env::shaderc_target_env_vulkan,
+            shaderc_env_version::shaderc_env_version_vulkan_1_1);
+        spirv_options.SetTargetSpirv(
+            shaderc_spirv_version::shaderc_spirv_version_1_3);
+      }
+      break;
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
       spirv_options.SetOptimizationLevel(
