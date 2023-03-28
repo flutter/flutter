@@ -48,6 +48,7 @@ impeller_shaders("shader_fixtures") {
     "simple.vert",
     "test_texture.frag",
     "test_texture.vert",
+    "half.frag",
   ]
 
   if (impeller_enable_opengles) {
@@ -55,6 +56,7 @@ impeller_shaders("shader_fixtures") {
       "sample.comp",
       "stage1.comp",
       "stage2.comp",
+      "half.frag",
     ]
   }
 }

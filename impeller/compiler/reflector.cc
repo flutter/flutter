@@ -18,6 +18,7 @@
 #include "impeller/compiler/code_gen_template.h"
 #include "impeller/compiler/uniform_sorter.h"
 #include "impeller/compiler/utilities.h"
+#include "impeller/geometry/half.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/scalar.h"
 
@@ -534,6 +535,11 @@ static std::optional<KnownType> ReadKnownScalarType(
           .name = "Scalar",
           .byte_size = sizeof(Scalar),
       };
+    case spirv_cross::SPIRType::BaseType::Half:
+      return KnownType{
+          .name = "Half",
+          .byte_size = sizeof(Half),
+      };
     case spirv_cross::SPIRType::BaseType::UInt:
       return KnownType{
           .name = "uint32_t",
@@ -759,6 +765,75 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(Vector4),                       // size
+          stride * array_elements.value_or(1),   // byte_length
+          array_elements,                        // array_elements
+          element_padding,                       // element_padding
+      });
+      current_byte_offset += stride * array_elements.value_or(1);
+      continue;
+    }
+
+    // Tightly packed half Point (vec2).
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Half &&  //
+        member.width == sizeof(Half) * 8 &&                          //
+        member.columns == 1 &&                                       //
+        member.vecsize == 2                                          //
+    ) {
+      uint32_t stride =
+          GetArrayStride<sizeof(HalfVector2)>(struct_type, member, i);
+      uint32_t element_padding = stride - sizeof(HalfVector2);
+      result.emplace_back(StructMember{
+          "HalfVector2",                         // type
+          BaseTypeToString(member.basetype),     // basetype
+          GetMemberNameAtIndex(struct_type, i),  // name
+          struct_member_offset,                  // offset
+          sizeof(HalfVector2),                   // size
+          stride * array_elements.value_or(1),   // byte_length
+          array_elements,                        // array_elements
+          element_padding,                       // element_padding
+      });
+      current_byte_offset += stride * array_elements.value_or(1);
+      continue;
+    }
+
+    // Tightly packed Half Float Vector3.
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Half &&  //
+        member.width == sizeof(Half) * 8 &&                          //
+        member.columns == 1 &&                                       //
+        member.vecsize == 3                                          //
+    ) {
+      uint32_t stride =
+          GetArrayStride<sizeof(HalfVector3)>(struct_type, member, i);
+      uint32_t element_padding = stride - sizeof(HalfVector3);
+      result.emplace_back(StructMember{
+          "HalfVector3",                         // type
+          BaseTypeToString(member.basetype),     // basetype
+          GetMemberNameAtIndex(struct_type, i),  // name
+          struct_member_offset,                  // offset
+          sizeof(HalfVector3),                   // size
+          stride * array_elements.value_or(1),   // byte_length
+          array_elements,                        // array_elements
+          element_padding,                       // element_padding
+      });
+      current_byte_offset += stride * array_elements.value_or(1);
+      continue;
+    }
+
+    // Tightly packed Half Float Vector4.
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Half &&  //
+        member.width == sizeof(Half) * 8 &&                          //
+        member.columns == 1 &&                                       //
+        member.vecsize == 4                                          //
+    ) {
+      uint32_t stride =
+          GetArrayStride<sizeof(HalfVector4)>(struct_type, member, i);
+      uint32_t element_padding = stride - sizeof(HalfVector4);
+      result.emplace_back(StructMember{
+          "HalfVector4",                         // type
+          BaseTypeToString(member.basetype),     // basetype
+          GetMemberNameAtIndex(struct_type, i),  // name
+          struct_member_offset,                  // offset
+          sizeof(HalfVector4),                   // size
           stride * array_elements.value_or(1),   // byte_length
           array_elements,                        // array_elements
           element_padding,                       // element_padding
