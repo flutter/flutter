@@ -11662,7 +11662,7 @@ void main() {
      skip: isBrowser, // [intended] Browser handles arrow keys differently.
   );
 
-  testWidgets('mouse click and drag can edge scroll vertically on desktop platforms', (WidgetTester tester) async {
+  testWidgets('mouse click and drag can edge scroll vertically', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -11739,7 +11739,7 @@ void main() {
       textOffsetToPosition(tester, 0).dy,
       moreOrLessEquals(firstCharY - lineHeight, epsilon: 1),
     );
-  }, variant: TargetPlatformVariant.desktop());
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets(
     'long tap after a double tap select is not affected',
