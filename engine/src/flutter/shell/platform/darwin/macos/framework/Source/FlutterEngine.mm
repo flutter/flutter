@@ -455,8 +455,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   flutterArguments.command_line_argc = static_cast<int>(argv.size());
   flutterArguments.command_line_argv = argv.empty() ? nullptr : argv.data();
   flutterArguments.platform_message_callback = (FlutterPlatformMessageCallback)OnPlatformMessage;
-  flutterArguments.update_semantics_callback = [](const FlutterSemanticsUpdate* update,
-                                                  void* user_data) {
+  flutterArguments.update_semantics_callback2 = [](const FlutterSemanticsUpdate2* update,
+                                                   void* user_data) {
     // TODO(dkwingsmt): This callback only supports single-view, therefore it
     // only operates on the default view. To support multi-view, we need a
     // way to pass in the ID (probably through FlutterSemanticsUpdate).

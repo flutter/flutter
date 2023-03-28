@@ -498,17 +498,19 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return _engine != nil;
 }
 
-- (void)updateSemantics:(const FlutterSemanticsUpdate*)update {
+- (void)updateSemantics:(const FlutterSemanticsUpdate2*)update {
   NSAssert(_engine.semanticsEnabled, @"Semantics must be enabled.");
   if (!_engine.semanticsEnabled) {
     return;
   }
-  for (size_t i = 0; i < update->nodes_count; i++) {
-    _bridge->AddFlutterSemanticsNodeUpdate(update->nodes[i]);
+  for (size_t i = 0; i < update->node_count; i++) {
+    const FlutterSemanticsNode2* node = update->nodes[i];
+    _bridge->AddFlutterSemanticsNodeUpdate(*node);
   }
 
-  for (size_t i = 0; i < update->custom_actions_count; i++) {
-    _bridge->AddFlutterSemanticsCustomActionUpdate(update->custom_actions[i]);
+  for (size_t i = 0; i < update->custom_action_count; i++) {
+    const FlutterSemanticsCustomAction2* action = update->custom_actions[i];
+    _bridge->AddFlutterSemanticsCustomActionUpdate(*action);
   }
 
   _bridge->CommitUpdates();

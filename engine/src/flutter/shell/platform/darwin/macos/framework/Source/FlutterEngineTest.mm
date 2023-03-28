@@ -198,12 +198,12 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   FlutterEngine* engine = GetFlutterEngine();
   // Capture the update callbacks before the embedder API initializes.
   auto original_init = engine.embedderAPI.Initialize;
-  std::function<void(const FlutterSemanticsUpdate*, void*)> update_semantics_callback;
+  std::function<void(const FlutterSemanticsUpdate2*, void*)> update_semantics_callback;
   engine.embedderAPI.Initialize = MOCK_ENGINE_PROC(
       Initialize, ([&update_semantics_callback, &original_init](
                        size_t version, const FlutterRendererConfig* config,
                        const FlutterProjectArgs* args, void* user_data, auto engine_out) {
-        update_semantics_callback = args->update_semantics_callback;
+        update_semantics_callback = args->update_semantics_callback2;
         return original_init(version, config, args, user_data, engine_out);
       }));
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
@@ -222,7 +222,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   engine.semanticsEnabled = YES;
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -239,7 +239,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
 
-  FlutterSemanticsNode child1;
+  FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.flags = static_cast<FlutterSemanticsFlag>(0);
   child1.actions = static_cast<FlutterSemanticsAction>(0);
@@ -254,11 +254,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
 
-  FlutterSemanticsUpdate update;
-  update.nodes_count = 2;
-  FlutterSemanticsNode nodes[] = {root, child1};
+  FlutterSemanticsUpdate2 update;
+  update.node_count = 2;
+  FlutterSemanticsNode2* nodes[] = {&root, &child1};
   update.nodes = nodes;
-  update.custom_actions_count = 0;
+  update.custom_action_count = 0;
   update_semantics_callback(&update, (__bridge void*)engine);
 
   // Verify the accessibility tree is attached to the flutter view.
@@ -292,12 +292,12 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   FlutterEngine* engine = GetFlutterEngine();
   // Capture the update callbacks before the embedder API initializes.
   auto original_init = engine.embedderAPI.Initialize;
-  std::function<void(const FlutterSemanticsUpdate*, void*)> update_semantics_callback;
+  std::function<void(const FlutterSemanticsUpdate2*, void*)> update_semantics_callback;
   engine.embedderAPI.Initialize = MOCK_ENGINE_PROC(
       Initialize, ([&update_semantics_callback, &original_init](
                        size_t version, const FlutterRendererConfig* config,
                        const FlutterProjectArgs* args, void* user_data, auto engine_out) {
-        update_semantics_callback = args->update_semantics_callback;
+        update_semantics_callback = args->update_semantics_callback2;
         return original_init(version, config, args, user_data, engine_out);
       }));
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
@@ -312,7 +312,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   engine.semanticsEnabled = YES;
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -329,7 +329,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
 
-  FlutterSemanticsNode child1;
+  FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.flags = static_cast<FlutterSemanticsFlag>(0);
   child1.actions = static_cast<FlutterSemanticsAction>(0);
@@ -344,11 +344,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
 
-  FlutterSemanticsUpdate update;
-  update.nodes_count = 2;
-  FlutterSemanticsNode nodes[] = {root, child1};
+  FlutterSemanticsUpdate2 update;
+  update.node_count = 2;
+  FlutterSemanticsNode2* nodes[] = {&root, &child1};
   update.nodes = nodes;
-  update.custom_actions_count = 0;
+  update.custom_action_count = 0;
   // This call updates semantics for the default view, which does not exist,
   // and therefore this call is invalid. But the engine should not crash.
   update_semantics_callback(&update, (__bridge void*)engine);
