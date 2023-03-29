@@ -32,11 +32,11 @@ class MyStatelessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: SizedBox(
           width: 250,
-          child: const TextField(
+          child: TextField(
             obscureText: true,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
