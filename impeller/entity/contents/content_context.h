@@ -12,6 +12,12 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "impeller/base/validation.h"
+#include "impeller/entity/entity.h"
+#include "impeller/renderer/capabilities.h"
+#include "impeller/renderer/formats.h"
+#include "impeller/renderer/pipeline.h"
+#include "impeller/scene/scene_context.h"
+
 #include "impeller/entity/blend.frag.h"
 #include "impeller/entity/blend.vert.h"
 #include "impeller/entity/border_mask_blur.frag.h"
@@ -19,10 +25,6 @@
 #include "impeller/entity/color_matrix_color_filter.frag.h"
 #include "impeller/entity/color_matrix_color_filter.vert.h"
 #include "impeller/entity/conical_gradient_fill.frag.h"
-#include "impeller/entity/entity.h"
-#include "impeller/entity/gaussian_blur.frag.h"
-#include "impeller/entity/gaussian_blur.vert.h"
-#include "impeller/entity/gaussian_blur_decal.frag.h"
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
 #include "impeller/entity/glyph_atlas_sdf.frag.h"
@@ -48,10 +50,12 @@
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.vert.h"
-#include "impeller/renderer/capabilities.h"
-#include "impeller/renderer/formats.h"
-#include "impeller/renderer/pipeline.h"
-#include "impeller/scene/scene_context.h"
+
+#include "impeller/entity/gaussian_blur.vert.h"
+#include "impeller/entity/gaussian_blur_alpha_decal.frag.h"
+#include "impeller/entity/gaussian_blur_alpha_nodecal.frag.h"
+#include "impeller/entity/gaussian_blur_noalpha_decal.frag.h"
+#include "impeller/entity/gaussian_blur_noalpha_nodecal.frag.h"
 
 #include "impeller/entity/position_color.vert.h"
 
@@ -132,10 +136,18 @@ using PositionUVPipeline =
     RenderPipelineT<TextureFillVertexShader, TiledTextureFillFragmentShader>;
 using TiledTexturePipeline = RenderPipelineT<TiledTextureFillVertexShader,
                                              TiledTextureFillFragmentShader>;
-using GaussianBlurPipeline =
-    RenderPipelineT<GaussianBlurVertexShader, GaussianBlurFragmentShader>;
+using GaussianBlurAlphaDecalPipeline =
+    RenderPipelineT<GaussianBlurVertexShader,
+                    GaussianBlurAlphaDecalFragmentShader>;
+using GaussianBlurAlphaPipeline =
+    RenderPipelineT<GaussianBlurVertexShader,
+                    GaussianBlurAlphaNodecalFragmentShader>;
 using GaussianBlurDecalPipeline =
-    RenderPipelineT<GaussianBlurVertexShader, GaussianBlurDecalFragmentShader>;
+    RenderPipelineT<GaussianBlurVertexShader,
+                    GaussianBlurNoalphaDecalFragmentShader>;
+using GaussianBlurPipeline =
+    RenderPipelineT<GaussianBlurVertexShader,
+                    GaussianBlurNoalphaNodecalFragmentShader>;
 using BorderMaskBlurPipeline =
     RenderPipelineT<BorderMaskBlurVertexShader, BorderMaskBlurFragmentShader>;
 using MorphologyFilterPipeline =
@@ -388,14 +400,24 @@ class ContentContext {
     return GetPipeline(tiled_texture_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGaussianBlurPipeline(
+  std::shared_ptr<Pipeline<PipelineDescriptor>>
+  GetGaussianBlurAlphaDecalPipeline(ContentContextOptions opts) const {
+    return GetPipeline(gaussian_blur_alpha_decal_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGaussianBlurAlphaPipeline(
       ContentContextOptions opts) const {
-    return GetPipeline(gaussian_blur_pipelines_, opts);
+    return GetPipeline(gaussian_blur_alpha_nodecal_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetGaussianBlurDecalPipeline(
       ContentContextOptions opts) const {
-    return GetPipeline(gaussian_blur_decal_pipelines_, opts);
+    return GetPipeline(gaussian_blur_noalpha_decal_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGaussianBlurPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(gaussian_blur_noalpha_nodecal_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetBorderMaskBlurPipeline(
@@ -665,8 +687,14 @@ class ContentContext {
   mutable Variants<TexturePipeline> texture_pipelines_;
   mutable Variants<PositionUVPipeline> position_uv_pipelines_;
   mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
-  mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
-  mutable Variants<GaussianBlurDecalPipeline> gaussian_blur_decal_pipelines_;
+  mutable Variants<GaussianBlurAlphaDecalPipeline>
+      gaussian_blur_alpha_decal_pipelines_;
+  mutable Variants<GaussianBlurAlphaPipeline>
+      gaussian_blur_alpha_nodecal_pipelines_;
+  mutable Variants<GaussianBlurDecalPipeline>
+      gaussian_blur_noalpha_decal_pipelines_;
+  mutable Variants<GaussianBlurPipeline>
+      gaussian_blur_noalpha_nodecal_pipelines_;
   mutable Variants<BorderMaskBlurPipeline> border_mask_blur_pipelines_;
   mutable Variants<MorphologyFilterPipeline> morphology_filter_pipelines_;
   mutable Variants<ColorMatrixColorFilterPipeline>
