@@ -9,8 +9,8 @@
 
 #include "flutter/fml/macros.h"
 
-#include "impeller/renderer/allocator.h"
-#include "impeller/renderer/texture.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/texture.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/node.h"
 

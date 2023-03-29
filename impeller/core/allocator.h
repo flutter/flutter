@@ -8,8 +8,8 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "impeller/renderer/device_buffer_descriptor.h"
-#include "impeller/renderer/texture_descriptor.h"
+#include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/texture_descriptor.h"
 
 namespace impeller {
 

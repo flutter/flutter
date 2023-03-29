@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/host_buffer.h"
+#include "impeller/core/host_buffer.h"
 
 #include <algorithm>
 #include <cstring>
 
 #include "flutter/fml/logging.h"
 
-#include "impeller/renderer/allocator.h"
-#include "impeller/renderer/buffer_view.h"
-#include "impeller/renderer/device_buffer.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/buffer_view.h"
+#include "impeller/core/device_buffer.h"
 
 namespace impeller {
 

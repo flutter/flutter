@@ -5,7 +5,7 @@
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 
 #include "impeller/base/validation.h"
-#include "impeller/renderer/texture_descriptor.h"
+#include "impeller/core/texture_descriptor.h"
 
 namespace impeller {
 

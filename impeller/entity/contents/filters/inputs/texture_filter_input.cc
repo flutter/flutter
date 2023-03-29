@@ -6,7 +6,7 @@
 
 #include <utility>
 
-#include "impeller/renderer/formats.h"
+#include "impeller/core/formats.h"
 
 namespace impeller {
 

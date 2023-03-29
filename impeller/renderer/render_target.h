@@ -9,9 +9,9 @@
 #include <optional>
 
 #include "flutter/fml/macros.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
-#include "impeller/renderer/allocator.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
 

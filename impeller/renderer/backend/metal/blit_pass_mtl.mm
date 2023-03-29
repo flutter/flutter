@@ -11,6 +11,8 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/host_buffer.h"
 #include "impeller/renderer/backend/metal/blit_command_mtl.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
@@ -18,8 +20,6 @@
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/blit_command.h"
-#include "impeller/renderer/formats.h"
-#include "impeller/renderer/host_buffer.h"
 #include "impeller/renderer/shader_types.h"
 
 namespace impeller {

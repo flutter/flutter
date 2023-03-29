@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/vertex_buffer.h"
+#include "impeller/core/buffer.h"
 
 namespace impeller {
 
-//
+Buffer::~Buffer() = default;
 
 }  // namespace impeller

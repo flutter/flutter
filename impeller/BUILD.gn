@@ -91,6 +91,10 @@ impeller_component("impeller_unittests") {
       "typographer:typographer_unittests",
     ]
   }
+
+  if (impeller_enable_compute) {
+    deps += [ "renderer:compute_tessellation_unittests" ]
+  }
 }
 
 if (impeller_supports_rendering) {

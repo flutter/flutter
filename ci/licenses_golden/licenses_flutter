@@ -1106,6 +1106,30 @@ ORIGIN: ../../../flutter/impeller/compiler/uniform_sorter.cc + ../../../flutter/
 ORIGIN: ../../../flutter/impeller/compiler/uniform_sorter.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/utilities.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/utilities.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/allocator.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/allocator.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/buffer.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/buffer.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/buffer_view.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/buffer_view.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/device_buffer.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/device_buffer.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/device_buffer_descriptor.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/device_buffer_descriptor.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/formats.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/formats.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/host_buffer.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/host_buffer.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/platform.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/platform.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/range.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/range.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/texture.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/texture.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/texture_descriptor.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/texture_descriptor.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/vertex_buffer.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/vertex_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/display_list/display_list_dispatcher.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/display_list/display_list_dispatcher.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/display_list/display_list_image_impeller.cc + ../../../flutter/LICENSE
@@ -1337,8 +1361,6 @@ ORIGIN: ../../../flutter/impeller/image/compressed_image.cc + ../../../flutter/L
 ORIGIN: ../../../flutter/impeller/image/compressed_image.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/image/decompressed_image.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/image/decompressed_image.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/allocator.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/allocator.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/gles/blit_command_gles.cc + ../../../flutter/LICENSE
@@ -1487,10 +1509,6 @@ ORIGIN: ../../../flutter/impeller/renderer/blit_command.cc + ../../../flutter/LI
 ORIGIN: ../../../flutter/impeller/renderer/blit_command.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/blit_pass.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/blit_pass.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/buffer.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/buffer.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/buffer_view.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/buffer_view.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/capabilities.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/capabilities.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/command.cc + ../../../flutter/LICENSE
@@ -1505,18 +1523,13 @@ ORIGIN: ../../../flutter/impeller/renderer/compute_pipeline_builder.cc + ../../.
 ORIGIN: ../../../flutter/impeller/renderer/compute_pipeline_builder.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/compute_tessellator.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/compute_tessellator.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/context.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/device_buffer.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/device_buffer.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/device_buffer_descriptor.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/device_buffer_descriptor.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/formats.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/formats.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/gpu_tracer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/gpu_tracer.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/host_buffer.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/host_buffer.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/path_polyline.comp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/pipeline.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/pipeline.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/pipeline_builder.cc + ../../../flutter/LICENSE
@@ -1525,10 +1538,6 @@ ORIGIN: ../../../flutter/impeller/renderer/pipeline_descriptor.cc + ../../../flu
 ORIGIN: ../../../flutter/impeller/renderer/pipeline_descriptor.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/pipeline_library.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/pipeline_library.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/platform.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/platform.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/range.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/range.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/render_pass.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/render_pass.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/render_target.cc + ../../../flutter/LICENSE
@@ -1551,14 +1560,9 @@ ORIGIN: ../../../flutter/impeller/renderer/shader_types.cc + ../../../flutter/LI
 ORIGIN: ../../../flutter/impeller/renderer/shader_types.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/snapshot.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/snapshot.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/stroke.comp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/surface.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/surface.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/texture.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/texture.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/texture_descriptor.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/texture_descriptor.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/vertex_buffer.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/renderer/vertex_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/vertex_buffer_builder.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/vertex_buffer_builder.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/vertex_descriptor.cc + ../../../flutter/LICENSE
@@ -3673,6 +3677,30 @@ FILE: ../../../flutter/impeller/compiler/uniform_sorter.cc
 FILE: ../../../flutter/impeller/compiler/uniform_sorter.h
 FILE: ../../../flutter/impeller/compiler/utilities.cc
 FILE: ../../../flutter/impeller/compiler/utilities.h
+FILE: ../../../flutter/impeller/core/allocator.cc
+FILE: ../../../flutter/impeller/core/allocator.h
+FILE: ../../../flutter/impeller/core/buffer.cc
+FILE: ../../../flutter/impeller/core/buffer.h
+FILE: ../../../flutter/impeller/core/buffer_view.cc
+FILE: ../../../flutter/impeller/core/buffer_view.h
+FILE: ../../../flutter/impeller/core/device_buffer.cc
+FILE: ../../../flutter/impeller/core/device_buffer.h
+FILE: ../../../flutter/impeller/core/device_buffer_descriptor.cc
+FILE: ../../../flutter/impeller/core/device_buffer_descriptor.h
+FILE: ../../../flutter/impeller/core/formats.cc
+FILE: ../../../flutter/impeller/core/formats.h
+FILE: ../../../flutter/impeller/core/host_buffer.cc
+FILE: ../../../flutter/impeller/core/host_buffer.h
+FILE: ../../../flutter/impeller/core/platform.cc
+FILE: ../../../flutter/impeller/core/platform.h
+FILE: ../../../flutter/impeller/core/range.cc
+FILE: ../../../flutter/impeller/core/range.h
+FILE: ../../../flutter/impeller/core/texture.cc
+FILE: ../../../flutter/impeller/core/texture.h
+FILE: ../../../flutter/impeller/core/texture_descriptor.cc
+FILE: ../../../flutter/impeller/core/texture_descriptor.h
+FILE: ../../../flutter/impeller/core/vertex_buffer.cc
+FILE: ../../../flutter/impeller/core/vertex_buffer.h
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.cc
 FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.h
 FILE: ../../../flutter/impeller/display_list/display_list_image_impeller.cc
@@ -3904,8 +3932,6 @@ FILE: ../../../flutter/impeller/image/compressed_image.cc
 FILE: ../../../flutter/impeller/image/compressed_image.h
 FILE: ../../../flutter/impeller/image/decompressed_image.cc
 FILE: ../../../flutter/impeller/image/decompressed_image.h
-FILE: ../../../flutter/impeller/renderer/allocator.cc
-FILE: ../../../flutter/impeller/renderer/allocator.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.cc
 FILE: ../../../flutter/impeller/renderer/backend/gles/allocator_gles.h
 FILE: ../../../flutter/impeller/renderer/backend/gles/blit_command_gles.cc
@@ -4054,10 +4080,6 @@ FILE: ../../../flutter/impeller/renderer/blit_command.cc
 FILE: ../../../flutter/impeller/renderer/blit_command.h
 FILE: ../../../flutter/impeller/renderer/blit_pass.cc
 FILE: ../../../flutter/impeller/renderer/blit_pass.h
-FILE: ../../../flutter/impeller/renderer/buffer.cc
-FILE: ../../../flutter/impeller/renderer/buffer.h
-FILE: ../../../flutter/impeller/renderer/buffer_view.cc
-FILE: ../../../flutter/impeller/renderer/buffer_view.h
 FILE: ../../../flutter/impeller/renderer/capabilities.cc
 FILE: ../../../flutter/impeller/renderer/capabilities.h
 FILE: ../../../flutter/impeller/renderer/command.cc
@@ -4072,18 +4094,13 @@ FILE: ../../../flutter/impeller/renderer/compute_pipeline_builder.cc
 FILE: ../../../flutter/impeller/renderer/compute_pipeline_builder.h
 FILE: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/compute_pipeline_descriptor.h
+FILE: ../../../flutter/impeller/renderer/compute_tessellator.cc
+FILE: ../../../flutter/impeller/renderer/compute_tessellator.h
 FILE: ../../../flutter/impeller/renderer/context.cc
 FILE: ../../../flutter/impeller/renderer/context.h
-FILE: ../../../flutter/impeller/renderer/device_buffer.cc
-FILE: ../../../flutter/impeller/renderer/device_buffer.h
-FILE: ../../../flutter/impeller/renderer/device_buffer_descriptor.cc
-FILE: ../../../flutter/impeller/renderer/device_buffer_descriptor.h
-FILE: ../../../flutter/impeller/renderer/formats.cc
-FILE: ../../../flutter/impeller/renderer/formats.h
 FILE: ../../../flutter/impeller/renderer/gpu_tracer.cc
 FILE: ../../../flutter/impeller/renderer/gpu_tracer.h
-FILE: ../../../flutter/impeller/renderer/host_buffer.cc
-FILE: ../../../flutter/impeller/renderer/host_buffer.h
+FILE: ../../../flutter/impeller/renderer/path_polyline.comp
 FILE: ../../../flutter/impeller/renderer/pipeline.cc
 FILE: ../../../flutter/impeller/renderer/pipeline.h
 FILE: ../../../flutter/impeller/renderer/pipeline_builder.cc
@@ -4092,10 +4109,6 @@ FILE: ../../../flutter/impeller/renderer/pipeline_descriptor.cc
 FILE: ../../../flutter/impeller/renderer/pipeline_descriptor.h
 FILE: ../../../flutter/impeller/renderer/pipeline_library.cc
 FILE: ../../../flutter/impeller/renderer/pipeline_library.h
-FILE: ../../../flutter/impeller/renderer/platform.cc
-FILE: ../../../flutter/impeller/renderer/platform.h
-FILE: ../../../flutter/impeller/renderer/range.cc
-FILE: ../../../flutter/impeller/renderer/range.h
 FILE: ../../../flutter/impeller/renderer/render_pass.cc
 FILE: ../../../flutter/impeller/renderer/render_pass.h
 FILE: ../../../flutter/impeller/renderer/render_target.cc
@@ -4118,14 +4131,9 @@ FILE: ../../../flutter/impeller/renderer/shader_types.cc
 FILE: ../../../flutter/impeller/renderer/shader_types.h
 FILE: ../../../flutter/impeller/renderer/snapshot.cc
 FILE: ../../../flutter/impeller/renderer/snapshot.h
+FILE: ../../../flutter/impeller/renderer/stroke.comp
 FILE: ../../../flutter/impeller/renderer/surface.cc
 FILE: ../../../flutter/impeller/renderer/surface.h
-FILE: ../../../flutter/impeller/renderer/texture.cc
-FILE: ../../../flutter/impeller/renderer/texture.h
-FILE: ../../../flutter/impeller/renderer/texture_descriptor.cc
-FILE: ../../../flutter/impeller/renderer/texture_descriptor.h
-FILE: ../../../flutter/impeller/renderer/vertex_buffer.cc
-FILE: ../../../flutter/impeller/renderer/vertex_buffer.h
 FILE: ../../../flutter/impeller/renderer/vertex_buffer_builder.cc
 FILE: ../../../flutter/impeller/renderer/vertex_buffer_builder.h
 FILE: ../../../flutter/impeller/renderer/vertex_descriptor.cc

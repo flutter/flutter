@@ -16,7 +16,7 @@ constexpr std::string_view kReflectionHeaderTemplate =
 {# Note: The nogncheck decorations are only to make GN not mad at the template#}
 {# this file is generated from. There are no GN rule violations in the generated#}
 {# file itself and the no-check declarations will be stripped in generated files.#}
-#include "impeller/renderer/buffer_view.h"                {# // nogncheck #}
+#include "impeller/core/buffer_view.h"                {# // nogncheck #}
 
 #include "impeller/renderer/command.h"                    {# // nogncheck #}
 
@@ -26,7 +26,7 @@ constexpr std::string_view kReflectionHeaderTemplate =
 
 #include "impeller/renderer/shader_types.h"               {# // nogncheck #}
 
-#include "impeller/renderer/texture.h"                    {# // nogncheck #}
+#include "impeller/core/texture.h"                    {# // nogncheck #}
 
 
 namespace impeller {

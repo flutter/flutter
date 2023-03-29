@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/texture.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/renderer/device_buffer.h"
-#include "impeller/renderer/texture.h"
 
 namespace impeller {
 

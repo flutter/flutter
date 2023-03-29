@@ -7,8 +7,8 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "impeller/core/texture.h"
 #include "impeller/entity/contents/contents.h"
-#include "impeller/renderer/texture.h"
 
 namespace impeller {
 

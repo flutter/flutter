@@ -12,6 +12,9 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
@@ -21,12 +24,9 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/path_builder.h"
-#include "impeller/renderer/allocator.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/texture.h"
 
 namespace impeller {
 

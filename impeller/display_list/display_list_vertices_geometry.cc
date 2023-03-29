@@ -4,6 +4,7 @@
 
 #include "impeller/display_list/display_list_vertices_geometry.h"
 
+#include "impeller/core/device_buffer.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/position_color.vert.h"
@@ -11,7 +12,6 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/point.h"
-#include "impeller/renderer/device_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkRect.h"

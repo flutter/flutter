@@ -8,7 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
-#include "impeller/renderer/texture.h"
+#include "impeller/core/texture.h"
 
 namespace impeller {
 

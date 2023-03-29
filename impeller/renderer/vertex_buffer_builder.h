@@ -10,12 +10,12 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/strings.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/host_buffer.h"
+#include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/vector.h"
-#include "impeller/renderer/allocator.h"
-#include "impeller/renderer/device_buffer.h"
-#include "impeller/renderer/formats.h"
-#include "impeller/renderer/host_buffer.h"
-#include "impeller/renderer/vertex_buffer.h"
 
 namespace impeller {
 

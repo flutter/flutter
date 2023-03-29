@@ -42,6 +42,7 @@ vec2 compute_offset(uint index) {
 void main() {
   uint ident = gl_GlobalInvocationID.x;
   if (ident >= polyline.count || ident == 0) {
+    // This is ok because there is no barrier() below.
     return;
   }
 
@@ -56,8 +57,8 @@ void main() {
 
   // TODO(dnfield): Implement other cap/join mechanisms.
   if (ident == polyline.count - 1) {
-    vertex_buffer.position[index * 4 + 4] = vec2(140, 20);
-    vertex_buffer.position[index * 4 + 5] = vec2(140, 20);
+    vertex_buffer.position[index * 4 + 4] = polyline.data[ident] + offset;
+    vertex_buffer.position[index * 4 + 5] = polyline.data[ident] - offset;
     atomicAdd(vertex_buffer_count.count, 2);
   }
 }

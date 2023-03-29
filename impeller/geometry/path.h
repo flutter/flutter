@@ -15,6 +15,18 @@
 
 namespace impeller {
 
+enum class Cap {
+  kButt,
+  kRound,
+  kSquare,
+};
+
+enum class Join {
+  kMiter,
+  kRound,
+  kBevel,
+};
+
 enum class FillType {
   kNonZero,  // The default winding order.
   kOdd,
