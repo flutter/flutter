@@ -514,7 +514,7 @@ class _MockHttpResponse implements HttpClientResponse {
 }
 
 /// A mocked [HttpHeaders] that ignores all writes.
-class _MockHttpHeaders extends HttpHeaders {
+class _MockHttpHeaders implements HttpHeaders {
   @override
   List<String>? operator [](String name) => <String>[];
 
@@ -522,13 +522,40 @@ class _MockHttpHeaders extends HttpHeaders {
   void add(String name, Object value, {bool preserveHeaderCase = false}) { }
 
   @override
+  late bool chunkedTransferEncoding;
+
+  @override
   void clear() { }
+
+  @override
+  int contentLength = -1;
+
+  @override
+  ContentType? contentType;
+
+  @override
+  DateTime? date;
+
+  @override
+  DateTime? expires;
 
   @override
   void forEach(void Function(String name, List<String> values) f) { }
 
   @override
+  String? host;
+
+  @override
+  DateTime? ifModifiedSince;
+
+  @override
   void noFolding(String name) { }
+
+  @override
+  late bool persistentConnection;
+
+  @override
+  int? port;
 
   @override
   void remove(String name, Object value) { }
