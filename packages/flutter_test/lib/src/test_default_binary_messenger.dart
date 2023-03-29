@@ -8,7 +8,8 @@ import 'dart:ui' as ui;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 
-import '../flutter_test.dart';
+import 'mock_event_channel.dart';
+import 'widget_tester.dart';
 
 /// A function which takes the name of the method channel, it's handler,
 /// platform message and asynchronously returns an encoded response.
