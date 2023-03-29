@@ -15,7 +15,7 @@ import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
-const Duration _iosAnnouncementDelayDuration = Duration(seconds: 1);
+const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
 
 // Examples can assume:
 // late BuildContext context;
@@ -254,7 +254,7 @@ class FormState extends State<Form> {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(Future<void>(() async {
-          await Future<void>.delayed(_iosAnnouncementDelayDuration);
+          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
           SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
         }));
       } else {

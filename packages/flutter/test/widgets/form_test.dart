@@ -140,7 +140,6 @@ void main() {
   });
 
   testWidgets('Should announce error text when validate returns error', (WidgetTester tester) async {
-    // Arrange.
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -172,7 +171,6 @@ void main() {
     await tester.pump();
     expect(find.text('error'), findsOneWidget);
 
-    // Assert.
     final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
     expect(announcement.message, 'error');
     expect(announcement.textDirection, TextDirection.ltr);
