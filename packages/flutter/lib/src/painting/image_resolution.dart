@@ -269,6 +269,10 @@ class AssetImage extends AssetBundleImageProvider {
   // We assume the main asset is designed for a device pixel ratio of 1.0
   static const double _naturalResolution = 1.0;
 
+  ImageConfiguration _updateConfigration(ImageConfiguration config) {
+    return config;
+  }
+
   @override
   Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration) {
     // This function tries to return a SynchronousFuture if possible. We do this
@@ -277,6 +281,7 @@ class AssetImage extends AssetBundleImageProvider {
     // which all happens in one call frame; using native Futures would guarantee
     // that we resolve each future in a new call frame, and thus not in this
     // build/layout/paint sequence.)
+    configuration = _updateConfigration(configuration);
     final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
     Completer<AssetBundleImageKey>? completer;
     Future<AssetBundleImageKey>? result;
@@ -326,7 +331,11 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata>? candidateVariants) {
+  AssetMetadata _chooseVariant(
+    String mainAssetKey,
+    ImageConfiguration config,
+    Iterable<AssetMetadata>? candidateVariants,
+  ) {
     if (candidateVariants == null) {
       return AssetMetadata(key: mainAssetKey, targetDevicePixelRatio: null, main: true);
     }
@@ -397,4 +406,121 @@ class AssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
+}
+
+
+/// Fetches an image from an [AssetBundle], associating it with the given scale.
+///
+/// This implementation requires an explicit final [assetName] and [scale] on
+/// construction, and ignores the device pixel ratio and size in the
+/// configuration passed into [resolve]. For a resolution-aware variant that
+/// uses the configuration to pick an appropriate image based on the device
+/// pixel ratio and size, see [AssetImage].
+///
+/// ## Fetching assets
+///
+/// When fetching an image provided by the app itself, use the [assetName]
+/// argument to name the asset to choose. For instance, consider a directory
+/// `icons` with an image `heart.png`. First, the `pubspec.yaml` of the project
+/// should specify its assets in the `flutter` section:
+///
+/// ```yaml
+/// flutter:
+///   assets:
+///     - icons/heart.png
+/// ```
+///
+/// Then, to fetch the image and associate it with scale `1.5`, use:
+///
+/// {@tool snippet}
+/// ```dart
+/// const ExactAssetImage('icons/heart.png', scale: 1.5)
+/// ```
+/// {@end-tool}
+///
+/// ## Assets in packages
+///
+/// To fetch an asset from a package, the [package] argument must be provided.
+/// For instance, suppose the structure above is inside a package called
+/// `my_icons`. Then to fetch the image, use:
+///
+/// {@tool snippet}
+/// ```dart
+/// const ExactAssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
+/// ```
+/// {@end-tool}
+///
+/// Assets used by the package itself should also be fetched using the [package]
+/// argument as above.
+///
+/// If the desired asset is specified in the `pubspec.yaml` of the package, it
+/// is bundled automatically with the app. In particular, assets used by the
+/// package itself must be specified in its `pubspec.yaml`.
+///
+/// A package can also choose to have assets in its 'lib/' folder that are not
+/// specified in its `pubspec.yaml`. In this case for those images to be
+/// bundled, the app has to specify which ones to include. For instance a
+/// package named `fancy_backgrounds` could have:
+///
+///     lib/backgrounds/background1.png
+///     lib/backgrounds/background2.png
+///     lib/backgrounds/background3.png
+///
+/// To include, say the first image, the `pubspec.yaml` of the app should specify
+/// it in the `assets` section:
+///
+/// ```yaml
+///   assets:
+///     - packages/fancy_backgrounds/backgrounds/background1.png
+/// ```
+///
+/// The `lib/` is implied, so it should not be included in the asset path.
+///
+/// See also:
+///
+///  * [Image.asset] for a shorthand of an [Image] widget backed by
+///    [ExactAssetImage] when using a scale.
+@immutable
+class ExactAssetImage extends AssetImage {
+  /// Creates an object that fetches the given image from an asset bundle.
+  ///
+  /// The [assetName] and [scale] arguments must not be null. The [scale] arguments
+  /// defaults to 1.0. The [bundle] argument may be null, in which case the
+  /// bundle provided in the [ImageConfiguration] passed to the [resolve] call
+  /// will be used instead.
+  ///
+  /// The [package] argument must be non-null when fetching an asset that is
+  /// included in a package. See the documentation for the [ExactAssetImage] class
+  /// itself for details.
+  const ExactAssetImage(
+    super.assetName, {
+    this.scale = 1.0,
+    super.bundle,
+    super.package,
+  });
+
+  /// The scale to place in the [ImageInfo] object of the image.
+  final double scale;
+
+  @override
+  ImageConfiguration _updateConfigration(ImageConfiguration config) {
+    return config.copyWith(devicePixelRatio: scale);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ExactAssetImage
+        && other.keyName == keyName
+        && other.scale == scale
+        && other.bundle == bundle;
+  }
+
+  @override
+  int get hashCode => Object.hash(keyName, scale, bundle);
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'ExactAssetImage')}(name: "$keyName", scale: $scale, bundle: $bundle)';
 }

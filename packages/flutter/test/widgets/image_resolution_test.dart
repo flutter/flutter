@@ -87,6 +87,24 @@ class TestAssetImage extends AssetImage {
   }
 }
 
+class TestExactAssetImage extends ExactAssetImage {
+  const TestExactAssetImage(super.name, this.images, {required super.scale});
+
+  final Map<double, ui.Image> images;
+
+  @override
+  ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
+    late ImageInfo imageInfo;
+    key.bundle.load(key.name).then<void>((ByteData data) {
+      final ui.Image image = images[scaleOf(data)]!;
+      imageInfo = ImageInfo(image: image, scale: key.scale);
+    });
+    return FakeImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(imageInfo),
+    );
+  }
+}
+
 Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize, Map<double, ui.Image> images, [ AssetBundle? bundle ]) {
   const double windowSize = 500.0; // 500 logical pixels
   const double imageSize = 200.0; // 200 logical pixels
@@ -150,6 +168,36 @@ Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
   const Duration pumpDuration = Duration.zero;
   const EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
+}
+
+Widget buildImageWithExactScale(String imageName, Key key, double scale, bool inferSize, Map<double, ui.Image> images, [ AssetBundle? bundle ]) {
+  const double windowSize = 500.0; // 500 logical pixels
+  const double imageSize = 200.0; // 200 logical pixels
+
+  return MediaQuery(
+    data: const MediaQueryData(
+      size: Size(windowSize, windowSize),
+    ),
+    child: DefaultAssetBundle(
+      bundle: bundle ?? TestAssetBundle(manifest: testManifest),
+      child: Center(
+        child: inferSize ?
+          Image(
+            key: key,
+            excludeFromSemantics: true,
+            image: TestExactAssetImage(imageName, images, scale: scale),
+          ) :
+          Image(
+            key: key,
+            excludeFromSemantics: true,
+            image: TestExactAssetImage(imageName, images, scale: scale),
+            height: imageSize,
+            width: imageSize,
+            fit: BoxFit.fill,
+          ),
+      ),
+    ),
+  );
 }
 
 void main() {
@@ -343,5 +391,53 @@ void main() {
     await testRatio(ratio: 2.0, expectedScale: 1.5);
     await testRatio(ratio: 2.25, expectedScale: 1.5);
     await testRatio(ratio: 10.0, expectedScale: 1.5);
+  });
+
+   testWidgets('Exact Image with scale of 1.75', (WidgetTester tester) async {
+    const double ratio = 1.75;
+    Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageWithExactScale(image, key, ratio, false, images));
+    expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
+    expect(getRenderImage(tester, key).scale, 2.0);
+    key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageWithExactScale(image, key, ratio, true, images));
+    expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
+    expect(getRenderImage(tester, key).scale, 2.0);
+  });
+
+  testWidgets('Exact Image with scale of 2.3', (WidgetTester tester) async {
+    const double ratio = 2.3;
+    Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageWithExactScale(image, key, ratio, false, images));
+    expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
+    expect(getRenderImage(tester, key).scale, 2.0);
+    key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageWithExactScale(image, key, ratio, true, images));
+    expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
+    expect(getRenderImage(tester, key).scale, 2.0);
+  });
+
+  testWidgets('Exact Image with scale of 3.7', (WidgetTester tester) async {
+    const double ratio = 3.7;
+    Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageWithExactScale(image, key, ratio, false, images));
+    expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
+    expect(getRenderImage(tester, key).scale, 4.0);
+    key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageWithExactScale(image, key, ratio, true, images));
+    expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
+    expect(getRenderImage(tester, key).scale, 4.0);
+  });
+
+  testWidgets('Exact Image with scale of 5.1', (WidgetTester tester) async {
+    const double ratio = 5.1;
+    Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageWithExactScale(image, key, ratio, false, images));
+    expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
+    expect(getRenderImage(tester, key).scale, 4.0);
+    key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageWithExactScale(image, key, ratio, true, images));
+    expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
+    expect(getRenderImage(tester, key).scale, 4.0);
   });
 }
