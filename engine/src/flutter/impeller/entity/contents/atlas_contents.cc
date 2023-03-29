@@ -8,6 +8,7 @@
 
 #include "flutter/fml/macros.h"
 
+#include "impeller/core/formats.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
@@ -18,7 +19,6 @@
 #include "impeller/entity/geometry.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/vertex_buffer_builder.h"

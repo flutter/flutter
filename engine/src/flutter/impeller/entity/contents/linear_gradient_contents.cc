@@ -5,11 +5,11 @@
 #include "linear_gradient_contents.h"
 
 #include "flutter/fml/logging.h"
+#include "impeller/core/formats.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/gradient_generator.h"
 #include "impeller/entity/entity.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 

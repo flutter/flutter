@@ -8,12 +8,12 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/core/texture.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/texture.h"
 
 namespace impeller {
 

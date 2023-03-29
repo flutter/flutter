@@ -5,11 +5,11 @@
 #pragma once
 
 #include "gmock/gmock.h"
-#include "impeller/renderer/allocator.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/texture.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_target.h"
-#include "impeller/renderer/texture.h"
 
 namespace impeller {
 namespace testing {

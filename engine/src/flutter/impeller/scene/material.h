@@ -6,10 +6,10 @@
 
 #include <memory>
 
+#include "impeller/core/formats.h"
+#include "impeller/core/texture.h"
 #include "impeller/geometry/scalar.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/texture.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/pipeline_key.h"
 

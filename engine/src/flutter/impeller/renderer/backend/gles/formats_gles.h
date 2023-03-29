@@ -6,8 +6,8 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/gles.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/shader_types.h"
 
 namespace impeller {

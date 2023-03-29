@@ -8,8 +8,8 @@
 
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/host_buffer.h"
 #include "impeller/renderer/blit_command.h"
-#include "impeller/renderer/host_buffer.h"
 
 namespace impeller {
 

@@ -12,8 +12,8 @@
 #include "impeller/base/allocation.h"
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
 

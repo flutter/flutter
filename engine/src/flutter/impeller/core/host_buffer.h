@@ -11,9 +11,9 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/allocation.h"
-#include "impeller/renderer/buffer.h"
-#include "impeller/renderer/buffer_view.h"
-#include "impeller/renderer/platform.h"
+#include "impeller/core/buffer.h"
+#include "impeller/core/buffer_view.h"
+#include "impeller/core/platform.h"
 
 namespace impeller {
 

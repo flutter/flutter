@@ -4,6 +4,8 @@
 
 #include "flutter/testing/testing.h"
 #include "impeller/base/strings.h"
+#include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/formats.h"
 #include "impeller/fixtures/array.frag.h"
 #include "impeller/fixtures/array.vert.h"
 #include "impeller/fixtures/box_fade.frag.h"
@@ -26,8 +28,6 @@
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/device_buffer_descriptor.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/renderer.h"

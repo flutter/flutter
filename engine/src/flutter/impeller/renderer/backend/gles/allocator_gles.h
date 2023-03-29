@@ -5,7 +5,7 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/allocator.h"
+#include "impeller/core/allocator.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 
 namespace impeller {

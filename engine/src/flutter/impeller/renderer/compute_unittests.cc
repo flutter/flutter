@@ -7,6 +7,7 @@
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "impeller/base/strings.h"
+#include "impeller/core/formats.h"
 #include "impeller/fixtures/sample.comp.h"
 #include "impeller/fixtures/stage1.comp.h"
 #include "impeller/fixtures/stage2.comp.h"
@@ -16,7 +17,6 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/compute_command.h"
 #include "impeller/renderer/compute_pipeline_builder.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline_library.h"
 
 namespace impeller {

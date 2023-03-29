@@ -9,10 +9,10 @@
 #include <variant>
 #include <vector>
 
+#include "impeller/core/formats.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/sigma.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
 

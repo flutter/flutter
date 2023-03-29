@@ -8,8 +8,8 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/capabilities.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
 

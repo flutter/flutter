@@ -7,10 +7,10 @@
 #include <iostream>
 
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
 

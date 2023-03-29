@@ -8,12 +8,12 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/allocator.h"
-#include "impeller/renderer/buffer.h"
-#include "impeller/renderer/buffer_view.h"
-#include "impeller/renderer/device_buffer_descriptor.h"
-#include "impeller/renderer/range.h"
-#include "impeller/renderer/texture.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/buffer.h"
+#include "impeller/core/buffer_view.h"
+#include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/range.h"
+#include "impeller/core/texture.h"
 
 namespace impeller {
 

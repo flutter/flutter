@@ -10,13 +10,13 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/core/texture.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_delegate.h"
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/renderer/render_target.h"
-#include "impeller/renderer/texture.h"
 #include "impeller/typographer/lazy_glyph_atlas.h"
 
 namespace impeller {

@@ -4,14 +4,14 @@
 
 #pragma once
 
+#include "impeller/core/allocator.h"
+#include "impeller/core/host_buffer.h"
+#include "impeller/core/vertex_buffer.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
-#include "impeller/renderer/allocator.h"
-#include "impeller/renderer/host_buffer.h"
-#include "impeller/renderer/vertex_buffer.h"
 
 namespace impeller {
 
@@ -28,18 +28,6 @@ enum GeometryVertexType {
   kPosition,
   kColor,
   kUV,
-};
-
-enum class Cap {
-  kButt,
-  kRound,
-  kSquare,
-};
-
-enum class Join {
-  kMiter,
-  kRound,
-  kBevel,
 };
 
 class Geometry {

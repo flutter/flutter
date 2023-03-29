@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "flutter/fml/logging.h"
+#include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/border_mask_blur_filter_contents.h"
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
@@ -25,7 +26,6 @@
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {
