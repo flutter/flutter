@@ -206,9 +206,18 @@ class _MockHttpClient implements HttpClient {
 }
 
 /// A mocked [HttpClientRequest] which always returns a [_MockHttpClientResponse].
-class _MockHttpRequest extends HttpClientRequest {
+class _MockHttpRequest implements HttpClientRequest {
+  @override
+  bool bufferOutput = true;
+
+  @override
+  int contentLength = -1;
+
   @override
   late Encoding encoding;
+
+  @override
+  bool followRedirects = true;
 
   @override
   final HttpHeaders headers = _MockHttpHeaders();
@@ -247,7 +256,13 @@ class _MockHttpRequest extends HttpClientRequest {
   }
 
   @override
+  int maxRedirects = 5;
+
+  @override
   String get method => '';
+
+  @override
+  bool persistentConnection = true;
 
   @override
   Uri get uri => Uri();
