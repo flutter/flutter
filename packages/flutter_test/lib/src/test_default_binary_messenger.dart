@@ -8,6 +8,8 @@ import 'dart:ui' as ui;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 
+import '../flutter_test.dart';
+
 /// A function which takes the name of the method channel, it's handler,
 /// platform message and asynchronously returns an encoded response.
 typedef AllMessagesHandler = Future<ByteData?>? Function(
@@ -300,6 +302,53 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
         return channel.codec.encodeErrorEnvelope(code: 'error', message: '$error');
       }
     }, handler);
+  }
+
+  /// Set a mock stream handler for this channel
+  void setMockStreamHandler(EventChannel channel, MockStreamHandler handler) {
+    final StreamController<dynamic> controller = StreamController<dynamic>();
+
+    setMockMethodCallHandler(MethodChannel(channel.name, channel.codec),
+        (MethodCall call) async {
+      switch (call.method) {
+        case 'listen':
+          return handler.onListen(
+            call.arguments,
+            MockStreamHandlerEventSink(controller.sink),
+          );
+        case 'cancel':
+          return handler.onCancel(call.arguments);
+        default:
+          throw UnimplementedError('Method ${call.method} not implemented');
+      }
+    });
+
+    final StreamSubscription<dynamic> sub = controller.stream.listen(
+      (dynamic e) => channel.binaryMessenger.handlePlatformMessage(
+        channel.name,
+        channel.codec.encodeSuccessEnvelope(e),
+        null,
+      ),
+    );
+    sub.onError((dynamic e) {
+      if (e is! PlatformException) {
+        throw ArgumentError('Stream error must be a PlatformException');
+      }
+      channel.binaryMessenger.handlePlatformMessage(
+        channel.name,
+        channel.codec.encodeErrorEnvelope(
+          code: e.code,
+          message: e.message,
+          details: e.details,
+        ),
+        null,
+      );
+    });
+    sub.onDone(
+      () => channel.binaryMessenger
+          .handlePlatformMessage(channel.name, null, null),
+    );
+    addTearDown(() => sub.cancel());
   }
 
   /// Returns true if the `handler` argument matches the `handler`
