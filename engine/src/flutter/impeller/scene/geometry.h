@@ -7,13 +7,13 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/host_buffer.h"
+#include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/vector.h"
-#include "impeller/renderer/allocator.h"
 #include "impeller/renderer/command.h"
-#include "impeller/renderer/device_buffer.h"
-#include "impeller/renderer/host_buffer.h"
-#include "impeller/renderer/vertex_buffer.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/pipeline_key.h"
 #include "impeller/scene/scene_context.h"

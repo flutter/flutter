@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "flutter/impeller/renderer/texture.h"
+#include "flutter/impeller/core/texture.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/gradient.h"
 #include "impeller/geometry/path.h"

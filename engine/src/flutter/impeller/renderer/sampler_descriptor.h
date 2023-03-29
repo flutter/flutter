@@ -8,7 +8,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
-#include "impeller/renderer/formats.h"
+#include "impeller/core/formats.h"
 
 namespace impeller {
 

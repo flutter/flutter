@@ -2,10 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/renderer/device_buffer_descriptor.h"
+#pragma once
+
+#include <cstddef>
+
+#include "impeller/core/formats.h"
 
 namespace impeller {
 
-//
+struct DeviceBufferDescriptor {
+  StorageMode storage_mode = StorageMode::kDeviceTransient;
+  size_t size = 0u;
+};
 
 }  // namespace impeller

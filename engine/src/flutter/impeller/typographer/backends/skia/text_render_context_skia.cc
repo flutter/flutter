@@ -9,7 +9,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation.h"
-#include "impeller/renderer/allocator.h"
+#include "impeller/core/allocator.h"
 #include "impeller/typographer/backends/skia/typeface_skia.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"

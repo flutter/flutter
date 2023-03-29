@@ -4,6 +4,8 @@
 
 #include "vertices_contents.h"
 
+#include "impeller/core/formats.h"
+#include "impeller/core/vertex_buffer.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -11,10 +13,8 @@
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/geometry/color.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
-#include "impeller/renderer/vertex_buffer.h"
 
 namespace impeller {
 

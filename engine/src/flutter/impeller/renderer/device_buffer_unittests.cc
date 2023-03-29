@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/playground/playground.h"
-#include "impeller/renderer/device_buffer.h"
 
 namespace impeller {
 namespace testing {

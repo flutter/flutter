@@ -8,11 +8,11 @@
 #include "fml/logging.h"
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {

@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "flutter/fml/logging.h"
-#include "impeller/renderer/allocator.h"
+#include "impeller/core/allocator.h"
 #include "impeller/scene/importer/conversions.h"
 
 namespace impeller {

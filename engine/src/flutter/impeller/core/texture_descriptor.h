@@ -6,9 +6,9 @@
 
 #include <optional>
 
+#include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
 #include "impeller/image/decompressed_image.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
 

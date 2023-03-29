@@ -1,0 +1,172 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+#extension GL_KHR_shader_subgroup_arithmetic : enable
+
+layout(local_size_x = 512, local_size_y = 1) in;
+layout(std430) buffer;
+
+#include <impeller/path.glsl>
+
+layout(binding = 0) readonly buffer Cubics {
+  uint count;
+  CubicData data[];
+}
+cubics;
+
+layout(binding = 1) buffer Quads {
+  uint count;
+  QuadData data[];
+}
+quads;
+
+layout(binding = 2) buffer Lines {
+  uint count;
+  LineData data[];
+}
+lines;
+
+layout(binding = 3) buffer Components {
+  uint count;
+  PathComponent data[];
+}
+components;
+
+layout(binding = 4) buffer Polyline {
+  uint count;
+  vec2 data[];
+}
+polyline;
+
+uniform Config {
+  float cubic_accuracy;
+  float quad_tolerance;
+}
+config;
+
+shared uvec2 cubic_ranges[512];
+shared uvec2 quad_ranges[512];
+shared uint scratch_count[512];
+shared uint scratch_sum[512];
+
+uint ComputePosition(uint index) {
+  if (index < gl_SubgroupSize) {
+    return scratch_sum[index];
+  }
+  int position = -1;
+  uint sum = scratch_sum[index];
+  do {
+    position += int(gl_SubgroupSize);
+    sum += scratch_sum[position];
+  } while (position < index);
+  return sum;
+}
+
+void ProcessCubic(uint ident) {
+  CubicData cubic;
+  uint quad_count = 0;
+  if (ident < cubics.count) {
+    cubic = cubics.data[ident];
+    quad_count = EstimateQuadraticCount(cubic, config.cubic_accuracy);
+    scratch_count[ident] = quad_count;
+  }
+
+  barrier();
+
+  if (quad_count == 0) {
+    return;
+  }
+
+  scratch_sum[ident] = subgroupExclusiveAdd(scratch_count[ident]);
+
+  uint offset = ComputePosition(ident) + quads.count;
+  atomicAdd(quads.count, quad_count);
+
+  cubic_ranges[ident] = uvec2(offset, quad_count);
+  for (uint i = 0; i < quad_count; i++) {
+    quads.data[offset + i] = GenerateQuadraticFromCubic(cubic, i, quad_count);
+  }
+}
+
+void ProcessQuad(uint ident) {
+  QuadData quad;
+  QuadDecomposition decomposition;
+  if (ident < quads.count) {
+    quad = quads.data[ident];
+    decomposition = DecomposeQuad(quad, config.quad_tolerance);
+    scratch_count[ident] = decomposition.line_count;
+  }
+
+  barrier();
+
+  if (decomposition.line_count == 0) {
+    return;
+  }
+
+  scratch_sum[ident] = subgroupExclusiveAdd(scratch_count[ident]);
+
+  uint offset = ComputePosition(ident) + lines.count;
+  atomicAdd(lines.count, decomposition.line_count);
+  quad_ranges[ident] = uvec2(offset, decomposition.line_count);
+
+  vec2 last_point = quad.p1;
+  for (uint i = 1; i < decomposition.line_count; i++) {
+    LineData line =
+        LineData(last_point, GenerateLineFromQuad(quad, i, decomposition));
+    last_point = line.p2;
+    lines.data[offset + i - 1] = line;
+  }
+  lines.data[offset + decomposition.line_count - 1] =
+      LineData(last_point, quad.p2);
+}
+
+void ProcessLine(uint ident) {
+  if (ident == lines.count) {
+    atomicAdd(polyline.count, lines.count + 1);
+  }
+
+  PathComponent component;
+  uvec2 range = uvec2(0, 0);
+  if (ident < components.count) {
+    component = components.data[ident];
+    if (component.count == 4) {
+      // Determine location in quads
+      uvec2 quad_range = cubic_ranges[component.index];
+      range.x = quad_ranges[quad_range.x].x;
+      range.y = quad_ranges[quad_range.x + quad_range.y - 1].x +
+                quad_ranges[quad_range.x + quad_range.y - 1].y - range.x;
+    } else if (component.count == 3) {
+      range = quad_ranges[component.index];
+    } else if (component.count == 2) {
+      range = uvec2(component.index, 1);
+    }
+
+    scratch_count[ident] = range.y;
+  }
+  barrier();
+
+  if (ident < components.count) {
+    scratch_sum[ident] = subgroupExclusiveAdd(scratch_count[ident]);
+
+    uint offset = ComputePosition(ident);
+    polyline.data[offset] = lines.data[range.x].p1;
+    for (uint i = 0; i < range.y; i++) {
+      polyline.data[offset + i + 1] = lines.data[range.x + i].p2;
+    }
+  }
+}
+
+void main() {
+  uint ident = gl_GlobalInvocationID.x;
+  // Turn each cubic into quads.
+  ProcessCubic(ident);
+  barrier();
+
+  // Turn each quad into lines.
+  ProcessQuad(ident);
+  barrier();
+
+  // Copy lines to the output buffer.
+  ProcessLine(ident);
+  barrier();
+}

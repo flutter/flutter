@@ -24,6 +24,7 @@
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/surface_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+#include "impeller/renderer/mtl/compute_shaders.h"
 #include "impeller/scene/shaders/mtl/scene_shaders.h"
 
 namespace impeller {
@@ -34,23 +35,24 @@ struct PlaygroundImplMTL::Data {
 
 static std::vector<std::shared_ptr<fml::Mapping>>
 ShaderLibraryMappingsForPlayground() {
-  return {
-      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_data,
-                                             impeller_entity_shaders_length),
-      std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_data,
-                                             impeller_modern_shaders_length),
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_framebuffer_blend_shaders_data,
-          impeller_framebuffer_blend_shaders_length),
-      std::make_shared<fml::NonOwnedMapping>(impeller_fixtures_shaders_data,
-                                             impeller_fixtures_shaders_length),
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_subgroup_fixtures_shaders_data,
-          impeller_subgroup_fixtures_shaders_length),
-      std::make_shared<fml::NonOwnedMapping>(impeller_imgui_shaders_data,
-                                             impeller_imgui_shaders_length),
-      std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_data,
-                                             impeller_scene_shaders_length),
+  return {std::make_shared<fml::NonOwnedMapping>(
+              impeller_entity_shaders_data, impeller_entity_shaders_length),
+          std::make_shared<fml::NonOwnedMapping>(
+              impeller_modern_shaders_data, impeller_modern_shaders_length),
+          std::make_shared<fml::NonOwnedMapping>(
+              impeller_framebuffer_blend_shaders_data,
+              impeller_framebuffer_blend_shaders_length),
+          std::make_shared<fml::NonOwnedMapping>(
+              impeller_fixtures_shaders_data, impeller_fixtures_shaders_length),
+          std::make_shared<fml::NonOwnedMapping>(
+              impeller_subgroup_fixtures_shaders_data,
+              impeller_subgroup_fixtures_shaders_length),
+          std::make_shared<fml::NonOwnedMapping>(impeller_imgui_shaders_data,
+                                                 impeller_imgui_shaders_length),
+          std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_data,
+                                                 impeller_scene_shaders_length),
+          std::make_shared<fml::NonOwnedMapping>(
+              impeller_compute_shaders_data, impeller_compute_shaders_length)
 
   };
 }

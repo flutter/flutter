@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "impeller/renderer/buffer_view.h"
-#include "impeller/renderer/formats.h"
+#include "impeller/core/buffer_view.h"
+#include "impeller/core/formats.h"
 
 namespace impeller {
 

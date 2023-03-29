@@ -4,18 +4,48 @@
 
 import("//flutter/impeller/tools/impeller.gni")
 
+if (impeller_enable_compute) {
+  impeller_shaders("compute_shaders") {
+    name = "compute"
+    enable_opengles = false
+
+    if (impeller_enable_vulkan) {
+      vulkan_language_version = 130
+    }
+
+    if (is_ios) {
+      metal_version = "2.4"
+    } else if (is_mac) {
+      metal_version = "2.1"
+    }
+
+    shaders = [
+      "stroke.comp",
+      "path_polyline.comp",
+    ]
+  }
+
+  impeller_component("compute_tessellation_unittests") {
+    testonly = true
+    sources = [ "compute_subgroup_unittests.cc" ]
+
+    deps = [
+      ":compute_shaders",
+      ":renderer",
+      "../entity",
+      "../fixtures",
+      "../playground:playground_test",
+      "//flutter/testing:testing_lib",
+    ]
+  }
+}
+
 impeller_component("renderer") {
   sources = [
-    "allocator.cc",
-    "allocator.h",
     "blit_command.cc",
     "blit_command.h",
     "blit_pass.cc",
     "blit_pass.h",
-    "buffer.cc",
-    "buffer.h",
-    "buffer_view.cc",
-    "buffer_view.h",
     "capabilities.cc",
     "capabilities.h",
     "command.cc",
@@ -32,16 +62,8 @@ impeller_component("renderer") {
     "compute_pipeline_descriptor.h",
     "context.cc",
     "context.h",
-    "device_buffer.cc",
-    "device_buffer.h",
-    "device_buffer_descriptor.cc",
-    "device_buffer_descriptor.h",
-    "formats.cc",
-    "formats.h",
     "gpu_tracer.cc",
     "gpu_tracer.h",
-    "host_buffer.cc",
-    "host_buffer.h",
     "pipeline.cc",
     "pipeline.h",
     "pipeline_builder.cc",
@@ -50,10 +72,6 @@ impeller_component("renderer") {
     "pipeline_descriptor.h",
     "pipeline_library.cc",
     "pipeline_library.h",
-    "platform.cc",
-    "platform.h",
-    "range.cc",
-    "range.h",
     "render_pass.cc",
     "render_pass.h",
     "render_target.cc",
@@ -78,12 +96,6 @@ impeller_component("renderer") {
     "snapshot.h",
     "surface.cc",
     "surface.h",
-    "texture.cc",
-    "texture.h",
-    "texture_descriptor.cc",
-    "texture_descriptor.h",
-    "vertex_buffer.cc",
-    "vertex_buffer.h",
     "vertex_buffer_builder.cc",
     "vertex_buffer_builder.h",
     "vertex_descriptor.cc",
@@ -92,11 +104,20 @@ impeller_component("renderer") {
 
   public_deps = [
     "../base",
+    "../core",
     "../geometry",
     "../image",
     "../runtime_stage",
     "../tessellator",
   ]
+
+  if (impeller_enable_compute) {
+    sources += [
+      "compute_tessellator.cc",
+      "compute_tessellator.h",
+    ]
+    public_deps += [ ":compute_shaders" ]
+  }
 
   deps = [ "//flutter/fml" ]
 }
@@ -111,20 +132,16 @@ impeller_component("renderer_unittests") {
     "renderer_unittests.cc",
   ]
 
-  if (impeller_enable_vulkan || impeller_enable_metal) {
-    sources += [
-      "compute_subgroup_unittests.cc",
-      "compute_unittests.cc",
-    ]
-  }
-
   deps = [
     ":renderer",
-    "../entity",
     "../fixtures",
     "../playground:playground_test",
     "//flutter/testing:testing_lib",
   ]
+
+  if (impeller_enable_compute) {
+    sources += [ "compute_unittests.cc" ]
+  }
 }
 
 test_fixtures("renderer_dart_fixtures") {

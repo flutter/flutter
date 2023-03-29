@@ -11,7 +11,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
-#include "impeller/renderer/texture.h"
+#include "impeller/core/texture.h"
 
 namespace flutter {
 

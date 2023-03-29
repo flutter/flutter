@@ -9,9 +9,9 @@
 #include <optional>
 
 #include "flutter/fml/macros.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/geometry/color.h"
-#include "impeller/renderer/formats.h"
-#include "impeller/renderer/texture_descriptor.h"
 
 namespace impeller {
 

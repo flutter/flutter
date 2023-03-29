@@ -7,7 +7,7 @@
 
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
-#include "impeller/renderer/host_buffer.h"
+#include "impeller/core/host_buffer.h"
 
 namespace impeller {
 

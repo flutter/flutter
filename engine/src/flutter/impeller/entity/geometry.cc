@@ -4,13 +4,13 @@
 
 #include "impeller/entity/geometry.h"
 
+#include "impeller/core/device_buffer.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_builder.h"
-#include "impeller/renderer/device_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/tessellator/tessellator.h"
 

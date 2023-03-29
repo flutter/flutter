@@ -7,10 +7,10 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/buffer.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
-#include "impeller/renderer/buffer.h"
 
 namespace impeller {
 

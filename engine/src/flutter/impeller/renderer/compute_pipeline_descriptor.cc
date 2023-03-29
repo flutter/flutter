@@ -4,7 +4,7 @@
 
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 
-#include "impeller/renderer/formats.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/renderer/vertex_descriptor.h"

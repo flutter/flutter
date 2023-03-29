@@ -7,10 +7,10 @@
 #include <memory>
 
 #include "flutter/fml/memory/ref_ptr.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
 

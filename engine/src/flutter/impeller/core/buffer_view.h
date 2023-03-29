@@ -5,8 +5,8 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/buffer.h"
-#include "impeller/renderer/range.h"
+#include "impeller/core/buffer.h"
+#include "impeller/core/range.h"
 
 namespace impeller {
 

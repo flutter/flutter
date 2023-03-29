@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
-#include "impeller/renderer/host_buffer.h"
+#include "impeller/core/host_buffer.h"
 
 namespace impeller {
 namespace testing {

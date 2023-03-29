@@ -7,7 +7,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
-#include "impeller/renderer/allocator.h"
+#include "impeller/core/allocator.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"

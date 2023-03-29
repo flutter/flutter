@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "impeller/base/validation.h"
-#include "impeller/renderer/formats.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {

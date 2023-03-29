@@ -6,9 +6,9 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/thread.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "impeller/renderer/texture_descriptor.h"
 
 namespace impeller {
 

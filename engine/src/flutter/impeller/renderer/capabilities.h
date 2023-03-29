@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/formats.h"
+#include "impeller/core/formats.h"
 
 namespace impeller {
 

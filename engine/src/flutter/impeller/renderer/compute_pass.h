@@ -7,10 +7,9 @@
 #include <string>
 #include <variant>
 
-#include "command_buffer.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/texture.h"
 #include "impeller/renderer/compute_command.h"
-#include "impeller/renderer/device_buffer.h"
-#include "impeller/renderer/texture.h"
 
 namespace impeller {
 

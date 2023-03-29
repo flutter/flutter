@@ -8,9 +8,9 @@
 #include <sstream>
 
 #include "impeller/base/strings.h"
+#include "impeller/core/formats.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/tessellator/tessellator.h"

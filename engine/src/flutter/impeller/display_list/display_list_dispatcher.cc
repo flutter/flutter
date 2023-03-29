@@ -14,6 +14,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/core/formats.h"
 #include "impeller/display_list/display_list_image_impeller.h"
 #include "impeller/display_list/display_list_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
@@ -32,7 +33,6 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 
 #include "third_party/skia/include/core/SkColor.h"

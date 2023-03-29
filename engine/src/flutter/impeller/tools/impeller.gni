@@ -46,6 +46,8 @@ declare_args() {
   impeller_supports_rendering =
       impeller_enable_metal || impeller_enable_opengles ||
       impeller_enable_vulkan
+
+  impeller_enable_compute = impeller_enable_vulkan || impeller_enable_metal
 }
 
 # ------------------------------------------------------------------------------
@@ -301,6 +303,7 @@ template("impellerc") {
     }
 
     if (defined(invoker.metal_version)) {
+      assert(is_mac || is_ios)
       metal_version = invoker.metal_version
       args += [ "--metal-version=$metal_version" ]
     }
@@ -392,7 +395,7 @@ template("impellerc_reflect") {
                              ])
 
     deps = [
-      "//flutter/impeller/renderer",
+      "//flutter/impeller/core",
       impellerc_invocation,
     ]
   }
@@ -581,12 +584,13 @@ template("_impeller_shaders_vk") {
   impellerc(impellerc_vk) {
     shaders = invoker.shaders
     sl_file_extension = "vkspv"
-    if (defined(invoker.metal_version)) {
-      metal_version = invoker.metal_version
-    }
 
     # Metal reflectors generate a superset of information.
     if (impeller_enable_metal) {
+      if (defined(invoker.metal_version)) {
+        metal_version = invoker.metal_version
+      }
+
       intermediates_subdir = "vk"
     }
     shader_target_flag = "--vulkan"
@@ -682,7 +686,6 @@ template("_impeller_shaders_vk") {
 #    openGL semantics when compilig SPIR-V.
 #
 template("impeller_shaders") {
-  metal_version = "1.2"
   if (defined(invoker.metal_version)) {
     metal_version = invoker.metal_version
   }
@@ -703,6 +706,9 @@ template("impeller_shaders") {
   }
 
   if (impeller_enable_metal) {
+    if (!defined(metal_version)) {
+      metal_version = "1.2"
+    }
     not_needed(invoker, [ "analyze" ])
     mtl_shaders = "mtl_$target_name"
     _impeller_shaders_metal(mtl_shaders) {
@@ -745,7 +751,6 @@ template("impeller_shaders") {
         vulkan_language_version = invoker.vulkan_language_version
       }
       shaders = invoker.shaders
-      metal_version = metal_version
       analyze = analyze
     }
   }

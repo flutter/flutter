@@ -5,8 +5,8 @@
 #include "impeller/entity/entity_pass_target.h"
 
 #include "impeller/base/validation.h"
-#include "impeller/renderer/formats.h"
-#include "impeller/renderer/texture.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture.h"
 
 namespace impeller {
 

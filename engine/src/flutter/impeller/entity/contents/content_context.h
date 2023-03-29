@@ -12,9 +12,9 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/capabilities.h"
-#include "impeller/renderer/formats.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/scene/scene_context.h"
 

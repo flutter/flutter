@@ -10,13 +10,13 @@
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
-#include "impeller/renderer/formats.h"
 
 namespace impeller {
 

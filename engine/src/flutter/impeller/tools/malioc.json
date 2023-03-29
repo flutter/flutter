@@ -13645,6 +13645,131 @@
       }
     }
   },
+  "flutter/impeller/renderer/path_polyline.comp.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/renderer/path_polyline.comp.vkspv",
+      "has_uniform_computation": true,
+      "type": "Compute",
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 0,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              null
+            ],
+            "longest_path_cycles": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              0.75,
+              0.0,
+              0.75,
+              0.0,
+              2.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              5.9375,
+              2.737499952316284,
+              4.824999809265137,
+              5.9375,
+              35.0,
+              0.0
+            ]
+          },
+          "shared_storage_used": 12288,
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 50,
+          "uniform_registers_used": 34,
+          "work_registers_used": 55
+        }
+      }
+    }
+  },
+  "flutter/impeller/renderer/stroke.comp.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/renderer/stroke.comp.vkspv",
+      "has_uniform_computation": true,
+      "type": "Compute",
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 0,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "longest_path_cycles": [
+              0.3125,
+              0.3125,
+              0.1875,
+              0.125,
+              7.0,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_cvt"
+            ],
+            "shortest_path_cycles": [
+              0.0625,
+              0.0,
+              0.0625,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              0.3125,
+              0.3125,
+              0.1875,
+              0.125,
+              7.0,
+              0.0
+            ]
+          },
+          "shared_storage_used": 0,
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 10,
+          "work_registers_used": 24
+        }
+      }
+    }
+  },
   "flutter/impeller/scene/shaders/gles/skinned.vert.gles": {
     "Mali-G78": {
       "core": "Mali-G78",
