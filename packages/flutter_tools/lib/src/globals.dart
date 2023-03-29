@@ -43,6 +43,7 @@ import 'pre_run_validator.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
+import 'runner/flutter_command.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
@@ -285,3 +286,7 @@ const String kDefaultFrameworkChannel = 'master';
 
 // Used to build RegExp instances which can detect the VM service message.
 final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+
+// The official tool no longer allows non-null safe builds. This can be
+// overridden in other clients.
+NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? NonNullSafeBuilds.notAllowed;
