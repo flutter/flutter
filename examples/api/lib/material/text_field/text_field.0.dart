@@ -6,45 +6,37 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+class ObscuredTextFieldSample extends StatelessWidget {
+  const ObscuredTextFieldSample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 250,
+      child: TextField(
+        obscureText: true,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Password',
+        ),
+      ),
+    );
+  }
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Obscured Textfield')),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: ObscuredTextFieldSample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: SizedBox(
-          width: 250,
-          child: TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password',
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+void main() => runApp(const MyApp());
