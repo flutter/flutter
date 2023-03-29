@@ -288,6 +288,7 @@ targets:
       - .ci.yaml
 
   - name: Linux customer_testing
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/123696
     enabled_branches:
       - master
     recipe: flutter/flutter
