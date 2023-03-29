@@ -35,25 +35,29 @@ import 'mac.dart';
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices({
     required Platform platform,
-    required XCDevice xcdevice,
+    required this.xcdevice,
     required IOSWorkflow iosWorkflow,
     required Logger logger,
   }) : _platform = platform,
-       _xcdevice = xcdevice,
        _iosWorkflow = iosWorkflow,
        _logger = logger,
        super('iOS devices');
 
   final Platform _platform;
-  final XCDevice _xcdevice;
   final IOSWorkflow _iosWorkflow;
   final Logger _logger;
+
+  @visibleForTesting
+  final XCDevice xcdevice;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
 
   @override
   bool get canListAnything => _iosWorkflow.canListDevices;
+
+  @override
+  bool get requiresExtendedWirelessDeviceDiscovery => true;
 
   StreamSubscription<Map<XCDeviceEvent, String>>? _observedDeviceEventsSubscription;
 
@@ -64,18 +68,22 @@ class IOSDevices extends PollingDeviceDiscovery {
         'Control of iOS devices or simulators only supported on macOS.'
       );
     }
-    if (!_xcdevice.isInstalled) {
+    if (!xcdevice.isInstalled) {
       return;
     }
 
     deviceNotifier ??= ItemListNotifier<Device>();
 
     // Start by populating all currently attached devices.
-    deviceNotifier!.updateWithNewList(await pollingGetDevices());
+    final List<Device> devices = await pollingGetDevices();
+
+    // Only show connected devices.
+    final List<Device> filteredDevices = devices.where((Device device) => device.isConnected == true).toList();
+    deviceNotifier!.updateWithNewList(filteredDevices);
 
     // cancel any outstanding subscriptions.
     await _observedDeviceEventsSubscription?.cancel();
-    _observedDeviceEventsSubscription = _xcdevice.observedDeviceEvents()?.listen(
+    _observedDeviceEventsSubscription = xcdevice.observedDeviceEvents()?.listen(
       _onDeviceEvent,
       onError: (Object error, StackTrace stack) {
         _logger.printTrace('Process exception running xcdevice observe:\n$error\n$stack');
@@ -109,7 +117,10 @@ class IOSDevices extends PollingDeviceDiscovery {
       // There's no way to get details for an individual attached device,
       // so repopulate them all.
       final List<Device> devices = await pollingGetDevices();
-      notifier.updateWithNewList(devices);
+
+      // Only show connected devices.
+      final List<Device> filteredDevices = devices.where((Device device) => device.isConnected == true).toList();
+      notifier.updateWithNewList(filteredDevices);
     } else if (eventType == XCDeviceEvent.detach && knownDevice != null) {
       notifier.removeItem(knownDevice);
     }
@@ -128,7 +139,26 @@ class IOSDevices extends PollingDeviceDiscovery {
       );
     }
 
-    return _xcdevice.getAvailableIOSDevices(timeout: timeout);
+    return xcdevice.getAvailableIOSDevices(timeout: timeout);
+  }
+
+  Future<Device?> waitForDeviceToConnect(
+    IOSDevice device,
+    Logger logger,
+  ) async {
+    final XCDeviceEventNotification? eventDetails =
+        await xcdevice.waitForDeviceToConnect(device.id);
+
+    if (eventDetails != null) {
+      device.isConnected = true;
+      device.connectionInterface = eventDetails.eventInterface.connectionInterface;
+      return device;
+    }
+    return null;
+  }
+
+  void cancelWaitForDeviceToConnect() {
+    xcdevice.cancelWaitForDeviceToConnect();
   }
 
   @override
@@ -139,7 +169,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       ];
     }
 
-    return _xcdevice.getDiagnostics();
+    return xcdevice.getDiagnostics();
   }
 
   @override
@@ -152,6 +182,7 @@ class IOSDevice extends Device {
     required this.name,
     required this.cpuArchitecture,
     required this.connectionInterface,
+    required this.isConnected,
     String? sdkVersion,
     required Platform platform,
     required IOSDeploy iosDeploy,
@@ -200,7 +231,15 @@ class IOSDevice extends Device {
   final DarwinArch cpuArchitecture;
 
   @override
-  final DeviceConnectionInterface connectionInterface;
+  /// The [connectionInterface] provided from `XCDevice.getAvailableIOSDevices`
+  /// may not be accurate. Sometimes if it doesn't have a long enough time
+  /// to connect, wireless devices will have an interface of `usb`/`attached`.
+  /// This may change after waiting for the device to connect in
+  /// `waitForDeviceToConnect`.
+  DeviceConnectionInterface connectionInterface;
+
+  @override
+  bool isConnected;
 
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 

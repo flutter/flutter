@@ -219,9 +219,16 @@ class FakeDeviceManager implements DeviceManager {
   }) async => filteredDevices(filter);
 
   @override
+  Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
+
+  @override
   Future<List<Device>> getDevicesById(
     String deviceId, {
     DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
   }) async {
     return filteredDevices(filter).where((Device device) {
       return device.id == deviceId || device.id.startsWith(deviceId);
@@ -231,6 +238,7 @@ class FakeDeviceManager implements DeviceManager {
   @override
   Future<List<Device>> getDevices({
     DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
   }) {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId!, filter: filter)
