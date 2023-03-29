@@ -983,6 +983,7 @@ void main() {
       await tester.tap(find.text('Tap me'));
       await tester.pump();
       final Material material = getMenuBarMaterial(tester);
+      // Tests the default MenuAnchor Clip to be Clip.hardEdge
       expect(material.clipBehavior, equals(Clip.hardEdge));
     });
 
@@ -1025,6 +1026,7 @@ void main() {
       await tester.tap(find.text('Tap me'));
       await tester.pump();
       final Material material = getMenuBarMaterial(tester);
+      // Tests the provided MenuAnchor clip to be what is is set as
       expect(material.clipBehavior, equals(Clip.antiAlias));
     });
 
