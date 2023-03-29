@@ -337,14 +337,10 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       return;
     }
 
-    setMockMethodCallHandler(MethodChannel(channel.name, channel.codec),
-        (MethodCall call) async {
+    setMockMethodCallHandler(MethodChannel(channel.name, channel.codec), (MethodCall call) async {
       switch (call.method) {
         case 'listen':
-          return handler.onListen(
-            call.arguments,
-            MockStreamHandlerEventSink(controller.sink),
-          );
+          return handler.onListen(call.arguments, MockStreamHandlerEventSink(controller.sink));
         case 'cancel':
           return handler.onCancel(call.arguments);
         default:
@@ -373,10 +369,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
         null,
       );
     });
-    sub.onDone(
-      () => channel.binaryMessenger
-          .handlePlatformMessage(channel.name, null, null),
-    );
+    sub.onDone(() => channel.binaryMessenger.handlePlatformMessage(channel.name, null, null));
     addTearDown(() => sub.cancel());
   }
 
