@@ -6,6 +6,7 @@
 #define TEXTURE_GLSL_
 
 #include <impeller/branching.glsl>
+#include <impeller/types.glsl>
 
 /// Sample from a texture.
 ///
@@ -87,6 +88,26 @@ vec4 IPSampleWithTileMode(sampler2D tex,
   if (x_tile_mode == kTileModeDecal && (coords.x < 0 || coords.x >= 1) ||
       y_tile_mode == kTileModeDecal && (coords.y < 0 || coords.y >= 1)) {
     return vec4(0);
+  }
+
+  return texture(tex, coords);
+}
+
+const float16_t kTileModeDecalHf = 3.0hf;
+
+/// Sample a texture, emulating a specific tile mode.
+///
+/// This is useful for Impeller graphics backend that don't have native support
+/// for Decal.
+f16vec4 IPHalfSampleWithTileMode(f16sampler2D tex,
+                                 f16vec2 coords,
+                                 float16_t x_tile_mode,
+                                 float16_t y_tile_mode) {
+  if (x_tile_mode == kTileModeDecalHf &&
+          (coords.x < 0.0hf || coords.x >= 1.0hf) ||
+      y_tile_mode == kTileModeDecalHf &&
+          (coords.y < 0.0hf || coords.y >= 1.0hf)) {
+    return f16vec4(0.0hf);
   }
 
   return texture(tex, coords);
