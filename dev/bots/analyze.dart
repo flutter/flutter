@@ -2074,6 +2074,7 @@ bool _isGeneratedPluginRegistrant(File file) {
   final String filename = path.basename(file.path);
   return !file.path.contains('.pub-cache')
       && (filename == 'GeneratedPluginRegistrant.java' ||
+          filename == 'GeneratedPluginRegistrant.swift' ||
           filename == 'GeneratedPluginRegistrant.h' ||
           filename == 'GeneratedPluginRegistrant.m' ||
           filename == 'generated_plugin_registrant.dart' ||
