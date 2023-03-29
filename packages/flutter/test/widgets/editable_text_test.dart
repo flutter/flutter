@@ -15522,6 +15522,64 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       );
     });
 
+    testWidgets('Selection is updated when the field has focus and the new selection is invalid', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/120631.
+      final TextEditingController controller = TextEditingController();
+      controller.text = 'Text';
+      final FocusNode focusNode = FocusNode();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            key: ValueKey<String>(controller.text),
+            controller: controller,
+            focusNode: focusNode,
+            style: Typography.material2018().black.titleMedium!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: -1),
+      );
+
+      // Tab to focus the field.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      expect(
+        controller.selection,
+        kIsWeb
+          ? TextSelection(
+              baseOffset: 0,
+              extentOffset: controller.text.length,
+            )
+          : TextSelection.collapsed(
+              offset: controller.text.length,
+            ),
+      );
+
+      // Update text with an invalid selection.
+      controller.text = 'Updated';
+
+      expect(focusNode.hasFocus, isTrue);
+      expect(
+        controller.selection,
+        kIsWeb
+          ? TextSelection(
+              baseOffset: 0,
+              extentOffset: controller.text.length,
+            )
+          : TextSelection.collapsed(
+              offset: controller.text.length,
+            ),
+      );
+    });
+
     testWidgets('when having focus stolen between frames on web', (WidgetTester tester) async {
       final TextEditingController controller1 = TextEditingController();
       controller1.text = 'Text1';
