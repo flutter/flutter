@@ -13,7 +13,7 @@ namespace impeller {
 
 class PlaygroundImplVK final : public PlaygroundImpl {
  public:
-  PlaygroundImplVK();
+  explicit PlaygroundImplVK(PlaygroundSwitches switches);
 
   ~PlaygroundImplVK();
 
