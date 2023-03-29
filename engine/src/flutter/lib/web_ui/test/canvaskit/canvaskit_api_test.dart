@@ -1591,9 +1591,9 @@ void _paragraphTests() {
       ..forceStrutHeight = false;
 
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
-    final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontProvider(
+    final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      CanvasKitRenderer.instance.fontCollection.fontProvider,
+      CanvasKitRenderer.instance.fontCollection.skFontCollection,
     );
 
     builder.addText('Hello');
@@ -1737,9 +1737,9 @@ void _paragraphTests() {
       ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder =
-        canvasKit.ParagraphBuilder.MakeFromFontProvider(
+        canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      CanvasKitRenderer.instance.fontCollection.fontProvider,
+      CanvasKitRenderer.instance.fontCollection.skFontCollection,
     );
     builder.addText('hello');
 
