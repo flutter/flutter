@@ -872,8 +872,8 @@ class MenuItemButton extends StatefulWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
-  /// Determines if the menuAnchor should stay opened after a [MenuItemButton]
-  /// is pressed.
+  /// Determines if the menuAnchor should stay open after a [MenuItemButton]
+  /// has been pressed.
   /// Defaults to false.
   final bool keepMenuOpen;
 
