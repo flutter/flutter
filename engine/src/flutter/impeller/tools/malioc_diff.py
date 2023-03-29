@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 import argparse
+import difflib
 import json
 import os
 import sys
@@ -32,6 +33,12 @@ import sys
 # If there are differences between before and after, whether positive or
 # negative, the exit code for this script will be 1, and 0 otherwise.
 
+SRC_ROOT = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+)
+
 CORES = [
     'Mali-G78',  # Pixel 6 / 2020
     'Mali-T880',  # 2016
@@ -53,6 +60,13 @@ def parse_args(argv):
       '-b',
       type=str,
       help='The path to a json file containing existing malioc results.',
+  )
+  parser.add_argument(
+      '--print-diff',
+      '-p',
+      default=False,
+      action='store_true',
+      help='Print a unified diff to stdout when differences are found.',
   )
   parser.add_argument(
       '--update',
@@ -303,6 +317,23 @@ def main(argv):
         '$ ./flutter/impeller/tools/malioc_diff.py --before {} --after {} --update'
         .format(args.before, args.after)
     )
+    if args.print_diff:
+      before_lines = json.dumps(
+          before_json, sort_keys=True, indent=2
+      ).splitlines(keepends=True)
+      after_lines = json.dumps(
+          after_json, sort_keys=True, indent=2
+      ).splitlines(keepends=True)
+      before_path = os.path.relpath(
+          os.path.abspath(args.before), start=SRC_ROOT
+      )
+      diff = difflib.unified_diff(
+          before_lines, after_lines, fromfile=before_path
+      )
+      print('\nYou can alternately apply the diff below:')
+      print('patch -p0 <<DONE')
+      print(*diff, sep='')
+      print('DONE')
 
   return 1 if changed else 0
 
