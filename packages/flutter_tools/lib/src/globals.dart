@@ -74,7 +74,8 @@ LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 
 // Analytics instance for package:unified_analytics for telemetry
 // reporting for all Flutter and Dart related tooling
-final Analytics analytics = Analytics(
+Analytics get analytics => context.get<Analytics>() ?? _defaultAnalytics;
+final Analytics _defaultAnalytics = Analytics(
   tool: DashTool.flutterTools,
   flutterChannel: flutterVersion.channel,
   flutterVersion: flutterVersion.frameworkVersion,
