@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:intl/date_symbol_data_local.dart';
-
 import 'runner.dart' as runner;
 import 'src/artifacts.dart';
 import 'src/base/context.dart';
@@ -80,8 +78,6 @@ Future<void> main(List<String> args) async {
   final bool daemon = args.contains('daemon');
   final bool runMachine = (args.contains('--machine') && args.contains('run')) ||
                           (args.contains('--machine') && args.contains('attach'));
-
-  await initializeDateFormatting();
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real
