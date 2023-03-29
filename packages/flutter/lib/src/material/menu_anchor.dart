@@ -1530,7 +1530,7 @@ class SubmenuButton extends StatefulWidget {
     this.style,
     this.menuStyle,
     this.alignmentOffset,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     this.focusNode,
     this.statesController,
     this.leadingIcon,
