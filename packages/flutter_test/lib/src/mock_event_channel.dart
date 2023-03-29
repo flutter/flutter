@@ -12,6 +12,26 @@ abstract class MockStreamHandler {
   void onCancel(dynamic arguments);
 }
 
+/// Convenience class for creating a [MockStreamHandler] inline.
+class InlineMockStreamHandler extends MockStreamHandler {
+  /// Create a new [InlineMockStreamHandler] with the given [onListen] and
+  /// [onCancel] handlers.
+  InlineMockStreamHandler({
+    required void Function(dynamic arguments, MockStreamHandlerEventSink events) onListen,
+    void Function(dynamic arguments)? onCancel,
+  })  : _onListenInline = onListen,
+        _onCancelInline = onCancel;
+
+  final void Function(dynamic arguments, MockStreamHandlerEventSink events) _onListenInline;
+  final void Function(dynamic arguments)? _onCancelInline;
+
+  @override
+  void onListen(dynamic arguments, MockStreamHandlerEventSink events) => _onListenInline(arguments, events);
+
+  @override
+  void onCancel(dynamic arguments) => _onCancelInline?.call(arguments);
+}
+
 /// A mock event sink for a [MockStreamHandler] that mimics the native
 /// EventSink API.
 class MockStreamHandlerEventSink {
@@ -28,11 +48,36 @@ class MockStreamHandlerEventSink {
     required String code,
     String? message,
     Object? details,
-  }) =>
-      _sink.addError(
-        PlatformException(code: code, message: message, details: details),
-      );
+  }) => _sink.addError(PlatformException(code: code, message: message, details: details));
 
   /// Send an end of stream event.
   void endOfStream() => _sink.close();
 }
+
+// void main() {
+//   group('EventChannel', () {
+//     test('can receive event stream', () async {
+//       bool canceled = false;
+//       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+//           .setMockStreamHandler(
+//         channel,
+//         InlineMockStreamHandler(
+//           onListen:
+//               (dynamic arguments, MockStreamHandlerEventSink events) async {
+//             events.success('${arguments}1');
+//             events.success('${arguments}2');
+//             events.endOfStream();
+//           },
+//           onCancel: (dynamic arguments) {
+//             canceled = true;
+//           },
+//         ),
+//       );
+//       final List<dynamic> events =
+//           await channel.receiveBroadcastStream('hello').toList();
+//       expect(events, orderedEquals(<String>['hello1', 'hello2']));
+//       await Future<void>.delayed(Duration.zero);
+//       expect(canceled, isTrue);
+//     });
+//   });
+// }

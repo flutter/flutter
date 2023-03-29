@@ -268,35 +268,23 @@ void main() {
   });
 
   group('EventChannel', () {
-    const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
     const MethodCodec jsonMethod = JSONMethodCodec();
     const EventChannel channel = EventChannel('ch', jsonMethod);
-    void emitEvent(ByteData? event) {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'ch',
-        event,
-        (ByteData? reply) {},
-      );
-    }
+
     test('can receive event stream', () async {
       bool canceled = false;
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-        'ch',
-        (ByteData? message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
-          if (methodCall['method'] == 'listen') {
-            final String argument = methodCall['args'] as String;
-            emitEvent(jsonMethod.encodeSuccessEnvelope('${argument}1'));
-            emitEvent(jsonMethod.encodeSuccessEnvelope('${argument}2'));
-            emitEvent(null);
-            return jsonMethod.encodeSuccessEnvelope(null);
-          } else if (methodCall['method'] == 'cancel') {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
+        channel,
+        InlineMockStreamHandler(
+          onListen: (dynamic arguments, MockStreamHandlerEventSink events) {
+            events.success('${arguments}1');
+            events.success('${arguments}2');
+            events.endOfStream();
+          },
+          onCancel: (dynamic arguments) {
             canceled = true;
-            return jsonMethod.encodeSuccessEnvelope(null);
-          } else {
-            fail('Expected listen or cancel');
-          }
-        },
+          },
+        ),
       );
       final List<dynamic> events = await channel.receiveBroadcastStream('hello').toList();
       expect(events, orderedEquals(<String>['hello1', 'hello2']));
@@ -305,20 +293,13 @@ void main() {
     });
 
     test('can receive error event', () async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-        'ch',
-        (ByteData? message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
-          if (methodCall['method'] == 'listen') {
-            final String argument = methodCall['args'] as String;
-            emitEvent(jsonMethod.encodeErrorEnvelope(code: '404', message: 'Not Found.', details: argument));
-            return jsonMethod.encodeSuccessEnvelope(null);
-          } else if (methodCall['method'] == 'cancel') {
-            return jsonMethod.encodeSuccessEnvelope(null);
-          } else {
-            fail('Expected listen or cancel');
-          }
-        },
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
+        channel,
+        InlineMockStreamHandler(
+          onListen: (dynamic arguments, MockStreamHandlerEventSink events) {
+            events.error(code: '404', message: 'Not Found.', details: arguments);
+          },
+        ),
       );
       final List<dynamic> events = <dynamic>[];
       final List<dynamic> errors = <dynamic>[];
