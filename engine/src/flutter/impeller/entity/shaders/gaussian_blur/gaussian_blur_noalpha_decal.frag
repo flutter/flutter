@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <impeller/texture.glsl>
-
-vec4 Sample(sampler2D tex, vec2 coords) {
-  return IPSampleDecal(tex, coords);
-}
+#define ENABLE_ALPHA_MASK 0
+#define ENABLE_DECAL_SPECIALIZATION 1
 
 #include "gaussian_blur.glsl"
