@@ -824,9 +824,6 @@ class FakeXcdevice extends Fake implements XCDevice {
       return null;
     }
   }
-
-  @override
-  void cancelWaitForDeviceToConnect() {}
 }
 
 class FakeProcess extends Fake implements Process {
