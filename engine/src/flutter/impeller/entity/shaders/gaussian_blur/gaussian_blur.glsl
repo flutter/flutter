@@ -18,52 +18,52 @@
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
-uniform sampler2D texture_sampler;
+uniform f16sampler2D texture_sampler;
 
 uniform BlurInfo {
-  vec2 texture_size;
-  vec2 blur_direction;
+  f16vec2 texture_size;
+  f16vec2 blur_direction;
 
   // The blur sigma and radius have a linear relationship which is defined
   // host-side, but both are useful controls here. Sigma (pixels per standard
   // deviation) is used to define the gaussian function itself, whereas the
   // radius is used to limit how much of the function is integrated.
-  float blur_sigma;
-  float blur_radius;
+  float16_t blur_sigma;
+  float16_t blur_radius;
 }
 blur_info;
 
 #if ENABLE_ALPHA_MASK
-uniform sampler2D alpha_mask_sampler;
+uniform f16sampler2D alpha_mask_sampler;
 
 uniform MaskInfo {
-  float src_factor;
-  float inner_blur_factor;
-  float outer_blur_factor;
+  float16_t src_factor;
+  float16_t inner_blur_factor;
+  float16_t outer_blur_factor;
 }
 mask_info;
 #endif
 
-vec4 Sample(sampler2D tex, vec2 coords) {
+f16vec4 Sample(f16sampler2D tex, f16vec2 coords) {
 #if ENABLE_DECAL_SPECIALIZATION
-  return IPSampleDecal(tex, coords);
+  return IPHalfSampleDecal(tex, coords);
 #else
   return texture(tex, coords);
 #endif
 }
 
-in vec2 v_texture_coords;
-in vec2 v_src_texture_coords;
+in f16vec2 v_texture_coords;
+in f16vec2 v_src_texture_coords;
 
-out vec4 frag_color;
+out f16vec4 frag_color;
 
 void main() {
-  vec4 total_color = vec4(0);
-  float gaussian_integral = 0;
-  vec2 blur_uv_offset = blur_info.blur_direction / blur_info.texture_size;
+  f16vec4 total_color = f16vec4(0.0hf);
+  float16_t gaussian_integral = 0.0hf;
+  f16vec2 blur_uv_offset = blur_info.blur_direction / blur_info.texture_size;
 
-  for (float i = -blur_info.blur_radius; i <= blur_info.blur_radius; i++) {
-    float gaussian = IPGaussian(i, blur_info.blur_sigma);
+  for (float16_t i = -blur_info.blur_radius; i <= blur_info.blur_radius; i++) {
+    float16_t gaussian = IPGaussian(i, blur_info.blur_sigma);
     gaussian_integral += gaussian;
     total_color +=
         gaussian *
@@ -75,11 +75,12 @@ void main() {
   frag_color = total_color / gaussian_integral;
 
 #if ENABLE_ALPHA_MASK
-  vec4 src_color = Sample(alpha_mask_sampler,   // sampler
-                          v_src_texture_coords  // texture coordinates
+  f16vec4 src_color = Sample(alpha_mask_sampler,   // sampler
+                             v_src_texture_coords  // texture coordinates
   );
-  float blur_factor = mask_info.inner_blur_factor * float(src_color.a > 0) +
-                      mask_info.outer_blur_factor * float(src_color.a == 0);
+  float16_t blur_factor =
+      mask_info.inner_blur_factor * float16_t(src_color.a > 0.0hf) +
+      mask_info.outer_blur_factor * float16_t(src_color.a == 0.0hf);
 
   frag_color = frag_color * blur_factor + src_color * mask_info.src_factor;
 #endif
