@@ -1432,7 +1432,6 @@ void _canvasTests() {
     builder.addText('Hello');
     final CkParagraph paragraph = builder.build();
 
-    paragraph.delete();
     paragraph.dispose();
     expect(paragraph.debugDisposed, true);
   });
