@@ -222,7 +222,7 @@ physical):
 ```
 
 Note:
-To use `--dart-define` with `gradlew` you must `base64` encode all parameters, 
+To use `--dart-define` with `gradlew` you must `base64` encode all parameters,
 and pass them to gradle in a comma separated list:
 ```bash
 ./gradlew project:task -Pdart-defines="{base64(key=value)},[...]"
