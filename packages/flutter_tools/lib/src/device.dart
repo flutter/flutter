@@ -102,6 +102,11 @@ abstract class DeviceManager {
     _specifiedDeviceId = id;
   }
 
+  /// A minimum duration to use when discovering wireless iOS devices.
+  static const Duration minimumWirelessDeviceDiscoveryTimeout = Duration(
+    seconds: 5,
+  );
+
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
@@ -229,6 +234,22 @@ abstract class DeviceManager {
     ]);
 
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
+  }
+
+  /// Discard existing cache of discoverers that are known to take longer to
+  /// discover wireless devices.
+  ///
+  /// Then, search for devices for those discoverers to populate the cache for
+  /// no longer than [timeout].
+  Future<void> refreshExtendedWirelessDeviceDiscoverers({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        if (discoverer.requiresExtendedWirelessDeviceDiscovery)
+          discoverer.discoverDevices(timeout: timeout)
+    ]);
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.
@@ -434,6 +455,10 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
+  /// Whether this device discovery is known to take longer to discover
+  /// wireless devices.
+  bool get requiresExtendedWirelessDeviceDiscovery => false;
+
   /// Return all connected devices, cached on subsequent calls.
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter});
 
@@ -504,6 +529,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   /// Get devices from cache filtered by [filter].
   ///
   /// If the cache is empty, populate the cache.
+  ///
+  /// If [filter] is null, it may return devices that are not connected.
   @override
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) {
     return _populateDevices(filter: filter);
@@ -512,6 +539,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   /// Empty the cache and repopulate it before getting devices from cache filtered by [filter].
   ///
   /// Search for devices to populate the cache for no longer than [timeout].
+  ///
+  /// If [filter] is null, it may return devices that are not connected.
   @override
   Future<List<Device>> discoverDevices({
     Duration? timeout,
