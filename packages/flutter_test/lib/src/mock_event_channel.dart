@@ -53,31 +53,3 @@ class MockStreamHandlerEventSink {
   /// Send an end of stream event.
   void endOfStream() => _sink.close();
 }
-
-// void main() {
-//   group('EventChannel', () {
-//     test('can receive event stream', () async {
-//       bool canceled = false;
-//       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-//           .setMockStreamHandler(
-//         channel,
-//         InlineMockStreamHandler(
-//           onListen:
-//               (dynamic arguments, MockStreamHandlerEventSink events) async {
-//             events.success('${arguments}1');
-//             events.success('${arguments}2');
-//             events.endOfStream();
-//           },
-//           onCancel: (dynamic arguments) {
-//             canceled = true;
-//           },
-//         ),
-//       );
-//       final List<dynamic> events =
-//           await channel.receiveBroadcastStream('hello').toList();
-//       expect(events, orderedEquals(<String>['hello1', 'hello2']));
-//       await Future<void>.delayed(Duration.zero);
-//       expect(canceled, isTrue);
-//     });
-//   });
-// }
