@@ -945,12 +945,13 @@ void main() {
       expect(material.color, equals(Colors.red));
     });
 
-    testWidgets('default MenuAnchor visual attributes', (WidgetTester tester) async {
+    testWidgets('make clipBehavior be set correctly for MenuAnchor', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: Center(
               child: MenuAnchor(
+                clipBehavior: Clip.antiAlias,
                 menuChildren: const <Widget> [
                   MenuItemButton(
                     child: Text('Button 1'),
@@ -983,7 +984,7 @@ void main() {
       await tester.tap(find.text('Tap me'));
       await tester.pump();
       final Material material = getMenuBarMaterial(tester);
-      expect(material.clipBehavior, equals(Clip.hardEdge));
+      expect(material.clipBehavior, equals(Clip.antiAlias));
     });
 
     testWidgets('open and close works', (WidgetTester tester) async {
