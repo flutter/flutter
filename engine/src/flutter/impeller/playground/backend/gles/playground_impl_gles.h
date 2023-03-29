@@ -11,7 +11,7 @@ namespace impeller {
 
 class PlaygroundImplGLES final : public PlaygroundImpl {
  public:
-  PlaygroundImplGLES();
+  explicit PlaygroundImplGLES(PlaygroundSwitches switches);
 
   ~PlaygroundImplGLES();
 

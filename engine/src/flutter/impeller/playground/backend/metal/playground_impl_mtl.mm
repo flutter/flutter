@@ -62,8 +62,10 @@ void PlaygroundImplMTL::DestroyWindowHandle(WindowHandle handle) {
   ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
 
-PlaygroundImplMTL::PlaygroundImplMTL()
-    : handle_(nullptr, &DestroyWindowHandle), data_(std::make_unique<Data>()) {
+PlaygroundImplMTL::PlaygroundImplMTL(PlaygroundSwitches switches)
+    : PlaygroundImpl(switches),
+      handle_(nullptr, &DestroyWindowHandle),
+      data_(std::make_unique<Data>()) {
   ::glfwDefaultWindowHints();
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   ::glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);

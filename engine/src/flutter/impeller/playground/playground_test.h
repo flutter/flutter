@@ -39,8 +39,6 @@ class PlaygroundTest : public Playground,
   std::string GetWindowTitle() const override;
 
  private:
-  const PlaygroundSwitches switches_;
-
   // |Playground|
   bool ShouldKeepRendering() const;
 

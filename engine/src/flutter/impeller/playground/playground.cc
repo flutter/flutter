@@ -73,8 +73,9 @@ struct Playground::GLFWInitializer {
   }
 };
 
-Playground::Playground()
-    : glfw_initializer_(std::make_unique<GLFWInitializer>()) {}
+Playground::Playground(PlaygroundSwitches switches)
+    : switches_(switches),
+      glfw_initializer_(std::make_unique<GLFWInitializer>()) {}
 
 Playground::~Playground() = default;
 
@@ -109,7 +110,7 @@ bool Playground::SupportsBackend(PlaygroundBackend backend) {
 void Playground::SetupContext(PlaygroundBackend backend) {
   FML_CHECK(SupportsBackend(backend));
 
-  impl_ = PlaygroundImpl::Create(backend);
+  impl_ = PlaygroundImpl::Create(backend, switches_);
   if (!impl_) {
     return;
   }

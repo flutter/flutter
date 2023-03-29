@@ -15,7 +15,8 @@ namespace testing {
 
 MetalScreenshoter::MetalScreenshoter() {
   FML_CHECK(::glfwInit() == GLFW_TRUE);
-  playground_ = PlaygroundImpl::Create(PlaygroundBackend::kMetal);
+  playground_ =
+      PlaygroundImpl::Create(PlaygroundBackend::kMetal, PlaygroundSwitches{});
   aiks_context_.reset(new AiksContext(playground_->GetContext()));
 }
 

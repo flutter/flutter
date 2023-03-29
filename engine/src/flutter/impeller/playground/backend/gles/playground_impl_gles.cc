@@ -51,8 +51,9 @@ void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
   ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
 
-PlaygroundImplGLES::PlaygroundImplGLES()
-    : handle_(nullptr, &DestroyWindowHandle),
+PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
+    : PlaygroundImpl(switches),
+      handle_(nullptr, &DestroyWindowHandle),
       worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())) {
   ::glfwDefaultWindowHints();
 

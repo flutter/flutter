@@ -13,6 +13,7 @@
 #include "impeller/geometry/point.h"
 #include "impeller/image/compressed_image.h"
 #include "impeller/image/decompressed_image.h"
+#include "impeller/playground/switches.h"
 #include "impeller/renderer/renderer.h"
 #include "impeller/renderer/texture.h"
 #include "impeller/runtime_stage/runtime_stage.h"
@@ -33,7 +34,7 @@ class Playground {
  public:
   using SinglePassCallback = std::function<bool(RenderPass& pass)>;
 
-  explicit Playground();
+  explicit Playground(PlaygroundSwitches switches);
 
   virtual ~Playground();
 
@@ -92,6 +93,8 @@ class Playground {
   virtual std::string GetWindowTitle() const = 0;
 
  protected:
+  const PlaygroundSwitches switches_;
+
   virtual bool ShouldKeepRendering() const;
 
  private:

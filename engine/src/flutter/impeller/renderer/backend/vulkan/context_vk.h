@@ -36,6 +36,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
     std::vector<std::shared_ptr<fml::Mapping>> shader_libraries_data;
     fml::UniqueFD cache_directory;
     std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner;
+    bool enable_validation = false;
 
     Settings() = default;
 

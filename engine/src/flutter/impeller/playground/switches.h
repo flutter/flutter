@@ -17,6 +17,9 @@ struct PlaygroundSwitches {
   // specified in the timeout. If the timeout is zero, exactly one frame will be
   // rendered in the playground.
   std::optional<std::chrono::milliseconds> timeout;
+  bool enable_vulkan_validation = false;
+
+  PlaygroundSwitches();
 
   explicit PlaygroundSwitches(const fml::CommandLine& args);
 };
