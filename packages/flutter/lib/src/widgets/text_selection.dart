@@ -2005,6 +2005,14 @@ class TextSelectionGestureDetectorBuilder {
   // cursor will not move on drag update.
   bool? _dragBeganOnPreviousSelection;
 
+  // For iOS long press behavior when the field is not focused. iOS uses this value
+  // to determine if a long press began on a field that was not focused.
+  //
+  // If the field was not focused when the long press began, a long press will select
+  // the word and a long press move will select word-by-word. If the field was
+  // focused, the cursor moves to the long press position.
+  bool _longPressStartedWithoutFocus = false;
+
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
   /// By default, it forwards the tap to [RenderEditable.handleTapDown] and sets
@@ -2240,10 +2248,15 @@ class TextSelectionGestureDetectorBuilder {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
+          if (!renderEditable.hasFocus) {
+            _longPressStartedWithoutFocus = true;
+            renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          } else {
+            renderEditable.selectPositionAt(
+              from: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            );
+          }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -2291,10 +2304,18 @@ class TextSelectionGestureDetectorBuilder {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
+          if (_longPressStartedWithoutFocus) {
+            renderEditable.selectWordsInRange(
+              from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
+              to: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            );
+          } else {
+            renderEditable.selectPositionAt(
+              from: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            );
+          }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -2342,6 +2363,7 @@ class TextSelectionGestureDetectorBuilder {
     if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
     }
+    _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
   }

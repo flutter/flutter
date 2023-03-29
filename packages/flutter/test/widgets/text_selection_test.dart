@@ -460,8 +460,12 @@ void main() {
     expect(dragEndCount, 1);
   });
 
-  testWidgets('test TextSelectionGestureDetectorBuilder long press on Apple Platforms', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on Apple Platforms - focused renderEditable', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    renderEditable.hasFocus = true;
+
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: 0,
@@ -470,12 +474,28 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
-    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
     expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on iOS - renderEditable not focused', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+    );
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(state.showToolbarCalled, isTrue);
+    expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.longPress);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
