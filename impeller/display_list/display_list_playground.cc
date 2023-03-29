@@ -29,7 +29,7 @@ bool DisplayListPlayground::OpenPlaygroundHere(
 
 bool DisplayListPlayground::OpenPlaygroundHere(
     DisplayListPlaygroundCallback callback) {
-  if (!Playground::is_enabled()) {
+  if (!switches_.enable_playground) {
     return true;
   }
 

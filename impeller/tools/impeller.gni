@@ -8,9 +8,6 @@ import("//flutter/impeller/tools/malioc.gni")
 import("//flutter/testing/testing.gni")
 
 declare_args() {
-  # Whether playgrounds are enabled for unit tests.
-  impeller_enable_playground = false
-
   # Whether the Metal backend is enabled.
   impeller_enable_metal = is_mac || is_ios
 
