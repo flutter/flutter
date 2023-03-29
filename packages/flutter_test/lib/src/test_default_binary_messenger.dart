@@ -371,7 +371,8 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       );
     });
     sub.onDone(() => channel.binaryMessenger.handlePlatformMessage(channel.name, null, null));
-    addTearDown(() => sub.cancel());
+    addTearDown(controller.close);
+    addTearDown(sub.cancel);
   }
 
   /// Returns true if the `handler` argument matches the `handler`
