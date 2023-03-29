@@ -2626,6 +2626,10 @@
 ../../../third_party/skia/include/android/BUILD.bazel
 ../../../third_party/skia/include/codec/BUILD.bazel
 ../../../third_party/skia/include/config/BUILD.bazel
+../../../third_party/skia/include/config/OWNERS
+../../../third_party/skia/include/config/WORKSPACE.bazel
+../../../third_party/skia/include/config/copts.bzl
+../../../third_party/skia/include/config/linkopts.bzl
 ../../../third_party/skia/include/core/BUILD.bazel
 ../../../third_party/skia/include/docs/BUILD.bazel
 ../../../third_party/skia/include/effects/BUILD.bazel
