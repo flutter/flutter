@@ -15106,23 +15106,23 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
       );
       controller.value = value;
-        await tester.pumpWidget(
-          CupertinoApp(
-            home: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-              selectionControls: cupertinoTextSelectionControls,
-              spellCheckConfiguration:
-                const SpellCheckConfiguration(
-                  misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
-                  spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
-                ),
-            ),
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: cupertinoTextSelectionControls,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
           ),
-        );
+        ),
+      );
 
       final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
