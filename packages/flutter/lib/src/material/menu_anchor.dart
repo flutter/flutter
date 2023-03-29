@@ -1148,6 +1148,7 @@ class CheckboxMenuButton extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
+    this.keepMenuOpen = false,
     required this.child,
   });
 
@@ -1250,6 +1251,11 @@ class CheckboxMenuButton extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
+  /// Determines if the menuAnchor should stay open after a [MenuItemButton]
+  /// has been pressed.
+  /// Defaults to false.
+  final bool keepMenuOpen;
+
   /// The widget displayed in the center of this button.
   ///
   /// Typically this is the button's label, using a [Text] widget.
@@ -1300,6 +1306,7 @@ class CheckboxMenuButton extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
+      keepMenuOpen: keepMenuOpen,
       child: child,
     );
   }
@@ -1340,6 +1347,7 @@ class RadioMenuButton<T> extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
+    this.keepMenuOpen = false,
     required this.child,
   });
 
@@ -1444,6 +1452,11 @@ class RadioMenuButton<T> extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
+  /// Determines if the menuAnchor should stay open after a [MenuItemButton]
+  /// has been pressed.
+  /// Defaults to false.
+  final bool keepMenuOpen;
+
   /// The widget displayed in the center of this button.
   ///
   /// Typically this is the button's label, using a [Text] widget.
@@ -1491,6 +1504,7 @@ class RadioMenuButton<T> extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
+      keepMenuOpen: keepMenuOpen,
       child: child,
     );
   }
