@@ -15,6 +15,9 @@ static constexpr const char* kInstanceLayer = "ImpellerInstance";
 
 CapabilitiesVK::CapabilitiesVK(bool enable_validations)
     : enable_validations_(enable_validations) {
+  if (enable_validations_) {
+    FML_LOG(INFO) << "Vulkan validations are enabled.";
+  }
   auto extensions = vk::enumerateInstanceExtensionProperties();
   auto layers = vk::enumerateInstanceLayerProperties();
 

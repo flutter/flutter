@@ -48,8 +48,9 @@ void PlaygroundImplVK::DestroyWindowHandle(WindowHandle handle) {
   ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
 
-PlaygroundImplVK::PlaygroundImplVK()
-    : concurrent_loop_(fml::ConcurrentMessageLoop::Create()),
+PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
+    : PlaygroundImpl(switches),
+      concurrent_loop_(fml::ConcurrentMessageLoop::Create()),
       handle_(nullptr, &DestroyWindowHandle) {
   if (!::glfwVulkanSupported()) {
     VALIDATION_LOG << "Attempted to initialize a Vulkan playground on a system "
@@ -76,6 +77,7 @@ PlaygroundImplVK::PlaygroundImplVK()
   context_settings.shader_libraries_data = ShaderLibraryMappingsForPlayground();
   context_settings.cache_directory = fml::paths::GetCachesDirectory();
   context_settings.worker_task_runner = concurrent_loop_->GetTaskRunner();
+  context_settings.enable_validation = switches_.enable_vulkan_validation;
 
   auto context = ContextVK::Create(std::move(context_settings));
 
