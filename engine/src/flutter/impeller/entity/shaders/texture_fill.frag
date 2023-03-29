@@ -4,18 +4,18 @@
 
 #include <impeller/types.glsl>
 
-uniform sampler2D texture_sampler;
+uniform f16sampler2D texture_sampler;
 
 uniform FragInfo {
-  float alpha;
+  float16_t alpha;
 }
 frag_info;
 
-in vec2 v_texture_coords;
+in f16vec2 v_texture_coords;
 
-out vec4 frag_color;
+out f16vec4 frag_color;
 
 void main() {
-  vec4 sampled = texture(texture_sampler, v_texture_coords);
+  f16vec4 sampled = texture(texture_sampler, v_texture_coords);
   frag_color = sampled * frag_info.alpha;
 }

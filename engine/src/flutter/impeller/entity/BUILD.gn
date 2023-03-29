@@ -11,6 +11,8 @@ impeller_shaders("entity_shaders") {
     vulkan_language_version = 130
   }
 
+  use_half_textures = true
+
   shaders = [
     "shaders/blending/advanced_blend.vert",
     "shaders/blending/advanced_blend_color.frag",

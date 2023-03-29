@@ -5,24 +5,25 @@
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
-uniform sampler2D texture_sampler;
+uniform f16sampler2D texture_sampler;
 
 uniform FragInfo {
-  float x_tile_mode;
-  float y_tile_mode;
-  float alpha;
+  float16_t x_tile_mode;
+  float16_t y_tile_mode;
+  float16_t alpha;
 }
 frag_info;
 
-in vec2 v_texture_coords;
+in f16vec2 v_texture_coords;
 
-out vec4 frag_color;
+out f16vec4 frag_color;
 
 void main() {
-  frag_color = IPSampleWithTileMode(texture_sampler,   // sampler
-                                    v_texture_coords,  // texture coordinates
-                                    frag_info.x_tile_mode,  // x tile mode
-                                    frag_info.y_tile_mode   // y tile mode
-                                    ) *
-               frag_info.alpha;
+  frag_color =
+      IPHalfSampleWithTileMode(texture_sampler,        // sampler
+                               v_texture_coords,       // texture coordinates
+                               frag_info.x_tile_mode,  // x tile mode
+                               frag_info.y_tile_mode   // y tile mode
+                               ) *
+      frag_info.alpha;
 }
