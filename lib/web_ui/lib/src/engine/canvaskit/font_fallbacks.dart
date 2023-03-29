@@ -225,7 +225,7 @@ class FontFallbackData {
     registeredFallbackFonts.add(RegisteredFont(bytes, family, typeface));
     // Insert emoji font before all other fallback fonts so we use the emoji
     // whenever it's available.
-    if (family == 'Noto Emoji') {
+    if (family == 'Noto Color Emoji') {
       if (globalFontFallbacks.first == 'Roboto') {
         globalFontFallbacks.insert(1, family);
       } else {
