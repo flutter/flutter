@@ -137,10 +137,10 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
               .makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       expect(image.debugDisposed, isFalse);
-      expect(image.box.isDeletedPermanently, isFalse);
+      expect(image.box.isDisposed, isFalse);
       image.dispose();
       expect(image.debugDisposed, isTrue);
-      expect(image.box.isDeletedPermanently, isTrue);
+      expect(image.box.isDisposed, isTrue);
 
       // Disallow double-dispose.
       expect(() => image.dispose(), throwsAssertionError);
@@ -152,7 +152,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
           canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!
               .makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
-      final SkiaObjectBox<CkImage, SkImage> box = image.box;
+      final CountedRef<CkImage, SkImage> box = image.box;
       expect(box.refCount, 1);
       expect(box.debugGetStackTraces().length, 1);
 
@@ -161,19 +161,19 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       expect(box.debugGetStackTraces().length, 2);
 
       expect(image.isCloneOf(clone), isTrue);
-      expect(box.isDeletedPermanently, isFalse);
+      expect(box.isDisposed, isFalse);
 
       testCollector.collectNow();
       expect(skImage.isDeleted(), isFalse);
       image.dispose();
       expect(box.refCount, 1);
-      expect(box.isDeletedPermanently, isFalse);
+      expect(box.isDisposed, isFalse);
 
       testCollector.collectNow();
       expect(skImage.isDeleted(), isFalse);
       clone.dispose();
       expect(box.refCount, 0);
-      expect(box.isDeletedPermanently, isTrue);
+      expect(box.isDisposed, isTrue);
 
       testCollector.collectNow();
       expect(skImage.isDeleted(), isTrue);
@@ -265,26 +265,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       testCollector.collectNow();
     // TODO(hterkelsen): Firefox and Safari do not currently support ImageDecoder.
     }, skip: isFirefox || isSafari);
-
-    // Regression test for https://github.com/flutter/flutter/issues/72469
-    test('CkImage can be resurrected', () {
-      browserSupportsFinalizationRegistry = false;
-      final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!
-              .makeImageAtCurrentFrame();
-      final CkImage image = CkImage(skImage);
-      expect(image.box.rawSkiaObject, isNotNull);
-
-      // Pretend that the image is temporarily deleted.
-      image.box.delete();
-      image.box.didDelete();
-      expect(image.box.rawSkiaObject, isNull);
-
-      // Attempting to access the skia object here would previously throw
-      // "Stack Overflow" in Safari.
-      expect(image.box.skiaObject, isNotNull);
-      testCollector.collectNow();
-    });
 
     test('skiaInstantiateWebImageCodec loads an image from the network',
         () async {

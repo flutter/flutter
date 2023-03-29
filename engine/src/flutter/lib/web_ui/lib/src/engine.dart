@@ -39,6 +39,7 @@ export 'engine/canvaskit/layer_scene_builder.dart';
 export 'engine/canvaskit/layer_tree.dart';
 export 'engine/canvaskit/mask_filter.dart';
 export 'engine/canvaskit/n_way_canvas.dart';
+export 'engine/canvaskit/native_memory.dart';
 export 'engine/canvaskit/noto_font.dart';
 export 'engine/canvaskit/painting.dart';
 export 'engine/canvaskit/path.dart';
