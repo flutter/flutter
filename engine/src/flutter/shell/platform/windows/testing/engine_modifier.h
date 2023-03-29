@@ -66,10 +66,6 @@ class EngineModifier {
   // restart. This resets the keyboard's state if it exists.
   void Restart() { engine_->OnPreEngineRestart(); }
 
-  void SetLifecycleManager(std::unique_ptr<WindowsLifecycleManager>&& handler) {
-    engine_->lifecycle_manager_ = std::move(handler);
-  }
-
  private:
   FlutterWindowsEngine* engine_;
 
