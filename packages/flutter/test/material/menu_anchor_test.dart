@@ -945,6 +945,47 @@ void main() {
       expect(material.color, equals(Colors.red));
     });
 
+    testWidgets('default MenuAnchor visual attributes', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                menuChildren: const <Widget> [
+                  MenuItemButton(
+                    child: Text('Button 1'),
+                  ),
+                  MenuItemButton(
+                    child: Text('Button 2'),
+                  ),
+                  MenuItemButton(
+                    child: Text('Button 3'),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('Tap me'),
+                  );
+                },
+              ),
+            )
+          )
+        ),
+      );
+
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      final Material material = getMenuBarMaterial(tester);
+      expect(material.clipBehavior, equals(Clip.hardEdge));
+    });
+
     testWidgets('open and close works', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
