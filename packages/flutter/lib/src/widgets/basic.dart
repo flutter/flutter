@@ -4083,10 +4083,10 @@ class _RawIndexedStack extends Stack {
 }
 
 class _IndexedStackElement extends MultiChildRenderObjectElement {
-  _IndexedStackElement(IndexedStack super.widget);
+  _IndexedStackElement(_RawIndexedStack super.widget);
 
   @override
-  IndexedStack get widget => super.widget as IndexedStack;
+  _RawIndexedStack get widget => super.widget as _RawIndexedStack;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
