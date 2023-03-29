@@ -810,6 +810,7 @@ class MenuItemButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.leadingIcon,
     this.trailingIcon,
+    this.keepMenuOpen = false,
     required this.child,
   });
 
@@ -870,6 +871,11 @@ class MenuItemButton extends StatefulWidget {
 
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
+
+  /// Determines if the menuAnchor should stay opened after a [MenuItemButton]
+  /// is pressed.
+  /// Defaults to false.
+  final bool keepMenuOpen;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1089,7 +1095,9 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
     widget.onPressed?.call();
-    _MenuAnchorState._maybeOf(context)?._root._close();
+    if (!widget.keepMenuOpen) {
+      _MenuAnchorState._maybeOf(context)?._root._close();
+    }
   }
 
   void _createInternalFocusNodeIfNeeded() {
