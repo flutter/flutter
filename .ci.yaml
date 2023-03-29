@@ -4215,6 +4215,7 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows customer_testing
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/123694
     enabled_branches:
       - master
     recipe: flutter/flutter
