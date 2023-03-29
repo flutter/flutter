@@ -38,8 +38,6 @@ class Playground {
 
   virtual ~Playground();
 
-  static constexpr bool is_enabled() { return is_enabled_; }
-
   static bool ShouldOpenNewPlaygrounds();
 
   void SetupContext(PlaygroundBackend backend);
@@ -98,15 +96,9 @@ class Playground {
   virtual bool ShouldKeepRendering() const;
 
  private:
-#if IMPELLER_ENABLE_PLAYGROUND
-  static const bool is_enabled_ = true;
-#else
-  static const bool is_enabled_ = false;
-#endif  // IMPELLER_ENABLE_PLAYGROUND
+  struct GLFWInitializer;
 
   fml::TimeDelta start_time_;
-
-  struct GLFWInitializer;
   std::unique_ptr<GLFWInitializer> glfw_initializer_;
   std::unique_ptr<PlaygroundImpl> impl_;
   std::shared_ptr<Context> context_;

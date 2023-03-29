@@ -13,6 +13,7 @@
 namespace impeller {
 
 struct PlaygroundSwitches {
+  bool enable_playground = false;
   // If specified, the playgrounds will render for at least the duration
   // specified in the timeout. If the timeout is zero, exactly one frame will be
   // rendered in the playground.
