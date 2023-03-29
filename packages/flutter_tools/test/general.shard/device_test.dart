@@ -141,29 +141,92 @@ void main() {
     });
 
     testWithoutContext('getAllDevices caches', () async {
-      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-      final TestDeviceManager deviceManager = TestDeviceManager(
-        <Device>[device1],
-        logger: BufferLogger.test(),
-      );
-      expect(await deviceManager.getAllDevices(), <Device>[device1]);
+      final FakePollingDeviceDiscovery notSupportedDiscoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(requiresExtendedWirelessDeviceDiscovery: true);
 
-      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
-      deviceManager.resetDevices(<Device>[device2]);
-      expect(await deviceManager.getAllDevices(), <Device>[device1]);
+      final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice wirelessDevice = FakeDevice('Wireless device', 'wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
+
+      notSupportedDiscoverer.addDevice(attachedDevice);
+      supportedDiscoverer.addDevice(wirelessDevice);
+
+      final TestDeviceManager deviceManager = TestDeviceManager(
+        <Device>[],
+        logger: BufferLogger.test(),
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          notSupportedDiscoverer,
+          supportedDiscoverer,
+        ],
+      );
+      expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
+
+      final FakeDevice newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      notSupportedDiscoverer.addDevice(newAttachedDevice);
+
+      final FakeDevice newWirelessDevice = FakeDevice('New wireless device', 'new-wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
+      supportedDiscoverer.addDevice(newWirelessDevice);
+
+      expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
     });
 
     testWithoutContext('refreshAllDevices does not cache', () async {
-      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
-      final TestDeviceManager deviceManager = TestDeviceManager(
-        <Device>[device1],
-        logger: BufferLogger.test(),
-      );
-      expect(await deviceManager.refreshAllDevices(), <Device>[device1]);
+      final FakePollingDeviceDiscovery notSupportedDiscoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery supportedDiscoverer = FakePollingDeviceDiscovery(requiresExtendedWirelessDeviceDiscovery: true);
 
-      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
-      deviceManager.resetDevices(<Device>[device2]);
-      expect(await deviceManager.refreshAllDevices(), <Device>[device2]);
+      final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice wirelessDevice = FakeDevice('Wireless device', 'wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
+
+      notSupportedDiscoverer.addDevice(attachedDevice);
+      supportedDiscoverer.addDevice(wirelessDevice);
+
+      final TestDeviceManager deviceManager = TestDeviceManager(
+        <Device>[],
+        logger: BufferLogger.test(),
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          notSupportedDiscoverer,
+          supportedDiscoverer,
+        ],
+      );
+      expect(await deviceManager.refreshAllDevices(), <Device>[attachedDevice, wirelessDevice]);
+
+      final FakeDevice newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      notSupportedDiscoverer.addDevice(newAttachedDevice);
+
+      final FakeDevice newWirelessDevice = FakeDevice('New wireless device', 'new-wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
+      supportedDiscoverer.addDevice(newWirelessDevice);
+
+      expect(await deviceManager.refreshAllDevices(), <Device>[attachedDevice, newAttachedDevice, wirelessDevice, newWirelessDevice]);
+    });
+
+    testWithoutContext('refreshExtendedWirelessDeviceDiscoverers only refreshes discoverers that require extended time', () async {
+      final FakePollingDeviceDiscovery normalDiscoverer = FakePollingDeviceDiscovery();
+      final FakePollingDeviceDiscovery extendedDiscoverer = FakePollingDeviceDiscovery(requiresExtendedWirelessDeviceDiscovery: true);
+
+      final FakeDevice attachedDevice = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice wirelessDevice = FakeDevice('Wireless device', 'wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
+
+      normalDiscoverer.addDevice(attachedDevice);
+      extendedDiscoverer.addDevice(wirelessDevice);
+
+      final TestDeviceManager deviceManager = TestDeviceManager(
+        <Device>[],
+        logger: BufferLogger.test(),
+        deviceDiscoveryOverrides: <DeviceDiscovery>[
+          normalDiscoverer,
+          extendedDiscoverer,
+        ],
+      );
+      await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
+      expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
+
+      final FakeDevice newAttachedDevice = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      normalDiscoverer.addDevice(newAttachedDevice);
+
+      final FakeDevice newWirelessDevice = FakeDevice('New wireless device', 'new-wireless-device', connectionInterface: DeviceConnectionInterface.wireless);
+      extendedDiscoverer.addDevice(newWirelessDevice);
+
+      await deviceManager.refreshExtendedWirelessDeviceDiscoverers();
+      expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice, newWirelessDevice]);
     });
   });
 
@@ -1032,34 +1095,6 @@ class TestDeviceManager extends DeviceManager {
   void resetDevices(List<Device> allDevices) {
     _fakeDeviceDiscoverer.setDevices(allDevices);
   }
-}
-
-class MockDeviceDiscovery extends Fake implements DeviceDiscovery {
-  int devicesCalled = 0;
-  int discoverDevicesCalled = 0;
-
-  @override
-  bool supportsPlatform = true;
-
-  List<Device> deviceValues = <Device>[];
-
-  @override
-  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async {
-    devicesCalled += 1;
-    return deviceValues;
-  }
-
-  @override
-  Future<List<Device>> discoverDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
-  }) async {
-    discoverDevicesCalled += 1;
-    return deviceValues;
-  }
-
-  @override
-  List<String> get wellKnownIds => <String>[];
 }
 
 class TestDeviceDiscoverySupportFilter extends DeviceDiscoverySupportFilter {

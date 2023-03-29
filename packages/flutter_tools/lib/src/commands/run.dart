@@ -200,6 +200,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
 
   @override
+  bool get refreshWirelessDevices => true;
+
+  @override
   bool get reportNullSafety => true;
 
   /// Whether to start the application paused by default.

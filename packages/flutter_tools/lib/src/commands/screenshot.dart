@@ -66,6 +66,9 @@ class ScreenshotCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.tools;
 
   @override
+  bool get refreshWirelessDevices => true;
+
+  @override
   final List<String> aliases = <String>['pic'];
 
   Device? device;

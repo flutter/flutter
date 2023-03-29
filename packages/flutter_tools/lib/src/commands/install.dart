@@ -35,6 +35,9 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   final String category = FlutterCommandCategory.tools;
 
+  @override
+  bool get refreshWirelessDevices => true;
+
   Device? device;
 
   bool get uninstallOnly => boolArg('uninstall-only');
