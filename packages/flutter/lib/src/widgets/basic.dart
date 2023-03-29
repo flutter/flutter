@@ -4075,6 +4075,28 @@ class _RawIndexedStack extends Stack {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context);
   }
+
+  @override
+  MultiChildRenderObjectElement createElement() {
+    return _IndexedStackElement(this);
+  }
+}
+
+class _IndexedStackElement extends MultiChildRenderObjectElement {
+  _IndexedStackElement(_RawIndexedStack super.widget);
+
+  @override
+  _RawIndexedStack get widget => super.widget as _RawIndexedStack;
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    final int? index = widget.index;
+    // If the index is null, no child is onstage. Otherwise, only the child at
+    // the selected index is.
+    if (index != null && children.isNotEmpty) {
+      visitor(children.elementAt(index));
+    }
+  }
 }
 
 /// A widget that controls where a child of a [Stack] is positioned.
