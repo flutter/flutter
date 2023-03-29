@@ -15,7 +15,7 @@ EntityPlayground::EntityPlayground() = default;
 EntityPlayground::~EntityPlayground() = default;
 
 bool EntityPlayground::OpenPlaygroundHere(EntityPass& entity_pass) {
-  if (!Playground::is_enabled()) {
+  if (!switches_.enable_playground) {
     return true;
   }
 
@@ -31,7 +31,7 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPass& entity_pass) {
 }
 
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
-  if (!Playground::is_enabled()) {
+  if (!switches_.enable_playground) {
     return true;
   }
 
@@ -46,7 +46,7 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
 }
 
 bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
-  if (!Playground::is_enabled()) {
+  if (!switches_.enable_playground) {
     return true;
   }
 

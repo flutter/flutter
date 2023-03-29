@@ -546,11 +546,6 @@ def to_gn_args(args):
     gn_args['dart_use_mallinfo2'] = args.use_mallinfo2
 
   # Impeller flags.
-  if args.enable_impeller_playground:
-    gn_args['impeller_enable_playground'] = args.enable_impeller_playground
-  elif os.getenv('FLUTTER_IMPELLER_ENABLE_PLAYGROUND', '0') == '1':
-    gn_args['impeller_enable_playground'] = True
-
   if args.enable_impeller_3d:
     gn_args['impeller_enable_3d'] = True
 
@@ -977,13 +972,6 @@ def parse_args(args):
   )
 
   # Impeller flags.
-  parser.add_argument(
-      '--enable-impeller-playground',
-      default=False,
-      action='store_true',
-      help='Whether impeller unit tests run in playground mode.'
-  )
-
   parser.add_argument(
       '--enable-impeller-vulkan',
       default=False,

@@ -22,7 +22,7 @@ bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
 }
 
 bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
-  if (!Playground::is_enabled()) {
+  if (!switches_.enable_playground) {
     return true;
   }
 

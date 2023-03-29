@@ -58,8 +58,6 @@ impeller_component("playground") {
     public_deps += [ "../fixtures:shader_subgroup_fixtures" ]
   }
 
-  public_configs = [ ":playground_config" ]
-
   if (is_mac) {
     frameworks = [
       "AppKit.framework",
@@ -82,10 +80,4 @@ impeller_component("playground_test") {
     ":playground",
     "//flutter/testing",
   ]
-}
-
-config("playground_config") {
-  if (impeller_enable_playground) {
-    defines = [ "IMPELLER_ENABLE_PLAYGROUND" ]
-  }
 }
