@@ -64,7 +64,8 @@ class GenerateFallbackFontDataCommand extends Command<bool>
     final Map<String, Uri> urlForFamily = <String, Uri>{};
     for (final Map<String, dynamic> fontData in fontDatas) {
       if (fallbackFonts.contains(fontData['family'])) {
-        final Uri uri = Uri.parse(fontData['files']['regular'] as String).replace(scheme: 'https');
+        final Uri uri = Uri.parse(fontData['files']['regular'] as String)
+            .replace(scheme: 'https');
         urlForFamily[fontData['family'] as String] = uri;
       }
     }
@@ -82,7 +83,11 @@ class GenerateFallbackFontDataCommand extends Command<bool>
     }
     for (final String family in fallbackFonts) {
       print('Downloading $family...');
-      final Uri uri = urlForFamily[family]!;
+      final Uri? uri = urlForFamily[family];
+      if (uri == null) {
+        throw ToolExit('Unable to determine URL to download $family. '
+            'Check if it is still hosted on Google Fonts.');
+      }
       final http.Response fontResponse = await client.get(uri);
       if (fontResponse.statusCode != 200) {
         throw ToolExit('Failed to download font for $family');
@@ -160,7 +165,7 @@ class GenerateFallbackFontDataCommand extends Command<bool>
 
 const List<String> fallbackFonts = <String>[
   'Noto Sans',
-  'Noto Emoji',
+  'Noto Color Emoji',
   'Noto Sans Symbols',
   'Noto Sans Symbols 2',
   'Noto Sans Adlam',
@@ -242,7 +247,7 @@ const List<String> fallbackFonts = <String>[
   'Noto Sans Mro',
   'Noto Sans Multani',
   'Noto Sans Myanmar',
-  'Noto Sans N Ko',
+  'Noto Sans NKo',
   'Noto Sans Nabataean',
   'Noto Sans New Tai Lue',
   'Noto Sans Newa',
