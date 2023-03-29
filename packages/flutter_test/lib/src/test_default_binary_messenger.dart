@@ -304,9 +304,38 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     }, handler);
   }
 
-  /// Set a mock stream handler for this channel
-  void setMockStreamHandler(EventChannel channel, MockStreamHandler handler) {
+  /// Set a handler for intercepting stream events sent to the
+  /// platform on the given channel.
+  ///
+  /// Intercepted method calls are not forwarded to the platform.
+  ///
+  /// The given handler will replace the currently registered
+  /// handler for that channel, if any. To stop intercepting messages
+  /// at all, pass null as the handler.
+  ///
+  /// Events are decoded using the codec of the channel.
+  ///
+  /// The handler's stream messages are used as a response, after re-encoding
+  /// them using the channel's codec.
+  ///
+  /// To send an error, send a [PlatformException] in the handler.
+  /// Other exceptions are not caught.
+  ///
+  /// {@macro flutter.flutter_test.TestDefaultBinaryMessenger.handlePlatformMessage.asyncHandlers}
+  ///
+  /// Registered handlers are cleared after each test.
+  ///
+  /// See also:
+  ///
+  ///  * [setMockMethodCallHandler], which is the similar method for
+  /// [MethodChannel].
+  void setMockStreamHandler(EventChannel channel, MockStreamHandler? handler) {
     final StreamController<dynamic> controller = StreamController<dynamic>();
+
+    if (handler == null) {
+      setMockMessageHandler(channel.name, null);
+      return;
+    }
 
     setMockMethodCallHandler(MethodChannel(channel.name, channel.codec),
         (MethodCall call) async {
