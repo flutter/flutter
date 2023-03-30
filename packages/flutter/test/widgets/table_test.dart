@@ -45,6 +45,7 @@ void main() {
       ),
     );
   });
+
   testWidgets('Table widget - control test', (WidgetTester tester) async {
     Future<void> run(TextDirection textDirection) async {
       await tester.pumpWidget(

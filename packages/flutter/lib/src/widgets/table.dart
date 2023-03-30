@@ -136,10 +136,12 @@ class Table extends RenderObjectWidget {
        }()),
        assert(() {
          if (children.isNotEmpty) {
-           if (children.any((TableRow row) => row.children.isEmpty)) {
+           final int cellCount = children.first.children.length;
+           if (children.any((TableRow row) => row.children.length != cellCount)) {
              throw FlutterError(
-               'One or more TableRow have no children.\n'
-               'Every TableRow in a Table must have at least one child, so there is no empty row. ',
+               'Table contains irregular row lengths.\n'
+               'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
+               'Otherwise, the table will contain holes.',
              );
            }
          }
@@ -147,12 +149,10 @@ class Table extends RenderObjectWidget {
        }()),
        assert(() {
          if (children.isNotEmpty) {
-           final int cellCount = children.first.children.length;
-           if (children.any((TableRow row) => row.children.length != cellCount)) {
+           if (children.any((TableRow row) => row.children.isEmpty)) {
              throw FlutterError(
-               'Table contains irregular row lengths.\n'
-               'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
-               'Otherwise, the table will contain holes.',
+               'One or more TableRow have no children.\n'
+               'Every TableRow in a Table must have at least one child, so there is no empty row. ',
              );
            }
          }
