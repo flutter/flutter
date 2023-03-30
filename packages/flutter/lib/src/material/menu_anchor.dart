@@ -872,9 +872,12 @@ class MenuItemButton extends StatefulWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
-  /// Determines if the menuAnchor should be closed after a [MenuItemButton]
-  /// has been pressed.
+  /// {@template flutter.material.menu_anchor.closeOnActivate}
+  /// Determines if the menu will be closed when a [MenuItemButton]
+  /// is pressed.
+  ///
   /// Defaults to true.
+  /// {@endtemplate}
   final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
@@ -1251,9 +1254,7 @@ class CheckboxMenuButton extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
-  /// Determines if the menuAnchor should be closed after a [MenuItemButton]
-  /// has been pressed.
-  /// Defaults to true.
+  /// {@macro flutter.material.menu_anchor.closeOnActivate}
   final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
@@ -1452,9 +1453,7 @@ class RadioMenuButton<T> extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
-  /// Determines if the menuAnchor should be closed after a [MenuItemButton]
-  /// has been pressed.
-  /// Defaults to true.
+  /// {@macro flutter.material.menu_anchor.closeOnActivate}
   final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
