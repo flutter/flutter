@@ -306,6 +306,10 @@ enum class SamplerAddressMode {
   // More modes are almost always supported but they are usually behind
   // extensions checks. The ones current in these structs are safe (always
   // supported) defaults.
+
+  /// @brief decal sampling mode is only supported on devices that pass
+  ///        the Capabilities.SupportsDecalTileMode check.
+  kDecal,
 };
 
 enum class ColorWriteMask : uint64_t {
