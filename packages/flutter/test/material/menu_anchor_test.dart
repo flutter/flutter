@@ -2771,6 +2771,7 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(1));
 
+    // Taps the MenuItemButton which should close the menu
     await tester.tap(find.text('Button 1'));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(0));
@@ -2808,6 +2809,7 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(1));
 
+    // Taps the MenuItemButton which shouldn't close the menu
     await tester.tap(find.text('Button 1'));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(1));
