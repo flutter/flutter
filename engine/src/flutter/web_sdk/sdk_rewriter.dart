@@ -11,6 +11,7 @@ final ArgParser argParser = ArgParser()
   ..addOption('output-dir')
   ..addOption('input-dir')
   ..addFlag('ui')
+  ..addFlag('public')
   ..addOption('library-name')
   ..addOption('api-file')
   ..addMultiOption('source-file')
@@ -34,11 +35,12 @@ export 'dart:_engine'
   ),
 ];
 
-List<Replacer> generateApiFilePatterns(String libraryName, List<String> extraImports) {
+List<Replacer> generateApiFilePatterns(String libraryName, bool isPublic, List<String> extraImports) {
+  final String libraryPrefix = isPublic ? '' : '_';
   return <Replacer>[
     AllReplacer(RegExp('library\\s+$libraryName;'), '''
 @JS()
-library dart._$libraryName;
+library dart.$libraryPrefix$libraryName;
 
 import 'dart:async';
 import 'dart:collection';
@@ -63,9 +65,10 @@ part '$libraryName/${match.group(1)}';
   ];
 }
 
-List<Replacer> generatePartsPatterns(String libraryName) {
+List<Replacer> generatePartsPatterns(String libraryName, bool isPublic) {
+  final String libraryPrefix = isPublic ? '' : '_';
   return <Replacer>[
-    AllReplacer(RegExp('part\\s+of\\s+$libraryName;'), 'part of dart._$libraryName;'),
+    AllReplacer(RegExp('part\\s+of\\s+$libraryName;'), 'part of dart.$libraryPrefix$libraryName;'),
     // Remove library-level JS annotations.
     AllReplacer(RegExp(r'\n@JS(.*)\nlibrary .+;'), ''),
     // Remove library directives.
@@ -86,6 +89,7 @@ final List<Replacer> stripMetaPatterns = <Replacer>[
 ];
 
 const Set<String> rootLibraryNames = <String>{
+  'ui_web',
   'engine',
   'skwasm_stub',
   'skwasm_impl',
@@ -93,6 +97,7 @@ const Set<String> rootLibraryNames = <String>{
 
 final Map<Pattern, String> extraImportsMap = <Pattern, String>{
   RegExp('skwasm_(stub|impl)'): "import 'dart:_skwasm_stub' if (dart.library.ffi) 'dart:_skwasm_impl';",
+  'ui_web': "import 'dart:ui_web' as ui_web;",
   'engine': "import 'dart:_engine';",
   'web_unicode': "import 'dart:_web_unicode';",
   'web_test_fonts': "import 'dart:_web_test_fonts';",
@@ -110,6 +115,8 @@ void main(List<String> arguments) {
   List<Replacer> replacementPatterns;
   String? libraryName;
 
+  final bool isPublic = results['public'] as bool;
+
   if (results['ui'] as bool) {
     replacementPatterns = uiPatterns;
   } else {
@@ -118,7 +125,7 @@ void main(List<String> arguments) {
       throw Exception('library-name must be specified if not rewriting ui');
     }
     preprocessor = (String source) => preprocessPartFile(source, libraryName!);
-    replacementPatterns = generatePartsPatterns(libraryName);
+    replacementPatterns = generatePartsPatterns(libraryName, isPublic);
   }
   for (final String inputFilePath in results['source-file'] as Iterable<String>) {
     String pathSuffix = inputFilePath.substring(inputDirectoryPath.length);
@@ -139,7 +146,7 @@ void main(List<String> arguments) {
         directory.path, path.basename(inputFilePath));
 
     final List<String> extraImports = getExtraImportsForLibrary(libraryName);
-    replacementPatterns = generateApiFilePatterns(libraryName, extraImports);
+    replacementPatterns = generateApiFilePatterns(libraryName, isPublic, extraImports);
 
     processFile(
       inputFilePath,
