@@ -766,6 +766,29 @@ TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
   EXPECT_TRUE(triedToTerminate);
 }
 
+TEST_F(FlutterEngineTest, HandleAccessibilityEvent) {
+  __block BOOL announced = FALSE;
+  id engineMock = CreateMockFlutterEngine(nil);
+
+  OCMStub([engineMock announceAccessibilityMessage:[OCMArg any]
+                                      withPriority:NSAccessibilityPriorityMedium])
+      .andDo((^(NSInvocation* invocation) {
+        announced = TRUE;
+        [invocation retainArguments];
+        NSString* message;
+        [invocation getArgument:&message atIndex:2];
+        EXPECT_EQ(message, @"error message");
+      }));
+
+  NSDictionary<NSString*, id>* annotatedEvent =
+      @{@"type" : @"announce",
+        @"data" : @{@"message" : @"error message"}};
+
+  [engineMock handleAccessibilityEvent:annotatedEvent];
+
+  EXPECT_TRUE(announced);
+}
+
 }  // namespace flutter::testing
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
