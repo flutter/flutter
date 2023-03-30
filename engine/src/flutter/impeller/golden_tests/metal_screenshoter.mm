@@ -21,9 +21,12 @@ MetalScreenshoter::MetalScreenshoter() {
 }
 
 std::unique_ptr<MetalScreenshot> MetalScreenshoter::MakeScreenshot(
-    Picture&& picture,
+    const Picture& picture,
     const ISize& size) {
-  std::shared_ptr<Image> image = picture.ToImage(*aiks_context_, size);
+  Vector2 content_scale = playground_->GetContentScale();
+  std::shared_ptr<Image> image = picture.ToImage(
+      *aiks_context_,
+      ISize(size.width * content_scale.x, size.height * content_scale.y));
   std::shared_ptr<Texture> texture = image->GetTexture();
   id<MTLTexture> metal_texture =
       std::static_pointer_cast<TextureMTL>(texture)->GetMTLTexture();

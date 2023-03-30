@@ -39,8 +39,9 @@ bool GoldenDigest::Write(WorkingDirectory* working_directory) {
   for (const auto& entry : entries_) {
     if (!is_first) {
       fout << "," << std::endl;
-      is_first = false;
     }
+    is_first = false;
+
     fout << "  { "
          << "\"testName\" : \"" << entry.test_name << "\", "
          << "\"filename\" : \"" << entry.filename << "\", "

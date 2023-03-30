@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/entity.h"
-#include "impeller/geometry/geometry_unittests.h"
+#include "impeller/geometry/geometry_asserts.h"
 
 namespace impeller {
 namespace testing {

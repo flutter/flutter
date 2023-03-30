@@ -84,6 +84,7 @@ impeller_component("impeller_unittests") {
       "display_list:display_list_unittests",
       "entity:entity_unittests",
       "fixtures",
+      "geometry:geometry_unittests",
       "image:image_unittests",
       "playground",
       "renderer:renderer_unittests",

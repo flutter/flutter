@@ -17,12 +17,18 @@ source_set("testing_lib") {
 
   sources = [
     "assertions.h",
+    "debugger_detection.cc",
+    "debugger_detection.h",
     "display_list_testing.cc",
     "display_list_testing.h",
     "mock_canvas.cc",
     "mock_canvas.h",
     "post_task_sync.cc",
     "post_task_sync.h",
+    "test_args.cc",
+    "test_args.h",
+    "test_timeout_listener.cc",
+    "test_timeout_listener.h",
     "testing.cc",
     "testing.h",
     "thread_test.cc",
@@ -41,15 +47,7 @@ source_set("testing_lib") {
 source_set("testing") {
   testonly = true
 
-  sources = [
-    "debugger_detection.cc",
-    "debugger_detection.h",
-    "run_all_unittests.cc",
-    "test_args.cc",
-    "test_args.h",
-    "test_timeout_listener.cc",
-    "test_timeout_listener.h",
-  ]
+  sources = [ "run_all_unittests.cc" ]
 
   public_deps = [ ":testing_lib" ]
   public_configs = [ ":dynamic_symbols" ]

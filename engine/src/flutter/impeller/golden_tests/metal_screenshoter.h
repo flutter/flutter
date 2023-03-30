@@ -17,9 +17,15 @@ class MetalScreenshoter {
  public:
   MetalScreenshoter();
 
-  std::unique_ptr<MetalScreenshot> MakeScreenshot(Picture&& picture,
+  std::unique_ptr<MetalScreenshot> MakeScreenshot(const Picture& picture,
                                                   const ISize& size = {300,
                                                                        300});
+
+  AiksContext& GetContext() { return *aiks_context_; }
+
+  const AiksContext& GetContext() const { return *aiks_context_; }
+
+  const PlaygroundImpl& GetPlayground() const { return *playground_; }
 
  private:
   std::unique_ptr<PlaygroundImpl> playground_;

@@ -21,13 +21,13 @@ struct Picture {
 
   std::optional<Snapshot> Snapshot(AiksContext& context);
 
-  std::shared_ptr<Image> ToImage(AiksContext& context, ISize size);
+  std::shared_ptr<Image> ToImage(AiksContext& context, ISize size) const;
 
  private:
   std::shared_ptr<Texture> RenderToTexture(
       AiksContext& context,
       ISize size,
-      std::optional<const Matrix> translate = std::nullopt);
+      std::optional<const Matrix> translate = std::nullopt) const;
 };
 
 }  // namespace impeller

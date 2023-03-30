@@ -31,17 +31,43 @@ impeller_component("aiks") {
   deps = [ "//flutter/fml" ]
 }
 
-impeller_component("aiks_unittests") {
+impeller_component("aiks_playground") {
   testonly = true
   sources = [
     "aiks_playground.cc",
     "aiks_playground.h",
-    "aiks_unittests.cc",
   ]
   deps = [
     ":aiks",
-    "../geometry:geometry_unittests",
     "../playground:playground_test",
-    "//flutter/testing",
+  ]
+}
+
+impeller_component("aiks_unittests") {
+  testonly = true
+  sources = [ "aiks_unittests.cc" ]
+  deps = [
+    ":aiks",
+    ":aiks_playground",
+    "//flutter/impeller/geometry:geometry_asserts",
+    "//flutter/impeller/golden_tests:golden_playground_test",
+    "//flutter/impeller/playground:playground_test",
+    "//flutter/testing:testing_lib",
+  ]
+}
+
+impeller_component("aiks_unittests_golden") {
+  testonly = true
+
+  defines = [ "IMPELLER_GOLDEN_TESTS" ]
+
+  sources = [ "aiks_unittests.cc" ]
+  deps = [
+    ":aiks",
+    ":aiks_playground",
+    "//flutter/impeller/geometry:geometry_asserts",
+    "//flutter/impeller/golden_tests:golden_playground_test",
+    "//flutter/impeller/playground:playground_test",
+    "//flutter/testing:testing_lib",
   ]
 }

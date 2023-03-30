@@ -45,15 +45,22 @@ impeller_component("geometry") {
   deps = [ "//flutter/fml" ]
 }
 
-impeller_component("geometry_unittests") {
+impeller_component("geometry_asserts") {
   testonly = true
-  sources = [
-    "geometry_unittests.cc",
-    "geometry_unittests.h",
-  ]
+  sources = [ "geometry_asserts.h" ]
   deps = [
     ":geometry",
-    "//flutter/testing",
+    "//flutter/testing:testing_lib",
+  ]
+}
+
+impeller_component("geometry_unittests") {
+  testonly = true
+  sources = [ "geometry_unittests.cc" ]
+  deps = [
+    ":geometry",
+    ":geometry_asserts",
+    "//flutter/testing:testing_lib",
   ]
 }
 
