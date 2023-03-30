@@ -494,8 +494,8 @@ class WebReleaseBundle extends Target {
 /// Static assets provided by the Flutter SDK that do not change, such as
 /// CanvasKit.
 ///
-/// These assets can be cached forever and are only invalidated when the
-/// Flutter SDK is upgraded to a new version.
+/// These assets can be cached until a new version of the flutter web sdk is
+/// downloaded.
 class WebBuiltInAssets extends Target {
   const WebBuiltInAssets(this.fileSystem, {required this.isWasm});
 
@@ -512,7 +512,9 @@ class WebBuiltInAssets extends Target {
   List<String> get depfiles => const <String>[];
 
   @override
-  List<Source> get inputs => const <Source>[];
+  List<Source> get inputs => const <Source>[
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[];
