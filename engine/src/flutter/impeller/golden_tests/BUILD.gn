@@ -5,9 +5,56 @@
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
 
+impeller_component("golden_playground_test") {
+  testonly = true
+
+  sources = [ "golden_playground_test.h" ]
+
+  deps = [
+    ":digest",
+    "//flutter/fml",
+    "//flutter/impeller/aiks",
+    "//flutter/impeller/playground",
+    "//flutter/testing:testing_lib",
+  ]
+
+  if (is_mac) {
+    sources += [ "golden_playground_test_mac.cc" ]
+    deps += [ ":metal_screenshot" ]
+  } else {
+    sources += [ "golden_playground_test_stub.cc" ]
+  }
+}
+
+impeller_component("digest") {
+  testonly = true
+
+  sources = [
+    "golden_digest.cc",
+    "golden_digest.h",
+    "working_directory.cc",
+    "working_directory.h",
+  ]
+
+  deps = [ "//flutter/fml" ]
+}
+
 if (is_mac) {
-  test_fixtures("impeller_golden_tests_fixtures") {
-    fixtures = []
+  impeller_component("metal_screenshot") {
+    testonly = true
+
+    sources = [
+      "metal_screenshot.h",
+      "metal_screenshot.mm",
+      "metal_screenshoter.h",
+      "metal_screenshoter.mm",
+    ]
+
+    deps = [
+      "//flutter/impeller/aiks",
+      "//flutter/impeller/playground",
+      "//flutter/impeller/renderer/backend/metal:metal",
+    ]
   }
 
   impeller_component("impeller_golden_tests") {
@@ -16,23 +63,16 @@ if (is_mac) {
     testonly = true
 
     sources = [
-      "golden_digest.cc",
-      "golden_digest.h",
       "golden_tests.cc",
       "main.cc",
-      "metal_screenshot.h",
-      "metal_screenshot.mm",
-      "metal_screenshoter.h",
-      "metal_screenshoter.mm",
-      "working_directory.cc",
-      "working_directory.h",
     ]
 
     deps = [
-      ":impeller_golden_tests_fixtures",
+      ":digest",
+      ":metal_screenshot",
       "//flutter/impeller/aiks",
-      "//flutter/impeller/playground",
-      "//flutter/impeller/renderer/backend/metal:metal",
+      "//flutter/impeller/aiks:aiks_unittests_golden",
+      "//flutter/impeller/fixtures",
       "//third_party/googletest:gtest",
     ]
   }
