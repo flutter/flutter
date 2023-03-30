@@ -50,13 +50,16 @@ static uint32_t ParseMSLVersion(const std::string& msl_version) {
                                                              patch);
 }
 
-static CompilerBackend CreateMSLCompiler(const spirv_cross::ParsedIR& ir,
-                                         const SourceOptions& source_options) {
+static CompilerBackend CreateMSLCompiler(
+    const spirv_cross::ParsedIR& ir,
+    const SourceOptions& source_options,
+    std::optional<uint32_t> msl_version_override = {}) {
   auto sl_compiler = std::make_shared<spirv_cross::CompilerMSL>(ir);
   spirv_cross::CompilerMSL::Options sl_options;
   sl_options.platform =
       TargetPlatformToMSLPlatform(source_options.target_platform);
-  sl_options.msl_version = ParseMSLVersion(source_options.metal_version);
+  sl_options.msl_version = msl_version_override.value_or(
+      ParseMSLVersion(source_options.metal_version));
   sl_options.ios_use_simdgroup_functions =
       sl_options.is_ios() &&
       sl_options.msl_version >=
@@ -115,13 +118,15 @@ static CompilerBackend CreateMSLCompiler(const spirv_cross::ParsedIR& ir,
 static CompilerBackend CreateVulkanCompiler(
     const spirv_cross::ParsedIR& ir,
     const SourceOptions& source_options) {
-  auto gl_compiler = std::make_shared<spirv_cross::CompilerGLSL>(ir);
-  spirv_cross::CompilerGLSL::Options sl_options;
-  sl_options.vulkan_semantics = true;
-  sl_options.vertex.fixup_clipspace = true;
-  sl_options.force_zero_initialized_variables = true;
-  gl_compiler->set_common_options(sl_options);
-  return CompilerBackend(gl_compiler);
+  // TODO(dnfield): It seems like what we'd want is a CompilerGLSL with
+  // vulkan_semantics set to true, but that has regressed some things on GLES
+  // somehow. In the mean time, go back to using CompilerMSL, but set the Metal
+  // Language version to something really high so that we don't get weird
+  // complaints about using Metal features while trying to build Vulkan shaders.
+  // https://github.com/flutter/flutter/issues/123795
+  return CreateMSLCompiler(
+      ir, source_options,
+      spirv_cross::CompilerMSL::Options::make_msl_version(3, 0, 0));
 }
 
 static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
