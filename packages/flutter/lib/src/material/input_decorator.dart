@@ -402,7 +402,6 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     assert(widget.errorText != null);
     return Semantics(
       container: true,
-      liveRegion: true,
       child: FadeTransition(
         opacity: _controller,
         child: FractionalTranslation(

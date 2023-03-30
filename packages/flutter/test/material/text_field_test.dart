@@ -802,10 +802,9 @@ void main() {
 
   testWidgets('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const TextField(
-          ),
-        ),
+      overlay(
+        child: const TextField(),
+      ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -816,11 +815,11 @@ void main() {
 
   testWidgets('cursor has expected radius value', (WidgetTester tester) async {
     await tester.pumpWidget(
-        overlay(
-          child: const TextField(
-            cursorRadius: Radius.circular(3.0),
-          ),
+      overlay(
+        child: const TextField(
+          cursorRadius: Radius.circular(3.0),
         ),
+      ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -831,8 +830,7 @@ void main() {
   testWidgets('clipBehavior has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-        ),
+        child: const TextField(),
       ),
     );
 
@@ -8047,9 +8045,6 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               label: 'oh no!',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLiveRegion,
-              ],
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -8066,16 +8061,16 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: MediaQuery(
-              data: const MediaQueryData(textScaleFactor: 4.0),
-              child: Center(
-                child: TextField(
-                  decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),
-                  controller: controller,
-                ),
+            data: const MediaQueryData(textScaleFactor: 4.0),
+            child: Center(
+              child: TextField(
+                decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),
+                controller: controller,
               ),
             ),
           ),
         ),
+      ),
     );
 
     await tester.tap(find.byType(TextField));

@@ -221,6 +221,13 @@ physical):
 ./gradlew app:connectedAndroidTest -Ptarget=`pwd`/../integration_test/foo_test.dart
 ```
 
+Note:
+To use `--dart-define` with `gradlew` you must `base64` encode all parameters,
+and pass them to gradle in a comma separated list:
+```bash
+./gradlew project:task -Pdart-defines="{base64(key=value)},[...]"
+```
+
 ## Firebase Test Lab
 
 If this is your first time testing with Firebase Test Lab, you'll need to follow
