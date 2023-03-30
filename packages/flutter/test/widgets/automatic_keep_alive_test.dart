@@ -16,7 +16,7 @@ class Leaf extends StatefulWidget {
 
 class _LeafState extends State<Leaf> {
   bool _keepAlive = false;
-  final _handle = KeepAliveHandle();
+  final KeepAliveHandle _handle = KeepAliveHandle();
 
   @override
   void deactivate() {
