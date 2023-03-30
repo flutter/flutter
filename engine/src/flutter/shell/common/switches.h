@@ -261,6 +261,11 @@ DEF_SWITCH(EnableImpeller,
            "enable-impeller",
            "Enable the Impeller renderer on supported platforms. Ignored if "
            "Impeller is not supported on the platform.")
+DEF_SWITCH(EnableVulkanValidation,
+           "enable-vulkan-validation",
+           "Enable loading Vulkan validation layers. The layers must be "
+           "available to the application and loadable. On non-Vulkan backends, "
+           "this flag does nothing.")
 DEF_SWITCH(LeakVM,
            "leak-vm",
            "When the last shell shuts down, the shared VM is leaked by default "

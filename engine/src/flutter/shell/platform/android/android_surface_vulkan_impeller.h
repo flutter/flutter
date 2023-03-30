@@ -17,7 +17,8 @@ class AndroidSurfaceVulkanImpeller : public AndroidSurface {
  public:
   AndroidSurfaceVulkanImpeller(
       const std::shared_ptr<AndroidContext>& android_context,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+      bool enable_vulkan_validation);
 
   ~AndroidSurfaceVulkanImpeller() override;
 
