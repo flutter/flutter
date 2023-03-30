@@ -151,6 +151,11 @@ constexpr char kTextPlainFormat[] = "text/plain";
 - (void)setUpPlatformViewChannel;
 
 /**
+ * Creates an accessibility channel and sets up the message handler.
+ */
+- (void)setUpAccessibilityChannel;
+
+/**
  * Handles messages received from the Flutter engine on the _*Channel channels.
  */
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -366,6 +371,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // A message channel for sending user settings to the flutter engine.
   FlutterBasicMessageChannel* _settingsChannel;
 
+  // A message channel for accessibility.
+  FlutterBasicMessageChannel* _accessibilityChannel;
+
   // A method channel for miscellaneous platform functionality.
   FlutterMethodChannel* _platformChannel;
 
@@ -409,6 +417,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   _platformViewController = [[FlutterPlatformViewController alloc] init];
   [self setUpPlatformViewChannel];
+  [self setUpAccessibilityChannel];
   [self setUpNotificationCenterListeners];
 
   return self;
@@ -923,6 +932,16 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   }];
 }
 
+- (void)setUpAccessibilityChannel {
+  _accessibilityChannel = [FlutterBasicMessageChannel
+      messageChannelWithName:@"flutter/accessibility"
+             binaryMessenger:self.binaryMessenger
+                       codec:[FlutterStandardMessageCodec sharedInstance]];
+  __weak FlutterEngine* weakSelf = self;
+  [_accessibilityChannel setMessageHandler:^(id message, FlutterReply reply) {
+    [weakSelf handleAccessibilityEvent:message];
+  }];
+}
 - (void)setUpNotificationCenterListeners {
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   // macOS fires this private message when VoiceOver turns on or off.
@@ -967,7 +986,30 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   self.semanticsEnabled = enabled;
 }
+- (void)handleAccessibilityEvent:(NSDictionary<NSString*, id>*)annotatedEvent {
+  NSString* type = annotatedEvent[@"type"];
+  if ([type isEqualToString:@"announce"]) {
+    NSString* message = annotatedEvent[@"data"][@"message"];
+    NSNumber* assertiveness = annotatedEvent[@"data"][@"assertiveness"];
+    if (message == nil) {
+      return;
+    }
 
+    NSAccessibilityPriorityLevel priority = [assertiveness isEqualToNumber:@1]
+                                                ? NSAccessibilityPriorityHigh
+                                                : NSAccessibilityPriorityMedium;
+
+    [self announceAccessibilityMessage:message withPriority:priority];
+  }
+}
+
+- (void)announceAccessibilityMessage:(NSString*)message
+                        withPriority:(NSAccessibilityPriorityLevel)priority {
+  NSAccessibilityPostNotificationWithUserInfo(
+      [self viewControllerForId:kFlutterDefaultViewId].flutterView,
+      NSAccessibilityAnnouncementRequestedNotification,
+      @{NSAccessibilityAnnouncementKey : message, NSAccessibilityPriorityKey : @(priority)});
+}
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   if ([call.method isEqualToString:@"SystemNavigator.pop"]) {
     [NSApp terminate:self];
