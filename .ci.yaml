@@ -2972,7 +2972,6 @@ targets:
       task_name: platform_view_macos__start_up
 
   - name: Mac platform_channel_sample_test_macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
