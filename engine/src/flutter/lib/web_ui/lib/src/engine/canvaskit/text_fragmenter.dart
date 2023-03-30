@@ -6,7 +6,76 @@ import 'dart:typed_data';
 
 import '../dom.dart';
 import '../text/line_breaker.dart';
+import '../util.dart';
 import 'canvaskit_api.dart';
+
+typedef SegmentationResult = ({
+  Uint32List words,
+  Uint32List graphemes,
+  Uint32List breaks,
+});
+
+// The cache numbers below were picked based on the following logic.
+//
+// Most paragraphs in an app are small (e.g. icons, button labels, etc). These
+// paragraphs are also cheap to cache. So we cache a lot of them. 100,000 of
+// them amounts to a worst case of 5MB (10-character long text + words uint list
+// + graphemes uint list + breaks uint list).
+//
+// Large paragraphs are less common (a handful per page), but are expensive to
+// cache. So we cache fewer of them. 20 of them at a length of 50,000 characters
+// amount to a memory usage of 5MB (50,000-character long text + words uint list
+// + graphemes uint list + breaks uint list).
+//
+// Medium paragraphs are somewhere in between. 10,000 of them amount to a worst
+// case of 5MB (100-character long text + words uint list + graphemes uint list
+// + breaks uint list).
+
+typedef SegmentationCacheSpec = ({int cacheSize, int maxTextLength});
+
+const SegmentationCacheSpec kSmallParagraphCacheSpec = (cacheSize: 100000, maxTextLength: 10);
+const SegmentationCacheSpec kMediumParagraphCacheSpec = (cacheSize: 10000, maxTextLength: 100);
+const SegmentationCacheSpec kLargeParagraphCacheSpec = (cacheSize: 20, maxTextLength: 50000);
+
+typedef SegmentationCache = ({
+  LruCache<String, SegmentationResult> small,
+  LruCache<String, SegmentationResult> medium,
+  LruCache<String, SegmentationResult> large,
+});
+
+/// Caches segmentation results for small, medium and large paragraphts.
+///
+/// Paragraphs are frequently re-created because of style or font changes, while
+/// their text contents remain the same. This cache is effective at
+/// short-circuiting the segmentation of such paragraphs.
+final SegmentationCache segmentationCache = (
+  small: LruCache<String, SegmentationResult>(kSmallParagraphCacheSpec.cacheSize),
+  medium: LruCache<String, SegmentationResult>(kMediumParagraphCacheSpec.cacheSize),
+  large: LruCache<String, SegmentationResult>(kLargeParagraphCacheSpec.cacheSize),
+);
+
+extension SegmentationCacheExtensions on SegmentationCache {
+  /// Gets the appropriate cache for the given [text].
+  LruCache<String, SegmentationResult>? getCacheForText(String text) {
+    if (text.length <= kSmallParagraphCacheSpec.maxTextLength) {
+      return small;
+    }
+    if (text.length <= kMediumParagraphCacheSpec.maxTextLength) {
+      return medium;
+    }
+    if (text.length <= kLargeParagraphCacheSpec.maxTextLength) {
+      return large;
+    }
+    return null;
+  }
+
+  /// Clears all the caches.
+  void clear() {
+    small.clear();
+    medium.clear();
+    large.clear();
+  }
+}
 
 /// Injects required ICU data into the [builder].
 ///
@@ -18,14 +87,33 @@ void injectClientICU(SkParagraphBuilder builder) {
     'This method should only be used with the CanvasKit Chromium variant.',
   );
 
-  final String text = builder.getText();
-  builder.setWordsUtf16(
-    fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word),
-  );
-  builder.setGraphemeBreaksUtf16(
-    fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.grapheme),
-  );
-  builder.setLineBreaksUtf16(fragmentUsingV8LineBreaker(text));
+  final SegmentationResult result = segmentText(builder.getText());
+  builder.setWordsUtf16(result.words);
+  builder.setGraphemeBreaksUtf16(result.graphemes);
+  builder.setLineBreaksUtf16(result.breaks);
+}
+
+/// Segments the [text] into words, graphemes and line breaks.
+///
+/// Caches results in [segmentationCache].
+SegmentationResult segmentText(String text) {
+  final LruCache<String, SegmentationResult>? cache = segmentationCache.getCacheForText(text);
+  final SegmentationResult? cachedResult = cache?[text];
+
+  final SegmentationResult result;
+  if (cachedResult != null) {
+    result = cachedResult;
+  } else {
+    result = (
+      words: fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word),
+      graphemes: fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.grapheme),
+      breaks: fragmentUsingV8LineBreaker(text),
+    );
+  }
+
+  // Save or promote to most recently used.
+  cache?.cache(text, result);
+  return result;
 }
 
 /// The granularity at which to segment text.

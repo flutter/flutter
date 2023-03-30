@@ -177,7 +177,9 @@ void testMain() {
       v8BreakIterator = Object(); // Any non-null value.
       browserSupportsImageDecoder = false;
 
-      expect(browserSupportsCanvaskitChromium, isFalse);
+      // TODO(mdebbar): we don't check image codecs for now.
+      // https://github.com/flutter/flutter/issues/122331
+      expect(browserSupportsCanvaskitChromium, isTrue);
     });
 
     test('Detect browsers that do not support v8BreakIterator', () {
