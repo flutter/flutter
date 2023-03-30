@@ -1259,6 +1259,48 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         tester.widget<Text>(find.text('Label ${index + 2}'));
     expect(bodyMediumStyle, nextLabelTextWidget.style);
   });
+
+  testWidgets('Stepper stepIconBuilder test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            stepIconBuilder: (int index, StepState state) {
+              if (state == StepState.complete) {
+                return const FlutterLogo(size: 18);
+              }
+              return null;
+            },
+            steps: const <Step>[
+              Step(
+                title: Text('A'),
+                state: StepState.complete,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+              Step(
+                title: Text('B'),
+                state: StepState.editing,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+              Step(
+                title: Text('C'),
+                state: StepState.error,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    /// Finds the overridden widget for StepState.complete
+    expect(find.byType(FlutterLogo), findsOneWidget);
+
+    /// StepState.editing and StepState.error should have a default icon
+    expect(find.byIcon(Icons.edit), findsOneWidget);
+    expect(find.text('!'), findsOneWidget);
+  });
+
 }
 
 class _TappableColorWidget extends StatefulWidget {

@@ -29,11 +29,7 @@ enum CacheExtentStyle {
 /// content, which can be controlled by a [ViewportOffset]. This interface lets
 /// the framework recognize such render objects and interact with them without
 /// having specific knowledge of all the various types of viewports.
-abstract class RenderAbstractViewport extends RenderObject {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  RenderAbstractViewport._();
-
+abstract interface class RenderAbstractViewport extends RenderObject {
   /// Returns the [RenderAbstractViewport] that most tightly encloses the given
   /// render object.
   ///

@@ -1311,6 +1311,23 @@ flutter:
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
+
+  testUsingContext('throws when port is an integer outside the valid TCP range', () async {
+    final BufferLogger logger = BufferLogger.test();
+
+    DebuggingOptions debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '65536');
+    ResidentRunner residentWebRunner =
+        setUpResidentRunner(flutterDevice, logger: logger, debuggingOptions: debuggingOptions);
+    await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: 65536.*'));
+
+    debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '-1');
+    residentWebRunner =
+      setUpResidentRunner(flutterDevice, logger: logger, debuggingOptions: debuggingOptions);
+    await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: -1.*'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
 }
 
 ResidentRunner setUpResidentRunner(

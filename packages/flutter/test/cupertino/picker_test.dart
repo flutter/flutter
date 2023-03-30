@@ -118,7 +118,7 @@ void main() {
 
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '1').first),
-        const Offset(0.0, 175.0),
+        offsetMoreOrLessEquals(const Offset(0.0, 170.0), epsilon: 0.5),
       );
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '0').first),
@@ -347,7 +347,7 @@ void main() {
       // The item that was in the center now moved a bit.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '10')),
-        const Offset(200.0, 280.0),
+        const Offset(200.0, 250.0),
       );
 
       await tester.pumpAndSettle();
@@ -366,7 +366,7 @@ void main() {
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '10')).dy,
         // It's down by 100.0 now.
-        moreOrLessEquals(350.0, epsilon: 0.5),
+        moreOrLessEquals(340.0, epsilon: 0.5),
       );
       expect(selectedItems, <int>[9]);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));

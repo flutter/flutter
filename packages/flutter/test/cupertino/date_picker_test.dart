@@ -592,13 +592,25 @@ void main() {
       );
     });
 
-    testWidgets('width of wheel in background does not increase at large widths', (WidgetTester tester) async {
+    testWidgets('wheel does not bend outwards', (WidgetTester tester) async {
 
       final Widget dateWidget = CupertinoDatePicker(
         mode: CupertinoDatePickerMode.date,
         onDateTimeChanged: (_) { },
         initialDateTime: DateTime(2018, 1, 1, 10, 30),
       );
+
+      const String centerMonth = 'January';
+      const List<String> visibleMonthsExceptTheCenter = <String>[
+        'September',
+        'October',
+        'November',
+        'December',
+        'February',
+        'March',
+        'April',
+        'May',
+      ];
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -614,9 +626,13 @@ void main() {
         ),
       );
 
-      double decemberX = tester.getBottomLeft(find.text('December')).dx;
-      double octoberX = tester.getBottomLeft(find.text('October')).dx;
-      final double distance = octoberX - decemberX;
+      // The wheel does not bend outwards.
+      for (final String month in visibleMonthsExceptTheCenter) {
+        expect(
+          tester.getBottomLeft(find.text(centerMonth)).dx,
+          lessThan(tester.getBottomLeft(find.text(month)).dx),
+        );
+      }
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -632,14 +648,13 @@ void main() {
         ),
       );
 
-      decemberX = tester.getBottomLeft(find.text('December')).dx;
-      octoberX = tester.getBottomLeft(find.text('October')).dx;
-
       // The wheel does not bend outwards at large widths.
-      expect(
-        distance >= (octoberX - decemberX),
-        true,
-      );
+      for (final String month in visibleMonthsExceptTheCenter) {
+        expect(
+          tester.getBottomLeft(find.text(centerMonth)).dx,
+          lessThan(tester.getBottomLeft(find.text(month)).dx),
+        );
+      }
     });
 
     testWidgets('picker automatically scrolls away from invalid date on month change', (WidgetTester tester) async {

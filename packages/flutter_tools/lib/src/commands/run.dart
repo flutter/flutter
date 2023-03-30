@@ -38,6 +38,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDartDefineOption();
     usesFlavorOption();
     usesWebRendererOption();
+    usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     usesApplicationBinaryOption();
@@ -197,6 +198,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   ImpellerStatus get enableImpeller => ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   @override
   bool get reportNullSafety => true;
