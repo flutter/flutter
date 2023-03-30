@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/core/sampler_descriptor.h"
-
+#include "impeller/renderer/sampler_descriptor.h"
 #include "fml/logging.h"
 
 namespace impeller {

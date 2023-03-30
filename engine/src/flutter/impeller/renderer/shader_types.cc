@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/core/resource_binder.h"
+#include "impeller/renderer/shader_types.h"
 
 namespace impeller {
 

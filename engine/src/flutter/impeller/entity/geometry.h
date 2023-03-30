@@ -12,9 +12,6 @@
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
-#include "impeller/geometry/point.h"
-#include "impeller/geometry/scalar.h"
-#include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
 

@@ -11,9 +11,9 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/logging.h"
-#include "impeller/core/runtime_types.h"
 #include "impeller/geometry/half.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/runtime_stage/runtime_types.h"
 
 namespace impeller {
 

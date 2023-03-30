@@ -10,8 +10,8 @@
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/image.h"
 #include "impeller/aiks/paint.h"
-#include "impeller/core/sampler_descriptor.h"
 #include "impeller/geometry/path.h"
+#include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
 

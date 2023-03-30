@@ -15,13 +15,13 @@
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
-#include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/metal/compute_pipeline_mtl.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/compute_command.h"
+#include "impeller/renderer/shader_types.h"
 
 namespace impeller {
 

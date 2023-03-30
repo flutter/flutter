@@ -5,8 +5,8 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/shader_types.h"
 
 namespace impeller {
 

@@ -13,8 +13,6 @@
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/sampler.h"
-#include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
@@ -23,6 +21,8 @@
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/sampler.h"
+#include "impeller/renderer/shader_types.h"
 #include "vulkan/vulkan_enums.hpp"
 #include "vulkan/vulkan_structs.hpp"
 
