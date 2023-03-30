@@ -850,9 +850,57 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
 
   final Set<int> _acceptedActivePointers = <int>{};
 
-  Offset _getDeltaForDetails(Offset delta);
-  double? _getPrimaryValueFromOffset(Offset value);
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
+  /// Computes the effective drag delta based on the given `delta` value.
+  ///
+  /// The value returned from this method is used in calculating the global distance
+  /// that a pointer has moved, and can be overriden to customize the drag behavior of this recognizer.
+  ///
+  /// For example, to limit this recognizer to horizontal dragging, the global distance
+  /// calculation should only take into account movement on the x-axis. In that
+  /// case this method should return `Offset(delta.dx, 0.0)`.
+  ///
+  /// See also:
+  ///   * [TapAndHorizontalDragGestureRecognizer.getDeltaForDetails], which returns
+  ///   a modified `delta` that only takes into account the value on the x-axis.
+  ///   * [TapAndPanGestureRecognizer.getDeltaForDetails], which returns the given
+  ///   `delta` unmodified so a drag can be allowed in any direction.
+  @protected
+  Offset getDeltaForDetails(Offset delta);
+
+  /// Returns the primary value from the given [Offset] based on the desired
+  /// drag direction of this recognizer.
+  ///
+  /// The value returned from this method is used in calculating the directional
+  /// component of the global distance that a pointer has moved, and can be 
+  /// overriden to customize the drag behavior of this recognizer.
+  ///
+  /// For example, to limit this recognizer to horizontal dragging, the global distance
+  /// calculation should only take into account movement on the x-axis. In that
+  /// case this method should return `value.dx`.
+  ///
+  /// See also:
+  ///   * [TapAndHorizontalDragGestureRecognizer.getPrimaryValueFromOffset], which returns
+  ///   the horizontal component of the given [Offset].
+  ///   * [TapAndPanGestureRecognizer.getPrimaryValueFromOffset], which returns null
+  ///   and indicates that the recognizer should use both horizontal and vertical
+  ///   components when calculating the global distance moved by a pointer.
+  @protected
+  double? getPrimaryValueFromOffset(Offset value);
+
+  /// Determines whether the `globalDistance` on the desired axis has passed
+  /// the threshold to be considered a drag.
+  ///
+  /// This method can be overriden to define a custom threshold for a drag.
+  ///
+  /// See also:
+  ///   * [TapAndHorizontalDragGestureRecognizer.hasSufficientGlobalDistanceToAccept], which
+  ///   defines the default threshold the global distance should pass for a horizontal movement
+  ///  to be considered a drag.
+  ///   * [TapAndPanGestureRecognizer.hasSufficientGlobalDistanceToAccept], which
+  ///   defines the default threshold the global distance should pass for movement
+  ///   on a plane to be considered a drag.
+  @protected
+  bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double globalDistanceMoved);
 
   // Drag updates may require throttling to avoid excessive updating, such as for text layouts in text
   // fields. The frequency of invocations is controlled by the [dragUpdateThrottleFrequency].
@@ -1002,7 +1050,7 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
       //
       // To be recognized as a drag, the [PointerMoveEvent] must also have moved
       // a sufficient global distance from the initial [PointerDownEvent] to be
-      // accepted as a drag. This logic is handled in [_hasSufficientGlobalDistanceToAccept].
+      // accepted as a drag. This logic is handled in [hasSufficientGlobalDistanceToAccept].
       //
       // The recognizer will also detect the gesture as a drag when the pointer
       // has been accepted and it has moved past the [slopTolerance] but has not moved
@@ -1087,18 +1135,18 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
 
   void _checkDrag(PointerMoveEvent event) {
     final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
-    final Offset movedLocally = _getDeltaForDetails(event.localDelta);
+    final Offset movedLocally = getDeltaForDetails(event.localDelta);
     _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
       transform: localToGlobalTransform,
       untransformedDelta: movedLocally,
       untransformedEndPosition: event.localPosition
-    ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
+    ).distance * (getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
     _globalDistanceMovedAllAxes += PointerEvent.transformDeltaViaPositions(
       transform: localToGlobalTransform,
       untransformedDelta: event.localDelta,
       untransformedEndPosition: event.localPosition
     ).distance * 1.sign;
-    if (_hasSufficientGlobalDistanceToAccept(event.kind)
+    if (hasSufficientGlobalDistanceToAccept(event.kind, _globalDistanceMoved)
         || (_wonArenaForPrimaryPointer && _globalDistanceMovedAllAxes.abs() > computePanSlop(event.kind, gestureSettings))) {
       _start = event;
       _dragState = _DragState.accepted;
@@ -1295,15 +1343,15 @@ class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecogni
   });
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
+  bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double globalDistanceMoved) {
+    return globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
-  Offset _getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
+  Offset getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
 
   @override
-  double _getPrimaryValueFromOffset(Offset value) => value.dx;
+  double getPrimaryValueFromOffset(Offset value) => value.dx;
 
   @override
   String get debugDescription => 'tap and horizontal drag';
@@ -1325,15 +1373,15 @@ class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   });
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double globalDistanceMoved) {
+    return globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
-  Offset _getDeltaForDetails(Offset delta) => delta;
+  Offset getDeltaForDetails(Offset delta) => delta;
 
   @override
-  double? _getPrimaryValueFromOffset(Offset value) => null;
+  double? getPrimaryValueFromOffset(Offset value) => null;
 
   @override
   String get debugDescription => 'tap and pan';
@@ -1358,15 +1406,15 @@ class TapAndDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   });
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  bool hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double globalDistanceMoved) {
+    return globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
-  Offset _getDeltaForDetails(Offset delta) => delta;
+  Offset getDeltaForDetails(Offset delta) => delta;
 
   @override
-  double? _getPrimaryValueFromOffset(Offset value) => null;
+  double? getPrimaryValueFromOffset(Offset value) => null;
 
   @override
   String get debugDescription => 'tap and pan';
