@@ -2,4 +2,3 @@
 // found in the LICENSE file.
 
 apply from: "/Users/bartek/fvm/versions/master/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy"
-apply plugin: FlutterPlugin

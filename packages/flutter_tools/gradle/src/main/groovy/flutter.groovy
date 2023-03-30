@@ -76,6 +76,8 @@ android {
     }
 }
 
+apply plugin: FlutterPlugin
+
 class FlutterPlugin implements Plugin<Project> {
     private static final String DEFAULT_MAVEN_HOST = "https://storage.googleapis.com";
 
