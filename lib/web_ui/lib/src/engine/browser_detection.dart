@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import 'dom.dart';
-import 'safe_browser_api.dart';
 
 // iOS 15 launched WebGL 2.0, but there's something broken about it, which
 // leads to apps failing to load. For now, we're forcing WebGL 1 on iOS.
@@ -269,5 +268,4 @@ int _detectWebGLVersion() {
 }
 
 /// Whether the current browser supports the Chromium variant of CanvasKit.
-bool get browserSupportsCanvaskitChromium =>
-    browserSupportsImageDecoder && domIntl.v8BreakIterator != null;
+bool get browserSupportsCanvaskitChromium => domIntl.v8BreakIterator != null;
