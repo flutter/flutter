@@ -1,4 +1,4 @@
-Signature: 2164e2369c09b0555ac686d685ef1ef4
+Signature: 623f615bbcfe8d5751dea096cb961d7d
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -3959,6 +3959,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/flatland_example.dart + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/media_session.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/inspect_sink.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.element/graphical_presenter.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -3977,6 +3978,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/globals.cc + ../..
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/component/outgoing/cpp/globals.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/flatland_example.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/media_session.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/inspect_sink.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.element/graphical_presenter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl
