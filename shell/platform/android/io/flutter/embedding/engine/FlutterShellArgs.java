@@ -44,6 +44,8 @@ public class FlutterShellArgs {
   public static final String ARG_TRACE_SYSTRACE = "--trace-systrace";
   public static final String ARG_KEY_ENABLE_IMPELLER = "enable-impeller";
   public static final String ARG_ENABLE_IMPELLER = "--enable-impeller";
+  public static final String ARG_KEY_ENABLE_VULKAN_VALIDATION = "enable-vulkan-validation";
+  public static final String ARG_ENABLE_VULKAN_VALIDATION = "--enable-vulkan-validation";
   public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
       "dump-skp-on-shader-compilation";
   public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
@@ -120,6 +122,9 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_IMPELLER, false)) {
       args.add(ARG_ENABLE_IMPELLER);
+    }
+    if (intent.getBooleanExtra(ARG_KEY_ENABLE_VULKAN_VALIDATION, false)) {
+      args.add(ARG_ENABLE_VULKAN_VALIDATION);
     }
     if (intent.getBooleanExtra(ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION, false)) {
       args.add(ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION);
