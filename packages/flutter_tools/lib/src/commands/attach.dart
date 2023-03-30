@@ -218,11 +218,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     MacOSDesignedForIPadDevices.allowDiscovery = true;
 
     await super.validateCommand();
-    if (await findTargetDevice() == null) {
+
+    final Device? targetDevice = await findTargetDevice();
+    if (targetDevice == null) {
       throwToolExit(null);
     }
+
     debugPort;
-    if (debugPort == null && debugUri == null && argResults!.wasParsed(FlutterCommand.ipv6Flag)) {
+    if (targetDevice is FuchsiaDevice && debugPort == null && debugUri == null && argResults!.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
         'When the --debug-port or --debug-url is unknown, this command determines '
         'the value of --ipv6 on its own.',
@@ -394,8 +397,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           );
         _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         vmServiceUri = vmServiceDiscovery.uris;
-        // Determine ipv6 status from the scanned logs.
-        usesIpv6 = vmServiceDiscovery.ipv6;
       }
     } else {
       vmServiceUri = Stream<Uri>
