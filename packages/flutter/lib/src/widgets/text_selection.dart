@@ -3135,9 +3135,9 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
-          gestures[TapAndDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndDragGestureRecognizer>(
-            () => TapAndDragGestureRecognizer(debugOwner: this),
-            (TapAndDragGestureRecognizer instance) {
+          gestures[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
+            () => TapAndHorizontalDragGestureRecognizer(debugOwner: this),
+            (TapAndHorizontalDragGestureRecognizer instance) {
               instance
                 // Text selection should start from the position of the first pointer
                 // down event.
@@ -3151,6 +3151,22 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
                 ..onCancel = _handleTapCancel;
             },
           );
+          // gestures[TapAndDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndDragGestureRecognizer>(
+          //   () => TapAndDragGestureRecognizer(debugOwner: this),
+          //   (TapAndDragGestureRecognizer instance) {
+          //     instance
+          //       // Text selection should start from the position of the first pointer
+          //       // down event.
+          //       ..dragStartBehavior = DragStartBehavior.down
+          //       ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
+          //       ..onTapDown = _handleTapDown
+          //       ..onDragStart = _handleDragStart
+          //       ..onDragUpdate = _handleDragUpdate
+          //       ..onDragEnd = _handleDragEnd
+          //       ..onTapUp = _handleTapUp
+          //       ..onCancel = _handleTapCancel;
+          //   },
+          // );
       }
     }
 
