@@ -71,6 +71,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsReadFromResolve() const override;
 
   // |Capabilities|
+  bool SupportsDecalTileMode() const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|

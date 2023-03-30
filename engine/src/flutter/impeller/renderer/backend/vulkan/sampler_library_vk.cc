@@ -33,13 +33,15 @@ std::shared_ptr<const Sampler> SamplerLibraryVK::GetSampler(
   const auto address_mode_v = ToVKSamplerAddressMode(desc.height_address_mode);
   const auto address_mode_w = ToVKSamplerAddressMode(desc.depth_address_mode);
 
-  const auto sampler_create_info = vk::SamplerCreateInfo()
-                                       .setMagFilter(mag_filter)
-                                       .setMinFilter(min_filter)
-                                       .setAddressModeU(address_mode_u)
-                                       .setAddressModeV(address_mode_v)
-                                       .setAddressModeW(address_mode_w)
-                                       .setMipmapMode(mip_map);
+  const auto sampler_create_info =
+      vk::SamplerCreateInfo()
+          .setMagFilter(mag_filter)
+          .setMinFilter(min_filter)
+          .setAddressModeU(address_mode_u)
+          .setAddressModeV(address_mode_v)
+          .setAddressModeW(address_mode_w)
+          .setBorderColor(vk::BorderColor::eFloatTransparentBlack)
+          .setMipmapMode(mip_map);
 
   auto res = device_.createSamplerUnique(sampler_create_info);
   if (res.result != vk::Result::eSuccess) {

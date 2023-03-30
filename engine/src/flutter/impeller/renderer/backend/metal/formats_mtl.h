@@ -349,6 +349,8 @@ constexpr MTLSamplerAddressMode ToMTLSamplerAddressMode(
       return MTLSamplerAddressModeRepeat;
     case SamplerAddressMode::kMirror:
       return MTLSamplerAddressModeMirrorRepeat;
+    case SamplerAddressMode::kDecal:
+      return MTLSamplerAddressModeClampToZero;
   }
   return MTLSamplerAddressModeClampToEdge;
 }

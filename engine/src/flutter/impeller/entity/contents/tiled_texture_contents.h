@@ -53,7 +53,9 @@ class TiledTextureContents final : public ColorSourceContents {
   std::optional<std::shared_ptr<Texture>> CreateFilterTexture(
       const ContentContext& renderer) const;
 
-  SamplerDescriptor CreateDescriptor() const;
+  SamplerDescriptor CreateDescriptor(const Capabilities& capabilities) const;
+
+  bool UsesEmulatedTileMode(const Capabilities& capabilities) const;
 
   std::shared_ptr<Texture> texture_;
   SamplerDescriptor sampler_descriptor_ = {};
