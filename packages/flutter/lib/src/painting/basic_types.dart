@@ -175,6 +175,14 @@ enum VerticalDirection {
 /// that may be modifying the scroll offset, such as from a drag. For the
 /// current scrolling direction, see [ScrollDirection].
 ///
+/// {@tool dartpad}
+/// This sample shows a [CustomScrollView], with [Radio] buttons in the
+/// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+/// configurations.
+///
+/// ** See code in examples/api/lib/painting/axis_direction/axis_direction.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///   * [ScrollDirection], the direction of a scroll, relative to the positive
@@ -188,7 +196,6 @@ enum VerticalDirection {
 ///   * [axisDirectionIsReversed], which returns whether traveling along the
 ///     given axis direction visits coordinates along that axis in numerically
 ///     decreasing order.
-// TODO(Piinks): Add sample code
 enum AxisDirection {
   /// A direction in the [Axis.vertical] where zero is at the bottom and
   /// positive values are above it: `⇈`
@@ -199,12 +206,19 @@ enum AxisDirection {
   /// For example, the default behavior of a [ListView] with [ListView.reverse]
   /// set to true would have this axis direction.
   ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Axis.vertical],
+  /// [AxisDirection.up], and [GrowthDirection.forward], with the alphabet
+  /// progressing in the positive scroll offset as described above.
+  ///
+  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction_up.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///   * [axisDirectionIsReversed], which returns whether traveling along the
   ///     given axis direction visits coordinates along that axis in numerically
   ///     decreasing order.
-  // TODO(Piinks): Add sample code
   up,
 
   /// A direction in the [Axis.horizontal] where zero is on the left and
@@ -217,12 +231,19 @@ enum AxisDirection {
   /// For example, the behavior of a [ListView] with [ListView.scrollDirection]
   /// set to [Axis.horizontal] would have this axis direction.
   ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Axis.horizontal],
+  /// [AxisDirection.right], and [GrowthDirection.forward], with the alphabet
+  /// progressing in the positive scroll offset as described above.
+  ///
+  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction_right.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///   * [axisDirectionIsReversed], which returns whether traveling along the
   ///     given axis direction visits coordinates along that axis in numerically
   ///     decreasing order.
-  // TODO(Piinks): Add sample code
   right,
 
   /// A direction in the [Axis.vertical] where zero is at the top and positive
@@ -235,12 +256,19 @@ enum AxisDirection {
   /// For example, the default behavior of a [ListView] would have this axis
   /// direction.
   ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Axis.vertical],
+  /// [AxisDirection.down], and [GrowthDirection.forward], with the alphabet
+  /// progressing in the positive scroll offset as described above.
+  ///
+  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction_down.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///   * [axisDirectionIsReversed], which returns whether traveling along the
   ///     given axis direction visits coordinates along that axis in numerically
   ///     decreasing order.
-  // TODO(Piinks): Add sample code
   down,
 
   /// A direction in the [Axis.horizontal] where zero is to the right and
@@ -254,12 +282,19 @@ enum AxisDirection {
   /// set to [Axis.horizontal] and [ListView.reverse] set to true would have
   /// this axis direction.
   ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Axis.horizontal],
+  /// [AxisDirection.left], and [GrowthDirection.forward], with the alphabet
+  /// progressing in the positive scroll offset as described above.
+  ///
+  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction_left.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///   * [axisDirectionIsReversed], which returns whether traveling along the
   ///     given axis direction visits coordinates along that axis in numerically
   ///     decreasing order.
-  // TODO(Piinks): Add sample code
   left,
 }
 
