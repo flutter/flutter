@@ -872,7 +872,7 @@ class MenuItemButton extends StatefulWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
-  /// Determines if the menuAnchor should stay open after a [MenuItemButton]
+  /// Determines if the menuAnchor should be closed after a [MenuItemButton]
   /// has been pressed.
   /// Defaults to true.
   final bool closeOnActivate;
@@ -1251,7 +1251,7 @@ class CheckboxMenuButton extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
-  /// Determines if the menuAnchor should stay open after a [MenuItemButton]
+  /// Determines if the menuAnchor should be closed after a [MenuItemButton]
   /// has been pressed.
   /// Defaults to true.
   final bool closeOnActivate;
@@ -1452,7 +1452,7 @@ class RadioMenuButton<T> extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
-  /// Determines if the menuAnchor should stay open after a [MenuItemButton]
+  /// Determines if the menuAnchor should be closed after a [MenuItemButton]
   /// has been pressed.
   /// Defaults to true.
   final bool closeOnActivate;
