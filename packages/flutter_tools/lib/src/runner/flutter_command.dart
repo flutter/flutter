@@ -1060,6 +1060,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableVulkanValidationFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-vulkan-validation',
+        hide: !verboseHelp,
+        help: 'Enable vulkan validation on the Impeller rendering backend if '
+              'Vulkan is in use and the validation layers are available to the '
+              'application.',
+    );
+  }
+
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-embedder-api',
         hide: !verboseHelp,

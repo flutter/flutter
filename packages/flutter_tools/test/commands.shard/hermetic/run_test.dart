@@ -1050,6 +1050,7 @@ void main() {
       '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
+      '--enable-vulkan-validation',
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
@@ -1068,6 +1069,7 @@ void main() {
     expect(options.nativeNullAssertions, true);
     expect(options.traceSystrace, true);
     expect(options.enableImpeller, ImpellerStatus.enabled);
+    expect(options.enableVulkanValidation, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{
