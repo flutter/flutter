@@ -2800,7 +2800,7 @@ void main() {
     });
   });
 
-  testWidgets("MenuItemButton doesn't close when pressed", (WidgetTester tester) async {
+  testWidgets('MenuItemButton respects closeOnActivate property', (WidgetTester tester) async {
     final MenuController controller = MenuController();
     await tester.pumpWidget(
       MaterialApp(
