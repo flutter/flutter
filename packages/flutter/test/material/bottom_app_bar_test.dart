@@ -11,8 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'material_state_mixin_test.dart';
-
 void main() {
   testWidgets('no overlap with floating action button', (WidgetTester tester) async {
     await tester.pumpWidget(
