@@ -1883,7 +1883,7 @@ void main() {
 
   group('BrowserContextMenu', () {
     setUp(() async {
-      SystemChannels.contextMenu.setMockMethodCallHandler((MethodCall call) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall call) {
         // Just complete successfully, so that BrowserContextMenu thinks that
         // the engine successfully received its call.
         return Future<void>.value();
@@ -1893,7 +1893,7 @@ void main() {
 
     tearDown(() async {
       await BrowserContextMenu.enableContextMenu();
-      SystemChannels.contextMenu.setMockMethodCallHandler(null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
     });
 
     testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {

@@ -835,7 +835,7 @@ void main() {
 
   testWidgets('selection rects re-sent when refocused', (WidgetTester tester) async {
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       if (methodCall.method == 'TextInput.setSelectionRects') {
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         final List<SelectionRect> selectionRects = <SelectionRect>[];
@@ -847,6 +847,7 @@ void main() {
         }
         log.add(selectionRects);
       }
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -1725,7 +1726,7 @@ void main() {
 
   group('BrowserContextMenu', () {
     setUp(() async {
-      SystemChannels.contextMenu.setMockMethodCallHandler((MethodCall call) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall call) {
         // Just complete successfully, so that BrowserContextMenu thinks that
         // the engine successfully received its call.
         return Future<void>.value();
@@ -1735,7 +1736,7 @@ void main() {
 
     tearDown(() async {
       await BrowserContextMenu.enableContextMenu();
-      SystemChannels.contextMenu.setMockMethodCallHandler(null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
     });
 
     testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
@@ -5162,7 +5163,7 @@ void main() {
     tester.view.physicalSize = const Size(750.0, 1334.0);
 
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       if (methodCall.method == 'TextInput.setSelectionRects') {
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         final List<SelectionRect> selectionRects = <SelectionRect>[];
@@ -5174,6 +5175,7 @@ void main() {
         }
         log.add(selectionRects);
       }
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();
@@ -5297,8 +5299,9 @@ void main() {
 
   testWidgets('selection rects are not sent if scribbleEnabled is false', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     final TextEditingController controller = TextEditingController();

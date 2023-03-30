@@ -21,7 +21,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, null);
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
