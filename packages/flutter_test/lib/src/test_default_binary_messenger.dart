@@ -331,12 +331,13 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///  * [setMockMethodCallHandler], which is the similar method for
   /// [MethodChannel].
   void setMockStreamHandler(EventChannel channel, MockStreamHandler? handler) {
-    final StreamController<dynamic> controller = StreamController<dynamic>();
-
     if (handler == null) {
       setMockMessageHandler(channel.name, null);
       return;
     }
+
+    final StreamController<dynamic> controller = StreamController<dynamic>();
+    addTearDown(controller.close);
 
     setMockMethodCallHandler(MethodChannel(channel.name, channel.codec), (MethodCall call) async {
       switch (call.method) {
@@ -356,6 +357,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
         null,
       ),
     );
+    addTearDown(sub.cancel);
     sub.onError((dynamic e) {
       if (e is! PlatformException) {
         throw ArgumentError('Stream error must be a PlatformException');
@@ -371,8 +373,6 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       );
     });
     sub.onDone(() => channel.binaryMessenger.handlePlatformMessage(channel.name, null, null));
-    addTearDown(controller.close);
-    addTearDown(sub.cancel);
   }
 
   /// Returns true if the `handler` argument matches the `handler`
