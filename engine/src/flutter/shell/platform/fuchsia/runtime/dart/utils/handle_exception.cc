@@ -114,12 +114,12 @@ void HandleException(std::shared_ptr<::sys::ServiceDirectory> services,
 
   fuchsia::feedback::CrashReporterPtr crash_reporter =
       services->Connect<fuchsia::feedback::CrashReporter>();
-  crash_reporter->File(
+  crash_reporter->FileReport(
       std::move(crash_report),
-      [](fuchsia::feedback::CrashReporter_File_Result result) {
+      [](fuchsia::feedback::CrashReporter_FileReport_Result result) {
         if (result.is_err()) {
-          FX_LOGF(ERROR, LOG_TAG, "Failed to report Dart exception: %d (%s)",
-                  result.err(), zx_status_get_string(result.err()));
+          FX_LOGF(ERROR, LOG_TAG, "Failed to report Dart exception: %u",
+                  static_cast<uint32_t>(result.err()));
         }
       });
 }
