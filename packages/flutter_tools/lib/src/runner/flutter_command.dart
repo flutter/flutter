@@ -1065,7 +1065,7 @@ abstract class FlutterCommand extends Command<void> {
         hide: !verboseHelp,
         help: 'Enable vulkan validation on the Impeller rendering backend if '
               'Vulkan is in use and the validation layers are available to the '
-              'application',
+              'application.',
     );
   }
 
