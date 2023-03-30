@@ -1772,7 +1772,11 @@ Future<void> _checkConsumerDependencies() async {
 
       final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
-        workset.add(dependencyTree[dependency]!);
+        // Don't add dependencies we've already seen or we will get stuck
+        // forever if there are any circular references.
+        if (!dependencies.contains(dependency)) {
+          workset.add(dependencyTree[dependency]!);
+        }
       }
     }
   }
