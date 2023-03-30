@@ -3112,46 +3112,22 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     if (widget.onDragSelectionStart != null ||
         widget.onDragSelectionUpdate != null ||
         widget.onDragSelectionEnd != null) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.iOS:
-          gestures[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
-            () => TapAndHorizontalDragGestureRecognizer(debugOwner: this),
-            (TapAndHorizontalDragGestureRecognizer instance) {
-              instance
-                // Text selection should start from the position of the first pointer
-                // down event.
-                ..dragStartBehavior = DragStartBehavior.down
-                ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
-                ..onTapDown = _handleTapDown
-                ..onDragStart = _handleDragStart
-                ..onDragUpdate = _handleDragUpdate
-                ..onDragEnd = _handleDragEnd
-                ..onTapUp = _handleTapUp
-                ..onCancel = _handleTapCancel;
-            },
-          );
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          gestures[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-            () => TapAndPanGestureRecognizer(debugOwner: this),
-            (TapAndPanGestureRecognizer instance) {
-              instance
-                // Text selection should start from the position of the first pointer
-                // down event.
-                ..dragStartBehavior = DragStartBehavior.down
-                ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
-                ..onTapDown = _handleTapDown
-                ..onDragStart = _handleDragStart
-                ..onDragUpdate = _handleDragUpdate
-                ..onDragEnd = _handleDragEnd
-                ..onTapUp = _handleTapUp
-                ..onCancel = _handleTapCancel;
-            },
-          );
-      }
+      gestures[_TextSelectionTapAndDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_TextSelectionTapAndDragGestureRecognizer>(
+        () => _TextSelectionTapAndDragGestureRecognizer(debugOwner: this),
+        (_TextSelectionTapAndDragGestureRecognizer instance) {
+          instance
+            // Text selection should start from the position of the first pointer
+            // down event.
+            ..dragStartBehavior = DragStartBehavior.down
+            ..dragUpdateThrottleFrequency = _kDragSelectionUpdateThrottle
+            ..onTapDown = _handleTapDown
+            ..onDragStart = _handleDragStart
+            ..onDragUpdate = _handleDragUpdate
+            ..onDragEnd = _handleDragEnd
+            ..onTapUp = _handleTapUp
+            ..onCancel = _handleTapCancel;
+        },
+      );
     }
 
     if (widget.onForcePressStart != null || widget.onForcePressEnd != null) {
@@ -3322,4 +3298,18 @@ mixin TextSelectionHandleControls on TextSelectionControls {
 
   @override
   void handleSelectAll(TextSelectionDelegate delegate) {}
+}
+
+class _TextSelectionTapAndDragGestureRecognizer extends TapAndHorizontalDragGestureRecognizer {
+  _TextSelectionTapAndDragGestureRecognizer({super.debugOwner});
+
+  @override
+  bool hasSufficientGlobalDistanceToAccept(
+    PointerDeviceKind pointerDeviceKind,
+    double globalDistanceMovedOnAxis,
+    double globalDistanceMovedAllAxes,
+    bool wonArenaForPrimaryPointer) {
+    return globalDistanceMovedOnAxis.abs() > computePanSlop(pointerDeviceKind, gestureSettings)
+      || (wonArenaForPrimaryPointer && globalDistanceMovedAllAxes.abs() > computePanSlop(pointerDeviceKind, gestureSettings));
+  }
 }
