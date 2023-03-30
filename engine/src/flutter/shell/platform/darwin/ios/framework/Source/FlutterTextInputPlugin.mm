@@ -1043,8 +1043,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 - (BOOL)resignFirstResponder {
   BOOL success = [super resignFirstResponder];
   if (success) {
-    [self.textInputDelegate flutterTextInputView:self
-        didResignFirstResponderWithTextInputClient:_textInputClient];
+    [self.textInputDelegate flutterTextInputViewDidResignFirstResponder:self];
   }
   return success;
 }
