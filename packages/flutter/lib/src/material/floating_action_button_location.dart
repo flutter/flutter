@@ -633,7 +633,7 @@ mixin FabContainedOffsetY on StandardFabLocation {
 
     double safeMargin;
     if (contentMargin > bottomViewPadding + fabHeight) {
-      // If contentMargin is higher than bottomMinInset enough to display the
+      // If contentMargin is higher than bottomViewPadding enough to display the
       // FAB without clipping, don't provide a margin
       safeMargin = 0.0;
     } else {
