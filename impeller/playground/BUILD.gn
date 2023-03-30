@@ -78,6 +78,6 @@ impeller_component("playground_test") {
 
   public_deps = [
     ":playground",
-    "//flutter/testing",
+    "//flutter/testing:testing_lib",
   ]
 }

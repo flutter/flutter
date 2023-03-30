@@ -118,7 +118,7 @@ impeller_component("importer_unittests") {
   deps = [
     ":importer_lib",
     "../../fixtures",
-    "../../geometry:geometry_unittests",
+    "../../geometry:geometry_asserts",
     "//flutter/testing:testing_lib",
   ]
 }

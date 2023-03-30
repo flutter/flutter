@@ -246,7 +246,7 @@ impeller_component("entity_unittests") {
 
   deps = [
     ":entity",
-    "../geometry:geometry_unittests",
+    "../geometry:geometry_asserts",
     "../playground:playground_test",
   ]
 }

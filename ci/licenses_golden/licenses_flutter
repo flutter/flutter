@@ -1311,6 +1311,7 @@ ORIGIN: ../../../flutter/impeller/geometry/color.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/color.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/constants.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/constants.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/geometry/geometry_asserts.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/geometry_benchmarks.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/gradient.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/gradient.h + ../../../flutter/LICENSE
@@ -1344,6 +1345,9 @@ ORIGIN: ../../../flutter/impeller/geometry/vector.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/vector.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/golden_digest.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/golden_digest.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/golden_tests/golden_playground_test.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/golden_tests/golden_playground_test_mac.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/golden_tests/golden_playground_test_stub.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/golden_tests.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/main.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/golden_tests/metal_screenshot.h + ../../../flutter/LICENSE
@@ -3880,6 +3884,7 @@ FILE: ../../../flutter/impeller/geometry/color.cc
 FILE: ../../../flutter/impeller/geometry/color.h
 FILE: ../../../flutter/impeller/geometry/constants.cc
 FILE: ../../../flutter/impeller/geometry/constants.h
+FILE: ../../../flutter/impeller/geometry/geometry_asserts.h
 FILE: ../../../flutter/impeller/geometry/geometry_benchmarks.cc
 FILE: ../../../flutter/impeller/geometry/gradient.cc
 FILE: ../../../flutter/impeller/geometry/gradient.h
@@ -3913,6 +3918,9 @@ FILE: ../../../flutter/impeller/geometry/vector.cc
 FILE: ../../../flutter/impeller/geometry/vector.h
 FILE: ../../../flutter/impeller/golden_tests/golden_digest.cc
 FILE: ../../../flutter/impeller/golden_tests/golden_digest.h
+FILE: ../../../flutter/impeller/golden_tests/golden_playground_test.h
+FILE: ../../../flutter/impeller/golden_tests/golden_playground_test_mac.cc
+FILE: ../../../flutter/impeller/golden_tests/golden_playground_test_stub.cc
 FILE: ../../../flutter/impeller/golden_tests/golden_tests.cc
 FILE: ../../../flutter/impeller/golden_tests/main.cc
 FILE: ../../../flutter/impeller/golden_tests/metal_screenshot.h

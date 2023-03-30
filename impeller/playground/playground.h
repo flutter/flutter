@@ -62,19 +62,16 @@ class Playground {
 
   bool OpenPlaygroundHere(SinglePassCallback pass_callback);
 
-  std::shared_ptr<CompressedImage> LoadFixtureImageCompressed(
-      std::shared_ptr<fml::Mapping> mapping) const;
+  static std::shared_ptr<CompressedImage> LoadFixtureImageCompressed(
+      std::shared_ptr<fml::Mapping> mapping);
 
-  std::optional<DecompressedImage> DecodeImageRGBA(
-      const std::shared_ptr<CompressedImage>& compressed) const;
+  static std::optional<DecompressedImage> DecodeImageRGBA(
+      const std::shared_ptr<CompressedImage>& compressed);
 
-  std::shared_ptr<Texture> CreateTextureForFixture(
-      DecompressedImage& decompressed_image,
-      bool enable_mipmapping = false) const;
-
-  std::shared_ptr<Texture> CreateTextureForFixture(
+  static std::shared_ptr<Texture> CreateTextureForMapping(
+      const std::shared_ptr<Context>& context,
       std::shared_ptr<fml::Mapping> mapping,
-      bool enable_mipmapping = false) const;
+      bool enable_mipmapping = false);
 
   std::shared_ptr<Texture> CreateTextureForFixture(
       const char* fixture_name,
