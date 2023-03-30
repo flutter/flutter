@@ -13,6 +13,7 @@
 
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 namespace testing {
@@ -353,7 +354,7 @@ TEST(DisplayListComplexity, DrawImage) {
                         SkAlphaType::kPremul_SkAlphaType);
   SkBitmap bitmap;
   bitmap.allocPixels(info, 0);
-  auto image = SkImage::MakeFromBitmap(bitmap);
+  auto image = SkImages::RasterFromBitmap(bitmap);
 
   DisplayListBuilder builder;
   builder.DrawImage(DlImage::Make(image), SkPoint::Make(0, 0),
@@ -372,7 +373,7 @@ TEST(DisplayListComplexity, DrawImageNine) {
                         SkAlphaType::kPremul_SkAlphaType);
   SkBitmap bitmap;
   bitmap.allocPixels(info, 0);
-  auto image = SkImage::MakeFromBitmap(bitmap);
+  auto image = SkImages::RasterFromBitmap(bitmap);
 
   SkIRect center = SkIRect::MakeXYWH(5, 5, 20, 20);
   SkRect dest = SkRect::MakeXYWH(0, 0, 50, 50);
@@ -394,7 +395,7 @@ TEST(DisplayListComplexity, DrawImageRect) {
                         SkAlphaType::kPremul_SkAlphaType);
   SkBitmap bitmap;
   bitmap.allocPixels(info, 0);
-  auto image = SkImage::MakeFromBitmap(bitmap);
+  auto image = SkImages::RasterFromBitmap(bitmap);
 
   SkRect src = SkRect::MakeXYWH(0, 0, 50, 50);
   SkRect dest = SkRect::MakeXYWH(0, 0, 50, 50);
@@ -416,7 +417,7 @@ TEST(DisplayListComplexity, DrawAtlas) {
                         SkAlphaType::kPremul_SkAlphaType);
   SkBitmap bitmap;
   bitmap.allocPixels(info, 0);
-  auto image = SkImage::MakeFromBitmap(bitmap);
+  auto image = SkImages::RasterFromBitmap(bitmap);
 
   std::vector<SkRect> rects;
   std::vector<SkRSXform> xforms;

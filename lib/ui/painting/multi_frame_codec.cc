@@ -13,7 +13,9 @@
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
+#include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
 namespace flutter {
@@ -163,19 +165,19 @@ sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
             // Defer decoding until time of draw later on the raster thread.
             // Can happen when GL operations are currently forbidden such as
             // in the background on iOS.
-            skImage = SkImage::MakeFromBitmap(bitmap);
+            skImage = SkImages::RasterFromBitmap(bitmap);
           })
           .SetIfFalse([&skImage, &resourceContext, &bitmap] {
             if (resourceContext) {
               SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
                               bitmap.pixelRef()->rowBytes());
-              skImage = SkImage::MakeCrossContextFromPixmap(
+              skImage = SkImages::CrossContextTextureFromPixmap(
                   resourceContext.get(), pixmap, true);
             } else {
               // Defer decoding until time of draw later on the raster thread.
               // Can happen when GL operations are currently forbidden such as
               // in the background on iOS.
-              skImage = SkImage::MakeFromBitmap(bitmap);
+              skImage = SkImages::RasterFromBitmap(bitmap);
             }
           }));
 

@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -156,7 +157,8 @@ bool ImageMatchesFixture(const std::string& fixture_file_name,
   auto encoded_image = SkData::MakeWithoutCopy(
       fixture_image_mapping.GetMapping(), fixture_image_mapping.GetSize());
   auto fixture_image =
-      SkImage::MakeFromEncoded(std::move(encoded_image))->makeRasterImage();
+      SkImages::DeferredFromEncodedData(std::move(encoded_image))
+          ->makeRasterImage();
 
   FML_CHECK(fixture_image) << "Could not create image from fixture: "
                            << fixture_file_name;
