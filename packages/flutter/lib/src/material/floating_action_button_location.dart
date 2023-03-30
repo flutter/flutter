@@ -630,10 +630,9 @@ mixin FabContainedOffsetY on StandardFabLocation {
     final double contentMargin = scaffoldGeometry.scaffoldSize.height - contentBottom;
     final double bottomViewPadding = scaffoldGeometry.minViewPadding.bottom;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
-    final double bottomMinInset = scaffoldGeometry.minInsets.bottom;
 
-    double safeMargin = 0.0;
-    if (contentMargin > bottomMinInset + fabHeight / 2.0) {
+    double safeMargin;
+    if (contentMargin > bottomViewPadding + fabHeight) {
       // If contentMargin is higher than bottomMinInset enough to display the
       // FAB without clipping, don't provide a margin
       safeMargin = 0.0;
@@ -641,9 +640,14 @@ mixin FabContainedOffsetY on StandardFabLocation {
       safeMargin = bottomViewPadding;
     }
 
-    final double fabY = contentBottom - fabHeight / 2.0 - safeMargin;
+    // This is to compute the distance between the content bottom to the top edge
+    // of the floating action button. This can be negative if content margin is
+    // too small.
+    final double contentBottomToFabTop = (contentMargin - bottomViewPadding - fabHeight) / 2.0;
+    final double fabY = contentBottom + contentBottomToFabTop;
     final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight - safeMargin;
-    return math.min(maxFabY, fabY + contentMargin / 2);
+
+    return math.min(maxFabY, fabY);
   }
 }
 
