@@ -20,6 +20,7 @@ web_engine_libraries = [
   ":skwasm_stub_library",
   ":web_engine_library",
   ":web_ui_library",
+  ":web_ui_ui_web",
   ":web_ui_library_sources",
   ":web_unicode_library",
   ":web_test_fonts_library",
@@ -77,6 +78,11 @@ template("sdk_rewriter") {
       "--stamp",
       rebase_path(stamp_location, root_build_dir),
     ]
+
+    if (defined(invoker.is_public) && invoker.is_public) {
+      args += [ "--public" ]
+    }
+
     if (ui) {
       args += [ "--ui" ]
     } else {
@@ -102,6 +108,14 @@ sdk_rewriter("web_ui_library_sources") {
 
   # exclude everything in the engine directory, it will be a separate internal library
   exclude_patterns = [ rebase_path("//flutter/lib/web_ui/lib/src/*") ]
+}
+
+sdk_rewriter("web_ui_ui_web") {
+  library_name = "ui_web"
+  is_public = true
+  api_file = "//flutter/lib/web_ui/lib/ui_web/src/ui_web.dart"
+  input_dir = "//flutter/lib/web_ui/lib/ui_web/src/ui_web/"
+  output_dir = "$root_out_dir/flutter_web_sdk/lib/ui_web/"
 }
 
 sdk_rewriter("web_engine_library") {
@@ -307,6 +321,8 @@ template("_compile_platform") {
       "--source",
       "dart:ui",
       "--source",
+      "dart:ui_web",
+      "--source",
       "dart:_engine",
       "--source",
       "dart:_skwasm_stub",
@@ -442,6 +458,7 @@ template("_compile_ddc_modules") {
 
       # Additional Flutter web dart libraries
       "dart:ui",
+      "dart:ui_web",
       "dart:_engine",
       "dart:_skwasm_stub",
       "dart:_web_unicode",
