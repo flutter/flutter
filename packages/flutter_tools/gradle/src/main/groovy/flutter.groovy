@@ -991,7 +991,7 @@ class FlutterPlugin implements Plugin<Project> {
                             ? outputDirectory.get()
                             : outputDirectory
                         String filename = "app"
-                        String abi = output.getFilter(OutputFile.ABI)
+                        String abi = output.getFilter("ABI")
                         if (abi != null && !abi.isEmpty()) {
                             filename += "-${abi}"
                         }
