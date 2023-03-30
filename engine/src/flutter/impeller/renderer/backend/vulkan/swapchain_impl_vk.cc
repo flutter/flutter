@@ -188,7 +188,11 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
                  caps.maxImageExtent.height),
   };
   swapchain_info.minImageCount = std::clamp(
-      caps.minImageCount + 1u, caps.minImageCount, caps.maxImageCount);
+      caps.minImageCount + 1u,  // preferred image count
+      caps.minImageCount,       // min count cannot be zero
+      caps.maxImageCount == 0u ? caps.minImageCount + 1u
+                               : caps.maxImageCount  // max zero means no limit
+  );
   swapchain_info.imageArrayLayers = 1u;
   swapchain_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
   swapchain_info.preTransform = caps.currentTransform;
