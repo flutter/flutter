@@ -513,7 +513,7 @@ class WebBuiltInAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    const Source.hostArtifact(HostArtifact.flutterWebSdk),
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
   ];
 
   @override
