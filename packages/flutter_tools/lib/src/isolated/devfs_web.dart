@@ -296,6 +296,9 @@ class WebAssetServer implements AssetReader {
         PackageUriMapper(packageConfig),
         digestProvider,
         server.basePath,
+        packageConfig.toPackageUri(
+          globals.fs.file(entrypoint).absolute.uri,
+        ),
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
