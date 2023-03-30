@@ -75,7 +75,7 @@ sk_sp<SkImage> DeserializeImageWithoutData(const void* data,
       SkData::MakeUninitialized(image_size.width() * image_size.height() * 4);
   memset(image_data->writable_data(), 0x0f, image_data->size());
   sk_sp<SkImage> image =
-      SkImage::MakeRasterData(info, image_data, image_size.width() * 4);
+      SkImages::RasterFromData(info, image_data, image_size.width() * 4);
 
   return image;
 };

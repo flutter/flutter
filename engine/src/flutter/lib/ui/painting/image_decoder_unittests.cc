@@ -24,6 +24,7 @@
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -361,7 +362,7 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
   SkBitmap bitmap;
   bitmap.allocPixels(info, 10 * 4);
   auto data = SkData::MakeWithoutCopy(bitmap.getPixels(), 10 * 10 * 4);
-  auto image = SkImage::MakeFromBitmap(bitmap);
+  auto image = SkImages::RasterFromBitmap(bitmap);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(10, 10), image->dimensions());
   ASSERT_EQ(nullptr, image->colorSpace());
@@ -384,7 +385,7 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
 
 TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3) {
   auto data = OpenFixtureAsSkData("DisplayP3Logo.png");
-  auto image = SkImage::MakeFromEncoded(data);
+  auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
 
@@ -439,7 +440,7 @@ TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
   SkBitmap bitmap;
   bitmap.allocPixels(info, 10 * 16);
   auto data = SkData::MakeWithoutCopy(bitmap.getPixels(), 10 * 10 * 16);
-  auto image = SkImage::MakeFromBitmap(bitmap);
+  auto image = SkImages::RasterFromBitmap(bitmap);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(10, 10), image->dimensions());
   ASSERT_EQ(nullptr, image->colorSpace());
@@ -473,7 +474,7 @@ float DecodeBGR10(uint32_t x) {
 
 TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
   auto data = OpenFixtureAsSkData("DisplayP3Logo.jpg");
-  auto image = SkImage::MakeFromEncoded(data);
+  auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
 
@@ -525,7 +526,7 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
 
 TEST_F(ImageDecoderFixtureTest, ImpellerNonWideGamut) {
   auto data = OpenFixtureAsSkData("Horizontal.jpg");
-  auto image = SkImage::MakeFromEncoded(data);
+  auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
 
@@ -669,9 +670,9 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
 }
 
 TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
-  const auto image_dimensions =
-      SkImage::MakeFromEncoded(OpenFixtureAsSkData("DashInNooglerHat.jpg"))
-          ->dimensions();
+  const auto image_dimensions = SkImages::DeferredFromEncodedData(
+                                    OpenFixtureAsSkData("DashInNooglerHat.jpg"))
+                                    ->dimensions();
 
   ASSERT_FALSE(image_dimensions.isEmpty());
 
@@ -767,7 +768,7 @@ TEST(ImageDecoderTest,
 
 TEST(ImageDecoderTest, VerifySimpleDecoding) {
   auto data = OpenFixtureAsSkData("Horizontal.jpg");
-  auto image = SkImage::MakeFromEncoded(data);
+  auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
 
@@ -809,7 +810,7 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   auto descriptor =
       fml::MakeRefCounted<ImageDescriptor>(data, std::move(generator));
 
-  auto image = SkImage::MakeFromEncoded(data);
+  auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
 

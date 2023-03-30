@@ -8,6 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 
@@ -29,7 +30,7 @@ sk_sp<SkImage> ImageGenerator::GetImage() {
     return nullptr;
   }
   bitmap.setImmutable();
-  return SkImage::MakeFromBitmap(bitmap);
+  return SkImages::RasterFromBitmap(bitmap);
 }
 
 BuiltinSkiaImageGenerator::~BuiltinSkiaImageGenerator() = default;
