@@ -1409,11 +1409,15 @@ void main() {
     testWidgets('portrait', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizePortrait);
       expect(tester.widget<Text>(find.text('Fri, Jan 15')).style?.fontSize, 32);
+      await tester.tap('Cancel');
+      await tester.pumpAndSettle();
     });
 
     testWidgets('landscape', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape);
       expect(tester.widget<Text>(find.text('Fri, Jan 15')).style?.fontSize, 24);
+      await tester.tap('Cancel');
+      await tester.pumpAndSettle();
     });
   });
 }
