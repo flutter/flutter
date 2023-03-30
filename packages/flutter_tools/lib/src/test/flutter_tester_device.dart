@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../resident_runner.dart';
 import '../vmservice.dart';
 
 import 'font_config_manager.dart';
@@ -72,6 +73,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   Process? _process;
   HttpServer? _server;
+  DevtoolsLauncher? _devToolsLauncher;
 
   /// Starts the device.
   ///
@@ -163,9 +165,11 @@ class FlutterTesterTestDevice extends TestDevice {
             debuggingOptions.hostVmServicePort == detectedUri.port);
 
         Uri? forwardingUri;
+        DartDevelopmentService? dds;
+
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
-          final DartDevelopmentService dds = await startDds(
+          dds = await startDds(
             detectedUri,
             uriConverter: uriConverter,
           );
@@ -193,10 +197,10 @@ class FlutterTesterTestDevice extends TestDevice {
         }));
 
         if (debuggingOptions.startPaused && !machine!) {
-          logger.printStatus('The test process has been started.');
-          logger.printStatus('You can now connect to it using vmService. To connect, load the following Web site in your browser:');
-          logger.printStatus('  $forwardingUri');
-          logger.printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
+          logger.printStatus('The Dart VM service is listening on $forwardingUri');
+          await _startDevTools(forwardingUri, dds);
+          logger.printStatus('');
+          logger.printStatus('The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.');
         }
         _gotProcessVmServiceUri.complete(forwardingUri);
       },
@@ -214,6 +218,9 @@ class FlutterTesterTestDevice extends TestDevice {
   Future<void> kill() async {
     logger.printTrace('test $id: Terminating flutter_tester process');
     _process?.kill(io.ProcessSignal.sigkill);
+
+    logger.printTrace('test $id: Shutting down DevTools server');
+    await _devToolsLauncher?.close();
 
     logger.printTrace('test $id: Shutting down test harness socket server');
     await _server?.close(force: true);
@@ -259,6 +266,29 @@ class FlutterTesterTestDevice extends TestDevice {
       ipv6: host!.type == InternetAddressType.IPv6,
       uriConverter: uriConverter,
     );
+  }
+
+  Future<void> _startDevTools(Uri forwardingUri, DartDevelopmentService? dds) async {
+    _devToolsLauncher = DevtoolsLauncher.instance;
+    logger.printTrace('test $id: Serving DevTools...');
+    final DevToolsServerAddress? devToolsServerAddress = await _devToolsLauncher?.serve();
+
+    if (devToolsServerAddress == null) {
+      logger.printTrace('test $id: Failed to start DevTools');
+      return;
+    }
+    await _devToolsLauncher?.ready;
+    logger.printTrace('test $id: DevTools is being served at ${devToolsServerAddress.uri}');
+
+    // Notify the DDS instance that there's a DevTools instance available so it can correctly
+    // redirect DevTools related requests.
+    dds?.setExternalDevToolsUri(devToolsServerAddress.uri!);
+
+    final Uri devToolsUri = devToolsServerAddress.uri!.replace(
+      // Use query instead of queryParameters to avoid unnecessary encoding.
+      query: 'uri=$forwardingUri',
+    );
+    logger.printStatus('The Flutter DevTools debugger and profiler is available at: $devToolsUri');
   }
 
   /// Binds an [HttpServer] serving from `host` on `port`.
