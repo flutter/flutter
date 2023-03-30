@@ -35,6 +35,14 @@ String? get localEngineSrcPathFromEnv {
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
 
+/// The local Web SDK to use for [flutter] and [evalFlutter], if any.
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localWebSdkFromEnv {
+  const bool isDefined = bool.hasEnvironment('localWebSdk');
+  return isDefined ? const String.fromEnvironment('localWebSdk') : null;
+}
+
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();
 

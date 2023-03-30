@@ -1176,6 +1176,7 @@ class WebCompileTest {
     required String metric,
     bool measureBuildTime = false,
   }) {
+    final String? localWebSdk = localWebSdkFromEnv;
     return inDirectory<Map<String, int>>(directory, () async {
       final Map<String, int> metrics = <String, int>{};
 
@@ -1184,9 +1185,12 @@ class WebCompileTest {
       watch?.start();
       await evalFlutter('build', options: <String>[
         'web',
+        if (localWebSdk != null)
+          ...<String>['--local-web-sdk', localWebSdk],
         '-v',
         '--release',
         '--no-pub',
+        '--no-web-resources-cdn',
       ]);
       watch?.stop();
       final String buildDir = path.join(directory, 'build', 'web');
