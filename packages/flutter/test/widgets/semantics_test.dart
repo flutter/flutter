@@ -520,7 +520,7 @@ void main() {
       ),
     );
 
-    final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+    final Set<SemanticsAction> allActions = SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList.toSet()
       ..remove(SemanticsAction.moveCursorForwardByWord)
       ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
@@ -612,7 +612,7 @@ void main() {
           liveRegion: true,
         ),
     );
-    final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    final List<SemanticsFlag> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)

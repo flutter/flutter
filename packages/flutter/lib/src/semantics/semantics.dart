@@ -669,7 +669,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     final List<String> actionSummary = <String>[
-      for (final SemanticsAction action in SemanticsAction.values.values)
+      for (final SemanticsAction action in SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList)
         if ((actions & action.index) != 0)
           describeEnum(action),
     ];
@@ -680,7 +680,7 @@ class SemanticsData with Diagnosticable {
     properties.add(IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[
-      for (final SemanticsFlag flag in SemanticsFlag.values.values)
+      for (final SemanticsFlag flag in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList)
         if ((flags & flag.index) != 0)
           describeEnum(flag),
     ];
@@ -2755,7 +2755,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null));
-    final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
+    final List<String> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
