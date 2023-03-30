@@ -48,6 +48,8 @@ bool TargetPlatformIsMetal(TargetPlatform platform);
 
 bool TargetPlatformIsOpenGL(TargetPlatform platform);
 
+bool TargetPlatformIsVulkan(TargetPlatform platform);
+
 SourceType SourceTypeFromFileName(const std::string& file_name);
 
 std::string SourceTypeToString(SourceType type);
