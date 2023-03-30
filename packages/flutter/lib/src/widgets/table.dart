@@ -144,11 +144,6 @@ class Table extends RenderObjectWidget {
                'Otherwise, the table will contain holes.',
              );
            }
-         }
-         return true;
-       }()),
-       assert(() {
-         if (children.isNotEmpty) {
            if (children.any((TableRow row) => row.children.isEmpty)) {
              throw FlutterError(
                'One or more TableRow have no children.\n'
