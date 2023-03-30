@@ -204,6 +204,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
+    this.clipBehavior,
   }) : assert(elevation == null || elevation >= 0.0),
        preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
 
@@ -714,6 +715,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@endtemplate}
   final bool forceMaterialTransparency;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  final Clip? clipBehavior;
+
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
       switch (theme.platform) {
@@ -759,7 +763,8 @@ class _AppBarState extends State<AppBar> {
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
+    if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)
+      && Scaffold.isBodyDescendant(notification.context!)) {
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
       switch (metrics.axisDirection) {
@@ -1044,6 +1049,7 @@ class _AppBarState extends State<AppBar> {
     // If the toolbar is allocated less than toolbarHeight make it
     // appear to scroll upwards within its shrinking container.
     Widget appBar = ClipRect(
+      clipBehavior: widget.clipBehavior ?? Clip.hardEdge,
       child: CustomSingleChildLayout(
         delegate: _ToolbarContainerLayout(toolbarHeight),
         child: IconTheme.merge(
@@ -1186,6 +1192,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.titleTextStyle,
     required this.systemOverlayStyle,
     required this.forceMaterialTransparency,
+    required this.clipBehavior
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
@@ -1221,6 +1228,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final SystemUiOverlayStyle? systemOverlayStyle;
   final double _bottomHeight;
   final bool forceMaterialTransparency;
+  final Clip? clipBehavior;
 
   @override
   double get minExtent => collapsedHeight;
@@ -1259,6 +1267,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       toolbarOpacity: toolbarOpacity,
       isScrolledUnder: isScrolledUnder,
       child: AppBar(
+        clipBehavior: clipBehavior,
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
@@ -1463,6 +1472,7 @@ class SliverAppBar extends StatefulWidget {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
+    this.clipBehavior,
   }) : assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
        assert(collapsedHeight == null || collapsedHeight >= toolbarHeight, 'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].');
@@ -1929,6 +1939,9 @@ class SliverAppBar extends StatefulWidget {
   /// This property is used to configure an [AppBar].
   final bool forceMaterialTransparency;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  final Clip? clipBehavior;
+
   @override
   State<SliverAppBar> createState() => _SliverAppBarState();
 }
@@ -2035,6 +2048,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           titleTextStyle: widget.titleTextStyle,
           systemOverlayStyle: widget.systemOverlayStyle,
           forceMaterialTransparency: widget.forceMaterialTransparency,
+          clipBehavior: widget.clipBehavior,
         ),
       ),
     );

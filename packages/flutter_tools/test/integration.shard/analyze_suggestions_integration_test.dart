@@ -38,6 +38,7 @@ void main() {
           terminal: globals.terminal,
           processManager: globals.processManager,
           allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
+          suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -74,6 +75,7 @@ void main() {
         allProjectValidators: <ProjectValidator>[
           PubDependenciesProjectValidator(globals.processManager),
         ],
+        suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
