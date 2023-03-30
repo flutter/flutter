@@ -613,9 +613,11 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      // ignore: deprecated_member_use
       for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         actions |= index;
       }
+      // ignore: deprecated_member_use
       for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         flags |= index;
       }
@@ -895,9 +897,11 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      // ignore: deprecated_member_use
       for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         actions |= index;
       }
+      // ignore: deprecated_member_use
       for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         flags |= index;
       }
@@ -1081,9 +1085,11 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
+      // ignore: deprecated_member_use
       for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         allActions |= index;
       }
+      // ignore: deprecated_member_use
       for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         allFlags |= index;
       }

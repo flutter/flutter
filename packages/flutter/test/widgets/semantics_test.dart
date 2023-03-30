@@ -520,6 +520,7 @@ void main() {
       ),
     );
 
+    // ignore: deprecated_member_use
     final Set<SemanticsAction> allActions = SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList.toSet()
       ..remove(SemanticsAction.moveCursorForwardByWord)
       ..remove(SemanticsAction.moveCursorBackwardByWord)
@@ -612,6 +613,7 @@ void main() {
           liveRegion: true,
         ),
     );
+    // ignore: deprecated_member_use
     final List<SemanticsFlag> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)

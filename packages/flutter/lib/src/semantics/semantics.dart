@@ -669,6 +669,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     final List<String> actionSummary = <String>[
+      // ignore: deprecated_member_use
       for (final SemanticsAction action in SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList)
         if ((actions & action.index) != 0)
           describeEnum(action),
@@ -680,6 +681,7 @@ class SemanticsData with Diagnosticable {
     properties.add(IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[
+      // ignore: deprecated_member_use
       for (final SemanticsFlag flag in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList)
         if ((flags & flag.index) != 0)
           describeEnum(flag),
@@ -2755,6 +2757,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null));
+    // ignore: deprecated_member_use
     final List<String> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));

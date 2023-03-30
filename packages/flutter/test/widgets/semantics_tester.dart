@@ -633,6 +633,7 @@ class SemanticsTester {
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
     Iterable<SemanticsFlag> list;
     if (flags is int) {
+      // ignore: deprecated_member_use
       list = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList
           .where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
@@ -648,6 +649,7 @@ class SemanticsTester {
   static String _actionsToSemanticsActionExpression(dynamic actions) {
     Iterable<SemanticsAction> list;
     if (actions is int) {
+      // ignore: deprecated_member_use
       list = SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList
           .where((SemanticsAction action) => (action.index & actions) != 0);
     } else {
