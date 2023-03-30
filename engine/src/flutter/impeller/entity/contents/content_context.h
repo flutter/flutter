@@ -59,7 +59,6 @@
 
 #include "impeller/entity/position_color.vert.h"
 
-#include "impeller/scene/scene_context.h"
 #include "impeller/typographer/glyph_atlas.h"
 
 #include "impeller/entity/conical_gradient_ssbo_fill.frag.h"
