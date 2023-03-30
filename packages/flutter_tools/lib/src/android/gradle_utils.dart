@@ -290,7 +290,7 @@ void exitWithNoSdkMessage() {
   );
 }
 
-// return gradlew file name based on the platform.
+// Returns gradlew file name based on the platform.
 String getGradlewFileName(Platform platform) {
   if (platform.isWindows) {
     return 'gradlew.bat';
