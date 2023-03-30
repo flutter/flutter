@@ -1398,6 +1398,7 @@ void main() {
     Future<void> showPicker(WidgetTester tester, Size size) async {
       addTearDown(tester.view.reset);
       tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(find.byIcon(Icons.edit_outlined));
         await tester.pumpAndSettle();
