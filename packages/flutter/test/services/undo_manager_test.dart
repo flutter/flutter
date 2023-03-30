@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Undo Interactions', () {
     test('UndoManagerClient handleUndo', () async {
@@ -21,7 +21,7 @@ void main() {
         'args': <dynamic>['undo'],
         'method': 'UndoManagerClient.handleUndo',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/undomanager',
         messageBytes,
         null,
@@ -34,7 +34,7 @@ void main() {
         'args': <dynamic>['redo'],
         'method': 'UndoManagerClient.handleUndo',
       });
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/undomanager',
         messageBytes,
         (ByteData? _) {},
