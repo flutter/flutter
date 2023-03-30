@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 /// The direction of a scroll, relative to the positive scroll offset axis given
@@ -15,6 +16,18 @@ import 'package:flutter/foundation.dart';
 /// the user is scrolling in the same direction as the detected scroll offset
 /// change.
 ///
+/// {@template flutter.rendering.ScrollDirection.sample}
+/// {@tool dartpad}
+/// This sample shows a [CustomScrollView], with [Radio] buttons in the
+/// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+/// configurations. With a [NotificationListener] to listen to
+/// [UserScrollNotification]s, which occur when the [ScrollDirection] changes
+/// or stops.
+///
+/// ** See code in examples/api/lib/rendering/scroll_direction/scroll_direction.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [AxisDirection], which is a directional version of this enum (with values
@@ -22,8 +35,8 @@ import 'package:flutter/foundation.dart';
 ///  * [GrowthDirection], the direction in which slivers and their content are
 ///    ordered, relative to the scroll offset axis as specified by
 ///    [AxisDirection].
-///  * [UserScrollNotification]
-// TODO(Piinks): sample code
+///  * [UserScrollNotification], which will notify listeners when the
+///    [ScrollDirection] changes.
 enum ScrollDirection {
   /// No scrolling is underway.
   idle,
@@ -37,7 +50,8 @@ enum ScrollDirection {
   ///
   /// An anecdote for this most common case is 'forward is toward' the zero
   /// position.
-  // TODO(Piinks): sample code
+  ///
+  /// {@macro flutter.rendering.ScrollDirection.sample}
   forward,
 
   /// Scrolling is happening in the positive scroll offset direction.
@@ -49,7 +63,8 @@ enum ScrollDirection {
   ///
   /// An anecdote for this most common case is reversing, or backing away, from
   /// the zero position.
-  // TODO(Piinks): sample code
+  ///
+  /// {@macro flutter.rendering.ScrollDirection.sample}
   reverse,
 }
 

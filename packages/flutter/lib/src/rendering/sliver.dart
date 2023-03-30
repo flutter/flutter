@@ -42,7 +42,7 @@ import 'viewport_offset.dart';
 /// illustrated on either side. The sliver that shares the
 /// [CustomScrollView.center] key is positioned at the [CustomScrollView.anchor].
 ///
-/// ** See code in examples/api/lib/rendering/axis_direction/growth_direction.0.dart **
+/// ** See code in examples/api/lib/rendering/growth_direction/growth_direction.0.dart **
 /// {@end-tool}
 /// {@endtemplate}
 ///
