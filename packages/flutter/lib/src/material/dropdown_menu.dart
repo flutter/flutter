@@ -184,7 +184,7 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to null;
   final String? hintText;
-  
+
   /// Text that provides context about the [DropdownMenu]'s value, such
   /// as how the value will be used.
   ///
@@ -194,7 +194,7 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to null;
   final String? helperText;
-  
+
   /// Text that appears below the [DropdownMenu] and the border to show the error message.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is not shown.
