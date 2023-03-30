@@ -16,6 +16,23 @@ import '../framework/browser.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
+/// The local Web SDK to use for [flutter] and [evalFlutter], if any.
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localWebSdkFromEnv {
+  const bool isDefined = bool.hasEnvironment('localWebSdk');
+  return isDefined ? const String.fromEnvironment('localWebSdk') : null;
+}
+
+/// The local engine source path to use if a local engine is used for [flutter]
+/// and [evalFlutter].
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localEngineSrcPathFromEnv {
+  const bool isDefined = bool.hasEnvironment('localEngineSrcPath');
+  return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
+}
+
 /// The port number used by the local benchmark server.
 const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
@@ -25,11 +42,18 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
   return inDirectory(macrobenchmarksDirectory, () async {
+    final String? localWebSdk = localWebSdkFromEnv;
+    final String? localEngineSrcPath = localEngineSrcPathFromEnv;
     await evalFlutter('build', options: <String>[
       'web',
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
       '--web-renderer=${useCanvasKit ? 'canvaskit' : 'html'}',
+      if (localWebSdk != null)
+        ...<String>['--local-web-sdk', localWebSdk],
+      if (localEngineSrcPath != null)
+        ...<String>['--local-engine-src-path', localEngineSrcPath],
       '--profile',
+      '--no-web-resources-cdn',
       '-t',
       'lib/web_benchmarks.dart',
     ]);
