@@ -1309,14 +1309,49 @@ class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecogni
   String get debugDescription => 'tap and horizontal drag';
 }
 
+/// {@template flutter.gestures.selectionrecognizers.TapAndPanGestureRecognizer}
 /// Recognizes taps along with both horizontal and vertical movement.
 ///
 /// See also:
 ///
 ///  * [PanGestureRecognizer], for a similar recognizer that only recognizes
 ///  movement.
+/// {@endtemplate}
+class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
+  /// Create a gesture recognizer for interactions on a plane.
+  TapAndPanGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+  });
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double? _getPrimaryValueFromOffset(Offset value) => null;
+
+  @override
+  String get debugDescription => 'tap and pan';
+}
+
+@Deprecated(
+  'Use [TapAndPanGestureRecognizer] instead. '
+  '[TapAndPanGestureRecognizer] works exactly the same but has a more disambiguated name from [BaseTapAndDragGestureRecognizer]. '
+  'This feature was deprecated after v3.9.0-19.0.pre.36.'
+)
+/// {@macro flutter.gestures.selectionrecognizers.TapAndPanGestureRecognizer}
 class TapAndDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions on a plane.
+  @Deprecated(
+    'Use [TapAndPanGestureRecognizer] instead. '
+    '[TapAndPanGestureRecognizer] works exactly the same but has a more disambiguated name from [BaseTapAndDragGestureRecognizer]. '
+    'This feature was deprecated after v3.9.0-19.0.pre.36.'
+  )
   TapAndDragGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
