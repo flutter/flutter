@@ -2874,7 +2874,6 @@ void main() {
     await tester.tap(find.text('Button 1'));
     await tester.pump();
     expect(find.byType(MenuItemButton), findsNWidgets(1));
-
   });
 }
 
