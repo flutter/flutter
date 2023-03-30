@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
-#include "impeller/renderer/sampler_descriptor.h"
+#include "impeller/core/sampler_descriptor.h"
 
 namespace impeller {
 
