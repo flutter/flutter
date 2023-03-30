@@ -9,9 +9,9 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/geometry/path.h"
-#include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
 
