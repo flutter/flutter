@@ -45,6 +45,7 @@ void main() {
       ),
     );
   });
+
   testWidgets('Table widget - control test', (WidgetTester tester) async {
     Future<void> run(TextDirection textDirection) async {
       await tester.pumpWidget(
@@ -1031,6 +1032,51 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('Hello'), findsOneWidget);
+  });
+
+  testWidgets('TableRow with no children throws an error message', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/119541.
+    String result = 'no exception';
+
+    // Test TableRow with children.
+    try {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                Text('A'),
+              ],
+            ),
+          ],
+        ),
+      ));
+    } on FlutterError catch (e) {
+      result = e.toString();
+    }
+
+    expect(result, 'no exception');
+
+    // Test TableRow with no children.
+    try {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          children: const <TableRow>[
+            TableRow(),
+          ],
+        ),
+      ));
+    } on FlutterError catch (e) {
+      result = e.toString();
+    }
+
+    expect(
+      result,
+      'One or more TableRow have no children.\n'
+      'Every TableRow in a Table must have at least one child, so there is no empty row.',
+    );
   });
 
   // TODO(ianh): Test handling of TableCell object
