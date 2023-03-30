@@ -1110,7 +1110,7 @@ void main() {
     expect(textInput1.width, 200);
     expect(menu1.width, 200);
   });
-  
+
   testWidgets('Semantics does not include hint when input is not empty', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     const String hintText = 'I am hintText';
