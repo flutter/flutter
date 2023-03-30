@@ -11,7 +11,6 @@
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/geometry/rect.h"
@@ -19,6 +18,7 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/renderer/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 
 namespace impeller {

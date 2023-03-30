@@ -9,9 +9,9 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
-#include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
 #include "impeller/renderer/capabilities.h"
+#include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
 

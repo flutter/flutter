@@ -8,8 +8,8 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/testing/testing.h"
-#include "impeller/core/shader_types.h"
 #include "impeller/renderer/shader_library.h"
+#include "impeller/renderer/shader_types.h"
 
 namespace impeller {
 
