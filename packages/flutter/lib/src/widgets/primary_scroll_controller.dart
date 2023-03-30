@@ -84,8 +84,10 @@ class PrimaryScrollController extends InheritedWidget {
   /// PrimaryScrollController.none into the tree to prevent further descendant
   /// ScrollViews from inheriting the current PrimaryScrollController.
   ///
+  /// For the direction in which active scrolling may be occurring, see
+  /// [ScrollDirection].
+  ///
   /// Defaults to [Axis.vertical].
-  // TODO(Piinks): clarify!
   final Axis? scrollDirection;
 
   /// The [TargetPlatform]s this controller is configured for [ScrollView]s to

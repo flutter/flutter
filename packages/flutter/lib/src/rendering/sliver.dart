@@ -173,7 +173,14 @@ class SliverConstraints extends Constraints {
 
   /// The direction in which the [scrollOffset] and [remainingPaintExtent]
   /// increase.
-  // TODO(Piinks): sample code
+  ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Radio] buttons in the
+  /// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+  /// configurations.
+  ///
+  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction.0.dart **
+  /// {@end-tool}
   final AxisDirection axisDirection;
 
   /// The direction in which the contents of slivers are ordered, relative to
@@ -197,7 +204,8 @@ class SliverConstraints extends Constraints {
   ///
   /// Normally, the absolute zero offset is determined by the viewport's
   /// [RenderViewport.center] and [RenderViewport.anchor] properties.
-  // TODO(Piinks): sample code
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   final GrowthDirection growthDirection;
 
   /// The direction in which the user is attempting to scroll, relative to the
@@ -216,7 +224,8 @@ class SliverConstraints extends Constraints {
   /// scroll offset. For example, [RenderSliverFloatingPersistentHeader] will
   /// only expand a floating app bar when the [userScrollDirection] is in the
   /// positive scroll offset direction.
-  // TODO(Piinks): sample code
+  ///
+  /// {@macro flutter.rendering.ScrollDirection.sample}
   final ScrollDirection userScrollDirection;
 
   /// The scroll offset, in this sliver's coordinate system, that corresponds to

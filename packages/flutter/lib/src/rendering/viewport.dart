@@ -1226,7 +1226,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 /// [Axis], anchored on a [center] sliver, which is placed at the zero scroll
 /// offset. The center widget is displayed in the viewport according to the
 /// [anchor] property.
-// TODO(Piinks): Add example for anchor
 ///
 /// Slivers that are earlier in the child list than [center] are displayed in
 /// reverse order in the reverse [axisDirection] starting from the [center]. For
@@ -1235,7 +1234,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 /// the child list than [center] are placed in order in the [axisDirection]. For
 /// example, in the preceding scenario, the first sliver after [center] is
 /// placed below the [center].
-// TODO(Piinks): Add example for center
+///
+/// {@macro flutter.rendering.GrowthDirection.sample}
 ///
 /// [RenderViewport] cannot contain [RenderBox] children directly. Instead, use
 /// a [RenderSliverList], [RenderSliverFixedExtentList], [RenderSliverGrid], or

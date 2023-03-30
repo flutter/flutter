@@ -823,10 +823,12 @@ class PageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
 
-  /// The axis along which the page view scrolls.
+  /// The [Axis] along which the scroll view's offset increases with each page.
+  ///
+  /// For the direction in which active scrolling may be occurring, see
+  /// [ScrollDirection].
   ///
   /// Defaults to [Axis.horizontal].
-  // TODO(Piinks): clarify!
   final Axis scrollDirection;
 
   /// Whether the page view scrolls in the reading direction.

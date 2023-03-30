@@ -114,10 +114,12 @@ abstract class ScrollView extends StatelessWidget {
        physics = physics ?? ((primary ?? false) || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null);
 
   /// {@template flutter.widgets.scroll_view.scrollDirection}
-  /// The axis along which the scroll view scrolls.
+  /// The [Axis] along which the scroll view's offset increases.
+  ///
+  /// For the direction in which active scrolling may be occurring, see
+  /// [ScrollDirection].
   ///
   /// Defaults to [Axis.vertical].
-  // TODO(Piinks): clarify!
   /// {@endtemplate}
   final Axis scrollDirection;
 

@@ -274,6 +274,8 @@ class ScrollEndNotification extends ScrollNotification {
 /// For the direction that the [ScrollView] is oriented to, and the direction
 /// contents are being laid out in, see [AxisDirection] & [GrowthDirection].
 ///
+/// {@macro flutter.rendering.ScrollDirection.sample}
+///
 /// See also:
 ///
 ///  * [ScrollNotification], which describes the notification lifecycle.
@@ -292,7 +294,8 @@ class UserScrollNotification extends ScrollNotification {
   /// of the [Viewport], which respectively represent the direction that the
   /// scroll offset is increasing in, and the direction that contents are being
   /// laid out in.
-  // TODO(Piinks): sample code
+  ///
+  /// {@macro flutter.rendering.ScrollDirection.sample}
   final ScrollDirection direction;
 
   @override
