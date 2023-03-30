@@ -7,8 +7,8 @@
 #include <cstddef>
 
 #include "flutter/fml/macros.h"
-#include "impeller/core/shader_types.h"
 #include "impeller/geometry/size.h"
+#include "impeller/renderer/shader_types.h"
 
 namespace impeller {
 

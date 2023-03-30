@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/entity/contents/color_source_contents.h"
+#include "color_source_contents.h"
 
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/geometry/point.h"
 
 namespace impeller {
 

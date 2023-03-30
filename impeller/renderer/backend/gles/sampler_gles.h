@@ -6,7 +6,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
-#include "impeller/core/sampler.h"
+#include "impeller/renderer/sampler.h"
 
 namespace impeller {
 
