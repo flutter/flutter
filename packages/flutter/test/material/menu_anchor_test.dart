@@ -2786,7 +2786,7 @@ void main() {
                 controller: controller,
                 menuChildren: <Widget> [
                   MenuItemButton(
-                    keepMenuOpen: true,
+                    closeOnActivate: false,
                     onPressed: () {},
                     child: const Text('Button 1'),
                   ),

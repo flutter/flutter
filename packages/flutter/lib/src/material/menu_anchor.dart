@@ -810,7 +810,7 @@ class MenuItemButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.leadingIcon,
     this.trailingIcon,
-    this.keepMenuOpen = false,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -874,8 +874,8 @@ class MenuItemButton extends StatefulWidget {
 
   /// Determines if the menuAnchor should stay open after a [MenuItemButton]
   /// has been pressed.
-  /// Defaults to false.
-  final bool keepMenuOpen;
+  /// Defaults to true.
+  final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1095,7 +1095,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
     widget.onPressed?.call();
-    if (!widget.keepMenuOpen) {
+    if (widget.closeOnActivate) {
       _MenuAnchorState._maybeOf(context)?._root._close();
     }
   }
@@ -1148,7 +1148,7 @@ class CheckboxMenuButton extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
-    this.keepMenuOpen = false,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -1253,8 +1253,8 @@ class CheckboxMenuButton extends StatelessWidget {
 
   /// Determines if the menuAnchor should stay open after a [MenuItemButton]
   /// has been pressed.
-  /// Defaults to false.
-  final bool keepMenuOpen;
+  /// Defaults to true.
+  final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1306,7 +1306,7 @@ class CheckboxMenuButton extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
-      keepMenuOpen: keepMenuOpen,
+      closeOnActivate: closeOnActivate,
       child: child,
     );
   }
@@ -1347,7 +1347,7 @@ class RadioMenuButton<T> extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
-    this.keepMenuOpen = false,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -1454,8 +1454,8 @@ class RadioMenuButton<T> extends StatelessWidget {
 
   /// Determines if the menuAnchor should stay open after a [MenuItemButton]
   /// has been pressed.
-  /// Defaults to false.
-  final bool keepMenuOpen;
+  /// Defaults to true.
+  final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1504,7 +1504,7 @@ class RadioMenuButton<T> extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
-      keepMenuOpen: keepMenuOpen,
+      closeOnActivate: closeOnActivate,
       child: child,
     );
   }
