@@ -78,9 +78,9 @@ TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
 }
 
 TEST_P(CompilerTest, BindingBaseForFragShader) {
-#ifndef IMPELLER_ENABLE_VULKAN
-  GTEST_SKIP();
-#endif
+  if (!TargetPlatformIsVulkan(GetParam())) {
+    GTEST_SKIP();
+  }
 
   ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
   ASSERT_TRUE(CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));

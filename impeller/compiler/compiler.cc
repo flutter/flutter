@@ -463,9 +463,10 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   }
 
   spirv_options.SetAutoBindUniforms(true);
-#ifdef IMPELLER_ENABLE_VULKAN
-  SetBindingBase(spirv_options);
-#endif
+  if (source_options.target_platform == TargetPlatform::kVulkan ||
+      source_options.target_platform == TargetPlatform::kRuntimeStageVulkan) {
+    SetBindingBase(spirv_options);
+  }
   spirv_options.SetAutoMapLocations(true);
 
   std::vector<std::string> included_file_names;

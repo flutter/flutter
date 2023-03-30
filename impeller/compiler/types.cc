@@ -314,6 +314,24 @@ bool TargetPlatformIsMetal(TargetPlatform platform) {
   FML_UNREACHABLE();
 }
 
+bool TargetPlatformIsVulkan(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform::kRuntimeStageVulkan:
+    case TargetPlatform::kVulkan:
+      return true;
+    case TargetPlatform::kMetalDesktop:
+    case TargetPlatform::kMetalIOS:
+    case TargetPlatform::kRuntimeStageMetal:
+    case TargetPlatform::kUnknown:
+    case TargetPlatform::kSkSL:
+    case TargetPlatform::kOpenGLES:
+    case TargetPlatform::kOpenGLDesktop:
+    case TargetPlatform::kRuntimeStageGLES:
+      return false;
+  }
+  FML_UNREACHABLE();
+}
+
 bool TargetPlatformBundlesSkSL(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform::kSkSL:
