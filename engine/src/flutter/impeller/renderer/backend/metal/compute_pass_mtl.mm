@@ -55,6 +55,8 @@ bool ComputePassMTL::OnEncodeCommands(const Context& context,
     return false;
   }
 
+  FML_DCHECK(!grid_size_.IsEmpty() && !thread_group_size_.IsEmpty());
+
   // TODO(dnfield): Support non-serial dispatch type on higher iOS versions.
   auto compute_command_encoder = [buffer_ computeCommandEncoder];
 

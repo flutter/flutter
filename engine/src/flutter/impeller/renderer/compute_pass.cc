@@ -47,6 +47,11 @@ bool ComputePass::AddCommand(ComputeCommand command) {
 }
 
 bool ComputePass::EncodeCommands() const {
+  if (grid_size_.IsEmpty() || thread_group_size_.IsEmpty()) {
+    FML_DLOG(WARNING) << "Attempted to encode a compute pass with an empty "
+                         "grid or thread group size.";
+    return false;
+  }
   auto context = context_.lock();
   // The context could have been collected in the meantime.
   if (!context) {
