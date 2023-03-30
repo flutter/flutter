@@ -8,9 +8,8 @@ import 'package:flutter/foundation.dart';
 /// The direction of a scroll, relative to the positive scroll offset axis given
 /// by an [AxisDirection] and a [GrowthDirection].
 ///
-/// This is often the opposite of [GrowthDirection], but further contrasts in
-/// that it has a third value, [idle], for the case where no scroll is
-/// occurring.
+/// This is similar to [GrowthDirection], but contrasts in that it has a third
+/// value, [idle], for the case where no scroll is occurring.
 ///
 /// This is used by [RenderSliverFloatingPersistentHeader] to only expand when
 /// the user is scrolling in the same direction as the detected scroll offset
@@ -20,9 +19,10 @@ import 'package:flutter/foundation.dart';
 ///
 ///  * [AxisDirection], which is a directional version of this enum (with values
 ///    like left and right, rather than just horizontal).
-///   * [GrowthDirection], the direction in which slivers and their content are
-///     ordered, relative to the scroll offset axis as specified by
-///     [AxisDirection].
+///  * [GrowthDirection], the direction in which slivers and their content are
+///    ordered, relative to the scroll offset axis as specified by
+///    [AxisDirection].
+///  * [UserScrollNotification]
 // TODO(Piinks): sample code
 enum ScrollDirection {
   /// No scrolling is underway.
