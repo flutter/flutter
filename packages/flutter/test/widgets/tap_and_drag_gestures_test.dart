@@ -16,11 +16,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late List<String> events;
-  late TapAndPanGestureRecognizer tapAndDrag;
+  late TapAndDragGestureRecognizer tapAndDrag;
 
   setUp(() {
     events = <String>[];
-    tapAndDrag = TapAndPanGestureRecognizer()
+    tapAndDrag = TapAndDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down
       ..maxConsecutiveTap = 3
       ..onTapDown = (TapDragDownDetails details) {
