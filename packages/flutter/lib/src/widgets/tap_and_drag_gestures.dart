@@ -14,10 +14,10 @@ double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
   return offset.distance;
 }
 
-// The possible states of a [TapAndDragGestureRecognizer].
+// The possible states of a [BaseTapAndDragGestureRecognizer].
 //
 // The recognizer advances from [ready] to [possible] when it starts tracking
-// a pointer in [TapAndDragGestureRecognizer.addAllowedPointer]. Where it advances
+// a pointer in [BaseTapAndDragGestureRecognizer.addAllowedPointer]. Where it advances
 // from there depends on the sequence of pointer events that is tracked by the
 // recognizer, following the initial [PointerDownEvent]:
 //
@@ -51,7 +51,7 @@ enum _DragState {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragDownDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onTapDown].
+/// Used by [BaseTapAndDragGestureRecognizer.onTapDown].
 typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 
 /// Details for [GestureTapDragDownCallback], such as the number of
@@ -59,8 +59,8 @@ typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onTapDown] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onTapDown] callback.
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
@@ -110,7 +110,7 @@ class TapDragDownDetails with Diagnosticable {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragUpDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onTapUp].
+/// Used by [BaseTapAndDragGestureRecognizer.onTapUp].
 typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 
 /// Details for [GestureTapDragUpCallback], such as the number of
@@ -118,8 +118,8 @@ typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onTapUp] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onTapUp] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
@@ -169,7 +169,7 @@ class TapDragUpDetails with Diagnosticable {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragStartDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onDragStart].
+/// Used by [BaseTapAndDragGestureRecognizer.onDragStart].
 typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details);
 
 /// Details for [GestureTapDragStartCallback], such as the number of
@@ -177,8 +177,8 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onDragStart] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onDragStart] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
@@ -242,7 +242,7 @@ class TapDragStartDetails with Diagnosticable {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragUpdateDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onDragUpdate].
+/// Used by [BaseTapAndDragGestureRecognizer.onDragUpdate].
 typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails details);
 
 /// Details for [GestureTapDragUpdateCallback], such as the number of
@@ -250,8 +250,8 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onDragUpdate] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onDragUpdate] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
@@ -374,7 +374,7 @@ class TapDragUpdateDetails with Diagnosticable {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragEndDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onDragEnd].
+/// Used by [BaseTapAndDragGestureRecognizer.onDragEnd].
 typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 
 /// Details for [GestureTapDragEndCallback], such as the number of
@@ -382,8 +382,8 @@ typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onDragEnd] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onDragEnd] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
@@ -443,7 +443,7 @@ class TapDragEndDetails with Diagnosticable {
 /// Signature for when the pointer that previously triggered a
 /// [GestureTapDragDownCallback] did not complete.
 ///
-/// Used by [TapAndDragGestureRecognizer.onCancel].
+/// Used by [BaseTapAndDragGestureRecognizer.onCancel].
 typedef GestureCancelCallback = void Function();
 
 // A mixin for [OneSequenceGestureRecognizer] that tracks the number of taps
@@ -642,14 +642,14 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 }
 
-/// Recognizes taps and movements.
+///  A base class for gesture recognizers that recognize taps and movements.
 ///
 /// Takes on the responsibilities of [TapGestureRecognizer] and
 /// [DragGestureRecognizer] in one [GestureRecognizer].
 ///
 /// ### Gesture arena behavior
 ///
-/// [TapAndDragGestureRecognizer] competes on the pointer events of
+/// [BaseTapAndDragGestureRecognizer] competes on the pointer events of
 /// [kPrimaryButton] only when it has at least one non-null `onTap*`
 /// or `onDrag*` callback.
 ///
@@ -673,7 +673,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// ### When competing with `TapGestureRecognizer` and `DragGestureRecognizer`
 ///
 /// Similar to [TapGestureRecognizer] and [DragGestureRecognizer],
-/// [TapAndDragGestureRecognizer] will not aggressively declare victory when it detects
+/// [BaseTapAndDragGestureRecognizer] will not aggressively declare victory when it detects
 /// a tap, so when it is competing with those gesture recognizers and others it has a chance
 /// of losing.
 ///
@@ -686,11 +686,11 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
 /// pointer does travel enough distance then the recognizer that entered the arena
 /// first will win. The gesture detected in this case is a drag.
-abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
+abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  TapAndDragGestureRecognizer({
+  BaseTapAndDragGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
@@ -740,7 +740,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [TapDragDownDetails] object.
   ///
-  /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@template flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   /// The number of consecutive taps, and the keys that were pressed on tap down
   /// are also provided in the callback's `details` argument.
   /// {@endtemplate}
@@ -759,7 +759,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [TapDragUpDetails] object.
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -773,7 +773,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
   /// argument, which is a [TapDragStartDetails] object. The [dragStartBehavior]
   /// determines this position.
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -786,7 +786,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
   /// The distance traveled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [TapDragUpdateDetails] object.
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -799,7 +799,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
   /// The velocity is provided in the callback's `details` argument, which is a
   /// [TapDragEndDetails] object.
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -1285,7 +1285,7 @@ abstract class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer 
 ///
 ///  * [HorizontalDragGestureRecognizer], for a similar recognizer that only recognizes
 ///  horizontal movement.
-class TapAndHorizontalDragGestureRecognizer extends TapAndDragGestureRecognizer {
+class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
@@ -1315,9 +1315,9 @@ class TapAndHorizontalDragGestureRecognizer extends TapAndDragGestureRecognizer 
 ///
 ///  * [PanGestureRecognizer], for a similar recognizer that only recognizes
 ///  movement.
-class TapAndPanGestureRecognizer extends TapAndDragGestureRecognizer {
+class TapAndDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions on a plane.
-  TapAndPanGestureRecognizer({
+  TapAndDragGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
   });
