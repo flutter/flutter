@@ -12,6 +12,9 @@
       "ui": {
         "uri": "lib/ui/ui.dart"
       },
+      "ui_web": {
+        "uri": "lib/ui_web/ui_web.dart"
+      },
       "_engine": {
         "uri": "lib/_engine/engine.dart"
       },
@@ -40,6 +43,9 @@
       "ui": {
         "uri": "lib/ui/ui.dart"
       },
+      "ui_web": {
+        "uri": "lib/ui_web/ui_web.dart"
+      },
       "_engine": {
         "uri": "lib/_engine/engine.dart"
       },
@@ -67,6 +73,9 @@
     "libraries": {
       "ui": {
         "uri": "lib/ui/ui.dart"
+      },
+      "ui_web": {
+        "uri": "lib/ui_web/ui_web.dart"
       },
       "_engine": {
         "uri": "lib/_engine/engine.dart"

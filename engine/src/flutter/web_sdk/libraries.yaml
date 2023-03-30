@@ -21,6 +21,9 @@ dartdevc:
     ui:
       uri: "lib/ui/ui.dart"
 
+    ui_web:
+      uri: "lib/ui_web/ui_web.dart"
+
     _engine:
       uri: "lib/_engine/engine.dart"
 
@@ -44,6 +47,9 @@ dart2js:
     ui:
       uri: "lib/ui/ui.dart"
 
+    ui_web:
+      uri: "lib/ui_web/ui_web.dart"
+
     _engine:
       uri: "lib/_engine/engine.dart"
 
@@ -66,6 +72,9 @@ wasm:
   libraries:
     ui:
       uri: "lib/ui/ui.dart"
+
+    ui_web:
+      uri: "lib/ui_web/ui_web.dart"
 
     _engine:
       uri: "lib/_engine/engine.dart"
