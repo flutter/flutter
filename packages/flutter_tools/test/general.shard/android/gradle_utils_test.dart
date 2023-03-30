@@ -431,7 +431,7 @@ allprojects {
         JavaGradleTestData(true, javaVersion: '1.10', gradleVersion: '4.7'),
         JavaGradleTestData(true, javaVersion: '1.9', gradleVersion: '4.3'),
         JavaGradleTestData(true, javaVersion: '1.8', gradleVersion: '2.0'),
-        // Values too old:
+        // Gradle too old for java version.
         JavaGradleTestData(false, javaVersion: '19', gradleVersion: '6.7'),
         JavaGradleTestData(false, javaVersion: '11', gradleVersion: '4.10.1'),
         JavaGradleTestData(false, javaVersion: '1.9', gradleVersion: '4.1'),
