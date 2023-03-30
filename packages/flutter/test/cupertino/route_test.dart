@@ -138,7 +138,7 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
       CupertinoPageRoute<void>(
@@ -153,7 +153,7 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.widgetWithText(CupertinoNavigationBar, 'A Phone'), findsOneWidget);
     expect(tester.getCenter(find.text('A Phone')).dx, 400.0);
@@ -415,65 +415,66 @@ void main() {
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(443.7, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(475.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(291.9, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(350.0, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(168.2, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(237.4, epsilon: 0.1));
+
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(149.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(89.5, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(48.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(54.4, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(26.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(33.2, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(14.3, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(20.4, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.41, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(12.6, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(3.0, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.4, epsilon: 0.1));
 
-    await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(0.0, epsilon: 0.1));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(156.3, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(411.03, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(308.1, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(484.35, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(431.7, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(530.67, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(510.4, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(557.61, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(551.8, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(573.88, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(573.8, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(583.86, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(585.6, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(590.26, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(592.6, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(594.58, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(596.9, epsilon: 0.1));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(597.66, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(600.0, epsilon: 0.1));
@@ -520,41 +521,41 @@ void main() {
     // entire screen.
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-70.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-55.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-137.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-111.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-192.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-161.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-227.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-200.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-246.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-226.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-255.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-242.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-260.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-251.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-264.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-257.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-266.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-261.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-267.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-263.0, epsilon: 1.0));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 40));
-    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-198.0, epsilon: 1.0));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-83.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 360));
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
@@ -673,40 +674,40 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
-    // The whole transition is 400ms based on CupertinoPageRoute.transitionDuration.
+    // The whole transition is 500ms based on CupertinoPageRoute.transitionDuration.
     // Break it up into small chunks.
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-87, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(537, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-69, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(609, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(301, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-136, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(362, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Translation slows down as time goes on.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-220, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(141, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-191, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(192, epsilon: 1));
 
     // Finish the rest of the animation
-    await tester.pump(const Duration(milliseconds: 250));
+    await tester.pump(const Duration(milliseconds: 350));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-179, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(262, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-197, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(190, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-100, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(499, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-129, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(437, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Translation slows down as time goes on.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-47, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(659, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-74, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(607, epsilon: 1));
   });
 
   testWidgets('Dragged pop gesture is linear', (WidgetTester tester) async {
@@ -1060,7 +1061,7 @@ void main() {
       expect(box, paintsShadowRect(dx: 468, color: const Color(0x01000000)));
       expect(box, paintsShadowRect(dx: 458, color: const Color(0x00000000)));
 
-      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // At the end of the animation, the shadow approaches full transparency
       expect(box, paintsShadowRect(dx: 794, color: const Color(0x01000000)));

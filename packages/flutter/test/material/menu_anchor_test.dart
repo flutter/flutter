@@ -945,6 +945,67 @@ void main() {
       expect(material.color, equals(Colors.red));
     });
 
+    testWidgets('MenuAnchor clip behavior', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          MaterialApp(
+              home: Material(
+                  child: Center(
+                    child: MenuAnchor(
+                      menuChildren: const <Widget> [
+                        MenuItemButton(
+                          child: Text('Button 1'),
+                        ),
+                      ],
+                      builder: (BuildContext context, MenuController controller, Widget? child) {
+                        return FilledButton(
+                          onPressed: () {
+                            controller.open();
+                          },
+                          child: const Text('Tap me'),
+                        );
+                      },
+                    ),
+                  )
+              )
+          )
+      );
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      // Test default clip behavior.
+      expect(getMenuBarMaterial(tester).clipBehavior, equals(Clip.hardEdge));
+      // Close the menu.
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(
+          MaterialApp(
+              home: Material(
+                  child: Center(
+                    child: MenuAnchor(
+                      clipBehavior: Clip.antiAlias,
+                      menuChildren: const <Widget> [
+                        MenuItemButton(
+                          child: Text('Button 1'),
+                        ),
+                      ],
+                      builder: (BuildContext context, MenuController controller, Widget? child) {
+                        return FilledButton(
+                          onPressed: () {
+                            controller.open();
+                          },
+                          child: const Text('Tap me'),
+                        );
+                      },
+                    ),
+                  )
+              )
+          )
+      );
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      // Test custom clip behavior.
+      expect(getMenuBarMaterial(tester).clipBehavior, equals(Clip.antiAlias));
+    });
+
     testWidgets('open and close works', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2057,7 +2118,7 @@ void main() {
             'focusNode: null',
             'menuStyle: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: MaterialStatePropertyAll(20.0), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
-            'clipBehavior: none',
+            'clipBehavior: hardEdge',
           ],
         ),
       );
