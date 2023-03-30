@@ -325,10 +325,21 @@ class KeepAliveHandle extends ChangeNotifier {
   /// This method does not call [dispose]. When the handle is not needed
   /// anymore, it must be [dispose]d regardless of whether notifying listeners.
   @Deprecated(
-    'Use dispose instead. '
+    'Use dispose and/or removeKeepAlive instead. '
     'This feature was deprecated after v3.3.0-0.0.pre.',
   )
   void release() {
+    notifyListeners();
+  }
+
+  /// Trigger the listeners to indicate that the widget
+  /// no longer needs to be kept alive.
+  /// A widget can be marked as needing to be kept alive again with
+  /// [KeepAliveNotification.dispatch].
+  ///
+  /// *This method does not call [dispose].* When the handle is not needed
+  /// anymore, it must be [dispose]d regardless of whether notifying listeners.
+  void removeKeepAlive() {
     notifyListeners();
   }
 
