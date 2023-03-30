@@ -46,6 +46,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   // widget must be the same across frames.
   late Widget _child;
   bool _keepingAlive = false;
+  bool _disposed = false;
 
   @override
   void initState() {
@@ -68,6 +69,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 
   @override
   void dispose() {
+    _disposed = true;
     if (_handles != null) {
       for (final Listenable handle in _handles!.keys) {
         handle.removeListener(_handles![handle]!);
@@ -146,7 +148,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   VoidCallback _createCallback(Listenable handle) {
     return () {
       assert(() {
-        if (!mounted) {
+        if (_disposed) {
           throw FlutterError(
             'AutomaticKeepAlive handle triggered after AutomaticKeepAlive was disposed.\n'
             'Widgets should always trigger their KeepAliveNotification handle when they are '
