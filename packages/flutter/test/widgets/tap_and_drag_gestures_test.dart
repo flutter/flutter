@@ -588,4 +588,94 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(1);
     expect(events, <String>['down#1']);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/102084.
+  testGesture('Does not get stuck waiting for a drag when losing the arena', (GestureTester tester) {
+    final TapAndDragGestureRecognizer tapAndDrag1 = _RejectingTapAndDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down
+      ..maxConsecutiveTap = 3
+      ..onTapDown = (TapDragDownDetails details) {
+        events.add('down#${details.consecutiveTapCount}');
+      }
+      ..onTapUp = (TapDragUpDetails details) {
+        events.add('up#${details.consecutiveTapCount}');
+      }
+      ..onDragStart = (TapDragStartDetails details) {
+        events.add('dragstart#${details.consecutiveTapCount}');
+      }
+      ..onDragUpdate = (TapDragUpdateDetails details) {
+        events.add('dragupdate#${details.consecutiveTapCount}');
+      }
+      ..onDragEnd = (TapDragEndDetails details) {
+        events.add('dragend#${details.consecutiveTapCount}');
+      }
+      ..onCancel = () {
+        events.add('cancel');
+      };
+
+    const PointerDownEvent horizontalDragDown = PointerDownEvent(
+      pointer: 6,
+      position: Offset(10.0, 10.0),
+    );
+    const PointerMoveEvent horizontalDragMove = PointerMoveEvent(
+      pointer: 6,
+      position: Offset(55.0, 10.0),
+    );
+    const PointerUpEvent horizontalDragUp = PointerUpEvent(
+      pointer: 6,
+      position: Offset(55.0, 10.0),
+    );
+
+    // TODO(justinmc): Either do this 2 detector approach, or extend it and dont accept?
+
+    print('justin start drag');
+    /*
+    tapAndDrag.addPointer(horizontalDragDown);
+    tester.closeArena(horizontalDragDown.pointer);
+    tester.route(horizontalDragDown);
+    tester.route(horizontalDragMove);
+    tester.route(horizontalDragUp);
+    GestureBinding.instance.gestureArena.sweep(horizontalDragDown.pointer);
+    expect(events, <String>['down#1', 'dragstart#1', 'dragend#1']);
+    */
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    tapAndDrag1.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+    tester.route(pointer.move(const Offset(50.0, 10.0)));
+    tester.route(pointer.up());
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(events, <String>['down#1', 'dragstart#1', 'dragupdate#1', 'dragend#1']);
+    print('justin done drag\n');
+
+    print('justin start tap');
+    events.clear();
+    tester.async.elapse(const Duration(milliseconds: 1000));
+    tapAndDrag1.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['down#1', 'up#1']);
+    print('justin done tap\n');
+
+    print('justin start second tap');
+    events.clear();
+    tester.async.elapse(const Duration(milliseconds: 1000));
+    tapAndDrag1.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+    tester.route(up2);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(events, <String>['down#1', 'up#1']);
+  });
+}
+
+class _RejectingTapAndDragGestureRecognizer extends TapAndDragGestureRecognizer {
+  @override
+  void acceptGesture(int pointer) {
+    print('justin should I accept this? $pointer');
+    return;
+  }
 }

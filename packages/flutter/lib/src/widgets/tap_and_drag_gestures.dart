@@ -955,6 +955,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     _wonArenaForPrimaryPointer = true;
 
+    print('justin acceptGesture $_start, just set _wonArenaForPrimaryPointer to true');
     if (_start != null) {
       _acceptDrag(_start!);
     }
@@ -999,9 +1000,12 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         _checkDragEnd();
     }
 
+    print('justin didStopTrackingLastPointer would usually clear start here');
     _stopDeadlineTimer();
     _dragState = _DragState.ready;
     _pastSlopTolerance = false;
+    // TODO(justinmc): Undo this when test is working.
+    //_start = null;
   }
 
   @override
@@ -1032,6 +1036,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       if (_dragState == _DragState.accepted) {
         _checkDragUpdate(event);
       } else if (_dragState == _DragState.possible) {
+        print('justin possible $_start');
         if (_start == null) {
           // Only check for a drag if the start of a drag was not already identified.
           _checkDrag(event);
@@ -1081,9 +1086,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   String get debugDescription => 'tap_and_drag';
 
   void _acceptDrag(PointerEvent event) {
+    print('justin _acceptDrag $_wonArenaForPrimaryPointer');
     if (!_wonArenaForPrimaryPointer) {
       return;
     }
+    print('justin drag accepted');// \n${StackTrace.current}');
     _dragState = _DragState.accepted;
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
@@ -1111,7 +1118,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       untransformedDelta: event.localDelta,
       untransformedEndPosition: event.localPosition
     ).distance * 1.sign;
+    print('justin _checkDrag has enough? ${event.localDelta}');
     if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
+      print('justin _checkDrag setting _start');
       _start = event;
     }
   }
@@ -1173,6 +1182,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       invokeCallback<void>('onDragStart', () => onDragStart!(details));
     }
 
+    print('justin _checkDragStart clearing _start');
     _start = null;
   }
 
@@ -1265,6 +1275,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   }
 
   void _resetTaps() {
+    print('justin reset taps');
     _sentTapDown = false;
     _wonArenaForPrimaryPointer = false;
     _primaryPointer = null;
