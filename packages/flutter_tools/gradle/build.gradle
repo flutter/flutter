@@ -2,28 +2,19 @@ plugins {
     id 'groovy-gradle-plugin'
 }
 
-sourceSets {
-    main {
-        groovy {
-            srcDirs += ['.']
-        }
-    }
-}
-
 repositories {
     mavenCentral()
     google()
 }
 
-group = 'dev.flutter'
+group = 'dev.flutter.plugin'
 version = '1.0.0'
 
 gradlePlugin {
-    // Define the plugin
     plugins {
         blahblah {
             id = 'dev.flutter.flutter-gradle-plugin'
-            implementationClass = 'FlutterPlugin'
+            implementationClass = 'dev.flutter.plugin.FlutterPlugin'
         }
     }
 }
@@ -35,5 +26,5 @@ dependencies {
 }
 
 tasks.withType(Jar) {
-    duplicatesStrategy = DuplicatesStrategy.WARN
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
