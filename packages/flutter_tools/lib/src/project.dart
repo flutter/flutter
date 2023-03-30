@@ -574,12 +574,17 @@ class AndroidProject extends FlutterProjectPlatform {
     String? localAgpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
 
-
-
     // TODO Begin Android Studio <-> AGP Validation.
     // https://developer.android.com/studio/releases/gradle-plugin#android_gradle_plugin_and_android_studio_compatibility
 
-    return gradle.validateGradleAndAgp(globals.logger, gradleV: localGradleVersion, agpV: localAgpVersion);
+    final bool compatibleGradleAgp = gradle.validateGradleAndAgp(
+        globals.logger,
+        gradleV: localGradleVersion,
+        agpV: localAgpVersion);
+
+    final bool compatibleJavaGradle = gradle.validateJavaGradle(javaV: javaVersion, gradleV: localGradleVersion);
+
+    return compatibleGradleAgp;
   }
 
   bool get isUsingGradle {

@@ -405,6 +405,13 @@ allprojects {
     });
 
     // TODO add test for _isWithinVersionRange
+
+    testWithoutContext('validates gradle/agp versions', () async {
+      expect(
+          validateJavaGradle(javaV: '11', gradleV: '7.5'),
+          isFalse,
+        );
+    });
   });
 }
 

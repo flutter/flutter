@@ -279,7 +279,18 @@ String _formatParseWarning(String content) {
       ' and if one does not exist file a new issue.';
 }
 
-// Validate that Gradle version and AGP are compatible.
+// Validate that Gradle version and AGP are compatible with each other.
+//
+// Returns true if versions are compatible.
+// Null Gradle version or AGP version returns false.
+// If compatability can not be evaulated returns false.
+// If versions are newer than the max known version a warning is logged and true
+// returned.
+//
+// Source of truth found here:
+// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+// AGP has a minimim version of gradle required but no max starting at
+// AGP version 2.3.0+.
 bool validateGradleAndAgp(Logger logger,
     {required String? gradleV, required String? agpV}) {
   // Update these when new versions of AGP or Gradle come out.
@@ -291,7 +302,6 @@ bool validateGradleAndAgp(Logger logger,
   const String oldestSupportedGradleVersion = '4.10.1';
 
   // Begin Gradle <-> AGP validation.
-  // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 
   if (gradleV == null || agpV == null) {
     logger
@@ -401,7 +411,20 @@ bool validateGradleAndAgp(Logger logger,
 
   logger.printTrace('Unknown Gradle-Agp compatability');
   // TODO should we default to true or false here?
-  return true;
+  return false;
+}
+
+// Validate that the [javaVersion] and Gradle version are compatible with
+// each other.
+bool validateJavaGradle({required String? javaV, required String? gradleV}) {
+  if (javaV == null) {
+    return false;
+  }
+  if (gradleV == null) {
+    return false;
+  }
+
+  return false;
 }
 
 /// Returns true if [targetVersion] is within the range [min] and [max]
