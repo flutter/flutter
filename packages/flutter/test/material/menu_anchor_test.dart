@@ -2738,6 +2738,81 @@ void main() {
       expect(radioValue, 1);
     });
   });
+
+  testWidgets("MenuItemButton doesn't close when pressed", (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MenuAnchor(
+              controller: controller,
+              menuChildren: <Widget> [
+                MenuItemButton(
+                  onPressed: () {},
+                  child: const Text('Button 1'),
+                ),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return FilledButton(
+                  onPressed: () {
+                    controller.open();
+                  },
+                  child: const Text('Tap me'),
+                );
+              },
+            ),
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.text('Tap me'));
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsNWidgets(1));
+
+    await tester.tap(find.text('Button 1'));
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsNWidgets(0));
+
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                controller: controller,
+                menuChildren: <Widget> [
+                  MenuItemButton(
+                    keepMenuOpen: true,
+                    onPressed: () {},
+                    child: const Text('Button 1'),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () {
+                      controller.open();
+                    },
+                    child: const Text('Tap me'),
+                  );
+                },
+              ),
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.text('Tap me'));
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsNWidgets(1));
+
+    await tester.tap(find.text('Button 1'));
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsNWidgets(1));
+
+  });
 }
 
 List<Widget> createTestMenus({
