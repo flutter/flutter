@@ -217,6 +217,10 @@ struct Settings {
   bool enable_impeller = false;
 #endif
 
+  // Enable Vulkan validation on backends that support it. The validation layers
+  // must be available to the application.
+  bool enable_vulkan_validation = false;
+
   // Data set by platform-specific embedders for use in font initialization.
   uint32_t font_initialization_data = 0;
 

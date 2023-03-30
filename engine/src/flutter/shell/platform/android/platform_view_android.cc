@@ -32,10 +32,12 @@ namespace flutter {
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    bool enable_impeller)
+    bool enable_impeller,
+    bool enable_vulkan_validation)
     : android_context_(context),
       jni_facade_(std::move(jni_facade)),
-      enable_impeller_(enable_impeller) {}
+      enable_impeller_(enable_impeller),
+      enable_vulkan_validation_(enable_vulkan_validation) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
@@ -48,8 +50,8 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
       if (enable_impeller_) {
 // TODO(kaushikiska@): Enable this after wiring a preference for Vulkan backend.
 #if false
-        return std::make_unique<AndroidSurfaceVulkanImpeller>(android_context_,
-                                                              jni_facade_);
+        return std::make_unique<AndroidSurfaceVulkanImpeller>(
+            android_context_, jni_facade_, enable_vulkan_validation_);
 
 #else
         return std::make_unique<AndroidSurfaceGLImpeller>(android_context_,
@@ -114,10 +116,12 @@ PlatformViewAndroid::PlatformViewAndroid(
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-        android_context_, jni_facade_,
-        delegate.OnPlatformViewGetSettings().enable_impeller);
+        android_context_,                                              //
+        jni_facade_,                                                   //
+        delegate.OnPlatformViewGetSettings().enable_impeller,          //
+        delegate.OnPlatformViewGetSettings().enable_vulkan_validation  //
+    );
     android_surface_ = surface_factory_->CreateSurface();
-
     FML_CHECK(android_surface_ && android_surface_->IsValid())
         << "Could not create an OpenGL, Vulkan or Software surface to set up "
            "rendering.";

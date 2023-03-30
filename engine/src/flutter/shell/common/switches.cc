@@ -450,6 +450,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
         enable_impeller_value.empty() || "true" == enable_impeller_value;
   }
 
+  settings.enable_vulkan_validation =
+      command_line.HasOption(FlagForSwitch(Switch::EnableVulkanValidation));
+
   settings.enable_embedder_api =
       command_line.HasOption(FlagForSwitch(Switch::EnableEmbedderAPI));
 
