@@ -72,9 +72,8 @@ class GradleUtils {
     final Directory androidDir = project.android.hostAppGradleRoot;
     injectGradleWrapperIfNeeded(androidDir);
 
-    final File gradle = androidDir.childFile(
-      _platform.isWindows ? 'gradlew.bat' : 'gradlew',
-    );
+    final File gradle = androidDir.childFile(getGradlewFileName(_platform));
+
     if (gradle.existsSync()) {
       _logger.printTrace('Using gradle from ${gradle.absolute.path}.');
       // If the Gradle executable doesn't have execute permission,
@@ -289,4 +288,13 @@ void exitWithNoSdkMessage() {
     '${globals.logger.terminal.warningMark} No Android SDK found. '
     'Try setting the ANDROID_SDK_ROOT environment variable.'
   );
+}
+
+// return gradlew file name based on the platform.
+String getGradlewFileName(Platform platform) {
+  if (platform.isWindows) {
+    return 'gradlew.bat';
+  } else {
+    return 'gradlew';
+  }
 }

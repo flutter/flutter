@@ -4,6 +4,8 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart'
+    show getGradlewFileName;
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -42,7 +44,7 @@ void main() {
 
     final Directory androidApp = tempDir.childDirectory('android');
     result = await processManager.run(<String>[
-      './gradlew',
+      './${getGradlewFileName(platform)}',
       ...getLocalEngineArguments(),
       '-q', // quiet output.
       'javaVersion',

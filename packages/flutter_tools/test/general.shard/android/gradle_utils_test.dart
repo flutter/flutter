@@ -186,5 +186,11 @@ void main() {
         androidDirectory.childFile('gradlew').path,
       );
     });
+    testWithoutContext('getGradleFileName for notWindows', () {
+      expect(getGradlewFileName(notWindowsPlatform), 'gradlew');
+    });
+    testWithoutContext('getGradleFileName for windows', () {
+      expect(getGradlewFileName(windowsPlatform), 'gradlew.bat');
+    });
   });
 }
