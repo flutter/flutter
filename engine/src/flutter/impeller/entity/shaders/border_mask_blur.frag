@@ -15,42 +15,42 @@
 // integral (using an erf approximation) to the 4 edges of the UV rectangle and
 // multiplying them.
 
-uniform f16sampler2D texture_sampler;
+uniform sampler2D texture_sampler;
 
 uniform FragInfo {
-  float16_t src_factor;
-  float16_t inner_blur_factor;
-  float16_t outer_blur_factor;
+  float src_factor;
+  float inner_blur_factor;
+  float outer_blur_factor;
 
-  f16vec2 sigma_uv;
+  vec2 sigma_uv;
 }
 frag_info;
 
-in f16vec2 v_texture_coords;
+in vec2 v_texture_coords;
 
-out f16vec4 frag_color;
+out vec4 frag_color;
 
-float16_t BoxBlurMask(f16vec2 uv) {
+float BoxBlurMask(vec2 uv) {
   // LTRB
-  return IPGaussianIntegral(uv.x, frag_info.sigma_uv.x) *          //
-         IPGaussianIntegral(uv.y, frag_info.sigma_uv.y) *          //
-         IPGaussianIntegral(1.0hf - uv.x, frag_info.sigma_uv.x) *  //
-         IPGaussianIntegral(1.0hf - uv.y, frag_info.sigma_uv.y);
+  return IPGaussianIntegral(uv.x, frag_info.sigma_uv.x) *      //
+         IPGaussianIntegral(uv.y, frag_info.sigma_uv.y) *      //
+         IPGaussianIntegral(1 - uv.x, frag_info.sigma_uv.x) *  //
+         IPGaussianIntegral(1 - uv.y, frag_info.sigma_uv.y);
 }
 
 void main() {
-  f16vec4 image_color = texture(texture_sampler, v_texture_coords);
-  float16_t blur_factor = BoxBlurMask(v_texture_coords);
+  vec4 image_color = texture(texture_sampler, v_texture_coords);
+  float blur_factor = BoxBlurMask(v_texture_coords);
 
-  float16_t within_bounds =
-      float16_t(v_texture_coords.x >= 0.0hf && v_texture_coords.y >= 0.0hf &&
-                v_texture_coords.x < 1.0hf && v_texture_coords.y < 1.0hf);
-  float16_t inner_factor =
+  float within_bounds =
+      float(v_texture_coords.x >= 0 && v_texture_coords.y >= 0 &&
+            v_texture_coords.x < 1 && v_texture_coords.y < 1);
+  float inner_factor =
       (frag_info.inner_blur_factor * blur_factor + frag_info.src_factor) *
       within_bounds;
-  float16_t outer_factor =
-      frag_info.outer_blur_factor * blur_factor * (1.0hf - within_bounds);
+  float outer_factor =
+      frag_info.outer_blur_factor * blur_factor * (1 - within_bounds);
 
-  float16_t mask_factor = inner_factor + outer_factor;
+  float mask_factor = inner_factor + outer_factor;
   frag_color = image_color * mask_factor;
 }

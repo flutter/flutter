@@ -11,10 +11,10 @@ frame_info;
 
 in vec2 position;
 
-out f16vec2 v_position;
+out vec2 v_position;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
   // The fragment stage uses local coordinates to compute the blur.
-  v_position = f16vec2(position);
+  v_position = position;
 }
