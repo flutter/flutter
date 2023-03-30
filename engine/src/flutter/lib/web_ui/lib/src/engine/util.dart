@@ -4,9 +4,11 @@
 
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
@@ -735,5 +737,104 @@ extension FirstWhereOrNull<T> on Iterable<T> {
       }
     }
     return null;
+  }
+}
+
+typedef _LruCacheEntry<K extends Object, V extends Object> = ({K key, V value});
+
+/// Caches up to a [maximumSize] key-value pairs.
+///
+/// Call [cache] to cache a key-value pair.
+class LruCache<K extends Object, V extends Object> {
+  LruCache(this.maximumSize);
+
+  /// The maximum number of key/value pairs this cache can contain.
+  ///
+  /// To avoid exceeding this limit the cache remove least recently used items.
+  final int maximumSize;
+
+  /// A doubly linked list of the objects in the cache.
+  ///
+  /// This makes it fast to move a recently used object to the front.
+  final DoubleLinkedQueue<_LruCacheEntry<K, V>> _itemQueue = DoubleLinkedQueue<_LruCacheEntry<K, V>>();
+
+  @visibleForTesting
+  DoubleLinkedQueue<_LruCacheEntry<K, V>> get debugItemQueue => _itemQueue;
+
+  /// A map of objects to their associated node in the [_itemQueue].
+  ///
+  /// This makes it fast to find the node in the queue when we need to
+  /// move the object to the front of the queue.
+  final Map<K, DoubleLinkedQueueEntry<_LruCacheEntry<K, V>>> _itemMap = <K, DoubleLinkedQueueEntry<_LruCacheEntry<K, V>>>{};
+
+  @visibleForTesting
+  Map<K, DoubleLinkedQueueEntry<_LruCacheEntry<K, V>>> get itemMap => _itemMap;
+
+  /// The number of objects in the cache.
+  int get length => _itemQueue.length;
+
+  /// Whether or not [object] is in the cache.
+  ///
+  /// This is only for testing.
+  @visibleForTesting
+  bool debugContainsValue(V object) {
+    return _itemMap.containsValue(object);
+  }
+
+  @visibleForTesting
+  bool debugContainsKey(K key) {
+    return _itemMap.containsKey(key);
+  }
+
+  /// Returns the cached value associated with the [key].
+  ///
+  /// If the value is not in the cache, returns null.
+  V? operator[](K key) {
+    return _itemMap[key]?.element.value;
+  }
+
+  /// Caches the given [key]/[value] pair in this cache.
+  ///
+  /// If the pair is not already in the cache, adds it to the cache as the most
+  /// recently used pair.
+  ///
+  /// If the [key] is already in the cache, moves it to the most recently used
+  /// position. If the [value] corresponding to the [key] is different from
+  /// what's in the cache, updates the value.
+  void cache(K key, V value) {
+    final DoubleLinkedQueueEntry<_LruCacheEntry<K, V>>? item = _itemMap[key];
+    if (item == null) {
+      // New key-value pair, just add.
+      _add(key, value);
+    } else if (item.element.value != value) {
+      // Key already in the cache, but value is new. Re-add.
+      item.remove();
+      _add(key, value);
+    } else {
+      // Key-value pair already in the cache, move to most recently used.
+      item.remove();
+      _itemQueue.addFirst(item.element);
+      _itemMap[key] = _itemQueue.firstEntry()!;
+    }
+  }
+
+  void clear() {
+    _itemQueue.clear();
+    _itemMap.clear();
+  }
+
+  void _add(K key, V value) {
+    _itemQueue.addFirst((key: key, value: value));
+    _itemMap[key] = _itemQueue.firstEntry()!;
+
+    if (_itemQueue.length > maximumSize) {
+      _removeLeastRecentlyUsedValue();
+    }
+  }
+
+  void _removeLeastRecentlyUsedValue() {
+    final bool didRemove = _itemMap.remove(_itemQueue.last.key) != null;
+    assert(didRemove);
+    _itemQueue.removeLast();
   }
 }

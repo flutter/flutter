@@ -17,6 +17,8 @@ import 'skia_object_cache.dart';
 import 'text_fragmenter.dart';
 import 'util.dart';
 
+final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
+
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 String? _effectiveFontFamily(String? fontFamily) {
   return ui.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
@@ -887,7 +889,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
   /// Builds the CkParagraph with the builder and deletes the builder.
   SkParagraph _buildSkParagraph() {
-    if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
+    if (_ckRequiresClientICU) {
       injectClientICU(_paragraphBuilder);
     }
     final SkParagraph result = _paragraphBuilder.build();
