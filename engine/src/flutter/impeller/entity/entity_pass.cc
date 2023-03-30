@@ -478,6 +478,15 @@ bool EntityPass::OnRender(ContentContext& renderer,
     return false;
   }
 
+  if (!(clear_color_ == Color::BlackTransparent())) {
+    // Force the pass context to create at least one new pass if the clear color
+    // is present. The `EndPass` first ensures that the clear color will get
+    // applied even if this EntityPass is getting collapsed into the parent
+    // pass.
+    pass_context.EndPass();
+    pass_context.GetRenderPass(pass_depth);
+  }
+
   auto render_element = [&stencil_depth_floor, &pass_context, &pass_depth,
                          &renderer, &stencil_coverage_stack,
                          &global_pass_position](Entity& element_entity) {
