@@ -1,0 +1,5 @@
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+apply from: "/Users/bartek/fvm/versions/master/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy"
+apply plugin: FlutterPlugin

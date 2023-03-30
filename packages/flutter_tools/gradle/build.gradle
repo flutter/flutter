@@ -14,7 +14,7 @@ gradlePlugin {
     plugins {
         blahblah {
             id = 'dev.flutter.flutter-gradle-plugin'
-            implementationClass = 'dev.flutter.plugin.FlutterPlugin'
+            implementationClass = 'FlutterPlugin'
         }
     }
 }
@@ -23,8 +23,4 @@ dependencies {
     // When bumping, also update ndkVersion in FlutterExtension, as well as the
     // Android Gradle Plugin version in ../lib/src/android/gradle_utils.dart.
     compileOnly("com.android.tools.build:gradle:7.2.2")
-}
-
-tasks.withType(Jar) {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
