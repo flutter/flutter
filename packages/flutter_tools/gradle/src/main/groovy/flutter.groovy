@@ -6,8 +6,6 @@
 
 import static groovy.io.FileType.FILES
 
-//import com.android.builder.model.AndroidProject
-//import com.android.build.OutputFile
 import groovy.json.JsonSlurper
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -850,13 +848,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // for only the output APK, not for the variant itself. Skipping this step simply
                     // causes Gradle to use the value of variant.versionCode for the APK.
                     // For more, see https://developer.android.com/studio/build/configure-apk-splits
-                    project.logger.quiet("variant is: ${variant.getClass()}")
-                    //def outputFile = OutputFile.ABI
-                    //project.logger.quiet("outputFile: ${outputFile}, type: ${outputFile.getClass()}")
-                    def filter = output.getFilter("ABI") // using String to not import AGP
-                    project.logger.quiet("filter: ${filter}, type: ${filter.getClass()}")
-                    def abiVersionCode = ABI_VERSION.get(filter)
-                    project.logger.quiet("abiVersionCode: $abiVersionCode")
+                    def abiVersionCode = ABI_VERSION.get(output.getFilter("ABI"))
                     if (abiVersionCode != null) {
                         output.versionCodeOverride =
                             abiVersionCode * 1000 + variant.versionCode
