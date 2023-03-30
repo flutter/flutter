@@ -582,7 +582,7 @@ class AndroidProject extends FlutterProjectPlatform {
         gradleV: localGradleVersion,
         agpV: localAgpVersion);
 
-    final bool compatibleJavaGradle = gradle.validateJavaGradle(javaV: javaVersion, gradleV: localGradleVersion);
+    final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: localGradleVersion);
 
     return compatibleGradleAgp;
   }

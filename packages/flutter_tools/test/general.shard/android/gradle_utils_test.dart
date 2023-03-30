@@ -404,13 +404,69 @@ allprojects {
       }
     });
 
-    // TODO add test for _isWithinVersionRange
+    // TODO add test for _isWithinVersionRange inclusive min and max
 
     testWithoutContext('validates gradle/agp versions', () async {
-      expect(
-          validateJavaGradle(javaV: '11', gradleV: '7.5'),
-          isFalse,
+      final List<JavaGradleTestData> testData = <JavaGradleTestData>[
+        // Values too new *these need to update* when
+        // max supported java and max known gradle versions are updated:
+        // Newer tools version does not even meet current gradle version requiremnts.
+        JavaGradleTestData(false, javaVersion: '20', gradleVersion: '7.5'),
+        // Newer tools version requires newer gradle version.
+        JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.1'),
+        // Max known unsuported java version.
+        JavaGradleTestData(true, javaVersion: '24', gradleVersion: '8.1'),
+
+        // Minimims as defined in
+        // https://docs.gradle.org/current/userguide/compatibility.html#java
+        JavaGradleTestData(true, javaVersion: '19', gradleVersion: '7.6'),
+        JavaGradleTestData(true, javaVersion: '18', gradleVersion: '7.5'),
+        JavaGradleTestData(true, javaVersion: '17', gradleVersion: '7.3'),
+        JavaGradleTestData(true, javaVersion: '16', gradleVersion: '7.0'),
+        JavaGradleTestData(true, javaVersion: '15', gradleVersion: '6.7'),
+        JavaGradleTestData(true, javaVersion: '14', gradleVersion: '6.3'),
+        JavaGradleTestData(true, javaVersion: '13', gradleVersion: '6.0'),
+        JavaGradleTestData(true, javaVersion: '12', gradleVersion: '5.4'),
+        JavaGradleTestData(true, javaVersion: '11', gradleVersion: '5.0'),
+        JavaGradleTestData(true, javaVersion: '1.10', gradleVersion: '4.7'),
+        JavaGradleTestData(true, javaVersion: '1.9', gradleVersion: '4.3'),
+        JavaGradleTestData(true, javaVersion: '1.8', gradleVersion: '2.0'),
+        // Values too old:
+        JavaGradleTestData(false, javaVersion: '19', gradleVersion: '6.7'),
+        JavaGradleTestData(false, javaVersion: '11', gradleVersion: '4.10.1'),
+        JavaGradleTestData(false, javaVersion: '1.9', gradleVersion: '4.1'),
+        // Null values:
+        // ignore: avoid_redundant_argument_values
+        JavaGradleTestData(false, javaVersion: null, gradleVersion: '7.2'),
+        // ignore: avoid_redundant_argument_values
+        JavaGradleTestData(false, javaVersion: '11', gradleVersion: null),
+        // ignore: avoid_redundant_argument_values
+        JavaGradleTestData(false, javaVersion: null, gradleVersion: null),
+        //Higher gradle cases:
+        JavaGradleTestData(true, javaVersion: '19', gradleVersion: '8.0'),
+        JavaGradleTestData(true, javaVersion: '18', gradleVersion: '8.0'),
+        JavaGradleTestData(true, javaVersion: '17', gradleVersion: '7.5'),
+        JavaGradleTestData(true, javaVersion: '16', gradleVersion: '7.3'),
+        JavaGradleTestData(true, javaVersion: '15', gradleVersion: '7.3'),
+        JavaGradleTestData(true, javaVersion: '14', gradleVersion: '7.0'),
+        JavaGradleTestData(true, javaVersion: '13', gradleVersion: '6.7'),
+        JavaGradleTestData(true, javaVersion: '12', gradleVersion: '6.3'),
+        JavaGradleTestData(true, javaVersion: '11', gradleVersion: '6.0'),
+        JavaGradleTestData(true, javaVersion: '1.10', gradleVersion: '5.4'),
+        JavaGradleTestData(true, javaVersion: '1.9', gradleVersion: '5.0'),
+        JavaGradleTestData(true, javaVersion: '1.8', gradleVersion: '4.3'),
+      ];
+      for (final JavaGradleTestData data in testData) {
+        expect(
+          validateJavaGradle(
+            BufferLogger.test(),
+            javaV: data.javaVersion,
+            gradleV: data.gradleVersion,
+          ),
+          data.validPair ? isTrue : isFalse,
+          reason: 'J: ${data.javaVersion}, G: ${data.gradleVersion}'
         );
+      }
     });
   });
 }
@@ -419,5 +475,12 @@ class GradleAgpTestData {
   GradleAgpTestData(this.validPair, {this.gradleVersion, this.agpVersion});
   final String? gradleVersion;
   final String? agpVersion;
+  final bool validPair;
+}
+
+class JavaGradleTestData {
+  JavaGradleTestData(this.validPair, {this.javaVersion, this.gradleVersion});
+  final String? gradleVersion;
+  final String? javaVersion;
   final bool validPair;
 }
