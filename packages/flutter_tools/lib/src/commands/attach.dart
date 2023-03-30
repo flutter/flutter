@@ -225,7 +225,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
 
     debugPort;
-    if (targetDevice is FuchsiaDevice && debugPort == null && debugUri == null && argResults!.wasParsed(FlutterCommand.ipv6Flag)) {
+    if (targetDevice is FuchsiaDevice &&
+        debugPort == null &&
+        debugUri == null &&
+        argResults!.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
         'When the --debug-port or --debug-url is unknown, this command determines '
         'the value of --ipv6 on its own.',
