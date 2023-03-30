@@ -136,6 +136,17 @@ class Table extends RenderObjectWidget {
        }()),
        assert(() {
          if (children.isNotEmpty) {
+           if (children.any((TableRow row) => row.children.isEmpty)) {
+             throw FlutterError(
+               'One or more TableRow have no children.\n'
+               'Every TableRow in a Table must have at least one child, so there is no empty row. ',
+             );
+           }
+         }
+         return true;
+       }()),
+       assert(() {
+         if (children.isNotEmpty) {
            final int cellCount = children.first.children.length;
            if (children.any((TableRow row) => row.children.length != cellCount)) {
              throw FlutterError(
