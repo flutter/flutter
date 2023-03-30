@@ -11,6 +11,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/core/sampler.h"
 #include "impeller/renderer/backend/metal/allocator_mtl.h"
 #include "impeller/renderer/backend/metal/command_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/gpu_tracer_mtl.h"
@@ -18,7 +19,6 @@
 #include "impeller/renderer/backend/metal/shader_library_mtl.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/context.h"
-#include "impeller/renderer/sampler.h"
 
 namespace impeller {
 

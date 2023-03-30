@@ -10,10 +10,10 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/core/texture.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
 
