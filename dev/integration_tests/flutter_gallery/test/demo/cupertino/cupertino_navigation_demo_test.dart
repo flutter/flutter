@@ -32,7 +32,7 @@ void main() {
     // Tap some row to go to the next page.
     await tester.tap(find.text('Buy this cool color').first);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     await expectLater(
       find.byType(CupertinoNavigationDemo),
