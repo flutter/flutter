@@ -6,10 +6,10 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ExampleApp extends StatelessWidget {
+  const ExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -61,8 +61,8 @@ class MyWidget extends StatelessWidget {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Icon>[
-                            Icon(Icons.arrow_forward_rounded),
-                            Icon(Icons.arrow_forward_rounded),
+                            Icon(Icons.arrow_back_rounded),
+                            Icon(Icons.arrow_back_rounded),
                           ],
                         ),
                       ],

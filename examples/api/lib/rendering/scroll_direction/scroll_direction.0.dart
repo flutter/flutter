@@ -7,10 +7,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ExampleApp extends StatelessWidget {
+  const ExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
