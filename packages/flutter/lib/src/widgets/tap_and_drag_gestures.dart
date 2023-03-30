@@ -859,6 +859,10 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
   /// calculation should only take into account movement on the x-axis. In that
   /// case this method should return `Offset(delta.dx, 0.0)`.
   ///
+  /// When overriding this method, both this and [getPrimaryValueFromOffset]
+  /// should be overriden with the same direction in mind, or unexpected behavior
+  /// may be observed.
+  ///
   /// See also:
   ///   * [TapAndHorizontalDragGestureRecognizer.getDeltaForDetails], which returns
   ///   a modified `delta` that only takes into account the value on the x-axis.
@@ -877,6 +881,10 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
   /// For example, to limit this recognizer to horizontal dragging, the global distance
   /// calculation should only take into account movement on the x-axis. In that
   /// case this method should return `value.dx`.
+  /// 
+  /// When overriding this method, both this and [getDeltaForDetails] should be
+  /// overriden with the same direction in mind, or unexpected behavior may be
+  /// observed.
   ///
   /// See also:
   ///   * [TapAndHorizontalDragGestureRecognizer.getPrimaryValueFromOffset], which returns
