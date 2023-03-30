@@ -80,6 +80,16 @@ class SemanticsAction {
     _kSetTextIndex: setText,
   };
 
+  /// Temporary API until [values] return a list.
+  /// https://github.com/flutter/flutter/issues/123346
+  @Deprecated('This getter is temporary and will be removed shortly.')
+  static List<SemanticsAction> get doNotUseWillBeDeletedWithoutWarningValuesAsList => values.values.toList(growable: false);
+
+  /// Temporary API until [values] return a list.
+  /// https://github.com/flutter/flutter/issues/123346
+  @Deprecated('This getter is temporary and will be removed shortly.')
+  static Iterable<int> get doNotUseWillBeDeletedWithoutWarningKeys => values.keys;
+
   @override
   String toString() {
     switch (index) {
@@ -220,6 +230,16 @@ class SemanticsFlag {
     _kIsKeyboardKeyIndex: isKeyboardKey,
     _kIsCheckStateMixedIndex: isCheckStateMixed,
   };
+
+  /// Temporary API until [values] return a list.
+  /// https://github.com/flutter/flutter/issues/123346
+  @Deprecated('This getter is temporary and will be removed shortly.')
+  static List<SemanticsFlag> get doNotUseWillBeDeletedWithoutWarningValuesAsList => values.values.toList(growable: false);
+
+  /// Temporary API until [values] return a list.
+  /// https://github.com/flutter/flutter/issues/123346
+  @Deprecated('This getter is temporary and will be removed shortly.')
+  static Iterable<int> get doNotUseWillBeDeletedWithoutWarningKeys => values.keys;
 
   @override
   String toString() {
