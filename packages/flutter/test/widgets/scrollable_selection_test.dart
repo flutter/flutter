@@ -976,7 +976,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'em 0It');
+      expect(clipboardData['text'], 'em 0\nIt');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
     testWidgets('can copy off screen selection - non-Apple', (WidgetTester tester) async {
@@ -1017,7 +1017,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'em 0It');
+      expect(clipboardData['text'], 'em 0\nIt');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
   });
 }

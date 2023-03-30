@@ -915,7 +915,8 @@ void main() {
       final Key child2 = UniqueKey();
       final Key child3 = UniqueKey();
 
-      await tester.pumpWidget(Column(
+      await tester.pumpWidget(Flex(
+        direction: Axis.vertical,
         key: root,
         children: <Widget>[
           LookupBoundary(

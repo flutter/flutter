@@ -24,11 +24,12 @@ void main() {
       skipOffstage: false,
     ).toList();
 
-    expect(elements.length, 3);
+    expect(elements.length, 4);
     expect(elements[0].widget, isA<Row>());
-    expect(elements[1].widget, isA<RichText>());
-    expect(((elements[1].widget as RichText).text as TextSpan).text, 'a');
+    expect(elements[1].widget, isA<Flex>());
     expect(elements[2].widget, isA<RichText>());
-    expect(((elements[2].widget as RichText).text as TextSpan).text, 'b');
+    expect(((elements[2].widget as RichText).text as TextSpan).text, 'a');
+    expect(elements[3].widget, isA<RichText>());
+    expect(((elements[3].widget as RichText).text as TextSpan).text, 'b');
   });
 }

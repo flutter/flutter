@@ -318,9 +318,9 @@ void main() {
         'incompatible type FlexParentData.\n'
         'Usually, this means that the Positioned widget has the wrong ancestor RenderObjectWidget. '
         'Typically, Positioned widgets are placed directly inside Stack widgets.\n'
-        'The offending Positioned is currently placed inside a Row widget.\n'
+        'The offending Positioned is currently placed inside a Flex widget.\n'
         'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  DecoratedBox ← Positioned ← Row ← DummyWidget ← Directionality ← ', // End of chain omitted, not relevant for test.
+        '  DecoratedBox ← Positioned ← Flex ← Row ← DummyWidget ← Directionality ← ', // End of chain omitted, not relevant for test.
       ),
     );
 
@@ -419,7 +419,7 @@ void main() {
         'Typically, Expanded widgets are placed directly inside Flex widgets.\n'
         'The offending Expanded is currently placed inside a Stack widget.\n'
         'The ownership chain for the RenderObject that received the incompatible parent data was:\n'
-        '  LimitedBox ← Container ← Expanded ← Stack ← Row ← Directionality ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
+        '  LimitedBox ← Container ← Expanded ← Stack ← Flex ← Row ← Directionality ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });

@@ -3690,7 +3690,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       Map<Object, Object?> event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
       List<int> data = event['events']! as List<int>;
-      expect(data.length, equals(14));
+      expect(data.length, equals(16));
       final int numDataEntries = data.length ~/ 2;
       Map<String, List<int>> newLocations = event['newLocations']! as Map<String, List<int>>;
       expect(newLocations, isNotNull);
@@ -3701,12 +3701,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(fileLocationsMap.length, equals(1));
       expect(fileLocationsMap.keys.first, equals(file));
       final List<int> locationsForFile = newLocations[file]!;
-      expect(locationsForFile.length, equals(21));
+      expect(locationsForFile.length, equals(24));
       final int numLocationEntries = locationsForFile.length ~/ 3;
       expect(numLocationEntries, equals(numDataEntries));
       final Map<String, List<Object?>> locations = fileLocationsMap[file]!;
       expect(locations.length, equals(4));
-      expect(locations['ids']!.length, equals(7));
+      expect(locations['ids']!.length, equals(8));
 
       final Map<int, _CreationLocation> knownLocations = <int, _CreationLocation>{};
       _addToKnownLocationsMap(
@@ -3722,7 +3722,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         maxCount = max(maxCount, count);
         expect(knownLocations, contains(id));
       }
-      expect(totalCount, equals(27));
+      expect(totalCount, equals(28));
       // The creation locations that were rebuilt the most were rebuilt 6 times
       // as there are 6 instances of the ClockText widget.
       expect(maxCount, equals(6));
@@ -4447,7 +4447,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         final Map<String, Object?>? parentRenderElement = result['parentRenderElement'] as Map<String, Object?>?;
         expect(parentRenderElement, isNotNull);
-        expect(parentRenderElement!['description'], equals('Row'));
+        expect(parentRenderElement!['description'], equals('Flex'));
 
         final Map<String, Object?>? constraints = result['constraints'] as Map<String, Object?>?;
         expect(constraints, isNotNull);

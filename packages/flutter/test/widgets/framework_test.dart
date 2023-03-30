@@ -1152,7 +1152,8 @@ void main() {
 
   testWidgets('MultiChildRenderObjectElement.children', (WidgetTester tester) async {
     GlobalKey key0, key1, key2;
-    await tester.pumpWidget(Column(
+    await tester.pumpWidget(Flex(
+      direction: Axis.vertical,
       key: key0 = GlobalKey(),
       children: <Widget>[
         Container(),
@@ -1189,7 +1190,7 @@ void main() {
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
+        'debugCreator: _EmptyWidget ← Flex ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });
@@ -1222,7 +1223,7 @@ void main() {
         'are not a subtype of `RenderObjectWidget`.\n'
         'The following element does not have an associated render object:\n'
         '  _EmptyWidget\n'
-        'debugCreator: _EmptyWidget ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
+        'debugCreator: _EmptyWidget ← Flex ← Column ← ', // Omitted end of debugCreator chain because it's irrelevant for test.
       ),
     );
   });
@@ -1239,29 +1240,30 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext! as MultiChildRenderObjectElement;
+    final StatelessElement element = key0.currentContext! as StatelessElement;
 
     expect(element, hasAGoodToStringDeep);
     expect(
       element.toStringDeep(),
       equalsIgnoringHashCodes(
-        'Column-[GlobalKey#00000](direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#00000)\n'
-        '├Container\n'
-        '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├Container-[GlobalKey#00000]\n'
-        '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
-        '│└Container\n'
-        '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
-        '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
-        '├Container-[GlobalKey#00000]\n'
-        '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '└Container\n'
-        ' └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n',
+        'Column-[GlobalKey#00000]\n'
+        '└Flex(direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#ca5e0)\n'
+        ' ├Container\n'
+        ' │└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        ' │ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        ' ├Container-[GlobalKey#00000]\n'
+        ' │└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        ' │ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        ' ├ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
+        ' │└Container\n'
+        ' │ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
+        ' │  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
+        ' ├Container-[GlobalKey#00000]\n'
+        ' │└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        ' │ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        ' └Container\n'
+        '  └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        '   └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n',
       ),
     );
   });

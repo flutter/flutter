@@ -25,7 +25,8 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: const Column(
+        child: const Flex(
+          direction: Axis.vertical,
           children: <Widget>[
             Text('column1', textDirection: TextDirection.ltr),
             Text('column2', textDirection: TextDirection.ltr),
@@ -69,7 +70,8 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: const Column(
+        child: const Flex(
+          direction: Axis.vertical
         ),
       ),
     );
@@ -80,7 +82,8 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: const Column(
+        child: const Flex(
+          direction: Axis.vertical,
           children: <Widget>[
             Text('column1', textDirection: TextDirection.ltr),
           ],
@@ -94,7 +97,8 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: const Column(
+        child: const Flex(
+          direction: Axis.vertical,
         ),
       ),
     );
@@ -111,7 +115,8 @@ void main() {
         registrar: registrar,
         child: SelectionContainer(
           delegate: delegate,
-          child: const Column(
+          child: const Flex(
+            direction: Axis.vertical,
             children: <Widget>[
               Text('column1', textDirection: TextDirection.ltr),
             ],
