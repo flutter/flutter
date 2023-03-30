@@ -61,6 +61,8 @@ static GLint ToAddressMode(SamplerAddressMode mode) {
       return GL_REPEAT;
     case SamplerAddressMode::kMirror:
       return GL_MIRRORED_REPEAT;
+    case SamplerAddressMode::kDecal:
+      break;  // Unsupported.
   }
   FML_UNREACHABLE();
 }
