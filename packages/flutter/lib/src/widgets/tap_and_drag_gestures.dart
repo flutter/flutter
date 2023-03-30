@@ -936,7 +936,9 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
 
     // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent] has
     // moved a sufficient global distance.
-    if (_dragState == _DragState.accepted && _start != null) {
+    if (_start != null) {
+      assert(_dragState == _DragState.accepted);
+      assert(currentUp == null);
       _acceptDrag(_start!);
     }
 
