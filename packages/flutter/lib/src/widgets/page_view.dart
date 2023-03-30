@@ -16,6 +16,7 @@ import 'page_storage.dart';
 import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
@@ -23,7 +24,6 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
-import 'sliver.dart';
 import 'sliver_fill.dart';
 import 'viewport.dart';
 

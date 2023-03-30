@@ -479,7 +479,6 @@ bool _validate(Object? manifest, Logger logger) {
           if (kvp.value is! String) {
             errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
           }
-          break;
         case 'flutter':
           if (kvp.value == null) {
             continue;
@@ -489,7 +488,6 @@ bool _validate(Object? manifest, Logger logger) {
           } else {
             _validateFlutter(kvp.value as YamlMap?, errors);
           }
-          break;
         default:
         // additionalProperties are allowed.
           break;
@@ -522,7 +520,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         if (yamlValue is! bool) {
           errors.add('Expected "$yamlKey" to be a bool, but got $yamlValue (${yamlValue.runtimeType}).');
         }
-        break;
       case 'assets':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -533,7 +530,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
             'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
           );
         }
-        break;
       case 'shaders':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -544,7 +540,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
             'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
           );
         }
-        break;
       case 'models':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -555,7 +550,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
             'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
           );
         }
-        break;
       case 'fonts':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -568,7 +562,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         } else {
           _validateFonts(yamlValue, errors);
         }
-        break;
       case 'licenses':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list of files, but got $yamlValue (${yamlValue.runtimeType})');
@@ -581,7 +574,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         } else {
           _validateListType<String>(yamlValue, errors, '"$yamlKey"', 'files');
         }
-        break;
       case 'module':
         if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -597,7 +589,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         if (yamlValue['iosBundleIdentifier'] != null && yamlValue['iosBundleIdentifier'] is! String) {
           errors.add('The "iosBundleIdentifier" section must be a string if set.');
         }
-        break;
       case 'plugin':
         if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -605,12 +596,10 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         }
         final List<String> pluginErrors = Plugin.validatePluginYaml(yamlValue);
         errors.addAll(pluginErrors);
-        break;
       case 'generate':
         break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
-        break;
       default:
         errors.add('Unexpected child "$yamlKey" found under "flutter".');
         break;
@@ -698,17 +687,14 @@ void _validateFonts(YamlList fonts, List<String> errors) {
             if (kvp.value is! String) {
               errors.add('Expected font asset ${kvp.value} ((${kvp.value.runtimeType})) to be a string.');
             }
-            break;
           case 'weight':
             if (!fontWeights.contains(kvp.value)) {
               errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> weight.');
             }
-            break;
           case 'style':
             if (kvp.value != 'normal' && kvp.value != 'italic') {
               errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> style.');
             }
-            break;
           default:
             errors.add('Unexpected key $fontKey ((${kvp.value.runtimeType})) under font.');
             break;

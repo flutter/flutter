@@ -359,5 +359,6 @@ IOSDevice setUpIOSDevice({
     ),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: interfaceType ?? DeviceConnectionInterface.attached,
+    isConnected: true,
   );
 }

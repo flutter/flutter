@@ -67,6 +67,52 @@ void main() {
       Logger: () => BufferLogger.test(),
     });
 
+    testUsingContext('does not support --no-sound-null-safety by default', () async {
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('.packages').createSync();
+
+      final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
+          'run',
+          '--use-application-binary=app/bar/faz',
+          '--no-sound-null-safety',
+        ]),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'toString',
+          contains('Could not find an option named "no-sound-null-safety"'),
+        )),
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+    });
+
+    testUsingContext('supports --no-sound-null-safety with an overridden NonNullSafeBuilds', () async {
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('.packages').createSync();
+
+      final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
+
+      testDeviceManager.devices = <Device>[device];
+      final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+      await createTestCommandRunner(command).run(const <String>[
+        'run',
+        '--use-application-binary=app/bar/faz',
+        '--no-sound-null-safety',
+      ]);
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => testDeviceManager,
+      FileSystem: () => fileSystem,
+      Logger: () => BufferLogger.test(),
+      NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
@@ -428,7 +474,7 @@ void main() {
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd56': 'false', 'cd57': 'usb',
+            'cd57': 'usb',
           })
         )));
       }, overrides: <Type, Generator>{
@@ -699,7 +745,6 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -739,7 +784,6 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'usb',
         ));
       }, overrides: <Type, Generator>{
@@ -783,7 +827,6 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
         ));
       }, overrides: <Type, Generator>{
@@ -827,7 +870,6 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
         ));
       }, overrides: <Type, Generator>{
@@ -1005,8 +1047,10 @@ void main() {
       '--trace-skia',
       '--trace-systrace',
       '--verbose-system-logs',
+      '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
+      '--enable-vulkan-validation',
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
@@ -1021,9 +1065,11 @@ void main() {
     expect(options.traceSkia, true);
     expect(options.traceSystrace, true);
     expect(options.verboseSystemLogs, true);
+    expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
     expect(options.traceSystrace, true);
-    expect(options.enableImpeller, true);
+    expect(options.enableImpeller, ImpellerStatus.enabled);
+    expect(options.enableVulkanValidation, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{
@@ -1125,6 +1171,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool get supportsFastStart => false;
+
+  @override
+  bool get ephemeral => true;
 
   @override
   bool get isConnected => true;

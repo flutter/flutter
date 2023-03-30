@@ -456,10 +456,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _value;
-        break;
       case TextDirection.ltr:
         visualPosition = _value;
-        break;
     }
     return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
   }
@@ -475,10 +473,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
       switch (textDirection) {
         case TextDirection.rtl:
           _currentDragValue -= valueDelta;
-          break;
         case TextDirection.ltr:
           _currentDragValue += valueDelta;
-          break;
       }
       onChanged!(_discretizedCurrentDragValue);
     }
@@ -522,12 +518,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
         visualPosition = 1.0 - _position.value;
         leftColor = _activeColor;
         rightColor = trackColor;
-        break;
       case TextDirection.ltr:
         visualPosition = _position.value;
         leftColor = trackColor;
         rightColor = _activeColor;
-        break;
     }
 
     final double trackCenter = offset.dy + size.height / 2.0;

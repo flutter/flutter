@@ -102,6 +102,11 @@ abstract class DeviceManager {
     _specifiedDeviceId = id;
   }
 
+  /// A minimum duration to use when discovering wireless iOS devices.
+  static const Duration minimumWirelessDeviceDiscoveryTimeout = Duration(
+    seconds: 5,
+  );
+
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
@@ -229,6 +234,22 @@ abstract class DeviceManager {
     ]);
 
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
+  }
+
+  /// Discard existing cache of discoverers that are known to take longer to
+  /// discover wireless devices.
+  ///
+  /// Then, search for devices for those discoverers to populate the cache for
+  /// no longer than [timeout].
+  Future<void> refreshExtendedWirelessDeviceDiscoverers({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async {
+    await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        if (discoverer.requiresExtendedWirelessDeviceDiscovery)
+          discoverer.discoverDevices(timeout: timeout)
+    ]);
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.
@@ -434,6 +455,10 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
+  /// Whether this device discovery is known to take longer to discover
+  /// wireless devices.
+  bool get requiresExtendedWirelessDeviceDiscovery => false;
+
   /// Return all connected devices, cached on subsequent calls.
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter});
 
@@ -504,6 +529,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   /// Get devices from cache filtered by [filter].
   ///
   /// If the cache is empty, populate the cache.
+  ///
+  /// If [filter] is null, it may return devices that are not connected.
   @override
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) {
     return _populateDevices(filter: filter);
@@ -512,6 +539,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   /// Empty the cache and repopulate it before getting devices from cache filtered by [filter].
   ///
   /// Search for devices to populate the cache for no longer than [timeout].
+  ///
+  /// If [filter] is null, it may return devices that are not connected.
   @override
   Future<List<Device>> discoverDevices({
     Duration? timeout,
@@ -877,6 +906,23 @@ class _NoMemoryInfo implements MemoryInfo {
   Map<String, Object> toJson() => <String, Object>{};
 }
 
+enum ImpellerStatus {
+  platformDefault._(null),
+  enabled._(true),
+  disabled._(false);
+
+  const ImpellerStatus._(this.asBool);
+
+  factory ImpellerStatus.fromBool(bool? b) {
+    if (b == null) {
+      return platformDefault;
+    }
+    return b ? enabled : disabled;
+  }
+
+  final bool? asBool;
+}
+
 class DebuggingOptions {
   DebuggingOptions.enabled(
     this.buildInfo, {
@@ -916,10 +962,12 @@ class DebuggingOptions {
     this.webLaunchUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
+    this.nullAssertions = false,
     this.nativeNullAssertions = false,
-    this.enableImpeller = false,
+    this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableVulkanValidation = false,
     this.uninstallFirst = false,
-    this.serveObservatory = true,
+    this.serveObservatory = false,
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
    }) : debuggingEnabled = true;
@@ -938,7 +986,8 @@ class DebuggingOptions {
       this.webLaunchUrl,
       this.cacheSkSL = false,
       this.traceAllowlist,
-      this.enableImpeller = false,
+      this.enableImpeller = ImpellerStatus.platformDefault,
+      this.enableVulkanValidation = false,
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
@@ -966,6 +1015,7 @@ class DebuggingOptions {
       vmserviceOutFile = null,
       fastStart = false,
       webEnableExpressionEvaluation = false,
+      nullAssertions = false,
       nativeNullAssertions = false,
       serveObservatory = false;
 
@@ -1008,8 +1058,10 @@ class DebuggingOptions {
     required this.webLaunchUrl,
     required this.vmserviceOutFile,
     required this.fastStart,
+    required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.enableImpeller,
+    required this.enableVulkanValidation,
     required this.uninstallFirst,
     required this.serveObservatory,
     required this.enableDartProfiling,
@@ -1048,7 +1100,8 @@ class DebuggingOptions {
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
-  final bool enableImpeller;
+  final ImpellerStatus enableImpeller;
+  final bool enableVulkanValidation;
   final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
@@ -1080,6 +1133,8 @@ class DebuggingOptions {
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
   final bool fastStart;
+
+  final bool nullAssertions;
 
   /// Additional null runtime checks inserted for web applications.
   ///
@@ -1123,7 +1178,8 @@ class DebuggingOptions {
       if (purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
-      if (enableImpeller) '--enable-impeller',
+      if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
+      if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
@@ -1175,8 +1231,10 @@ class DebuggingOptions {
     'webLaunchUrl': webLaunchUrl,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
+    'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
-    'enableImpeller': enableImpeller,
+    'enableImpeller': enableImpeller.asBool,
+    'enableVulkanValidation': enableVulkanValidation,
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1222,8 +1280,10 @@ class DebuggingOptions {
       webLaunchUrl: json['webLaunchUrl'] as String?,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
+      nullAssertions: json['nullAssertions']! as bool,
       nativeNullAssertions: json['nativeNullAssertions']! as bool,
-      enableImpeller: (json['enableImpeller'] as bool?) ?? false,
+      enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
+      enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
       uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
@@ -1303,9 +1363,13 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   void dispose() { }
 }
 
+/// Append --null_assertions to any existing Dart VM flags if
+/// [debuggingOptions.nullAssertions] is true.
 String computeDartVmFlags(DebuggingOptions debuggingOptions) {
-  if (debuggingOptions.dartFlags.isNotEmpty) {
-    return debuggingOptions.dartFlags;
-  }
-  return '';
+  return <String>[
+    if (debuggingOptions.dartFlags.isNotEmpty)
+      debuggingOptions.dartFlags,
+    if (debuggingOptions.nullAssertions)
+      '--null_assertions',
+  ].join(',');
 }
