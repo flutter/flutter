@@ -687,29 +687,21 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
+    final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (
-        await observer.didPushRouteInformation(
-          RouteInformation(
-            uri: Uri.parse(route),
-          ),
-        )
-      ) {
+      if (await observer.didPushRouteInformation(routeInformation)) {
         return;
       }
     }
   }
 
   Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+    final RouteInformation routeInformation = RouteInformation(
+      uri: Uri.parse(routeArguments['location'] as String),
+      state: routeArguments['state'] as Object?,
+    );
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (
-        await observer.didPushRouteInformation(
-          RouteInformation(
-            uri: Uri.parse(routeArguments['location'] as String),
-            state: routeArguments['state'] as Object?,
-          ),
-        )
-      ) {
+      if (await observer.didPushRouteInformation(routeInformation)) {
         return;
       }
     }
