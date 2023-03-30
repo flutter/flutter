@@ -581,7 +581,7 @@ Future<void> main() async {
           textDirection: TextDirection.ltr,
           child: Stack(
             children: <Widget>[
-              for (int i = 0; i < 10; i++)
+              for (int i = 0; i < 25; i++)
                 Positioned(
                   left: i * 6,
                   top: i * 6,
@@ -607,7 +607,7 @@ Future<void> main() async {
       matchesGoldenFile('painting.box_decoration.border.filled.png'),
     );
 
-    await tester.pumpWidget(buildWidget(Border.all(color: const Color(0xfaffffff), width: 25)));
+    await tester.pumpWidget(buildWidget(Border.all(color: const Color(0xfeffffff), width: 25)));
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('painting.box_decoration.border.leaking.png'),

@@ -174,7 +174,7 @@ Future<void> main() async {
           textDirection: TextDirection.ltr,
           child: Stack(
             children: <Widget>[
-              for (int i = 0; i < 10; i++)
+              for (int i = 0; i < 25; i++)
                 Positioned(
                   left: i * 6,
                   top: i * 6,

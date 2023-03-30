@@ -475,6 +475,24 @@ class _BoxDecorationPainter extends BoxPainter {
         rect.right - insets.right,
         rect.bottom - insets.bottom,
       );
+    } else if (_decoration.border is BorderDirectional && textDirection != null) {
+      final BorderDirectional border = _decoration.border! as BorderDirectional;
+      final BorderSide leftBorder = textDirection == TextDirection.rtl ? border.end : border.start;
+      final BorderSide rightBorder = textDirection == TextDirection.rtl ? border.start : border.end;
+
+      final EdgeInsets insets = EdgeInsets.fromLTRB(
+        leftBorder.color.alpha == 255 ? leftBorder.strokeInset : 0,
+        border.top.color.alpha == 255 ? border.top.strokeInset : 0,
+        rightBorder.color.alpha == 255 ? rightBorder.strokeInset : 0,
+        border.bottom.color.alpha == 255 ? border.bottom.strokeInset : 0,
+      ) / 2;
+
+      return Rect.fromLTRB(
+        rect.left + insets.left,
+        rect.top + insets.top,
+        rect.right - insets.right,
+        rect.bottom - insets.bottom,
+      );
     }
     return rect;
   }
