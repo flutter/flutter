@@ -26,7 +26,25 @@ import 'viewport_offset.dart';
 /// vertical alphabetical list that is going [AxisDirection.down] with a
 /// [GrowthDirection.reverse] would have the Z at the top (at scroll offset
 /// zero) and the A below it.
-// TODO(Piinks): Add sample code
+///
+/// {@template flutter.rendering.GrowthDirection.sample}
+/// Most scroll views by default are ordered [GrowthDirection.forward].
+/// Changing the default values of [CustomScrollView.anchor],
+/// [CustomScrollView.center], or both, can configure a scroll view for
+/// [GrowthDirection.reverse].
+///
+/// {@tool dartpad}
+/// This sample shows a [CustomScrollView], with [Radio] buttons in the
+/// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+/// configurations. The [CustomScrollView.anchor] and [CustomScrollView.center]
+/// properties are also set to have the 0 scroll offset positioned in the middle
+/// of the viewport, with [GrowthDirection.forward] and [GrowthDirection.reverse]
+/// illustrated on either side. The sliver that shares the
+/// [CustomScrollView.center] key is positioned at the [CustomScrollView.anchor].
+///
+/// ** See code in examples/api/lib/rendering/axis_direction/growth_direction.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -38,11 +56,7 @@ enum GrowthDirection {
   /// [AxisDirection.down] with a [GrowthDirection.forward] would have the A at
   /// the top and the Z at the bottom, with the A adjacent to the origin.
   ///
-  /// Most scroll views by default are ordered [GrowthDirection.forward].
-  /// Changing the default values of [CustomScrollView.anchor],
-  /// [CustomScrollView.center], or both, can configure a scroll view for
-  /// [GrowthDirection.reverse].
-  // TODO(Piinks): sample code
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   ///
   /// See also:
   ///
@@ -52,6 +66,8 @@ enum GrowthDirection {
 
   /// This sliver's contents are ordered in the opposite direction of the
   /// [AxisDirection].
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   ///
   /// See also:
   ///

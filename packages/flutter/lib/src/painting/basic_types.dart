@@ -173,7 +173,7 @@ enum VerticalDirection {
 /// This value relates to the direction in which the scroll offset increases
 /// from the origin. This value does not represent the direction of user input
 /// that may be modifying the scroll offset, such as from a drag. For the
-/// current scrolling direction, see [ScrollDirection].
+/// active scrolling direction, see [ScrollDirection].
 ///
 /// {@tool dartpad}
 /// This sample shows a [CustomScrollView], with [Radio] buttons in the
@@ -185,7 +185,7 @@ enum VerticalDirection {
 ///
 /// See also:
 ///
-///   * [ScrollDirection], the direction of a scroll, relative to the positive
+///   * [ScrollDirection], the direction of active scrolling, relative to the positive
 ///     scroll offset axis given by an [AxisDirection] and a [GrowthDirection].
 ///   * [GrowthDirection], the direction in which slivers and their content are
 ///     ordered, relative to the scroll offset axis as specified by

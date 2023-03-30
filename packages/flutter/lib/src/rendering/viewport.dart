@@ -1326,7 +1326,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// vertically centered within the viewport. If the [anchor] is 1.0, and the
   /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
   /// on the left edge of the viewport.
-  // TODO(Piinks): Add example for anchor
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   double get anchor => _anchor;
   double _anchor;
   set anchor(double value) {
@@ -1350,7 +1351,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// Similarly, the children above the [center] and []
   ///
   /// The [center] must be a child of the viewport.
-  // TODO(Piinks): Add example for center
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   RenderSliver? get center => _center;
   RenderSliver? _center;
   set center(RenderSliver? value) {

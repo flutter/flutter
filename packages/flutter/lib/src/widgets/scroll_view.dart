@@ -277,6 +277,8 @@ abstract class ScrollView extends StatelessWidget {
   /// supports [center]; for that class, the given key must be the key of one of
   /// the slivers in the [CustomScrollView.slivers] list.
   ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
+  ///
   /// See also:
   ///
   ///  * [anchor], which controls where the [center] as aligned in the viewport.
@@ -291,6 +293,8 @@ abstract class ScrollView extends StatelessWidget {
   /// within the viewport. If the [anchor] is 1.0, and the axis direction is
   /// [AxisDirection.right], then the zero scroll offset is on the left edge of
   /// the viewport.
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   /// {@endtemplate}
   final double anchor;
 

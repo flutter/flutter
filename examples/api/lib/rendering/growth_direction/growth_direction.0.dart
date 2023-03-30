@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AxisDirection]s.
+// Flutter code sample for [GrowthDirection]s.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 void main() => runApp(const MyApp());
 
@@ -35,6 +36,7 @@ class _MyWidgetState extends State<MyWidget> {
     'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
   ];
   final Widget spacer = const SizedBox.square(dimension: 10);
+  final UniqueKey center = UniqueKey();
   Axis axis = Axis.vertical;
   bool reverse = false;
 
@@ -47,9 +49,13 @@ class _MyWidgetState extends State<MyWidget> {
     }
   }
 
-  Widget _getArrows() {
+  Widget _getArrows(SliverConstraints constraints) {
     final Widget arrow;
-    switch(_getAxisDirection()) {
+    final AxisDirection adjustedAxisDirection = applyGrowthDirectionToAxisDirection(
+      _getAxisDirection(),
+      constraints.growthDirection,
+    );
+    switch(adjustedAxisDirection) {
       case AxisDirection.up:
         arrow = const Icon(Icons.arrow_upward_rounded);
       case AxisDirection.down:
@@ -63,13 +69,13 @@ class _MyWidgetState extends State<MyWidget> {
     switch(axis) {
       case Axis.vertical:
         return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ]
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[ arrow, arrow ]
         );
       case Axis.horizontal:
         return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ]
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[ arrow, arrow ]
         );
     }
   }
@@ -95,21 +101,21 @@ class _MyWidgetState extends State<MyWidget> {
     });
   }
 
-  Widget _getLeading() {
+  Widget _getLeading(SliverConstraints constraints, bool isForward) {
     return Container(
-      color: Colors.blue[100],
+      color: isForward ? Colors.orange[300] : Colors.green[400],
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text(axis.toString()),
+            Text(constraints.axis.toString()),
             spacer,
-            Text(_getAxisDirection().toString()),
+            Text(constraints.axisDirection.toString()),
             spacer,
-            const Text('GrowthDirection.forward'),
+            Text(constraints.growthDirection.toString()),
             spacer,
-            _getArrows(),
+            _getArrows(constraints),
           ],
         ),
       ),
@@ -163,11 +169,45 @@ class _MyWidgetState extends State<MyWidget> {
     );
   }
 
+  Widget _getList({ required bool isForward }) {
+    // The SliverLayoutBuilder is not necessary, and is here to allow us to
+    // the SliverContraints & directional information that is provided to the
+    // SliverList when laying out. Since it is the top level sliver here, it's
+    // key will be center if it is the forward list.
+    return SliverLayoutBuilder(
+      builder: (BuildContext context, SliverConstraints constraints) {
+        return SliverList.builder(
+          itemCount: 27,
+          itemBuilder: (BuildContext context, int index) {
+            late Widget child;
+            if (index == 0) {
+              child = _getLeading(constraints, isForward);
+            } else {
+              child = Container(
+                color: isForward
+                  ? (index.isEven ? Colors.amber[100] : Colors.amberAccent)
+                  : (index.isEven ? Colors.green[100] : Colors.lightGreen),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(child: Text(alphabet[index - 1])),
+                ),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: child,
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AxisDirection'),
+        title: const Text('GrowthDirection & AxisDirection'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(
@@ -179,28 +219,24 @@ class _MyWidgetState extends State<MyWidget> {
       body: CustomScrollView(
         reverse: reverse,
         scrollDirection: axis,
+        // Places the leading edge of the center sliver in the middle of the
+        // viewport. Changing this value between 0.0 (the default) and 1.0
+        // changes the position of the inflection point between GrowthDirections
+        // in the viewport when the slivers are laid out.
+        anchor: 0.5,
+        center: center,
         slivers: <Widget>[
-          SliverList.builder(
-            itemCount: 27,
-            itemBuilder: (BuildContext context, int index) {
-              late Widget child;
-              if (index == 0) {
-                child = _getLeading();
-              } else {
-                child = Container(
-                  color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(child: Text(alphabet[index - 1])),
-                  ),
-                );
-              }
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: child,
-              );
-            }
+          _getList(isForward: false),
+          SliverToBoxAdapter(
+            // This sliver will be located at the anchor. The scroll position
+            // will progress in either direction from this point.
+            key: center,
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Center(child: Text('0', style: TextStyle(fontWeight: FontWeight.bold))),
+            ),
           ),
+          _getList(isForward: true),
         ],
       ),
     );
