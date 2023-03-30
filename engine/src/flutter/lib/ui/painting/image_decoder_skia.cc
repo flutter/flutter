@@ -11,6 +11,7 @@
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 
 namespace flutter {
 
@@ -63,7 +64,7 @@ static sk_sp<SkImage> ResizeRasterImage(const sk_sp<SkImage>& image,
   // instead of copying.
   scaled_bitmap.setImmutable();
 
-  auto scaled_image = SkImage::MakeFromBitmap(scaled_bitmap);
+  auto scaled_image = SkImages::RasterFromBitmap(scaled_bitmap);
   if (!scaled_image) {
     FML_LOG(ERROR) << "Could not create a scaled image from a scaled bitmap.";
     return nullptr;
@@ -79,7 +80,7 @@ static sk_sp<SkImage> ImageFromDecompressedData(
     const fml::tracing::TraceFlow& flow) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   flow.Step(__FUNCTION__);
-  auto image = SkImage::MakeRasterData(
+  auto image = SkImages::RasterFromData(
       descriptor->image_info(), descriptor->data(), descriptor->row_bytes());
 
   if (!image) {
@@ -139,7 +140,7 @@ sk_sp<SkImage> ImageDecoderSkia::ImageFromCompressedData(
       // the pixels instead of copying.
       scaled_bitmap.setImmutable();
 
-      auto decoded_image = SkImage::MakeFromBitmap(scaled_bitmap);
+      auto decoded_image = SkImages::RasterFromBitmap(scaled_bitmap);
       FML_DCHECK(decoded_image);
       if (!decoded_image) {
         FML_LOG(ERROR)
@@ -186,7 +187,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
       fml::SyncSwitch::Handlers()
           .SetIfTrue([&result, &pixmap, &image] {
             SkSafeRef(image.get());
-            sk_sp<SkImage> texture_image = SkImage::MakeFromRaster(
+            sk_sp<SkImage> texture_image = SkImages::RasterFromPixmap(
                 pixmap,
                 [](const void* pixels, SkImage::ReleaseContext context) {
                   SkSafeUnref(static_cast<SkImage*>(context));
@@ -197,12 +198,13 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
           .SetIfFalse([&result, context = io_manager->GetResourceContext(),
                        &pixmap, queue = io_manager->GetSkiaUnrefQueue()] {
             TRACE_EVENT0("flutter", "MakeCrossContextImageFromPixmap");
-            sk_sp<SkImage> texture_image = SkImage::MakeCrossContextFromPixmap(
-                context.get(),  // context
-                pixmap,         // pixmap
-                true,           // buildMips,
-                true            // limitToMaxTextureSize
-            );
+            sk_sp<SkImage> texture_image =
+                SkImages::CrossContextTextureFromPixmap(
+                    context.get(),  // context
+                    pixmap,         // pixmap
+                    true,           // buildMips,
+                    true            // limitToMaxTextureSize
+                );
             if (!texture_image) {
               FML_LOG(ERROR) << "Could not make x-context image.";
               result = {};

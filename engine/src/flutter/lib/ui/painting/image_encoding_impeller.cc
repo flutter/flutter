@@ -10,6 +10,7 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
 #include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 namespace {
@@ -51,7 +52,7 @@ sk_sp<SkImage> ConvertBufferToSkImage(
                        new std::shared_ptr<impeller::DeviceBuffer>(buffer));
   bitmap.setImmutable();
 
-  sk_sp<SkImage> raster_image = SkImage::MakeFromBitmap(bitmap);
+  sk_sp<SkImage> raster_image = SkImages::RasterFromBitmap(bitmap);
   return raster_image;
 }
 

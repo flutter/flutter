@@ -8,6 +8,7 @@
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 
 #include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -915,7 +916,7 @@ sk_sp<SkImage> ImageFromBitmapWithNewID(const SkBitmap& bitmap) {
   // so we will avoid hitting the cache.
   SkPixmap pixmap;
   bitmap.peekPixels(&pixmap);
-  return SkImage::MakeFromRaster(pixmap, nullptr, nullptr);
+  return SkImages::RasterFromPixmap(pixmap, nullptr, nullptr);
 }
 
 // Draws `kImagesToDraw` bitmaps to a canvas, either with texture-backed
