@@ -75,13 +75,24 @@ LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 
 // Analytics instance for package:unified_analytics for telemetry
 // reporting for all Flutter and Dart related tooling
-Analytics get analytics => context.get<Analytics>() ?? _defaultAnalytics;
-final Analytics _defaultAnalytics = Analytics(
-  tool: DashTool.flutterTools,
-  flutterChannel: flutterVersion.channel,
-  flutterVersion: flutterVersion.frameworkVersion,
-  dartVersion: flutterVersion.dartSdkVersion,
-);
+Analytics get analytics => context.get<Analytics>() ?? getDefaultAnalytics();
+
+Analytics getDefaultAnalytics() {
+  final Analytics defaultAnalytics = Analytics(
+    tool: DashTool.flutterTool,
+    flutterChannel: flutterVersion.channel,
+    flutterVersion: flutterVersion.frameworkVersion,
+    dartVersion: flutterVersion.dartSdkVersion,
+  );
+  
+  // Ensure that the consent message has been displayed
+  if (defaultAnalytics.shouldShowMessage) {
+    print(defaultAnalytics.getConsentMessage);
+    defaultAnalytics.clientShowedMessage();
+  }
+  
+  return defaultAnalytics;
+}
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
