@@ -1179,6 +1179,7 @@ class WebCompileTest {
     return inDirectory<Map<String, int>>(directory, () async {
       final Map<String, int> metrics = <String, int>{};
 
+      await flutter('clean');
       await flutter('packages', options: <String>['get']);
       final Stopwatch? watch = measureBuildTime ? Stopwatch() : null;
       watch?.start();
@@ -1187,6 +1188,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
+        '--no-web-resources-cdn',
       ]);
       watch?.stop();
       final String buildDir = path.join(directory, 'build', 'web');
