@@ -1218,7 +1218,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
         keysPressedOnDown: keysPressedOnDown,
       );
 
-    invokeCallback<void>('onDragEnd', () => onDragEnd!(endDetails));
+    if (onDragEnd != null) {
+      invokeCallback<void>('onDragEnd', () => onDragEnd!(endDetails));
+    }
 
     _resetTaps();
     _resetDragUpdateThrottle();
