@@ -662,6 +662,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'enable-impeller', 'false'],
       if (debuggingOptions.enableVulkanValidation)
         ...<String>['--ez', 'enable-vulkan-validation', 'true'],
+      if (debuggingOptions.impellerForceGL)
+        ...<String>['--ez', 'impeller-force-gl', 'true'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],

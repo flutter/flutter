@@ -184,6 +184,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
+    addImpellerForceGLFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
 
@@ -198,6 +199,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller => ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
+  bool get impellerForceGL => boolArg('impeller-force-gl');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
 
@@ -240,6 +242,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserFlags: webBrowserFlags,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
+        impellerForceGL: impellerForceGL,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
@@ -289,6 +292,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
+        impellerForceGL: impellerForceGL,
         uninstallFirst: uninstallFirst,
         serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
