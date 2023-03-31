@@ -180,8 +180,12 @@ def read_malioc_tree(malioc_tree):
 # a space of `width` characters, and separated by `sep`. The separator does not
 # count against the `width`. If `width` is 0, then the width is unconstrained.
 def pretty_list(lst, fmt='s', sep='', width=12):
-  return (sep.join(['{:<{width}{fmt}}'] * len(lst))).format(
-      width='' if width == 0 else width, fmt=fmt, *lst
+  formats = [
+      '{:<{width}{fmt}}' if ele is not None else '{:<{width}s}' for ele in lst
+  ]
+  sanitized_list = [x if x is not None else 'null' for x in lst]
+  return (sep.join(formats)).format(
+      width='' if width == 0 else width, fmt=fmt, *sanitized_list
   )
 
 
