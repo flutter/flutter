@@ -454,6 +454,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   };
   final String? localEngine = localEngineFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+  final String? localWebSdk = localWebSdkFromEnv;
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
@@ -468,6 +469,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    if (localWebSdk != null) ...<String>['--local-web-sdk', localWebSdk],
     ...options,
   ];
 }

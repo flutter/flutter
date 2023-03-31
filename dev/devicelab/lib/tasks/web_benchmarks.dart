@@ -25,14 +25,11 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
   return inDirectory(macrobenchmarksDirectory, () async {
-    final String? localWebSdk = localWebSdkFromEnv;
     await flutter('clean');
     await evalFlutter('build', options: <String>[
       'web',
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
       '--web-renderer=${useCanvasKit ? 'canvaskit' : 'html'}',
-      if (localWebSdk != null)
-        ...<String>['--local-web-sdk', localWebSdk],
       '--profile',
       '--no-web-resources-cdn',
       '-t',
