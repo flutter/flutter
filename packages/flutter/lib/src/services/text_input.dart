@@ -1184,7 +1184,7 @@ mixin TextInputClient {
   /// close themselves from within the keyboard UI), then this method will be called to update the
   /// focus state in the framework.
   ///
-  /// Different from [connectionClosed], this method should simply unfocus without finalize editing.
+  /// Different from [connectionClosed], this method should only unfocus without finalize editing.
   void unfocus() {}
 }
 
