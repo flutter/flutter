@@ -89,6 +89,7 @@
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
@@ -208,6 +209,7 @@
 /dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf_impeller_ios__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
