@@ -467,8 +467,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     );
     Widget? contents = widget.child;
     if (contents != null) {
-      contents = DefaultTextStyle(
+      contents = AnimatedDefaultTextStyle(
         style: widget.textStyle ?? Theme.of(context).textTheme.bodyMedium!,
+        duration: Duration.zero,
         child: contents,
       );
     }
