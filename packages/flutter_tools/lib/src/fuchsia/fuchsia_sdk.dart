@@ -8,6 +8,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../convert.dart';
+import '../features.dart' show featureFlags;
 import '../globals.dart' as globals;
 
 import 'fuchsia_ffx.dart';
@@ -16,7 +17,7 @@ import 'fuchsia_pm.dart';
 
 /// Returns [true] if the current platform supports Fuchsia targets.
 bool isFuchsiaSupportedPlatform(Platform platform) {
-  return platform.isLinux || platform.isMacOS;
+  return featureFlags.isFuchsiaEnabled && (platform.isLinux || platform.isMacOS);
 }
 
 /// The Fuchsia SDK shell commands.
