@@ -8,8 +8,8 @@
 uniform sampler2D texture_sampler;
 
 uniform FragInfo {
-  vec2 start_point;
-  vec2 end_point;
+  highp vec2 start_point;
+  highp vec2 end_point;
   float tile_mode;
   float texture_sampler_y_coord_scale;
   float alpha;
@@ -17,7 +17,7 @@ uniform FragInfo {
 }
 frag_info;
 
-in vec2 v_position;
+highp in vec2 v_position;
 
 out vec4 frag_color;
 
