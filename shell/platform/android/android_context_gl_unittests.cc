@@ -87,7 +87,7 @@ TEST(AndroidContextGl, Create) {
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context = std::make_unique<AndroidContextGLSkia>(
-      AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
+      AndroidRenderingAPI::kGPU, environment, task_runners, 0);
   context->SetMainSkiaContext(main_context);
   EXPECT_NE(context.get(), nullptr);
   context.reset();
@@ -108,7 +108,7 @@ TEST(AndroidContextGl, CreateSingleThread) {
       TaskRunners(thread_label, platform_runner, platform_runner,
                   platform_runner, platform_runner);
   auto context = std::make_unique<AndroidContextGLSkia>(
-      AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
+      AndroidRenderingAPI::kGPU, environment, task_runners, 0);
   context->SetMainSkiaContext(main_context);
   EXPECT_NE(context.get(), nullptr);
   context.reset();
@@ -127,7 +127,7 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNotNull) {
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto android_context = std::make_shared<AndroidContextGLSkia>(
-      AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
+      AndroidRenderingAPI::kGPU, environment, task_runners, 0);
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto android_surface =
       std::make_unique<AndroidSurfaceGLSkia>(android_context, jni);
@@ -155,7 +155,7 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNull) {
   ThreadHost thread_host(host_config);
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto android_context = std::make_shared<AndroidContextGLSkia>(
-      AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
+      AndroidRenderingAPI::kGPU, environment, task_runners, 0);
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto android_surface =
       std::make_unique<AndroidSurfaceGLSkia>(android_context, jni);
@@ -178,7 +178,7 @@ TEST(AndroidContextGl, DISABLED_MSAAx4) {
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context = std::make_unique<AndroidContextGLSkia>(
-      AndroidRenderingAPI::kOpenGLES, environment, task_runners, 4);
+      AndroidRenderingAPI::kGPU, environment, task_runners, 4);
   context->SetMainSkiaContext(main_context);
 
   EGLint sample_count;
@@ -200,7 +200,7 @@ TEST(AndroidContextGl, EnsureMakeCurrentChecksCurrentContextStatus) {
       ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context = std::make_unique<AndroidContextGLSkia>(
-      AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
+      AndroidRenderingAPI::kGPU, environment, task_runners, 0);
 
   auto pbuffer_surface = context->CreatePbufferSurface();
   auto status = pbuffer_surface->MakeCurrent();
