@@ -15,6 +15,7 @@ import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'magnifier.dart';
+import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -787,6 +788,32 @@ class CupertinoTextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.dotted,
   );
 
+  /// Default builder for the spell check suggestions toolbar in the Cupertino
+  /// style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
+  ///     builder configured to show a spell check suggestions toolbar.
+  ///  * [TextField.defaultSpellCheckSuggestionsToolbarBuilder], the builder
+  ///    configured to show the Material style spell check suggestions toolbar.
+  @visibleForTesting
+  static Widget defaultSpellCheckSuggestionsToolbarBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    final List<ContextMenuButtonItem>? buttonItems =
+      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+
+    if (buttonItems == null || buttonItems.isEmpty){
+      return const SizedBox.shrink();
+    }
+
+    return CupertinoSpellCheckSuggestionsToolbar(
+      anchors: editableTextState.contextMenuAnchors,
+      buttonItems: buttonItems,
+    );
+  }
+
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
@@ -1274,7 +1301,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? CupertinoTextField.cupertinoMisspelledTextStyle)
+              ?? CupertinoTextField.cupertinoMisspelledTextStyle,
+            spellCheckSuggestionsToolbarBuilder:
+              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
+                ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+          )
         : const SpellCheckConfiguration.disabled();
 
     final Widget paddedEditable = Padding(
