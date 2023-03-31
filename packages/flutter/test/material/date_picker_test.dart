@@ -1432,11 +1432,8 @@ void main() {
       addTearDown(tester.view.reset);
       tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1.0;
-      await prepareDatePicker(tester, (Future<DateTime?> date) async {
-        await tester.tap(find.byIcon(Icons.edit_outlined));
-        await tester.pumpAndSettle();
-      },
-      useMaterial3: true);
+      initialEntryMode = DatePickerEntryMode.input;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async { }, useMaterial3: true);
     }
 
     testWidgets('portrait', (WidgetTester tester) async {
