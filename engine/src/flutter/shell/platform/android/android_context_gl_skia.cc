@@ -69,7 +69,7 @@ AndroidContextGLSkia::AndroidContextGLSkia(
     fml::RefPtr<AndroidEnvironmentGL> environment,
     const TaskRunners& task_runners,
     uint8_t msaa_samples)
-    : AndroidContext(AndroidRenderingAPI::kGPU),
+    : AndroidContext(AndroidRenderingAPI::kOpenGLES),
       environment_(std::move(environment)),
       config_(nullptr),
       task_runners_(task_runners) {
