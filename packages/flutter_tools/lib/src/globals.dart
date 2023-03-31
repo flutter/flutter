@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
@@ -85,6 +86,33 @@ final BotDetector _defaultBotDetector = BotDetector(
   ),
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+
+// Analytics instance for package:unified_analytics for telemetry
+// reporting for all Flutter and Dart related tooling
+Analytics get analytics => context.get<Analytics>() ?? getDefaultAnalytics();
+Analytics getDefaultAnalytics() {
+  final Analytics defaultAnalytics = Analytics(
+    tool: DashTool.flutterTool,
+    flutterChannel: flutterVersion.channel,
+    flutterVersion: flutterVersion.frameworkVersion,
+    dartVersion: flutterVersion.dartSdkVersion,
+  );
+
+  // Ensure that the consent message has been displayed
+  if (defaultAnalytics.shouldShowMessage) {
+    logger.printStatus(defaultAnalytics.getConsentMessage);
+
+    // Invoking this will onboard the flutter tool onto
+    // the package on the developer's machine and will
+    // allow for events to be sent to Google Analytics
+    // on subsequent runs of the flutter tool (ie. no events
+    // will be sent on the first run to allow developers to
+    // opt out of collection)
+    defaultAnalytics.clientShowedMessage();
+  }
+
+  return defaultAnalytics;
+}
 
 /// Currently active implementation of the file system.
 ///
