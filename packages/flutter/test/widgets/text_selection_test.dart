@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
 
+const int kSingleTapUpTimeout = 500;
+
 void main() {
   late int tapCount;
   late int singleTapUpCount;
@@ -687,6 +689,47 @@ void main() {
     expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
 
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled and text selection toolbar on additonal taps', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    const TextSelection selection = TextSelection.collapsed(offset: 1);
+    state.updateEditingValue(const TextEditingValue(text: 'something misspelled', selection: selection));
+
+    // Mark word to be tapped as misspelled for testing.
+    state.markCurrentSelectionAsMisspelled = true;
+    await tester.pump();
+
+    // Test spell check suggestions toolbar is shown on first tap of misspelled word.
+    const Offset position = Offset(25.0, 200.0);
+    await tester.tapAt(position);
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
+
+    // Reset and test text selection toolbar is toggled for additional taps.
+    state.showSpellCheckSuggestionsToolbarCalled = false;
+    renderEditable.selection = selection;
+    await tester.pump(const Duration(milliseconds: kSingleTapUpTimeout));
+
+    // Test first tap.
+    await tester.tapAt(position);
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isTrue);
+
+    // Reset and test second tap.
+    state.toggleToolbarCalled = false;
+    await tester.pump(const Duration(milliseconds: kSingleTapUpTimeout));
+
+    await tester.tapAt(position);
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isTrue);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
@@ -1646,6 +1689,7 @@ class FakeEditableTextState extends EditableTextState {
   bool showToolbarCalled = false;
   bool toggleToolbarCalled = false;
   bool showSpellCheckSuggestionsToolbarCalled = false;
+  bool markCurrentSelectionAsMisspelled = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
@@ -1666,6 +1710,15 @@ class FakeEditableTextState extends EditableTextState {
   bool showSpellCheckSuggestionsToolbar() {
     showSpellCheckSuggestionsToolbarCalled = true;
     return true;
+  }
+
+  @override
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    return markCurrentSelectionAsMisspelled
+      ? const SuggestionSpan(
+        TextRange(start: 7, end: 12),
+        <String>['word', 'world', 'old'],
+      ) : null;
   }
 
   @override
