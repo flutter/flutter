@@ -138,7 +138,7 @@ class SpellCheckConfiguration {
 
       // Start search for the next misspelled word at the end of currentSpan.
       searchStart = currentSpan.range.end + 1 + offset;
-      correctedSpellCheckResults.add(adjustedSpan);       
+      correctedSpellCheckResults.add(adjustedSpan);
     } else if (currentSpanFoundElsewhere) {
       // Word was pushed forward but not modified.
       final int adjustedSpanStart = searchStart + foundIndex;
@@ -167,7 +167,7 @@ class SpellCheckConfiguration {
         final RegExp regex = RegExp(' ');
         final int adjustedSearchStartForSpace = modifiedFoundIndex + searchStart + spanLength;
         final int foundEndIndex = newText.substring(adjustedSearchStartForSpace).indexOf(regex);
-        
+
         if (foundEndIndex >= 0) {
           // Word was found within newText.
           final int adjustedSpanStart = modifiedFoundIndex + searchStart;
