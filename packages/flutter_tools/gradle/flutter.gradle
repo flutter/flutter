@@ -1,6 +1,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO: Handle local.properties being in different location in add-to-app cases
+// def localPropertiesFile = new File(buildscript.sourceFile.parentFile.parentFile, 'local.properties')
+
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()
 

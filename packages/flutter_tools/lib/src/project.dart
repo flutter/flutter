@@ -487,8 +487,10 @@ class AndroidProject extends FlutterProjectPlatform {
       return false;
     }
     for (final String line in appGradle.readAsLinesSync()) {
-      if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
-          line.contains("def flutterPluginVersion = 'managed'")) {
+      final bool legacyApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
+      final bool apply = line.contains(RegExp(r'dev.flutter.flutter-gradle-plugin'));
+      final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+      if (legacyApply || apply || managed) {
         return true;
       }
     }
