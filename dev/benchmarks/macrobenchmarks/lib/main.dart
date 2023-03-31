@@ -11,6 +11,7 @@ import 'src/animated_complex_opacity.dart';
 import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
+import 'src/animted_blur_backdrop_filter.dart';
 import 'src/backdrop_filter.dart';
 import 'src/clipper_cache.dart';
 import 'src/color_filter_and_fade.dart';
@@ -51,7 +52,7 @@ class MacrobenchmarksApp extends StatelessWidget {
       initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => const HomePage(),
-        kCullOpacityRouteName: (BuildContext context) => const CullOpacityPage(),
+        kCullOpacityRouteName: (BuildContext context) => const AnimatedBlurBackdropFilter(),
         kCubicBezierRouteName: (BuildContext context) => const CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => const BackdropFilterPage(),
         kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),
@@ -84,6 +85,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
         kListTextLayoutRouteName: (BuildContext context) => const ColumnOfText(),
         kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) => const AnimatedComplexImageFiltered(),
+        kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
       },
     );
   }
@@ -309,6 +311,13 @@ class HomePage extends StatelessWidget {
             child: const Text('A list with lots of text'),
             onPressed: () {
               Navigator.pushNamed(context, kListTextLayoutRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedBlurBackdropFilter),
+            child: const Text('An animating backdrop filter'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedBlurBackdropFilter);
             },
           ),
         ],
