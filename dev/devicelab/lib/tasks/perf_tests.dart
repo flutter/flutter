@@ -620,6 +620,19 @@ TaskFunction createGradientStaticPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createAnimatedBlurBackropFilterPerfTest({
+  bool enableImpeller = false,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'animated_blur_backdrop_filter_perf',
+    enableImpeller: enableImpeller,
+    testDriver: 'test_driver/animated_blur_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
   bool enableImpeller = false,
 }) {
