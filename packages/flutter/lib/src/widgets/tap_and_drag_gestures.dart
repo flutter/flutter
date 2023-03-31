@@ -1104,7 +1104,9 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
         || (_wonArenaForPrimaryPointer && _globalDistanceMovedAllAxes.abs() > computePanSlop(event.kind, gestureSettings))) {
       _start = event;
       _dragState = _DragState.accepted;
-      resolve(GestureDisposition.accepted);
+      if (!_wonArenaForPrimaryPointer) {
+        resolve(GestureDisposition.accepted);
+      }
     }
   }
 
