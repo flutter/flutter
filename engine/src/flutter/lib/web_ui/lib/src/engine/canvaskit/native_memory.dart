@@ -11,9 +11,11 @@ import 'canvaskit_api.dart';
 
 /// Collects native objects that weren't explicitly disposed of using
 /// [UniqueRef.dispose] or [CountedRef.unref].
-SkObjectFinalizationRegistry _finalizationRegistry = SkObjectFinalizationRegistry((UniqueRef<Object> uniq) {
-  uniq.collect();
-}.toJS);
+SkObjectFinalizationRegistry _finalizationRegistry = SkObjectFinalizationRegistry(
+  (UniqueRef<Object> uniq) {
+    uniq.collect();
+  }.toJS
+);
 
 NativeMemoryFinalizationRegistry nativeMemoryFinalizationRegistry = NativeMemoryFinalizationRegistry();
 
