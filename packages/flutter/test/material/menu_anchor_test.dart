@@ -2492,12 +2492,11 @@ void main() {
                 child: Align(
                   alignment: Alignment.bottomLeft,
                   child: MenuAnchor(
-                    menuChildren: const <Widget>[
+                    menuChildren: const <Widget> [
                       MenuItemButton(child: Text('Button1'),
                       ),
                     ],
-                    builder: (BuildContext context, MenuController controller,
-                        Widget? child) {
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
                       return FilledButton(
                         onPressed: () {
                           if (controller.isOpen) {
@@ -2543,12 +2542,11 @@ void main() {
                   alignment: Alignment.bottomLeft,
                   child: MenuAnchor(
                     alignmentOffset: const Offset(0, 50),
-                    menuChildren: const <Widget>[
+                    menuChildren: const <Widget> [
                       MenuItemButton(child: Text('Button1'),
                       ),
                     ],
-                    builder: (BuildContext context, MenuController controller,
-                        Widget? child) {
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
                       return FilledButton(
                         onPressed: () {
                           if (controller.isOpen) {
