@@ -56,8 +56,6 @@ enum GrowthDirection {
   /// [AxisDirection.down] with a [GrowthDirection.forward] would have the A at
   /// the top and the Z at the bottom, with the A adjacent to the origin.
   ///
-  /// {@macro flutter.rendering.GrowthDirection.sample}
-  ///
   /// See also:
   ///
   ///   * [applyGrowthDirectionToAxisDirection], which returns the direction in
@@ -66,8 +64,6 @@ enum GrowthDirection {
 
   /// This sliver's contents are ordered in the opposite direction of the
   /// [AxisDirection].
-  ///
-  /// {@macro flutter.rendering.GrowthDirection.sample}
   ///
   /// See also:
   ///

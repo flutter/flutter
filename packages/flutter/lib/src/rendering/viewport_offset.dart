@@ -49,8 +49,6 @@ enum ScrollDirection {
   ///
   /// An anecdote for this most common case is 'forward is toward' the zero
   /// position.
-  ///
-  /// {@macro flutter.rendering.ScrollDirection.sample}
   forward,
 
   /// Scrolling is happening in the positive scroll offset direction.
@@ -62,8 +60,6 @@ enum ScrollDirection {
   ///
   /// An anecdote for this most common case is reversing, or backing away, from
   /// the zero position.
-  ///
-  /// {@macro flutter.rendering.ScrollDirection.sample}
   reverse,
 }
 

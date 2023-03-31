@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AxisDirection.left].
+// Flutter code sample for [AxisDirection.right].
 
 import 'package:flutter/material.dart';
 
@@ -25,7 +25,7 @@ class ExampleApp extends StatelessWidget {
 class MyWidget extends StatelessWidget {
   const MyWidget({ super.key });
 
-  List<String> get alphabet => <String>[
+  List<String> get _alphabet => <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
     'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
   ];
@@ -33,48 +33,46 @@ class MyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Scrolling Directions')),
+      appBar: AppBar(title: const Text('AxisDirection.right')),
+      // Also works for ListView.builder, which creates a SliverList for itself.
+      // A CustomScrollView allows multiple slivers to be composed together.
       body: CustomScrollView(
         scrollDirection: Axis.horizontal,
         slivers: <Widget>[
           SliverList.builder(
             itemCount: 27,
             itemBuilder: (BuildContext context, int index) {
-              late Widget child;
+              final Widget child;
               const Widget spacer = SizedBox(height: 10);
 
               if (index == 0) {
                 child = Container(
                   color: Colors.blue[100],
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        Text('Axis.horizontal'),
-                        spacer,
-                        Text('AxisDirection.right'),
-                        spacer,
-                        Text('GrowthDirection.forward'),
-                        spacer,
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Icon>[
-                            Icon(Icons.arrow_forward_rounded),
-                            Icon(Icons.arrow_forward_rounded),
-                          ],
-                        ),
-                      ],
-                    ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      Text('Axis.horizontal'),
+                      spacer,
+                      Text('AxisDirection.right'),
+                      spacer,
+                      Text('GrowthDirection.forward'),
+                      spacer,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Icon>[
+                          Icon(Icons.arrow_forward_rounded),
+                          Icon(Icons.arrow_forward_rounded),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               } else {
                 child = Container(
                   color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(child: Text(alphabet[index - 1])),
-                  ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(child: Text(_alphabet[index - 1])),
                 );
               }
               return Padding(

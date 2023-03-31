@@ -69,55 +69,61 @@ class _MyWidgetState extends State<MyWidget> {
     switch(axis) {
       case Axis.vertical:
         return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[ arrow, arrow ]
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[ arrow, arrow ]
         );
       case Axis.horizontal:
         return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[ arrow, arrow ]
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[ arrow, arrow ]
         );
     }
   }
 
   void _onAxisDirectionChanged(AxisDirection? axisDirection) {
+    if (axisDirection == null) {
+      return;
+    }
+    final bool newReverse;
+    final Axis newAxis;
     switch(axisDirection) {
       case AxisDirection.up:
-        reverse = true;
-        axis = Axis.vertical;
+        newReverse = true;
+        newAxis = Axis.vertical;
       case AxisDirection.down:
-        reverse = false;
-        axis = Axis.vertical;
+        newReverse = false;
+        newAxis = Axis.vertical;
       case AxisDirection.left:
-        reverse = true;
-        axis = Axis.horizontal;
+        newReverse = true;
+        newAxis = Axis.horizontal;
       case AxisDirection.right:
-        reverse = false;
-        axis = Axis.horizontal;
-      case null:
+        newReverse = false;
+        newAxis = Axis.horizontal;
     }
-    setState((){
-      // Respond to change in axis direction.
-    });
+    if (newReverse != reverse || newAxis != axis) {
+      setState(() {
+        // Respond to change in axis direction.
+        reverse = newReverse;
+        axis = newAxis;
+      });
+    }
   }
 
   Widget _getLeading(SliverConstraints constraints, bool isForward) {
     return Container(
       color: isForward ? Colors.orange[300] : Colors.green[400],
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(constraints.axis.toString()),
-            spacer,
-            Text(constraints.axisDirection.toString()),
-            spacer,
-            Text(constraints.growthDirection.toString()),
-            spacer,
-            _getArrows(constraints),
-          ],
-        ),
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(constraints.axis.toString()),
+          spacer,
+          Text(constraints.axisDirection.toString()),
+          spacer,
+          Text(constraints.growthDirection.toString()),
+          spacer,
+          _getArrows(constraints),
+        ],
       ),
     );
   }
@@ -170,16 +176,15 @@ class _MyWidgetState extends State<MyWidget> {
   }
 
   Widget _getList({ required bool isForward }) {
-    // The SliverLayoutBuilder is not necessary, and is here to allow us to
-    // the SliverContraints & directional information that is provided to the
-    // SliverList when laying out. Since it is the top level sliver here, it's
-    // key will be center if it is the forward list.
+    // The SliverLayoutBuilder is not necessary, and is here to allow us to see
+    // the SliverConstraints & directional information that is provided to the
+    // SliverList when laying out.
     return SliverLayoutBuilder(
       builder: (BuildContext context, SliverConstraints constraints) {
         return SliverList.builder(
           itemCount: 27,
           itemBuilder: (BuildContext context, int index) {
-            late Widget child;
+            final Widget child;
             if (index == 0) {
               child = _getLeading(constraints, isForward);
             } else {
@@ -187,10 +192,8 @@ class _MyWidgetState extends State<MyWidget> {
                 color: isForward
                   ? (index.isEven ? Colors.amber[100] : Colors.amberAccent)
                   : (index.isEven ? Colors.green[100] : Colors.lightGreen),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(child: Text(alphabet[index - 1])),
-                ),
+                padding: const EdgeInsets.all(8.0),
+                child: Center(child: Text(alphabet[index - 1])),
               );
             }
             return Padding(
@@ -207,7 +210,7 @@ class _MyWidgetState extends State<MyWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GrowthDirection & AxisDirection'),
+        title: const Text('GrowthDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(

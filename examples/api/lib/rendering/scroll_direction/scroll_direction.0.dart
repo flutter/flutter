@@ -65,57 +65,63 @@ class _MyWidgetState extends State<MyWidget> {
     switch(axis) {
       case Axis.vertical:
         return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[ arrow, arrow ]
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[ arrow, arrow ]
         );
       case Axis.horizontal:
         return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[ arrow, arrow ]
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[ arrow, arrow ]
         );
     }
   }
 
   void _onAxisDirectionChanged(AxisDirection? axisDirection) {
+    if (axisDirection == null) {
+      return;
+    }
+    final bool newReverse;
+    final Axis newAxis;
     switch(axisDirection) {
       case AxisDirection.up:
-        reverse = true;
-        axis = Axis.vertical;
+        newReverse = true;
+        newAxis = Axis.vertical;
       case AxisDirection.down:
-        reverse = false;
-        axis = Axis.vertical;
+        newReverse = false;
+        newAxis = Axis.vertical;
       case AxisDirection.left:
-        reverse = true;
-        axis = Axis.horizontal;
+        newReverse = true;
+        newAxis = Axis.horizontal;
       case AxisDirection.right:
-        reverse = false;
-        axis = Axis.horizontal;
-      case null:
+        newReverse = false;
+        newAxis = Axis.horizontal;
     }
-    setState((){
-      // Respond to change in axis direction.
-    });
+    if (newReverse != reverse || newAxis != axis) {
+      setState(() {
+        // Respond to change in axis direction.
+        reverse = newReverse;
+        axis = newAxis;
+      });
+    }
   }
 
   Widget _getLeading() {
     return Container(
       color: Colors.blue[100],
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(axis.toString()),
-            spacer,
-            Text(_getAxisDirection().toString()),
-            spacer,
-            const Text('GrowthDirection.forward'),
-            spacer,
-            Text(scrollDirection.toString()),
-            spacer,
-            _getArrows(),
-          ],
-        ),
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(axis.toString()),
+          spacer,
+          Text(_getAxisDirection().toString()),
+          spacer,
+          const Text('GrowthDirection.forward'),
+          spacer,
+          Text(scrollDirection.toString()),
+          spacer,
+          _getArrows(),
+        ],
       ),
     );
   }
@@ -180,7 +186,7 @@ class _MyWidgetState extends State<MyWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scrolling Directions'),
+        title: const Text('ScrollDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(
@@ -191,30 +197,30 @@ class _MyWidgetState extends State<MyWidget> {
       ),
       body: NotificationListener<UserScrollNotification>(
         onNotification: _handleNotification,
+        // Also works for ListView.builder, which creates a SliverList for itself.
+        // A CustomScrollView allows multiple slivers to be composed together.
         child: CustomScrollView(
           reverse: reverse,
           scrollDirection: axis,
           slivers: <Widget>[
             SliverList.builder(
-                itemCount: 27,
-                itemBuilder: (BuildContext context, int index) {
-                  late Widget child;
-                  if (index == 0) {
-                    child = _getLeading();
-                  } else {
-                    child = Container(
-                      color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(child: Text(alphabet[index - 1])),
-                      ),
-                    );
-                  }
-                  return Padding(
+              itemCount: 27,
+              itemBuilder: (BuildContext context, int index) {
+                final Widget child;
+                if (index == 0) {
+                  child = _getLeading();
+                } else {
+                  child = Container(
+                    color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
                     padding: const EdgeInsets.all(8.0),
-                    child: child,
+                    child: Center(child: Text(alphabet[index - 1])),
                   );
                 }
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: child,
+                );
+              }
             ),
           ],
         ),

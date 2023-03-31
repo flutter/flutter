@@ -75,43 +75,49 @@ class _MyWidgetState extends State<MyWidget> {
   }
 
   void _onAxisDirectionChanged(AxisDirection? axisDirection) {
+    if (axisDirection == null) {
+      return;
+    }
+    final bool newReverse;
+    final Axis newAxis;
     switch(axisDirection) {
       case AxisDirection.up:
-        reverse = true;
-        axis = Axis.vertical;
+        newReverse = true;
+        newAxis = Axis.vertical;
       case AxisDirection.down:
-        reverse = false;
-        axis = Axis.vertical;
+        newReverse = false;
+        newAxis = Axis.vertical;
       case AxisDirection.left:
-        reverse = true;
-        axis = Axis.horizontal;
+        newReverse = true;
+        newAxis = Axis.horizontal;
       case AxisDirection.right:
-        reverse = false;
-        axis = Axis.horizontal;
-      case null:
+        newReverse = false;
+        newAxis = Axis.horizontal;
     }
-    setState((){
-      // Respond to change in axis direction.
-    });
+    if (newReverse != reverse || newAxis != axis) {
+      setState(() {
+        // Respond to change in axis direction.
+        reverse = newReverse;
+        axis = newAxis;
+      });
+    }
   }
 
   Widget _getLeading() {
     return Container(
       color: Colors.blue[100],
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(axis.toString()),
-            spacer,
-            Text(_getAxisDirection().toString()),
-            spacer,
-            const Text('GrowthDirection.forward'),
-            spacer,
-            _getArrows(),
-          ],
-        ),
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(axis.toString()),
+          spacer,
+          Text(_getAxisDirection().toString()),
+          spacer,
+          const Text('GrowthDirection.forward'),
+          spacer,
+          _getArrows(),
+        ],
       ),
     );
   }
@@ -167,7 +173,7 @@ class _MyWidgetState extends State<MyWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AxisDirection'),
+        title: const Text('AxisDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(
@@ -176,6 +182,8 @@ class _MyWidgetState extends State<MyWidget> {
           ),
         ),
       ),
+      // Also works for ListView.builder, which creates a SliverList for itself.
+      // A CustomScrollView allows multiple slivers to be composed together.
       body: CustomScrollView(
         reverse: reverse,
         scrollDirection: axis,
@@ -183,16 +191,14 @@ class _MyWidgetState extends State<MyWidget> {
           SliverList.builder(
             itemCount: 27,
             itemBuilder: (BuildContext context, int index) {
-              late Widget child;
+              final Widget child;
               if (index == 0) {
                 child = _getLeading();
               } else {
                 child = Container(
                   color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(child: Text(alphabet[index - 1])),
-                  ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(child: Text(alphabet[index - 1])),
                 );
               }
               return Padding(

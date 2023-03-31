@@ -1345,12 +1345,13 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// [ViewportOffset.pixels] of [offset] is `0`.
   ///
   /// Children after [center] will be placed in the [axisDirection] relative to
-  /// the [center]. Children before [center] will be placed in the opposite of
-  /// the [axisDirection] relative to the [center].
+  /// the [center].
   ///
-  /// Similarly, the children above the [center] and []
+  /// Children before [center] will be placed in the opposite of
+  /// the [axisDirection] relative to the [center]. These children above
+  /// [center] will have a growth direction of [GrowthDirection.reverse].
   ///
-  /// The [center] must be a child of the viewport.
+  /// The [center] must be a direct child of the viewport.
   ///
   /// {@macro flutter.rendering.GrowthDirection.sample}
   RenderSliver? get center => _center;

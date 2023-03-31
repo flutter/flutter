@@ -203,8 +203,8 @@ enum AxisDirection {
   /// Alphabetical content with a [GrowthDirection.forward] would have the A at
   /// the bottom and the Z at the top.
   ///
-  /// For example, the default behavior of a [ListView] with [ListView.reverse]
-  /// set to true would have this axis direction.
+  /// For example, the behavior of a [ListView] with [ListView.reverse] set to
+  /// true would have this axis direction.
   ///
   /// {@tool dartpad}
   /// This sample shows a [CustomScrollView], with [Axis.vertical],
