@@ -2347,24 +2347,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Replace composing region with specified text.
-  void replaceComposingRegion(SelectionChangedCause cause, String text) {
-    // Replacement cannot be performed if the text is read only or obscured.
-    assert(!widget.readOnly && !widget.obscureText);
-
-    _replaceText(ReplaceTextIntent(textEditingValue, text, textEditingValue.composing, cause));
-
-    if (cause == SelectionChangedCause.toolbar) {
-      // Schedule a call to bringIntoView() after renderEditable updates.
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          bringIntoView(textEditingValue.selection.extent);
-        }
-      });
-      hideToolbar();
-    }
-  }
-
   /// Finds specified [SuggestionSpan] that matches the provided index using
   /// binary search.
   ///
@@ -2409,21 +2391,35 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// If spell check is enabled, this will try to infer a value for
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
-    if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
+    final SpellCheckService? spellCheckService = configuration?.spellCheckService;
+    final bool spellCheckAutomaticallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
+    final bool spellCheckServiceIsConfigured = spellCheckService != null || spellCheckService == null && WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
+    if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
+      // Only enable spell check if a non-disabled configuration is provided
+      // and if that configuration does not specify a spell check service,
+      // a native spell checker must be supported.
+      assert(() {
+        if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'Spell check was enabled with spellCheckConfiguration, but the '
+                'current platform does not have a supported spell check '
+                'service, and none was provided. Consider disabling spell '
+                'check for this platform or passing a SpellCheckConfiguration '
+                'with a specified spell check service.',
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+        return true;
+      }());
       return const SpellCheckConfiguration.disabled();
     }
 
-    SpellCheckService? spellCheckService = configuration.spellCheckService;
-
-    assert(
-      spellCheckService != null
-      || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined,
-      'spellCheckService must be specified for this platform because no default service available',
-    );
-
-    spellCheckService = spellCheckService ?? DefaultSpellCheckService();
-
-    return configuration.copyWith(spellCheckService: spellCheckService);
+    return configuration.copyWith(spellCheckService: spellCheckService ?? DefaultSpellCheckService());
   }
 
   /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
@@ -3966,7 +3962,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Shows toolbar with spell check suggestions of misspelled words that are
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
+    // Spell check suggestions toolbars are intended to be shown on non-web
+    // platforms. Additionally, the Cupertino style toolbar can't be drawn on
+    // the web with the HTML renderer due to
+    // https://github.com/flutter/flutter/issues/123560.
+    final bool platformNotSupported = kIsWeb && BrowserContextMenu.enabled;
     if (!spellCheckEnabled
+        || platformNotSupported
         || widget.readOnly
         || _selectionOverlay == null
         || !_spellCheckResultsReceived) {

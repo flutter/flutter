@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'common.dart';
-
+import 'src/animated_blur_backdrop_filter.dart';
 import 'src/animated_complex_image_filtered.dart';
 import 'src/animated_complex_opacity.dart';
 import 'src/animated_image.dart';
@@ -84,6 +84,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
         kListTextLayoutRouteName: (BuildContext context) => const ColumnOfText(),
         kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) => const AnimatedComplexImageFiltered(),
+        kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
       },
     );
   }
@@ -309,6 +310,13 @@ class HomePage extends StatelessWidget {
             child: const Text('A list with lots of text'),
             onPressed: () {
               Navigator.pushNamed(context, kListTextLayoutRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedBlurBackdropFilter),
+            child: const Text('An animating backdrop filter'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedBlurBackdropFilter);
             },
           ),
         ],
