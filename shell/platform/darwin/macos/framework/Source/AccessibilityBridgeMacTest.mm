@@ -73,7 +73,7 @@ TEST(AccessibilityBridgeMacTest, SendsAccessibilityCreateNotificationToWindowOfF
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -135,7 +135,7 @@ TEST(AccessibilityBridgeMacTest, NonZeroRootNodeId) {
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
 
-  FlutterSemanticsNode node1;
+  FlutterSemanticsNode2 node1;
   std::vector<int32_t> node1_children{2};
   node1.id = 1;
   node1.flags = static_cast<FlutterSemanticsFlag>(0);
@@ -153,7 +153,7 @@ TEST(AccessibilityBridgeMacTest, NonZeroRootNodeId) {
   node1.children_in_hit_test_order = node1_children.data();
   node1.custom_accessibility_actions_count = 0;
 
-  FlutterSemanticsNode node2;
+  FlutterSemanticsNode2 node2;
   node2.id = 2;
   node2.flags = static_cast<FlutterSemanticsFlag>(0);
   node2.actions = static_cast<FlutterSemanticsAction>(0);
@@ -198,7 +198,7 @@ TEST(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhenH
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -245,7 +245,7 @@ TEST(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhenN
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
   root.actions = static_cast<FlutterSemanticsAction>(0);

@@ -125,31 +125,31 @@ std::unique_ptr<FlutterWindowsEngineSpy> GetTestEngine() {
 // node4 is a static text node with no text, and hence has the "ignored" state.
 void PopulateAXTree(std::shared_ptr<AccessibilityBridge> bridge) {
   // Add node 0: root.
-  FlutterSemanticsNode node0{sizeof(FlutterSemanticsNode), 0};
+  FlutterSemanticsNode2 node0{sizeof(FlutterSemanticsNode2), 0};
   std::vector<int32_t> node0_children{1, 2};
   node0.child_count = node0_children.size();
   node0.children_in_traversal_order = node0_children.data();
   node0.children_in_hit_test_order = node0_children.data();
 
   // Add node 1: text child of node 0.
-  FlutterSemanticsNode node1{sizeof(FlutterSemanticsNode), 1};
+  FlutterSemanticsNode2 node1{sizeof(FlutterSemanticsNode2), 1};
   node1.label = "prefecture";
   node1.value = "Kyoto";
 
   // Add node 2: subtree child of node 0.
-  FlutterSemanticsNode node2{sizeof(FlutterSemanticsNode), 2};
+  FlutterSemanticsNode2 node2{sizeof(FlutterSemanticsNode2), 2};
   std::vector<int32_t> node2_children{3, 4};
   node2.child_count = node2_children.size();
   node2.children_in_traversal_order = node2_children.data();
   node2.children_in_hit_test_order = node2_children.data();
 
   // Add node 3: text child of node 2.
-  FlutterSemanticsNode node3{sizeof(FlutterSemanticsNode), 3};
+  FlutterSemanticsNode2 node3{sizeof(FlutterSemanticsNode2), 3};
   node3.label = "city";
   node3.value = "Uji";
 
   // Add node 4: text child (with no text) of node 2.
-  FlutterSemanticsNode node4{sizeof(FlutterSemanticsNode), 4};
+  FlutterSemanticsNode2 node4{sizeof(FlutterSemanticsNode2), 4};
 
   bridge->AddFlutterSemanticsNodeUpdate(node0);
   bridge->AddFlutterSemanticsNodeUpdate(node1);
