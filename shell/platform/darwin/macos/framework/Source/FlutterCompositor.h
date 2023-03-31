@@ -49,7 +49,7 @@ class FlutterCompositor {
 
   // Presents the FlutterLayers by updating the FlutterView specified by
   // `view_id` using the layer content. Sets frame_started_ to false.
-  bool Present(uint64_t view_id, const FlutterLayer** layers, size_t layers_count);
+  bool Present(int64_t view_id, const FlutterLayer** layers, size_t layers_count);
 
  private:
   void PresentPlatformViews(FlutterView* default_base_view,
