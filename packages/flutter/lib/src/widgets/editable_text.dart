@@ -4087,8 +4087,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void unfocus() {
-    widget.onEditingComplete?.call();
-    widget.focusNode.unfocus();
+    if (widget.onEditingComplete != null) {
+      widget.onEditingComplete!();
+    } else {
+      widget.focusNode.unfocus();
+    }
   }
 
   @override
