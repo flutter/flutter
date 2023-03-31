@@ -10,8 +10,8 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
-#include "flutter/shell/platform/android/android_context_gl_impeller.h"
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
+#include "flutter/shell/platform/android/android_context_impeller.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
@@ -33,11 +33,13 @@ AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     bool enable_impeller,
-    bool enable_vulkan_validation)
+    bool enable_vulkan_validation,
+    bool impeller_force_gl)
     : android_context_(context),
       jni_facade_(std::move(jni_facade)),
       enable_impeller_(enable_impeller),
-      enable_vulkan_validation_(enable_vulkan_validation) {}
+      enable_vulkan_validation_(enable_vulkan_validation),
+      impeller_force_gl_(impeller_force_gl) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
@@ -46,17 +48,17 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
     case AndroidRenderingAPI::kSoftware:
       return std::make_unique<AndroidSurfaceSoftware>(android_context_,
                                                       jni_facade_);
-    case AndroidRenderingAPI::kOpenGLES:
+    case AndroidRenderingAPI::kGPU:
       if (enable_impeller_) {
-// TODO(kaushikiska@): Enable this after wiring a preference for Vulkan backend.
-#if false
-        return std::make_unique<AndroidSurfaceVulkanImpeller>(
-            android_context_, jni_facade_, enable_vulkan_validation_);
-
-#else
+        if (!impeller_force_gl_) {
+          auto vk_surface = std::make_unique<AndroidSurfaceVulkanImpeller>(
+              android_context_, jni_facade_, enable_vulkan_validation_);
+          if (vk_surface->IsValid()) {
+            return vk_surface;
+          }
+        }
         return std::make_unique<AndroidSurfaceGLImpeller>(android_context_,
                                                           jni_facade_);
-#endif
       } else {
         return std::make_unique<AndroidSurfaceGLSkia>(android_context_,
                                                       jni_facade_);
@@ -76,10 +78,10 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
   }
   if (enable_impeller) {
-    return std::make_unique<AndroidContextGLImpeller>();
+    return std::make_unique<AndroidContextImpeller>();
   }
   return std::make_unique<AndroidContextGLSkia>(
-      AndroidRenderingAPI::kOpenGLES,               //
+      AndroidRenderingAPI::kGPU,                    //
       fml::MakeRefCounted<AndroidEnvironmentGL>(),  //
       task_runners,                                 //
       msaa_samples                                  //
@@ -116,10 +118,11 @@ PlatformViewAndroid::PlatformViewAndroid(
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-        android_context_,                                              //
-        jni_facade_,                                                   //
-        delegate.OnPlatformViewGetSettings().enable_impeller,          //
-        delegate.OnPlatformViewGetSettings().enable_vulkan_validation  //
+        android_context_,                                               //
+        jni_facade_,                                                    //
+        delegate.OnPlatformViewGetSettings().enable_impeller,           //
+        delegate.OnPlatformViewGetSettings().enable_vulkan_validation,  //
+        delegate.OnPlatformViewGetSettings().impeller_force_gl          //
     );
     android_surface_ = surface_factory_->CreateSurface();
     FML_CHECK(android_surface_ && android_surface_->IsValid())
@@ -271,7 +274,7 @@ void PlatformViewAndroid::UpdateSemantics(
 void PlatformViewAndroid::RegisterExternalTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
-  if (android_context_->RenderingApi() == AndroidRenderingAPI::kOpenGLES) {
+  if (android_context_->RenderingApi() == AndroidRenderingAPI::kGPU) {
     RegisterTexture(std::make_shared<AndroidExternalTextureGL>(
         texture_id, surface_texture, jni_facade_));
   } else {

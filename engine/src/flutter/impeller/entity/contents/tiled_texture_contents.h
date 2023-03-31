@@ -13,6 +13,7 @@
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path.h"
+#include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/sampler_descriptor.h"
 
 namespace impeller {
