@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210704"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -990,7 +983,6 @@ void main() {
     setUp(() { EditableText.debugDeterministicCursor = true; });
     tearDown(() {
       EditableText.debugDeterministicCursor = false;
-      _TestRenderEditablePainter.paintHistory.clear();
       editable.foregroundPainter = null;
       editable.painter = null;
       editable.paintCount = 0;
@@ -1080,24 +1072,27 @@ void main() {
     test('swapping painters', () {
       layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
 
-      final _TestRenderEditablePainter painter1 = _TestRenderEditablePainter();
-      final _TestRenderEditablePainter painter2 = _TestRenderEditablePainter();
+      final _TestRenderEditablePainter painter1 = _TestRenderEditablePainter(color: const Color(0x01234567));
+      final _TestRenderEditablePainter painter2 = _TestRenderEditablePainter(color: const Color(0x76543210));
 
       editable.painter = painter1;
       editable.foregroundPainter = painter2;
-      pumpFrame(phase: EnginePhase.paint);
       expect(
-        _TestRenderEditablePainter.paintHistory,
-        <_TestRenderEditablePainter>[painter1, painter2],
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: painter1.color)
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: painter2.color),
       );
 
-      _TestRenderEditablePainter.paintHistory.clear();
       editable.painter = painter2;
       editable.foregroundPainter = painter1;
-      pumpFrame(phase: EnginePhase.paint);
       expect(
-        _TestRenderEditablePainter.paintHistory,
-        <_TestRenderEditablePainter>[painter2, painter1],
+        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        paints
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: painter2.color)
+          ..paragraph()
+          ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: painter1.color),
       );
     });
 
@@ -1112,11 +1107,8 @@ void main() {
         errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
       });
       expect(errorDetails, isNull);
+      expect(painter.paintCount, 2);
 
-      expect(
-        _TestRenderEditablePainter.paintHistory,
-        <_TestRenderEditablePainter>[painter, painter],
-      );
       expect(
         (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
@@ -1125,6 +1117,7 @@ void main() {
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
       );
     });
+
     test('does not repaint the render editable when custom painters need repaint', () {
       layout(editable, constraints: BoxConstraints.loose(const Size(100, 100)));
 
@@ -1789,15 +1782,17 @@ class _TestRenderEditable extends RenderEditable {
 }
 
 class _TestRenderEditablePainter extends RenderEditablePainter {
+  _TestRenderEditablePainter({this.color = const Color(0x12345678)});
+
+  final Color color;
+
   bool repaint = true;
   int paintCount = 0;
-  static final List<_TestRenderEditablePainter> paintHistory = <_TestRenderEditablePainter>[];
 
   @override
   void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
     paintCount += 1;
-    canvas.drawRect(const Rect.fromLTRB(1, 1, 1, 1), Paint()..color = const Color(0x12345678));
-    paintHistory.add(this);
+    canvas.drawRect(const Rect.fromLTRB(1, 1, 1, 1), Paint()..color = color);
   }
 
   @override
@@ -1806,4 +1801,7 @@ class _TestRenderEditablePainter extends RenderEditablePainter {
   void markNeedsPaint() {
     notifyListeners();
   }
+
+  @override
+  String toString() => '_TestRenderEditablePainter#${shortHash(this)}';
 }
