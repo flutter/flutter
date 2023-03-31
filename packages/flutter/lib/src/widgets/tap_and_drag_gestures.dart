@@ -962,6 +962,9 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
             // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
             // drag gesture.
             if (currentDown != null) {
+              if (!_acceptedActivePointers.remove(pointer)) {
+                resolvePointer(pointer, GestureDisposition.rejected);
+              }
               _dragState = _DragState.accepted;
               _acceptDrag(currentDown!);
               _checkDragEnd();
@@ -1031,7 +1034,7 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
       if (_dragState == _DragState.possible) {
         // The drag has not been accepted before a [PointerUpEvent], therefore the recognizer
         // attempts to recognize a tap.
-        _acceptedActivePointers.remove(event.pointer);
+        // _acceptedActivePointers.remove(event.pointer);
         stopTrackingIfPointerNoLongerDown(event);
       } else if (_dragState == _DragState.accepted) {
         _giveUpPointer(event.pointer);
