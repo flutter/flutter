@@ -5,7 +5,7 @@
 #include "impeller/scene/material.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
-#include "impeller/renderer/sampler_descriptor.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/scene/importer/conversions.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
