@@ -5,6 +5,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
@@ -164,35 +165,75 @@ Future<void> main() async {
     // Fix https://github.com/flutter/flutter/issues/13675
     final Key key = UniqueKey();
     Widget buildWidget(Color color) {
-      return Container(
-        width: 250,
-        height: 250,
-        color: Colors.red,
-        alignment: Alignment.center,
-        key: key,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Stack(
-            children: <Widget>[
-              for (int i = 0; i < 25; i++)
-                Positioned(
-                  left: i * 6,
-                  top: i * 6,
-                  child: Container(
-                    height: 200,
-                    width: 200,
-                    decoration: ShapeDecoration(
-                      color: Colors.black,
-                      shape: CircleBorder(
-                        side: BorderSide(
-                          color: color,
-                          width: 15,
-                        ),
-                      ),
+      const double containerWidth = 400;
+
+      List<Widget> getCircles({
+        required int numberOfCircles,
+        required double radius,
+        required double circleRadius,
+      }) {
+        final List<Widget> circles = <Widget>[];
+        for (int i = 0; i < numberOfCircles; i++) {
+          final double angle = 2 * math.pi * i / numberOfCircles;
+          final double x = radius * math.cos(angle);
+          final double y = radius * math.sin(angle);
+
+          circles.add(
+            Positioned(
+              left: containerWidth / 2 - x - circleRadius,
+              top: containerWidth / 2 - y - circleRadius,
+              child: Container(
+                width: circleRadius * 2,
+                height: circleRadius * 2,
+                decoration: ShapeDecoration(
+                  color: Colors.black,
+                  shape: CircleBorder(
+                    side: BorderSide(
+                      color: color,
+                      width: 40,
                     ),
                   ),
                 ),
-            ],
+              ),
+            ),
+          );
+        }
+        return circles;
+      }
+
+      return Center(
+        key: key,
+        child: Container(
+          width: containerWidth,
+          height: containerWidth,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(128),
+            border: Border.all(
+              strokeAlign: BorderSide.strokeAlignOutside,
+            ),
+          ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                ...getCircles(
+                  circleRadius: 50,
+                  numberOfCircles: 20,
+                  radius: 150,
+                ),
+                ...getCircles(
+                  circleRadius: 48,
+                  numberOfCircles: 30,
+                  radius: 100,
+                ),
+                ...getCircles(
+                  circleRadius: 44,
+                  numberOfCircles: 5,
+                  radius: 50,
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -201,13 +242,13 @@ Future<void> main() async {
     await tester.pumpWidget(buildWidget(const Color(0xffffffff)));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('painting.shape_decoration.outlined_border.filled.png'),
+      matchesGoldenFile('painting.shape_decoration.outlined_border.should_be_white.png'),
     );
 
     await tester.pumpWidget(buildWidget(const Color(0xfaffffff)));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('painting.shape_decoration.outlined_border.leaking.png'),
+      matchesGoldenFile('painting.shape_decoration.outlined_border.show_lines_due_to_opacity.png'),
     );
   });
 }
