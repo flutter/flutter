@@ -878,12 +878,12 @@ class DeviceDomain extends Domain {
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  /// Return a list of the current devices, with each device represented as a map
-  /// of properties (id, name, platform, ...).
+  /// Return a list of the currently connected devices, with each device
+  /// represented as a map of properties (id, name, platform, ...).
   Future<List<Map<String, Object?>>> getDevices([ Map<String, Object?>? args ]) async {
     return <Map<String, Object?>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.devices())
+        for (final Device device in await discoverer.devices(filter: DeviceDiscoveryFilter()))
           await _deviceToMap(device),
     ];
   }
@@ -1066,10 +1066,12 @@ class DeviceDomain extends Domain {
     return Future<void>.value();
   }
 
-  /// Return the device matching the deviceId field in the args.
+  /// Return the connected device matching the deviceId field in the args.
   Future<Device?> _getDevice(String? deviceId) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.devices();
+      final List<Device> devices = await discoverer.devices(
+        filter: DeviceDiscoveryFilter(),
+      );
       Device? device;
       for (final Device localDevice in devices) {
         if (localDevice.id == deviceId) {
