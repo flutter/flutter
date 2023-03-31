@@ -27,15 +27,48 @@ import 'viewport_offset.dart';
 /// [GrowthDirection.reverse] would have the Z at the top (at scroll offset
 /// zero) and the A below it.
 ///
-/// The direction in which the scroll offset increases is given by
-/// [applyGrowthDirectionToAxisDirection].
+/// {@template flutter.rendering.GrowthDirection.sample}
+/// Most scroll views by default are ordered [GrowthDirection.forward].
+/// Changing the default values of [ScrollView.anchor],
+/// [ScrollView.center], or both, can configure a scroll view for
+/// [GrowthDirection.reverse].
+///
+/// {@tool dartpad}
+/// This sample shows a [CustomScrollView], with [Radio] buttons in the
+/// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+/// configurations. The [CustomScrollView.anchor] and [CustomScrollView.center]
+/// properties are also set to have the 0 scroll offset positioned in the middle
+/// of the viewport, with [GrowthDirection.forward] and [GrowthDirection.reverse]
+/// illustrated on either side. The sliver that shares the
+/// [CustomScrollView.center] key is positioned at the [CustomScrollView.anchor].
+///
+/// ** See code in examples/api/lib/rendering/growth_direction/growth_direction.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
+///
+/// See also:
+///
+///   * [applyGrowthDirectionToAxisDirection], which returns the direction in
+///     which the scroll offset increases.
 enum GrowthDirection {
   /// This sliver's contents are ordered in the same direction as the
-  /// [AxisDirection].
+  /// [AxisDirection]. For example, a vertical alphabetical list that is going
+  /// [AxisDirection.down] with a [GrowthDirection.forward] would have the A at
+  /// the top and the Z at the bottom, with the A adjacent to the origin.
+  ///
+  /// See also:
+  ///
+  ///   * [applyGrowthDirectionToAxisDirection], which returns the direction in
+  ///     which the scroll offset increases.
   forward,
 
   /// This sliver's contents are ordered in the opposite direction of the
   /// [AxisDirection].
+  ///
+  /// See also:
+  ///
+  ///   * [applyGrowthDirectionToAxisDirection], which returns the direction in
+  ///     which the scroll offset increases.
   reverse,
 }
 
@@ -57,11 +90,12 @@ AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, G
   }
 }
 
-/// Flips the [ScrollDirection] if the [GrowthDirection] is [GrowthDirection.reverse].
+/// Flips the [ScrollDirection] if the [GrowthDirection] is
+/// [GrowthDirection.reverse].
 ///
 /// Specifically, returns `scrollDirection` if `scrollDirection` is
-/// [GrowthDirection.forward], otherwise returns [flipScrollDirection] applied to
-/// `scrollDirection`.
+/// [GrowthDirection.forward], otherwise returns [flipScrollDirection] applied
+/// to `scrollDirection`.
 ///
 /// This function is useful in [RenderSliver] subclasses that are given both an
 /// [ScrollDirection] and a [GrowthDirection] and wish to compute the
@@ -135,6 +169,14 @@ class SliverConstraints extends Constraints {
 
   /// The direction in which the [scrollOffset] and [remainingPaintExtent]
   /// increase.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Radio] buttons in the
+  /// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+  /// configurations.
+  ///
+  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction.0.dart **
+  /// {@end-tool}
   final AxisDirection axisDirection;
 
   /// The direction in which the contents of slivers are ordered, relative to
@@ -158,14 +200,16 @@ class SliverConstraints extends Constraints {
   ///
   /// Normally, the absolute zero offset is determined by the viewport's
   /// [RenderViewport.center] and [RenderViewport.anchor] properties.
+  ///
+  /// {@macro flutter.rendering.GrowthDirection.sample}
   final GrowthDirection growthDirection;
 
   /// The direction in which the user is attempting to scroll, relative to the
   /// [axisDirection] and [growthDirection].
   ///
-  /// For example, if [growthDirection] is [GrowthDirection.reverse] and
+  /// For example, if [growthDirection] is [GrowthDirection.forward] and
   /// [axisDirection] is [AxisDirection.down], then a
-  /// [ScrollDirection.forward] means that the user is scrolling up, in the
+  /// [ScrollDirection.reverse] means that the user is scrolling down, in the
   /// positive [scrollOffset] direction.
   ///
   /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
@@ -176,6 +220,8 @@ class SliverConstraints extends Constraints {
   /// scroll offset. For example, [RenderSliverFloatingPersistentHeader] will
   /// only expand a floating app bar when the [userScrollDirection] is in the
   /// positive scroll offset direction.
+  ///
+  /// {@macro flutter.rendering.ScrollDirection.sample}
   final ScrollDirection userScrollDirection;
 
   /// The scroll offset, in this sliver's coordinate system, that corresponds to
