@@ -4,7 +4,13 @@
 // TODO: Handle local.properties being in different location in add-to-app cases
 // def localPropertiesFile = new File(buildscript.sourceFile.parentFile.parentFile, 'local.properties')
 
+// Standard case: Flutter-only app
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+if (!localPropertiesFile.exists()) {
+    // If this is a Flutter module, local.properties should be in the parent directory")
+    localPropertiesFile = new File(rootProject.projectDir.parentFile, "local.properties")
+}
+
 def properties = new Properties()
 
 assert localPropertiesFile.exists()
