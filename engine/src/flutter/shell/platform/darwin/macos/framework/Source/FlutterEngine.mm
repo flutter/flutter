@@ -25,6 +25,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 
+const uint64_t kFlutterDefaultViewId = 0;
+
 NSString* const kFlutterPlatformChannel = @"flutter/platform";
 
 /**
@@ -88,7 +90,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
  */
 @property(nonatomic, strong) NSMutableArray<NSNumber*>* isResponseValid;
 
-- (nullable FlutterViewController*)viewControllerForId:(int64_t)viewId;
+- (nullable FlutterViewController*)viewControllerForId:(uint64_t)viewId;
 
 /**
  * An internal method that adds the view controller with the given ID.
@@ -96,7 +98,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
  * This method assigns the controller with the ID, puts the controller into the
  * map, and does assertions related to the default view ID.
  */
-- (void)registerViewController:(FlutterViewController*)controller forId:(int64_t)viewId;
+- (void)registerViewController:(FlutterViewController*)controller forId:(uint64_t)viewId;
 
 /**
  * An internal method that removes the view controller with the given ID.
@@ -105,7 +107,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
  * map. This is an no-op if the view ID is not associated with any view
  * controllers.
  */
-- (void)deregisterViewControllerForId:(int64_t)viewId;
+- (void)deregisterViewControllerForId:(uint64_t)viewId;
 
 /**
  * Shuts down the engine if view requirement is not met, and headless execution
@@ -292,7 +294,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
   return [self viewForId:kFlutterDefaultViewId];
 }
 
-- (NSView*)viewForId:(int64_t)viewId {
+- (NSView*)viewForId:(uint64_t)viewId {
   FlutterViewController* controller = [_flutterEngine viewControllerForId:viewId];
   if (controller == nil) {
     return nil;
@@ -571,7 +573,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   }
 }
 
-- (void)registerViewController:(FlutterViewController*)controller forId:(int64_t)viewId {
+- (void)registerViewController:(FlutterViewController*)controller forId:(uint64_t)viewId {
   NSAssert(controller != nil, @"The controller must not be nil.");
   NSAssert(![controller attached],
            @"The incoming view controller is already attached to an engine.");
@@ -581,7 +583,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   [_viewControllers setObject:controller forKey:@(viewId)];
 }
 
-- (void)deregisterViewControllerForId:(int64_t)viewId {
+- (void)deregisterViewControllerForId:(uint64_t)viewId {
   FlutterViewController* oldController = [self viewControllerForId:viewId];
   if (oldController != nil) {
     [oldController detachFromEngine];
@@ -595,7 +597,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   }
 }
 
-- (FlutterViewController*)viewControllerForId:(int64_t)viewId {
+- (FlutterViewController*)viewControllerForId:(uint64_t)viewId {
   FlutterViewController* controller = [_viewControllers objectForKey:@(viewId)];
   NSAssert(controller == nil || controller.viewId == viewId,
            @"The stored controller has unexpected view ID.");

@@ -192,7 +192,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
 
   // Set up embedder API mock.
   FlutterSemanticsAction called_action;
-  int64_t called_id;
+  uint64_t called_id;
 
   engine.embedderAPI.DispatchSemanticsAction = MOCK_ENGINE_PROC(
       DispatchSemanticsAction,
