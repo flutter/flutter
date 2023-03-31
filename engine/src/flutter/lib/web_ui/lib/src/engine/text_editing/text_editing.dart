@@ -51,7 +51,8 @@ void _emptyCallback(dynamic _) {}
 
 /// The default [HostNode] that hosts all DOM required for text editing when a11y is not enabled.
 @visibleForTesting
-HostNode get defaultTextEditingRoot => flutterViewEmbedder.glassPaneShadow;
+DomElement get defaultTextEditingRoot =>
+    flutterViewEmbedder.textEditingHostNode;
 
 /// These style attributes are constant throughout the life time of an input
 /// element.

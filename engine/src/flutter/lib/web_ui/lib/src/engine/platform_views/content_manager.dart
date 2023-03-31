@@ -128,8 +128,9 @@ class PlatformViewManager {
       }
 
       _ensureContentCorrectlySized(content, viewType);
+      wrapper.append(content);
 
-      return wrapper..append(content);
+      return wrapper;
     });
   }
 
