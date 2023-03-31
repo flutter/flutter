@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// package dev.flutter.plugin
-
 import static groovy.io.FileType.FILES
 
 import groovy.json.JsonSlurper
