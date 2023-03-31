@@ -1073,16 +1073,14 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double prefixIconHeight = prefixIcon?.size.height ?? 0;
     final double suffixIconHeight = suffixIcon?.size.height ?? 0;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
-    final double contentHeight = math.max(
-      fixIconHeight,
-      topHeight
+    final double contentHeightWithoutIcon = topHeight
       + contentPadding.top
       + fixAboveInput
       + inputHeight
       + fixBelowInput
       + contentPadding.bottom
-      + densityOffset.dy,
-    );
+      + densityOffset.dy;
+    final double contentHeight = math.max(fixIconHeight, contentHeightWithoutIcon);
     final double minContainerHeight = decoration.isDense! || decoration.isCollapsed || expands
       ? 0.0
       : kMinInteractiveDimension;
@@ -1090,6 +1088,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
+
+    // In cases where the content is shorter than the height of the prefix or
+    // suffix icon, center it next to the icon.
+    final double undersizedContentIconAdjustment =
+        math.max(0, fixIconHeight - contentHeightWithoutIcon) / 2.0;
 
     // Ensure the text is vertically centered in cases where the content is
     // shorter than kMinInteractiveDimension.
@@ -1115,6 +1118,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + inputInternalBaseline
       + baselineAdjustment
       + interactiveAdjustment
+      + undersizedContentIconAdjustment
       + densityOffset.dy / 2.0;
     final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
