@@ -17,14 +17,14 @@ TEST(FlutterPlatformNodeDelegateTest, NodeDelegateHasUniqueId) {
       std::make_shared<TestAccessibilityBridge>();
 
   // Add node 0: root.
-  FlutterSemanticsNode node0{sizeof(FlutterSemanticsNode), 0};
+  FlutterSemanticsNode2 node0{sizeof(FlutterSemanticsNode2), 0};
   std::vector<int32_t> node0_children{1};
   node0.child_count = node0_children.size();
   node0.children_in_traversal_order = node0_children.data();
   node0.children_in_hit_test_order = node0_children.data();
 
   // Add node 1: text child of node 0.
-  FlutterSemanticsNode node1{sizeof(FlutterSemanticsNode), 1};
+  FlutterSemanticsNode2 node1{sizeof(FlutterSemanticsNode2), 1};
   node1.label = "prefecture";
   node1.value = "Kyoto";
 
@@ -40,7 +40,7 @@ TEST(FlutterPlatformNodeDelegateTest, NodeDelegateHasUniqueId) {
 TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -85,7 +85,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
   // Set up a flutter accessibility node.
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -110,7 +110,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
 TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -126,7 +126,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode child1;
+  FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
@@ -156,7 +156,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
 TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -172,7 +172,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode child1;
+  FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
@@ -202,7 +202,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
 TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -218,7 +218,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode child1;
+  FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
@@ -249,7 +249,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
 TEST(FlutterPlatformNodeDelegateTest, selfIsLowestPlatformAncestor) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -271,7 +271,7 @@ TEST(FlutterPlatformNodeDelegateTest, selfIsLowestPlatformAncestor) {
 TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -285,7 +285,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   root.custom_accessibility_actions_count = 0;
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode child1;
+  FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";

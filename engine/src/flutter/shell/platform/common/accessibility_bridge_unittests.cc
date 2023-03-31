@@ -15,7 +15,7 @@ namespace testing {
 
 using ::testing::Contains;
 
-FlutterSemanticsNode CreateSemanticsNode(
+FlutterSemanticsNode2 CreateSemanticsNode(
     int32_t id,
     const char* label,
     const std::vector<int32_t>* children = nullptr) {
@@ -42,9 +42,9 @@ TEST(AccessibilityBridgeTest, BasicTest) {
       std::make_shared<TestAccessibilityBridge>();
 
   std::vector<int32_t> children{1, 2};
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root", &children);
-  FlutterSemanticsNode child1 = CreateSemanticsNode(1, "child 1");
-  FlutterSemanticsNode child2 = CreateSemanticsNode(2, "child 2");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root", &children);
+  FlutterSemanticsNode2 child1 = CreateSemanticsNode(1, "child 1");
+  FlutterSemanticsNode2 child2 = CreateSemanticsNode(2, "child 2");
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -74,9 +74,9 @@ TEST(AccessibilityBridgeTest, AccessibilityRootId) {
       std::make_shared<TestAccessibilityBridge>();
 
   std::vector<int32_t> children{456, 789};
-  FlutterSemanticsNode root = CreateSemanticsNode(123, "root", &children);
-  FlutterSemanticsNode child1 = CreateSemanticsNode(456, "child 1");
-  FlutterSemanticsNode child2 = CreateSemanticsNode(789, "child 2");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(123, "root", &children);
+  FlutterSemanticsNode2 child1 = CreateSemanticsNode(456, "child 1");
+  FlutterSemanticsNode2 child2 = CreateSemanticsNode(789, "child 2");
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -113,13 +113,13 @@ TEST(AccessibilityBridgeTest, AddOrder) {
   std::vector<int32_t> root_children{34, 56};
   std::vector<int32_t> child2_children{78};
   std::vector<int32_t> child3_children{90};
-  FlutterSemanticsNode root = CreateSemanticsNode(12, "root", &root_children);
-  FlutterSemanticsNode child1 = CreateSemanticsNode(34, "child 1");
-  FlutterSemanticsNode child2 =
+  FlutterSemanticsNode2 root = CreateSemanticsNode(12, "root", &root_children);
+  FlutterSemanticsNode2 child1 = CreateSemanticsNode(34, "child 1");
+  FlutterSemanticsNode2 child2 =
       CreateSemanticsNode(56, "child 2", &child2_children);
-  FlutterSemanticsNode child3 =
+  FlutterSemanticsNode2 child3 =
       CreateSemanticsNode(78, "child 3", &child3_children);
-  FlutterSemanticsNode child4 = CreateSemanticsNode(90, "child 4");
+  FlutterSemanticsNode2 child4 = CreateSemanticsNode(90, "child 4");
 
   bridge->AddFlutterSemanticsNodeUpdate(child3);
   bridge->AddFlutterSemanticsNodeUpdate(child2);
@@ -162,8 +162,8 @@ TEST(AccessibilityBridgeTest, CanFireChildrenChangedCorrectly) {
       std::make_shared<TestAccessibilityBridge>();
 
   std::vector<int32_t> children{1};
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root", &children);
-  FlutterSemanticsNode child1 = CreateSemanticsNode(1, "child 1");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root", &children);
+  FlutterSemanticsNode2 child1 = CreateSemanticsNode(1, "child 1");
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -185,7 +185,7 @@ TEST(AccessibilityBridgeTest, CanFireChildrenChangedCorrectly) {
   int32_t new_children[] = {1, 2};
   root.children_in_traversal_order = new_children;
 
-  FlutterSemanticsNode child2 = CreateSemanticsNode(2, "child 2");
+  FlutterSemanticsNode2 child2 = CreateSemanticsNode(2, "child 2");
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->AddFlutterSemanticsNodeUpdate(child2);
@@ -210,8 +210,8 @@ TEST(AccessibilityBridgeTest, CanRecreateNodeDelegates) {
       std::make_shared<TestAccessibilityBridge>();
 
   std::vector<int32_t> children{1};
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root", &children);
-  FlutterSemanticsNode child1 = CreateSemanticsNode(1, "child 1");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root", &children);
+  FlutterSemanticsNode2 child1 = CreateSemanticsNode(1, "child 1");
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -242,7 +242,7 @@ TEST(AccessibilityBridgeTest, CanRecreateNodeDelegates) {
 TEST(AccessibilityBridgeTest, CanHandleSelectionChangeCorrectly) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocused);
@@ -274,7 +274,7 @@ TEST(AccessibilityBridgeTest, CanHandleSelectionChangeCorrectly) {
 TEST(AccessibilityBridgeTest, DoesNotAssignEditableRootToSelectableText) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly);
@@ -290,7 +290,7 @@ TEST(AccessibilityBridgeTest, DoesNotAssignEditableRootToSelectableText) {
 TEST(AccessibilityBridgeTest, ToggleHasToggleButtonRole) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState |
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasEnabledState |
@@ -305,7 +305,7 @@ TEST(AccessibilityBridgeTest, ToggleHasToggleButtonRole) {
 TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsSlider |
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasEnabledState |
@@ -326,7 +326,7 @@ TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
 TEST(AccessibilityBridgeTest, CanSetCheckboxChecked) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root");
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   root.flags = static_cast<FlutterSemanticsFlag>(
       FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
       FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked);
@@ -346,10 +346,10 @@ TEST(AccessibilityBridgeTest, CanReparentNode) {
 
   std::vector<int32_t> root_children{1};
   std::vector<int32_t> child1_children{2};
-  FlutterSemanticsNode root = CreateSemanticsNode(0, "root", &root_children);
-  FlutterSemanticsNode child1 =
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root", &root_children);
+  FlutterSemanticsNode2 child1 =
       CreateSemanticsNode(1, "child 1", &child1_children);
-  FlutterSemanticsNode child2 = CreateSemanticsNode(2, "child 2");
+  FlutterSemanticsNode2 child2 = CreateSemanticsNode(2, "child 2");
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -417,15 +417,15 @@ TEST(AccessibilityBridgeTest, CanReparentMultipleNodes) {
   std::vector<int32_t> root_children{intermediary1_id, intermediary2_id};
   std::vector<int32_t> intermediary1_children{leaf1_id};
   std::vector<int32_t> intermediary2_children{leaf2_id, leaf3_id};
-  FlutterSemanticsNode root =
+  FlutterSemanticsNode2 root =
       CreateSemanticsNode(root_id, "root", &root_children);
-  FlutterSemanticsNode intermediary1 = CreateSemanticsNode(
+  FlutterSemanticsNode2 intermediary1 = CreateSemanticsNode(
       intermediary1_id, "intermediary 1", &intermediary1_children);
-  FlutterSemanticsNode intermediary2 = CreateSemanticsNode(
+  FlutterSemanticsNode2 intermediary2 = CreateSemanticsNode(
       intermediary2_id, "intermediary 2", &intermediary2_children);
-  FlutterSemanticsNode leaf1 = CreateSemanticsNode(leaf1_id, "leaf 1");
-  FlutterSemanticsNode leaf2 = CreateSemanticsNode(leaf2_id, "leaf 2");
-  FlutterSemanticsNode leaf3 = CreateSemanticsNode(leaf3_id, "leaf 3");
+  FlutterSemanticsNode2 leaf1 = CreateSemanticsNode(leaf1_id, "leaf 1");
+  FlutterSemanticsNode2 leaf2 = CreateSemanticsNode(leaf2_id, "leaf 2");
+  FlutterSemanticsNode2 leaf3 = CreateSemanticsNode(leaf3_id, "leaf 3");
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->AddFlutterSemanticsNodeUpdate(intermediary1);
@@ -508,13 +508,13 @@ TEST(AccessibilityBridgeTest, CanReparentNodeWithChild) {
 
   std::vector<int32_t> root_children{intermediary1_id, intermediary2_id};
   std::vector<int32_t> intermediary1_children{leaf1_id};
-  FlutterSemanticsNode root =
+  FlutterSemanticsNode2 root =
       CreateSemanticsNode(root_id, "root", &root_children);
-  FlutterSemanticsNode intermediary1 = CreateSemanticsNode(
+  FlutterSemanticsNode2 intermediary1 = CreateSemanticsNode(
       intermediary1_id, "intermediary 1", &intermediary1_children);
-  FlutterSemanticsNode intermediary2 =
+  FlutterSemanticsNode2 intermediary2 =
       CreateSemanticsNode(intermediary2_id, "intermediary 2");
-  FlutterSemanticsNode leaf1 = CreateSemanticsNode(leaf1_id, "leaf 1");
+  FlutterSemanticsNode2 leaf1 = CreateSemanticsNode(leaf1_id, "leaf 1");
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->AddFlutterSemanticsNodeUpdate(intermediary1);
@@ -593,7 +593,7 @@ TEST(AccessibilityBridgeTest, LineBreakingObjectTest) {
 
   const int32_t root_id = 0;
 
-  FlutterSemanticsNode root = CreateSemanticsNode(root_id, "root", {});
+  FlutterSemanticsNode2 root = CreateSemanticsNode(root_id, "root", {});
 
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
