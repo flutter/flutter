@@ -5,13 +5,12 @@
 import 'package:flutter/material.dart';
 
 import 'common.dart';
-
+import 'src/animated_blur_backdrop_filter.dart';
 import 'src/animated_complex_image_filtered.dart';
 import 'src/animated_complex_opacity.dart';
 import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
 import 'src/animation_with_microtasks.dart';
-import 'src/animted_blur_backdrop_filter.dart';
 import 'src/backdrop_filter.dart';
 import 'src/clipper_cache.dart';
 import 'src/color_filter_and_fade.dart';
@@ -52,7 +51,7 @@ class MacrobenchmarksApp extends StatelessWidget {
       initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => const HomePage(),
-        kCullOpacityRouteName: (BuildContext context) => const AnimatedBlurBackdropFilter(),
+        kCullOpacityRouteName: (BuildContext context) => const CullOpacityPage(),
         kCubicBezierRouteName: (BuildContext context) => const CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => const BackdropFilterPage(),
         kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),

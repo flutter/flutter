@@ -46,7 +46,7 @@ class _AnimatedBlurBackdropFilterState extends State<AnimatedBlurBackdropFilter>
     return MaterialApp(
       home: Scaffold(
         body: Stack(
-          children: [
+          children: <Widget>[
             ListView(
               children: <Widget>[
                 for (int i = 0; i < 30; i++)
