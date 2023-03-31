@@ -810,6 +810,7 @@ class MenuItemButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.leadingIcon,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -870,6 +871,14 @@ class MenuItemButton extends StatefulWidget {
 
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
+
+  /// {@template flutter.material.menu_anchor.closeOnActivate}
+  /// Determines if the menu will be closed when a [MenuItemButton]
+  /// is pressed.
+  ///
+  /// Defaults to true.
+  /// {@endtemplate}
+  final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1089,7 +1098,9 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
     widget.onPressed?.call();
-    _MenuAnchorState._maybeOf(context)?._root._close();
+    if (widget.closeOnActivate) {
+      _MenuAnchorState._maybeOf(context)?._root._close();
+    }
   }
 
   void _createInternalFocusNodeIfNeeded() {
@@ -1140,6 +1151,7 @@ class CheckboxMenuButton extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -1242,6 +1254,9 @@ class CheckboxMenuButton extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
+  /// {@macro flutter.material.menu_anchor.closeOnActivate}
+  final bool closeOnActivate;
+
   /// The widget displayed in the center of this button.
   ///
   /// Typically this is the button's label, using a [Text] widget.
@@ -1292,6 +1307,7 @@ class CheckboxMenuButton extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
+      closeOnActivate: closeOnActivate,
       child: child,
     );
   }
@@ -1332,6 +1348,7 @@ class RadioMenuButton<T> extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -1436,6 +1453,9 @@ class RadioMenuButton<T> extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
+  /// {@macro flutter.material.menu_anchor.closeOnActivate}
+  final bool closeOnActivate;
+
   /// The widget displayed in the center of this button.
   ///
   /// Typically this is the button's label, using a [Text] widget.
@@ -1483,6 +1503,7 @@ class RadioMenuButton<T> extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
+      closeOnActivate: closeOnActivate,
       child: child,
     );
   }
