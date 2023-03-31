@@ -1148,7 +1148,6 @@ Future<void> _runInteractive({
         if (!busy) {
           rerun();
         }
-        break;
     }
   });
   Watcher(file.absolute.path).events.listen((_) => rerun());

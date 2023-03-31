@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
 import 'sliver.dart';
@@ -28,11 +29,7 @@ enum CacheExtentStyle {
 /// content, which can be controlled by a [ViewportOffset]. This interface lets
 /// the framework recognize such render objects and interact with them without
 /// having specific knowledge of all the various types of viewports.
-abstract class RenderAbstractViewport extends RenderObject {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  RenderAbstractViewport._();
-
+abstract interface class RenderAbstractViewport extends RenderObject {
   /// Returns the [RenderAbstractViewport] that most tightly encloses the given
   /// render object.
   ///
@@ -624,16 +621,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     switch (applyGrowthDirectionToAxisDirection(axisDirection, child.constraints.growthDirection)) {
       case AxisDirection.down:
         top += overlapCorrection;
-        break;
       case AxisDirection.up:
         bottom -= overlapCorrection;
-        break;
       case AxisDirection.right:
         left += overlapCorrection;
-        break;
       case AxisDirection.left:
         right -= overlapCorrection;
-        break;
     }
     return Rect.fromLTRB(left, top, right, bottom);
   }
@@ -714,10 +707,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         switch (axis) {
           case Axis.vertical:
             size = Size(child.constraints.crossAxisExtent, child.geometry!.layoutExtent);
-            break;
           case Axis.horizontal:
             size = Size(child.geometry!.layoutExtent, child.constraints.crossAxisExtent);
-            break;
         }
         canvas.drawRect(((offset + paintOffsetOf(child)) & size).deflate(0.5), paint);
         child = childAfter(child);
@@ -733,11 +724,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       case Axis.vertical:
         mainAxisPosition = position.dy;
         crossAxisPosition = position.dx;
-        break;
       case Axis.horizontal:
         mainAxisPosition = position.dx;
         crossAxisPosition = position.dy;
-        break;
     }
     final SliverHitTestResult sliverResult = SliverHitTestResult.wrap(result);
     for (final RenderSliver child in childrenInHitTestOrder) {
@@ -821,10 +810,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       switch (axis) {
         case Axis.horizontal:
           pivotExtent = pivot.size.width;
-          break;
         case Axis.vertical:
           pivotExtent = pivot.size.height;
-          break;
       }
       rect ??= target.paintBounds;
       rectLocal = MatrixUtils.transformRect(target.getTransformTo(pivot), rect);
@@ -844,14 +831,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
               targetSliver.geometry!.scrollExtent,
               targetSliver.constraints.crossAxisExtent,
             );
-            break;
           case Axis.vertical:
             rect = Rect.fromLTWH(
               0, 0,
               targetSliver.constraints.crossAxisExtent,
               targetSliver.geometry!.scrollExtent,
             );
-            break;
         }
       }
       rectLocal = rect;
@@ -870,19 +855,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       case AxisDirection.up:
         leadingScrollOffset += pivotExtent - rectLocal.bottom;
         targetMainAxisExtent = rectLocal.height;
-        break;
       case AxisDirection.right:
         leadingScrollOffset += rectLocal.left;
         targetMainAxisExtent = rectLocal.width;
-        break;
       case AxisDirection.down:
         leadingScrollOffset += rectLocal.top;
         targetMainAxisExtent = rectLocal.height;
-        break;
       case AxisDirection.left:
         leadingScrollOffset += pivotExtent - rectLocal.right;
         targetMainAxisExtent = rectLocal.width;
-        break;
     }
 
     // So far leadingScrollOffset is the scroll offset of `rect` in the `child`
@@ -909,7 +890,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
           return RevealedOffset(offset: double.infinity, rect: targetRect);
         }
         leadingScrollOffset -= extentOfPinnedSlivers;
-        break;
       case GrowthDirection.reverse:
         if (isPinned && alignment >= 1) {
           return RevealedOffset(offset: double.negativeInfinity, rect: targetRect);
@@ -920,22 +900,17 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         switch (axis) {
           case Axis.vertical:
             leadingScrollOffset -= targetRect.height;
-            break;
           case Axis.horizontal:
             leadingScrollOffset -= targetRect.width;
-            break;
         }
-        break;
     }
 
     final double mainAxisExtent;
     switch (axis) {
       case Axis.horizontal:
         mainAxisExtent = size.width - extentOfPinnedSlivers;
-        break;
       case Axis.vertical:
         mainAxisExtent = size.height - extentOfPinnedSlivers;
-        break;
     }
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
@@ -944,16 +919,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     switch (axisDirection) {
       case AxisDirection.down:
         targetRect = targetRect.translate(0.0, offsetDifference);
-        break;
       case AxisDirection.right:
         targetRect = targetRect.translate(offsetDifference, 0.0);
-        break;
       case AxisDirection.up:
         targetRect = targetRect.translate(0.0, -offsetDifference);
-        break;
       case AxisDirection.left:
         targetRect = targetRect.translate(-offsetDifference, 0.0);
-        break;
     }
 
     return RevealedOffset(offset: targetOffset, rect: targetRect);
@@ -1388,73 +1359,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(() {
-      if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
-        switch (axis) {
-          case Axis.vertical:
-            if (!constraints.hasBoundedHeight) {
-              throw FlutterError.fromParts(<DiagnosticsNode>[
-                ErrorSummary('Vertical viewport was given unbounded height.'),
-                ErrorDescription(
-                  'Viewports expand in the scrolling direction to fill their container. '
-                  'In this case, a vertical viewport was given an unlimited amount of '
-                  'vertical space in which to expand. This situation typically happens '
-                  'when a scrollable widget is nested inside another scrollable widget.',
-                ),
-                ErrorHint(
-                  'If this widget is always nested in a scrollable widget there '
-                  'is no need to use a viewport because there will always be enough '
-                  'vertical space for the children. In this case, consider using a '
-                  'Column or Wrap instead. Otherwise, consider using a '
-                  'CustomScrollView to concatenate arbitrary slivers into a '
-                  'single scrollable.',
-                ),
-              ]);
-            }
-            if (!constraints.hasBoundedWidth) {
-              throw FlutterError(
-                'Vertical viewport was given unbounded width.\n'
-                'Viewports expand in the cross axis to fill their container and '
-                'constrain their children to match their extent in the cross axis. '
-                'In this case, a vertical viewport was given an unlimited amount of '
-                'horizontal space in which to expand.',
-              );
-            }
-            break;
-          case Axis.horizontal:
-            if (!constraints.hasBoundedWidth) {
-              throw FlutterError.fromParts(<DiagnosticsNode>[
-                ErrorSummary('Horizontal viewport was given unbounded width.'),
-                ErrorDescription(
-                  'Viewports expand in the scrolling direction to fill their container. '
-                  'In this case, a horizontal viewport was given an unlimited amount of '
-                  'horizontal space in which to expand. This situation typically happens '
-                  'when a scrollable widget is nested inside another scrollable widget.',
-                ),
-                ErrorHint(
-                  'If this widget is always nested in a scrollable widget there '
-                  'is no need to use a viewport because there will always be enough '
-                  'horizontal space for the children. In this case, consider using a '
-                  'Row or Wrap instead. Otherwise, consider using a '
-                  'CustomScrollView to concatenate arbitrary slivers into a '
-                  'single scrollable.',
-                ),
-              ]);
-            }
-            if (!constraints.hasBoundedHeight) {
-              throw FlutterError(
-                'Horizontal viewport was given unbounded height.\n'
-                'Viewports expand in the cross axis to fill their container and '
-                'constrain their children to match their extent in the cross axis. '
-                'In this case, a horizontal viewport was given an unlimited amount of '
-                'vertical space in which to expand.',
-              );
-            }
-            break;
-        }
-      }
-      return true;
-    }());
+    assert(debugCheckHasBoundedAxis(axis, constraints));
     return constraints.biggest;
   }
 
@@ -1472,10 +1377,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     switch (axis) {
       case Axis.vertical:
         offset.applyViewportDimension(size.height);
-        break;
       case Axis.horizontal:
         offset.applyViewportDimension(size.width);
-        break;
     }
 
     if (center == null) {
@@ -1494,11 +1397,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       case Axis.vertical:
         mainAxisExtent = size.height;
         crossAxisExtent = size.width;
-        break;
       case Axis.horizontal:
         mainAxisExtent = size.width;
         crossAxisExtent = size.height;
-        break;
     }
 
     final double centerOffsetAdjustment = center!.centerOffsetAdjustment;
@@ -1565,10 +1466,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
         _calculatedCacheExtent = cacheExtent;
-        break;
       case CacheExtentStyle.viewport:
         _calculatedCacheExtent = mainAxisExtent * _cacheExtent;
-        break;
     }
 
     final double fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
@@ -1622,10 +1521,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     switch (growthDirection) {
       case GrowthDirection.forward:
         _maxScrollExtent += childLayoutGeometry.scrollExtent;
-        break;
       case GrowthDirection.reverse:
         _minScrollExtent -= childLayoutGeometry.scrollExtent;
-        break;
     }
     if (childLayoutGeometry.hasVisualOverflow) {
       _hasVisualOverflow = true;
@@ -1858,19 +1755,46 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   late double _shrinkWrapExtent;
   bool _hasVisualOverflow = false;
 
+  bool _debugCheckHasBoundedCrossAxis() {
+    assert(() {
+      switch (axis) {
+        case Axis.vertical:
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError(
+              'Vertical viewport was given unbounded width.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a vertical shrinkwrapping viewport was given an '
+              'unlimited amount of horizontal space in which to expand.',
+            );
+          }
+        case Axis.horizontal:
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError(
+              'Horizontal viewport was given unbounded height.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a horizontal shrinkwrapping viewport was given an '
+              'unlimited amount of vertical space in which to expand.',
+            );
+          }
+      }
+      return true;
+    }());
+    return true;
+  }
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (firstChild == null) {
+      // Shrinkwrapping viewport only requires the cross axis to be bounded.
+      assert(_debugCheckHasBoundedCrossAxis());
       switch (axis) {
         case Axis.vertical:
-          assert(constraints.hasBoundedWidth);
           size = Size(constraints.maxWidth, constraints.minHeight);
-          break;
         case Axis.horizontal:
-          assert(constraints.hasBoundedHeight);
           size = Size(constraints.minWidth, constraints.maxHeight);
-          break;
       }
       offset.applyViewportDimension(0.0);
       _maxScrollExtent = 0.0;
@@ -1882,17 +1806,15 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
     final double mainAxisExtent;
     final double crossAxisExtent;
+    // Shrinkwrapping viewport only requires the cross axis to be bounded.
+    assert(_debugCheckHasBoundedCrossAxis());
     switch (axis) {
       case Axis.vertical:
-        assert(constraints.hasBoundedWidth);
         mainAxisExtent = constraints.maxHeight;
         crossAxisExtent = constraints.maxWidth;
-        break;
       case Axis.horizontal:
-        assert(constraints.hasBoundedHeight);
         mainAxisExtent = constraints.maxWidth;
         crossAxisExtent = constraints.maxHeight;
-        break;
     }
 
     double correction;
@@ -1905,10 +1827,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
         switch (axis) {
           case Axis.vertical:
             effectiveExtent = constraints.constrainHeight(_shrinkWrapExtent);
-            break;
           case Axis.horizontal:
             effectiveExtent = constraints.constrainWidth(_shrinkWrapExtent);
-            break;
         }
         final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
         final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
@@ -1920,10 +1840,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     switch (axis) {
       case Axis.vertical:
         size = constraints.constrainDimensions(crossAxisExtent, effectiveExtent);
-        break;
       case Axis.horizontal:
         size = constraints.constrainDimensions(effectiveExtent, crossAxisExtent);
-        break;
     }
   }
 
@@ -1947,10 +1865,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
         _calculatedCacheExtent = cacheExtent;
-        break;
       case CacheExtentStyle.viewport:
         _calculatedCacheExtent = mainAxisExtent * _cacheExtent;
-        break;
     }
 
     return layoutChildSequence(

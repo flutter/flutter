@@ -414,11 +414,9 @@ class RadioListTile<T> extends StatelessWidget {
       case ListTileControlAffinity.platform:
         leading = control;
         trailing = secondary;
-        break;
       case ListTileControlAffinity.trailing:
         leading = secondary;
         trailing = control;
-        break;
     }
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);

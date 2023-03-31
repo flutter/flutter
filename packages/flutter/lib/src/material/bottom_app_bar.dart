@@ -81,8 +81,8 @@ class BottomAppBar extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   ///
-  /// Typically this the child will be a [Row], with the first child
-  /// being an [IconButton] with the [Icons.menu] icon.
+  /// Typically the child will be a [Row] whose first child
+  /// is an [IconButton] with the [Icons.menu] icon.
   final Widget? child;
 
   /// The amount of space to surround the child inside the bounds of the [BottomAppBar].
@@ -194,9 +194,12 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
     final Color shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
-    final Widget child = Padding(
-      padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
-      child: widget.child,
+    final Widget child = SizedBox(
+      height: height,
+      child: Padding(
+        padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
+        child: widget.child,
+      ),
     );
 
     final Material material = Material(
@@ -209,16 +212,14 @@ class _BottomAppBarState extends State<BottomAppBar> {
       child: SafeArea(child: child),
     );
 
-    final PhysicalShape physicalShape = PhysicalShape(
+    return PhysicalShape(
       clipper: clipper,
       elevation: elevation,
       shadowColor: shadowColor,
       color: effectiveColor,
       clipBehavior: widget.clipBehavior,
       child: material,
-     );
-
-    return SizedBox(height: height, child: physicalShape);
+    );
   }
 }
 
