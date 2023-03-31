@@ -1938,7 +1938,9 @@ void main() {
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getSize(find.byIcon(Icons.pages)).height, 48.0);
     expect(tester.getSize(find.byIcon(Icons.satellite)).height, 48.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 12.0);
+    // The text would be at 12.0, but because the icon (48) is bigger than
+    // everything else (40), it's centered next to the icon.
+    expect(tester.getTopLeft(find.text('text')).dy, 16.0);
     expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, 0.0);
     expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
