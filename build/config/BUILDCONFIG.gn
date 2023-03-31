@@ -445,10 +445,6 @@ if (is_win) {
   ]
 }
 
-if (is_wasm) {
-  _native_compiler_configs += [ "//build/config/wasm:limit_inlining" ]
-}
-
 # Executable defaults.
 _executable_configs =
     _native_compiler_configs + [ "//build/config:default_libs" ]
