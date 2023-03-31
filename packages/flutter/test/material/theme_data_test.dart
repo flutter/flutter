@@ -90,12 +90,10 @@ void main() {
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(themeData.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 
@@ -434,7 +432,6 @@ void main() {
         } else {
           expect(theme.splashFactory, equals(InkSparkle.splashFactory));
         }
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -464,7 +461,6 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.standard));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -479,7 +475,6 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(themeData.visualDensity, equals(VisualDensity.standard));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -791,6 +786,8 @@ void main() {
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
+      searchBarTheme: const SearchBarThemeData(),
+      searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: sliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
@@ -909,6 +906,8 @@ void main() {
       popupMenuTheme: const PopupMenuThemeData(color: Colors.white),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
+      searchBarTheme: const SearchBarThemeData(),
+      searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: otherSliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
@@ -1012,6 +1011,8 @@ void main() {
       popupMenuTheme: otherTheme.popupMenuTheme,
       progressIndicatorTheme: otherTheme.progressIndicatorTheme,
       radioTheme: otherTheme.radioTheme,
+      searchBarTheme: otherTheme.searchBarTheme,
+      searchViewTheme: otherTheme.searchViewTheme,
       sliderTheme: otherTheme.sliderTheme,
       snackBarTheme: otherTheme.snackBarTheme,
       switchTheme: otherTheme.switchTheme,
@@ -1112,6 +1113,8 @@ void main() {
     expect(themeDataCopy.popupMenuTheme, equals(otherTheme.popupMenuTheme));
     expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
     expect(themeDataCopy.radioTheme, equals(otherTheme.radioTheme));
+    expect(themeDataCopy.searchBarTheme, equals(otherTheme.searchBarTheme));
+    expect(themeDataCopy.searchViewTheme, equals(otherTheme.searchViewTheme));
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.snackBarTheme, equals(otherTheme.snackBarTheme));
     expect(themeDataCopy.switchTheme, equals(otherTheme.switchTheme));
@@ -1249,6 +1252,8 @@ void main() {
       'popupMenuTheme',
       'progressIndicatorTheme',
       'radioTheme',
+      'searchBarTheme',
+      'searchViewTheme',
       'segmentedButtonTheme',
       'sliderTheme',
       'snackBarTheme',

@@ -220,11 +220,11 @@ Future<void> run(List<String> arguments) async {
 FeatureSet _parsingFeatureSet() => FeatureSet.latestLanguageVersion();
 
 _Line _getLine(ParseStringResult parseResult, int offset) {
-  final int lineNumber =
-      parseResult.lineInfo.getLocation(offset).lineNumber;
+  final int lineNumber = parseResult.lineInfo.getLocation(offset).lineNumber;
   final String content = parseResult.content.substring(
-      parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
-      parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1);
+    parseResult.lineInfo.getOffsetOfLine(lineNumber - 1),
+    parseResult.lineInfo.getOffsetOfLine(lineNumber) - 1,
+  );
   return _Line(lineNumber, content);
 }
 
@@ -264,27 +264,21 @@ Future<void> verifyNoDoubleClamp(String workingDirectory) async {
       _allFiles(flutterLibPath, 'dart', minimumMatches: 100);
   final List<String> errors = <String>[];
   await for (final File file in testFiles) {
-    try {
-      final ParseStringResult parseResult = parseFile(
-        featureSet: _parsingFeatureSet(),
-        path: file.absolute.path,
-      );
-      final _DoubleClampVisitor visitor = _DoubleClampVisitor(parseResult);
-      visitor.visitCompilationUnit(parseResult.unit);
-      for (final _Line clamp in visitor.clamps) {
-        errors.add('${file.path}:${clamp.line}: `clamp` method used without ignore_clamp_double_lint comment.');
-      }
-    } catch (ex) {
-      // TODO(gaaclarke): There is a bug with super parameter parsing on mac so
-      // we skip certain files until that is fixed.
-      // https://github.com/dart-lang/sdk/issues/49032
-      print('skipping ${file.path}: $ex');
+    final ParseStringResult parseResult = parseFile(
+      featureSet: _parsingFeatureSet(),
+      path: file.absolute.path,
+    );
+    final _DoubleClampVisitor visitor = _DoubleClampVisitor(parseResult);
+    visitor.visitCompilationUnit(parseResult.unit);
+    for (final _Line clamp in visitor.clamps) {
+      errors.add('${file.path}:${clamp.line}: `clamp` method used instead of `clampDouble`.');
     }
   }
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '\n${bold}See: https://github.com/flutter/flutter/pull/103559',
+      '\n${bold}For performance reasons, we use a custom `clampDouble` function instead of using `Double.clamp`.$reset',
+      '\n${bold}For non-double uses of `clamp`, use `// ignore_clamp_double_lint` on the line to silence this message.$reset',
     ]);
   }
 }
@@ -612,6 +606,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'cc', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'cpp', overrideMinimumMatches ?? 0, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
@@ -1777,7 +1772,14 @@ Future<void> _checkConsumerDependencies() async {
 
       final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
-        workset.add(dependencyTree[dependency]!);
+        // Don't add dependencies we've already seen or we will get stuck
+        // forever if there are any circular references.
+        // TODO(dantup): Consider failing gracefully with the names of the
+        //  packages once the cycle between test_api and matcher is resolved.
+        //  https://github.com/dart-lang/test/issues/1979
+        if (!dependencies.contains(dependency)) {
+          workset.add(dependencyTree[dependency]!);
+        }
       }
     }
   }
@@ -2079,8 +2081,10 @@ bool _isGeneratedPluginRegistrant(File file) {
   final String filename = path.basename(file.path);
   return !file.path.contains('.pub-cache')
       && (filename == 'GeneratedPluginRegistrant.java' ||
+          filename == 'GeneratedPluginRegistrant.swift' ||
           filename == 'GeneratedPluginRegistrant.h' ||
           filename == 'GeneratedPluginRegistrant.m' ||
           filename == 'generated_plugin_registrant.dart' ||
-          filename == 'generated_plugin_registrant.h');
+          filename == 'generated_plugin_registrant.h' ||
+          filename == 'generated_plugin_registrant.cc');
 }

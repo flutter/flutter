@@ -100,7 +100,19 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
 
   @override
   void undo() {
-    _update(_stack.undo());
+    if (_stack.currentValue == null)  {
+      // Returns early if there is not a first value registered in the history.
+      // This is important because, if an undo is received while the initial
+      // value is being pushed (a.k.a when the field gets the focus but the
+      // throttling delay is pending), the initial push should not be canceled.
+      return;
+    }
+    if (_throttleTimer?.isActive ?? false) {
+      _throttleTimer?.cancel(); // Cancel ongoing push, if any.
+      _update(_stack.currentValue);
+    } else {
+      _update(_stack.undo());
+    }
     _updateState();
   }
 
@@ -184,10 +196,8 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     switch(direction) {
       case UndoDirection.undo:
         undo();
-        break;
       case UndoDirection.redo:
         redo();
-        break;
     }
   }
 
@@ -455,27 +465,17 @@ typedef _Throttled<T> = Timer Function(T currentArg);
 _Throttled<T> _throttle<T>({
   required Duration duration,
   required _Throttleable<T> function,
-  // If true, calls at the start of the timer.
-  bool leadingEdge = false,
 }) {
   Timer? timer;
-  bool calledDuringTimer = false;
   late T arg;
 
   return (T currentArg) {
     arg = currentArg;
-    if (timer != null) {
-      calledDuringTimer = true;
+    if (timer != null && timer!.isActive) {
       return timer!;
     }
-    if (leadingEdge) {
-      function(arg);
-    }
-    calledDuringTimer = false;
     timer = Timer(duration, () {
-      if (!leadingEdge || calledDuringTimer) {
-        function(arg);
-      }
+      function(arg);
       timer = null;
     });
     return timer!;

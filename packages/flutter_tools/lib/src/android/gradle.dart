@@ -19,6 +19,7 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -31,6 +32,7 @@ import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
+import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
 
 /// The directory where the APK artifact is generated.
@@ -235,10 +237,16 @@ class AndroidGradleBuilder implements AndroidBuilder {
     int retry = 0,
     @visibleForTesting int? maxRetries,
   }) async {
-
     if (!project.android.isSupportedVersion) {
       _exitWithUnsupportedProjectMessage(_usage, _logger.terminal);
     }
+
+    final List<ProjectMigrator> migrators = <ProjectMigrator>[
+      TopLevelGradleBuildFileMigration(project.android, _logger),
+    ];
+
+    final ProjectMigration migration = ProjectMigration(migrators);
+    migration.run();
 
     final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
     if (usesAndroidX) {

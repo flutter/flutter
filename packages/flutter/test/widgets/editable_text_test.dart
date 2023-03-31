@@ -5374,6 +5374,46 @@ void main() {
     );
   });
 
+  testWidgets('text styling info is sent on show keyboard (bold override)', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
+      log.add(methodCall);
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(boldText: true),
+        child: EditableText(
+          textDirection: TextDirection.rtl,
+          controller: controller,
+          focusNode: FocusNode(),
+          style: const TextStyle(
+            fontSize: 20.0,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w600,
+          ),
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
+    expect(
+      setStyle,
+      isMethodCall('TextInput.setStyle', arguments: <String, dynamic>{
+        'fontSize': 20.0,
+        'fontFamily': 'Roboto',
+        'fontWeightIndex': FontWeight.bold.index,
+        'textAlignIndex': 4,
+        'textDirectionIndex': 0,
+      }),
+    );
+  });
+
   testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
     late StateSetter setState;
@@ -5906,7 +5946,6 @@ void main() {
                 0 + kMinInteractiveDimension,
               ),
             );
-            break;
           case HandlePositionInViewport.rightEdge:
             expect(
               pos,
@@ -5915,7 +5954,6 @@ void main() {
                 viewport.width + kMinInteractiveDimension,
               ),
             );
-            break;
           case HandlePositionInViewport.within:
             expect(
               pos,
@@ -5924,7 +5962,6 @@ void main() {
                 viewport.width + kMinInteractiveDimension,
               ),
             );
-            break;
         }
       }
       expect(state.selectionOverlay!.handlesAreVisible, isTrue);
@@ -6351,7 +6388,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS expand by line.
       case TargetPlatform.iOS:
@@ -6367,7 +6403,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     // Select All
@@ -6525,7 +6560,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
       // On macOS/iOS expand selection.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -6539,7 +6573,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     // Move to start again.
@@ -7330,7 +7363,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
@@ -7344,7 +7376,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     expect(controller.text, equals(testText), reason: 'on $platform');
@@ -7372,7 +7403,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
@@ -7387,7 +7417,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
     expect(controller.text, equals(testText), reason: 'on $platform');
   },
@@ -7481,7 +7510,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
@@ -7495,7 +7523,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     expect(controller.text, equals(testText), reason: 'on $platform');
@@ -7523,7 +7550,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux does nothing at a wordwrap with subsequent presses.
       case TargetPlatform.linux:
@@ -7536,7 +7562,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows jumps to the previous wordwrapped line.
       case TargetPlatform.windows:
@@ -7549,7 +7574,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -7642,7 +7666,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
@@ -7657,7 +7680,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
     expect(controller.text, equals(testText), reason: 'on $platform');
 
@@ -7684,7 +7706,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux does nothing at a wordwrap with subsequent presses.
       case TargetPlatform.linux:
@@ -7698,7 +7719,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows jumps to the next wordwrapped line.
       case TargetPlatform.windows:
@@ -7712,7 +7732,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -7835,7 +7854,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux extends to the line start/end.
       case TargetPlatform.linux:
@@ -7860,7 +7878,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows expands to the line start/end.
       case TargetPlatform.windows:
@@ -7884,7 +7901,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS go to the start/end of the document.
       case TargetPlatform.iOS:
@@ -7910,7 +7926,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -8174,7 +8189,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS select to the start of the document.
       case TargetPlatform.iOS:
@@ -8189,7 +8203,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms select to the line start.
       case TargetPlatform.linux:
@@ -8204,7 +8217,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     expect(controller.text, equals(testText), reason: 'on $platform');
@@ -8231,7 +8243,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS select to the start of the document.
       case TargetPlatform.iOS:
@@ -8246,7 +8257,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux does nothing at a wordwrap with subsequent presses.
       case TargetPlatform.linux:
@@ -8260,7 +8270,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows jumps to the previous wordwrapped line.
       case TargetPlatform.windows:
@@ -8274,7 +8283,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -8366,7 +8374,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS select to the end of the document.
       case TargetPlatform.iOS:
@@ -8381,7 +8388,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms select to the line end.
       case TargetPlatform.linux:
@@ -8397,7 +8403,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
     expect(controller.text, equals(testText), reason: 'on $platform');
 
@@ -8423,7 +8428,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS stay at the end of the document.
       case TargetPlatform.iOS:
@@ -8438,7 +8442,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux does nothing at a wordwrap with subsequent presses.
       case TargetPlatform.linux:
@@ -8453,7 +8456,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows jumps to the previous wordwrapped line.
       case TargetPlatform.windows:
@@ -8468,7 +8470,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -9009,7 +9010,6 @@ void main() {
                 0 + kMinInteractiveDimension,
               ),
             );
-            break;
           case HandlePositionInViewport.rightEdge:
             expect(
               pos,
@@ -9018,7 +9018,6 @@ void main() {
                 viewport.width + kMinInteractiveDimension,
               ),
             );
-            break;
           case HandlePositionInViewport.within:
             expect(
               pos,
@@ -9027,7 +9026,6 @@ void main() {
                 viewport.width + kMinInteractiveDimension,
               ),
             );
-            break;
         }
       }
       expect(state.selectionOverlay!.handlesAreVisible, isTrue);
@@ -11610,14 +11608,12 @@ void main() {
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 17);
         expect(controller.selection.extentOffset, 15);
-        break;
 
       // Mac and iOS expand by line.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 15);
         expect(controller.selection.extentOffset, 24);
-        break;
     }
 
     // Set the caret to the end of a line.
@@ -13011,6 +13007,58 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
 
+    // Regression test for https://github.com/flutter/flutter/issues/120194.
+    testWidgets('Cursor does not jump after undo', (WidgetTester tester) async {
+      // Initialize the controller with a non empty text.
+      final TextEditingController controller = TextEditingController(text: textA);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and wait for throttling delay to get the initial
+      // state saved in text editing history.
+      focusNode.requestFocus();
+      await tester.pump();
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Insert some text.
+      await tester.enterText(find.byType(EditableText), textAB);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the insertion without waiting for the throttling delay.
+      await sendUndo(tester);
+      expect(controller.value.selection.isValid, true);
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
+    testWidgets('Initial value is recorded when an undo is received just after getting the focus', (WidgetTester tester) async {
+      // Initialize the controller with a non empty text.
+      final TextEditingController controller = TextEditingController(text: textA);
+      final FocusNode focusNode = FocusNode();
+      await tester.pumpWidget(boilerplate(controller, focusNode));
+
+      // Focus the field and do not wait for throttling delay before calling undo.
+      focusNode.requestFocus();
+      await tester.pump();
+      await sendUndo(tester);
+      await waitForThrottling(tester);
+      expect(controller.value, textACollapsedAtEnd);
+
+      // Insert some text.
+      await tester.enterText(find.byType(EditableText), textAB);
+      expect(controller.value, textABCollapsedAtEnd);
+
+      // Undo the insertion.
+      await sendUndo(tester);
+
+      // Initial text should have been recorded and restored.
+      expect(controller.value, textACollapsedAtEnd);
+
+    // On web, these keyboard shortcuts are handled by the browser.
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
     testWidgets('Can make changes in the middle of the history', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final FocusNode focusNode = FocusNode();
@@ -13774,7 +13822,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               selection: TextSelection.collapsed(offset: 6),
             ),
           );
-          break;
         // Composing changes are ignored on all other platforms.
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -13788,7 +13835,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               selection: TextSelection.collapsed(offset: 4),
             ),
           );
-          break;
       }
       await sendUndo(tester);
       expect(
@@ -13833,7 +13879,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               selection: TextSelection.collapsed(offset: 6),
             ),
           );
-          break;
         // Composing changes are ignored on all other platforms.
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -13847,7 +13892,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               selection: TextSelection.collapsed(offset: 4),
             ),
           );
-          break;
       }
       await sendRedo(tester);
       expect(
@@ -14794,28 +14838,34 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     });
 
     testWidgets(
-      'Error thrown when spell check enabled but no default spell check service available',
+      'Spell check disabled when spell check configuration specified but no default spell check service available',
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         false;
 
       await tester.pumpWidget(
-          EditableText(
-              controller: TextEditingController(text: 'A'),
-              focusNode: FocusNode(),
-              style: const TextStyle(),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              cursorOpacityAnimates: true,
-              autofillHints: null,
-              spellCheckConfiguration:
-                const SpellCheckConfiguration(
-                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
-              ),
-          ));
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        )
+      );
 
-        expect(tester.takeException(), isA<AssertionError>());
-        tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+      expect(tester.takeException(), isA<AssertionError>());
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+      tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
 
     testWidgets(
@@ -15466,6 +15516,27 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     },
       skip: !kIsWeb, // [intended]
     );
+  });
+
+  testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(boldText: true),
+        child: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: const TextStyle(fontWeight: FontWeight.normal),
+          cursorColor: Colors.red,
+          backgroundCursorColor: Colors.green,
+        ),
+      ),
+    ));
+
+    controller.text = 'foo';
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    expect(state.buildTextSpan().style!.fontWeight, FontWeight.bold);
   });
 }
 

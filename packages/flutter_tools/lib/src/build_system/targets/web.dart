@@ -295,6 +295,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final Artifacts artifacts = globals.artifacts!;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
+    final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.path;
 
@@ -319,10 +320,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
       dartSdkRoot,
       '--libraries-spec',
       artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path,
+      '--depfile=${depFile.path}',
 
       environment.buildDir.childFile('main.dart').path, // dartfile
       outputWasmFile.path,
     ];
+    globals.printTrace('compiling dart code to wasm with command "${compilationArgs.join(' ')}"');
     final ProcessResult compileResult = await globals.processManager.run(compilationArgs);
     if (compileResult.exitCode != 0) {
       throw Exception(_collectOutput(compileResult));
@@ -334,6 +337,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
 
   @override
   String get name => 'dart2wasm';
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2wasm.d',
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
@@ -486,8 +494,8 @@ class WebReleaseBundle extends Target {
 /// Static assets provided by the Flutter SDK that do not change, such as
 /// CanvasKit.
 ///
-/// These assets can be cached forever and are only invalidated when the
-/// Flutter SDK is upgraded to a new version.
+/// These assets can be cached until a new version of the flutter web sdk is
+/// downloaded.
 class WebBuiltInAssets extends Target {
   const WebBuiltInAssets(this.fileSystem, {required this.isWasm});
 
@@ -504,7 +512,9 @@ class WebBuiltInAssets extends Target {
   List<String> get depfiles => const <String>[];
 
   @override
-  List<Source> get inputs => const <Source>[];
+  List<Source> get inputs => const <Source>[
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[];

@@ -778,6 +778,8 @@ void main() {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
 
+    final File depFile = environment.buildDir.childFile('dart2wasm.d');
+
     processManager.addCommand(FakeCommand(
       command: <String>[
         'bin/cache/dart-sdk/bin/dartaotruntime',
@@ -796,6 +798,7 @@ void main() {
         'bin/cache',
         '--libraries-spec',
         'bin/cache/flutter_web_sdk/libraries.json',
+        '--depfile=${depFile.absolute.path}',
 
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
@@ -942,5 +945,27 @@ void main() {
     expect(environment.outputDir.childDirectory('canvaskit')
       .childFile('canvaskit.wasm')
       .existsSync(), true);
+  }));
+
+  test('wasm copies over canvaskit again if the web sdk changes', () => testbed.run(() async {
+    final File canvasKitInput = globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
+      ..createSync(recursive: true);
+    canvasKitInput.writeAsStringSync('foo', flush: true);
+
+    await WebBuiltInAssets(globals.fs, isWasm: true).build(environment);
+
+    final File canvasKitOutputBefore = environment.outputDir.childDirectory('canvaskit')
+      .childFile('canvaskit.wasm');
+    expect(canvasKitOutputBefore.existsSync(), true);
+    expect(canvasKitOutputBefore.readAsStringSync(), 'foo');
+
+    canvasKitInput.writeAsStringSync('bar', flush: true);
+
+    await WebBuiltInAssets(globals.fs, isWasm: true).build(environment);
+
+    final File canvasKitOutputAfter = environment.outputDir.childDirectory('canvaskit')
+      .childFile('canvaskit.wasm');
+    expect(canvasKitOutputAfter.existsSync(), true);
+    expect(canvasKitOutputAfter.readAsStringSync(), 'bar');
   }));
 }
