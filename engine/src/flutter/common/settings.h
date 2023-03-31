@@ -221,6 +221,11 @@ struct Settings {
   // must be available to the application.
   bool enable_vulkan_validation = false;
 
+  // Force Impeller to use the GL backend if possible.
+  // On platforms where there is no GL backend (e.g. macOS and iOS), this is a
+  // no-op.
+  bool impeller_force_gl = false;
+
   // Data set by platform-specific embedders for use in font initialization.
   uint32_t font_initialization_data = 0;
 
