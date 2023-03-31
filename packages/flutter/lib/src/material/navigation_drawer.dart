@@ -57,6 +57,7 @@ class NavigationDrawer extends StatelessWidget {
     this.shadowColor,
     this.surfaceTintColor,
     this.elevation,
+    this.width,
     this.indicatorColor,
     this.indicatorShape,
     this.onDestinationSelected,
@@ -124,6 +125,10 @@ class NavigationDrawer extends StatelessWidget {
   /// Upon updating [selectedIndex], the [NavigationDrawer] will be rebuilt.
   final ValueChanged<int>? onDestinationSelected;
 
+  /// The width of navigation drawer. 
+  /// Defaults to [DrawerThemeData.width]. If that is also null, Defaults to 360.
+  final double? width;
+
   @override
   Widget build(BuildContext context) {
     final int totalNumberOfDestinations =
@@ -164,6 +169,7 @@ class NavigationDrawer extends StatelessWidget {
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       elevation: elevation,
+      width: width,
       child: SafeArea(
         bottom: false,
         child: ListView(
@@ -321,7 +327,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      padding: navigationDrawerTheme.tilePadding ?? defaults.tilePadding!,
       child: _NavigationDestinationSemantics(
         child: SizedBox(
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
@@ -665,6 +671,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
     : super(
         elevation: 1.0,
         tileHeight: 56.0,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 12.0),
         indicatorShape: const StadiumBorder(),
         indicatorSize: const Size(336.0, 56.0),
       );

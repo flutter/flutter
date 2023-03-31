@@ -17,6 +17,7 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
     : super(
         elevation: ${elevation("md.comp.navigation-drawer.modal.container")},
         tileHeight: ${tokens["md.comp.navigation-drawer.active-indicator.height"]},
+        tilePadding: const EdgeInsets.symmetric(horizontal: 12.0),
         indicatorShape: ${shape("md.comp.navigation-drawer.active-indicator")},
         indicatorSize: const Size(${tokens["md.comp.navigation-drawer.active-indicator.width"]}, ${tokens["md.comp.navigation-drawer.active-indicator.height"]}),
       );

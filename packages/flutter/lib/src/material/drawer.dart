@@ -32,21 +32,8 @@ enum DrawerAlignment {
   end,
 }
 
-// TODO(eseidel): Draw width should vary based on device size:
-// https://material.io/design/components/navigation-drawer.html#specs
-
-// Mobile:
-// Width = Screen width − 56 dp
-// Maximum width: 320dp
-// Maximum width applies only when using a left nav. When using a right nav,
-// the panel can cover the full width of the screen.
-
-// Desktop/Tablet:
-// Maximum width for a left nav is 400dp.
-// The right nav can vary depending on content.
-
-const double _kWidth = 304.0;
 const double _kEdgeDragWidth = 20.0;
+const double _kEdgeScrimWidth = 56.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 
@@ -254,23 +241,26 @@ class Drawer extends StatelessWidget {
     }
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
-    final DrawerThemeData defaults= useMaterial3 ? _DrawerDefaultsM3(context): _DrawerDefaultsM2(context);
-    return Semantics(
-      scopesRoute: true,
-      namesRoute: true,
-      explicitChildNodes: true,
-      label: label,
-      child: ConstrainedBox(
-        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
-        child: Material(
-          color: backgroundColor ?? drawerTheme.backgroundColor ?? defaults.backgroundColor,
-          elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation!,
-          shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
-          surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
-          shape: shape ?? (isDrawerStart
-            ? (drawerTheme.shape ?? defaults.shape)
-            : (drawerTheme.endShape ?? defaults.endShape)),
-          child: child,
+    final DrawerThemeData defaults = useMaterial3 ? _DrawerDefaultsM3(context): _DrawerDefaultsM2(context);
+    return Padding(
+      padding: isDrawerStart ? EdgeInsets.only(right: _kEdgeScrimWidth) : EdgeInsets.only(left: _kEdgeScrimWidth),
+      child: Semantics(
+        scopesRoute: true,
+        namesRoute: true,
+        explicitChildNodes: true,
+        label: label,
+        child: ConstrainedBox(
+          constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
+          child: Material(
+            color: backgroundColor ?? drawerTheme.backgroundColor ?? defaults.backgroundColor,
+            elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation!,
+            shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
+            surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+            shape: shape ?? (isDrawerStart
+              ? (drawerTheme.shape ?? defaults.shape)
+              : (drawerTheme.endShape ?? defaults.endShape)),
+            child: child,
+          ),
         ),
       ),
     );
@@ -797,6 +787,9 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
   @override
   Color? get shadowColor => Theme.of(context).shadowColor;
 
+  @override
+  double? get width => 304.0;
+
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Drawer
@@ -814,6 +807,9 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
 
   final BuildContext context;
   late final TextDirection direction = Directionality.of(context);
+
+  @override
+  double? get width => 360.0;
 
   @override
   Color? get backgroundColor => Theme.of(context).colorScheme.surface;

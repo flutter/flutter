@@ -17,6 +17,9 @@ class _${blockName}DefaultsM3 extends DrawerThemeData {
   late final TextDirection direction = Directionality.of(context);
 
   @override
+  double? get width => ${tokens["md.comp.navigation-drawer.container.width"]};
+
+  @override
   Color? get backgroundColor => ${componentColor("md.comp.navigation-drawer.container")};
 
   @override

@@ -43,6 +43,7 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// [NavigationDrawerTheme].
   const NavigationDrawerThemeData({
     this.tileHeight,
+    this.tilePadding,
     this.backgroundColor,
     this.elevation,
     this.shadowColor,
@@ -56,6 +57,9 @@ class NavigationDrawerThemeData with Diagnosticable {
 
   /// Overrides the default height of [NavigationDrawerDestination].
   final double? tileHeight;
+
+  /// Overrides the default paddings of [NavigationDrawerDestination].
+  final EdgeInsetsGeometry? tilePadding;
 
   /// Overrides the default value of [NavigationDrawer.backgroundColor].
   final Color? backgroundColor;
@@ -95,6 +99,7 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// new values.
   NavigationDrawerThemeData copyWith({
     double? tileHeight,
+    EdgeInsetsGeometry? tilePadding,
     Color? backgroundColor,
     double? elevation,
     Color? shadowColor,
@@ -107,6 +112,7 @@ class NavigationDrawerThemeData with Diagnosticable {
   }) {
     return NavigationDrawerThemeData(
       tileHeight: tileHeight ?? this.tileHeight,
+      tilePadding: tilePadding ?? this.tilePadding,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
       shadowColor: shadowColor ?? this.shadowColor,
@@ -130,6 +136,7 @@ class NavigationDrawerThemeData with Diagnosticable {
     }
     return NavigationDrawerThemeData(
       tileHeight: lerpDouble(a?.tileHeight, b?.tileHeight, t),
+      tilePadding: EdgeInsetsGeometry.lerp(a?.tilePadding, b?.tilePadding, t),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
@@ -147,6 +154,7 @@ class NavigationDrawerThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
         tileHeight,
+        tilePadding,
         backgroundColor,
         elevation,
         shadowColor,
@@ -168,6 +176,7 @@ class NavigationDrawerThemeData with Diagnosticable {
     }
     return other is NavigationDrawerThemeData &&
         other.tileHeight == tileHeight &&
+        other.tilePadding == tilePadding &&
         other.backgroundColor == backgroundColor &&
         other.elevation == elevation &&
         other.shadowColor == shadowColor &&
@@ -184,6 +193,8 @@ class NavigationDrawerThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties
         .add(DoubleProperty('tileHeight', tileHeight, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<EdgeInsetsGeometry>('tilePadding', tilePadding, defaultValue: null));
     properties.add(
         ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
