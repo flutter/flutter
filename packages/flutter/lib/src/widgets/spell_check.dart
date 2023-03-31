@@ -105,7 +105,7 @@ class SpellCheckConfiguration {
   final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
 
   int spanPointer = 0;
-  int offset = 0;
+  int offset = 0; // the cummulative difference between where we are and where we thought we'd be
   int foundIndex;
   int spanLength;
   SuggestionSpan currentSpan;
@@ -125,64 +125,90 @@ class SpellCheckConfiguration {
     currentSpanText =
         resultsText.substring(currentSpan.range.start, currentSpan.range.end);
     
+    print('searchStart: $searchStart');
+    print('current text: $currentSpanText');
     regex = RegExp('\\b$currentSpanText\\b');
+    if (searchStart >= newText.length) {
+      // TODO(camsim99): determine if this is valid.
+      break;
+    }
     foundIndex = newText.substring(searchStart).indexOf(regex);
-    currentSpanFoundExactly = foundIndex == searchStart;
-    currentSpanFoundElsewhere = foundIndex >= 0;
+    print('foundIndex $foundIndex');
+    currentSpanFoundExactly = currentSpan.range.start == foundIndex + searchStart; // perfectly equal to where we found it, meaning the old index == new index. implies offset == 0.
+    bool currentSpanFoundExactlyWithOffset = currentSpan.range.start + offset == foundIndex + searchStart;
+    currentSpanFoundElsewhere = foundIndex >= 0; // it was found in newText[searchStart:] but offset not updated
+    print('offset: $offset');
 
-    if (currentSpanFoundExactly) {
+    if (currentSpanFoundExactly || currentSpanFoundExactlyWithOffset) {
       // currentSpan was found at the same index in new text and old text
       // (resultsText), so apply it to new text by adding it to the list of
       // corrected results.
-      searchStart = currentSpan.range.end + offset;
       adjustedSpan = SuggestionSpan(
           TextRange(
-              start: currentSpan.range.start + offset, end: searchStart),
-          currentSpan.suggestions
+              start: currentSpan.range.start + offset, end: currentSpan.range.end + offset),
+          currentSpan.suggestions,
       );
+      searchStart = currentSpan.range.end + 1 + offset; // the span end plus 1 to account for space plus whatever offset has been used
+      print('adjusted span 1: ${adjustedSpan.range}');
       correctedSpellCheckResults.add(adjustedSpan);       
     } else if (currentSpanFoundElsewhere) {
       // Word was pushed forward but not modified.
       spanLength = currentSpan.range.end - currentSpan.range.start;
-      searchStart = foundIndex + searchStart;
+      int adjustedSpanStart = searchStart + foundIndex; // the actual index we found the word at
+      int adjustedSpanEnd = adjustedSpanStart + spanLength; // the actual start plus the span length
       adjustedSpan = SuggestionSpan(
-          TextRange(start: searchStart, end: searchStart + spanLength),
-          currentSpan.suggestions
+          TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
+          currentSpan.suggestions,
       );
-      offset = foundIndex - currentSpan.range.start;
+      searchStart = adjustedSpanEnd + 1; // the adjusted span end plus 1 to account for space
+      print('adjusted span 2: ${adjustedSpan.range}');
+      offset = adjustedSpanStart - currentSpan.range.start; // the adjusted start minus the expected start
       correctedSpellCheckResults.add(adjustedSpan);
     } else {
       // Check if word was modified by extension.
-      regex = RegExp('\s$currentSpanText');
-      final int fI1 = newText.substring(searchStart).indexOf(regex);
+      print('EXTENSION CASE.');
+      regex = RegExp('$currentSpanText');
+      foundIndex = newText.substring(searchStart).indexOf(regex); // look for the word contained anywhere from searchStart
+      print('found index new: $foundIndex');
 
-      if (fI1 >= 0) {
+      if (foundIndex >= 0) {
         // Word was extended.
-        regex = RegExp('\s');
+        regex = RegExp(' ');
         spanLength = currentSpan.range.end - currentSpan.range.start;
-        final int fI3 = newText.substring(fI1 + spanLength).indexOf(regex);
+        int adjustedSearchStartForSpace = foundIndex + searchStart + spanLength; // end of found word. offset should be irrelevant because we are looking for this in general.
+        int foundEndIndex = newText.substring(adjustedSearchStartForSpace).indexOf(regex); // search for next space from found word
         
-        if (fI3 >= 0) {
+        if (foundEndIndex >= 0) {
           // Word not at end of string.
-          searchStart = fI3 + 1;
+          int adjustedSpanStart = foundIndex + searchStart; // where we found the word originally
+          int adjustedSpanEnd = adjustedSearchStartForSpace + foundEndIndex; // the end of the word plus whatever extra is left until the next space/whatever was added.
           adjustedSpan = SuggestionSpan(
-            TextRange(start: fI1, end: searchStart),
-            currentSpan.suggestions
+            TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
+            currentSpan.suggestions,
           );
-        correctedSpellCheckResults.add(adjustedSpan);
-        offset = searchStart - currentSpan.range.end;    
-        } else {
-          // Word at end of string.
-            adjustedSpan = SuggestionSpan(
-            TextRange(start: fI1, end: newText.length),
-            currentSpan.suggestions
-          );
+
+          print('adjusted span 3: ${adjustedSpan.range}');
+          searchStart = adjustedSpanEnd + 1; // the adjusted span end plus 1 to account for space
           correctedSpellCheckResults.add(adjustedSpan);
+          offset = (adjustedSpanEnd - adjustedSpanStart) - (currentSpan.range.end - currentSpan.range.start) + (adjustedSpanStart - currentSpan.range.start); // word was extended in some way, so whatever word is next, will be affected by that amount and however much it is shifted by
+        } else {
+          // Word at end of string. We do not need to update any values.
+          int adjustedSpanStart = foundIndex + searchStart; // where we found the word originally
+          adjustedSpan = SuggestionSpan(
+          TextRange(start: adjustedSpanStart, end: newText.length), // we end the span at the end of the string
+          currentSpan.suggestions,
+          );
+
+          print('adjusted span 4: ${adjustedSpan.range}');
+          correctedSpellCheckResults.add(adjustedSpan);
+          break;
         }
       }
     }
+    print('------');
     spanPointer++;
   }
+  print('----------------------------------------------------');
   return correctedSpellCheckResults;
 }
 
