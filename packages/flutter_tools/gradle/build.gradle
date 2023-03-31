@@ -12,7 +12,8 @@ version = '1.0.0'
 
 gradlePlugin {
     plugins {
-        blahblah {
+        // The "flutterPlugin" name isn't used anywhere
+        flutterPlugin {
             id = 'dev.flutter.flutter-gradle-plugin'
             implementationClass = 'FlutterPlugin'
         }
