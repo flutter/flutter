@@ -108,7 +108,6 @@ class SpellCheckConfiguration {
   int offset = 0; // the cummulative difference between where we are and where we thought we'd be
   int foundIndex;
   int spanLength;
-  SuggestionSpan currentSpan;
   SuggestionSpan adjustedSpan;
   String currentSpanText;
   RegExp regex;
@@ -121,23 +120,15 @@ class SpellCheckConfiguration {
 
   while (spanPointer < results.length) {
     // Try finding SuggestionSpan from old results (currentSpan) in new text.
-    currentSpan = results[spanPointer];
+    SuggestionSpan currentSpan = results[spanPointer];
     currentSpanText =
         resultsText.substring(currentSpan.range.start, currentSpan.range.end);
-    
-    print('searchStart: $searchStart');
-    print('current text: $currentSpanText');
+
     regex = RegExp('\\b$currentSpanText\\b');
-    if (searchStart >= newText.length) {
-      // TODO(camsim99): determine if this is valid.
-      break;
-    }
     foundIndex = newText.substring(searchStart).indexOf(regex);
-    print('foundIndex $foundIndex');
-    currentSpanFoundExactly = currentSpan.range.start == foundIndex + searchStart; // perfectly equal to where we found it, meaning the old index == new index. implies offset == 0.
+    currentSpanFoundExactly = currentSpan.range.start == foundIndex + searchStart;
     bool currentSpanFoundExactlyWithOffset = currentSpan.range.start + offset == foundIndex + searchStart;
-    currentSpanFoundElsewhere = foundIndex >= 0; // it was found in newText[searchStart:] but offset not updated
-    print('offset: $offset');
+    currentSpanFoundElsewhere = foundIndex >= 0;
 
     if (currentSpanFoundExactly || currentSpanFoundExactlyWithOffset) {
       // currentSpan was found at the same index in new text and old text
@@ -148,67 +139,59 @@ class SpellCheckConfiguration {
               start: currentSpan.range.start + offset, end: currentSpan.range.end + offset),
           currentSpan.suggestions,
       );
-      searchStart = currentSpan.range.end + 1 + offset; // the span end plus 1 to account for space plus whatever offset has been used
-      print('adjusted span 1: ${adjustedSpan.range}');
+      searchStart = currentSpan.range.end + 1 + offset;
       correctedSpellCheckResults.add(adjustedSpan);       
     } else if (currentSpanFoundElsewhere) {
       // Word was pushed forward but not modified.
       spanLength = currentSpan.range.end - currentSpan.range.start;
-      int adjustedSpanStart = searchStart + foundIndex; // the actual index we found the word at
-      int adjustedSpanEnd = adjustedSpanStart + spanLength; // the actual start plus the span length
+      int adjustedSpanStart = searchStart + foundIndex;
+      int adjustedSpanEnd = adjustedSpanStart + spanLength;
       adjustedSpan = SuggestionSpan(
           TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
           currentSpan.suggestions,
       );
-      searchStart = adjustedSpanEnd + 1; // the adjusted span end plus 1 to account for space
-      print('adjusted span 2: ${adjustedSpan.range}');
-      offset = adjustedSpanStart - currentSpan.range.start; // the adjusted start minus the expected start
+      searchStart = adjustedSpanEnd + 1;
+      offset = adjustedSpanStart - currentSpan.range.start;
       correctedSpellCheckResults.add(adjustedSpan);
     } else {
       // Check if word was modified by extension.
-      print('EXTENSION CASE.');
       regex = RegExp('$currentSpanText');
-      foundIndex = newText.substring(searchStart).indexOf(regex); // look for the word contained anywhere from searchStart
-      print('found index new: $foundIndex');
+      foundIndex = newText.substring(searchStart).indexOf(regex);
 
       if (foundIndex >= 0) {
         // Word was extended.
         regex = RegExp(' ');
         spanLength = currentSpan.range.end - currentSpan.range.start;
-        int adjustedSearchStartForSpace = foundIndex + searchStart + spanLength; // end of found word. offset should be irrelevant because we are looking for this in general.
-        int foundEndIndex = newText.substring(adjustedSearchStartForSpace).indexOf(regex); // search for next space from found word
+        int adjustedSearchStartForSpace = foundIndex + searchStart + spanLength;
+        int foundEndIndex = newText.substring(adjustedSearchStartForSpace).indexOf(regex);
         
         if (foundEndIndex >= 0) {
           // Word not at end of string.
-          int adjustedSpanStart = foundIndex + searchStart; // where we found the word originally
-          int adjustedSpanEnd = adjustedSearchStartForSpace + foundEndIndex; // the end of the word plus whatever extra is left until the next space/whatever was added.
+          int adjustedSpanStart = foundIndex + searchStart;
+          int adjustedSpanEnd = adjustedSearchStartForSpace + foundEndIndex;
           adjustedSpan = SuggestionSpan(
             TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
             currentSpan.suggestions,
           );
 
-          print('adjusted span 3: ${adjustedSpan.range}');
-          searchStart = adjustedSpanEnd + 1; // the adjusted span end plus 1 to account for space
+          searchStart = adjustedSpanEnd + 1;
           correctedSpellCheckResults.add(adjustedSpan);
-          offset = (adjustedSpanEnd - adjustedSpanStart) - (currentSpan.range.end - currentSpan.range.start) + (adjustedSpanStart - currentSpan.range.start); // word was extended in some way, so whatever word is next, will be affected by that amount and however much it is shifted by
+          offset = (adjustedSpanEnd - adjustedSpanStart) - (currentSpan.range.end - currentSpan.range.start) + (adjustedSpanStart - currentSpan.range.start);
         } else {
           // Word at end of string. We do not need to update any values.
-          int adjustedSpanStart = foundIndex + searchStart; // where we found the word originally
+          int adjustedSpanStart = foundIndex + searchStart;
           adjustedSpan = SuggestionSpan(
-          TextRange(start: adjustedSpanStart, end: newText.length), // we end the span at the end of the string
+          TextRange(start: adjustedSpanStart, end: newText.length),
           currentSpan.suggestions,
           );
 
-          print('adjusted span 4: ${adjustedSpan.range}');
           correctedSpellCheckResults.add(adjustedSpan);
           break;
         }
       }
     }
-    print('------');
     spanPointer++;
   }
-  print('----------------------------------------------------');
   return correctedSpellCheckResults;
 }
 
@@ -275,63 +258,63 @@ List<TextSpan> _buildSubtreesWithoutComposingRegion(
     TextStyle misspelledStyle,
     int cursorIndex,
 ) {
-  final List<TextSpan> tsTreeChildren = <TextSpan>[];
+  final List<TextSpan> textSpanTreeChildren = <TextSpan>[];
 
   int textPointer = 0;
-  int currSpanPointer = 0;
+  int currentSpanPointer = 0;
   int endIndex;
-  SuggestionSpan currSpan;
   final String text = value.text;
   final TextStyle misspelledJointStyle =
       style?.merge(misspelledStyle) ?? misspelledStyle;
-  bool cursorInCurrSpan = false;
+  bool cursorInCurrentSpan = false;
 
   // Add text interwoven with any misspelled words to the tree.
   if (spellCheckSuggestions != null) {
     while (textPointer < text.length &&
-      currSpanPointer < spellCheckSuggestions.length) {
-      currSpan = spellCheckSuggestions[currSpanPointer];
+      currentSpanPointer < spellCheckSuggestions.length) {
+      SuggestionSpan currentSpan = spellCheckSuggestions[currentSpanPointer];
 
-      if (currSpan.range.start > textPointer) {
-        endIndex = currSpan.range.start < text.length
-            ? currSpan.range.start
+      if (currentSpan.range.start > textPointer) {
+        endIndex = currentSpan.range.start < text.length
+            ? currentSpan.range.start
             : text.length;
-        tsTreeChildren.add(
+        textSpanTreeChildren.add(
           TextSpan(
             style: style,
-            text: text.substring(textPointer, endIndex)
+            text: text.substring(textPointer, endIndex),
           )
         );
         textPointer = endIndex;
       } else {
         endIndex =
-            currSpan.range.end < text.length ? currSpan.range.end : text.length;
-        cursorInCurrSpan = currSpan.range.start <= cursorIndex && currSpan.range.end >= cursorIndex;
-        tsTreeChildren.add(
+            currentSpan.range.end < text.length ? currentSpan.range.end : text.length;
+        cursorInCurrentSpan = currentSpan.range.start <= cursorIndex && currentSpan.range.end >= cursorIndex;
+        textSpanTreeChildren.add(
           TextSpan(
-            style: cursorInCurrSpan
+            style: cursorInCurrentSpan
                 ? style
                 : misspelledJointStyle,
-            text: text.substring(currSpan.range.start, endIndex)
+            text: text.substring(currentSpan.range.start, endIndex),
           )
         );
 
         textPointer = endIndex;
-        currSpanPointer++;
+        currentSpanPointer++;
       }
     }
   }
 
   // Add any remaining text to the tree if applicable.
   if (textPointer < text.length) {
-    tsTreeChildren.add(
+    textSpanTreeChildren.add(
       TextSpan(
-        style: style, text: text.substring(textPointer, text.length)
+        style: style,
+        text: text.substring(textPointer, text.length),
       )
     );
   }
 
-  return tsTreeChildren;
+  return textSpanTreeChildren;
 }
 
 /// Builds [TextSpan] subtree for text with misspelled words with logic based on
@@ -342,12 +325,12 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
     TextStyle? style,
     TextStyle misspelledStyle,
     bool composingWithinCurrentTextRange) {
-  final List<TextSpan> tsTreeChildren = <TextSpan>[];
+  final List<TextSpan> textSpanTreeChildren = <TextSpan>[];
 
   int textPointer = 0;
-  int currSpanPointer = 0;
+  int currentSpanPointer = 0;
   int endIndex;
-  SuggestionSpan currSpan;
+  SuggestionSpan currentSpan;
   final String text = value.text;
   final TextRange composingRegion = value.composing;
   final TextStyle composingTextStyle =
@@ -356,17 +339,17 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
   final TextStyle misspelledJointStyle =
       style?.merge(misspelledStyle) ?? misspelledStyle;
   bool textPointerWithinComposingRegion = false;
-  bool currSpanIsComposingRegion = false;
+  bool currentSpanIsComposingRegion = false;
 
   // Add text interwoven with any misspelled words to the tree.
   if (spellCheckSuggestions != null) {
     while (textPointer < text.length &&
-      currSpanPointer < spellCheckSuggestions.length) {
-      currSpan = spellCheckSuggestions[currSpanPointer];
+      currentSpanPointer < spellCheckSuggestions.length) {
+      currentSpan = spellCheckSuggestions[currentSpanPointer];
 
-      if (currSpan.range.start > textPointer) {
-        endIndex = currSpan.range.start < text.length
-            ? currSpan.range.start
+      if (currentSpan.range.start > textPointer) {
+        endIndex = currentSpan.range.start < text.length
+            ? currentSpan.range.start
             : text.length;
         textPointerWithinComposingRegion =
             composingRegion.start >= textPointer &&
@@ -374,19 +357,19 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
                 !composingWithinCurrentTextRange;
 
         if (textPointerWithinComposingRegion) {
-          _addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
+          _addComposingRegionTextSpans(textSpanTreeChildren, text, textPointer,
               composingRegion, style, composingTextStyle);
-          tsTreeChildren.add(
+          textSpanTreeChildren.add(
             TextSpan(
               style: style,
-              text: text.substring(composingRegion.end, endIndex)
+              text: text.substring(composingRegion.end, endIndex),
             )
           );
         } else {
-          tsTreeChildren.add(
+          textSpanTreeChildren.add(
             TextSpan(
               style: style,
-              text: text.substring(textPointer, endIndex)
+              text: text.substring(textPointer, endIndex),
             )
           );
         }
@@ -394,21 +377,21 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
         textPointer = endIndex;
       } else {
         endIndex =
-            currSpan.range.end < text.length ? currSpan.range.end : text.length;
-        currSpanIsComposingRegion = textPointer >= composingRegion.start &&
+            currentSpan.range.end < text.length ? currentSpan.range.end : text.length;
+        currentSpanIsComposingRegion = textPointer >= composingRegion.start &&
             endIndex <= composingRegion.end &&
             !composingWithinCurrentTextRange;
-        tsTreeChildren.add(
+        textSpanTreeChildren.add(
           TextSpan(
-            style: currSpanIsComposingRegion
+            style: currentSpanIsComposingRegion
                 ? composingTextStyle
                 : misspelledJointStyle,
-            text: text.substring(currSpan.range.start, endIndex)
+            text: text.substring(currentSpan.range.start, endIndex),
           )
         );
 
         textPointer = endIndex;
-        currSpanPointer++;
+        currentSpanPointer++;
       }
     }
   }
@@ -417,27 +400,27 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
   if (textPointer < text.length) {
     if (textPointer < composingRegion.start &&
         !composingWithinCurrentTextRange) {
-      _addComposingRegionTextSpans(tsTreeChildren, text, textPointer,
+      _addComposingRegionTextSpans(textSpanTreeChildren, text, textPointer,
           composingRegion, style, composingTextStyle);
 
       if (composingRegion.end != text.length) {
-        tsTreeChildren.add(
+        textSpanTreeChildren.add(
           TextSpan(
             style: style,
-            text: text.substring(composingRegion.end, text.length)
+            text: text.substring(composingRegion.end, text.length),
           )
         );
       }
     } else {
-      tsTreeChildren.add(
+      textSpanTreeChildren.add(
         TextSpan(
-          style: style, text: text.substring(textPointer, text.length)
+          style: style, text: text.substring(textPointer, text.length),
         )
       );
     }
   }
 
-  return tsTreeChildren;
+  return textSpanTreeChildren;
 }
 
 /// Helper method to create [TextSpan] tree children for specified range of
@@ -452,13 +435,13 @@ void _addComposingRegionTextSpans(
   treeChildren.add(
     TextSpan(
       style: style,
-      text: text.substring(start, composingRegion.start)
+      text: text.substring(start, composingRegion.start),
     )
   );
   treeChildren.add(
     TextSpan(
       style: composingTextStyle,
-      text: text.substring(composingRegion.start, composingRegion.end)
+      text: text.substring(composingRegion.start, composingRegion.end),
     )
   );
 }
