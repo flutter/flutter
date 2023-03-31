@@ -33,7 +33,7 @@
  *
  * This method is called by FlutterEngine.
  */
-- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(int64_t)viewId;
+- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(uint64_t)viewId;
 
 /**
  * Reset the `engine` and `id` of this controller.

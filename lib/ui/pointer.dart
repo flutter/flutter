@@ -197,7 +197,6 @@ class PointerData {
     this.panDeltaY = 0.0,
     this.scale = 0.0,
     this.rotation = 0.0,
-    this.viewId = 0,
     this.preferredStylusAuxiliaryAction = PointerPreferredStylusAuxiliaryAction.ignore,
   });
 
@@ -397,9 +396,6 @@ class PointerData {
   /// The current angle of the pan/zoom in radians, with 0.0 as the initial angle.
   final double rotation;
 
-  /// The ID of the view that this event took place.
-  final int viewId;
-
   /// For events with signal kind of stylusAuxiliaryAction
   ///
   /// The current preferred action for stylusAuxiliaryAction, with ignore as the default.
@@ -445,7 +441,6 @@ class PointerData {
              'panDeltaY: $panDeltaY, '
              'scale: $scale, '
              'rotation: $rotation, '
-             'viewId: $viewId, '
              'preferredStylusAuxiliaryAction: $preferredStylusAuxiliaryAction'
            ')';
   }

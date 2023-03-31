@@ -89,7 +89,6 @@ class PointerData {
     this.panDeltaY = 0.0,
     this.scale = 0.0,
     this.rotation = 0.0,
-    this.viewId = 0,
     this.preferredStylusAuxiliaryAction = PointerPreferredStylusAuxiliaryAction.ignore,
   });
   final int embedderId;
@@ -127,7 +126,6 @@ class PointerData {
   final double panDeltaY;
   final double scale;
   final double rotation;
-  final int viewId;
   final PointerPreferredStylusAuxiliaryAction preferredStylusAuxiliaryAction;
 
   @override
@@ -168,7 +166,6 @@ class PointerData {
            'panDeltaY: $panDeltaY, '
            'scale: $scale, '
            'rotation: $rotation, '
-           'viewId: $viewId, '
            'preferredStylusAuxiliaryAction: $preferredStylusAuxiliaryAction'
            ')';
   }
