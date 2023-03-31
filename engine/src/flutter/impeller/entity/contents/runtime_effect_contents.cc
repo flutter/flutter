@@ -11,6 +11,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/shader_types.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/runtime_effect.vert.h"
@@ -18,7 +19,6 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/shader_function.h"
-#include "impeller/renderer/shader_types.h"
 
 namespace impeller {
 

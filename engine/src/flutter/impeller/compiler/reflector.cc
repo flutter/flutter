@@ -86,21 +86,6 @@ static std::string ExecutionModelToString(spv::ExecutionModel model) {
   }
 }
 
-static std::string ExecutionModelToCommandTypeName(
-    spv::ExecutionModel execution_model) {
-  switch (execution_model) {
-    case spv::ExecutionModel::ExecutionModelVertex:
-    case spv::ExecutionModel::ExecutionModelFragment:
-    case spv::ExecutionModel::ExecutionModelTessellationControl:
-    case spv::ExecutionModel::ExecutionModelTessellationEvaluation:
-      return "Command&";
-    case spv::ExecutionModel::ExecutionModelGLCompute:
-      return "ComputeCommand&";
-    default:
-      return "unsupported";
-  }
-}
-
 static std::string StringToShaderStage(std::string str) {
   if (str == "vertex") {
     return "ShaderStage::kVertex";
@@ -1100,7 +1085,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
       proto.docstring = stream.str();
     }
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = ExecutionModelToCommandTypeName(execution_model),
+        .type_name = "ResourceBinder&",
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
@@ -1119,7 +1104,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
       proto.docstring = stream.str();
     }
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = ExecutionModelToCommandTypeName(execution_model),
+        .type_name = "ResourceBinder&",
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
@@ -1138,7 +1123,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
       proto.docstring = stream.str();
     }
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = ExecutionModelToCommandTypeName(execution_model),
+        .type_name = "ResourceBinder&",
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/runtime_stage/runtime_types.h"
+#include "impeller/core/runtime_types.h"
 
 namespace impeller {
 

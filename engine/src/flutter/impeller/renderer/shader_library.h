@@ -10,7 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "fml/mapping.h"
-#include "impeller/renderer/shader_types.h"
+#include "impeller/core/shader_types.h"
 
 namespace impeller {
 

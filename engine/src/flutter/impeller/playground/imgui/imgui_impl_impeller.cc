@@ -18,6 +18,7 @@
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/range.h"
+#include "impeller/core/sampler.h"
 #include "impeller/core/texture.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/core/vertex_buffer.h"
@@ -31,7 +32,6 @@
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/sampler.h"
 #include "impeller/renderer/sampler_library.h"
 
 struct ImGui_ImplImpeller_Data {
