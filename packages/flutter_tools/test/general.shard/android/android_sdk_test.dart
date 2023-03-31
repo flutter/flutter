@@ -4,13 +4,17 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
+import '../../commands.shard/permeable/build_apk_test.dart';
+import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart' show FakeOperatingSystemUtils;
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -378,6 +382,27 @@ OpenJDK Runtime Environment Homebrew (build 19.0.2)
 OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
 ''';
       expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0.2');
+    });
+
+    testUsingContext('getJavaBinary with AS install', () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
+      final AndroidStudio androidStudio = FakeAndroidStudio();
+
+      final String javaPath = AndroidSdk.findJavaBinary(
+          androidStudio: androidStudio,
+          fileSystem: fileSystem,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          platform: platform)!;
+      // Built from the implementation of findJavaBinary android studio case.
+      final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+
+      expect(javaPath, expectedJavaPath);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Config: () => config,
+      Platform: () => FakePlatform(environment: <String, String>{}),
     });
   });
 }

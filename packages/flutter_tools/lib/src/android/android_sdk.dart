@@ -413,23 +413,31 @@ class AndroidSdk {
 
   // Returns the version of java in the format \d(.\d)+(.\d)+
   // Returns null if version not found.
-  String? getJavaVersion() {
-    // final RunResult result = globals.processUtils.runSync(
-    //   <String>[javaPath!, '--version'],
-    //   environment: sdkManagerEnv,
-    // );
-    // if (result.exitCode != 0) {
-    //   globals.printTrace(
-    //       'java --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
-    //   return null;
-    // }
-    // return _parseJavaVersion(result.stdout);
-    const String versionOutput = '''
-openjdk version "11.0.18" 2023-01-17 LTS
-OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
-OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
-''';
-    return AndroidSdk.parseJavaVersion(versionOutput);
+  String? getJavaVersion(ProcessUtils processUtils) {
+    final RunResult result = processUtils.runSync(
+      <String>[
+        findJavaBinary(
+          androidStudio: globals.androidStudio,
+          fileSystem: globals.localFileSystem,
+          operatingSystemUtils: globals.os,
+          platform: globals.platform,
+        )!,
+        '--version'
+      ],
+      environment: sdkManagerEnv,
+    );
+    if (result.exitCode != 0) {
+      globals.printTrace(
+          'java --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
+      return null;
+    }
+    return parseJavaVersion(result.stdout);
+//     const String versionOutput = '''
+// openjdk version "11.0.18" 2023-01-17 LTS
+// OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
+// OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
+// ''';
+//     return AndroidSdk.parseJavaVersion(versionOutput);
   }
 
   // Java versions have 2 formats
