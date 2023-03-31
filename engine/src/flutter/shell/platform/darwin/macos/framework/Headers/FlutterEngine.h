@@ -26,7 +26,7 @@
  * backward compatibility, single-view APIs will always operate on the view with
  * this ID. Also, the first view assigned to the engine will also have this ID.
  */
-extern const uint64_t kFlutterDefaultViewId;
+extern const int64_t kFlutterDefaultViewId;
 
 @class FlutterViewController;
 
