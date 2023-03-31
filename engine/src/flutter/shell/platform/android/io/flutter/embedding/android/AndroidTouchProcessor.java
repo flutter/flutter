@@ -94,8 +94,9 @@ public class AndroidTouchProcessor {
     int UNKNOWN = 4;
   }
 
-  // Must match the unpacking code in hooks.dart.
-  private static final int POINTER_DATA_FIELD_COUNT = 36;
+  // If this value changes, other places need changing too. See
+  // _kPointerDataFieldCount in platform_dispatcher.dart.
+  private static final int POINTER_DATA_FIELD_COUNT = 37;
   @VisibleForTesting static final int BYTES_PER_FIELD = 8;
 
   // This value must match the value in framework's platform_view.dart.
@@ -238,6 +239,8 @@ public class AndroidTouchProcessor {
       int pointerData,
       Matrix transformMatrix,
       ByteBuffer packet) {
+    // TODO(dkwingsmt): Get the source view ID from event data.
+    int viewId = 0;
     if (pointerChange == -1) {
       return;
     }
@@ -372,6 +375,8 @@ public class AndroidTouchProcessor {
     packet.putDouble(0.0); // pan_delta_y
     packet.putDouble(1.0); // scale
     packet.putDouble(0.0); // rotation
+
+    packet.putLong(viewId); // viewId
 
     packet.putLong(PointerPreferredStylusAuxiliaryAction.IGNORE); // preferred stylus action
 

@@ -9,9 +9,9 @@
 
 namespace flutter {
 
-// If this value changes, update the pointer data unpacking code in
-// platform_dispatcher.dart.
-static constexpr int kPointerDataFieldCount = 36;
+// If this value changes, other places need changing too. See
+// _kPointerDataFieldCount in platform_dispatcher.dart.
+static constexpr int kPointerDataFieldCount = 37;
 static constexpr int kBytesPerField = sizeof(int64_t);
 // Must match the button constants in events.dart.
 enum PointerButtonMouse : int64_t {
@@ -110,6 +110,7 @@ struct alignas(8) PointerData {
   double pan_delta_y;
   double scale;
   double rotation;
+  int64_t view_id;
   PreferredStylusAuxiliaryAction preferred_auxiliary_stylus_action;
 
   void Clear();
