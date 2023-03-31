@@ -1058,6 +1058,58 @@ void main() {
     await gesture.moveTo(tester.getCenter(textFieldFinder));
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
+
+  testWidgets('The menu has the same width as the input field in ListView', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123631
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Rect textInput = tester.getRect(find.byType(TextField));
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final Finder findMenu = find.byWidgetPredicate((Widget widget) {
+      return widget.runtimeType.toString() == '_MenuPanel';
+    });
+    final Rect menu = tester.getRect(findMenu);
+    expect(textInput.width, menu.width);
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              width: 200,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Rect textInput1 = tester.getRect(find.byType(TextField));
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final Finder findMenu1 = find.byWidgetPredicate((Widget widget) {
+      return widget.runtimeType.toString() == '_MenuPanel';
+    });
+    final Rect menu1 = tester.getRect(findMenu1);
+    expect(textInput1.width, 200);
+    expect(menu1.width, 200);
+  });
 }
 
 enum TestMenu {
