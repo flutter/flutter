@@ -9,7 +9,7 @@
 uniform sampler2D texture_sampler;
 
 uniform FragInfo {
-  vec2 center;
+  highp vec2 center;
   float bias;
   float scale;
   float tile_mode;
@@ -19,7 +19,7 @@ uniform FragInfo {
 }
 frag_info;
 
-in vec2 v_position;
+highp in vec2 v_position;
 
 out vec4 frag_color;
 
