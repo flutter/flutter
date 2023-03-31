@@ -129,22 +129,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// when it is no longer needed. This will ensure we discard any resources used
 /// by the object.
 ///
-/// {@tool snippet}
+/// ## Obscured Input
+///
+/// {@tool dartpad}
 /// This example shows how to create a [TextField] that will obscure input. The
 /// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
 /// and adds a label.
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/text_field.png)
-///
-/// ```dart
-/// const TextField(
-///   obscureText: true,
-///   decoration: InputDecoration(
-///     border: OutlineInputBorder(),
-///     labelText: 'Password',
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/text_field/text_field.0.dart **
 /// {@end-tool}
 ///
 /// ## Reading values

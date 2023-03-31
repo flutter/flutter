@@ -67,6 +67,52 @@ void main() {
       Logger: () => BufferLogger.test(),
     });
 
+    testUsingContext('does not support --no-sound-null-safety by default', () async {
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('.packages').createSync();
+
+      final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
+          'run',
+          '--use-application-binary=app/bar/faz',
+          '--no-sound-null-safety',
+        ]),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'toString',
+          contains('Could not find an option named "no-sound-null-safety"'),
+        )),
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+    });
+
+    testUsingContext('supports --no-sound-null-safety with an overridden NonNullSafeBuilds', () async {
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('.packages').createSync();
+
+      final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
+
+      testDeviceManager.devices = <Device>[device];
+      final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+      await createTestCommandRunner(command).run(const <String>[
+        'run',
+        '--use-application-binary=app/bar/faz',
+        '--no-sound-null-safety',
+      ]);
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => testDeviceManager,
+      FileSystem: () => fileSystem,
+      Logger: () => BufferLogger.test(),
+      NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       fileSystem.file('pubspec.yaml').createSync();
@@ -1004,6 +1050,7 @@ void main() {
       '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
+      '--enable-vulkan-validation',
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
@@ -1022,6 +1069,7 @@ void main() {
     expect(options.nativeNullAssertions, true);
     expect(options.traceSystrace, true);
     expect(options.enableImpeller, ImpellerStatus.enabled);
+    expect(options.enableVulkanValidation, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{
@@ -1123,6 +1171,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool get supportsFastStart => false;
+
+  @override
+  bool get ephemeral => true;
 
   @override
   bool get isConnected => true;

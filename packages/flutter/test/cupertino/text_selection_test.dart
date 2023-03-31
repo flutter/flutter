@@ -200,12 +200,16 @@ void main() {
               data: const MediaQueryData(size: Size(800.0, 600.0)),
               child: Center(
                 child: CupertinoTextField(
+                  autofocus: true,
                   controller: controller,
                 ),
               ),
             ),
           ),
       ));
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       // Initially, the menu isn't shown at all.
       expect(find.text('Cut'), findsNothing);
@@ -432,12 +436,16 @@ void main() {
               data: const MediaQueryData(size: Size(800.0, 600.0)),
               child: Center(
                 child: CupertinoTextField(
+                  autofocus: true,
                   controller: controller,
                 ),
               ),
             ),
           ),
       ));
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       // Initially, the menu isn't shown at all.
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
@@ -546,6 +554,7 @@ void main() {
                 data: const MediaQueryData(size: Size(800.0, 600.0)),
                 child: Center(
                   child: CupertinoTextField(
+                    autofocus: true,
                     padding: const EdgeInsets.all(8.0),
                     controller: controller,
                     maxLines: 2,
@@ -554,6 +563,9 @@ void main() {
               ),
             ),
         ));
+
+        // This extra pump is so autofocus can propagate to renderEditable.
+        await tester.pump();
 
         // Initially, the menu isn't shown at all.
         expect(find.text('Cut'), findsNothing);
