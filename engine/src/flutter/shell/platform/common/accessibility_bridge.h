@@ -68,30 +68,6 @@ class AccessibilityBridge
       const FlutterSemanticsCustomAction2& action);
 
   //------------------------------------------------------------------------------
-  /// @brief      Adds a semantics node update to the pending semantics update.
-  ///             Calling this method alone will NOT update the semantics tree.
-  ///             To flush the pending updates, call the CommitUpdates().
-  ///
-  /// @param[in]  node           A reference to the semantics node update.
-  //  TODO(loicsharma): Remove this as FlutterSemanticsNode is deprecated.
-  //  See: https://github.com/flutter/flutter/issues/121176
-  void AddFlutterSemanticsNodeUpdate(const FlutterSemanticsNode& node);
-
-  //------------------------------------------------------------------------------
-  /// @brief      Adds a custom semantics action update to the pending semantics
-  ///             update. Calling this method alone will NOT update the
-  ///             semantics tree. To flush the pending updates, call the
-  ///             CommitUpdates().
-  ///
-  /// @param[in]  action           A reference to the custom semantics action
-  ///                              update.
-  //  TODO(loicsharma): Remove this as FlutterSemanticsCustomAction is
-  //  deprecated.
-  //  See: https://github.com/flutter/flutter/issues/121176
-  void AddFlutterSemanticsCustomActionUpdate(
-      const FlutterSemanticsCustomAction& action);
-
-  //------------------------------------------------------------------------------
   /// @brief      Flushes the pending updates and applies them to this
   ///             accessibility bridge. Calling this with no pending updates
   ///             does nothing, and callers should call this method at the end
@@ -272,17 +248,6 @@ class AccessibilityBridge
       const FlutterSemanticsNode2& flutter_node);
   SemanticsCustomAction FromFlutterSemanticsCustomAction(
       const FlutterSemanticsCustomAction2& flutter_custom_action);
-
-  // TODO(loicsharma): Remove this as FlutterSemanticsNode is deprecated.
-  // See: https://github.com/flutter/flutter/issues/121176
-  SemanticsNode FromFlutterSemanticsNode(
-      const FlutterSemanticsNode& flutter_node);
-
-  // TODO(loicsharma): Remove this as FlutterSemanticsCustomAction is
-  // deprecated.
-  // See: https://github.com/flutter/flutter/issues/121176
-  SemanticsCustomAction FromFlutterSemanticsCustomAction(
-      const FlutterSemanticsCustomAction& flutter_custom_action);
 
   // |AXTreeObserver|
   void OnNodeWillBeDeleted(ui::AXTree* tree, ui::AXNode* node) override;

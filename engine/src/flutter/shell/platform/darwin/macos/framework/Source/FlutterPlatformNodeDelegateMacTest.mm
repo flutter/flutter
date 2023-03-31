@@ -35,7 +35,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
   ;
@@ -71,7 +71,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags =
       static_cast<FlutterSemanticsFlag>(FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
@@ -113,7 +113,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags =
       static_cast<FlutterSemanticsFlag>(FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
@@ -160,7 +160,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   engine.semanticsEnabled = YES;
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -174,7 +174,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   root.custom_accessibility_actions_count = 0;
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode child1;
+  FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
@@ -235,7 +235,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
 
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
-  FlutterSemanticsNode root;
+  FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = static_cast<FlutterSemanticsFlag>(0);
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -256,7 +256,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   double rectSize = 50;
   double transformFactor = 0.5;
 
-  FlutterSemanticsNode child1;
+  FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
   child1.actions = static_cast<FlutterSemanticsAction>(0);
