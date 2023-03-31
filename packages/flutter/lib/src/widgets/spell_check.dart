@@ -103,86 +103,94 @@ class SpellCheckConfiguration {
   List<SuggestionSpan> _correctSpellCheckResults(
     String newText, String resultsText, List<SuggestionSpan> results) {
   final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
-
   int spanPointer = 0;
-  int offset = 0; // the cummulative difference between where we are and where we thought we'd be
-  int foundIndex;
-  int spanLength;
-  SuggestionSpan adjustedSpan;
-  String currentSpanText;
-  RegExp regex;
-  bool currentSpanFoundExactly = false;
-  bool currentSpanFoundElsewhere = false;
+  int offset = 0;
 
   // Assumes that the order of spans has not been jumbled for optimization
   // purposes, and will only search since the previously found span.
   int searchStart = 0;
 
   while (spanPointer < results.length) {
-    // Try finding SuggestionSpan from old results (currentSpan) in new text.
-    SuggestionSpan currentSpan = results[spanPointer];
-    currentSpanText =
+    final SuggestionSpan currentSpan = results[spanPointer];
+    final String currentSpanText =
         resultsText.substring(currentSpan.range.start, currentSpan.range.end);
+    final int spanLength = currentSpan.range.end - currentSpan.range.start;
 
-    regex = RegExp('\\b$currentSpanText\\b');
-    foundIndex = newText.substring(searchStart).indexOf(regex);
-    currentSpanFoundExactly = currentSpan.range.start == foundIndex + searchStart;
-    bool currentSpanFoundExactlyWithOffset = currentSpan.range.start + offset == foundIndex + searchStart;
-    currentSpanFoundElsewhere = foundIndex >= 0;
+    // Try finding SuggestionSpan from resultsText in new text.
+    final RegExp currentSpanTextRegexp = RegExp('\\b$currentSpanText\\b');
+    final int foundIndex = newText.substring(searchStart).indexOf(currentSpanTextRegexp);
+
+    // Check whether word was found exactly where expected or elsewhere in the newText.
+    final bool currentSpanFoundExactly = currentSpan.range.start == foundIndex + searchStart;
+    final bool currentSpanFoundExactlyWithOffset = currentSpan.range.start + offset == foundIndex + searchStart;
+    final bool currentSpanFoundElsewhere = foundIndex >= 0;
 
     if (currentSpanFoundExactly || currentSpanFoundExactlyWithOffset) {
-      // currentSpan was found at the same index in new text and old text
-      // (resultsText), so apply it to new text by adding it to the list of
+      // currentSpan was found at the same index in newText and resutsText
+      // or at the same index with the previously calculated adjustment by
+      // the offset value, so apply it to new text by adding it to the list of
       // corrected results.
-      adjustedSpan = SuggestionSpan(
+      final SuggestionSpan adjustedSpan = SuggestionSpan(
           TextRange(
               start: currentSpan.range.start + offset, end: currentSpan.range.end + offset),
           currentSpan.suggestions,
       );
+
+      // Start search for the next misspelled word at the end of currentSpan.
       searchStart = currentSpan.range.end + 1 + offset;
       correctedSpellCheckResults.add(adjustedSpan);       
     } else if (currentSpanFoundElsewhere) {
       // Word was pushed forward but not modified.
-      spanLength = currentSpan.range.end - currentSpan.range.start;
-      int adjustedSpanStart = searchStart + foundIndex;
-      int adjustedSpanEnd = adjustedSpanStart + spanLength;
-      adjustedSpan = SuggestionSpan(
+      final int adjustedSpanStart = searchStart + foundIndex;
+      final int adjustedSpanEnd = adjustedSpanStart + spanLength;
+      final SuggestionSpan adjustedSpan = SuggestionSpan(
           TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
           currentSpan.suggestions,
       );
+
+      // Start search for the next misspelled word at the end of the
+      // adjusted currentSpan.
       searchStart = adjustedSpanEnd + 1;
+      // Adjust offset to reflect the difference between where currentSpan
+      // was positioned in resultsText versus in newText.
       offset = adjustedSpanStart - currentSpan.range.start;
       correctedSpellCheckResults.add(adjustedSpan);
     } else {
-      // Check if word was modified by extension.
-      regex = RegExp('$currentSpanText');
-      foundIndex = newText.substring(searchStart).indexOf(regex);
+      // Check if word was modified by extension by searching for word
+      // anywhere in the remaing substring of newText left to search.
+      final RegExp modifiedRegex = RegExp(currentSpanText);
+      final int modifiedFoundIndex = newText.substring(searchStart).indexOf(modifiedRegex);
 
-      if (foundIndex >= 0) {
-        // Word was extended.
-        regex = RegExp(' ');
-        spanLength = currentSpan.range.end - currentSpan.range.start;
-        int adjustedSearchStartForSpace = foundIndex + searchStart + spanLength;
-        int foundEndIndex = newText.substring(adjustedSearchStartForSpace).indexOf(regex);
+      if (modifiedFoundIndex >= 0) {
+        // Word was modified by extension, so check for next space following the
+        // modified word to find its end index.
+        final RegExp regex = RegExp(' ');
+        final int adjustedSearchStartForSpace = modifiedFoundIndex + searchStart + spanLength;
+        final int foundEndIndex = newText.substring(adjustedSearchStartForSpace).indexOf(regex);
         
         if (foundEndIndex >= 0) {
-          // Word not at end of string.
-          int adjustedSpanStart = foundIndex + searchStart;
-          int adjustedSpanEnd = adjustedSearchStartForSpace + foundEndIndex;
-          adjustedSpan = SuggestionSpan(
+          // Word was found within newText.
+          final int adjustedSpanStart = modifiedFoundIndex + searchStart;
+          final int adjustedSpanEnd = adjustedSearchStartForSpace + foundEndIndex;
+          final SuggestionSpan adjustedSpan = SuggestionSpan(
             TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
             currentSpan.suggestions,
           );
 
+          // Start search for the next misspelled word at the end of the
+          // adjusted currentSpan.
           searchStart = adjustedSpanEnd + 1;
           correctedSpellCheckResults.add(adjustedSpan);
+          // Adjust offset to reflect the difference between where currentSpan
+          // was positioned in resultsText versus where the modified version
+          // is positioned in newText.
           offset = (adjustedSpanEnd - adjustedSpanStart) - (currentSpan.range.end - currentSpan.range.start) + (adjustedSpanStart - currentSpan.range.start);
         } else {
-          // Word at end of string. We do not need to update any values.
-          int adjustedSpanStart = foundIndex + searchStart;
-          adjustedSpan = SuggestionSpan(
-          TextRange(start: adjustedSpanStart, end: newText.length),
-          currentSpan.suggestions,
+          // Word was found at the end of newText.
+          final int adjustedSpanStart = modifiedFoundIndex + searchStart;
+          final SuggestionSpan adjustedSpan = SuggestionSpan(
+            TextRange(start: adjustedSpanStart, end: newText.length),
+            currentSpan.suggestions,
           );
 
           correctedSpellCheckResults.add(adjustedSpan);
@@ -248,9 +256,10 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
   );
 }
 
-/// Builds [TextSpan] subtree for text with misspelled words with no logic based
-/// on a valid composing region, and instead, ignoring misspelled words adjacent
-/// to the cursor.
+/// Builds the [TextSpan] tree for spell check without considering the composing
+/// region. Instead, uses the cursor to identify the word that's actively being
+/// edited and shouldn't be spell checked. This is useful for platforms and IMEs
+/// that don't use the composing region for the active word.
 List<TextSpan> _buildSubtreesWithoutComposingRegion(
     List<SuggestionSpan>? spellCheckSuggestions,
     TextEditingValue value,
@@ -272,7 +281,7 @@ List<TextSpan> _buildSubtreesWithoutComposingRegion(
   if (spellCheckSuggestions != null) {
     while (textPointer < text.length &&
       currentSpanPointer < spellCheckSuggestions.length) {
-      SuggestionSpan currentSpan = spellCheckSuggestions[currentSpanPointer];
+      final SuggestionSpan currentSpan = spellCheckSuggestions[currentSpanPointer];
 
       if (currentSpan.range.start > textPointer) {
         endIndex = currentSpan.range.start < text.length
