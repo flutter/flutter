@@ -494,10 +494,28 @@ void main() {
       'panend#1']);
   });
 
+  testGesture('TapAndHorizontalDragGestureRecognizer accepts drag on a pan when the arena has already been won by the primary pointer', (GestureTester tester) {
+    setUpTapAndHorizontalDragGestureRecognizer();
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
+
+    tapAndDrag.addPointer(downB);
+    tester.closeArena(5);
+    tester.route(downB);
+    tester.route(pointer.move(const Offset(25.0, 45.0)));
+    tester.route(pointer.up());
+    expect(events, <String>[
+      'down#1',
+      'horizontaldragstart#1',
+      'horizontaldragupdate#1',
+      'horizontaldragend#1']);
+  });
+
   testGesture('TapAndHorizontalDragGestureRecognizer loses to VerticalDragGestureRecognizer on a vertical drag', (GestureTester tester) {
     setUpTapAndHorizontalDragGestureRecognizer();
 
-    final VerticalDragGestureRecognizer pans = VerticalDragGestureRecognizer()
+    final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer()
       ..onStart = (DragStartDetails details) {
         events.add('verticalstart');
       }
@@ -515,7 +533,7 @@ void main() {
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
     tapAndDrag.addPointer(downB);
-    pans.addPointer(downB);
+    verticalDrag.addPointer(downB);
     tester.closeArena(5);
     tester.route(downB);
     tester.route(pointer.move(const Offset(10.0, 45.0)));
@@ -530,7 +548,7 @@ void main() {
   testGesture('TapAndPanGestureRecognizer loses to VerticalDragGestureRecognizer on a vertical drag', (GestureTester tester) {
     setUpTapAndPanGestureRecognizer();
 
-    final VerticalDragGestureRecognizer pans = VerticalDragGestureRecognizer()
+    final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer()
       ..onStart = (DragStartDetails details) {
         events.add('verticalstart');
       }
@@ -548,7 +566,7 @@ void main() {
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
     tapAndDrag.addPointer(downB);
-    pans.addPointer(downB);
+    verticalDrag.addPointer(downB);
     tester.closeArena(5);
     tester.route(downB);
     tester.route(pointer.move(const Offset(10.0, 45.0)));
@@ -563,7 +581,7 @@ void main() {
   testGesture('TapAndHorizontalDragGestureRecognizer beats VerticalDragGestureRecognizer on a horizontal drag', (GestureTester tester) {
     setUpTapAndHorizontalDragGestureRecognizer();
 
-    final VerticalDragGestureRecognizer pans = VerticalDragGestureRecognizer()
+    final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer()
       ..onStart = (DragStartDetails details) {
         events.add('verticalstart');
       }
@@ -581,7 +599,7 @@ void main() {
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
     tapAndDrag.addPointer(downB);
-    pans.addPointer(downB);
+    verticalDrag.addPointer(downB);
     tester.closeArena(5);
     tester.route(downB);
     tester.route(pointer.move(const Offset(45.0, 10.0)));
@@ -597,7 +615,7 @@ void main() {
   testGesture('TapAndPanGestureRecognizer beats VerticalDragGestureRecognizer on a horizontal pan', (GestureTester tester) {
     setUpTapAndPanGestureRecognizer();
 
-    final VerticalDragGestureRecognizer pans = VerticalDragGestureRecognizer()
+    final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer()
       ..onStart = (DragStartDetails details) {
         events.add('verticalstart');
       }
@@ -615,7 +633,7 @@ void main() {
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
 
     tapAndDrag.addPointer(downB);
-    pans.addPointer(downB);
+    verticalDrag.addPointer(downB);
     tester.closeArena(5);
     tester.route(downB);
     tester.route(pointer.move(const Offset(45.0, 25.0)));
