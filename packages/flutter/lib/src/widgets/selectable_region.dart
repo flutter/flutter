@@ -537,6 +537,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
    } else {
      _selectionOverlay!.hideMagnifier();
      _selectionOverlay!.showToolbar(
+       context: context,
        contextMenuBuilder: (BuildContext context) {
          return widget.contextMenuBuilder!(context, this);
        },

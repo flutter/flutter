@@ -14838,28 +14838,34 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     });
 
     testWidgets(
-      'Error thrown when spell check enabled but no default spell check service available',
+      'Spell check disabled when spell check configuration specified but no default spell check service available',
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         false;
 
       await tester.pumpWidget(
-          EditableText(
-              controller: TextEditingController(text: 'A'),
-              focusNode: FocusNode(),
-              style: const TextStyle(),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              cursorOpacityAnimates: true,
-              autofillHints: null,
-              spellCheckConfiguration:
-                const SpellCheckConfiguration(
-                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
-              ),
-          ));
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        )
+      );
 
-        expect(tester.takeException(), isA<AssertionError>());
-        tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+      expect(tester.takeException(), isA<AssertionError>());
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+      tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
 
     testWidgets(
