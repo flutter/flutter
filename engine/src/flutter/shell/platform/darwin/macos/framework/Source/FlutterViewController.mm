@@ -454,7 +454,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   [_flutterView setBackgroundColor:_backgroundColor];
 }
 
-- (int64_t)viewId {
+- (uint64_t)viewId {
   NSAssert([self attached], @"This view controller is not attched.");
   return _viewId;
 }
@@ -483,7 +483,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return _bridge;
 }
 
-- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(int64_t)viewId {
+- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(uint64_t)viewId {
   NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
   _engine = engine;
   _viewId = viewId;
