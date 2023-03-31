@@ -75,9 +75,10 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
     FML_LOG(ERROR) << "Could not add reactor worker.";
     return nullptr;
   }
-  FML_LOG(ERROR) << "Using the Impeller GL rendering backend.";
+  FML_LOG(ERROR) << "Using the Impeller rendering backend.";
   return context;
 }
+
 AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
     const std::shared_ptr<AndroidContext>& android_context,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)

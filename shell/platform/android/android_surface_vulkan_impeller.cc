@@ -56,9 +56,6 @@ AndroidSurfaceVulkanImpeller::AndroidSurfaceVulkanImpeller(
       CreateImpellerContext(proc_table_, workers_, enable_vulkan_validation);
   is_valid_ =
       proc_table_->HasAcquiredMandatoryProcAddresses() && impeller_context_;
-  if (is_valid_) {
-    FML_LOG(ERROR) << "Using the Impeller Vulkan rendering backend.";
-  }
 }
 
 AndroidSurfaceVulkanImpeller::~AndroidSurfaceVulkanImpeller() = default;
