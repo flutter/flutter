@@ -17,6 +17,7 @@ import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
@@ -52,6 +53,8 @@ enum ScrollViewKeyboardDismissBehavior {
 ///
 /// [ScrollView] helps orchestrate these pieces by creating the [Scrollable] and
 /// the viewport and deferring to its subclass to create the slivers.
+///
+/// To learn more about slivers, see [CustomScrollView.slivers].
 ///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
@@ -345,6 +348,8 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// Subclasses should override this method to build the slivers for the inside
   /// of the viewport.
+  ///
+  /// To learn more about slivers, see [CustomScrollView.slivers].
   @protected
   List<Widget> buildSlivers(BuildContext context);
 
@@ -461,7 +466,7 @@ abstract class ScrollView extends StatelessWidget {
   }
 }
 
-/// A [ScrollView] that creates custom scroll effects using slivers.
+/// A [ScrollView] that creates custom scroll effects using [slivers].
 ///
 /// A [CustomScrollView] lets you supply [slivers] directly to create various
 /// scrolling effects, such as lists, grids, and expanding headers. For example,
@@ -612,6 +617,101 @@ class CustomScrollView extends ScrollView {
   });
 
   /// The slivers to place inside the viewport.
+  ///
+  /// ## What is a sliver?
+  ///
+  /// > _**sliver** (noun): a small, thin piece of something._
+  ///
+  /// A _sliver_ is a widget backed by a [RenderSliver] subclass, i.e. one that
+  /// implements the constraint/geometry protocol that uses [SliverConstraints]
+  /// and [SliverGeometry].
+  ///
+  /// This is as distinct from those widgets that are backed by [RenderBox]
+  /// subclasses, which use [BoxConstraints] and [Size] respectively, and are
+  /// known as box widgets. (Widgets like [Container], [Row], and [SizedBox] are
+  /// box widgets.)
+  ///
+  /// While boxes are much more straightforward (implementing a simple
+  /// two-dimensional Cartesian layout system), slivers are much more powerful,
+  /// and are optimized for one-axis scrolling environments.
+  ///
+  /// Slivers are hosted in viewports, also known as scroll views, most notably
+  /// [CustomScrollView].
+  ///
+  /// ## Examples of slivers
+  ///
+  /// The Flutter framework has many built-in sliver widgets, and custom widgets
+  /// can be created in the same manner. By convention, sliver widgets always
+  /// start with the prefix `Sliver` and are always used in properties called
+  /// `sliver` or `slivers` (as opposed to `child` and `children` which are used
+  /// for box widgets).
+  ///
+  /// Examples of widgets unique to the sliver world include:
+  ///
+  /// * [SliverList], a lazily-loading list of variably-sized box widgets.
+  /// * [SliverFixedExtentList], a lazily-loading list of box widgets that are
+  ///   all forced to the same height.
+  /// * [SliverPrototypeExtentList], a lazily-loading list of box widgets that
+  ///   are all forced to the same height as a given prototype widget.
+  /// * [SliverGrid], a lazily-loading grid of box widgets.
+  /// * [SliverAnimatedList] and [SliverAnimatedGrid], animated variants of
+  ///   [SliverList] and [SliverGrid].
+  /// * [SliverFillRemaining], a widget that fills all remaining space in a
+  ///   scroll view, and lays a box widget out inside that space.
+  /// * [SliverFillViewport], a widget that lays a list of boxes out, each
+  ///   being sized to fit the whole viewport.
+  /// * [SliverPersistentHeader], a sliver that implements pinned and floating
+  ///   headers, e.g. used to implement [SliverAppBar].
+  /// * [SliverToBoxAdapter], a sliver that wraps a box widget.
+  ///
+  /// Examples of sliver variants of common box widgets include:
+  ///
+  /// * [SliverOpacity], [SliverAnimatedOpacity], and [SliverFadeTransition],
+  ///   sliver versions of [Opacity], [AnimatedOpacity], and [FadeTransition].
+  /// * [SliverIgnorePointer], a sliver version of [IgnorePointer].
+  /// * [SliverLayoutBuilder], a sliver version of [LayoutBuilder].
+  /// * [SliverOffstage], a sliver version of [Offstage].
+  /// * [SliverPadding], a sliver version of [Padding].
+  /// * [SliverReorderableList], a sliver version of [ReorderableList]
+  /// * [SliverSafeArea], a sliver version of [SafeArea].
+  /// * [SliverVisibility], a sliver version of [Visibility].
+  ///
+  /// ## Benefits of slivers over boxes
+  ///
+  /// The sliver protocol ([SliverConstraints] and [SliverGeometry]) enables
+  /// _scroll effects_, such as floating app bars, widgets that expand and
+  /// shrink during scroll, section headers that are pinned only while the
+  /// section's children are visible, etc.
+  ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=Mz3kHQxBjGg}
+  ///
+  /// ## Mixing slivers and boxes
+  ///
+  /// In general, slivers always wrap box widgets to actually render anything
+  /// (for example, there is no sliver equivalent of [Text] or [Container]);
+  /// the sliver part of the equation is mostly about how these boxes should
+  /// be laid out in a viewport (i.e. when scrolling).
+  ///
+  /// Typically, the simplest way to combine boxes into a sliver environment is
+  /// to use a [SliverList] (maybe using a [ListView, which is a convenient
+  /// combination of a [CustomScrollView] and a [SliverList]). In rare cases,
+  /// e.g. if a single [Divider] widget is needed between two [SliverGrid]s,
+  /// a [SliverToBoxAdapter] can be used to wrap the box widgets.
+  ///
+  /// ## Performance considerations
+  ///
+  /// Because the purpose of scroll views is to, well, scroll, it is common
+  /// for scroll views to contain more contents than are rendered on the screen
+  /// at any particular time.
+  ///
+  /// To improve the performance of scroll views, the content can be rendered in
+  /// _lazy_ widgets, notably [SliverList] and [SliverGrid] (and their variants,
+  /// such as [SliverFixedExtentList] and [SliverAnimatedGrid]). These widgets
+  /// ensure that only the portion of their child lists that are actually
+  /// visible get built, laid out, and painted.
+  ///
+  /// The [ListView] and [GridView] widgets provide a convenient way to combine
+  /// a [CustomScrollView] and a [SliverList] or [SliverGrid] (respectively).
   final List<Widget> slivers;
 
   @override

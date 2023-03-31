@@ -19,6 +19,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    namespace "dev.benchmarks.platform_views_layout_hybrid_composition"
     compileSdkVersion flutter.compileSdkVersion
 
     compileOptions {
