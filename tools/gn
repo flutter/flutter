@@ -208,6 +208,47 @@ def get_target_cpu(args):
   return 'x64'
 
 
+def setup_goma(args):
+  goma_gn_args = {}
+
+  goma_dir = os.environ.get('GOMA_DIR')
+  goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
+
+  # GOMA has a different default (home) path on gWindows.
+  if not os.path.exists(goma_home_dir) and sys.platform.startswith(
+      ('cygwin', 'win')):
+    goma_home_dir = os.path.join('c:\\', 'src', 'goma', 'goma-win64')
+
+  if args.target_os == 'wasm' or args.web:
+    goma_gn_args['use_goma'] = False
+    goma_gn_args['goma_dir'] = None
+    print('Disabling GOMA for wasm builds, it is not supported yet.')
+  elif args.goma and goma_dir and os.path.exists(goma_dir):
+    goma_gn_args['use_goma'] = True
+    goma_gn_args['goma_dir'] = goma_dir
+  elif args.goma and os.path.exists(goma_home_dir):
+    goma_gn_args['use_goma'] = True
+    goma_gn_args['goma_dir'] = goma_home_dir
+  elif args.goma:
+    raise Exception(
+        'GOMA was specified but was not found. Set the GOMA_DIR environment '
+        'variable, install goma at $HOME/goma following the instructions at '
+        'https://github.com/flutter/flutter/wiki/Compiling-the-engine, or '
+        'run this script with the --no-goma flag to do a non-goma-enabled '
+        'build.',
+    )
+  else:
+    goma_gn_args['use_goma'] = False
+    goma_gn_args['goma_dir'] = None
+
+  if goma_gn_args['use_goma'] and sys.platform == 'darwin':
+    if (os.environ.get('LUCI_CONTEXT') is None or args.xcode_symlinks or
+        os.getenv('FLUTTER_GOMA_CREATE_XCODE_SYMLINKS', '0') == '1'):
+      goma_gn_args['create_xcode_symlinks'] = True
+
+  return goma_gn_args
+
+
 def to_gn_args(args):
   if args.simulator:
     if args.target_os != 'ios':
@@ -219,41 +260,7 @@ def to_gn_args(args):
 
   gn_args['is_debug'] = args.unoptimized
 
-  goma_dir = os.environ.get('GOMA_DIR')
-  goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
-  depot_tools_bin_dir = os.path.join(args.depot_tools, '.cipd_bin')
-
-  # GOMA has a different default (home) path on gWindows.
-  if not os.path.exists(goma_home_dir) and sys.platform.startswith(
-      ('cygwin', 'win')):
-    goma_home_dir = os.path.join('c:\\', 'src', 'goma', 'goma-win64')
-
-  if args.target_os == 'wasm' or args.web:
-    gn_args['use_goma'] = False
-    gn_args['goma_dir'] = None
-    print('Disabling GOMA for wasm builds, it is not supported yet.')
-  elif args.goma and goma_dir:
-    gn_args['use_goma'] = True
-    gn_args['goma_dir'] = goma_dir
-  elif args.goma and os.path.exists(goma_home_dir):
-    gn_args['use_goma'] = True
-    gn_args['goma_dir'] = goma_home_dir
-  elif args.goma and os.path.exists(depot_tools_bin_dir):
-    gn_args['use_goma'] = True
-    gn_args['goma_dir'] = depot_tools_bin_dir
-  else:
-    if args.goma:
-      print(
-          "GOMA usage was specified but can't be found, falling back to local "
-          'builds. Set the GOMA_DIR environment variable to fix GOMA.'
-      )
-    gn_args['use_goma'] = False
-    gn_args['goma_dir'] = None
-
-  if gn_args['use_goma']:
-    if args.xcode_symlinks or os.getenv('FLUTTER_GOMA_CREATE_XCODE_SYMLINKS',
-                                        '0') == '1':
-      gn_args['create_xcode_symlinks'] = True
+  gn_args.update(setup_goma(args))
 
   # If building for WASM, set the GN args using 'to_gn_wasm_args' as most
   # of the Flutter SDK specific arguments are unused.
