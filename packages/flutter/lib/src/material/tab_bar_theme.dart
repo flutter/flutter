@@ -32,7 +32,6 @@ class TabBarTheme with Diagnosticable {
     this.indicatorColor,
     this.indicatorSize,
     this.dividerColor,
-    this.dividerHeight,
     this.labelColor,
     this.labelPadding,
     this.labelStyle,
@@ -54,9 +53,6 @@ class TabBarTheme with Diagnosticable {
 
   /// Overrides the default value for [TabBar.dividerColor].
   final Color? dividerColor;
-
-  /// Overrides the default value for [TabBar.dividerHeight].
-  final double? dividerHeight;
 
   /// Overrides the default value for [TabBar.labelColor].
   ///
@@ -101,7 +97,6 @@ class TabBarTheme with Diagnosticable {
     Color? indicatorColor,
     TabBarIndicatorSize? indicatorSize,
     Color? dividerColor,
-    double? dividerHeight,
     Color? labelColor,
     EdgeInsetsGeometry? labelPadding,
     TextStyle? labelStyle,
@@ -116,7 +111,6 @@ class TabBarTheme with Diagnosticable {
       indicatorColor: indicatorColor ?? this.indicatorColor,
       indicatorSize: indicatorSize ?? this.indicatorSize,
       dividerColor: dividerColor ?? this.dividerColor,
-      dividerHeight: dividerHeight ?? this.dividerHeight,
       labelColor: labelColor ?? this.labelColor,
       labelPadding: labelPadding ?? this.labelPadding,
       labelStyle: labelStyle ?? this.labelStyle,
@@ -147,7 +141,6 @@ class TabBarTheme with Diagnosticable {
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
       indicatorSize: t < 0.5 ? a.indicatorSize : b.indicatorSize,
       dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t),
-      dividerHeight: t < 0.5 ? a.dividerHeight : b.dividerHeight,
       labelColor: Color.lerp(a.labelColor, b.labelColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a.labelPadding, b.labelPadding, t),
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
@@ -165,7 +158,6 @@ class TabBarTheme with Diagnosticable {
     indicatorColor,
     indicatorSize,
     dividerColor,
-    dividerHeight,
     labelColor,
     labelPadding,
     labelStyle,
@@ -189,7 +181,6 @@ class TabBarTheme with Diagnosticable {
         && other.indicatorColor == indicatorColor
         && other.indicatorSize == indicatorSize
         && other.dividerColor == dividerColor
-        && other.dividerHeight == dividerHeight
         && other.labelColor == labelColor
         && other.labelPadding == labelPadding
         && other.labelStyle == labelStyle
