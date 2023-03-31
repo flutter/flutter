@@ -31,28 +31,18 @@ class MyWidget extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<MyWidget> {
-  final List<String> alphabet = <String>[
+  final List<String> _alphabet = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
     'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
   ];
-  final Widget spacer = const SizedBox.square(dimension: 10);
-  final UniqueKey center = UniqueKey();
-  Axis axis = Axis.vertical;
-  bool reverse = false;
-
-  AxisDirection _getAxisDirection() {
-    switch (axis) {
-      case Axis.vertical:
-        return reverse ? AxisDirection.up : AxisDirection.down;
-      case Axis.horizontal:
-        return reverse ? AxisDirection.left : AxisDirection.right;
-    }
-  }
+  final Widget _spacer = const SizedBox.square(dimension: 10);
+  final UniqueKey _center = UniqueKey();
+  AxisDirection _axisDirection = AxisDirection.down;
 
   Widget _getArrows(SliverConstraints constraints) {
     final Widget arrow;
     final AxisDirection adjustedAxisDirection = applyGrowthDirectionToAxisDirection(
-      _getAxisDirection(),
+      _axisDirection,
       constraints.growthDirection,
     );
     switch(adjustedAxisDirection) {
@@ -66,13 +56,15 @@ class _MyWidgetState extends State<MyWidget> {
         arrow = const Icon(Icons.arrow_forward_rounded);
     }
 
-    switch(axis) {
-      case Axis.vertical:
+    switch(_axisDirection) {
+      case AxisDirection.up:
+      case AxisDirection.down:
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[ arrow, arrow ]
         );
-      case Axis.horizontal:
+      case AxisDirection.left:
+      case AxisDirection.right:
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[ arrow, arrow ]
@@ -81,30 +73,10 @@ class _MyWidgetState extends State<MyWidget> {
   }
 
   void _onAxisDirectionChanged(AxisDirection? axisDirection) {
-    if (axisDirection == null) {
-      return;
-    }
-    final bool newReverse;
-    final Axis newAxis;
-    switch(axisDirection) {
-      case AxisDirection.up:
-        newReverse = true;
-        newAxis = Axis.vertical;
-      case AxisDirection.down:
-        newReverse = false;
-        newAxis = Axis.vertical;
-      case AxisDirection.left:
-        newReverse = true;
-        newAxis = Axis.horizontal;
-      case AxisDirection.right:
-        newReverse = false;
-        newAxis = Axis.horizontal;
-    }
-    if (newReverse != reverse || newAxis != axis) {
+    if (axisDirection != null && axisDirection != _axisDirection) {
       setState(() {
         // Respond to change in axis direction.
-        reverse = newReverse;
-        axis = newAxis;
+        _axisDirection = axisDirection;
       });
     }
   }
@@ -117,11 +89,11 @@ class _MyWidgetState extends State<MyWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Text(constraints.axis.toString()),
-          spacer,
+          _spacer,
           Text(constraints.axisDirection.toString()),
-          spacer,
+          _spacer,
           Text(constraints.growthDirection.toString()),
-          spacer,
+          _spacer,
           _getArrows(constraints),
         ],
       ),
@@ -142,32 +114,32 @@ class _MyWidgetState extends State<MyWidget> {
             children: <Widget>[
               Radio<AxisDirection>(
                 value: AxisDirection.up,
-                groupValue: _getAxisDirection(),
+                groupValue: _axisDirection,
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('up'),
-              spacer,
+              _spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.down,
-                groupValue: _getAxisDirection(),
+                groupValue: _axisDirection,
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('down'),
-              spacer,
+              _spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.left,
-                groupValue: _getAxisDirection(),
+                groupValue: _axisDirection,
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('left'),
-              spacer,
+              _spacer,
               Radio<AxisDirection>(
                 value: AxisDirection.right,
-                groupValue: _getAxisDirection(),
+                groupValue: _axisDirection,
                 onChanged: _onAxisDirectionChanged,
               ),
               const Text('right'),
-              spacer,
+              _spacer,
             ],
           ),
         ),
@@ -193,7 +165,7 @@ class _MyWidgetState extends State<MyWidget> {
                   ? (index.isEven ? Colors.amber[100] : Colors.amberAccent)
                   : (index.isEven ? Colors.green[100] : Colors.lightGreen),
                 padding: const EdgeInsets.all(8.0),
-                child: Center(child: Text(alphabet[index - 1])),
+                child: Center(child: Text(_alphabet[index - 1])),
               );
             }
             return Padding(
@@ -220,20 +192,24 @@ class _MyWidgetState extends State<MyWidget> {
         ),
       ),
       body: CustomScrollView(
-        reverse: reverse,
-        scrollDirection: axis,
+        // This method is available to conveniently determine if an scroll
+        // view is reversed by its AxisDirection.
+        reverse: axisDirectionIsReversed(_axisDirection),
+        // This method is available to conveniently convert an AxisDirection
+        // into its Axis.
+        scrollDirection: axisDirectionToAxis(_axisDirection),
         // Places the leading edge of the center sliver in the middle of the
         // viewport. Changing this value between 0.0 (the default) and 1.0
         // changes the position of the inflection point between GrowthDirections
         // in the viewport when the slivers are laid out.
         anchor: 0.5,
-        center: center,
+        center: _center,
         slivers: <Widget>[
           _getList(isForward: false),
           SliverToBoxAdapter(
             // This sliver will be located at the anchor. The scroll position
             // will progress in either direction from this point.
-            key: center,
+            key: _center,
             child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: Center(child: Text('0', style: TextStyle(fontWeight: FontWeight.bold))),
