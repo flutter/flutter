@@ -194,24 +194,6 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itDoesNotSetEnableGLByDefault() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String enableGLArg = "--impeller-force-gl";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(eq(ctx), shellArgsCaptor.capture(), anyString(), anyString(), anyString(), anyLong());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertFalse(arguments.contains(enableGLArg));
-  }
-
-  @Test
   public void itSetsEnableImpellerFromMetaData() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);

@@ -13,7 +13,7 @@ namespace flutter {
 
 enum class AndroidRenderingAPI {
   kSoftware,
-  kGPU,
+  kOpenGLES,
 };
 
 //------------------------------------------------------------------------------
