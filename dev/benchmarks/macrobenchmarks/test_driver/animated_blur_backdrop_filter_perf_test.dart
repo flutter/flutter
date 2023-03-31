@@ -7,7 +7,7 @@ import 'package:macrobenchmarks/common.dart';
 import 'util.dart';
 
 void main() {
-  macroPerfTestE2E(
+  macroPerfTest(
     'animated_blur_backdrop_filter_perf',
     kAnimatedBlurBackdropFilter,
     pageDelay: const Duration(seconds: 1),
