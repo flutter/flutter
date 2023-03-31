@@ -1216,9 +1216,7 @@ abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecogni
         keysPressedOnDown: keysPressedOnDown,
       );
 
-    if (onDragEnd != null) {
-      invokeCallback<void>('onDragEnd', () => onDragEnd!(endDetails));
-    }
+    invokeCallback<void>('onDragEnd', () => onDragEnd!(endDetails));
 
     _resetTaps();
     _resetDragUpdateThrottle();
