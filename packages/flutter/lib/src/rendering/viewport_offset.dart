@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 /// The direction of a scroll, relative to the positive scroll offset axis given
