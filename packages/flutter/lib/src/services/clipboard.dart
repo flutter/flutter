@@ -56,7 +56,7 @@ abstract final class Clipboard {
     if (result == null) {
       return null;
     }
-    return ClipboardData(text: result['text'] as String);
+    return ClipboardData(text: result['text']! as String);
   }
 
   /// Returns a future that resolves to true iff the clipboard contains string

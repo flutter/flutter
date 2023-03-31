@@ -210,6 +210,11 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get deprecated => false;
 
+  /// When the command runs and this is true, trigger an async process to
+  /// discover devices from discoverers that support wireless devices for an
+  /// extended amount of time and refresh the device cache with the results.
+  bool get refreshWirelessDevices => false;
+
   @override
   bool get hidden => deprecated;
 
@@ -719,6 +724,7 @@ abstract class FlutterCommand extends Command<void> {
   }();
 
   late final TargetDevices _targetDevices = TargetDevices(
+    platform: globals.platform,
     deviceManager: globals.deviceManager!,
     logger: globals.logger,
   );
@@ -816,20 +822,13 @@ abstract class FlutterCommand extends Command<void> {
 
   void addNullSafetyModeOptions({ required bool hide }) {
     argParser.addFlag(FlutterOptions.kNullSafety,
-      help:
-        'Whether to override the inferred null safety mode. This allows null-safe '
-        'libraries to depend on un-migrated (non-null safe) libraries. By default, '
-        'Flutter mobile & desktop applications will attempt to run at the null safety '
-        'level of their entrypoint library (usually lib/main.dart). Flutter web '
-        'applications will default to sound null-safety, unless specifically configured.',
+      help: 'This flag is deprecated as only null-safe code is supported.',
       defaultsTo: true,
-      hide: hide,
+      hide: true,
     );
     argParser.addFlag(FlutterOptions.kNullAssertions,
-      help:
-        'Perform additional null assertions on the boundaries of migrated and '
-        'un-migrated code. This setting is not currently supported on desktop '
-        'devices.'
+      help: 'This flag is deprecated as only null-safe code is supported.',
+      hide: true,
     );
   }
 
@@ -1058,6 +1057,15 @@ abstract class FlutterCommand extends Command<void> {
               'is available but not the default. This flag will cause Impeller '
               'to be used on Android. On other platforms, this flag will be '
               'ignored.',
+    );
+  }
+
+  void addEnableVulkanValidationFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-vulkan-validation',
+        hide: !verboseHelp,
+        help: 'Enable vulkan validation on the Impeller rendering backend if '
+              'Vulkan is in use and the validation layers are available to the '
+              'application.',
     );
   }
 
@@ -1462,7 +1470,25 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+    if (argParser.options.containsKey(FlutterOptions.kNullSafety) &&
+        argResults![FlutterOptions.kNullSafety] == false &&
+        globals.nonNullSafeBuilds == NonNullSafeBuilds.notAllowed) {
+      throwToolExit('''
+Could not find an option named "no-${FlutterOptions.kNullSafety}".
+
+Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.
+''');
+    }
+
     globals.preRunValidator.validate();
+
+    if (refreshWirelessDevices) {
+      // Loading wireless devices takes longer so start it early.
+      _targetDevices.startExtendedWirelessDeviceDiscovery(
+        deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+      );
+    }
+
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
@@ -1653,14 +1679,17 @@ abstract class FlutterCommand extends Command<void> {
 }
 
 /// A mixin which applies an implementation of [requiredArtifacts] that only
-/// downloads artifacts corresponding to an attached device.
+/// downloads artifacts corresponding to potentially connected devices.
 mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    // If there are no attached devices, use the default configuration.
-    // Otherwise, only add development artifacts which correspond to a
-    // connected device.
-    final List<Device> devices = await globals.deviceManager!.getDevices();
+    // If there are no devices, use the default configuration.
+    // Otherwise, only add development artifacts corresponding to
+    // potentially connected devices. We might not be able to determine if a
+    // device is connected yet, so include it in case it becomes connected.
+    final List<Device> devices = await globals.deviceManager!.getDevices(
+      filter: DeviceDiscoveryFilter(excludeDisconnected: false),
+    );
     if (devices.isEmpty) {
       return super.requiredArtifacts;
     }
@@ -1718,3 +1747,12 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
+
+/// Whether the tool should allow non-null safe builds.
+///
+/// The Dart SDK no longer supports non-null safe builds, so this value in the
+/// tool's context should always be [NonNullSafeBuilds.notAllowed].
+enum NonNullSafeBuilds {
+  allowed,
+  notAllowed,
+}

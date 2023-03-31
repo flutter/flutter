@@ -5399,4 +5399,59 @@ void main() {
     );
     expect(count, 1); // The `onSelectionChanged` will not be triggered.
   });
+
+  testWidgets("Off-screen selected text doesn't throw exception", (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/123527
+
+    TextSelection? selection;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 100,
+                      itemBuilder: (BuildContext context, int index) {
+                        return SelectableText(
+                          'I love Flutter! $index',
+                          onSelectionChanged: (TextSelection s, _) {
+                            selection = s;
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Pop'),
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
+    ));
+
+    expect(selection, null);
+
+    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText).first);
+    final TestGesture gesture = await tester.startGesture(selectableTextStart + const Offset(50, 5));
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+
+    expect(selection, isNotNull);
+
+    await tester.drag(find.byType(ListView), const Offset(0.0, -3000.0));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Pop'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
 }

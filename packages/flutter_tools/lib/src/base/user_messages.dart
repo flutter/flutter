@@ -272,7 +272,6 @@ class UserMessages {
   String get flutterFoundButUnsupportedDevices => 'The following devices were found, but are not supported by this project:';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
-  String get flutterMultipleDevicesFound => 'Multiple devices found:';
   String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
   String get flutterChooseOne => 'Please choose one (or "q" to quit)';
   String get flutterSpecifyDeviceWithAllOption =>
