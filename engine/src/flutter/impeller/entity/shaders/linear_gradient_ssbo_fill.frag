@@ -17,15 +17,15 @@ layout(std140) readonly buffer ColorData {
 color_data;
 
 uniform FragInfo {
-  vec2 start_point;
-  vec2 end_point;
+  highp vec2 start_point;
+  highp vec2 end_point;
   float alpha;
   float tile_mode;
   int colors_length;
 }
 frag_info;
 
-in vec2 v_position;
+highp in vec2 v_position;
 
 out vec4 frag_color;
 
