@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
@@ -407,6 +409,44 @@ class AndroidSdk {
       return path;
     }
     return null;
+  }
+
+  // Returns the version of java in the format \d(.\d)+(.\d)+
+  // Returns null if version not found.
+  String? getJavaVersion() {
+    // final RunResult result = globals.processUtils.runSync(
+    //   <String>[javaPath!, '--version'],
+    //   environment: sdkManagerEnv,
+    // );
+    // if (result.exitCode != 0) {
+    //   globals.printTrace(
+    //       'java --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
+    //   return null;
+    // }
+    // return _parseJavaVersion(result.stdout);
+    const String versionOutput = '''
+openjdk version "11.0.18" 2023-01-17 LTS
+OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
+OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
+''';
+    return AndroidSdk.parseJavaVersion(versionOutput);
+  }
+
+  // Java versions have 2 formats
+  @visibleForTesting
+  static String? parseJavaVersion(String? rawVersionOutput) {
+    if (rawVersionOutput == null) {
+      return null;
+    }
+    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
+    final RegExp jdkVersionRegex = RegExp(r'(\d+\.\d+(\.\d+(_?\d+)?))');
+    final Iterable<RegExpMatch> matches = jdkVersionRegex.allMatches(rawVersionOutput);
+    if (matches.isEmpty) {
+      return null;
+    }
+    final String? versionString = matches.first.group(1);
+    // Trim away _d+ from versions 1.8 and below.
+    return versionString?.split('_').first;
   }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.

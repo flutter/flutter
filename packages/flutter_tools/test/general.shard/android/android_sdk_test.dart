@@ -342,6 +342,44 @@ void main() {
       Config: () => config,
     });
   });
+
+  group('java version', () {
+    // Example strings came from actual terminal output.
+    testWithoutContext('parses jdk 8', () {
+      const String exampleJdkOutput = '''
+java version "1.8.0_202"
+Java(TM) SE Runtime Environment (build 1.8.0_202-b10)
+Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '1.8.0');
+    });
+
+    testWithoutContext('parses jdk 11', () {
+      const String exampleJdkOutput = '''
+openjdk version "11.0.18" 2023-01-17 LTS
+OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
+OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.18');
+    });
+    testWithoutContext('parses jdk 17', () {
+      const String exampleJdkOutput = '''
+openjdk 17.0.6 2023-01-17
+OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)
+OpenJDK 64-Bit Server VM (build 17.0.6+0-17.0.6b802.4-9586694, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '17.0.6');
+    });
+
+    testWithoutContext('parses jdk 19', () {
+      const String exampleJdkOutput = '''
+openjdk 19.0.2 2023-01-17
+OpenJDK Runtime Environment Homebrew (build 19.0.2)
+OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0.2');
+    });
+  });
 }
 
 /// A broken SDK installation.
