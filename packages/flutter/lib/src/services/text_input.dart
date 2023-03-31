@@ -1178,11 +1178,13 @@ mixin TextInputClient {
   /// from `DefaultKeyBinding.Dict`.
   void performSelector(String selectorName) {}
 
-  /// Request client to unfocus.
+  /// Requests that the client unfocus.
   ///
-  /// For example, when closes text input from platform (eg: Some third party keyboard can close
-  /// keyboard from native keyboard view), and this method will be called to update the focus state
-  /// in framework.
+  /// For example, when the text input connection is closed from the platform (some keyboards can
+  /// close themselves from within the keyboard UI), then this method will be called to update the
+  /// focus state in the framework.
+  ///
+  /// Different from [connectionClosed], this method should simply unfocus without finalize editing.
   void unfocus() {}
 }
 

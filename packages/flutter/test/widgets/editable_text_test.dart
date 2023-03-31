@@ -113,6 +113,8 @@ void main() {
 
   testWidgets('Can unfoucs correctly', (WidgetTester tester) async {
       final FocusNode node = FocusNode();
+      bool onEditingCompleteCalled = false;
+      bool onSubmittedCalled = false;
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
@@ -125,6 +127,12 @@ void main() {
                 backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: node,
+                onSubmitted: (String text) {
+                  onSubmittedCalled = true;
+                },
+                onEditingComplete: () {
+                  onEditingCompleteCalled = true;
+                },
                 style: textStyle,
                 cursorColor: cursorColor,
               ),
@@ -136,6 +144,8 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       state.unfocus();
       await tester.pump();
+      expect(onEditingCompleteCalled, isTrue);
+      expect(onSubmittedCalled, isFalse);
       expect(node.hasFocus, isFalse);
     },
   );
