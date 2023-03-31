@@ -206,14 +206,6 @@ enum AxisDirection {
   /// For example, the behavior of a [ListView] with [ListView.reverse] set to
   /// true would have this axis direction.
   ///
-  /// {@tool dartpad}
-  /// This sample shows a [CustomScrollView], with [Axis.vertical],
-  /// [AxisDirection.up], and [GrowthDirection.forward], with the alphabet
-  /// progressing in the positive scroll offset as described above.
-  ///
-  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction_up.0.dart **
-  /// {@end-tool}
-  ///
   /// See also:
   ///
   ///   * [axisDirectionIsReversed], which returns whether traveling along the
@@ -230,14 +222,6 @@ enum AxisDirection {
   ///
   /// For example, the behavior of a [ListView] with [ListView.scrollDirection]
   /// set to [Axis.horizontal] would have this axis direction.
-  ///
-  /// {@tool dartpad}
-  /// This sample shows a [CustomScrollView], with [Axis.horizontal],
-  /// [AxisDirection.right], and [GrowthDirection.forward], with the alphabet
-  /// progressing in the positive scroll offset as described above.
-  ///
-  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction_right.0.dart **
-  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -256,14 +240,6 @@ enum AxisDirection {
   /// For example, the default behavior of a [ListView] would have this axis
   /// direction.
   ///
-  /// {@tool dartpad}
-  /// This sample shows a [CustomScrollView], with [Axis.vertical],
-  /// [AxisDirection.down], and [GrowthDirection.forward], with the alphabet
-  /// progressing in the positive scroll offset as described above.
-  ///
-  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction_down.0.dart **
-  /// {@end-tool}
-  ///
   /// See also:
   ///
   ///   * [axisDirectionIsReversed], which returns whether traveling along the
@@ -281,14 +257,6 @@ enum AxisDirection {
   /// For example, the behavior of a [ListView] with [ListView.scrollDirection]
   /// set to [Axis.horizontal] and [ListView.reverse] set to true would have
   /// this axis direction.
-  ///
-  /// {@tool dartpad}
-  /// This sample shows a [CustomScrollView], with [Axis.horizontal],
-  /// [AxisDirection.left], and [GrowthDirection.forward], with the alphabet
-  /// progressing in the positive scroll offset as described above.
-  ///
-  /// ** See code in examples/api/lib/painting/axis_direction/axis_direction_left.0.dart **
-  /// {@end-tool}
   ///
   /// See also:
   ///

@@ -29,8 +29,8 @@ import 'viewport_offset.dart';
 ///
 /// {@template flutter.rendering.GrowthDirection.sample}
 /// Most scroll views by default are ordered [GrowthDirection.forward].
-/// Changing the default values of [CustomScrollView.anchor],
-/// [CustomScrollView.center], or both, can configure a scroll view for
+/// Changing the default values of [ScrollView.anchor],
+/// [ScrollView.center], or both, can configure a scroll view for
 /// [GrowthDirection.reverse].
 ///
 /// {@tool dartpad}
