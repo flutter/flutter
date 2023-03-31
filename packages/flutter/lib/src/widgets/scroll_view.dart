@@ -311,7 +311,22 @@ abstract class ScrollView extends StatelessWidget {
   /// [AxisDirection.right], then the zero scroll offset is on the left edge of
   /// the viewport.
   ///
-  /// {@macro flutter.rendering.GrowthDirection.sample}
+  /// Most scroll views by default are ordered [GrowthDirection.forward].
+  /// Changing the default values of [ScrollView.anchor],
+  /// [ScrollView.center], or both, can configure a scroll view for
+  /// [GrowthDirection.reverse].
+  ///
+  /// {@tool dartpad}
+  /// This sample shows a [CustomScrollView], with [Radio] buttons in the
+  /// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+  /// configurations. The [CustomScrollView.anchor] and [CustomScrollView.center]
+  /// properties are also set to have the 0 scroll offset positioned in the middle
+  /// of the viewport, with [GrowthDirection.forward] and [GrowthDirection.reverse]
+  /// illustrated on either side. The sliver that shares the
+  /// [CustomScrollView.center] key is positioned at the [CustomScrollView.anchor].
+  ///
+  /// ** See code in examples/api/lib/rendering/growth_direction/growth_direction.0.dart **
+  /// {@end-tool}
   /// {@endtemplate}
   final double anchor;
 

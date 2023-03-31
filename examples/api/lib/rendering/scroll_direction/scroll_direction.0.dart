@@ -44,26 +44,27 @@ class _MyWidgetState extends State<MyWidget> {
     switch(_axisDirection) {
       case AxisDirection.up:
         arrow = const Icon(Icons.arrow_upward_rounded);
-      case AxisDirection.down:
-        arrow = const Icon(Icons.arrow_downward_rounded);
-      case AxisDirection.left:
-        arrow = const Icon(Icons.arrow_back_rounded);
-      case AxisDirection.right:
-        arrow = const Icon(Icons.arrow_forward_rounded);
-    }
-
-    switch(_axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.down:
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ]
+          children: <Widget>[ arrow, arrow ],
+        );
+      case AxisDirection.down:
+        arrow = const Icon(Icons.arrow_downward_rounded);
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[ arrow, arrow ],
         );
       case AxisDirection.left:
-      case AxisDirection.right:
+        arrow = const Icon(Icons.arrow_back_rounded);
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ]
+          children: <Widget>[ arrow, arrow ],
+        );
+      case AxisDirection.right:
+        arrow = const Icon(Icons.arrow_forward_rounded);
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[ arrow, arrow ],
         );
     }
   }
