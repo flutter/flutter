@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/rendering/growth_direction/growth_direction.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Example app has GRowthDirections represented', (WidgetTester tester) async {
+  testWidgets('Example app has GrowthDirections represented', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ExampleApp(),
     );

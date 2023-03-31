@@ -39,9 +39,9 @@ class _MyWidgetState extends State<MyWidget> {
   final UniqueKey _center = UniqueKey();
   AxisDirection _axisDirection = AxisDirection.down;
 
-  Widget _getArrows() {
+  Widget _getArrows(AxisDirection axisDirection) {
     final Widget arrow;
-    switch(_axisDirection) {
+    switch(axisDirection) {
       case AxisDirection.up:
         arrow = const Icon(Icons.arrow_upward_rounded);
         return Row(
@@ -91,7 +91,12 @@ class _MyWidgetState extends State<MyWidget> {
           _spacer,
           Text(constraints.growthDirection.toString()),
           _spacer,
-          _getArrows(),
+          _getArrows(isForward
+            ? _axisDirection
+            // This method is available to conveniently flip an AxisDirection
+            // into its opposite direction.
+            : flipAxisDirection(_axisDirection),
+          ),
         ],
       ),
     );
