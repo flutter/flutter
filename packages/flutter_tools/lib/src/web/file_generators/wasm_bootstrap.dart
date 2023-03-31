@@ -36,11 +36,12 @@ String generateImports(bool isSkwasm) {
     return r'''
     const imports = new Promise((resolve, reject) => {
       const skwasmScript = document.createElement('script');
-      skwasmScript.src = 'skwasm/skwasm.js';
+      skwasmScript.src = 'canvaskit/skwasm.js';
 
       document.body.appendChild(skwasmScript);
       skwasmScript.addEventListener('load', async () => {
         const skwasmInstance = await skwasm();
+        window._flutter_skwasmInstance = skwasmInstance;
         resolve({
           "skwasm": skwasmInstance.asm,
           "ffi": {

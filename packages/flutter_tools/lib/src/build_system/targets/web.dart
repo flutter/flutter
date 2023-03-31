@@ -527,14 +527,6 @@ class WebBuiltInAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/52588
-    //
-    // Update this when we start building CanvasKit from sources. In the
-    // meantime, get the Web SDK directory from cache rather than through
-    // Artifacts. The latter is sensitive to `--local-engine`, which changes
-    // the directory to point to ENGINE/src/out. However, CanvasKit is not yet
-    // built as part of the engine, but fetched from CIPD, and so it won't be
-    // found in ENGINE/src/out.
     final Directory canvasKitDirectory = globals.fs.directory(
       globals.artifacts!.getArtifactPath(
         Artifact.canvasKitPath,
@@ -550,7 +542,7 @@ class WebBuiltInAssets extends Target {
       }
     } else if (webRenderer == WebRendererMode.skwasm) {
       final String skwasmSrcDirectory = canvasKitDirectory.path;
-      final String skwasmOutDirectory = fileSystem.path.join(environment.outputDir.path, 'skwasm');
+      final String skwasmOutDirectory = fileSystem.path.join(environment.outputDir.path, 'canvaskit');
       for (final String fileName in <String>['skwasm.wasm', 'skwasm.js', 'skwasm.worker.js']) {
         final File srcFile = fileSystem.file(fileSystem.path.join(skwasmSrcDirectory, fileName));
         final String targetPath = fileSystem.path.join(skwasmOutDirectory, fileName);
