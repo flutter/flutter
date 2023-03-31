@@ -173,23 +173,6 @@
                 "language": "python3"
             },
             {
-                "name": "release-nobitcode-FlutterMacOS.framework",
-                "parameters": [
-                    "--dst",
-                    "out/release-nobitcode",
-                    "--arm64-out-dir",
-                    "out/ios_release",
-                    "--simulator-x64-out-dir",
-                    "out/ios_debug_sim",
-                    "--simulator-arm64-out-dir",
-                    "out/ios_debug_sim_arm64",
-                    "--dsym",
-                    "--strip"
-                ],
-                "script": "flutter/sky/tools/create_full_ios_framework.py",
-                "language": "python3"
-            },
-            {
                 "name": "Release-macos-gen-snapshots",
                 "parameters": [
                     "--dst",
@@ -222,14 +205,6 @@
         {
             "source": "out/release/Flutter.dSYM.zip",
             "destination": "ios-release/Flutter.dSYM.zip"
-        },
-        {
-            "source": "out/release-nobitcode/artifacts.zip",
-            "destination": "ios-release-nobitcode/artifacts.zip"
-        },
-        {
-            "source": "out/release-nobitcode/Flutter.dSYM.zip",
-            "destination": "ios-release-nobitcode/Flutter.dSYM.zip"
         }
     ]
 }
