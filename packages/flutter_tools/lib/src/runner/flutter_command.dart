@@ -1060,6 +1060,25 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableVulkanValidationFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-vulkan-validation',
+        hide: !verboseHelp,
+        help: 'Enable vulkan validation on the Impeller rendering backend if '
+              'Vulkan is in use and the validation layers are available to the '
+              'application.',
+    );
+  }
+
+  void addImpellerForceGLFlag({required bool verboseHelp}) {
+    argParser.addFlag('impeller-force-gl',
+        hide: !verboseHelp,
+        help: 'On platforms that support OpenGL Rendering using Impeller, force '
+              'rendering using OpenGL over other APIs. If Impeller is not '
+              'enabled or the platform does not support OpenGL ES, this flag '
+              'does nothing.',
+    );
+  }
+
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-embedder-api',
         hide: !verboseHelp,
