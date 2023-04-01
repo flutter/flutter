@@ -7,7 +7,9 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../integration.shard/test_utils.dart';
@@ -347,14 +349,14 @@ void main() {
   });
 
   group('java version', () {
-    // Example strings came from actual terminal output.
-    testWithoutContext('parses jdk 8', () {
-      const String exampleJdkOutput = '''
+    const String exampleJdk8Output = '''
 java version "1.8.0_202"
 Java(TM) SE Runtime Environment (build 1.8.0_202-b10)
 Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
 ''';
-      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '1.8.0');
+    // Example strings came from actual terminal output.
+    testWithoutContext('parses jdk 8', () {
+      expect(AndroidSdk.parseJavaVersion(exampleJdk8Output), '1.8.0');
     });
 
     testWithoutContext('parses jdk 11', () {
@@ -397,6 +399,44 @@ OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
       final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
 
       expect(javaPath, expectedJavaPath);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Config: () => config,
+      Platform: () => FakePlatform(environment: <String, String>{}),
+    });
+
+    testUsingContext('getJavaVersion finds AS java and parses version', () {
+      final AndroidStudio androidStudio = FakeAndroidStudio();
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
+
+      final ProcessUtils processUtils = ProcessUtils(
+          processManager: processManager, logger: BufferLogger.test());
+      // Built from the implementation of findJavaBinary android studio case.
+      final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          expectedJavaPath,
+          '--version',
+        ],
+        stdout: exampleJdk8Output,
+      ));
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+
+      final String? javaVersion = AndroidSdk.getJavaVersion(
+          androidStudio: androidStudio,
+          fileSystem: fileSystem,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          platform: FakePlatform(),
+          sdkManagerEnv: sdk.sdkManagerEnv,
+          processUtils: processUtils,
+          );
+
+
+      expect(javaVersion, '1.8.0');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,

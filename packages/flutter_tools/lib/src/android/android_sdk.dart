@@ -413,17 +413,29 @@ class AndroidSdk {
 
   // Returns the version of java in the format \d(.\d)+(.\d)+
   // Returns null if version not found.
-  String? getJavaVersion(ProcessUtils processUtils) {
+  static String? getJavaVersion({
+    // TODO get these values from the object and revert making the method static.
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessUtils processUtils,
+    required Map<String, String>? sdkManagerEnv,
+  }) {
+    if (sdkManagerEnv == null) {
+      return null;
+    }
+    final String? javaBinary = findJavaBinary(
+      androidStudio: androidStudio,
+      fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: platform,
+    );
+    if (javaBinary == null) {
+      return null;
+    }
     final RunResult result = processUtils.runSync(
-      <String>[
-        findJavaBinary(
-          androidStudio: globals.androidStudio,
-          fileSystem: globals.localFileSystem,
-          operatingSystemUtils: globals.os,
-          platform: globals.platform,
-        )!,
-        '--version'
-      ],
+      <String>[javaBinary, '--version'],
       environment: sdkManagerEnv,
     );
     if (result.exitCode != 0) {
@@ -448,7 +460,8 @@ class AndroidSdk {
     }
     // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
     final RegExp jdkVersionRegex = RegExp(r'(\d+\.\d+(\.\d+(_?\d+)?))');
-    final Iterable<RegExpMatch> matches = jdkVersionRegex.allMatches(rawVersionOutput);
+    final Iterable<RegExpMatch> matches =
+        jdkVersionRegex.allMatches(rawVersionOutput);
     if (matches.isEmpty) {
       return null;
     }

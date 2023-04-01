@@ -7,6 +7,7 @@ import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/convert.dart';
+import 'android/android_sdk.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
@@ -542,18 +543,19 @@ class AndroidProject extends FlutterProjectPlatform {
   /// the projects gradle version is compatible with the AGP version used
   /// in build.gradle.
   Future<bool> hasValidJavaGradleAgpVersions() async {
-    String? localGradleVersion = await gradle.getGradleVersion(
+    String? gradleVersion = await gradle.getGradleVersion(
         hostAppGradleRoot, globals.logger, globals.processManager);
-    String? localAgpVersion =
+    String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
+    String? javaVersion = AndroidSdk.
 
     // TODO Begin Android Studio <-> AGP Validation.
     // https://developer.android.com/studio/releases/gradle-plugin#android_gradle_plugin_and_android_studio_compatibility
 
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(
         globals.logger,
-        gradleV: localGradleVersion,
-        agpV: localAgpVersion);
+        gradleV: gradleVersion,
+        agpV: agpVersion);
 
     final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: localGradleVersion);
 
