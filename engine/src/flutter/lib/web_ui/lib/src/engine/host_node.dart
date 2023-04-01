@@ -94,8 +94,6 @@ abstract class HostNode {
   /// See:
   /// * [Document.querySelectorAll](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll)
   Iterable<DomElement> querySelectorAll(String selectors);
-
-  DomElement get renderHost;
 }
 
 /// A [HostNode] implementation, backed by a [DomShadowRoot].
@@ -112,10 +110,11 @@ class ShadowDomHostNode implements HostNode {
   /// This also calls [applyGlobalCssRulesToSheet], with the [defaultFont]
   /// to be used as the default font definition.
   ShadowDomHostNode(DomElement root, String defaultFont)
-      : assert(root.isConnected ?? true,
-            'The `root` of a ShadowDomHostNode must be connected to the Document object or a ShadowRoot.') {
-    root.appendChild(renderHost);
-    _shadow = renderHost.attachShadow(<String, dynamic>{
+      : assert(
+          root.isConnected ?? true,
+          'The `root` of a ShadowDomHostNode must be connected to the Document object or a ShadowRoot.'
+        ) {
+    _shadow = root.attachShadow(<String, dynamic>{
       'mode': 'open',
       // This needs to stay false to prevent issues like this:
       // - https://github.com/flutter/flutter/issues/85759
@@ -135,9 +134,6 @@ class ShadowDomHostNode implements HostNode {
   }
 
   late DomShadowRoot _shadow;
-
-  @override
-  final DomElement renderHost = domDocument.createElement('flt-render-host');
 
   @override
   DomElement? get activeElement => _shadow.activeElement;
@@ -194,9 +190,6 @@ class ElementHostNode implements HostNode {
   }
 
   late DomElement _element;
-
-  @override
-  final DomElement renderHost = domDocument.createElement('flt-render-host');
 
   @override
   DomElement? get activeElement => _element.ownerDocument?.activeElement;
