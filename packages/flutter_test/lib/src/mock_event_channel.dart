@@ -9,6 +9,16 @@ import 'package:flutter/services.dart';
 /// A mock stream handler for an [EventChannel] that mimics the native
 /// StreamHandler API.
 abstract class MockStreamHandler {
+  /// Create a new [MockStreamHandler].
+  MockStreamHandler();
+
+  /// Create a new [InlineMockStreamHandler] with the given [onListen] and
+  /// [onCancel] handlers.
+  factory MockStreamHandler.inline({
+    required MockStreamHandlerOnListenCallback onListen,
+    MockStreamHandlerOnCancelCallback? onCancel,
+  }) => InlineMockStreamHandler._(onListen: onListen, onCancel: onCancel);
+
   /// Handler for the listen event.
   void onListen(Object? arguments, MockStreamHandlerEventSink events);
 
@@ -24,9 +34,7 @@ typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
 
 /// Convenience class for creating a [MockStreamHandler] inline.
 class InlineMockStreamHandler extends MockStreamHandler {
-  /// Create a new [InlineMockStreamHandler] with the given [onListen] and
-  /// [onCancel] handlers.
-  InlineMockStreamHandler({
+  InlineMockStreamHandler._({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
   })  : _onListenInline = onListen,
@@ -45,8 +53,8 @@ class InlineMockStreamHandler extends MockStreamHandler {
 /// A mock event sink for a [MockStreamHandler] that mimics the native
 /// EventSink API.
 class MockStreamHandlerEventSink {
-  /// Create a new [MockStreamHandlerEventSink] with the given [_sink].
-  MockStreamHandlerEventSink(this._sink);
+  /// Create a new [MockStreamHandlerEventSink] with the given [sink].
+  MockStreamHandlerEventSink(EventSink<Object?> sink) : _sink = sink;
 
   final EventSink<Object?> _sink;
 
