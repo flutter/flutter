@@ -107,12 +107,12 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
 
     FS::FragInfo frag_info;
     frag_info.radius = std::round(transformed_radius.GetLength());
-    frag_info.direction = input_snapshot->transform.Invert()
-                              .TransformDirection(transformed_radius)
-                              .Normalize();
-    frag_info.texture_size =
-        Point(transformed_texture_width, transformed_texture_height);
     frag_info.morph_type = static_cast<Scalar>(morph_type_);
+    frag_info.uv_offset =
+        input_snapshot->transform.Invert()
+            .TransformDirection(transformed_radius)
+            .Normalize() /
+        Point(transformed_texture_width, transformed_texture_height);
 
     Command cmd;
     cmd.label = "Morphology Filter";
@@ -121,10 +121,16 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     cmd.pipeline = renderer.GetMorphologyFilterPipeline(options);
     cmd.BindVertices(vtx_buffer);
 
+    auto sampler_descriptor = input_snapshot->sampler_descriptor;
+    if (renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+      sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
+      sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
+    }
+
     FS::BindTextureSampler(
         cmd, input_snapshot->texture,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            input_snapshot->sampler_descriptor));
+            sampler_descriptor));
     VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
 
