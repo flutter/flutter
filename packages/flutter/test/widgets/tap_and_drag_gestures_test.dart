@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -548,5 +549,43 @@ void main() {
     tester.route(up2);
     GestureBinding.instance.gestureArena.sweep(2);
     expect(events, <String>['down#1', 'up#1']);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/102084.
+  testGesture('Does not call onDragEnd if not provided', (GestureTester tester) {
+    tapAndDrag = TapAndDragGestureRecognizer()
+      ..dragStartBehavior = DragStartBehavior.down
+      ..maxConsecutiveTap = 3
+      ..onTapDown = (TapDragDownDetails details) {
+        events.add('down#${details.consecutiveTapCount}');
+      };
+
+    FlutterErrorDetails? errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails = details;
+    };
+    addTearDown(() {
+      FlutterError.onError = oldHandler;
+    });
+
+    tapAndDrag.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    tester.route(move5);
+    tester.route(up5);
+    GestureBinding.instance.gestureArena.sweep(5);
+    expect(events, <String>['down#1']);
+
+    expect(errorDetails, isNull);
+
+    events.clear();
+    tester.async.elapse(const Duration(milliseconds: 1000));
+    tapAndDrag.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(events, <String>['down#1']);
   });
 }

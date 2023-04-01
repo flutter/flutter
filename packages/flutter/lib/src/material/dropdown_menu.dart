@@ -19,6 +19,7 @@ import 'menu_anchor.dart';
 import 'menu_style.dart';
 import 'text_field.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 
 // Navigation shortcuts to move the selected menu items up or down.
@@ -535,10 +536,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             );
 
             return _DropdownMenuBody(
-              key: _anchorKey,
               width: widget.width,
               children: <Widget>[
                 TextField(
+                  key: _anchorKey,
                   mouseCursor: effectiveMouseCursor,
                   canRequestFocus: canRequestFocus(),
                   enableInteractiveSelection: canRequestFocus(),
@@ -607,7 +608,6 @@ class _ArrowDownIntent extends Intent {
 
 class _DropdownMenuBody extends MultiChildRenderObjectWidget {
   const _DropdownMenuBody({
-    super.key,
     super.children,
     this.width,
   });
@@ -826,6 +826,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
     return const MenuStyle(
       minimumSize: MaterialStatePropertyAll<Size>(Size(_kMinimumWidth, 0.0)),
       maximumSize: MaterialStatePropertyAll<Size>(Size.infinite),
+      visualDensity: VisualDensity.standard,
     );
   }
 
