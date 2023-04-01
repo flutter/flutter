@@ -124,9 +124,6 @@ class FlutterViewEmbedder {
   HostNode get glassPaneShadow => _glassPaneShadow;
   late HostNode _glassPaneShadow;
 
-  DomElement get textEditingHostNode => _textEditingHostNode;
-  late DomElement _textEditingHostNode;
-
   static const String defaultFontStyle = 'normal';
   static const String defaultFontWeight = 'normal';
   static const double defaultFontSize = 14;
@@ -171,9 +168,6 @@ class FlutterViewEmbedder {
     );
     _glassPaneShadow = glassPaneElementHostNode;
 
-    _textEditingHostNode =
-        createTextEditingHostNode(glassPaneElement, defaultCssFont);
-
     // Don't allow the scene to receive pointer events.
     _sceneHostElement = domDocument.createElement('flt-scene-host')
       ..style.pointerEvents = 'none';
@@ -195,19 +189,19 @@ class FlutterViewEmbedder {
     glassPaneElementHostNode.appendAll(<DomNode>[
       accessibilityPlaceholder,
       _sceneHostElement!,
-    ]);
 
-    // The semantic host goes last because hit-test order-wise it must be
-    // first. If semantics goes under the scene host, platform views will
-    // obscure semantic elements.
-    //
-    // You may be wondering: wouldn't semantics obscure platform views and
-    // make then not accessible? At least with some careful planning, that
-    // should not be the case. The semantics tree makes all of its non-leaf
-    // elements transparent. This way, if a platform view appears among other
-    // interactive Flutter widgets, as long as those widgets do not intersect
-    // with the platform view, the platform view will be reachable.
-    glassPaneElement.appendChild(semanticsHostElement);
+      // The semantic host goes last because hit-test order-wise it must be
+      // first. If semantics goes under the scene host, platform views will
+      // obscure semantic elements.
+      //
+      // You may be wondering: wouldn't semantics obscure platform views and
+      // make then not accessible? At least with some careful planning, that
+      // should not be the case. The semantics tree makes all of its non-leaf
+      // elements transparent. This way, if a platform view appears among other
+      // interactive Flutter widgets, as long as those widgets do not intersect
+      // with the platform view, the platform view will be reachable.
+      semanticsHostElement,
+    ]);
 
     // When debugging semantics, make the scene semi-transparent so that the
     // semantics tree is more prominent.
@@ -399,24 +393,3 @@ FlutterViewEmbedder? _flutterViewEmbedder;
 FlutterViewEmbedder ensureFlutterViewEmbedderInitialized() =>
     _flutterViewEmbedder ??=
         FlutterViewEmbedder(hostElement: configuration.hostElement);
-
-/// Creates a node to host text editing elements and applies a stylesheet
-/// to Flutter nodes that exist outside of the shadowDOM.
-DomElement createTextEditingHostNode(DomElement root, String defaultFont) {
-  final DomElement domElement =
-      domDocument.createElement('flt-text-editing-host');
-  final DomHTMLStyleElement styleElement = createDomHTMLStyleElement();
-
-  styleElement.id = 'flt-text-editing-stylesheet';
-  root.appendChild(styleElement);
-  applyGlobalCssRulesToSheet(
-    styleElement.sheet! as DomCSSStyleSheet,
-    hasAutofillOverlay: browserHasAutofillOverlay(),
-    cssSelectorPrefix: FlutterViewEmbedder.glassPaneTagName,
-    defaultCssFont: defaultFont,
-  );
-
-  root.appendChild(domElement);
-
-  return domElement;
-}

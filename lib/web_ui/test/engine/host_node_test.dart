@@ -16,20 +16,19 @@ void testMain() {
 
   group('ShadowDomHostNode', () {
     final HostNode hostNode = ShadowDomHostNode(rootNode, '14px monospace');
-    final DomElement renderHost = domDocument.querySelector('flt-render-host')!;
 
     test('Initializes and attaches a shadow root', () {
       expect(domInstanceOfString(hostNode.node, 'ShadowRoot'), isTrue);
-      expect((hostNode.node as DomShadowRoot).host, renderHost);
-      expect(hostNode.node, renderHost.shadowRoot);
+      expect((hostNode.node as DomShadowRoot).host, rootNode);
+      expect(hostNode.node, rootNode.shadowRoot);
 
       // The shadow root should be initialized with correct parameters.
-      expect(renderHost.shadowRoot!.mode, 'open');
+      expect(rootNode.shadowRoot!.mode, 'open');
       if (browserEngine != BrowserEngine.firefox &&
           browserEngine != BrowserEngine.webkit) {
         // Older versions of Safari and Firefox don't support this flag yet.
         // See: https://caniuse.com/mdn-api_shadowroot_delegatesfocus
-        expect(renderHost.shadowRoot!.delegatesFocus, isFalse);
+        expect(rootNode.shadowRoot!.delegatesFocus, isFalse);
       }
     });
 
