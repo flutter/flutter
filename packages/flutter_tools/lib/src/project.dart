@@ -542,10 +542,6 @@ class AndroidProject extends FlutterProjectPlatform {
   /// the projects gradle version is compatible with the AGP version used
   /// in build.gradle.
   Future<bool> hasValidJavaGradleAgpVersions() async {
-    const String javaVersion = '11';
-    const String gradleVersion = '6.7.1';
-    const String agpVersion = '4.2.0';
-
     String? localGradleVersion = await gradle.getGradleVersion(
         hostAppGradleRoot, globals.logger, globals.processManager);
     String? localAgpVersion =
