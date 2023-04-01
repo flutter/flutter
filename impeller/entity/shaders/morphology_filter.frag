@@ -8,29 +8,35 @@
 
 // These values must correspond to the order of the items in the
 // 'FilterContents::MorphType' enum class.
-const float kMorphTypeDilate = 0;
-const float kMorphTypeErode = 1;
+const float16_t kMorphTypeDilate = 0.0hf;
+const float16_t kMorphTypeErode = 1.0hf;
 
-uniform sampler2D texture_sampler;
+uniform f16sampler2D texture_sampler;
 
 uniform FragInfo {
-  vec2 texture_size;
-  vec2 direction;
-  float radius;
-  float morph_type;
+  f16vec2 uv_offset;
+  float16_t radius;
+  float16_t morph_type;
 }
 frag_info;
 
-in vec2 v_texture_coords;
-out vec4 frag_color;
+in highp vec2 v_texture_coords;
+
+out f16vec4 frag_color;
 
 void main() {
-  vec4 result = frag_info.morph_type == kMorphTypeDilate ? vec4(0) : vec4(1);
-  vec2 uv_offset = frag_info.direction / frag_info.texture_size;
-  for (float i = -frag_info.radius; i <= frag_info.radius; i++) {
-    vec2 texture_coords = v_texture_coords + uv_offset * i;
-    vec4 color;
-    color = IPSampleDecal(texture_sampler, texture_coords);
+  f16vec4 result =
+      frag_info.morph_type == kMorphTypeDilate ? f16vec4(0.0) : f16vec4(1.0);
+  for (float16_t i = -frag_info.radius; i <= frag_info.radius; i++) {
+    vec2 texture_coords = v_texture_coords + frag_info.uv_offset * i;
+
+// gles 2.0 is the only backend without native decal support.
+#ifdef IMPELLER_TARGET_OPENGLES
+    f16vec4 color = IPHalfSampleDecal(texture_sampler, texture_coords);
+#else
+    f16vec4 color = texture(texture_sampler, texture_coords);
+#endif
+
     if (frag_info.morph_type == kMorphTypeDilate) {
       result = max(color, result);
     } else {
