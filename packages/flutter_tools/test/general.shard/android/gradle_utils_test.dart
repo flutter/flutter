@@ -324,7 +324,7 @@ allprojects {
       );
     });
 
-    testWithoutContext('validates gradle/agp versions', () async {
+    group('validates gradle/agp versions', () {
       final List<GradleAgpTestData> testData = <GradleAgpTestData>[
         // Values too new *these need to update* when
         // max known gradle and max known agp versions are updated:
@@ -392,21 +392,22 @@ allprojects {
         GradleAgpTestData(true, agpVersion: '3.3.0', gradleVersion: '5.1.1'),
       ];
       for (final GradleAgpTestData data in testData) {
-        expect(
-          validateGradleAndAgp(
-            BufferLogger.test(),
-            gradleV: data.gradleVersion,
-            agpV: data.agpVersion,
-          ),
-          data.validPair ? isTrue : isFalse,
-          reason: 'G: ${data.gradleVersion}, AGP: ${data.agpVersion}'
-        );
+        test("(gradle, agp): (${data.gradleVersion}, ${data.agpVersion})", () {
+          expect(
+              validateGradleAndAgp(
+                BufferLogger.test(),
+                gradleV: data.gradleVersion,
+                agpV: data.agpVersion,
+              ),
+              data.validPair ? isTrue : isFalse,
+              reason: 'G: ${data.gradleVersion}, AGP: ${data.agpVersion}');
+        });
       }
     });
 
     // TODO add test for _isWithinVersionRange inclusive min and max
 
-    testWithoutContext('validates gradle/agp versions', () async {
+    group('validates java/gradle versions', () {
       final List<JavaGradleTestData> testData = <JavaGradleTestData>[
         // Values too new *these need to update* when
         // max supported java and max known gradle versions are updated:
@@ -442,6 +443,17 @@ allprojects {
         JavaGradleTestData(false, javaVersion: '11', gradleVersion: null),
         // ignore: avoid_redundant_argument_values
         JavaGradleTestData(false, javaVersion: null, gradleVersion: null),
+        // Middle Java cases:
+        // https://www.java.com/releases/
+        // JavaGradleTestData(true, javaVersion: '19.0.2', gradleVersion: '8.0'),
+        // JavaGradleTestData(true, javaVersion: '18.0.2', gradleVersion: '8.0'),
+        // JavaGradleTestData(true, javaVersion: '17.0.3', gradleVersion: '7.5'),
+        // JavaGradleTestData(true, javaVersion: '16.0.1', gradleVersion: '7.3'),
+        // JavaGradleTestData(true, javaVersion: '15.0.2', gradleVersion: '7.3'),
+        // JavaGradleTestData(true, javaVersion: '14.0.1', gradleVersion: '7.0'),
+        // JavaGradleTestData(true, javaVersion: '13.0.2', gradleVersion: '6.7'),
+        // JavaGradleTestData(true, javaVersion: '12.0.2', gradleVersion: '6.3'),
+        // JavaGradleTestData(true, javaVersion: '11.0.18', gradleVersion: '6.0'),
         //Higher gradle cases:
         JavaGradleTestData(true, javaVersion: '19', gradleVersion: '8.0'),
         JavaGradleTestData(true, javaVersion: '18', gradleVersion: '8.0'),
@@ -456,16 +468,18 @@ allprojects {
         JavaGradleTestData(true, javaVersion: '1.9', gradleVersion: '5.0'),
         JavaGradleTestData(true, javaVersion: '1.8', gradleVersion: '4.3'),
       ];
+
       for (final JavaGradleTestData data in testData) {
-        expect(
-          validateJavaGradle(
-            BufferLogger.test(),
-            javaV: data.javaVersion,
-            gradleV: data.gradleVersion,
-          ),
-          data.validPair ? isTrue : isFalse,
-          reason: 'J: ${data.javaVersion}, G: ${data.gradleVersion}'
-        );
+        testWithoutContext('(Java, gradle): (${data.javaVersion}, ${data.gradleVersion})', () {
+          expect(
+              validateJavaGradle(
+                BufferLogger.test(),
+                javaV: data.javaVersion,
+                gradleV: data.gradleVersion,
+              ),
+              data.validPair ? isTrue : isFalse,
+              reason: 'J: ${data.javaVersion}, G: ${data.gradleVersion}');
+        });
       }
     });
   });
