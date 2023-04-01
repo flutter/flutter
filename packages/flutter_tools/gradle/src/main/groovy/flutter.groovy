@@ -62,6 +62,19 @@ class FlutterExtension {
     String target
 }
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        /** When bumping, also update ndkVersion above, as well as the Android Gradle Plugin
+         * version in ../lib/src/android/gradle_utils.dart.
+         */
+        classpath 'com.android.tools.build:gradle:7.3.0'
+    }
+}
+
 /**
  * Some apps don't set default compile options.
  * Apps can change these values in android/app/build.gradle.
