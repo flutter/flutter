@@ -82,12 +82,12 @@ class TrackedObjectsVK {
 };
 
 CommandEncoderVK::CommandEncoderVK(vk::Device device,
-                                   vk::Queue queue,
+                                   const std::shared_ptr<QueueVK>& queue,
                                    const std::shared_ptr<CommandPoolVK>& pool,
                                    std::shared_ptr<FenceWaiterVK> fence_waiter)
     : fence_waiter_(std::move(fence_waiter)),
       tracked_objects_(std::make_shared<TrackedObjectsVK>(device, pool)) {
-  if (!fence_waiter_ || !tracked_objects_->IsValid()) {
+  if (!fence_waiter_ || !tracked_objects_->IsValid() || !queue) {
     return;
   }
   vk::CommandBufferBeginInfo begin_info;
@@ -131,7 +131,7 @@ bool CommandEncoderVK::Submit() {
   vk::SubmitInfo submit_info;
   std::vector<vk::CommandBuffer> buffers = {command_buffer};
   submit_info.setCommandBuffers(buffers);
-  if (queue_.submit(submit_info, *fence) != vk::Result::eSuccess) {
+  if (queue_->Submit(submit_info, *fence) != vk::Result::eSuccess) {
     return false;
   }
 
@@ -207,9 +207,6 @@ void CommandEncoderVK::PushDebugGroup(const char* label) const {
   if (auto command_buffer = GetCommandBuffer()) {
     command_buffer.beginDebugUtilsLabelEXT(label_info);
   }
-  if (queue_) {
-    queue_.beginDebugUtilsLabelEXT(label_info);
-  }
 }
 
 void CommandEncoderVK::PopDebugGroup() const {
@@ -218,9 +215,6 @@ void CommandEncoderVK::PopDebugGroup() const {
   }
   if (auto command_buffer = GetCommandBuffer()) {
     command_buffer.endDebugUtilsLabelEXT();
-  }
-  if (queue_) {
-    queue_.endDebugUtilsLabelEXT();
   }
 }
 
@@ -234,7 +228,7 @@ void CommandEncoderVK::InsertDebugMarker(const char* label) const {
     command_buffer.insertDebugUtilsLabelEXT(label_info);
   }
   if (queue_) {
-    queue_.insertDebugUtilsLabelEXT(label_info);
+    queue_->InsertDebugMarker(label);
   }
 }
 

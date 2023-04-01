@@ -70,7 +70,7 @@ CommandPoolVK::CommandPoolVK(const ContextVK* context)
     : owner_id_(std::this_thread::get_id()) {
   vk::CommandPoolCreateInfo pool_info;
 
-  pool_info.queueFamilyIndex = context->GetGraphicsQueueInfo().index;
+  pool_info.queueFamilyIndex = context->GetGraphicsQueue()->GetIndex().family;
   pool_info.flags = vk::CommandPoolCreateFlagBits::eTransient;
   auto pool = context->GetDevice().createCommandPoolUnique(pool_info);
   if (pool.result != vk::Result::eSuccess) {
