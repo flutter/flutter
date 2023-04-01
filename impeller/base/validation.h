@@ -24,7 +24,9 @@ class ValidationLog {
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(ValidationLog);
 };
 
-void ImpellerValidationBreak();
+void ImpellerValidationBreak(const char* message);
+
+void ImpellerValidationErrorsSetFatal(bool fatal);
 
 struct ScopedValidationDisable {
   ScopedValidationDisable();
