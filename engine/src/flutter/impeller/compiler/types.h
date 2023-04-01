@@ -66,8 +66,6 @@ std::string EntryPointFunctionNameFromSourceName(
     SourceLanguage source_language,
     const std::string& entry_point_name);
 
-bool TargetPlatformNeedsSL(TargetPlatform platform);
-
 bool TargetPlatformNeedsReflection(TargetPlatform platform);
 
 bool TargetPlatformBundlesSkSL(TargetPlatform platform);

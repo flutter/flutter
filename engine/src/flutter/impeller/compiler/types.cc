@@ -123,24 +123,6 @@ std::string EntryPointFunctionNameFromSourceName(
   return stream.str();
 }
 
-bool TargetPlatformNeedsSL(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kMetalIOS:
-    case TargetPlatform::kMetalDesktop:
-    case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
-    case TargetPlatform::kRuntimeStageMetal:
-    case TargetPlatform::kRuntimeStageGLES:
-    case TargetPlatform::kRuntimeStageVulkan:
-    case TargetPlatform::kSkSL:
-    case TargetPlatform::kVulkan:
-      return true;
-    case TargetPlatform::kUnknown:
-      return false;
-  }
-  FML_UNREACHABLE();
-}
-
 bool TargetPlatformNeedsReflection(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform::kMetalIOS:
