@@ -198,10 +198,9 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     frag_info.blur_radius = r.radius;
 
     // The blur direction is in input UV space.
-    frag_info.blur_direction =
-        pass_transform.Invert().TransformDirection(Vector2(1, 0)).Normalize();
-
-    frag_info.texture_size = Point(input_snapshot->GetCoverage().value().size);
+    frag_info.blur_uv_offset =
+        pass_transform.Invert().TransformDirection(Vector2(1, 0)).Normalize() /
+        Point(input_snapshot->GetCoverage().value().size);
 
     Command cmd;
     cmd.label = SPrintF("Gaussian Blur Filter (Radius=%.2f)",
