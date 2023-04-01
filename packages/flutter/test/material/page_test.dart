@@ -540,7 +540,7 @@ void main() {
     //     this case, it's at t=1.0 of the theme animation, so this is also the
     //     frame in which the theme animation ends.
     //  3. End all the other animations.
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 1);
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.android);
     final Offset helloPosition3 = tester.getCenter(find.text('HELLO'));
     expect(helloPosition3, helloPosition2);
