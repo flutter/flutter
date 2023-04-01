@@ -7,6 +7,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../dom.dart';
+import '../embedder.dart';
 import '../platform_dispatcher.dart';
 import '../safe_browser_api.dart';
 import '../text_editing/text_editing.dart';
@@ -421,14 +422,14 @@ class TextField extends RoleManager {
         ..height = '${semanticsObject.rect!.height}px';
 
       if (semanticsObject.hasFocus) {
-        if (domDocument.activeElement !=
+        if (flutterViewEmbedder.glassPaneShadow.activeElement !=
             activeEditableElement) {
           semanticsObject.owner.addOneTimePostUpdateCallback(() {
             activeEditableElement.focus();
           });
         }
         SemanticsTextEditingStrategy._instance?.activate(this);
-      } else if (domDocument.activeElement ==
+      } else if (flutterViewEmbedder.glassPaneShadow.activeElement ==
           activeEditableElement) {
         if (!isIosSafari) {
           SemanticsTextEditingStrategy._instance?.deactivate(this);
