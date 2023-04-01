@@ -638,12 +638,10 @@ void updateLocalProperties({
 
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
-    changeIfNecessary(
-        'sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
+    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary(
-      'flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot!));
+  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot!));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(
@@ -672,8 +670,7 @@ void writeLocalProperties(File properties) {
   final SettingsFile settings = SettingsFile();
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
-    settings.values['sdk.dir'] =
-        globals.fsUtils.escapePath(androidSdk.directory.path);
+    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
   }
   settings.writeContents(properties);
 }
