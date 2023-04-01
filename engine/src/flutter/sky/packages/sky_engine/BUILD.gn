@@ -239,7 +239,6 @@ generated_file("_embedder_yaml") {
     "  \"dart:math\": \"math/math.dart\"",
     "  \"dart:typed_data\": \"typed_data/typed_data.dart\"",
     "  \"dart:ui\": \"ui/ui.dart\"",
-    "  \"dart:ui_web\": \"ui_web/ui_web.dart\"",
     "  \"dart:wasm\": \"wasm/wasm_types.dart\"",
     "",
     "  \"dart:_http\": \"_http/http.dart\"",
