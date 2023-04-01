@@ -466,51 +466,52 @@ bool validateJavaGradle(Logger logger,
   }
 
   // Begin known evaluation.
-  if (javaV == '19') {
+  if (_isWithinVersionRange(javaV, min: '19', max: '20', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '7.6', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '18') {
+  if (_isWithinVersionRange(javaV, min: '18', max: '19', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '7.5', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '17') {
+  if (_isWithinVersionRange(javaV, min: '17', max: '18', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '7.3', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '16') {
+  if (_isWithinVersionRange(javaV, min: '16', max: '17', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '7.0', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '15') {
+  if (_isWithinVersionRange(javaV, min: '15', max: '16', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '6.7', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '14') {
+  if (_isWithinVersionRange(javaV, min: '14', max: '15', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '6.3', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '13') {
+  if (_isWithinVersionRange(javaV, min: '13', max: '14', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '6.0', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '12') {
+  if (_isWithinVersionRange(javaV, min: '12', max: '13', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '5.4', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '11') {
+  if (_isWithinVersionRange(javaV, min: '11', max: '12', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '5.0', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '1.10') {
+  // 1.11 is a made up java version to cover everything in 1.10.*
+  if (_isWithinVersionRange(javaV, min: '1.10', max: '1.11', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '4.7', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '1.9') {
+  if (_isWithinVersionRange(javaV, min: '1.9', max: '1.10', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '4.3', max: maxKnownAndSupportedGradleVersion);
   }
-  if (javaV == '1.8') {
+  if (_isWithinVersionRange(javaV, min: '1.8', max: '1.9', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
         min: '2.0', max: maxKnownAndSupportedGradleVersion);
   }

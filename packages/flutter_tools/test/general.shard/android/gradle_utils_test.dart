@@ -445,16 +445,16 @@ allprojects {
         JavaGradleTestData(false, javaVersion: null, gradleVersion: null),
         // Middle Java cases:
         // https://www.java.com/releases/
-        // JavaGradleTestData(true, javaVersion: '19.0.2', gradleVersion: '8.0'),
-        // JavaGradleTestData(true, javaVersion: '18.0.2', gradleVersion: '8.0'),
-        // JavaGradleTestData(true, javaVersion: '17.0.3', gradleVersion: '7.5'),
-        // JavaGradleTestData(true, javaVersion: '16.0.1', gradleVersion: '7.3'),
-        // JavaGradleTestData(true, javaVersion: '15.0.2', gradleVersion: '7.3'),
-        // JavaGradleTestData(true, javaVersion: '14.0.1', gradleVersion: '7.0'),
-        // JavaGradleTestData(true, javaVersion: '13.0.2', gradleVersion: '6.7'),
-        // JavaGradleTestData(true, javaVersion: '12.0.2', gradleVersion: '6.3'),
-        // JavaGradleTestData(true, javaVersion: '11.0.18', gradleVersion: '6.0'),
-        //Higher gradle cases:
+        JavaGradleTestData(true, javaVersion: '19.0.2', gradleVersion: '8.0'),
+        JavaGradleTestData(true, javaVersion: '18.0.2', gradleVersion: '8.0'),
+        JavaGradleTestData(true, javaVersion: '17.0.3', gradleVersion: '7.5'),
+        JavaGradleTestData(true, javaVersion: '16.0.1', gradleVersion: '7.3'),
+        JavaGradleTestData(true, javaVersion: '15.0.2', gradleVersion: '7.3'),
+        JavaGradleTestData(true, javaVersion: '14.0.1', gradleVersion: '7.0'),
+        JavaGradleTestData(true, javaVersion: '13.0.2', gradleVersion: '6.7'),
+        JavaGradleTestData(true, javaVersion: '12.0.2', gradleVersion: '6.3'),
+        JavaGradleTestData(true, javaVersion: '11.0.18', gradleVersion: '6.0'),
+        // Higher gradle cases:
         JavaGradleTestData(true, javaVersion: '19', gradleVersion: '8.0'),
         JavaGradleTestData(true, javaVersion: '18', gradleVersion: '8.0'),
         JavaGradleTestData(true, javaVersion: '17', gradleVersion: '7.5'),
