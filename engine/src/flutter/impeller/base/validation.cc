@@ -11,6 +11,11 @@
 namespace impeller {
 
 static std::atomic_int32_t sValidationLogsDisabledCount = 0;
+static bool sValidationLogsAreFatal = false;
+
+void ImpellerValidationErrorsSetFatal(bool fatal) {
+  sValidationLogsAreFatal = fatal;
+}
 
 ScopedValidationDisable::ScopedValidationDisable() {
   sValidationLogsDisabledCount++;
@@ -24,12 +29,7 @@ ValidationLog::ValidationLog() = default;
 
 ValidationLog::~ValidationLog() {
   if (sValidationLogsDisabledCount <= 0) {
-#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE)
-    FML_LOG(ERROR) << stream_.str();
-    ImpellerValidationBreak();
-#else
-    FML_LOG(FATAL) << stream_.str();
-#endif
+    ImpellerValidationBreak(stream_.str().c_str());
   }
 }
 
@@ -37,10 +37,18 @@ std::ostream& ValidationLog::GetStream() {
   return stream_;
 }
 
-void ImpellerValidationBreak() {
-  // Nothing to do. Exists for the debugger.
-  FML_LOG(ERROR) << "Break on " << __FUNCTION__
-                 << " to inspect point of failure.";
+void ImpellerValidationBreak(const char* message) {
+// Nothing to do. Exists for the debugger.
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+  std::stringstream stream;
+  stream << "Break on '" << __FUNCTION__
+         << "' to inspect point of failure: " << message;
+  if (sValidationLogsAreFatal) {
+    FML_LOG(FATAL) << stream.str();
+  } else {
+    FML_LOG(INFO) << stream.str();
+  }
+#endif  // FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
 }
 
 }  // namespace impeller
