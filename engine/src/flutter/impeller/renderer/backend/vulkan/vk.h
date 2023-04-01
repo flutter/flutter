@@ -69,12 +69,3 @@
 static_assert(VK_HEADER_VERSION >= 215, "Vulkan headers must not be too old.");
 
 #include "flutter/flutter_vma/flutter_vma.h"
-
-namespace impeller {
-
-struct QueueVK {
-  size_t family = 0;
-  size_t index = 0;
-};
-
-}  // namespace impeller
