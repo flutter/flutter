@@ -5,6 +5,7 @@
 #include "flutter/fml/time/time_point.h"
 
 #include "impeller/base/timing.h"
+#include "impeller/base/validation.h"
 #include "impeller/playground/playground_test.h"
 
 namespace impeller {
@@ -24,6 +25,8 @@ void PlaygroundTest::SetUp() {
     GTEST_SKIP_("Skipping due to user action.");
     return;
   }
+
+  ImpellerValidationErrorsSetFatal(true);
 
   SetupContext(GetParam());
   SetupWindow();
