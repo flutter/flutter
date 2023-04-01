@@ -7,20 +7,14 @@
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
 pluginManagement {
-    def localProperties = new Properties()
-    def localPropertiesFile = file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localPropertiesFile.withReader("UTF-8") { reader ->
-            localProperties.load(reader)
-        }
-    }
+    def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+    def properties = new Properties()
+    assert localPropertiesFile.exists()
+    localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+    def flutterSdkPath = properties.getProperty("flutter.sdk")
+    assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
 
-    def flutterRoot = localProperties.getProperty("flutter.sdk")
-    if (flutterRoot == null) {
-        throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-    }
-
-    includeBuild("$flutterRoot/packages/flutter_tools/gradle")
+    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     plugins {
         id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
@@ -33,10 +27,8 @@ enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
 
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()
-
 assert localPropertiesFile.exists()
 localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
-
 def flutterSdkPath = properties.getProperty("flutter.sdk")
 assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
 apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
