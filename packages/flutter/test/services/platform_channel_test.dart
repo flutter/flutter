@@ -275,7 +275,7 @@ void main() {
       bool canceled = false;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
         channel,
-        InlineMockStreamHandler(
+        MockStreamHandler.inline(
           onListen: (Object? arguments, MockStreamHandlerEventSink events) {
             events.success('${arguments}1');
             events.success('${arguments}2');
@@ -295,7 +295,7 @@ void main() {
     test('can receive error event', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
         channel,
-        InlineMockStreamHandler(
+        MockStreamHandler.inline(
           onListen: (Object? arguments, MockStreamHandlerEventSink events) {
             events.error(code: '404', message: 'Not Found.', details: arguments);
           },
