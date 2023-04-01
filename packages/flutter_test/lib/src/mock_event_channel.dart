@@ -10,30 +10,36 @@ import 'package:flutter/services.dart';
 /// StreamHandler API.
 abstract class MockStreamHandler {
   /// Handler for the listen event.
-  void onListen(dynamic arguments, MockStreamHandlerEventSink events);
+  void onListen(Object? arguments, MockStreamHandlerEventSink events);
 
   /// Handler for the cancel event.
-  void onCancel(dynamic arguments);
+  void onCancel(Object? arguments);
 }
+
+/// Typedef for the [InlineMockStreamHandler.onListen] callback.
+typedef MockStreamHandlerOnListenCallback = void Function(Object? arguments, MockStreamHandlerEventSink events);
+
+/// Typedef for the [InlineMockStreamHandler.onCancel] callback.
+typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
 
 /// Convenience class for creating a [MockStreamHandler] inline.
 class InlineMockStreamHandler extends MockStreamHandler {
   /// Create a new [InlineMockStreamHandler] with the given [onListen] and
   /// [onCancel] handlers.
   InlineMockStreamHandler({
-    required void Function(dynamic arguments, MockStreamHandlerEventSink events) onListen,
-    void Function(dynamic arguments)? onCancel,
+    required MockStreamHandlerOnListenCallback onListen,
+    MockStreamHandlerOnCancelCallback? onCancel,
   })  : _onListenInline = onListen,
         _onCancelInline = onCancel;
 
-  final void Function(dynamic arguments, MockStreamHandlerEventSink events) _onListenInline;
-  final void Function(dynamic arguments)? _onCancelInline;
+  final MockStreamHandlerOnListenCallback _onListenInline;
+  final MockStreamHandlerOnCancelCallback? _onCancelInline;
 
   @override
-  void onListen(dynamic arguments, MockStreamHandlerEventSink events) => _onListenInline(arguments, events);
+  void onListen(Object? arguments, MockStreamHandlerEventSink events) => _onListenInline(arguments, events);
 
   @override
-  void onCancel(dynamic arguments) => _onCancelInline?.call(arguments);
+  void onCancel(Object? arguments) => _onCancelInline?.call(arguments);
 }
 
 /// A mock event sink for a [MockStreamHandler] that mimics the native
@@ -42,10 +48,10 @@ class MockStreamHandlerEventSink {
   /// Create a new [MockStreamHandlerEventSink] with the given [_sink].
   MockStreamHandlerEventSink(this._sink);
 
-  final EventSink<dynamic> _sink;
+  final EventSink<Object?> _sink;
 
   /// Send a success event.
-  void success(dynamic event) => _sink.add(event);
+  void success(Object? event) => _sink.add(event);
 
   /// Send an error event.
   void error({
