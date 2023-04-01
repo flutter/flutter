@@ -606,6 +606,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, { bool checkMinimum
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', overrideMinimumMatches ?? 39, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', overrideMinimumMatches ?? 30, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', overrideMinimumMatches ?? 30, _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'cc', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'cpp', overrideMinimumMatches ?? 0, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', overrideMinimumMatches ?? 10, _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', overrideMinimumMatches ?? 80, _generateLicense('// '));
@@ -1771,7 +1772,14 @@ Future<void> _checkConsumerDependencies() async {
 
       final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
-        workset.add(dependencyTree[dependency]!);
+        // Don't add dependencies we've already seen or we will get stuck
+        // forever if there are any circular references.
+        // TODO(dantup): Consider failing gracefully with the names of the
+        //  packages once the cycle between test_api and matcher is resolved.
+        //  https://github.com/dart-lang/test/issues/1979
+        if (!dependencies.contains(dependency)) {
+          workset.add(dependencyTree[dependency]!);
+        }
       }
     }
   }
@@ -2073,8 +2081,10 @@ bool _isGeneratedPluginRegistrant(File file) {
   final String filename = path.basename(file.path);
   return !file.path.contains('.pub-cache')
       && (filename == 'GeneratedPluginRegistrant.java' ||
+          filename == 'GeneratedPluginRegistrant.swift' ||
           filename == 'GeneratedPluginRegistrant.h' ||
           filename == 'GeneratedPluginRegistrant.m' ||
           filename == 'generated_plugin_registrant.dart' ||
-          filename == 'generated_plugin_registrant.h');
+          filename == 'generated_plugin_registrant.h' ||
+          filename == 'generated_plugin_registrant.cc');
 }

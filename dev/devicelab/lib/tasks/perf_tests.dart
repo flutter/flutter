@@ -620,6 +620,19 @@ TaskFunction createGradientStaticPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createAnimatedBlurBackropFilterPerfTest({
+  bool enableImpeller = false,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'animated_blur_backdrop_filter_perf',
+    enableImpeller: enableImpeller,
+    testDriver: 'test_driver/animated_blur_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
   bool enableImpeller = false,
 }) {
@@ -1179,6 +1192,7 @@ class WebCompileTest {
     return inDirectory<Map<String, int>>(directory, () async {
       final Map<String, int> metrics = <String, int>{};
 
+      await flutter('clean');
       await flutter('packages', options: <String>['get']);
       final Stopwatch? watch = measureBuildTime ? Stopwatch() : null;
       watch?.start();
@@ -1187,6 +1201,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
+        '--no-web-resources-cdn',
       ]);
       watch?.stop();
       final String buildDir = path.join(directory, 'build', 'web');

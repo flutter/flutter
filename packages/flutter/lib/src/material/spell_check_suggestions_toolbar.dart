@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart' show SuggestionSpan;
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart' show SelectionChangedCause, SuggestionSpan;
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
@@ -42,6 +43,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   ///  * [AdaptiveTextSelectionToolbar.buttonItems], the list of
   ///    [ContextMenuButtonItem]s that are used to build the buttons of the
   ///    text selection toolbar.
+  ///  * [CupertinoSpellCheckSuggestionsToolbar.buttonItems], the list of
+  ///    [ContextMenuButtonItem]s used to build the Cupertino style spell check
+  ///    suggestions toolbar.
   final List<ContextMenuButtonItem> buttonItems;
 
   /// Padding between the toolbar and the anchor. Eyeballed on Pixel 4 emulator
@@ -77,10 +81,13 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     for (final String suggestion in spanAtCursorIndex.suggestions) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
-          editableTextState
-            .replaceComposingRegion(
-              SelectionChangedCause.toolbar,
-              suggestion,
+          if (!editableTextState.mounted) {
+            return;
+          }
+          _replaceText(
+            editableTextState,
+            suggestion,
+            spanAtCursorIndex.range,
           );
         },
         label: suggestion,
@@ -91,9 +98,13 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final ContextMenuButtonItem deleteButton =
       ContextMenuButtonItem(
         onPressed: () {
-          editableTextState.replaceComposingRegion(
-            SelectionChangedCause.toolbar,
+          if (!editableTextState.mounted) {
+            return;
+          }
+          _replaceText(
+            editableTextState,
             '',
+            editableTextState.currentTextEditingValue.composing,
           );
         },
         type: ContextMenuButtonType.delete,
@@ -101,6 +112,25 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     buttonItems.add(deleteButton);
 
     return buttonItems;
+  }
+
+  static void _replaceText(EditableTextState editableTextState, String text, TextRange replacementRange) {
+    // Replacement cannot be performed if the text is read only or obscured.
+    assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
+
+    final TextEditingValue newValue = editableTextState.textEditingValue.replaced(
+      replacementRange,
+      text,
+    );
+    editableTextState.userUpdateTextEditingValue(newValue,  SelectionChangedCause.toolbar);
+
+    // Schedule a call to bringIntoView() after renderEditable updates.
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+      if (editableTextState.mounted) {
+        editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
+      }
+    });
+    editableTextState.hideToolbar();
   }
 
   /// Determines the Offset that the toolbar will be anchored to.
