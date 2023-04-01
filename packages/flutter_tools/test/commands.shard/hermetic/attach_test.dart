@@ -1137,6 +1137,7 @@ class StreamLogger extends Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
@@ -1353,6 +1354,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   bool get isConnected => true;
+
+  @override
+  bool get ephemeral => true;
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {
