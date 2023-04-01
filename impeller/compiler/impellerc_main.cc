@@ -121,52 +121,49 @@ bool Main(const fml::CommandLine& command_line) {
     return false;
   }
 
-  if (TargetPlatformNeedsSL(options.target_platform)) {
-    auto sl_file_name = std::filesystem::absolute(
-        std::filesystem::current_path() / switches.sl_file_name);
-    const bool is_runtime_stage_data = switches.iplr;
-    if (is_runtime_stage_data) {
-      auto reflector = compiler.GetReflector();
-      if (reflector == nullptr) {
-        std::cerr << "Could not create reflector." << std::endl;
-        return false;
-      }
-      auto stage_data = reflector->GetRuntimeStageData();
-      if (!stage_data) {
-        std::cerr << "Runtime stage information was nil." << std::endl;
-        return false;
-      }
-      if (sksl_mapping) {
-        stage_data->SetSkSLData(sksl_mapping);
-      }
-      auto stage_data_mapping = options.json_format
-                                    ? stage_data->CreateJsonMapping()
-                                    : stage_data->CreateMapping();
-      if (!stage_data_mapping) {
-        std::cerr << "Runtime stage data could not be created." << std::endl;
-        return false;
-      }
-      if (!fml::WriteAtomically(*switches.working_directory,         //
-                                Utf8FromPath(sl_file_name).c_str(),  //
-                                *stage_data_mapping                  //
-                                )) {
-        std::cerr << "Could not write file to " << switches.sl_file_name
-                  << std::endl;
-        return false;
-      }
-      // Tools that consume the runtime stage data expect the access mode to
-      // be 0644.
-      if (!SetPermissiveAccess(sl_file_name)) {
-        return false;
-      }
-    } else {
-      if (!fml::WriteAtomically(*switches.working_directory,
-                                Utf8FromPath(sl_file_name).c_str(),
-                                *compiler.GetSLShaderSource())) {
-        std::cerr << "Could not write file to " << switches.sl_file_name
-                  << std::endl;
-        return false;
-      }
+  auto sl_file_name = std::filesystem::absolute(
+      std::filesystem::current_path() / switches.sl_file_name);
+  if (switches.iplr) {
+    auto reflector = compiler.GetReflector();
+    if (reflector == nullptr) {
+      std::cerr << "Could not create reflector." << std::endl;
+      return false;
+    }
+    auto stage_data = reflector->GetRuntimeStageData();
+    if (!stage_data) {
+      std::cerr << "Runtime stage information was nil." << std::endl;
+      return false;
+    }
+    if (sksl_mapping) {
+      stage_data->SetSkSLData(sksl_mapping);
+    }
+    auto stage_data_mapping = options.json_format
+                                  ? stage_data->CreateJsonMapping()
+                                  : stage_data->CreateMapping();
+    if (!stage_data_mapping) {
+      std::cerr << "Runtime stage data could not be created." << std::endl;
+      return false;
+    }
+    if (!fml::WriteAtomically(*switches.working_directory,         //
+                              Utf8FromPath(sl_file_name).c_str(),  //
+                              *stage_data_mapping                  //
+                              )) {
+      std::cerr << "Could not write file to " << switches.sl_file_name
+                << std::endl;
+      return false;
+    }
+    // Tools that consume the runtime stage data expect the access mode to
+    // be 0644.
+    if (!SetPermissiveAccess(sl_file_name)) {
+      return false;
+    }
+  } else {
+    if (!fml::WriteAtomically(*switches.working_directory,
+                              Utf8FromPath(sl_file_name).c_str(),
+                              *compiler.GetSLShaderSource())) {
+      std::cerr << "Could not write file to " << switches.sl_file_name
+                << std::endl;
+      return false;
     }
   }
 
