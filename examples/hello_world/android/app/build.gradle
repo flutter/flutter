@@ -54,8 +54,3 @@ android {
 flutter {
     source '../..'
 }
-
-dependencies {
-    // This is required by the Flutter Gradle Plugin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-}
