@@ -10,6 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
+#include "impeller/renderer/backend/vulkan/queue_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -53,14 +54,13 @@ class CommandEncoderVK {
   friend class ContextVK;
 
   vk::Device device_ = {};
-  vk::Queue queue_ = {};
-
+  std::shared_ptr<QueueVK> queue_;
   std::shared_ptr<FenceWaiterVK> fence_waiter_;
   std::shared_ptr<TrackedObjectsVK> tracked_objects_;
   bool is_valid_ = false;
 
   CommandEncoderVK(vk::Device device,
-                   vk::Queue queue,
+                   const std::shared_ptr<QueueVK>& queue,
                    const std::shared_ptr<CommandPoolVK>& pool,
                    std::shared_ptr<FenceWaiterVK> fence_waiter);
 

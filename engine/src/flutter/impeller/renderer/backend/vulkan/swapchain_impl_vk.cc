@@ -418,7 +418,7 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
     submit_info.setWaitSemaphores(*sync->render_ready);
     submit_info.setSignalSemaphores(*sync->present_ready);
     auto result =
-        context.GetGraphicsQueue().submit(submit_info, *sync->acquire);
+        context.GetGraphicsQueue()->Submit(submit_info, *sync->acquire);
     if (result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not wait on render semaphore: "
                      << vk::to_string(result);

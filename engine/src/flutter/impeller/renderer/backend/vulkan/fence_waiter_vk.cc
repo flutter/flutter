@@ -7,6 +7,7 @@
 #include <chrono>
 
 #include "flutter/fml/thread.h"
+#include "flutter/fml/trace_event.h"
 
 namespace impeller {
 
@@ -78,6 +79,7 @@ FenceWaiterVK::TrimAndCreateWaitSetLocked() {
   if (terminate_) {
     return std::nullopt;
   }
+  TRACE_EVENT0("impeller", "TrimFences");
   std::vector<vk::Fence> fences;
   fences.reserve(wait_set_.size());
   for (auto it = wait_set_.begin(); it != wait_set_.end();) {
