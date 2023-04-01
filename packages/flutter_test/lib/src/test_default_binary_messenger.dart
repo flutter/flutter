@@ -200,6 +200,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   ///  * [setMockMethodCallHandler], which wraps this method but decodes
   ///    the messages using a [MethodCodec].
+  ///
+  ///  * [setMockStreamHandler], which wraps [setMockMethodCallHandler] to
+  ///    handle [EventChannel] messages.
   void setMockMessageHandler(String channel, MessageHandler? handler, [ Object? identity ]) {
     if (handler == null) {
       _outboundHandlers.remove(channel);
@@ -240,6 +243,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   ///  * [setMockMethodCallHandler], which is similar but decodes
   ///    the messages using a [MethodCodec].
+  ///
+  ///  * [setMockStreamHandler], which wraps [setMockMethodCallHandler] to
+  ///    handle [EventChannel] messages.
   void setMockDecodedMessageHandler<T>(BasicMessageChannel<T> channel, Future<T> Function(T? message)? handler) {
     if (handler == null) {
       setMockMessageHandler(channel.name, null);
@@ -329,7 +335,13 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// See also:
   ///
   ///  * [setMockMethodCallHandler], which is the similar method for
-  /// [MethodChannel].
+  ///    [MethodChannel].
+  ///
+  ///  * [setMockMessageHandler], which is similar but provides raw
+  ///    access to the underlying bytes.
+  ///
+  ///  * [setMockDecodedMessageHandler], which is similar but decodes
+  ///    the messages using a [MessageCodec].
   void setMockStreamHandler(EventChannel channel, MockStreamHandler? handler) {
     if (handler == null) {
       setMockMessageHandler(channel.name, null);
