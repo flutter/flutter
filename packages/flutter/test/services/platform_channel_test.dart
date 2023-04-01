@@ -276,17 +276,17 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
         channel,
         InlineMockStreamHandler(
-          onListen: (dynamic arguments, MockStreamHandlerEventSink events) {
+          onListen: (Object? arguments, MockStreamHandlerEventSink events) {
             events.success('${arguments}1');
             events.success('${arguments}2');
             events.endOfStream();
           },
-          onCancel: (dynamic arguments) {
+          onCancel: (Object? arguments) {
             canceled = true;
           },
         ),
       );
-      final List<dynamic> events = await channel.receiveBroadcastStream('hello').toList();
+      final List<Object?> events = await channel.receiveBroadcastStream('hello').toList();
       expect(events, orderedEquals(<String>['hello1', 'hello2']));
       await Future<void>.delayed(Duration.zero);
       expect(canceled, isTrue);
@@ -296,22 +296,22 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
         channel,
         InlineMockStreamHandler(
-          onListen: (dynamic arguments, MockStreamHandlerEventSink events) {
+          onListen: (Object? arguments, MockStreamHandlerEventSink events) {
             events.error(code: '404', message: 'Not Found.', details: arguments);
           },
         ),
       );
-      final List<dynamic> events = <dynamic>[];
-      final List<dynamic> errors = <dynamic>[];
+      final List<Object?> events = <Object?>[];
+      final List<Object?> errors = <Object?>[];
       channel.receiveBroadcastStream('hello').listen(events.add, onError: errors.add);
       await Future<void>.delayed(Duration.zero);
       expect(events, isEmpty);
       expect(errors, hasLength(1));
       expect(errors[0], isA<PlatformException>());
-      final PlatformException error = errors[0] as PlatformException;
-      expect(error.code, '404');
-      expect(error.message, 'Not Found.');
-      expect(error.details, 'hello');
+      final PlatformException? error = errors[0] as PlatformException?;
+      expect(error?.code, '404');
+      expect(error?.message, 'Not Found.');
+      expect(error?.details, 'hello');
     });
   });
 }
