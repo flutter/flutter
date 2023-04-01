@@ -478,6 +478,10 @@ class AndroidSdk {
     // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
     if (platform.isMacOS) {
       try {
+        // -v Filter versions (as if JAVA_VERSION had been set in the environment).
+        // It is unlikley that filtering to java version 1.8 is the right
+        // decsion here. That said, trying this on a mac shows the same jdk
+        // path no matter what input is passed.
         final String javaHomeOutput = globals.processUtils.runSync(
           <String>['/usr/libexec/java_home', '-v', '1.8'],
           throwOnError: true,
