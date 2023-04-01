@@ -58,12 +58,9 @@ void GoldenPlaygroundTest::SetUp() {
   }
 
   std::string test_name = GetTestName();
-  if (test_name == "impeller_Play_AiksTest_CanRenderTiledTexture_Metal" ||
-      test_name ==
+  if (test_name ==
           "impeller_Play_AiksTest_CanRenderLinearGradientWithOverlappingStops_"
           "Metal" ||
-      test_name ==
-          "impeller_Play_AiksTest_CanRenderLinearGradientManyColors_Metal" ||
       test_name ==
           "impeller_Play_AiksTest_CanRenderLinearGradientWayManyColors_Metal" ||
       test_name ==
@@ -72,7 +69,6 @@ void GoldenPlaygroundTest::SetUp() {
       test_name == "impeller_Play_AiksTest_CanRenderRadialGradient_Metal" ||
       test_name ==
           "impeller_Play_AiksTest_CanRenderRadialGradientManyColors_Metal" ||
-      test_name == "impeller_Play_AiksTest_CanRenderSweepGradient_Metal" ||
       test_name ==
           "impeller_Play_AiksTest_CanRenderSweepGradientManyColors_Metal" ||
       test_name == "impeller_Play_AiksTest_CanPictureConvertToImage_Metal" ||
@@ -84,8 +80,7 @@ void GoldenPlaygroundTest::SetUp() {
       test_name ==
           "impeller_Play_AiksTest_"
           "CoverageOriginShouldBeAccountedForInSubpasses_Metal" ||
-      test_name == "impeller_Play_AiksTest_SceneColorSource_Metal" ||
-      test_name == "impeller_Play_AiksTest_CanRenderLinearGradient_Metal") {
+      test_name == "impeller_Play_AiksTest_SceneColorSource_Metal") {
     GTEST_SKIP_(
         "GoldenPlaygroundTest doesn't support interactive playground tests "
         "yet.");
