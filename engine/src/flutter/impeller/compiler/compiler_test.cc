@@ -107,19 +107,17 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
     return false;
   }
 
-  if (TargetPlatformNeedsSL(GetParam())) {
-    auto sl_source = compiler.GetSLShaderSource();
-    if (!sl_source) {
-      VALIDATION_LOG << "No SL source was generated.";
-      return false;
-    }
+  auto sl_source = compiler.GetSLShaderSource();
+  if (!sl_source) {
+    VALIDATION_LOG << "No SL source was generated.";
+    return false;
+  }
 
-    if (!fml::WriteAtomically(intermediates_directory_,
-                              SLFileName(fixture_name, GetParam()).c_str(),
-                              *sl_source)) {
-      VALIDATION_LOG << "Could not write SL intermediates.";
-      return false;
-    }
+  if (!fml::WriteAtomically(intermediates_directory_,
+                            SLFileName(fixture_name, GetParam()).c_str(),
+                            *sl_source)) {
+    VALIDATION_LOG << "Could not write SL intermediates.";
+    return false;
   }
 
   if (TargetPlatformNeedsReflection(GetParam())) {

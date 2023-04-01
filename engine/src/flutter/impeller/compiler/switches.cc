@@ -214,7 +214,7 @@ bool Switches::AreValid(std::ostream& explain) const {
     valid = false;
   }
 
-  if (sl_file_name.empty() && TargetPlatformNeedsSL(target_platform)) {
+  if (sl_file_name.empty()) {
     explain << "Target shading language file name was empty." << std::endl;
     valid = false;
   }

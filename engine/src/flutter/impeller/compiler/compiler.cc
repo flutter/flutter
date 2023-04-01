@@ -362,8 +362,7 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
   shaderc::CompileOptions spirv_options;
 
   // Make sure reflection is as effective as possible. The generated shaders
-  // will be processed later by backend specific compilers. So optimizations
-  // here are irrelevant and get in the way of generating reflection code.
+  // will be processed later by backend specific compilers.
   spirv_options.SetGenerateDebugInfo();
 
   switch (options_.source_language) {
@@ -509,11 +508,6 @@ Compiler::Compiler(const fml::Mapping& source_mapping,
     return;
   } else {
     included_file_names_ = std::move(included_file_names);
-  }
-
-  if (!TargetPlatformNeedsSL(source_options.target_platform)) {
-    is_valid_ = true;
-    return;
   }
 
   // SL Generation.
