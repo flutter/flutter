@@ -43,6 +43,11 @@ const String minSdkVersion = '16';
 const String targetSdkVersion = '31';
 const String ndkVersion = '23.1.7779620';
 
+// Update this when new versions of Gradle come out.
+const String _maxKnownAndSupportedGradleVersion = '8.0';
+// Update this when new versions of AGP.
+const String _maxKnownAgpVersion = '8.1';
+
 // Expected content:
 // "classpath 'com.android.tools.build:gradle:7.3.0'"
 // Parentheticals are use to group which helps with version extraction.
@@ -72,10 +77,10 @@ class GradleUtils {
     required Cache cache,
     required OperatingSystemUtils operatingSystemUtils,
   })  : _platform = platform,
-        _logger = logger,
-        _cache = cache,
-        _fileSystem = fileSystem,
-        _operatingSystemUtils = operatingSystemUtils;
+       _logger = logger,
+       _cache = cache,
+       _fileSystem = fileSystem,
+       _operatingSystemUtils = operatingSystemUtils;
 
   final Cache _cache;
   final FileSystem _fileSystem;
@@ -100,21 +105,24 @@ class GradleUtils {
       return gradle.absolute.path;
     }
     throwToolExit(
-        'Unable to locate gradlew script. Please check that ${gradle.path} '
-        'exists or that ${gradle.dirname} can be read.');
+       'Unable to locate gradlew script. Please check that ${gradle.path} '
+       'exists or that ${gradle.dirname} can be read.');
   }
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
-    copyDirectory(_cache.getArtifactDirectory('gradle_wrapper'), directory,
-        shouldCopyFile: (File sourceFile, File destinationFile) {
-      // Don't override the existing files in the project.
-      return !destinationFile.existsSync();
-    }, onFileCopied: (File source, File dest) {
-      _operatingSystemUtils.makeExecutable(dest);
-    });
+    copyDirectory(
+      _cache.getArtifactDirectory('gradle_wrapper'),
+      directory,
+      shouldCopyFile: (File sourceFile, File destinationFile) {
+        // Don't override the existing files in the project.
+        return !destinationFile.existsSync();
+      },
+      onFileCopied: (File source, File dest) {
+        _operatingSystemUtils.makeExecutable(dest);
+      }
+    );
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
-    // TODO can this share code with getGradleVersion
     final Directory propertiesDirectory = directory
         .childDirectory(gradleDirectoryName)
         .childDirectory(gradleWrapperDirectoryName);
@@ -146,17 +154,14 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   final File buildFile = directory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
-    // TODO should this be a warning?
     logger.printTrace(
         "$buildFile doesn't exist, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
-  final Iterable<Match> pluginMatches =
-      _androidGradlePluginRegExp.allMatches(buildFileContent);
+  final Iterable<Match> pluginMatches = _androidGradlePluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
-    logger.printTrace(
-        "$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
+    logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
   }
   final String? androidPluginVersion = pluginMatches.first.group(1);
@@ -255,7 +260,6 @@ OS:           Mac OS X 13.2.1 aarch64
 String? getAgpVersion(Directory androidDirectory, Logger logger) {
   final File buildFile = androidDirectory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
-    // TODO should this be a warning?
     logger.printTrace('Can not find build.gradle in $androidDirectory');
     return null;
   }
@@ -272,17 +276,12 @@ String? getAgpVersion(Directory androidDirectory, Logger logger) {
 }
 
 String _formatParseWarning(String content) {
-  return 'Could parse gradle version from: \n'
+  return 'Could not parse gradle version from: \n'
       '$content \n'
       'If there is a version please look for an existing bug '
       'https://github.com/flutter/flutter/issues/'
       ' and if one does not exist file a new issue.';
 }
-
-
-// Update this when new versions of Gradle come out.
-const String maxKnownAndSupportedGradleVersion = '8.0';
-
 
 // Validate that Gradle version and AGP are compatible with each other.
 //
@@ -298,14 +297,10 @@ const String maxKnownAndSupportedGradleVersion = '8.0';
 // AGP version 2.3.0+.
 bool validateGradleAndAgp(Logger logger,
     {required String? gradleV, required String? agpV}) {
-  // Update these when new versions of AGP or Gradle come out.
-  const String maxKnownAgpVersion = '8.1';
 
   // TODO are these the correct values we want to support?
   const String oldestSupportedAgpVersion = '3.3.0';
   const String oldestSupportedGradleVersion = '4.10.1';
-
-  // Begin Gradle <-> AGP validation.
 
   if (gradleV == null || agpV == null) {
     logger
@@ -326,13 +321,13 @@ bool validateGradleAndAgp(Logger logger,
   }
 
   // Check highest supported version before checking unknown versions.
-  if (_isWithinVersionRange(agpV, min: '8.0', max: maxKnownAgpVersion)) {
+  if (_isWithinVersionRange(agpV, min: '8.0', max: _maxKnownAgpVersion)) {
     return _isWithinVersionRange(gradleV,
-        min: '8.0', max: maxKnownAndSupportedGradleVersion);
+        min: '8.0', max: _maxKnownAndSupportedGradleVersion);
   }
   // Check if versions are newer than the max known versions.
   if (_isWithinVersionRange(agpV,
-      min: maxKnownAndSupportedGradleVersion, max: '100.100')) {
+      min: _maxKnownAndSupportedGradleVersion, max: '100.100')) {
     // Assume versions we do not know about are valid but log.
     final bool validGradle =
         _isWithinVersionRange(gradleV, min: '8.0', max: '100.00');
@@ -341,45 +336,46 @@ bool validateGradleAndAgp(Logger logger,
     return validGradle;
   }
 
+  // Begin Known Gradle <-> AGP validation.
   // Max agp here is a made up version to contain all 7.4 changes.
   if (_isWithinVersionRange(agpV, min: '7.4', max: '7.5')) {
     return _isWithinVersionRange(gradleV,
-        min: '7.5', max: maxKnownAndSupportedGradleVersion);
+        min: '7.5', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(agpV,
       min: '7.3', max: '7.4', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '7.4', max: maxKnownAndSupportedGradleVersion);
+        min: '7.4', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(agpV,
       min: '7.2', max: '7.3', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '7.3.3', max: maxKnownAndSupportedGradleVersion);
+        min: '7.3.3', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(agpV,
       min: '7.1', max: '7.2', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '7.2', max: maxKnownAndSupportedGradleVersion);
+        min: '7.2', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(agpV,
       min: '7.0', max: '7.1', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '7.0', max: maxKnownAndSupportedGradleVersion);
+        min: '7.0', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(agpV,
       min: '4.2.0', max: '7.0', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '6.7.1', max: maxKnownAndSupportedGradleVersion);
+        min: '6.7.1', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(agpV,
       min: '4.1.0', max: '4.2.0', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '6.5', max: maxKnownAndSupportedGradleVersion);
+        min: '6.5', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(agpV,
       min: '4.0.0', max: '4.1.0', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '6.1.1', max: maxKnownAndSupportedGradleVersion);
+        min: '6.1.1', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(
     agpV,
@@ -387,7 +383,7 @@ bool validateGradleAndAgp(Logger logger,
     max: '3.6.4',
   )) {
     return _isWithinVersionRange(gradleV,
-        min: '5.6.4', max: maxKnownAndSupportedGradleVersion);
+        min: '5.6.4', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(
     agpV,
@@ -395,7 +391,7 @@ bool validateGradleAndAgp(Logger logger,
     max: '3.5.4',
   )) {
     return _isWithinVersionRange(gradleV,
-        min: '5.4.1', max: maxKnownAndSupportedGradleVersion);
+        min: '5.4.1', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(
     agpV,
@@ -403,7 +399,7 @@ bool validateGradleAndAgp(Logger logger,
     max: '3.4.3',
   )) {
     return _isWithinVersionRange(gradleV,
-        min: '5.1.1', max: maxKnownAndSupportedGradleVersion);
+        min: '5.1.1', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(
     agpV,
@@ -411,7 +407,7 @@ bool validateGradleAndAgp(Logger logger,
     max: '3.3.3',
   )) {
     return _isWithinVersionRange(gradleV,
-        min: '4.10.1', max: maxKnownAndSupportedGradleVersion);
+        min: '4.10.1', max: _maxKnownAndSupportedGradleVersion);
   }
 
   logger.printTrace('Unknown Gradle-Agp compatability, $gradleV, $agpV');
@@ -442,7 +438,6 @@ bool validateJavaGradle(Logger logger,
   }
 
   // First check if versions are too old.
-  // TODO check for format of java version prior to 8.
   if (_isWithinVersionRange(javaV,
       min: '1.1', max: oldestSupportedJavaVersion, inclusiveMax: false)) {
     logger.printTrace('Java Version: $javaV is too old.');
@@ -459,61 +454,61 @@ bool validateJavaGradle(Logger logger,
     // Assume versions Java versions newer than [maxSupportedJavaVersion]
     // required a higher gradle version.
     final bool validGradle =
-        _isWithinVersionRange(gradleV, min: maxKnownAndSupportedGradleVersion, max: '100.00');
+        _isWithinVersionRange(gradleV, min: _maxKnownAndSupportedGradleVersion, max: '100.00');
     logger.printWarning('Newer than known valid Java version ($javaV), gradle ($gradleV).'
         '\n Treating as valid configuration.');
     return validGradle;
   }
 
-  // Begin known evaluation.
+  // Begin known Java <-> Gradle evaluation.
   if (_isWithinVersionRange(javaV, min: '19', max: '20', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '7.6', max: maxKnownAndSupportedGradleVersion);
+        min: '7.6', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '18', max: '19', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '7.5', max: maxKnownAndSupportedGradleVersion);
+        min: '7.5', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '17', max: '18', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '7.3', max: maxKnownAndSupportedGradleVersion);
+        min: '7.3', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '16', max: '17', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '7.0', max: maxKnownAndSupportedGradleVersion);
+        min: '7.0', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '15', max: '16', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '6.7', max: maxKnownAndSupportedGradleVersion);
+        min: '6.7', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '14', max: '15', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '6.3', max: maxKnownAndSupportedGradleVersion);
+        min: '6.3', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '13', max: '14', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '6.0', max: maxKnownAndSupportedGradleVersion);
+        min: '6.0', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '12', max: '13', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '5.4', max: maxKnownAndSupportedGradleVersion);
+        min: '5.4', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '11', max: '12', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '5.0', max: maxKnownAndSupportedGradleVersion);
+        min: '5.0', max: _maxKnownAndSupportedGradleVersion);
   }
   // 1.11 is a made up java version to cover everything in 1.10.*
   if (_isWithinVersionRange(javaV, min: '1.10', max: '1.11', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '4.7', max: maxKnownAndSupportedGradleVersion);
+        min: '4.7', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '1.9', max: '1.10', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '4.3', max: maxKnownAndSupportedGradleVersion);
+        min: '4.3', max: _maxKnownAndSupportedGradleVersion);
   }
   if (_isWithinVersionRange(javaV, min: '1.8', max: '1.9', inclusiveMax: false)) {
     return _isWithinVersionRange(gradleV,
-        min: '2.0', max: maxKnownAndSupportedGradleVersion);
+        min: '2.0', max: _maxKnownAndSupportedGradleVersion);
   }
 
   logger.printTrace('Unknown Java-Gradle compatability $javaV, $gradleV');
@@ -589,10 +584,18 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (_isWithinVersionRange(androidPluginVersion, min: '4.0.0', max: '4.1.0')) {
     return '6.7';
   }
+  // 7.5 is a made up value to include everything through 7.4.*
   if (_isWithinVersionRange(androidPluginVersion, min: '7.0', max: '7.5')) {
     return '7.5';
   }
-  // TODO update with more recent values.
+  if (_isWithinVersionRange(androidPluginVersion, min: '7.5', max: _maxKnownAgpVersion)) {
+    return '8.0';
+  }
+  // Assume if AGP is newer than this code know about return the highest gradle
+  // version we know about.
+  if (_isWithinVersionRange(androidPluginVersion, min: _maxKnownAgpVersion, max: '100.100')) {
+    return _maxKnownAndSupportedGradleVersion;
+  }
   // TODO should this be a regular thow so that chris can see these in crash logging.
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
 }
