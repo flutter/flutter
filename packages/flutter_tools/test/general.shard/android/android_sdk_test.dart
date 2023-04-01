@@ -10,11 +10,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
-import '../../commands.shard/permeable/build_apk_test.dart';
 import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart' show FakeOperatingSystemUtils;
+import '../../src/fakes.dart' show FakeAndroidStudio, FakeOperatingSystemUtils;
 
 void main() {
   late MemoryFileSystem fileSystem;
