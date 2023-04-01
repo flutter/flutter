@@ -336,7 +336,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       return;
     }
 
-    final StreamController<dynamic> controller = StreamController<dynamic>();
+    final StreamController<Object?> controller = StreamController<Object?>();
     addTearDown(controller.close);
 
     setMockMethodCallHandler(MethodChannel(channel.name, channel.codec), (MethodCall call) async {
@@ -350,15 +350,15 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       }
     });
 
-    final StreamSubscription<dynamic> sub = controller.stream.listen(
-      (dynamic e) => channel.binaryMessenger.handlePlatformMessage(
+    final StreamSubscription<Object?> sub = controller.stream.listen(
+      (Object? e) => channel.binaryMessenger.handlePlatformMessage(
         channel.name,
         channel.codec.encodeSuccessEnvelope(e),
         null,
       ),
     );
     addTearDown(sub.cancel);
-    sub.onError((dynamic e) {
+    sub.onError((Object? e) {
       if (e is! PlatformException) {
         throw ArgumentError('Stream error must be a PlatformException');
       }
