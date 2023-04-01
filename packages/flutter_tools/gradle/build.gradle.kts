@@ -1,0 +1,26 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+plugins {
+    `groovy-gradle-plugin`
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+
+group = "dev.flutter.plugin"
+version = "1.0.0"
+
+gradlePlugin {
+    plugins {
+        // The "flutterPlugin" name isn't used anywhere
+        create("flutterPlugin") {
+            id = "dev.flutter.flutter-gradle-plugin"
+            implementationClass = "FlutterPlugin"
+        }
+    }
+}
