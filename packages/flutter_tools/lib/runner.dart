@@ -61,6 +61,9 @@ Future<int> run(
     StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
+        // Invoking the getter for analytics here will ensure
+        // the consent message will get shown
+        globals.analytics;
         await runner.run(args);
 
         // Triggering [runZoned]'s error callback does not necessarily mean that
