@@ -11,8 +11,8 @@ uniform FrameInfo {
 }
 frame_info;
 
-in vec2 position;
-out vec2 v_position;
+in highp vec2 position;
+out highp vec2 v_position;
 
 void main() {
   v_position =
