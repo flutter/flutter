@@ -75,17 +75,14 @@ class GradleUtils {
   GradleUtils({
     required Platform platform,
     required Logger logger,
-    required FileSystem fileSystem,
     required Cache cache,
     required OperatingSystemUtils operatingSystemUtils,
   })  : _platform = platform,
        _logger = logger,
        _cache = cache,
-       _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils;
 
   final Cache _cache;
-  final FileSystem _fileSystem;
   final Platform _platform;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
