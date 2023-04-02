@@ -47,6 +47,7 @@ void main() {
         '--no-pub',
         '--no-current-package',
         '--suggestions',
+        '--verbose',
         '../../dev/integration_tests/flutter_gallery',
       ]);
 
