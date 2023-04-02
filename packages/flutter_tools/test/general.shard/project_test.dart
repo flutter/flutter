@@ -405,7 +405,7 @@ void main() {
       });
     });
 
-    group('compatibility', () {
+    group('java gradle agp compatability', () {
       late FakeProcessManager processManager;
       late AndroidStudio androidStudio;
       late FakeAndroidSdkWithDir androidSdk;
@@ -447,15 +447,67 @@ dependencies {
       }
 
       _testInMemory(
-        'Gradle agp compat',
+        'flamingo values are compatible',
         () async {
-          FlutterProject? project = await configureJavaGradleAgpForTest(
-            javaV: '1.8.0',
+          final FlutterProject? project = await configureJavaGradleAgpForTest(
+            javaV: '17.0.2',
             gradleV: '8.0',
             agpV: '7.4.2',
           );
-          final value = await project!.android.hasValidJavaGradleAgpVersions();
+          final CompatabilityResult value =
+              await project!.android.hasValidJavaGradleAgpVersions();
           expect(value.success, isTrue);
+        },
+        androidStudio: androidStudio,
+        processManager: processManager,
+        androidSdk: androidSdk,
+      );
+
+      _testInMemory(
+        'java 8 era values are compatible',
+        () async {
+          final FlutterProject? project = await configureJavaGradleAgpForTest(
+            javaV: '1.8.0_242',
+            gradleV: '6.7.1',
+            agpV: '4.2.0',
+          );
+          final CompatabilityResult value =
+              await project!.android.hasValidJavaGradleAgpVersions();
+          expect(value.success, isTrue);
+        },
+        androidStudio: androidStudio,
+        processManager: processManager,
+        androidSdk: androidSdk,
+      );
+
+      _testInMemory(
+        'electric eel era values are compatible',
+        () async {
+          final FlutterProject? project = await configureJavaGradleAgpForTest(
+            javaV: '11.0.14',
+            gradleV: '7.3.3',
+            agpV: '7.2.0',
+          );
+          final CompatabilityResult value =
+              await project!.android.hasValidJavaGradleAgpVersions();
+          expect(value.success, isTrue);
+        },
+        androidStudio: androidStudio,
+        processManager: processManager,
+        androidSdk: androidSdk,
+      );
+
+      _testInMemory(
+        'likley incompatabile flamingo versions',
+        () async {
+          final FlutterProject? project = await configureJavaGradleAgpForTest(
+            javaV: '11.0.14',
+            gradleV: '6.7.3',
+            agpV: '7.2.0',
+          );
+          final CompatabilityResult value =
+              await project!.android.hasValidJavaGradleAgpVersions();
+          expect(value.success, isFalse);
         },
         androidStudio: androidStudio,
         processManager: processManager,
