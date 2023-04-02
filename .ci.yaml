@@ -2439,6 +2439,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
+  - name: Linux_android animated_blur_backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: animated_blur_backdrop_filter_perf__timeline_summary
+
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
@@ -4048,6 +4058,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_impeller_ios
+
+  - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone

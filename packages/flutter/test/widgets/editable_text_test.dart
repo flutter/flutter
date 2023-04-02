@@ -15045,23 +15045,23 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
       );
       controller.value = value;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-              selectionControls: materialTextSelectionControls,
-              spellCheckConfiguration:
-                const SpellCheckConfiguration(
-                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
-                  spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
-                ),
-            ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
           ),
-        );
+        ),
+      );
 
       final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
@@ -15085,16 +15085,81 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         from: Offset.zero,
         cause: SelectionChangedCause.tap,
       );
+
       await tester.pumpAndSettle();
-      expect(state.showSpellCheckSuggestionsToolbar(), true);
+      // Toolbar will only show on non-web platforms.
+      expect(state.showSpellCheckSuggestionsToolbar(), !kIsWeb);
       await tester.pumpAndSettle();
-      expect(find.text('test'), findsOneWidget);
-      expect(find.text('sets'), findsOneWidget);
-      expect(find.text('set'), findsOneWidget);
-      expect(find.text('DELETE'), findsOneWidget);
+
+      const Matcher matcher = kIsWeb ? findsNothing : findsOneWidget;
+      expect(find.text('test'), matcher);
+      expect(find.text('sets'), matcher);
+      expect(find.text('set'), matcher);
+      expect(find.text('DELETE'), matcher);
     });
 
-    testWidgets('spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+    testWidgets('cupertino spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      const TextEditingValue value = TextEditingValue(
+        text: 'tset test test',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      controller.value = value;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: cupertinoTextSelectionControls,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      state.spellCheckResults = const SpellCheckResults('tset test test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+      await tester.pumpAndSettle();
+
+      // Set last tap down position so that selecting the word edge will be
+      // a valid operation.
+      final Offset pos1 = textOffsetToPosition(tester, 1);
+      final TestGesture gesture = await tester.startGesture(pos1);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(1));
+
+      // Test that tapping misspelled word replacement buttons will replace
+      // the correct word and select the word edge.
+      state.showSpellCheckSuggestionsToolbar();
+      await tester.pumpAndSettle();
+
+      if (kIsWeb) {
+        expect(find.text('sets'), findsNothing);
+      }
+      else {
+        expect(find.text('sets'), findsOneWidget);
+        await tester.tap(find.text('sets'));
+        await tester.pumpAndSettle();
+        expect(state.currentTextEditingValue.text, equals('sets test test'));
+        expect(state.currentTextEditingValue.selection.baseOffset, equals(4));
+      }
+    });
+
+    testWidgets('material spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(
@@ -15129,21 +15194,34 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         cause: SelectionChangedCause.tap,
       );
       await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
 
       // Test misspelled word replacement buttons.
       state.showSpellCheckSuggestionsToolbar();
       await tester.pumpAndSettle();
-      expect(find.text('sets'), findsOneWidget);
-      await tester.tap(find.text('sets'));
-      await tester.pumpAndSettle();
-      expect(state.currentTextEditingValue.text, equals('sets test test'));
+
+      if (kIsWeb) {
+        expect(find.text('sets'), findsNothing);
+      } else {
+        expect(find.text('sets'), findsOneWidget);
+        await tester.tap(find.text('sets'));
+        await tester.pumpAndSettle();
+        expect(state.currentTextEditingValue.text, equals('sets test test'));
+        expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
+      }
 
       // Test delete button.
       state.showSpellCheckSuggestionsToolbar();
       await tester.pumpAndSettle();
-      await tester.tap(find.text('DELETE'));
-      await tester.pumpAndSettle();
-      expect(state.currentTextEditingValue.text, equals(' test test'));
+      if (kIsWeb) {
+        expect(find.text('DELETE'), findsNothing);
+      } else {
+        expect(find.text('DELETE'), findsOneWidget);
+        await tester.tap(find.text('DELETE'));
+        await tester.pumpAndSettle();
+        expect(state.currentTextEditingValue.text, equals(' test test'));
+        expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
+      }
     });
   });
 
