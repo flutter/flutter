@@ -420,8 +420,19 @@ abstract class FlutterProjectPlatform {
 class AndroidProject extends FlutterProjectPlatform {
   AndroidProject._(this.parent);
 
+  // User facing string when java/gradle/agp versions are compatible.
   @visibleForTesting
   static const String validJavaGradleAgpString = 'compatible java/gradle/agp';
+
+  // User facing link that describes compatibility between gradle and
+  // android gradle plugin.
+  static const String gradleAgpCompatUrl =
+    'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle';
+
+  // User facing link that describes compatiblity between java and the first
+  // version of gradle to support it.
+  static const String javaGradleCompatUrl =
+    'https://docs.gradle.org/current/userguide/compatibility.html#java';
 
   /// The parent of this project.
   final FlutterProject parent;
@@ -571,16 +582,17 @@ Incompatible Gradle/AGP versions. \n
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
 Update gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
 See the link below for more information:
-https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+$gradleAgpCompatUrl
 ''';
     }
     if (!compatibleJavaGradle) {
+      // Should contain the agp error (if present) but not the valid String.
       description = '''
-${compatibleJavaGradle ? '' : description}
+${compatibleGradleAgp ? '' : description}
 Incompatible Java/Gradle versions.
 Java Version: $javaVersion, Gradle Version: $gradleVersion\n
 See the link below for more information:
-https://docs.gradle.org/current/userguide/compatibility.html#java
+$javaGradleCompatUrl
 ''';
     }
     // TODO(reidbaker): Android Studio <-> AGP Validation.
