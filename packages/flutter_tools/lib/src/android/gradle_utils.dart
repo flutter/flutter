@@ -47,7 +47,8 @@ const String ndkVersion = '23.1.7779620';
 // Update this when new versions of Gradle come out.
 const String _maxKnownAndSupportedGradleVersion = '8.0';
 // Update this when new versions of AGP.
-const String _maxKnownAgpVersion = '8.1';
+@visibleForTesting
+const String maxKnownAgpVersion = '8.1';
 
 // Expected content:
 // "classpath 'com.android.tools.build:gradle:7.3.0'"
@@ -322,7 +323,7 @@ bool validateGradleAndAgp(Logger logger,
   }
 
   // Check highest supported version before checking unknown versions.
-  if (isWithinVersionRange(agpV, min: '8.0', max: _maxKnownAgpVersion)) {
+  if (isWithinVersionRange(agpV, min: '8.0', max: maxKnownAgpVersion)) {
     return isWithinVersionRange(gradleV,
         min: '8.0', max: _maxKnownAndSupportedGradleVersion);
   }
@@ -563,12 +564,12 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (isWithinVersionRange(androidPluginVersion, min: '7.0', max: '7.5')) {
     return '7.5';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '7.5', max: _maxKnownAgpVersion)) {
+  if (isWithinVersionRange(androidPluginVersion, min: '7.5', max: maxKnownAgpVersion)) {
     return '8.0';
   }
   // Assume if AGP is newer than this code know about return the highest gradle
   // version we know about.
-  if (isWithinVersionRange(androidPluginVersion, min: _maxKnownAgpVersion, max: '100.100')) {
+  if (isWithinVersionRange(androidPluginVersion, min: maxKnownAgpVersion, max: '100.100')) {
     return _maxKnownAndSupportedGradleVersion;
   }
   // TODO should this be a regular thow so that chris can see these in crash logging.
