@@ -261,7 +261,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
-        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "flutter.gradle.kts")
+        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "kotlin", "flutter.gradle.kts")
 
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
