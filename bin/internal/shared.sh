@@ -108,6 +108,15 @@ function _wait_for_lock () {
   trap _rmlock INT TERM EXIT
 }
 
+# These are Git pathspecs, relative to the root of the Flutter repo.
+# Together they include all the inputs to compiling the tool.
+flutter_tool_source_pathspecs=(
+  bin/internal/engine.version         # aka ENGINE_VERSION
+  packages/flutter_tools/pubspec.yaml # from FLUTTER_TOOLS_DIR
+  packages/flutter_tools/bin/
+  packages/flutter_tools/lib/
+)
+
 # This function is always run in a subshell. Running the function in a subshell
 # is required to make sure any lock directory is cleaned up by the exit trap in
 # _wait_for_lock.
@@ -139,6 +148,18 @@ function upgrade_flutter () (
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
+
+    local stamp="$(cat "$STAMP_PATH")"
+    local old_revision="${stamp%%:*}" old_flutter_tool_args="${stamp#*:}"
+    if [[ "$old_flutter_tool_args" == "$FLUTTER_TOOL_ARGS" ]] \
+        && git -C "$FLUTTER_ROOT" diff --quiet "$old_revision" "$revision" \
+             -- "${flutter_tool_source_pathspecs[@]}" >/dev/null 2>&1; then
+      # The cache has the same FLUTTER_TOOL_ARGS as we would compile,
+      # and a revision with the same tool source as we would compile.
+      # So that's a cache hit; just update the stamp.
+      echo "$compilekey" > "$STAMP_PATH"
+      exit $?
+    fi
 
     >&2 echo Building flutter tool...
 
