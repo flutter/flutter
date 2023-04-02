@@ -1619,4 +1619,54 @@ void main() {
     expect((mergeableMaterial.children.first as MaterialSlice).color, firstPanelColor);
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
+
+  testWidgets('default materialGapSize should be 16', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              body: const SizedBox.shrink(),
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const SizedBox.shrink();
+              },
+            )
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionPanelList expansionPanelList = tester.widget(find.byType(ExpansionPanelList));
+    expect(expansionPanelList.materialGapSize, 16);
+  });
+
+  testWidgets('ExpansionPanelList respects materialGapSize', (WidgetTester tester) async {
+    Widget buildWidgetForTest({double materialGapSize = 16}) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            materialGapSize: materialGapSize,
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              )
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidgetForTest(materialGapSize: 0));
+    final ExpansionPanelList expansionPanelList = tester.widget(find.byType(ExpansionPanelList));
+    expect(expansionPanelList.materialGapSize, 0);
+
+    await tester.pumpWidget(buildWidgetForTest(materialGapSize: 20));
+    final ExpansionPanelList expansionPanelList2 = tester.widget(find.byType(ExpansionPanelList));
+    expect(expansionPanelList2.materialGapSize, 20);
+  });
 }
