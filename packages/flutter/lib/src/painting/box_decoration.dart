@@ -446,7 +446,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
   void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.color != null || _decoration.gradient != null) {
-      // When border is filled, we can reduce the rect to avoid
+      // When border is filled, the rect is reduced to avoid
       // visual glitches leaking the color due to clipping.
       // https://github.com/flutter/flutter/issues/13675
       final Rect ajustedRect = _adjustRectOnOutlinedBorder(rect, textDirection);
