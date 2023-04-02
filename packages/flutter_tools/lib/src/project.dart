@@ -524,18 +524,19 @@ class AndroidProject extends FlutterProjectPlatform {
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
     const String visibleName = 'Java/Gradle/Android Gradle Plugin';
-    final bool validJavaGradleAgpVersions =
-        await hasValidJavaGradleAgpVersions();
+    // final bool validJavaGradleAgpVersions =
+    //     await hasValidJavaGradleAgpVersions();
 
-    const String invalidJavaGradleAgpString =
-        'Incompatible Java/Gradle/AGP versions.';
+    // const String invalidJavaGradleAgpString =
+    //     'Incompatible Java/Gradle/AGP versions.';
+
+    final String validJavaGradleAgpVersions =
+        await hasValidJavaGradleAgpVersions();
 
     return ProjectValidatorResult(
       name: visibleName,
-      value: validJavaGradleAgpVersions
-          ? validJavaGradleAgpString
-          : invalidJavaGradleAgpString,
-      status: validJavaGradleAgpVersions
+      value: validJavaGradleAgpVersions,
+      status: validJavaGradleAgpVersions == validJavaGradleAgpString
           ? StatusProjectValidator.success
           : StatusProjectValidator.error,
     );
@@ -544,10 +545,11 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Ensures Java Sdk is compatible with the projects gradle version and
   /// the projects gradle version is compatible with the AGP version used
   /// in build.gradle.
-  Future<bool> hasValidJavaGradleAgpVersions() async {
-    String? gradleVersion = await gradle.getGradleVersion(
+  /// TODO return something better than string.
+  Future<String> hasValidJavaGradleAgpVersions() async {
+    final String? gradleVersion = await gradle.getGradleVersion(
         hostAppGradleRoot, globals.logger, globals.processManager);
-    String? agpVersion =
+    final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
     // TODO replace with generated version.
     final String? javaVersion = AndroidSdk.getJavaVersion(
@@ -559,16 +561,37 @@ class AndroidProject extends FlutterProjectPlatform {
       sdkManagerEnv: globals.androidSdk?.sdkManagerEnv,
     );
 
-    // TODO Begin Android Studio <-> AGP Validation.
-    // https://developer.android.com/studio/releases/gradle-plugin#android_gradle_plugin_and_android_studio_compatibility
+    String description = validJavaGradleAgpString;
 
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
         gradleV: gradleVersion, agpV: agpVersion);
 
+    if (!compatibleGradleAgp) {
+      description = '''
+Incompatible Gradle/AGP versions. \n
+Gradle Version: $gradleVersion, AGP Version: $agpVersion \n
+Update gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".
+See the link below for more information:
+https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+''';
+    }
+
     final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger,
         javaV: javaVersion, gradleV: gradleVersion);
 
-    return compatibleGradleAgp && compatibleJavaGradle;
+    if (!compatibleJavaGradle) {
+      description = '''
+${compatibleJavaGradle ? '' : description}
+Incompatible Java/Gradle versions. \n
+Java Version: $javaVersion, Gradle Version: $gradleVersion \n
+See the link below for more information:
+https://docs.gradle.org/current/userguide/compatibility.html#java
+''';
+    }
+    // TODO(reidbaker): Android Studio <-> AGP Validation.
+    // https://developer.android.com/studio/releases/gradle-plugin#android_gradle_plugin_and_android_studio_compatibility
+
+    return description;
   }
 
   bool get isUsingGradle {

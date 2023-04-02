@@ -522,7 +522,6 @@ bool validateJavaGradle(Logger logger,
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
 /// by picking the largest compatible version from
 /// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-@visibleForTesting
 String getGradleVersionFor(String androidPluginVersion) {
   if (isWithinVersionRange(androidPluginVersion, min: '1.0.0', max: '1.1.3')) {
     return '2.3';
