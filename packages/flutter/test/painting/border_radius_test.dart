@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   test('BorderRadius control test', () {
@@ -26,8 +28,8 @@ void main() {
     expect(borderRadius.bottomRight, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
 
-    const Radius radius1 = Radius.elliptical(8.9, 6.7);
-    const Radius radius2 = Radius.elliptical(9.3, 7.7);
+    const Radius radius1 = Radius.elliptical(89.0, 87.0);
+    const Radius radius2 = Radius.elliptical(103.0, 107.0);
 
     borderRadius = const BorderRadius.vertical(top: radius1, bottom: radius2);
     expect(borderRadius, hasOneLineDescription);
@@ -187,8 +189,8 @@ void main() {
     expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
     expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
 
-    const Radius radius1 = Radius.elliptical(8.9, 6.7);
-    const Radius radius2 = Radius.elliptical(9.3, 7.7);
+    const Radius radius1 = Radius.elliptical(89.0, 87.0);
+    const Radius radius2 = Radius.elliptical(103.0, 107.0);
 
     borderRadius = const BorderRadiusDirectional.vertical(top: radius1, bottom: radius2);
     expect(borderRadius, hasOneLineDescription);
@@ -566,34 +568,27 @@ void main() {
     expect(borderRadius.copyWith(bottomRight: Radius.zero).copyWith(bottomRight: radius), borderRadius);
   });
 
-  test('BorderRadius toRRect when radius is larger than rect size', () {
+  testWidgets('BorderRadius toRRect when radius is larger than rect size', (WidgetTester tester) async {
     const Rect rect = Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
-    const Radius radius1 = Radius.elliptical(88, 8);
-    const Radius radius2 = Radius.elliptical(9, 99);
-    const Radius radius1Expected = Radius.elliptical(10, 8);
-    const Radius radius2Expected = Radius.elliptical(9, 8);
-
-    BorderRadius borderRadius = const BorderRadius.vertical(top: radius1, bottom: radius2);
-    expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(
-      rect,
-      topLeft: radius1Expected,
-      topRight: radius1Expected,
-      bottomLeft: radius2Expected,
-      bottomRight: radius2Expected,
-    ));
-
-    borderRadius = const BorderRadius.only(topRight: radius1, bottomRight: radius2);
-    expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(
-      rect,
-      topRight: radius1Expected,
-      bottomRight: radius2Expected,
-    ));
-
-    const Radius radius3 = Radius.elliptical(11, 11);
-    borderRadius = const BorderRadius.all(radius3);
+    final BorderRadius borderRadius = BorderRadius.circular(double.infinity);
     expect(borderRadius.toRRect(rect), RRect.fromRectAndRadius(
       rect,
-      const Radius.elliptical(10, 8),
+      const Radius.circular(3.402823e+38),
     ));
+
+    await tester.pumpWidget(
+      Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(color: const Color(0xff123456), borderRadius: borderRadius),
+      ),
+    );
+    final RenderBox box = tester.renderObject(find.byType(Container));
+    expect(box, isNotNull);
+    expect(
+      box,
+      paints
+        ..rrect(rrect: RRect.fromLTRBR(0.0, 0.0, 800.0, 600.0, const Radius.circular(3.402823e+38))),
+    );
   });
 }

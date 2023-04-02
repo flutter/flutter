@@ -399,11 +399,12 @@ class BorderRadius extends BorderRadiusGeometry {
     // converting them to an RRect to be rendered, since negative radii on
     // RRects don't make sense.
     //
-    // We also clamp the radii to be no larger than [we need to define],
-    // to avoid a scenario where a rounded rectangle with a radius larger
-    // than 3.402823e+38 (max finite value of a float32) is displayed as
-    // a rectangle without rounded corners.
-    final Radius maxRadius = Radius.elliptical(rect.width, rect.height);
+    // Using BorderRadius.circular(double.infinity) results in a square rather
+    // than a rounded rectangle due to the renderer's limitations. To avoid
+    // this, we clamp the radii to a maximum finite value of a float32
+    // (3.402823e+38), ensuring that BorderRadius.circular(double.infinity)
+    //will display a rounded rectangle instead of a square.
+    const Radius maxRadius = Radius.circular(3.402823e+38);
     return RRect.fromRectAndCorners(
       rect,
       topLeft: topLeft.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
