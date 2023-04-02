@@ -881,7 +881,7 @@ class _LargeTitleNavigationBarSliverDelegate
 
     // this is added for declare ios version as int, i can get it directly, if you can please replace it
     if (Platform.isIOS) {
-      final _iosVersion = int.tryParse(
+      final iosVersion = int.tryParse(
           Platform.operatingSystemVersion.split(' ')[1].split('.').first);
       _iosSpecificLargeTitleResizer = ((_iosVersion ?? 15) < 14 ? 0 : 4);
     }
