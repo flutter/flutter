@@ -61,6 +61,7 @@ class NavigationDrawer extends StatelessWidget {
     this.indicatorShape,
     this.onDestinationSelected,
     this.selectedIndex = 0,
+    this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
   });
 
   /// The background color of the [Material] that holds the [NavigationDrawer]'s
@@ -124,6 +125,9 @@ class NavigationDrawer extends StatelessWidget {
   /// Upon updating [selectedIndex], the [NavigationDrawer] will be rebuilt.
   final ValueChanged<int>? onDestinationSelected;
 
+  /// padding of drawer items
+  final EdgeInsetsGeometry padding;
+
   @override
   Widget build(BuildContext context) {
     final int totalNumberOfDestinations =
@@ -141,6 +145,7 @@ class NavigationDrawer extends StatelessWidget {
             selectedAnimation: animation,
             indicatorColor: indicatorColor,
             indicatorShape: indicatorShape,
+            padding: padding,
             onTap: () {
               if (onDestinationSelected != null) {
                 onDestinationSelected!(index);
@@ -321,7 +326,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      padding: info.padding,
       child: _NavigationDestinationSemantics(
         child: SizedBox(
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
@@ -455,6 +460,7 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
     required this.indicatorShape,
     required this.onTap,
     required super.child,
+    required this.padding,
   });
 
   /// Which destination index is this in the navigation drawer.
@@ -513,6 +519,9 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// This is computed by calling [NavigationDrawer.onDestinationSelected]
   /// with [index] passed in.
   final VoidCallback onTap;
+
+  /// padding of drawer items
+  final EdgeInsetsGeometry padding;
 
   /// Returns a non null [_NavigationDrawerDestinationInfo].
   ///
