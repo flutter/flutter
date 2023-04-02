@@ -613,10 +613,12 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         actions |= index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -895,10 +897,12 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         actions |= index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -1081,10 +1085,12 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
-      for (final int index in SemanticsAction.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         allActions |= index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         allFlags |= index;
       }
       final SemanticsData emptyData = SemanticsData(
