@@ -877,7 +877,7 @@ class _LargeTitleNavigationBarSliverDelegate
       return navBar;
     }
 
-    int _iosSpecificLargeTitleResizer = 0;
+    int iosSpecificLargeTitleResizer = 0;
 
     // this is added for declare ios version as int, i can get it directly, if you can please replace it
     if (Platform.isIOS) {
