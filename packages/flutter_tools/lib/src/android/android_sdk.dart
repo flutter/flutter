@@ -414,7 +414,6 @@ class AndroidSdk {
   // Returns the version of java in the format \d(.\d)+(.\d)+
   // Returns null if version not found.
   String? getJavaVersion({
-    // TODO get these values from the object and revert making the method static.
     required AndroidStudio? androidStudio,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,

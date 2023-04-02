@@ -433,17 +433,6 @@ dependencies {
 ''';
         });
         addGradleWrapperFile(project.directory, gradleV);
-        final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
-        // Can this be removed? 
-        processManager.addCommand(FakeCommand(
-          command: <String>[
-            expectedJavaPath,
-            '--version',
-          ],
-          // For simplistity expose the version and some extra text but not
-          // the full output of java --version.
-          stdout: 'openjdk $javaV',
-        ));
         androidSdk.javaVersion = javaV;
         return project;
       }
