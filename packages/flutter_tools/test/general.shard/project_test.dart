@@ -4,9 +4,12 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -402,10 +405,48 @@ void main() {
     });
 
     group('compatibility', () {
-      // TODO improve test.
-      _testInMemory('always returns false', () async {
+      late MemoryFileSystem fs;
+      late FakeProcessManager processManager;
+      late ProcessUtils processUtils;
+      late FlutterProjectFactory flutterProjectFactory;
+      late AndroidStudio androidStudio;
+      setUp(() {
+        fs = MemoryFileSystem.test();
+        processManager = FakeProcessManager.empty();
+        androidStudio = FakeAndroidStudio();
+        flutterProjectFactory = FlutterProjectFactory(
+          logger: logger,
+          fileSystem: fs,
+        );
+      });
+      testUsingContext('Gradle agp compat', () async {
         final FlutterProject project = await someProject();
-        expect(await project.android.hasValidJavaGradleAgpVersions(), isFalse);
+        const String agpVersion = '7.4.2';
+        addAndroidGradleFile(project.directory, gradleFileContent: () {
+          return '''
+dependencies {
+    classpath 'com.android.tools.build:gradle:$agpVersion'
+}
+''';
+        });
+        addGradleWrapperFile(project.directory, '7.0.2');
+        final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+        processManager.addCommand(FakeCommand(
+        command: <String>[
+          expectedJavaPath,
+          '--version',
+        ],
+        stdout: '11.0.2',
+      ));
+        expect((await project.android.hasValidJavaGradleAgpVersions()).success,
+            isFalse);
+      }, overrides: <Type, Generator>{
+        AndroidStudio: () => androidStudio,
+        FileSystem: () => fs,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+        Platform: () => FakePlatform(),
+        ProcessManager: () => processManager,
+        FlutterProjectFactory: () => flutterProjectFactory,
       });
     });
 
@@ -1141,8 +1182,25 @@ void addAndroidGradleFile(Directory directory, { required String Function() grad
       .childDirectory('android')
       .childDirectory('app')
       .childFile('build.gradle')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(gradleFileContent());
+    ..createSync(recursive: true)
+    ..writeAsStringSync(gradleFileContent());
+}
+
+void addGradleWrapperFile(Directory directory, String gradleVersion) {
+  directory
+      .childDirectory('android')
+      .childDirectory('gradle')
+      .childDirectory('wrapper')
+      .childFile('gradle-wrapper.properties')
+    ..createSync(recursive: true)
+    // ignore: unnecessary_string_escapes
+    ..writeAsStringSync('''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-$gradleVersion-all.zip
+''');
 }
 
 void addAndroidWithGroup(Directory directory, String id) {
