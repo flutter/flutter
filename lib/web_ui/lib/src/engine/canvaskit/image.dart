@@ -15,10 +15,10 @@ import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'image_wasm_codecs.dart';
 import 'image_web_codecs.dart';
-import 'native_memory.dart';
 import 'painting.dart';
 import 'picture.dart';
 import 'picture_recorder.dart';
+import 'skia_object_cache.dart';
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
 FutureOr<ui.Codec> skiaInstantiateImageCodec(Uint8List list,
@@ -227,8 +227,52 @@ Future<Uint8List> readChunked(HttpFetchPayload payload, int contentLength, WebOn
 /// A [ui.Image] backed by an `SkImage` from Skia.
 class CkImage implements ui.Image, StackTraceDebugger {
   CkImage(SkImage skImage, { this.videoFrame }) {
-    box = CountedRef<CkImage, SkImage>(skImage, this, 'SkImage');
     _init();
+    if (browserSupportsFinalizationRegistry) {
+      box = SkiaObjectBox<CkImage, SkImage>(this, skImage);
+    } else {
+      // If finalizers are not supported we need to be able to resurrect the
+      // image if it was temporarily deleted. To do that, we keep the original
+      // pixels and ask the SkiaObjectBox to make an image from them when
+      // resurrecting.
+      //
+      // IMPORTANT: the alphaType, colorType, and colorSpace passed to
+      // _encodeImage and to canvasKit.MakeImage must be the same. Otherwise
+      // Skia will misinterpret the pixels and corrupt the image.
+      final ByteData? originalBytes = _encodeImage(
+        skImage: skImage,
+        format: ui.ImageByteFormat.rawRgba,
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+      );
+      if (originalBytes == null) {
+        printWarning('Unable to encode image to bytes. We will not '
+            'be able to resurrect it once it has been garbage collected.');
+        return;
+      }
+      final int originalWidth = skImage.width().toInt();
+      final int originalHeight = skImage.height().toInt();
+      box = SkiaObjectBox<CkImage, SkImage>.resurrectable(this, skImage, () {
+        final SkImage? skImage = canvasKit.MakeImage(
+          SkImageInfo(
+            alphaType: canvasKit.AlphaType.Premul,
+            colorType: canvasKit.ColorType.RGBA_8888,
+            colorSpace: SkColorSpaceSRGB,
+            width: originalWidth.toDouble(),
+            height: originalHeight.toDouble(),
+          ),
+          originalBytes.buffer.asUint8List(),
+          (4 * originalWidth).toDouble(),
+        );
+        if (skImage == null) {
+          throw ImageCodecException(
+            'Failed to resurrect image from pixels.'
+          );
+        }
+        return skImage;
+      });
+    }
   }
 
   CkImage.cloneOf(this.box, {this.videoFrame}) {
@@ -247,9 +291,9 @@ class CkImage implements ui.Image, StackTraceDebugger {
   StackTrace get debugStackTrace => _debugStackTrace;
   late StackTrace _debugStackTrace;
 
-  // Use ref counting because `SkImage` may be deleted either due to this object
+  // Use a box because `SkImage` may be deleted either due to this object
   // being garbage-collected, or by an explicit call to [delete].
-  late final CountedRef<CkImage, SkImage> box;
+  late final SkiaObjectBox<CkImage, SkImage> box;
 
   /// For browsers that support `ImageDecoder` this field holds the video frame
   /// from which this image was created.
@@ -261,9 +305,9 @@ class CkImage implements ui.Image, StackTraceDebugger {
 
   /// The underlying Skia image object.
   ///
-  /// Do not store the returned value. It is memory-managed by [CountedRef].
+  /// Do not store the returned value. It is memory-managed by [SkiaObjectBox].
   /// Storing it may result in use-after-free bugs.
-  SkImage get skImage => box.nativeObject;
+  SkImage get skImage => box.skiaObject;
 
   bool _disposed = false;
 

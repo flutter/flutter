@@ -46,7 +46,8 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
   /// false.
   ///
   /// This extra flag is necessary on top of [rawSkiaObject] because
-  /// [rawSkiaObject] being null does not indicate permanent deletion.
+  /// [rawSkiaObject] being null does not indicate permanent deletion. See
+  /// similar flag [SkiaObjectBox.isDeletedPermanently].
   bool _isDisposed = false;
 
   /// The stack trace taken when [dispose] was called.
