@@ -405,8 +405,6 @@ allprojects {
       }
     });
 
-    // TODO add test for _isWithinVersionRange inclusive min and max
-
     group('validates java/gradle versions', () {
       final List<JavaGradleTestData> testData = <JavaGradleTestData>[
         // Values too new *these need to update* when
@@ -470,7 +468,8 @@ allprojects {
       ];
 
       for (final JavaGradleTestData data in testData) {
-        testWithoutContext('(Java, gradle): (${data.javaVersion}, ${data.gradleVersion})', () {
+        testWithoutContext(
+            '(Java, gradle): (${data.javaVersion}, ${data.gradleVersion})', () {
           expect(
               validateJavaGradle(
                 BufferLogger.test(),

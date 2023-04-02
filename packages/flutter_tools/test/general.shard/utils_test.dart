@@ -56,6 +56,15 @@ baz=qux
 
       expect(Version.parse('Preview2.2'), isNull);
     });
+
+    group('isWithinVersionRange', () {
+      test('minIncluded by default', () {
+        expect(
+            isWithinVersionRange('1.0.0',
+                min: '1.0.0', max: '1.1.3'),
+            isTrue);
+      });
+    });
   });
 
   group('Misc', () {

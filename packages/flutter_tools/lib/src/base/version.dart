@@ -119,3 +119,31 @@ class Version implements Comparable<Version> {
   @override
   String toString() => _text;
 }
+
+/// Returns true if [targetVersion] is within the range [min] and [max]
+/// inclusive by default. Pass [inclusiveMax] = false for less than and
+/// not equal to max.
+bool isWithinVersionRange(
+  String targetVersion, {
+  required String min,
+  required String max,
+  bool inclusiveMax = true,
+  bool inclusiveMin = true,
+}) {
+  final Version? parsedTargetVersion = Version.parse(targetVersion);
+  final Version? minVersion = Version.parse(min);
+  final Version? maxVersion = Version.parse(max);
+
+  final bool withinMin = minVersion != null &&
+      parsedTargetVersion != null &&
+      (inclusiveMin
+      ? parsedTargetVersion >= minVersion
+      : parsedTargetVersion > minVersion);
+
+  final bool withinMax = maxVersion != null &&
+      parsedTargetVersion != null &&
+      (inclusiveMax
+          ? parsedTargetVersion <= maxVersion
+          : parsedTargetVersion < maxVersion);
+  return withinMin && withinMax;
+}
