@@ -171,7 +171,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
-    this.materialGapSize = 16,
+    this.materialGapSize = 16.0,
   }) : _allowOnlyOnePanelOpen = false,
        initialOpenPanelValue = null;
 
@@ -198,7 +198,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
-    this.materialGapSize = 16,
+    this.materialGapSize = 16.0,
   }) : _allowOnlyOnePanelOpen = true;
 
   /// The children of the expansion panel list. They are laid out in a similar
