@@ -34,6 +34,9 @@ struct _FlTextureRegistrarImpl {
   // plugins.  The keys are directly stored int64s. The values are stored
   // pointer to #FlTexture.  This table is freed by the responder.
   GHashTable* textures;
+
+  // The mutex guard to make `textures` thread-safe.
+  GMutex textures_mutex;
 };
 
 static void fl_texture_registrar_impl_iface_init(
@@ -57,21 +60,26 @@ static void engine_weak_notify_cb(gpointer user_data,
   self->engine = nullptr;
 
   // Unregister any textures.
+  g_mutex_lock(&self->textures_mutex);
   g_autoptr(GHashTable) textures = self->textures;
   self->textures = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                                          g_object_unref);
   g_hash_table_remove_all(textures);
+  g_mutex_unlock(&self->textures_mutex);
 }
 
 static void fl_texture_registrar_impl_dispose(GObject* object) {
   FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(object);
 
+  g_mutex_lock(&self->textures_mutex);
   g_clear_pointer(&self->textures, g_hash_table_unref);
+  g_mutex_unlock(&self->textures_mutex);
 
   if (self->engine != nullptr) {
     g_object_weak_unref(G_OBJECT(self->engine), engine_weak_notify_cb, self);
     self->engine = nullptr;
   }
+  g_mutex_clear(&self->textures_mutex);
 
   G_OBJECT_CLASS(fl_texture_registrar_impl_parent_class)->dispose(object);
 }
@@ -93,8 +101,10 @@ static gboolean register_texture(FlTextureRegistrar* registrar,
     int64_t id = self->next_id++;
     if (fl_engine_register_external_texture(self->engine, id)) {
       fl_texture_set_id(texture, id);
+      g_mutex_lock(&self->textures_mutex);
       g_hash_table_insert(self->textures, GINT_TO_POINTER(id),
                           g_object_ref(texture));
+      g_mutex_unlock(&self->textures_mutex);
       return TRUE;
     } else {
       return FALSE;
@@ -108,8 +118,11 @@ static gboolean register_texture(FlTextureRegistrar* registrar,
 static FlTexture* lookup_texture(FlTextureRegistrar* registrar,
                                  int64_t texture_id) {
   FlTextureRegistrarImpl* self = FL_TEXTURE_REGISTRAR_IMPL(registrar);
-  return reinterpret_cast<FlTexture*>(
+  g_mutex_lock(&self->textures_mutex);
+  FlTexture* texture = reinterpret_cast<FlTexture*>(
       g_hash_table_lookup(self->textures, GINT_TO_POINTER(texture_id)));
+  g_mutex_unlock(&self->textures_mutex);
+  return texture;
 }
 
 static gboolean mark_texture_frame_available(FlTextureRegistrar* registrar,
@@ -135,10 +148,12 @@ static gboolean unregister_texture(FlTextureRegistrar* registrar,
   gboolean result = fl_engine_unregister_external_texture(
       self->engine, fl_texture_get_id(texture));
 
+  g_mutex_lock(&self->textures_mutex);
   if (!g_hash_table_remove(self->textures,
                            GINT_TO_POINTER(fl_texture_get_id(texture)))) {
     g_warning("Unregistering a non-existent texture %p", texture);
   }
+  g_mutex_unlock(&self->textures_mutex);
 
   return result;
 }
@@ -155,6 +170,8 @@ static void fl_texture_registrar_impl_init(FlTextureRegistrarImpl* self) {
   self->next_id = 1;
   self->textures = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                                          g_object_unref);
+  // Initialize the mutex for textures.
+  g_mutex_init(&self->textures_mutex);
 }
 
 G_MODULE_EXPORT gboolean
