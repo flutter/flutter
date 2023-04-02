@@ -1620,7 +1620,7 @@ void main() {
     expect((mergeableMaterial.children.last as MaterialSlice).color, secondPanelColor);
   });
 
-  testWidgets('default materialGapSize should be 16', (WidgetTester tester) async {
+  testWidgets('ExpansionPanelList.materialGapSize defaults to 16.0', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: SingleChildScrollView(
         child: ExpansionPanelList(
