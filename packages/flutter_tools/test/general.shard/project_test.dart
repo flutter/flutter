@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -405,49 +406,61 @@ void main() {
     });
 
     group('compatibility', () {
-      late MemoryFileSystem fs;
       late FakeProcessManager processManager;
-      late ProcessUtils processUtils;
-      late FlutterProjectFactory flutterProjectFactory;
       late AndroidStudio androidStudio;
-      setUp(() {
-        fs = MemoryFileSystem.test();
-        processManager = FakeProcessManager.empty();
-        androidStudio = FakeAndroidStudio();
-        flutterProjectFactory = FlutterProjectFactory(
-          logger: logger,
-          fileSystem: fs,
-        );
-      });
-      testUsingContext('Gradle agp compat', () async {
+      late FakeAndroidSdkWithDir androidSdk;
+      late FileSystem fileSystem;
+      fileSystem = getFileSystemForPlatform();
+      processManager = FakeProcessManager.empty();
+      androidStudio = FakeAndroidStudio();
+      androidSdk =
+          FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+      fileSystem.currentDirectory
+          .childDirectory(androidStudio.javaPath!)
+          .createSync();
+
+      Future<FlutterProject?> configureJavaGradleAgpForTest({
+        required String javaV,
+        required String gradleV,
+        required String agpV,
+      }) async {
         final FlutterProject project = await someProject();
-        const String agpVersion = '7.4.2';
-        addAndroidGradleFile(project.directory, gradleFileContent: () {
+        addRootGradleFile(project.directory, gradleFileContent: () {
           return '''
 dependencies {
-    classpath 'com.android.tools.build:gradle:$agpVersion'
+    classpath 'com.android.tools.build:gradle:$agpV'
 }
 ''';
         });
-        addGradleWrapperFile(project.directory, '7.0.2');
+        addGradleWrapperFile(project.directory, gradleV);
         final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
         processManager.addCommand(FakeCommand(
-        command: <String>[
-          expectedJavaPath,
-          '--version',
-        ],
-        stdout: '11.0.2',
-      ));
-        expect((await project.android.hasValidJavaGradleAgpVersions()).success,
-            isFalse);
-      }, overrides: <Type, Generator>{
-        AndroidStudio: () => androidStudio,
-        FileSystem: () => fs,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-        Platform: () => FakePlatform(),
-        ProcessManager: () => processManager,
-        FlutterProjectFactory: () => flutterProjectFactory,
-      });
+          command: <String>[
+            expectedJavaPath,
+            '--version',
+          ],
+          // For simplistity expose the version and some extra text but not
+          // the full output of java --version.
+          stdout: 'openjdk $javaV',
+        ));
+        return project;
+      }
+
+      _testInMemory(
+        'Gradle agp compat',
+        () async {
+          FlutterProject? project = await configureJavaGradleAgpForTest(
+            javaV: '1.8.0',
+            gradleV: '8.0',
+            agpV: '7.4.2',
+          );
+          final value = await project!.android.hasValidJavaGradleAgpVersions();
+          expect(value.success, isTrue);
+        },
+        androidStudio: androidStudio,
+        processManager: processManager,
+        androidSdk: androidSdk,
+      );
     });
 
     group('language', () {
@@ -1074,42 +1087,52 @@ flutter:
 /// Executes the [testMethod] in a context where the file system
 /// is in memory.
 @isTest
-void _testInMemory(String description, Future<void> Function() testMethod) {
+void _testInMemory(
+  String description,
+  Future<void> Function() testMethod, {
+  FileSystem? fileSystem,
+  AndroidStudio? androidStudio,
+  ProcessManager? processManager,
+  AndroidSdk? androidSdk,
+}) {
   Cache.flutterRoot = getFlutterRoot();
-  final FileSystem testFileSystem = MemoryFileSystem(
-    style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
-  );
-  testFileSystem
-    .directory('.dart_tool')
-    .childFile('package_config.json')
+  final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
+  testFileSystem.directory('.dart_tool').childFile('package_config.json')
     ..createSync(recursive: true)
     ..writeAsStringSync('{"configVersion":2,"packages":[]}');
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
   final Logger logger = BufferLogger.test();
-  transfer(Cache(
-    fileSystem: globals.fs,
-    logger: logger,
-    artifacts: <ArtifactSet>[],
-    osUtils: OperatingSystemUtils(
-      fileSystem: globals.fs,
-      logger: logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
-    ),
-    platform: globals.platform,
-  ).getArtifactDirectory('gradle_wrapper'), testFileSystem);
-  transfer(globals.fs.directory(Cache.flutterRoot)
-      .childDirectory('packages')
-      .childDirectory('flutter_tools')
-      .childDirectory('templates'), testFileSystem);
+  transfer(
+      Cache(
+        fileSystem: globals.fs,
+        logger: logger,
+        artifacts: <ArtifactSet>[],
+        osUtils: OperatingSystemUtils(
+          fileSystem: globals.fs,
+          logger: logger,
+          platform: globals.platform,
+          processManager: globals.processManager,
+        ),
+        platform: globals.platform,
+      ).getArtifactDirectory('gradle_wrapper'),
+      testFileSystem);
+  transfer(
+      globals.fs
+          .directory(Cache.flutterRoot)
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .childDirectory('templates'),
+      testFileSystem);
   // Set up enough of the packages to satisfy the templating code.
-  final File packagesFile = testFileSystem.directory(Cache.flutterRoot)
+  final File packagesFile = testFileSystem
+      .directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('.dart_tool')
       .childFile('package_config.json');
-  final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
+  final Directory dummyTemplateImagesDirectory =
+      testFileSystem.directory(Cache.flutterRoot).parent;
   dummyTemplateImagesDirectory.createSync(recursive: true);
   packagesFile.createSync(recursive: true);
   packagesFile.writeAsStringSync(json.encode(<String, Object>{
@@ -1129,18 +1152,21 @@ void _testInMemory(String description, Future<void> Function() testMethod) {
     testMethod,
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => processManager ?? FakeProcessManager.any(),
+      AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
+      // Intentionlly null if not set. Some ios tests fail if this is a fake.
+      AndroidSdk: () => androidSdk,
       Cache: () => Cache(
-        logger: globals.logger,
-        fileSystem: testFileSystem,
-        osUtils: globals.os,
-        platform: globals.platform,
-        artifacts: <ArtifactSet>[],
-      ),
+            logger: globals.logger,
+            fileSystem: testFileSystem,
+            osUtils: globals.os,
+            platform: globals.platform,
+            artifacts: <ArtifactSet>[],
+          ),
       FlutterProjectFactory: () => FlutterProjectFactory(
-        fileSystem: testFileSystem,
-        logger: globals.logger,
-      ),
+            fileSystem: testFileSystem,
+            logger: globals.logger,
+          ),
     },
   );
 }
@@ -1186,6 +1212,13 @@ void addAndroidGradleFile(Directory directory, { required String Function() grad
     ..writeAsStringSync(gradleFileContent());
 }
 
+void addRootGradleFile(Directory directory,
+    {required String Function() gradleFileContent}) {
+  directory.childDirectory('android').childFile('build.gradle')
+    ..createSync(recursive: true)
+    ..writeAsStringSync(gradleFileContent());
+}
+
 void addGradleWrapperFile(Directory directory, String gradleVersion) {
   directory
       .childDirectory('android')
@@ -1201,6 +1234,14 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-$gradleVersion-all.zip
 ''');
+}
+
+FileSystem getFileSystemForPlatform() {
+  return MemoryFileSystem(
+    style: globals.platform.isWindows
+        ? FileSystemStyle.windows
+        : FileSystemStyle.posix,
+  );
 }
 
 void addAndroidWithGroup(Directory directory, String id) {
@@ -1310,4 +1351,28 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   bool get isInstalled => true;
+}
+
+class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
+  FakeAndroidSdkWithDir(this._directory, AndroidStudio _androidStudio) {
+    _javaPath = '${_androidStudio.javaPath}/bin/java';
+  }
+  late String _javaPath;
+
+  final Directory _directory;
+
+  @override
+  late bool platformToolsAvailable;
+
+  @override
+  late bool licensesAvailable;
+
+  @override
+  AndroidSdkVersion? latestVersion;
+
+  @override
+  Directory get directory => _directory;
+
+  @override
+  Map<String, String> get sdkManagerEnv => {'PATH': _javaPath};
 }

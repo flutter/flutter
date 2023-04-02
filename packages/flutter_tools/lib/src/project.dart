@@ -524,7 +524,7 @@ class AndroidProject extends FlutterProjectPlatform {
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
     const String visibleName = 'Java/Gradle/Android Gradle Plugin';
-    final _CompatabilityResult validJavaGradleAgpVersions =
+    final CompatabilityResult validJavaGradleAgpVersions =
         await hasValidJavaGradleAgpVersions();
 
 
@@ -540,7 +540,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Ensures Java Sdk is compatible with the projects gradle version and
   /// the projects gradle version is compatible with the AGP version used
   /// in build.gradle.
-  Future<_CompatabilityResult> hasValidJavaGradleAgpVersions() async {
+  Future<CompatabilityResult> hasValidJavaGradleAgpVersions() async {
     final String? gradleVersion = await gradle.getGradleVersion(
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
@@ -586,7 +586,7 @@ https://docs.gradle.org/current/userguide/compatibility.html#java
     // TODO(reidbaker): Android Studio <-> AGP Validation.
     // https://developer.android.com/studio/releases/gradle-plugin#android_gradle_plugin_and_android_studio_compatibility
 
-    return _CompatabilityResult(compatibleJavaGradle && compatibleGradleAgp, description);
+    return CompatabilityResult(compatibleJavaGradle && compatibleGradleAgp, description);
   }
 
   bool get isUsingGradle {
@@ -867,8 +867,11 @@ class FuchsiaProject {
       _meta ??= editableHostAppDirectory.childDirectory('meta');
 }
 
-class _CompatabilityResult {
-  _CompatabilityResult(this.success, this.description);
+// Combines success and a description into one object that can be returned
+// together.
+@visibleForTesting
+class CompatabilityResult {
+  CompatabilityResult(this.success, this.description);
   final bool success;
   final String description;
 }
