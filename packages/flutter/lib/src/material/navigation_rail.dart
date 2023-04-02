@@ -665,7 +665,6 @@ class _RailDestination extends StatelessWidget {
             ),
           );
         }
-        break;
       case NavigationRailLabelType.selected:
         final double appearingAnimationValue = 1 - _positionAnimation.value;
         final double verticalPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue)!;
@@ -717,7 +716,6 @@ class _RailDestination extends StatelessWidget {
             ),
           ),
         );
-        break;
       case NavigationRailLabelType.all:
         final double minHeight = material3 ? 0 : minWidth;
         final Widget topSpacing = SizedBox(height: material3 ? 0 : _verticalDestinationPaddingWithLabel);
@@ -752,7 +750,6 @@ class _RailDestination extends StatelessWidget {
             ],
           ),
         );
-        break;
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
@@ -1032,7 +1029,7 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)

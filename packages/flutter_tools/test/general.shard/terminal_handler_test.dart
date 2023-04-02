@@ -400,6 +400,52 @@ void main() {
       await terminalHandler.processTerminalInput('L');
     });
 
+    testWithoutContext('f - debugDumpFocusTree', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'FOCUS TREE',
+          }
+        ),
+      ]);
+      await terminalHandler.processTerminalInput('f');
+
+      expect(terminalHandler.logger.statusText, contains('FOCUS TREE'));
+    });
+
+    testWithoutContext('f - debugDumpLayerTree with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'FOCUS TREE',
+          }
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('f');
+
+      expect(terminalHandler.logger.statusText, contains('FOCUS TREE'));
+    });
+
+    testWithoutContext('f - debugDumpFocusTree with service protocol and profile mode is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], buildMode: BuildMode.profile);
+      await terminalHandler.processTerminalInput('f');
+    });
+
+    testWithoutContext('f - debugDumpFocusTree without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('f');
+    });
+
     testWithoutContext('o,O - debugTogglePlatform', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         // Request 1.
@@ -1423,19 +1469,16 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
         ..isRunningDebug = true
         ..isRunningProfile = false
         ..isRunningRelease = false;
-      break;
     case BuildMode.profile:
       residentRunner
         ..isRunningDebug = false
         ..isRunningProfile = true
         ..isRunningRelease = false;
-      break;
     case BuildMode.release:
       residentRunner
         ..isRunningDebug = false
         ..isRunningProfile = false
         ..isRunningRelease = true;
-      break;
   }
   return TerminalHandler(
     residentRunner,
@@ -1518,7 +1561,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

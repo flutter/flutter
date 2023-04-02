@@ -32,6 +32,8 @@ void main() {
     expect(bottomSheetTheme.shape, null);
     expect(bottomSheetTheme.clipBehavior, null);
     expect(bottomSheetTheme.constraints, null);
+    expect(bottomSheetTheme.dragHandleColor, null);
+    expect(bottomSheetTheme.dragHandleSize, null);
   });
 
   testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
@@ -55,6 +57,8 @@ void main() {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       clipBehavior: Clip.antiAlias,
       constraints: BoxConstraints(minWidth: 200, maxWidth: 640),
+      dragHandleColor: Color(0xFFFFFFFF),
+      dragHandleSize: Size(20, 20)
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -67,6 +71,8 @@ void main() {
       'elevation: 2.0',
       'shadowColor: Color(0xff00ffff)',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
+      'dragHandleColor: Color(0xffffffff)',
+      'dragHandleSize: Size(20.0, 20.0)',
       'clipBehavior: Clip.antiAlias',
       'constraints: BoxConstraints(200.0<=w<=640.0, 0.0<=h<=Infinity)',
     ]);

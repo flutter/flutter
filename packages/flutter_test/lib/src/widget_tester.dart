@@ -750,7 +750,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'your widget tree in a RootRestorationScope?',
     );
     return TestAsyncUtils.guard<void>(() async {
-      final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
+      final Widget widget = ((binding.rootElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
       final TestRestorationData restorationData = binding.restorationManager.restorationData;
       runApp(Container(key: UniqueKey()));
       await pump();
@@ -863,7 +863,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         .whereType<RenderObject>()
         .first;
       final Element? innerTargetElement = _lastWhereOrNull(
-        collectAllElementsFrom(binding.renderViewElement!, skipOffstage: true),
+        collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
         (Element element) => element.renderObject == innerTarget,
       );
       if (innerTargetElement == null) {
@@ -1045,7 +1045,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
     // TODO(goderbauer): Fix known leak in web engine when running integration tests and remove this "correction", https://github.com/flutter/flutter/issues/121640.
-    final int knownWebEngineLeakForLiveTestsCorrection = kIsWeb && binding is LiveTestWidgetsFlutterBinding ? 2 : 0;
+    final int knownWebEngineLeakForLiveTestsCorrection = kIsWeb && binding is LiveTestWidgetsFlutterBinding ? 1 : 0;
 
     if (_currentSemanticsHandles - knownWebEngineLeakForLiveTestsCorrection > _lastRecordedSemanticsHandles!) {
       throw FlutterError.fromParts(<DiagnosticsNode>[

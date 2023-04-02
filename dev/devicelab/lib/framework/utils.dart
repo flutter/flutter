@@ -35,6 +35,14 @@ String? get localEngineSrcPathFromEnv {
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
 
+/// The local Web SDK to use for [flutter] and [evalFlutter], if any.
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localWebSdkFromEnv {
+  const bool isDefined = bool.hasEnvironment('localWebSdk');
+  return isDefined ? const String.fromEnvironment('localWebSdk') : null;
+}
+
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();
 
@@ -446,6 +454,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   };
   final String? localEngine = localEngineFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+  final String? localWebSdk = localWebSdkFromEnv;
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
@@ -460,6 +469,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    if (localWebSdk != null) ...<String>['--local-web-sdk', localWebSdk],
     ...options,
   ];
 }
@@ -471,10 +481,15 @@ Future<int> flutter(String command, {
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
   String? workingDirectory,
-}) {
+}) async {
   final List<String> args = _flutterCommandArgs(command, options);
-  return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
+  final int exitCode = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
     canFail: canFail, environment: environment, workingDirectory: workingDirectory);
+
+  if (exitCode != 0 && !canFail) {
+    await _flutterScreenshot(workingDirectory: workingDirectory);
+  }
+  return exitCode;
 }
 
 /// Starts a Flutter subprocess.
@@ -506,13 +521,20 @@ Future<Process> startFlutter(String command, {
   String? workingDirectory,
 }) async {
   final List<String> args = _flutterCommandArgs(command, options);
-  return startProcess(
+  final Process process = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     args,
     environment: environment,
     isBot: isBot,
     workingDirectory: workingDirectory,
   );
+
+  unawaited(process.exitCode.then<void>((int exitCode) async {
+    if (exitCode != 0) {
+      await _flutterScreenshot(workingDirectory: workingDirectory);
+    }
+  }));
+  return process;
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
@@ -530,12 +552,53 @@ Future<String> evalFlutter(String command, {
 
 Future<ProcessResult> executeFlutter(String command, {
   List<String> options = const <String>[],
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
 }) async {
   final List<String> args = _flutterCommandArgs(command, options);
-  return _processManager.run(
+  final ProcessResult processResult = await _processManager.run(
     <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
     workingDirectory: cwd,
   );
+
+  if (processResult.exitCode != 0 && !canFail) {
+    await _flutterScreenshot();
+  }
+  return processResult;
+}
+
+Future<void> _flutterScreenshot({ String? workingDirectory }) async {
+  try {
+    final Directory? dumpDirectory = hostAgent.dumpDirectory;
+    if (dumpDirectory == null) {
+      return;
+    }
+    // On command failure try uploading screenshot of failing command.
+    final String screenshotPath = path.join(
+      dumpDirectory.path,
+      'device-screenshot-${DateTime.now().toLocal().toIso8601String()}.png',
+    );
+
+    final String deviceId = (await devices.workingDevice).deviceId;
+    print('Taking screenshot of working device $deviceId at $screenshotPath');
+    final List<String> args = _flutterCommandArgs(
+      'screenshot',
+      <String>[
+        '--out',
+        screenshotPath,
+        '-d', deviceId,
+      ],
+    );
+    final ProcessResult screenshot = await _processManager.run(
+      <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
+      workingDirectory: workingDirectory ?? cwd,
+    );
+
+    if (screenshot.exitCode != 0) {
+      print('Failed to take screenshot. Continuing.');
+    }
+  } catch (exception) {
+    print('Failed to take screenshot. Continuing.\n$exception');
+  }
 }
 
 String get dartBin =>

@@ -216,6 +216,7 @@ abstract class Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   });
 
   /// Send an event to be emitted.
@@ -376,11 +377,13 @@ class DelegatingLogger implements Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     return _delegate.startSpinner(
       onFinish: onFinish,
       timeout: timeout,
       slowWarningCallback: slowWarningCallback,
+      warningColor: warningColor,
     );
   }
 
@@ -587,6 +590,7 @@ class StdoutLogger extends Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     if (_status != null || !supportsColor) {
       return SilentStatus(
@@ -606,6 +610,7 @@ class StdoutLogger extends Logger {
       terminal: terminal,
       timeout: timeout,
       slowWarningCallback: slowWarningCallback,
+      warningColor: warningColor,
     )..start();
     return _status!;
   }
@@ -888,6 +893,7 @@ class BufferLogger extends Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     return SilentStatus(
       stopwatch: _stopwatchFactory.createStopwatch(),
@@ -1065,19 +1071,15 @@ class VerboseLogger extends DelegatingLogger {
         if (stackTrace != null) {
           super.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
         }
-        break;
       case _LogType.warning:
         super.printWarning(prefix + terminal.bolden(indentMessage));
-        break;
       case _LogType.status:
         super.printStatus(prefix + terminal.bolden(indentMessage));
-        break;
       case _LogType.trace:
         // This seems wrong, since there is a 'printTrace' to call on the
         // superclass, but it's actually the entire point of this logger: to
         // make things more verbose than they normally would be.
         super.printStatus(prefix + indentMessage);
-        break;
     }
   }
 
@@ -1273,6 +1275,7 @@ class AnonymousSpinnerStatus extends Status {
     required Stdio stdio,
     required Terminal terminal,
     this.slowWarningCallback,
+    this.warningColor,
     super.timeout,
   }) : _stdio = stdio,
        _terminal = terminal,
@@ -1282,6 +1285,7 @@ class AnonymousSpinnerStatus extends Status {
   final Terminal _terminal;
   String _slowWarning = '';
   final SlowWarningCallback? slowWarningCallback;
+  final TerminalColor? warningColor;
 
   static const String _backspaceChar = '\b';
   static const String _clearChar = ' ';
@@ -1364,8 +1368,15 @@ class AnonymousSpinnerStatus extends Status {
           _clear(_currentLineLength - _lastAnimationFrameLength);
         }
       }
-      if (_slowWarning == '' && slowWarningCallback != null) {
-        _slowWarning = slowWarningCallback!();
+      final SlowWarningCallback? callback = slowWarningCallback;
+      if (_slowWarning.isEmpty && callback != null) {
+        final TerminalColor? color = warningColor;
+        if (color != null) {
+          _slowWarning = _terminal.color(callback(), color);
+        } else {
+          _slowWarning = callback();
+        }
+
         _writeToStdOut(_slowWarning);
       }
     }

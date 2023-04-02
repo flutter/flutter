@@ -74,7 +74,8 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       );
       expect(device.isSupported(), isTrue);
     });
@@ -90,7 +91,8 @@ void main() {
         iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.armv7,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       );
       expect(device.isSupported(), isFalse);
     });
@@ -107,7 +109,8 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -120,7 +123,8 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -133,7 +137,8 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -146,7 +151,8 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -159,7 +165,8 @@ void main() {
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       ).majorSdkVersion, 0);
     });
 
@@ -175,7 +182,8 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3 17C54',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       );
 
       expect(await device.sdkNameAndVersion,'iOS 13.3 17C54');
@@ -193,7 +201,8 @@ void main() {
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -217,7 +226,8 @@ void main() {
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
-              interfaceType: IOSDeviceConnectionInterface.usb,
+              connectionInterface: DeviceConnectionInterface.attached,
+              isConnected: true,
             );
           },
           throwsAssertionError,
@@ -307,7 +317,8 @@ void main() {
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
-          interfaceType: IOSDeviceConnectionInterface.usb,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -368,7 +379,8 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       );
 
       device2 = IOSDevice(
@@ -382,7 +394,8 @@ void main() {
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
-        interfaceType: IOSDeviceConnectionInterface.usb,
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: true,
       );
     });
 
@@ -587,6 +600,120 @@ void main() {
       expect(diagnostics.first, 'Generic pairing error');
     });
   });
+
+  group('waitForDeviceToConnect', () {
+    late FakeXcdevice xcdevice;
+    late Cache cache;
+    late FakeProcessManager fakeProcessManager;
+    late BufferLogger logger;
+    late IOSDeploy iosDeploy;
+    late IMobileDevice iMobileDevice;
+    late IOSWorkflow iosWorkflow;
+    late IOSDevice notConnected1;
+
+    setUp(() {
+      xcdevice = FakeXcdevice();
+      final Artifacts artifacts = Artifacts.test();
+      cache = Cache.test(processManager: FakeProcessManager.any());
+      logger = BufferLogger.test();
+      iosWorkflow = FakeIOSWorkflow();
+      fakeProcessManager = FakeProcessManager.any();
+      iosDeploy = IOSDeploy(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        platform: macPlatform,
+        processManager: fakeProcessManager,
+      );
+      iMobileDevice = IMobileDevice(
+        artifacts: artifacts,
+        cache: cache,
+        processManager: fakeProcessManager,
+        logger: logger,
+      );
+      notConnected1 = IOSDevice(
+        '00000001-0000000000000000',
+        name: 'iPad',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
+        logger: logger,
+        platform: macPlatform,
+        fileSystem: MemoryFileSystem.test(),
+        connectionInterface: DeviceConnectionInterface.attached,
+        isConnected: false,
+      );
+    });
+
+    testWithoutContext('wait for device to connect via wifi', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+
+      xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
+        XCDeviceEvent.attach,
+        XCDeviceEventInterface.wifi,
+        '00000001-0000000000000000'
+      );
+
+      final Device? device = await iosDevices.waitForDeviceToConnect(
+        notConnected1,
+        logger
+      );
+
+      expect(device?.isConnected, isTrue);
+      expect(device?.connectionInterface, DeviceConnectionInterface.wireless);
+    });
+
+    testWithoutContext('wait for device to connect via usb', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+
+      xcdevice.waitForDeviceEvent = XCDeviceEventNotification(
+        XCDeviceEvent.attach,
+        XCDeviceEventInterface.usb,
+        '00000001-0000000000000000'
+      );
+
+      final Device? device = await iosDevices.waitForDeviceToConnect(
+        notConnected1,
+        logger
+      );
+
+      expect(device?.isConnected, isTrue);
+      expect(device?.connectionInterface, DeviceConnectionInterface.attached);
+    });
+
+    testWithoutContext('wait for device returns null', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+
+      xcdevice.waitForDeviceEvent = null;
+
+      final Device? device = await iosDevices.waitForDeviceToConnect(
+        notConnected1,
+        logger
+      );
+
+      expect(device, isNull);
+    });
+  });
 }
 
 class FakeIOSApp extends Fake implements IOSApp {
@@ -603,6 +730,7 @@ class FakeXcdevice extends Fake implements XCDevice {
   final List<List<IOSDevice>> devices = <List<IOSDevice>>[];
   final List<String> diagnostics = <String>[];
   StreamController<Map<XCDeviceEvent, String>> deviceEventController = StreamController<Map<XCDeviceEvent, String>>();
+  XCDeviceEventNotification? waitForDeviceEvent;
 
   @override
   bool isInstalled = true;
@@ -620,6 +748,16 @@ class FakeXcdevice extends Fake implements XCDevice {
   @override
   Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
     return devices[getAvailableIOSDevicesCount++];
+  }
+
+  @override
+  Future<XCDeviceEventNotification?> waitForDeviceToConnect(String deviceId) async {
+    final XCDeviceEventNotification? waitEvent = waitForDeviceEvent;
+    if (waitEvent != null) {
+      return XCDeviceEventNotification(waitEvent.eventType, waitEvent.eventInterface, waitEvent.deviceIdentifier);
+    } else {
+      return null;
+    }
   }
 }
 

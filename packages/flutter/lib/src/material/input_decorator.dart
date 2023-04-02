@@ -402,7 +402,6 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     assert(widget.errorText != null);
     return Semantics(
       container: true,
-      liveRegion: true,
       child: FadeTransition(
         opacity: _controller,
         child: FractionalTranslation(
@@ -1364,10 +1363,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       switch (textDirection) {
         case TextDirection.rtl:
           x = 0.0;
-          break;
         case TextDirection.ltr:
           x = _boxSize(icon).width;
-          break;
        }
       _boxParentData(container).offset = Offset(x, 0.0);
     }
@@ -1395,10 +1392,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       switch (textDirection) {
         case TextDirection.rtl:
           x = overallWidth - icon!.size.width;
-          break;
         case TextDirection.ltr:
           x = 0.0;
-          break;
        }
       centerLayout(icon!, x);
     }
@@ -1482,7 +1477,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           if (counter != null) {
             baselineLayout(counter!, left);
           }
-          break;
         case TextDirection.ltr:
           if (helperError != null) {
             baselineLayout(helperError!, left + _boxSize(icon).width);
@@ -1490,7 +1484,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           if (counter != null) {
             baselineLayout(counter!, right - counter!.size.width);
           }
-          break;
       }
     }
 
@@ -1511,7 +1504,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
             _boxSize(container).width / 2.0 + floatWidth / 2.0,
             floatAlign);
 
-          break;
         case TextDirection.ltr:
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
@@ -1523,7 +1515,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width + offsetToPrefixIcon,
             _boxSize(container).width / 2.0 - floatWidth / 2.0,
             floatAlign);
-          break;
       }
       decoration.borderGap.extent = label!.size.width * _kFinalLabelScale;
     } else {
@@ -1576,14 +1567,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
             floatStartX += material3 ? _boxSize(prefixIcon).width - contentPadding.left : 0.0;
           }
-          break;
         case TextDirection.ltr: // origin on the left
           startX = labelOffset.dx;
           floatStartX = startX;
           if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
             floatStartX += material3 ? -_boxSize(prefixIcon).width + contentPadding.left : 0.0;
           }
-          break;
       }
       final double floatEndX = lerpDouble(floatStartX, centeredFloatX, floatAlign)!;
       final double dx = lerpDouble(startX, floatEndX, t)!;
@@ -4542,7 +4531,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)

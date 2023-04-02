@@ -319,6 +319,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
   Offset? lastSecondaryTapDownPosition;
 
+  /// The [SelectionOverlay] that is currently visible on the screen.
+  ///
+  /// Can be null if there is no visible [SelectionOverlay].
+  @visibleForTesting
+  SelectionOverlay? get selectionOverlay => _selectionOverlay;
+
   @override
   void initState() {
     super.initState();
@@ -396,10 +402,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case SelectionStatus.uncollapsed:
       case SelectionStatus.collapsed:
         selection = const TextSelection(baseOffset: 0, extentOffset: 1);
-        break;
       case SelectionStatus.none:
         selection = const TextSelection.collapsed(offset: 1);
-        break;
     }
     textEditingValue = TextEditingValue(text: '__', selection: selection);
     if (_hasSelectionOverlayGeometry) {
@@ -533,6 +537,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
    } else {
      _selectionOverlay!.hideMagnifier();
      _selectionOverlay!.showToolbar(
+       context: context,
        contextMenuBuilder: (BuildContext context) {
          return widget.contextMenuBuilder!(context, this);
        },
@@ -988,11 +993,32 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       selectionGeometry: _selectionDelegate.value,
       onCopy: () {
         _copy();
-        hideToolbar();
+
+        // In Android copy should clear the selection.
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            _clearSelection();
+          case TargetPlatform.iOS:
+            hideToolbar(false);
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            hideToolbar();
+        }
       },
       onSelectAll: () {
-        selectAll();
-        hideToolbar();
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.iOS:
+          case TargetPlatform.fuchsia:
+            selectAll(SelectionChangedCause.toolbar);
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            selectAll();
+            hideToolbar();
+        }
       },
     );
   }
@@ -1349,15 +1375,12 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
       case SelectionEventType.startEdgeUpdate:
         _hasReceivedStartEvent.add(selectable);
         ensureChildUpdated(selectable);
-        break;
       case SelectionEventType.endEdgeUpdate:
         _hasReceivedEndEvent.add(selectable);
         ensureChildUpdated(selectable);
-        break;
       case SelectionEventType.clear:
         _hasReceivedStartEvent.remove(selectable);
         _hasReceivedEndEvent.remove(selectable);
-        break;
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
         break;
@@ -1366,7 +1389,6 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
         _hasReceivedStartEvent.add(selectable);
         _hasReceivedEndEvent.add(selectable);
         ensureChildUpdated(selectable);
-        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
@@ -1928,11 +1950,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         case SelectionExtendDirection.previousLine:
         case SelectionExtendDirection.backward:
           currentSelectionStartIndex = currentSelectionEndIndex = selectables.length;
-          break;
         case SelectionExtendDirection.nextLine:
         case SelectionExtendDirection.forward:
         currentSelectionStartIndex = currentSelectionEndIndex = 0;
-          break;
       }
     }
     int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
@@ -1950,7 +1970,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
             assert(result == SelectionResult.end);
           }
         }
-        break;
       case SelectionExtendDirection.nextLine:
         assert(result == SelectionResult.end || result == SelectionResult.next);
         if (result == SelectionResult.next) {
@@ -1963,11 +1982,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
             assert(result == SelectionResult.end);
           }
         }
-        break;
       case SelectionExtendDirection.forward:
       case SelectionExtendDirection.backward:
         assert(result == SelectionResult.end);
-        break;
     }
     if (event.isEnd) {
       currentSelectionEndIndex = targetIndex;
@@ -2001,27 +2018,21 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       case SelectionEventType.endEdgeUpdate:
         _extendSelectionInProgress = false;
         result = handleSelectionEdgeUpdate(event as SelectionEdgeUpdateEvent);
-        break;
       case SelectionEventType.clear:
         _extendSelectionInProgress = false;
         result = handleClearSelection(event as ClearSelectionEvent);
-        break;
       case SelectionEventType.selectAll:
         _extendSelectionInProgress = false;
         result = handleSelectAll(event as SelectAllSelectionEvent);
-        break;
       case SelectionEventType.selectWord:
         _extendSelectionInProgress = false;
         result = handleSelectWord(event as SelectWordSelectionEvent);
-        break;
       case SelectionEventType.granularlyExtendSelection:
         _extendSelectionInProgress = true;
         result = handleGranularlyExtendSelection(event as GranularlyExtendSelectionEvent);
-        break;
       case SelectionEventType.directionallyExtendSelection:
         _extendSelectionInProgress = true;
         result = handleDirectionallyExtendSelection(event as DirectionallyExtendSelectionEvent);
-        break;
     }
     _isHandlingSelectionEvent = false;
     _updateSelectionGeometry();
@@ -2080,12 +2091,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         case SelectionResult.next:
         case SelectionResult.none:
           newIndex = index;
-          break;
         case SelectionResult.end:
           newIndex = index;
           result = SelectionResult.end;
           hasFoundEdgeIndex = true;
-          break;
         case SelectionResult.previous:
           hasFoundEdgeIndex = true;
           if (index == 0) {
@@ -2093,12 +2102,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
             result = SelectionResult.previous;
           }
           result ??= SelectionResult.end;
-          break;
         case SelectionResult.pending:
           newIndex = index;
           result = SelectionResult.pending;
           hasFoundEdgeIndex = true;
-          break;
       }
     }
 
@@ -2152,7 +2159,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         case SelectionResult.pending:
         case SelectionResult.none:
           finalResult = currentSelectableResult;
-          break;
         case SelectionResult.next:
           if (forward == false) {
             newIndex += 1;
@@ -2163,7 +2169,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
             forward = true;
             newIndex += 1;
           }
-          break;
         case SelectionResult.previous:
           if (forward ?? false) {
             newIndex -= 1;
@@ -2174,7 +2179,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
             forward = false;
             newIndex -= 1;
           }
-          break;
       }
     }
     if (isEnd) {

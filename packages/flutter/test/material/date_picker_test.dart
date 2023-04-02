@@ -275,7 +275,7 @@ void main() {
       // Verify that the time picker is being laid out RTL.
       // We expect the left edge of the 'OK' button in the RTL
       // layout to match the gap between right edge of the 'OK'
-      // button and the right edge of the 800 wide window.
+      // button and the right edge of the 800 wide view.
       expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
     });
 
@@ -440,8 +440,8 @@ void main() {
 
       // Portrait layout.
 
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-      tester.binding.window.physicalSizeTestValue = const Size(900, 1200);
+      addTearDown(tester.view.reset);
+      tester.view.physicalSize = const Size(900, 1200);
 
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await tester.tap(find.text('X'));
@@ -1105,10 +1105,10 @@ void main() {
     const Size kSmallScreenSizeLandscape = Size(521, 320);
 
     Future<void> showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
-      tester.binding.window.physicalSizeTestValue = size;
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
-      addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(find.text('OK'));
       });
@@ -1385,6 +1385,36 @@ void main() {
       expect(currentMode, DatePickerEntryMode.calendar);
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNothing);
+    });
+  });
+
+  group('Landscape input-only date picker headers use headlineSmall', () {
+    // Regression test for https://github.com/flutter/flutter/issues/122056
+
+    // Common screen size roughly based on a Pixel 1
+    const Size kCommonScreenSizePortrait = Size(1070, 1770);
+    const Size kCommonScreenSizeLandscape = Size(1770, 1070);
+
+    Future<void> showPicker(WidgetTester tester, Size size) async {
+      addTearDown(tester.view.reset);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      initialEntryMode = DatePickerEntryMode.input;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async { }, useMaterial3: true);
+    }
+
+    testWidgets('portrait', (WidgetTester tester) async {
+      await showPicker(tester, kCommonScreenSizePortrait);
+      expect(tester.widget<Text>(find.text('Fri, Jan 15')).style?.fontSize, 32);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('landscape', (WidgetTester tester) async {
+      await showPicker(tester, kCommonScreenSizeLandscape);
+      expect(tester.widget<Text>(find.text('Fri, Jan 15')).style?.fontSize, 24);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
     });
   });
 }

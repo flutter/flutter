@@ -493,7 +493,7 @@ abstract class Finder {
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
-      WidgetsBinding.instance.renderViewElement!,
+      WidgetsBinding.instance.rootElement!,
       skipOffstage: skipOffstage,
     );
   }

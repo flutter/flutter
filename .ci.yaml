@@ -223,7 +223,6 @@ targets:
 
   - name: Linux build_tests_1_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -262,7 +261,6 @@ targets:
 
   - name: Linux build_tests_3_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -335,12 +333,30 @@ targets:
       validation: docs
       validation_name: Docs
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_test/
-      - packages/flutter_drive/
-      - packages/flutter_localizations/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_test/**
+      - packages/flutter_drive/**
+      - packages/flutter_localizations/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux engine_dependency_proxy_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: engine_dependency_proxy_test
+    runIf:
+      - dev/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
@@ -380,9 +396,8 @@ targets:
       task_name: release_smoke_test
 
   - name: Linux flutter_packaging_test
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -412,16 +427,16 @@ targets:
       tags: >
         ["framework","hostonly","shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux framework_tests_slow
@@ -437,16 +452,16 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux framework_tests_misc
@@ -467,16 +482,16 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux framework_tests_widgets
@@ -492,16 +507,16 @@ targets:
       tags: >
         ["framework","hostonly","shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux fuchsia_precache
@@ -769,10 +784,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux technical_debt__cost
@@ -820,9 +835,9 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_integration_tests_2_4
@@ -844,9 +859,9 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_integration_tests_3_4
@@ -868,9 +883,9 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_integration_tests_4_4
@@ -892,9 +907,9 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_tests_commands
@@ -912,9 +927,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_tests_general
@@ -932,9 +947,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_benchmarks_canvaskit
@@ -983,14 +998,13 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_long_running_tests_2_5
     recipe: flutter/flutter_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/121707
     timeout: 60
     properties:
       dependencies: >-
@@ -1004,9 +1018,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_long_running_tests_3_5
@@ -1024,9 +1038,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_long_running_tests_4_5
@@ -1044,9 +1058,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_long_running_tests_5_5
@@ -1064,9 +1078,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_0
@@ -1084,9 +1098,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_1
@@ -1104,9 +1118,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_2
@@ -1124,9 +1138,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_3
@@ -1144,9 +1158,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_4
@@ -1164,9 +1178,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_5
@@ -1184,9 +1198,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_6
@@ -1204,9 +1218,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_7_last
@@ -1224,9 +1238,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_canvaskit_tests_0
@@ -1244,9 +1258,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_1
     recipe: flutter/flutter_drone
@@ -1263,9 +1278,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_2
     recipe: flutter/flutter_drone
@@ -1282,9 +1298,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_3
     recipe: flutter/flutter_drone
@@ -1301,9 +1318,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_4
     recipe: flutter/flutter_drone
@@ -1320,9 +1338,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_5
     recipe: flutter/flutter_drone
@@ -1339,9 +1358,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_6
     recipe: flutter/flutter_drone
@@ -1358,9 +1378,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_7_last
     recipe: flutter/flutter_drone
@@ -1377,9 +1398,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
@@ -1397,9 +1419,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux_android analyzer_benchmark
@@ -2417,6 +2439,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
+  - name: Linux_android animated_blur_backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: animated_blur_backdrop_filter_perf__timeline_summary
+
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
@@ -2450,16 +2482,16 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
@@ -2701,18 +2733,16 @@ targets:
       task_name: flutter_gallery_macos__start_up
 
   - name: Mac flutter_packaging_test
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
   - name: Mac_arm64 flutter_packaging_test
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2950,6 +2980,19 @@ targets:
           {"dependency": "xcode", "version": "14a5294e"}
         ]
       task_name: platform_view_macos__start_up
+
+  - name: Mac platform_channel_sample_test_macos
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: platform_channel_sample_test_macos
 
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
@@ -4016,15 +4059,15 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_impeller_ios
 
-  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/121231
+  - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
+    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
+      task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
@@ -4214,16 +4257,16 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Windows framework_tests_misc
@@ -4242,16 +4285,16 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Windows framework_tests_widgets
@@ -4267,16 +4310,16 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Windows gradle_plugin_bundle_test
@@ -4870,9 +4913,8 @@ targets:
       task_name: windows_chrome_dev_mode
 
   - name: Windows flutter_packaging_test
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4917,7 +4959,7 @@ targets:
       task_name: flutter_tool_startup__macos
 
   - name: Linux flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4930,7 +4972,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Mac flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4946,7 +4988,7 @@ targets:
 
 
   - name: Mac_arm64 flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true
@@ -4957,9 +4999,11 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    dimensions:
+      cpu: "arm64"
 
   - name: Windows flutter_packaging
-    recipe: packaging_v2/packaging_v2
+    recipe: packaging/packaging
     timeout: 60
     scheduler: release
     bringup: true

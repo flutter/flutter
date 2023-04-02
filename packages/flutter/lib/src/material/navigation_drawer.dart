@@ -328,7 +328,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
           child: InkWell(
             highlightColor: Colors.transparent,
             onTap: info.onTap,
-            borderRadius: const BorderRadius.all(Radius.circular(28.0)),
+            customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
             child: Stack(
               alignment: Alignment.center,
               children: <Widget>[
@@ -658,30 +658,32 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
-  const _NavigationDrawerDefaultsM3(this.context)
-      : super(
-          elevation: 1.0,
-          tileHeight: 56.0,
-          indicatorShape: const StadiumBorder(),
-          indicatorSize: const Size(336.0, 56.0),
-        );
+  _NavigationDrawerDefaultsM3(this.context)
+    : super(
+        elevation: 1.0,
+        tileHeight: 56.0,
+        indicatorShape: const StadiumBorder(),
+        indicatorSize: const Size(336.0, 56.0),
+      );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get indicatorColor => Theme.of(context).colorScheme.secondaryContainer;
+  Color? get indicatorColor => _colors.secondaryContainer;
 
   @override
   MaterialStateProperty<IconThemeData?>? get iconTheme {
@@ -690,7 +692,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
         size: 24.0,
         color: states.contains(MaterialState.selected)
             ? null
-            : Theme.of(context).colorScheme.onSurfaceVariant,
+            : _colors.onSurfaceVariant,
       );
     });
   }
@@ -698,11 +700,11 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   @override
   MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      final TextStyle style = Theme.of(context).textTheme.labelLarge!;
+      final TextStyle style = _textTheme.labelLarge!;
       return style.apply(
         color: states.contains(MaterialState.selected)
-            ? Theme.of(context).colorScheme.onSecondaryContainer
-            : Theme.of(context).colorScheme.onSurfaceVariant,
+            ? _colors.onSecondaryContainer
+            : _colors.onSurfaceVariant,
       );
     });
   }
