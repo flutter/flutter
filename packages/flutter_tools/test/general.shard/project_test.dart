@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -1337,9 +1338,9 @@ void addRootGradleFile(Directory directory,
 void addGradleWrapperFile(Directory directory, String gradleVersion) {
   directory
       .childDirectory('android')
-      .childDirectory('gradle')
-      .childDirectory('wrapper')
-      .childFile('gradle-wrapper.properties')
+      .childDirectory(gradle_utils.gradleDirectoryName)
+      .childDirectory(gradle_utils.gradleWrapperDirectoryName)
+      .childFile(gradle_utils.gradleWrapperPropertiesFilename)
     ..createSync(recursive: true)
     // ignore: unnecessary_string_escapes
     ..writeAsStringSync('''

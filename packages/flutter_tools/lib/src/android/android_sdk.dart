@@ -439,12 +439,6 @@ class AndroidSdk {
       return null;
     }
     return parseJavaVersion(result.stdout);
-//     const String versionOutput = '''
-// openjdk version "11.0.18" 2023-01-17 LTS
-// OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
-// OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
-// ''';
-//     return AndroidSdk.parseJavaVersion(versionOutput);
   }
 
   // Java versions have 2 formats

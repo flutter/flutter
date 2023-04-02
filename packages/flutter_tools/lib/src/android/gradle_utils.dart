@@ -178,7 +178,6 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
 /// [directory] should be and android directory with a build.gradle file.
 Future<String?> getGradleVersion(
     Directory directory, Logger logger, ProcessManager processManager) async {
-  // TODO make constant to share with other places in this file.
   final File propertiesFile = directory
       .childDirectory(gradleDirectoryName)
       .childDirectory(gradleWrapperDirectoryName)
@@ -300,7 +299,7 @@ String _formatParseWarning(String content) {
 bool validateGradleAndAgp(Logger logger,
     {required String? gradleV, required String? agpV}) {
 
-  // TODO are these the correct values we want to support?
+  // TODO(reidbaker): are these the correct values we want to support?
   const String oldestSupportedAgpVersion = '3.3.0';
   const String oldestSupportedGradleVersion = '4.10.1';
 
@@ -571,7 +570,8 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (isWithinVersionRange(androidPluginVersion, min: maxKnownAgpVersion, max: '100.100')) {
     return _maxKnownAndSupportedGradleVersion;
   }
-  // TODO should this be a regular thow so that chris can see these in crash logging.
+  // TODO(reidbaker): should this be a regular thow so that @christopherfujino
+  // can see these in crash logging.
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
 }
 
