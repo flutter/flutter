@@ -165,25 +165,22 @@ Future<void> main() async {
     // Fix https://github.com/flutter/flutter/issues/13675
     final Key key = UniqueKey();
     Widget buildWidget(Color color) {
-      List<Widget> circles = [];
-      for (int i = 50; i > 0; i--) {
-        double radius = i * 2.5;
-        double angle = i * 0.5;
-        double x = radius * math.cos(angle);
-        double y = radius * math.sin(angle);
-        Widget circle = Positioned(
-          left: 150 - x,
-          top: 150 - y,
+      final List<Widget> circles = <Widget>[];
+      for (int i = 75; i > 25; i--) {
+        final double radius = i * 2.5;
+        final double angle = i * 0.5;
+        final double x = radius * math.cos(angle);
+        final double y = radius * math.sin(angle);
+        final Widget circle = Positioned(
+          left: 225 - x,
+          top: 225 - y,
           child: Container(
-            width: 200,
-            height: 200,
+            width: 250,
+            height: 250,
             decoration: ShapeDecoration(
               color: Colors.black,
               shape: CircleBorder(
-                side: BorderSide(
-                  color: Colors.white.withOpacity(0.99),
-                  width: 50,
-                ),
+                side: BorderSide(color: color, width: 50),
               ),
             ),
           ),
@@ -191,20 +188,23 @@ Future<void> main() async {
         circles.add(circle);
       }
 
-      return Container(
-        width: 500,
-        height: 500,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(75),
-          border: Border.all(
-            color: Colors.black,
-            width: 1,
-            strokeAlign: BorderSide.strokeAlignOutside,
+      return Center(
+        key: key,
+        child: Container(
+          width: 700,
+          height: 700,
+          decoration: const ShapeDecoration(
+            color: Colors.white,
+            shape: CircleBorder(
+              side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
+            ),
           ),
-        ),
-        child: Stack(
-          children: circles,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: circles,
+            ),
+          ),
         ),
       );
     }
