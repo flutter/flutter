@@ -524,19 +524,14 @@ class AndroidProject extends FlutterProjectPlatform {
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
     const String visibleName = 'Java/Gradle/Android Gradle Plugin';
-    // final bool validJavaGradleAgpVersions =
-    //     await hasValidJavaGradleAgpVersions();
-
-    // const String invalidJavaGradleAgpString =
-    //     'Incompatible Java/Gradle/AGP versions.';
-
-    final String validJavaGradleAgpVersions =
+    final _CompatabilityResult validJavaGradleAgpVersions =
         await hasValidJavaGradleAgpVersions();
+
 
     return ProjectValidatorResult(
       name: visibleName,
-      value: validJavaGradleAgpVersions,
-      status: validJavaGradleAgpVersions == validJavaGradleAgpString
+      value: validJavaGradleAgpVersions.description,
+      status: validJavaGradleAgpVersions.success
           ? StatusProjectValidator.success
           : StatusProjectValidator.error,
     );
@@ -545,13 +540,12 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Ensures Java Sdk is compatible with the projects gradle version and
   /// the projects gradle version is compatible with the AGP version used
   /// in build.gradle.
-  /// TODO return something better than string.
-  Future<String> hasValidJavaGradleAgpVersions() async {
+  Future<_CompatabilityResult> hasValidJavaGradleAgpVersions() async {
     final String? gradleVersion = await gradle.getGradleVersion(
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
-    // TODO replace with generated version.
+    // TODO update getJavaVersion to take fewer globals.
     final String? javaVersion = AndroidSdk.getJavaVersion(
       androidStudio: globals.androidStudio,
       fileSystem: globals.fs,
@@ -561,29 +555,30 @@ class AndroidProject extends FlutterProjectPlatform {
       sdkManagerEnv: globals.androidSdk?.sdkManagerEnv,
     );
 
+    // Assume valid configuration.
     String description = validJavaGradleAgpString;
 
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
         gradleV: gradleVersion, agpV: agpVersion);
 
+    final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger,
+        javaV: javaVersion, gradleV: gradleVersion);
+
+    // Begin description formatting.
     if (!compatibleGradleAgp) {
       description = '''
 Incompatible Gradle/AGP versions. \n
-Gradle Version: $gradleVersion, AGP Version: $agpVersion \n
-Update gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".
+Gradle Version: $gradleVersion, AGP Version: $agpVersion
+Update gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
 See the link below for more information:
 https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 ''';
     }
-
-    final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger,
-        javaV: javaVersion, gradleV: gradleVersion);
-
     if (!compatibleJavaGradle) {
       description = '''
 ${compatibleJavaGradle ? '' : description}
-Incompatible Java/Gradle versions. \n
-Java Version: $javaVersion, Gradle Version: $gradleVersion \n
+Incompatible Java/Gradle versions.
+Java Version: $javaVersion, Gradle Version: $gradleVersion\n
 See the link below for more information:
 https://docs.gradle.org/current/userguide/compatibility.html#java
 ''';
@@ -591,7 +586,7 @@ https://docs.gradle.org/current/userguide/compatibility.html#java
     // TODO(reidbaker): Android Studio <-> AGP Validation.
     // https://developer.android.com/studio/releases/gradle-plugin#android_gradle_plugin_and_android_studio_compatibility
 
-    return description;
+    return _CompatabilityResult(compatibleJavaGradle && compatibleGradleAgp, description);
   }
 
   bool get isUsingGradle {
@@ -870,4 +865,10 @@ class FuchsiaProject {
   Directory? _meta;
   Directory get meta =>
       _meta ??= editableHostAppDirectory.childDirectory('meta');
+}
+
+class _CompatabilityResult {
+  _CompatabilityResult(this.success, this.description);
+  final bool success;
+  final String description;
 }
