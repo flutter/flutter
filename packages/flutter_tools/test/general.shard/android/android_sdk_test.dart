@@ -359,7 +359,16 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
       expect(AndroidSdk.parseJavaVersion(exampleJdk8Output), '1.8.0');
     });
 
-    testWithoutContext('parses jdk 11', () {
+    testWithoutContext('parses jdk 11 windows', () {
+      const String exampleJdkOutput = '''
+java version "11.0.14"
+Java(TM) SE Runtime Environment (build 11.0.14+10-b13)
+Java HotSpot(TM) 64-Bit Server VM (build 11.0.14+10-b13, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.14');
+    });
+
+    testWithoutContext('parses jdk 11 mac/linux', () {
       const String exampleJdkOutput = '''
 openjdk version "11.0.18" 2023-01-17 LTS
 OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
@@ -367,6 +376,7 @@ OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
 ''';
       expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.18');
     });
+
     testWithoutContext('parses jdk 17', () {
       const String exampleJdkOutput = '''
 openjdk 17.0.6 2023-01-17
