@@ -152,8 +152,10 @@ class FlutterProject {
       final String? applicationId = android.applicationId;
       final String? group = android.group;
       candidates.addAll(<String>[
-        if (applicationId != null) applicationId,
-        if (group != null) group,
+        if (applicationId != null)
+          applicationId,
+        if (group != null)
+          group,
       ]);
     }
     if (example.android.existsSync()) {
@@ -226,11 +228,11 @@ class FlutterProject {
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory
-      .absolute
-      .childDirectory('.dart_tool')
-      .childDirectory('build')
-      .childDirectory('generated')
-      .childDirectory(manifest.appName);
+    .absolute
+    .childDirectory('.dart_tool')
+    .childDirectory('build')
+    .childDirectory('generated')
+    .childDirectory(manifest.appName);
 
   /// The generated Dart plugin registrant for non-web platforms.
   File get dartPluginRegistrant => dartTool
@@ -350,11 +352,9 @@ class FlutterProject {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(this,
-        iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
+    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling(
-          deprecationBehavior: deprecationBehavior);
+      await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling();
@@ -478,12 +478,12 @@ class AndroidProject extends FlutterProjectPlatform {
   bool _computeSupportedVersion() {
     final FileSystem fileSystem = hostAppGradleRoot.fileSystem;
     final File plugin = hostAppGradleRoot.childFile(
-      fileSystem.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
+        fileSystem.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
     if (plugin.existsSync()) {
       return false;
     }
     final File appGradle = hostAppGradleRoot.childFile(
-      fileSystem.path.join('app', 'build.gradle'));
+        fileSystem.path.join('app', 'build.gradle'));
     if (!appGradle.existsSync()) {
       return false;
     }
@@ -503,7 +503,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   File get appManifestFile {
-    if (isUsingGradle) {
+    if(isUsingGradle) {
       return hostAppGradleRoot
         .childDirectory('app')
         .childDirectory('src')
@@ -731,8 +731,8 @@ The detected reason was:
 ''');
     if (deprecationBehavior == DeprecationBehavior.ignore) {
       BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-    } else {// DeprecationBehavior.exit
-      BuildEvent('deprecated-v1-android-embedding-failed',  type: 'gradle', flutterUsage: globals.flutterUsage).send();
+    } else { // DeprecationBehavior.exit
+      BuildEvent('deprecated-v1-android-embedding-failed', type: 'gradle', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Build failed due to use of deprecated Android v1 embedding.',
         exitCode: 1,
@@ -846,10 +846,14 @@ class WebProject extends FlutterProjectPlatform {
   Directory get directory => parent.directory.childDirectory('web');
 
   /// The html file used to host the flutter web application.
-  File get indexFile => parent.directory.childDirectory('web').childFile('index.html');
+  File get indexFile => parent.directory
+      .childDirectory('web')
+      .childFile('index.html');
 
   /// The .dart_tool/dartpad directory
-  Directory get dartpadToolDirectory => parent.directory.childDirectory('.dart_tool').childDirectory('dartpad');
+  Directory get dartpadToolDirectory => parent.directory
+      .childDirectory('.dart_tool')
+      .childDirectory('dartpad');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
