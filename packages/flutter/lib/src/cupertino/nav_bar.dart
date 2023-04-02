@@ -878,12 +878,9 @@ class _LargeTitleNavigationBarSliverDelegate
     if (!transitionBetweenRoutes || !_isTransitionable(context)) {
       return navBar;
     }
-    
-    
 
     int _iosSpecificLargeTitleResizer = 0;
 
-    
     // this is added for declare ios version as int, i can get it directly, if you can please replace it
     if (Platform.isIOS) {
       final _iosVersion = int.tryParse(
@@ -891,8 +888,7 @@ class _LargeTitleNavigationBarSliverDelegate
       _iosSpecificLargeTitleResizer = ((_iosVersion ?? 15) < 14 ? 0 : 4);
     }
 
-    //and here i have changed fontSize of textStyle for ios 14+
-    
+    //and here i have changed fontSize of textStyle for ios 14+ 
     TextStyle _transitionableNavigationBarTextStyle =
         CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle;
     _transitionableNavigationBarTextStyle =
