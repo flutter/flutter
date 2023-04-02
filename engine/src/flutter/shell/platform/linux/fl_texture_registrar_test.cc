@@ -13,11 +13,13 @@
 #include <epoxy/gl.h>
 
 #include <gmodule.h>
+#include <pthread.h>
 
 static constexpr uint32_t kBufferWidth = 4u;
 static constexpr uint32_t kBufferHeight = 4u;
 static constexpr uint32_t kRealBufferWidth = 2u;
 static constexpr uint32_t kRealBufferHeight = 2u;
+static constexpr uint64_t kThreadCount = 16u;
 
 G_DECLARE_FINAL_TYPE(FlTestRegistrarTexture,
                      fl_test_registrar_texture,
@@ -64,6 +66,14 @@ static FlTestRegistrarTexture* fl_test_registrar_texture_new() {
       g_object_new(fl_test_registrar_texture_get_type(), nullptr));
 }
 
+static void* add_mock_texture_to_registrar(void* pointer) {
+  g_return_val_if_fail(FL_TEXTURE_REGISTRAR(pointer), ((void*)NULL));
+  FlTextureRegistrar* registrar = FL_TEXTURE_REGISTRAR(pointer);
+  g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
+  fl_texture_registrar_register_texture(registrar, texture);
+  pthread_exit(NULL);
+}
+
 // Checks can make a mock registrar.
 TEST(FlTextureRegistrarTest, MockRegistrar) {
   g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
@@ -103,4 +113,26 @@ TEST(FlTextureRegistrarTest, MarkTextureFrameAvailable) {
   EXPECT_TRUE(fl_texture_registrar_register_texture(registrar, texture));
   EXPECT_TRUE(
       fl_texture_registrar_mark_texture_frame_available(registrar, texture));
+}
+
+// Test the textures can be accessed via multiple threads without
+// synchronization issues.
+TEST(FlTextureRegistrarTest, RegistrarRegisterTextureInMultipleThreads) {
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  g_autoptr(FlTextureRegistrar) registrar = fl_texture_registrar_new(engine);
+  pthread_t threads[kThreadCount];
+
+  for (uint64_t t = 0; t < kThreadCount; t++) {
+    EXPECT_EQ(pthread_create(&threads[t], NULL, add_mock_texture_to_registrar,
+                             (void*)registrar),
+              0);
+  }
+  for (uint64_t t = 0; t < kThreadCount; t++) {
+    pthread_join(threads[t], NULL);
+  };
+  // Check the texture named from [1, threadCount].
+  for (uint64_t t = 1; t <= kThreadCount; t++) {
+    EXPECT_TRUE(fl_texture_registrar_lookup_texture(registrar, (int64_t)t) !=
+                NULL);
+  };
 }
