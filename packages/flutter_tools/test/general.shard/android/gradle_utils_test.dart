@@ -392,7 +392,7 @@ allprojects {
         GradleAgpTestData(true, agpVersion: '3.3.0', gradleVersion: '5.1.1'),
       ];
       for (final GradleAgpTestData data in testData) {
-        test("(gradle, agp): (${data.gradleVersion}, ${data.agpVersion})", () {
+        test('(gradle, agp): (${data.gradleVersion}, ${data.agpVersion})', () {
           expect(
               validateGradleAndAgp(
                 BufferLogger.test(),

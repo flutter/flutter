@@ -418,10 +418,10 @@ abstract class FlutterProjectPlatform {
 /// Instances will reflect the contents of the `android/` sub-folder of
 /// Flutter applications and the `.android/` sub-folder of Flutter module projects.
 class AndroidProject extends FlutterProjectPlatform {
+  AndroidProject._(this.parent);
 
   @visibleForTesting
   static const String validJavaGradleAgpString = 'compatible java/gradle/agp';
-  AndroidProject._(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
