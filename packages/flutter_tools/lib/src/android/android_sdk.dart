@@ -413,18 +413,14 @@ class AndroidSdk {
 
   // Returns the version of java in the format \d(.\d)+(.\d)+
   // Returns null if version not found.
-  static String? getJavaVersion({
+  String? getJavaVersion({
     // TODO get these values from the object and revert making the method static.
     required AndroidStudio? androidStudio,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
     required Platform platform,
     required ProcessUtils processUtils,
-    required Map<String, String>? sdkManagerEnv,
   }) {
-    if (sdkManagerEnv == null) {
-      return null;
-    }
     final String? javaBinary = findJavaBinary(
       androidStudio: androidStudio,
       fileSystem: fileSystem,

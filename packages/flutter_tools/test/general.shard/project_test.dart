@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -432,6 +434,7 @@ dependencies {
         });
         addGradleWrapperFile(project.directory, gradleV);
         final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+        // Can this be removed? 
         processManager.addCommand(FakeCommand(
           command: <String>[
             expectedJavaPath,
@@ -441,6 +444,7 @@ dependencies {
           // the full output of java --version.
           stdout: 'openjdk $javaV',
         ));
+        androidSdk.javaVersion = javaV;
         return project;
       }
 
@@ -511,17 +515,17 @@ dependencies {
           expect(value.success, isFalse);
           // Should not have the valid string
           expect(value.description,
-            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))));
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))));
           // On gradle/agp error print help url and gradle and agp versions.
           expect(value.description,
               contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
-          expect(value.description,contains(RegExp(gradleV)));
-          expect(value.description,contains(RegExp(agpV)));
+          expect(value.description, contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp(agpV)));
           // On gradle/agp error print help url and java and gradle versions.
           expect(value.description,
               contains(RegExp(AndroidProject.javaGradleCompatUrl)));
-          expect(value.description,contains(RegExp(javaV)));
-          expect(value.description,contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp(javaV)));
+          expect(value.description, contains(RegExp(gradleV)));
         },
         androidStudio: androidStudio,
         processManager: processManager,
@@ -544,19 +548,19 @@ dependencies {
           expect(value.success, isFalse);
           // Should not have the valid string.
           expect(value.description,
-            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))));
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))));
           // On gradle/agp error print help url and java and gradle versions.
           expect(value.description,
               contains(RegExp(AndroidProject.javaGradleCompatUrl)));
-          expect(value.description,contains(RegExp(javaV)));
-          expect(value.description,contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp(javaV)));
+          expect(value.description, contains(RegExp(gradleV)));
         },
         androidStudio: androidStudio,
         processManager: processManager,
         androidSdk: androidSdk,
       );
 
-       _testInMemory(
+      _testInMemory(
         'incompatabile gradle/agp only',
         () async {
           const String javaV = '11.0.2';
@@ -572,12 +576,12 @@ dependencies {
           expect(value.success, isFalse);
           // Should not have the valid string.
           expect(value.description,
-            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))));
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))));
           // On gradle/agp error print help url and gradle and agp versions.
           expect(value.description,
               contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
-          expect(value.description,contains(RegExp(gradleV)));
-          expect(value.description,contains(RegExp(agpV)));
+          expect(value.description, contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp(agpV)));
         },
         androidStudio: androidStudio,
         processManager: processManager,
@@ -1480,6 +1484,7 @@ class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
     _javaPath = '${_androidStudio.javaPath}/bin/java';
   }
   late String _javaPath;
+  String? javaVersion;
 
   final Directory _directory;
 
@@ -1496,5 +1501,16 @@ class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
   Directory get directory => _directory;
 
   @override
-  Map<String, String> get sdkManagerEnv => {'PATH': _javaPath};
+  Map<String, String> get sdkManagerEnv => <String, String>{'PATH': _javaPath};
+
+  @override
+  String? getJavaVersion({
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessUtils processUtils,
+  }) {
+    return javaVersion;
+  }
 }

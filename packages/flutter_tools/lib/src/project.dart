@@ -557,13 +557,12 @@ class AndroidProject extends FlutterProjectPlatform {
     final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
     // TODO update getJavaVersion to take fewer globals.
-    final String? javaVersion = AndroidSdk.getJavaVersion(
+    final String? javaVersion = globals.androidSdk?.getJavaVersion(
       androidStudio: globals.androidStudio,
       fileSystem: globals.fs,
       operatingSystemUtils: globals.os,
       platform: globals.platform,
       processUtils: globals.processUtils,
-      sdkManagerEnv: globals.androidSdk?.sdkManagerEnv,
     );
 
     // Assume valid configuration.

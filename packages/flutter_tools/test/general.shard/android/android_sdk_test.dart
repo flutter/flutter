@@ -416,42 +416,43 @@ OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
       Platform: () => FakePlatform(environment: <String, String>{}),
     });
 
-    testUsingContext('getJavaVersion finds AS java and parses version', () {
+    group('java', () {
       final AndroidStudio androidStudio = FakeAndroidStudio();
-      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
-      config.setValue('android-sdk', sdkDir.path);
+      testUsingContext('getJavaVersion finds AS java and parses version', () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+        config.setValue('android-sdk', sdkDir.path);
 
-      final ProcessUtils processUtils = ProcessUtils(
-          processManager: processManager, logger: BufferLogger.test());
-      // Built from the implementation of findJavaBinary android studio case.
-      final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+        final ProcessUtils processUtils = ProcessUtils(
+            processManager: processManager, logger: BufferLogger.test());
+        // Built from the implementation of findJavaBinary android studio case.
+        final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
 
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          expectedJavaPath,
-          '--version',
-        ],
-        stdout: exampleJdk8Output,
-      ));
+        processManager.addCommand(FakeCommand(
+          command: <String>[
+            expectedJavaPath,
+            '--version',
+          ],
+          stdout: exampleJdk8Output,
+        ));
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
 
-      final String? javaVersion = AndroidSdk.getJavaVersion(
+        final String? javaVersion = sdk.getJavaVersion(
           androidStudio: androidStudio,
           fileSystem: fileSystem,
           operatingSystemUtils: FakeOperatingSystemUtils(),
           platform: FakePlatform(),
-          sdkManagerEnv: sdk.sdkManagerEnv,
           processUtils: processUtils,
-          );
+        );
 
-
-      expect(javaVersion, '1.8.0');
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Config: () => config,
-      Platform: () => FakePlatform(environment: <String, String>{}),
+        expect(javaVersion, '1.8.0');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        AndroidStudio: () => androidStudio,
+        Config: () => config,
+        Platform: () => FakePlatform(environment: <String, String>{}),
+      });
     });
   });
 }
