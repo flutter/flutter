@@ -887,7 +887,7 @@ class _LargeTitleNavigationBarSliverDelegate
     }
 
     //and here i have changed fontSize of textStyle for ios 14+ 
-    TextStyle _transitionableNavigationBarTextStyle =
+    TextStyle transitionableNavigationBarTextStyle =
         CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle;
     _transitionableNavigationBarTextStyle =
         _transitionableNavigationBarTextStyle.copyWith(
