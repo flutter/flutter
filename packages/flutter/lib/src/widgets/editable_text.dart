@@ -2347,24 +2347,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Replace composing region with specified text.
-  void replaceComposingRegion(SelectionChangedCause cause, String text) {
-    // Replacement cannot be performed if the text is read only or obscured.
-    assert(!widget.readOnly && !widget.obscureText);
-
-    _replaceText(ReplaceTextIntent(textEditingValue, text, textEditingValue.composing, cause));
-
-    if (cause == SelectionChangedCause.toolbar) {
-      // Schedule a call to bringIntoView() after renderEditable updates.
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          bringIntoView(textEditingValue.selection.extent);
-        }
-      });
-      hideToolbar();
-    }
-  }
-
   /// Finds specified [SuggestionSpan] that matches the provided index using
   /// binary search.
   ///
@@ -3980,7 +3962,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Shows toolbar with spell check suggestions of misspelled words that are
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
+    // Spell check suggestions toolbars are intended to be shown on non-web
+    // platforms. Additionally, the Cupertino style toolbar can't be drawn on
+    // the web with the HTML renderer due to
+    // https://github.com/flutter/flutter/issues/123560.
+    final bool platformNotSupported = kIsWeb && BrowserContextMenu.enabled;
     if (!spellCheckEnabled
+        || platformNotSupported
         || widget.readOnly
         || _selectionOverlay == null
         || !_spellCheckResultsReceived) {
