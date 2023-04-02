@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../src/common.dart';
@@ -27,7 +28,6 @@ void main() {
       fileSystem = globals.localFileSystem;
     });
 
-    // TODO update for java/gradle/agp content.
     testUsingContext('General Info Project Validator', () async {
       final BufferLogger loggerTest = BufferLogger.test();
       final AnalyzeCommand command = AnalyzeCommand(
@@ -58,6 +58,7 @@ void main() {
       '│ [✓] Is Flutter Package: yes                                       │\n'
       '│ [✓] Uses Material Design: yes                                     │\n'
       '│ [✓] Is Plugin: no                                                 │\n'
+      '│ [✓] Java/Gradle/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpString} │\n'
       '└───────────────────────────────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));
