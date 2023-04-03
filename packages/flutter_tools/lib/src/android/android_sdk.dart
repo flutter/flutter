@@ -449,11 +449,16 @@ class AndroidSdk {
     final Iterable<RegExpMatch> matches =
         jdkVersionRegex.allMatches(rawVersionOutput);
     if (matches.isEmpty) {
+      globals.logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;
     }
     final String? versionString = matches.first.group(0);
+    if (versionString == null || versionString.split('_').isEmpty) {
+      globals.logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
     // Trim away _d+ from versions 1.8 and below.
-    return versionString?.split('_').first;
+    return versionString.split('_').first;
   }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
@@ -467,7 +472,8 @@ class AndroidSdk {
       return fileSystem.path.join(androidStudio!.javaPath!, 'bin', 'java');
     }
 
-    final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
+    final String? javaHomeEnv =
+        platform.environment[_javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
       // Trust JAVA_HOME.
       return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
@@ -481,23 +487,37 @@ class AndroidSdk {
         // It is unlikley that filtering to java version 1.8 is the right
         // decsion here. That said, trying this on a mac shows the same jdk
         // path no matter what input is passed.
-        final String javaHomeOutput = globals.processUtils.runSync(
-          <String>['/usr/libexec/java_home', '-v', '1.8'],
-          throwOnError: true,
-          hideStdout: true,
-        ).stdout.trim();
+        final String javaHomeOutput = globals.processUtils
+            .runSync(
+              <String>['/usr/libexec/java_home', '-v', '1.8'],
+              throwOnError: true,
+              hideStdout: true,
+            )
+            .stdout
+            .trim();
         if (javaHomeOutput.isNotEmpty) {
           final String javaHome = javaHomeOutput.split('\n').last.trim();
           return fileSystem.path.join(javaHome, 'bin', 'java');
         }
-      } on Exception { /* ignore */ }
+      } on Exception {/* ignore */}
     }
 
     // Fallback to PATH based lookup.
     return operatingSystemUtils.which(_javaExecutable)?.path;
   }
 
+  // Returns a user visible String that says the tool failed to parse
+  // the version of java along with the output.
+  static String _formatJavaVersionWarning(String javaVersionRaw) {
+    return 'Could not parse java version from: \n'
+        '$javaVersionRaw \n'
+        'If there is a version please look for an existing bug '
+        'https://github.com/flutter/flutter/issues/'
+        ' and if one does not exist file a new issue.';
+  }
+
   Map<String, String>? _sdkManagerEnv;
+
   /// Returns an environment with the Java folder added to PATH for use in calling
   /// Java-based Android SDK commands such as sdkmanager and avdmanager.
   Map<String, String> get sdkManagerEnv {

@@ -393,6 +393,34 @@ allprojects {
         null,
       );
     });
+    testWithoutContext('returns the AGP version when beta', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      androidDirectory.childFile('build.gradle').writeAsStringSync(r'''
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.3.0-beta03'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+''');
+
+      expect(
+        getAgpVersion(androidDirectory, BufferLogger.test()),
+        '7.3.0',
+      );
+    });
 
     group('validates gradle/agp versions', () {
       final List<GradleAgpTestData> testData = <GradleAgpTestData>[

@@ -200,17 +200,17 @@ Future<String?> getGradleVersion(
           final String gradleVersion = zipParts[1];
           return gradleVersion;
         } else {
-          // Did not find gradle zip url. Likley this is a bug in our parsing.
+          // Did not find gradle zip url. Likely this is a bug in our parsing.
           logger.printWarning(_formatParseWarning(wrapperFileContent));
         }
       } else {
-        // Did not find gradle zip url. Likley this is a bug in our parsing.
+        // Did not find gradle zip url. Likely this is a bug in our parsing.
         logger.printWarning(_formatParseWarning(wrapperFileContent));
       }
     } else {
       // If no distributionUrl log then treat as if there was no propertiesFile.
       logger.printTrace(
-          '$propertiesFile does not provide an Gradle version falling back to system gradle.');
+          '$propertiesFile does not provide a Gradle version falling back to system gradle.');
     }
   } else {
     // Could not find properties file.
@@ -240,7 +240,7 @@ OS:           Mac OS X 13.2.1 aarch64
     */
     // Observation shows that the version can have 2 or 3 numbers.
     // Inner parentheticals `(\.\d+)?` denote the optional third value.
-    // Outter parentheticals `Gradle (...)` denote a grouping used to extract
+    // Outer parentheticals `Gradle (...)` denote a grouping used to extract
     // the version number.
     final RegExp gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
     final RegExpMatch? version =
@@ -303,7 +303,6 @@ String _formatParseWarning(String content) {
 bool validateGradleAndAgp(Logger logger,
     {required String? gradleV, required String? agpV}) {
 
-  // TODO(reidbaker): are these the correct values we want to support?
   const String oldestSupportedAgpVersion = '3.3.0';
   const String oldestSupportedGradleVersion = '4.10.1';
 
