@@ -126,7 +126,7 @@ class NavigationDrawer extends StatelessWidget {
   /// Upon updating [selectedIndex], the [NavigationDrawer] will be rebuilt.
   final ValueChanged<int>? onDestinationSelected;
 
-  /// The width of navigation drawer. 
+  /// The width of navigation drawer.
   /// Defaults to [DrawerThemeData.width]. If that is also null, Defaults to 360.
   final double? width;
 
