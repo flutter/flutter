@@ -5,6 +5,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <vector>
 
 #include "flutter/fml/macros.h"

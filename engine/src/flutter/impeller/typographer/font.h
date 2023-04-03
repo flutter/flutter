@@ -11,7 +11,6 @@
 #include "impeller/base/comparable.h"
 #include "impeller/typographer/glyph.h"
 #include "impeller/typographer/typeface.h"
-#include "include/core/SkFont.h"
 
 namespace impeller {
 
