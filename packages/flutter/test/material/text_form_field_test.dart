@@ -1145,6 +1145,36 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
+  testWidgets('spellCheckConfiguration passes through to EditableText', (WidgetTester tester) async {
+    final SpellCheckConfiguration mySpellCheckConfiguration = SpellCheckConfiguration(
+        spellCheckService: DefaultSpellCheckService(),
+        misspelledTextStyle: TextField.materialMisspelledTextStyle,
+      );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: TextFormField(
+          spellCheckConfiguration: mySpellCheckConfiguration,
+        ),
+      ),
+    ));
+
+    expect(find.byType(EditableText), findsOneWidget);
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+
+    // Can't do equality comparison on spellCheckConfiguration itself because it
+    // will have been copied.
+    expect(
+      editableText.spellCheckConfiguration?.spellCheckService,
+      equals(mySpellCheckConfiguration.spellCheckService),
+    );
+    expect(
+      editableText.spellCheckConfiguration?.misspelledTextStyle,
+      equals(mySpellCheckConfiguration.misspelledTextStyle),
+    );
+  });
+
   testWidgets('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
     final TextMagnifierConfiguration myTextMagnifierConfiguration = TextMagnifierConfiguration(
       magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo> notifier) {
@@ -1154,7 +1184,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: TextField(
+        body: TextFormField(
           magnifierConfiguration: myTextMagnifierConfiguration,
         ),
       ),

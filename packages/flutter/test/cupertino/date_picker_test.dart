@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// no-shuffle:
-//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
-//   dependencies have been fixed.
-//   https://github.com/flutter/flutter/issues/85160
-//   Fails with "flutter test --test-randomize-ordering-seed=456"
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
 library;
 
 import 'dart:ui';
@@ -592,13 +587,25 @@ void main() {
       );
     });
 
-    testWidgets('width of wheel in background does not increase at large widths', (WidgetTester tester) async {
+    testWidgets('wheel does not bend outwards', (WidgetTester tester) async {
 
       final Widget dateWidget = CupertinoDatePicker(
         mode: CupertinoDatePickerMode.date,
         onDateTimeChanged: (_) { },
         initialDateTime: DateTime(2018, 1, 1, 10, 30),
       );
+
+      const String centerMonth = 'January';
+      const List<String> visibleMonthsExceptTheCenter = <String>[
+        'September',
+        'October',
+        'November',
+        'December',
+        'February',
+        'March',
+        'April',
+        'May',
+      ];
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -614,9 +621,13 @@ void main() {
         ),
       );
 
-      double decemberX = tester.getBottomLeft(find.text('December')).dx;
-      double octoberX = tester.getBottomLeft(find.text('October')).dx;
-      final double distance = octoberX - decemberX;
+      // The wheel does not bend outwards.
+      for (final String month in visibleMonthsExceptTheCenter) {
+        expect(
+          tester.getBottomLeft(find.text(centerMonth)).dx,
+          lessThan(tester.getBottomLeft(find.text(month)).dx),
+        );
+      }
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -632,14 +643,13 @@ void main() {
         ),
       );
 
-      decemberX = tester.getBottomLeft(find.text('December')).dx;
-      octoberX = tester.getBottomLeft(find.text('October')).dx;
-
       // The wheel does not bend outwards at large widths.
-      expect(
-        distance >= (octoberX - decemberX),
-        true,
-      );
+      for (final String month in visibleMonthsExceptTheCenter) {
+        expect(
+          tester.getBottomLeft(find.text(centerMonth)).dx,
+          lessThan(tester.getBottomLeft(find.text(month)).dx),
+        );
+      }
     });
 
     testWidgets('picker automatically scrolls away from invalid date on month change', (WidgetTester tester) async {

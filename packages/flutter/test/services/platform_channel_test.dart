@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=20210826"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -44,8 +37,14 @@ void main() {
   group('MethodChannel', () {
     const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
     const MethodCodec jsonMethod = JSONMethodCodec();
+
     const MethodChannel channel = MethodChannel('ch7', jsonMethod);
     const OptionalMethodChannel optionalMethodChannel = OptionalMethodChannel('ch8', jsonMethod);
+    tearDown(() {
+      channel.setMethodCallHandler(null);
+      optionalMethodChannel.setMethodCallHandler(null);
+    });
+
     test('can invoke method and get result', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
@@ -233,7 +232,6 @@ void main() {
             .having((PlatformException e) => e.message, 'message', equals('sayHello failed')),
         ),
       );
-      channel.setMethodCallHandler(null);
     });
 
     test('can handle method call with other error result', () async {
@@ -253,7 +251,6 @@ void main() {
             .having((PlatformException e) => e.message, 'message', equals('Invalid argument(s): bad')),
         ),
       );
-      channel.setMethodCallHandler(null);
     });
 
     test('can check the mock handler', () async {
