@@ -69,15 +69,15 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   ///
   /// The numbers were taken from this comment:
   /// [Cupertino blurs should boost saturation](https://github.com/flutter/flutter/issues/29483#issuecomment-477334981).
-  static List<double> _matrixWithSat(double sat) {
-    final double r = 0.213 * (1 - sat);
-    final double g = 0.715 * (1 - sat);
-    final double b = 0.072 * (1 - sat);
+  static List<double> _matrixWithSaturation(double saturation) {
+    final double r = 0.213 * (1 - saturation);
+    final double g = 0.715 * (1 - saturation);
+    final double b = 0.072 * (1 - saturation);
 
     return <double>[
-      r + sat, g, b, 0, 0, //
-      r, g + sat, b, 0, 0, //
-      r, g, b + sat, 0, 0, //
+      r + saturation, g, b, 0, 0, //
+      r, g + saturation, b, 0, 0, //
+      r, g, b + saturation, 0, 0, //
       0, 0, 0, 1, 0, //
     ];
   }
@@ -104,7 +104,8 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
       ),
       child: BackdropFilter(
         filter: ImageFilter.compose(
-          outer: ColorFilter.matrix(_matrixWithSat(_kToolbarSaturationBoost)),
+          outer: ColorFilter.matrix(
+              _matrixWithSaturation(_kToolbarSaturationBoost)),
           inner: ImageFilter.blur(
             sigmaX: _kToolbarBlurSigma,
             sigmaY: _kToolbarBlurSigma,
