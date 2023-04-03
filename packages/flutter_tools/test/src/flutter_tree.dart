@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
-import 'package:file/local.dart';
-
-import 'common.dart';
 
 /// A Flutter source tree.
 ///
@@ -40,9 +37,3 @@ class FlutterTree {
   Directory get frameworkDir => packagesDir.childDirectory('flutter'); // packages/flutter/
   Directory get toolsPackageDir => packagesDir.childDirectory('flutter_tools'); // packages/flutter_tools/
 }
-
-/// The Flutter source tree that this program is part of.
-///
-/// The tree is the one located by [getFlutterRoot].
-final FlutterTree hostFlutterTree = FlutterTree(
-  const LocalFileSystem().directory(getFlutterRoot()).absolute);

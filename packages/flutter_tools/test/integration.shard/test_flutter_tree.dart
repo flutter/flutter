@@ -7,9 +7,16 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 
+import '../src/common.dart';
 import '../src/flutter_tree.dart';
 import '../src/process.dart';
 import 'test_utils.dart';
+
+/// The Flutter source tree that this program is part of.
+///
+/// The tree is the one located by [getFlutterRoot].
+final FlutterTree hostFlutterTree = FlutterTree(
+    fileSystem.directory(getFlutterRoot()).absolute);
 
 /// The value the entrypoint writes into `flutterToolsStampFile`.
 ///

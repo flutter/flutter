@@ -9,7 +9,6 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
-import '../src/flutter_tree.dart';
 import 'test_flutter_tree.dart';
 import 'test_utils.dart';
 
