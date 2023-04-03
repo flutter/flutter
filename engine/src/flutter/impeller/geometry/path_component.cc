@@ -117,13 +117,13 @@ void QuadraticPathComponent::FillPointsForPolyline(std::vector<Point>& points,
   auto cross = (p2 - p1).Cross(dd);
   auto x0 = d01.Dot(dd) * 1 / cross;
   auto x2 = d12.Dot(dd) * 1 / cross;
-  auto scale = abs(cross / (hypot(dd.x, dd.y) * (x2 - x0)));
+  auto scale = std::abs(cross / (hypot(dd.x, dd.y) * (x2 - x0)));
 
   auto a0 = ApproximateParabolaIntegral(x0);
   auto a2 = ApproximateParabolaIntegral(x2);
   Scalar val = 0.f;
   if (std::isfinite(scale)) {
-    auto da = abs(a2 - a0);
+    auto da = std::abs(a2 - a0);
     auto sqrt_scale = sqrt(scale);
     if ((x0 < 0 && x2 < 0) || (x0 >= 0 && x2 >= 0)) {
       val = da * sqrt_scale;
