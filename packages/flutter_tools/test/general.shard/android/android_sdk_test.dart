@@ -423,7 +423,10 @@ OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
     });
 
     group('java', () {
-      final AndroidStudio androidStudio = FakeAndroidStudio();
+      late AndroidStudio androidStudio;
+      setUp(() {
+        androidStudio = FakeAndroidStudio();
+      });
       testUsingContext('getJavaVersion finds AS java and parses version', () {
         final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
         config.setValue('android-sdk', sdkDir.path);

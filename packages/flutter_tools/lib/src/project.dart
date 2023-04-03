@@ -547,8 +547,8 @@ class AndroidProject extends FlutterProjectPlatform {
     );
   }
 
-  /// Ensures Java Sdk is compatible with the projects gradle version and
-  /// the projects gradle version is compatible with the AGP version used
+  /// Ensures Java Sdk is compatible with the project's gradle version and
+  /// the project's gradle version is compatible with the AGP version used
   /// in build.gradle.
   Future<CompatabilityResult> hasValidJavaGradleAgpVersions() async {
     final String? gradleVersion = await gradle.getGradleVersion(
@@ -592,9 +592,6 @@ See the link below for more information:
 $javaGradleCompatUrl
 ''';
     }
-    // TODO(reidbaker): Android Studio <-> AGP Validation.
-    // https://developer.android.com/studio/releases/gradle-plugin#android_gradle_plugin_and_android_studio_compatibility
-
     return CompatabilityResult(compatibleJavaGradle && compatibleGradleAgp, description);
   }
 
