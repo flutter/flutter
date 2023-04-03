@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
 
+import 'framework.dart';
+import 'gesture_detector.dart';
+
 double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
   assert(originPosition != null);
   final Offset offset = event.position - originPosition!.global;
@@ -686,6 +689,74 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
 /// pointer does travel enough distance then the recognizer that entered the arena
 /// first will win. The gesture detected in this case is a drag.
+/// 
+/// {@tool snippet}
+///
+/// This example shows how to hook up [TapAndPanGestureRecognizer]s' to nested
+/// [RawGestureDetector]s'. It assumes that the code is being used inside a [State]
+/// object with a `_last` field that is then displayed as the child of the gesture detector.
+/// 
+/// In this example, if the pointer has moved past the drag threshold, then the
+/// the first [TapAndPanGestureRecognizer] instance to receive the [PointerEvent]
+/// will win the arena because the recognizer will immediately declare victory.
+///
+/// The first one to receive the event in the example will depend on where on both
+/// containers the pointer lands first. If your pointer begins in the overlapping
+/// area of both containers, then the inner-most widget will receive the event first.
+/// If your pointer begins in the yellow container then it will be the first to
+/// receive the event.
+/// 
+/// If the pointer has not moved past the drag threshold, then the first recognizer
+/// to enter the arena will win (i.e. they both tie and the gesture arena will call
+/// [GestureArenaManager.sweep] so the first member of the arena will win).
+///
+/// ```dart
+/// RawGestureDetector(
+///   gestures: <Type, GestureRecognizerFactory>{
+///     TapAndPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+///       () => TapAndPanGestureRecognizer(),
+///       (TapAndPanGestureRecognizer instance) {
+///         instance
+///           ..onTapDown = (TapDragDownDetails details) { setState(() { _last = 'down_a'; }); }
+///           ..onDragStart = (TapDragStartDetails details) { setState(() { _last = 'drag_start_a'; }); }
+///           ..onDragUpdate = (TapDragUpdateDetails details) { setState(() { _last = 'drag_update_a'; }); }
+///           ..onDragEnd = (TapDragEndDetails details) { setState(() { _last = 'drag_end_a'; }); }
+///           ..onTapUp = (TapDragUpDetails details) { setState(() { _last = 'up_a'; }); }
+///           ..onCancel = () { setState(() { _last = 'cancel_a'; }); };
+///       },
+///     ),
+///   },
+///   child: Container(
+///     width: 300.0,
+///     height: 300.0,
+///     color: Colors.yellow,
+///     alignment: Alignment.center,
+///     child: RawGestureDetector(
+///       gestures: <Type, GestureRecognizerFactory>{
+///         TapAndPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+///           () => TapAndPanGestureRecognizer(),
+///           (TapAndPanGestureRecognizer instance) {
+///             instance
+///               ..onTapDown = (TapDragDownDetails details) { setState(() { _last = 'down_b'; }); }
+///               ..onDragStart = (TapDragStartDetails details) { setState(() { _last = 'drag_start_b'; }); }
+///               ..onDragUpdate = (TapDragUpdateDetails details) { setState(() { _last = 'drag_update_b'; }); }
+///               ..onDragEnd = (TapDragEndDetails details) { setState(() { _last = 'drag_end_b'; }); }
+///               ..onTapUp = (TapDragUpDetails details) { setState(() { _last = 'up_b'; }); }
+///               ..onCancel = () { setState(() { _last = 'cancel_b'; }); };
+///           },
+///         ),
+///       },
+///       child: Container(
+///         width: 150.0,
+///         height: 150.0,
+///         color: Colors.blue,
+///         child: Text(_last),
+///       ),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
@@ -1289,8 +1360,17 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
 /// Recognizes taps along with movement in the horizontal direction.
 ///
+/// Before this recognizer has won the arena for the primary pointer being tracked,
+/// it will only accept a drag on the horizontal axis. If a drag is detected after
+/// this recognizer has won the arena then it will accept a drag on any axis.
+///
 /// See also:
 ///
+///  * [BaseTapAndDragGestureRecognizer], for the class that provides the main
+///  implementation details of this recognizer.
+///  * [TapAndPanGestureRecognizer], for a similar recognizer that accepts a drag
+///  on any axis regardless if the recognizer has won the arena for the primary
+///  pointer being tracked.
 ///  * [HorizontalDragGestureRecognizer], for a similar recognizer that only recognizes
 ///  horizontal movement.
 class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
@@ -1320,8 +1400,16 @@ class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecogni
 /// {@template flutter.gestures.selectionrecognizers.TapAndPanGestureRecognizer}
 /// Recognizes taps along with both horizontal and vertical movement.
 ///
+/// This recognizer will accept a drag on any axis, regardless if it has won the
+/// arena for the primary pointer being tracked.
+///
 /// See also:
 ///
+///  * [BaseTapAndDragGestureRecognizer], for the class that provides the main
+///  implementation details of this recognizer.
+///  * [TapAndHorizontalDragGestureRecognizer], for a similar recognizer that
+///  only accepts horizontal drags before it has won the arena for the primary
+///  pointer being tracked.
 ///  * [PanGestureRecognizer], for a similar recognizer that only recognizes
 ///  movement.
 /// {@endtemplate}
