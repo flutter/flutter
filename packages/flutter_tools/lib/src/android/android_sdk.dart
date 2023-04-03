@@ -441,20 +441,17 @@ class AndroidSdk {
     return parseJavaVersion(result.stdout);
   }
 
-  // Java versions have 2 formats
+  // Extracts jdk version from the output of java --version.
   @visibleForTesting
-  static String? parseJavaVersion(String? rawVersionOutput) {
-    if (rawVersionOutput == null) {
-      return null;
-    }
+  static String? parseJavaVersion(String rawVersionOutput) {
     // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
-    final RegExp jdkVersionRegex = RegExp(r'(\d+\.\d+(\.\d+(_?\d+)?))');
+    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
     final Iterable<RegExpMatch> matches =
         jdkVersionRegex.allMatches(rawVersionOutput);
     if (matches.isEmpty) {
       return null;
     }
-    final String? versionString = matches.first.group(1);
+    final String? versionString = matches.first.group(0);
     // Trim away _d+ from versions 1.8 and below.
     return versionString?.split('_').first;
   }

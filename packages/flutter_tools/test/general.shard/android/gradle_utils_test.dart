@@ -235,6 +235,33 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
       );
     });
 
+    testWithoutContext('returns gradlew version, whitespace, location', () async {
+      const String expectedVersion = '7.4.2';
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      final Directory wrapperDirectory = androidDirectory
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+        ..createSync(recursive: true);
+      // Distribution url is not the last line.
+      // Whitespace around distribution url.
+      wrapperDirectory
+          .childFile('gradle-wrapper.properties')
+          .writeAsStringSync('''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl = https\\://services.gradle.org/distributions/gradle-$expectedVersion-all.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+''');
+
+      expect(
+        await getGradleVersion(
+            androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        expectedVersion,
+      );
+    });
+
     testWithoutContext('returns the installed gradle version', () async {
       const String expectedVersion = '7.4.2';
       const String gradleOutput = '''

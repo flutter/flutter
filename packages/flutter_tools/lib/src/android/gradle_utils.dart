@@ -46,7 +46,7 @@ const String ndkVersion = '23.1.7779620';
 
 // Update this when new versions of Gradle come out.
 const String _maxKnownAndSupportedGradleVersion = '8.0';
-// Update this when new versions of AGP.
+// Update this when new versions of AGP come out.
 @visibleForTesting
 const String maxKnownAgpVersion = '8.1';
 
@@ -59,8 +59,8 @@ final RegExp _androidGradlePluginRegExp =
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';
-// Directory under android/ that gradle uses to store gradle information.
 
+// Directory under android/ that gradle uses to store gradle information.
 // Regularly used with [gradleWrapperDirectory] and
 // [gradleWrapperPropertiesFilename].
 // Different from the directory of gradle files stored in
@@ -172,7 +172,7 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
 /// [directory] or if not present the version available in local path.
 ///
 /// If gradle version is not found null is returned.
-/// [directory] should be and android directory with a build.gradle file.
+/// [directory] should be and android directory with an build.gradle file.
 Future<String?> getGradleVersion(
     Directory directory, Logger logger, ProcessManager processManager) async {
   final File propertiesFile = directory
@@ -186,7 +186,7 @@ Future<String?> getGradleVersion(
     // Expected content format (with lines above and below).
     // Version can have 2 or 3 numbers.
     // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
-    final RegExp distributionUrlRegex = RegExp(r'distributionUrl=.*\.zip');
+    final RegExp distributionUrlRegex = RegExp(r'distributionUrl\s?=\s?.*\.zip');
 
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);

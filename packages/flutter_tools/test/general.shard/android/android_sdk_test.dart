@@ -395,6 +395,12 @@ OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
       expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0.2');
     });
 
+
+    testWithoutContext('parses jdk two number versions', () {
+      const String exampleJdkOutput = 'openjdk 19.0 2023-01-17';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0');
+    });
+
     testUsingContext('getJavaBinary with AS install', () {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
