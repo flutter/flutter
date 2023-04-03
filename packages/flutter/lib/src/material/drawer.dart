@@ -243,7 +243,7 @@ class Drawer extends StatelessWidget {
     final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
     final DrawerThemeData defaults = useMaterial3 ? _DrawerDefaultsM3(context): _DrawerDefaultsM2(context);
     return Padding(
-      padding: isDrawerStart ? EdgeInsets.only(right: _kEdgeScrimWidth) : EdgeInsets.only(left: _kEdgeScrimWidth),
+      padding: isDrawerStart ? const EdgeInsets.only(right: _kEdgeScrimWidth) : const EdgeInsets.only(left: _kEdgeScrimWidth),
       child: Semantics(
         scopesRoute: true,
         namesRoute: true,

@@ -150,6 +150,7 @@ class NavigationDrawer extends StatelessWidget {
             selectedAnimation: animation,
             indicatorColor: indicatorColor,
             indicatorShape: indicatorShape,
+            tilePadding: tilePadding,
             onTap: () {
               if (onDestinationSelected != null) {
                 onDestinationSelected!(index);
