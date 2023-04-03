@@ -11,6 +11,10 @@ import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey
 import 'framework.dart';
 import 'gesture_detector.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+// late String _last;
+
 double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
   assert(originPosition != null);
   final Offset offset = event.position - originPosition!.global;
