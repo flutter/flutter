@@ -642,7 +642,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 }
 
-///  A base class for gesture recognizers that recognize taps and movements.
+/// A base class for gesture recognizers that recognize taps and movements.
 ///
 /// Takes on the responsibilities of [TapGestureRecognizer] and
 /// [DragGestureRecognizer] in one [GestureRecognizer].
@@ -686,7 +686,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
 /// pointer does travel enough distance then the recognizer that entered the arena
 /// first will win. The gesture detected in this case is a drag.
-abstract class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
+sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
