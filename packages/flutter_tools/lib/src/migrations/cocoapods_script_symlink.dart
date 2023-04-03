@@ -33,7 +33,7 @@ class CocoaPodsScriptReadlink extends ProjectMigrator {
 
     final Version? version = _xcodeProjectInterpreter.version;
 
-    // Skip if Xcode not installed or less than 14.3 with readlink behavior change, skip this migration.
+    // If Xcode not installed or less than 14.3 with readlink behavior change, skip this migration.
     if (version == null || version < Version(14, 3, 0)) {
       logger.printTrace('Detected Xcode version is $version, below 14.3, skipping "readlink -f" workaround.');
       return;
