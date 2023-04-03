@@ -4,6 +4,7 @@
 
 import static groovy.io.FileType.FILES
 
+import com.android.build.OutputFile
 import groovy.json.JsonSlurper
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -62,15 +63,18 @@ class FlutterExtension {
     String target
 }
 
+// This buildscript block exists solely for the compatibility with projects that
+// have not migrated to the declarative apply of the Flutter Gradle Plugin.
 buildscript {
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        /** When bumping, also update ndkVersion above, as well as the Android Gradle Plugin
-         * version in ../lib/src/android/gradle_utils.dart.
-         */
+        // When bumping, also update:
+        //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/flutter.groovy
+        //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
+        //  * AGP version in dependencies block in packages/flutter_tools/gradle/build.gradle.kts
         classpath 'com.android.tools.build:gradle:7.3.0'
     }
 }
@@ -861,7 +865,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // for only the output APK, not for the variant itself. Skipping this step simply
                     // causes Gradle to use the value of variant.versionCode for the APK.
                     // For more, see https://developer.android.com/studio/build/configure-apk-splits
-                    def abiVersionCode = ABI_VERSION.get(output.getFilter("ABI"))
+                    def abiVersionCode = ABI_VERSION.get(output.getFilter(OutputFile.ABI))
                     if (abiVersionCode != null) {
                         output.versionCodeOverride =
                             abiVersionCode * 1000 + variant.versionCode
@@ -1004,7 +1008,7 @@ class FlutterPlugin implements Plugin<Project> {
                             ? outputDirectory.get()
                             : outputDirectory
                         String filename = "app"
-                        String abi = output.getFilter("ABI")
+                        String abi = output.getFilter(OutputFile.ABI)
                         if (abi != null && !abi.isEmpty()) {
                             filename += "-${abi}"
                         }
