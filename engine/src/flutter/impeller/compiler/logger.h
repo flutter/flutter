@@ -34,10 +34,11 @@ class AutoLogger {
   FML_DISALLOW_COPY_AND_ASSIGN(AutoLogger);
 };
 
-#define COMPILER_ERROR \
-  ::impeller::compiler::AutoLogger(error_stream_) << GetSourcePrefix()
+#define COMPILER_ERROR(stream) \
+  ::impeller::compiler::AutoLogger(stream) << GetSourcePrefix()
 
-#define COMPILER_ERROR_NO_PREFIX ::impeller::compiler::AutoLogger(error_stream_)
+#define COMPILER_ERROR_NO_PREFIX(stream) \
+  ::impeller::compiler::AutoLogger(stream)
 
 }  // namespace compiler
 }  // namespace impeller

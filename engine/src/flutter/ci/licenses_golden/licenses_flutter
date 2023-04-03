@@ -1096,6 +1096,8 @@ ORIGIN: ../../../flutter/impeller/compiler/shader_lib/impeller/transform.glsl + 
 ORIGIN: ../../../flutter/impeller/compiler/shader_lib/impeller/types.glsl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/source_options.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/source_options.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/compiler/spirv_compiler.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/compiler/spirv_compiler.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/spirv_sksl.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/spirv_sksl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/switches.cc + ../../../flutter/LICENSE
@@ -3674,6 +3676,8 @@ FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/transform.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/types.glsl
 FILE: ../../../flutter/impeller/compiler/source_options.cc
 FILE: ../../../flutter/impeller/compiler/source_options.h
+FILE: ../../../flutter/impeller/compiler/spirv_compiler.cc
+FILE: ../../../flutter/impeller/compiler/spirv_compiler.h
 FILE: ../../../flutter/impeller/compiler/spirv_sksl.cc
 FILE: ../../../flutter/impeller/compiler/spirv_sksl.h
 FILE: ../../../flutter/impeller/compiler/switches.cc
