@@ -100,7 +100,13 @@ class SpellCheckConfiguration {
 
 // Methods for displaying spell check results:
 
-  List<SuggestionSpan> _correctSpellCheckResults(
+/// Adjusts spell check results to correspond to [newText] if the only results
+/// that the handler has access to are the [results] corresponding to
+/// [resultsText].
+///
+/// Used in the case where the request for the spell check results of the
+/// [newText] is lagging in order to avoid display of incorrect results.
+List<SuggestionSpan> _correctSpellCheckResults(
     String newText, String resultsText, List<SuggestionSpan> results) {
   final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
   int spanPointer = 0;
