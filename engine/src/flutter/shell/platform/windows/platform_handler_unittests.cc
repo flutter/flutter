@@ -82,7 +82,11 @@ class MockPlatformHandler : public PlatformHandler {
                void(const std::string&,
                     std::unique_ptr<MethodResult<rapidjson::Document>>));
 
-  MOCK_METHOD1(QuitApplication, void(int64_t exit_code));
+  MOCK_METHOD4(QuitApplication,
+               void(std::optional<HWND> hwnd,
+                    std::optional<WPARAM> wparam,
+                    std::optional<LPARAM> lparam,
+                    UINT exit_code));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockPlatformHandler);
@@ -483,7 +487,7 @@ TEST_F(PlatformHandlerTest, PlaySystemSound) {
 
 TEST_F(PlatformHandlerTest, SystemExitApplicationRequired) {
   use_headless_engine();
-  int exit_code = -1;
+  UINT exit_code = 0;
 
   TestBinaryMessenger messenger([](const std::string& channel,
                                    const uint8_t* message, size_t size,
@@ -491,7 +495,10 @@ TEST_F(PlatformHandlerTest, SystemExitApplicationRequired) {
   MockPlatformHandler platform_handler(&messenger, engine());
 
   ON_CALL(platform_handler, QuitApplication)
-      .WillByDefault([&exit_code](int ec) { exit_code = ec; });
+      .WillByDefault([&exit_code](std::optional<HWND> hwnd,
+                                  std::optional<WPARAM> wparam,
+                                  std::optional<LPARAM> lparam,
+                                  UINT ec) { exit_code = ec; });
   EXPECT_CALL(platform_handler, QuitApplication).Times(1);
 
   std::string result = SimulatePlatformMessage(
@@ -524,7 +531,7 @@ TEST_F(PlatformHandlerTest, SystemExitApplicationCancelableCancel) {
 TEST_F(PlatformHandlerTest, SystemExitApplicationCancelableExit) {
   use_headless_engine();
   bool called_cancel = false;
-  int exit_code = -1;
+  UINT exit_code = 0;
 
   TestBinaryMessenger messenger(
       [&called_cancel](const std::string& channel, const uint8_t* message,
@@ -536,7 +543,10 @@ TEST_F(PlatformHandlerTest, SystemExitApplicationCancelableExit) {
   MockPlatformHandler platform_handler(&messenger, engine());
 
   ON_CALL(platform_handler, QuitApplication)
-      .WillByDefault([&exit_code](int ec) { exit_code = ec; });
+      .WillByDefault([&exit_code](std::optional<HWND> hwnd,
+                                  std::optional<WPARAM> wparam,
+                                  std::optional<LPARAM> lparam,
+                                  UINT ec) { exit_code = ec; });
   EXPECT_CALL(platform_handler, QuitApplication).Times(1);
 
   std::string result = SimulatePlatformMessage(

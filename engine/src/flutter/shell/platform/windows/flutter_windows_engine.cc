@@ -161,7 +161,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
     std::unique_ptr<WindowsRegistry> registry)
     : project_(std::make_unique<FlutterProjectBundle>(project)),
       aot_data_(nullptr, nullptr),
-      windows_registry_(std::move(registry)) {
+      windows_registry_(std::move(registry)),
+      lifecycle_manager_(std::make_unique<WindowsLifecycleManager>(this)) {
   embedder_api_.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&embedder_api_);
 
@@ -203,6 +204,17 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       std::make_unique<FlutterWindowsTextureRegistrar>(this, gl_procs_);
   surface_manager_ = AngleSurfaceManager::Create();
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
+  window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
+      [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,
+         LRESULT* result) {
+        BASE_DCHECK(user_data);
+        FlutterWindowsEngine* that =
+            static_cast<FlutterWindowsEngine*>(user_data);
+        BASE_DCHECK(that->lifecycle_manager_);
+        return that->lifecycle_manager_->WindowProc(hwnd, msg, wpar, lpar,
+                                                    result);
+      },
+      static_cast<void*>(this));
 
   // Set up internal channels.
   // TODO: Replace this with an embedder.h API. See
@@ -748,6 +760,20 @@ void FlutterWindowsEngine::HandleAccessibilityMessage(
   }
   SendPlatformMessageResponse(message->response_handle,
                               reinterpret_cast<const uint8_t*>(""), 0);
+}
+
+void FlutterWindowsEngine::RequestApplicationQuit(HWND hwnd,
+                                                  WPARAM wparam,
+                                                  LPARAM lparam,
+                                                  AppExitType exit_type) {
+  platform_handler_->RequestAppExit(hwnd, wparam, lparam, exit_type, 0);
+}
+
+void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
+                                  std::optional<WPARAM> wparam,
+                                  std::optional<LPARAM> lparam,
+                                  UINT exit_code) {
+  lifecycle_manager_->Quit(hwnd, wparam, lparam, exit_code);
 }
 
 }  // namespace flutter
