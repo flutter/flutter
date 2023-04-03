@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of 'test_default_binary_messenger.dart';
+import 'dart:async';
+
+import 'package:flutter/services.dart';
 
 /// A mock stream handler for an [EventChannel] that mimics the native
 /// StreamHandler API.
@@ -51,7 +53,8 @@ class InlineMockStreamHandler extends MockStreamHandler {
 /// A mock event sink for a [MockStreamHandler] that mimics the native
 /// EventSink API.
 class MockStreamHandlerEventSink {
-  MockStreamHandlerEventSink._(this._sink);
+  /// Create a new [MockStreamHandlerEventSink] with the given [sink].
+  MockStreamHandlerEventSink(EventSink<Object?> sink) : _sink = sink;
 
   final EventSink<Object?> _sink;
 
