@@ -166,14 +166,14 @@ Future<void> main() async {
     final Key key = UniqueKey();
     Widget buildWidget(Color color) {
       final List<Widget> circles = <Widget>[];
-      for (int i = 75; i > 25; i--) {
+      for (int i = 100; i > 25; i--) {
         final double radius = i * 2.5;
         final double angle = i * 0.5;
         final double x = radius * math.cos(angle);
         final double y = radius * math.sin(angle);
         final Widget circle = Positioned(
-          left: 225 - x,
-          top: 225 - y,
+          left: 275 - x,
+          top: 275 - y,
           child: Container(
             width: 250,
             height: 250,
@@ -191,10 +191,10 @@ Future<void> main() async {
       return Center(
         key: key,
         child: Container(
-          width: 700,
-          height: 700,
+          width: 800,
+          height: 800,
           decoration: const ShapeDecoration(
-            color: Colors.white,
+            color: Colors.redAccent,
             shape: CircleBorder(
               side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
             ),
@@ -215,7 +215,7 @@ Future<void> main() async {
       matchesGoldenFile('painting.shape_decoration.outlined_border.should_be_white.png'),
     );
 
-    await tester.pumpWidget(buildWidget(const Color(0xfaffffff)));
+    await tester.pumpWidget(buildWidget(const Color(0xfeffffff)));
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('painting.shape_decoration.outlined_border.show_lines_due_to_opacity.png'),
