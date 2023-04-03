@@ -58,6 +58,7 @@ class NavigationDrawer extends StatelessWidget {
     this.surfaceTintColor,
     this.elevation,
     this.width,
+    this.tilePadding,
     this.indicatorColor,
     this.indicatorShape,
     this.onDestinationSelected,
@@ -128,6 +129,9 @@ class NavigationDrawer extends StatelessWidget {
   /// The width of navigation drawer. 
   /// Defaults to [DrawerThemeData.width]. If that is also null, Defaults to 360.
   final double? width;
+
+  /// The padding of drawer destination items.
+  final EdgeInsetsGeometry? tilePadding;
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +331,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
     return Padding(
-      padding: navigationDrawerTheme.tilePadding ?? defaults.tilePadding!,
+      padding: info.tilePadding ?? navigationDrawerTheme.tilePadding ?? defaults.tilePadding!,
       child: _NavigationDestinationSemantics(
         child: SizedBox(
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
@@ -461,6 +465,7 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
     required this.indicatorShape,
     required this.onTap,
     required super.child,
+    this.tilePadding,
   });
 
   /// Which destination index is this in the navigation drawer.
@@ -519,6 +524,9 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// This is computed by calling [NavigationDrawer.onDestinationSelected]
   /// with [index] passed in.
   final VoidCallback onTap;
+
+  /// The padding of drawer destination items.
+  final EdgeInsetsGeometry? tilePadding;
 
   /// Returns a non null [_NavigationDrawerDestinationInfo].
   ///

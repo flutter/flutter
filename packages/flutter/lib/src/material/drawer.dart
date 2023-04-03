@@ -250,7 +250,7 @@ class Drawer extends StatelessWidget {
         explicitChildNodes: true,
         label: label,
         child: ConstrainedBox(
-          constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
+          constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? defaults.width),
           child: Material(
             color: backgroundColor ?? drawerTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation!,
@@ -556,7 +556,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (box != null) {
       return box.size.width;
     }
-    return _kWidth; // drawer not being shown currently
+    final DrawerThemeData defaults = Theme.of(context).useMaterial3 ? _DrawerDefaultsM3(context): _DrawerDefaultsM2(context);
+    return defaults.width!; // drawer not being shown currently
   }
 
   bool _previouslyOpened = false;
