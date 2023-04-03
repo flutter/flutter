@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/project_migrator.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/ios/migrations/host_app_info_plist_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/ios_deployment_target_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migration.dart';
@@ -13,6 +14,8 @@ import 'package:flutter_tools/src/ios/migrations/project_build_location_migratio
 import 'package:flutter_tools/src/ios/migrations/remove_bitcode_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/migrations/cocoapods_script_symlink.dart';
 import 'package:flutter_tools/src/migrations/xcode_project_object_version_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_script_build_phase_migration.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -20,6 +23,7 @@ import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 void main () {
   group('iOS migration', () {
@@ -900,6 +904,104 @@ platform :ios, '11.0'
         expect('Disabling deprecated bitcode Xcode build setting'.allMatches(testLogger.warningText).length, 1);
       });
     });
+
+    group('CocoaPods script readlink', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger testLogger;
+      late FakeIosProject project;
+      late File podRunnerFrameworksScript;
+      late ProcessManager processManager;
+      late XcodeProjectInterpreter xcode143ProjectInterpreter;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+        podRunnerFrameworksScript = memoryFileSystem.file('Pods-Runner-frameworks.sh');
+        testLogger = BufferLogger.test();
+        project = FakeIosProject();
+        processManager = FakeProcessManager.any();
+        xcode143ProjectInterpreter = XcodeProjectInterpreter.test(processManager: processManager, version: Version(14, 3, 0));
+        project.podRunnerFrameworksScript = podRunnerFrameworksScript;
+      });
+
+      testWithoutContext('skipped if files are missing', () {
+        final CocoaPodsScriptReadlink iosProjectMigration = CocoaPodsScriptReadlink(
+          project,
+          xcode143ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(podRunnerFrameworksScript.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('CocoaPods Pods-Runner-frameworks.sh script not found'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skipped if nothing to upgrade', () {
+        const String contents = r'''
+  if [ -L "${source}" ]; then
+    echo "Symlinked..."
+    source="$(readlink -f "${source}")"
+  fi''';
+        podRunnerFrameworksScript.writeAsStringSync(contents);
+
+        final CocoaPodsScriptReadlink iosProjectMigration = CocoaPodsScriptReadlink(
+          project,
+          xcode143ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(podRunnerFrameworksScript.existsSync(), isTrue);
+        expect(testLogger.traceText, isEmpty);
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skipped if Xcode version below 14.3', () {
+        const String contents = r'''
+  if [ -L "${source}" ]; then
+    echo "Symlinked..."
+    source="$(readlink "${source}")"
+  fi''';
+        podRunnerFrameworksScript.writeAsStringSync(contents);
+
+        final XcodeProjectInterpreter xcode142ProjectInterpreter = XcodeProjectInterpreter.test(
+          processManager: processManager,
+          version: Version(14, 2, 0),
+        );
+
+        final CocoaPodsScriptReadlink iosProjectMigration = CocoaPodsScriptReadlink(
+          project,
+          xcode142ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(podRunnerFrameworksScript.existsSync(), isTrue);
+        expect(testLogger.traceText, contains('Detected Xcode version is 14.2.0, below 14.3, skipping "readlink -f" workaround'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('Xcode project is migrated', () {
+        const String contents = r'''
+  if [ -L "${source}" ]; then
+    echo "Symlinked..."
+    source="$(readlink "${source}")"
+  fi''';
+        podRunnerFrameworksScript.writeAsStringSync(contents);
+
+        final CocoaPodsScriptReadlink iosProjectMigration = CocoaPodsScriptReadlink(
+          project,
+          xcode143ProjectInterpreter,
+          testLogger,
+        );
+        iosProjectMigration.migrate();
+        expect(podRunnerFrameworksScript.readAsStringSync(), r'''
+  if [ -L "${source}" ]; then
+    echo "Symlinked..."
+    source="$(readlink -f "${source}")"
+  fi
+''');
+        expect(testLogger.statusText, contains('Upgrading Pods-Runner-frameworks.sh'));
+      });
+    });
   });
 
   group('update Xcode script build phase', () {
@@ -1025,6 +1127,9 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   File podfile = MemoryFileSystem.test().file('Podfile');
+
+  @override
+  File podRunnerFrameworksScript = MemoryFileSystem.test().file('podRunnerFrameworksScript');
 }
 
 class FakeIOSMigrator extends ProjectMigrator {
