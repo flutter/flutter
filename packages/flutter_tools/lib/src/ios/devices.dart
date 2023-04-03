@@ -156,7 +156,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       // connections, remove it.
       if (knownDevice != null &&
           !_deviceHasObservedConnection(deviceObservedConnections)) {
-        deviceNotifier!.removeItem(knownDevice);
+        notifier.removeItem(knownDevice);
       }
     }
   }
@@ -174,6 +174,10 @@ class IOSDevices extends PollingDeviceDiscovery {
   /// Updates notifier with devices found in the cache that are determined
   /// to be connected.
   void _updateNotifierFromCache() {
+    final ItemListNotifier<Device>? notifier = deviceNotifier;
+    if (notifier == null) {
+      return;
+    }
     // Device is connected if it has either an observed usb or wifi connection
     // or it has not been observed but was found as connected in the cache.
     final List<Device> connectedDevices = _cachedPolledDevices.values.where((Device device) {
@@ -184,7 +188,7 @@ class IOSDevices extends PollingDeviceDiscovery {
           (deviceObservedConnections == null && device.isConnected);
     }).toList();
 
-    deviceNotifier!.updateWithNewList(connectedDevices);
+    notifier.updateWithNewList(connectedDevices);
   }
 
   bool _deviceHasObservedConnection(
