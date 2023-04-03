@@ -380,7 +380,7 @@ void main() {
 
     expect(value, equals('three'));
 
-    await tester.tap(find.text('three', skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -439,7 +439,7 @@ void main() {
 
     expect(value, equals('three'));
 
-    await tester.tap(find.text('three', skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -558,7 +558,7 @@ void main() {
     // Initial value of null displays hint
     expect(value, equals(null));
     expect(getIndex(), 4);
-    await tester.tap(find.text('Select Value', skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.text('Select Value'), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pumpAndSettle();
@@ -645,7 +645,7 @@ void main() {
     );
     await tester.tap(find.text('First Item'));
     await tester.pump();
-    final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item', skipOffstage: false)).toList()[1];
+    final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item')).toList()[1];
     expect(secondItem.localToGlobal(Offset.zero).dx, equals(150.0));
     expect(secondItem.localToGlobal(Offset.zero).dy, equals(176.0));
   });
@@ -683,10 +683,14 @@ void main() {
 
     // We should have two copies of item 5, one in the menu and one in the
     // button itself.
-    expect(tester.elementList(find.text('5', skipOffstage: false)), hasLength(2));
+    expect(tester.elementList(find.text('5')), hasLength(2));
+
+    // We should only have one copy of item 19, which is in the button itself.
+    // The copy in the menu shouldn't be in the tree because it's off-screen.
+    expect(tester.elementList(find.text('19')), hasLength(1));
 
     expect(value, 4);
-    await tester.tap(find.byWidget(button, skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.byWidget(button), warnIfMissed: false);
     expect(value, 4);
     // this waits for the route's completer to complete, which calls handleChanged
     await tester.idle();
@@ -1103,7 +1107,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     // Tap on item 'one', which must appear over the button.
-    await tester.tap(find.byKey(buttonKey, skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.byKey(buttonKey), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -1171,7 +1175,7 @@ void main() {
       await tester.pumpAndSettle();
       menuRect = getMenuRect();
       buttonRect = getExpandedButtonRect();
-      await tester.tap(find.byType(dropdownButtonType, skipOffstage: false), warnIfMissed: false);
+      await tester.tap(find.byType(dropdownButtonType), warnIfMissed: false);
     }
 
     // Dropdown button is along the top of the app. The top of the menu is
@@ -1757,7 +1761,7 @@ void main() {
       ));
 
       final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
-        find.widgetWithText(Row, '25', skipOffstage: false),
+        find.widgetWithText(Row, '25'),
       );
       // DropdownButton should be the height of the largest item (hint inclusive)
       expect(dropdownButtonRenderBox.size.height, 125);
@@ -1831,7 +1835,7 @@ void main() {
       ));
 
       final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
-        find.widgetWithText(Row, '25', skipOffstage: false),
+        find.widgetWithText(Row, '25'),
       );
       // DropdownButton should be the height of the largest item (hint inclusive)
       expect(dropdownButtonRenderBox.size.height, 125);
@@ -2147,7 +2151,7 @@ void main() {
 
     // Initially shows the hint text
     expect(find.text('Please select an item'), findsOneWidget);
-    await tester.tap(find.text('Please select an item', skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.text('Please select an item'), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('1'));
     await tester.pumpAndSettle();
@@ -2193,10 +2197,10 @@ void main() {
     }
 
     final Finder dropdownIcon = find.byType(Icon);
-    final Finder item30 = find.byKey(const ValueKey<double>(30), skipOffstage: false);
-    final Finder item40 = find.byKey(const ValueKey<double>(40), skipOffstage: false);
-    final Finder item50 = find.byKey(const ValueKey<double>(50), skipOffstage: false);
-    final Finder item60 = find.byKey(const ValueKey<double>(60), skipOffstage: false);
+    final Finder item30 = find.byKey(const ValueKey<double>(30));
+    final Finder item40 = find.byKey(const ValueKey<double>(40));
+    final Finder item50 = find.byKey(const ValueKey<double>(50));
+    final Finder item60 = find.byKey(const ValueKey<double>(60));
 
     // Only the DropdownButton is visible. It contains the selected item
     // and a dropdown arrow icon.
@@ -2372,7 +2376,7 @@ void main() {
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
 
     // Show the popup menu.
-    await tester.tap(find.text('-item0-', skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.text('-item0-'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
@@ -2760,7 +2764,7 @@ void main() {
 
     // Scrolling to the top again has removed the one the focus was on from the
     // tree, causing it to lose focus.
-    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91), skipOffstage: false).last)).hasPrimaryFocus, isFalse);
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last)).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('DropdownButton onTap callback can request focus', (WidgetTester tester) async {
@@ -2901,7 +2905,7 @@ void main() {
     expect(dropdownButtonTapCounter, 1); // Should not change.
 
     // Tap dropdown button again.
-    await tester.tap(find.text('three', skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(value, equals('three'));
@@ -2967,7 +2971,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
 
     // Tap dropdown button again.
-    await tester.tap(find.text('three', skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.text('three'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Should not change.
@@ -2983,7 +2987,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
 
     // Tap dropdown button again.
-    await tester.tap(find.text('two', skipOffstage: false), warnIfMissed: false);
+    await tester.tap(find.text('two'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Should not change.
@@ -3677,50 +3681,50 @@ void main() {
       alignment: AlignmentDirectional.centerStart,
       isExpanded: false,
     ));
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 292.0);
+    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.topStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
       isExpanded: false,
     ));
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 250.0);
+    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.bottomStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
       isExpanded: false,
     ));
-    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
-    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dy, 350.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
     // AlignmentDirectional.center
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
       isExpanded: false,
     ));
-    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dx, 388.0);
-    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dy, 300.0);
+    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
     // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
       isExpanded: false,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 250.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
       isExpanded: false,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 292.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
       isExpanded: false,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 334.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 334.0);
 
     // DropdownButton with `isExpanded: true`
     // AlignmentDirectional.centerStart (default)
@@ -3728,50 +3732,50 @@ void main() {
       alignment: AlignmentDirectional.centerStart,
       isExpanded: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 292.0);
+    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.topStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
       isExpanded: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 250.0);
+    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.bottomStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
       isExpanded: true,
     ));
-    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
-    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dy, 350.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
     // AlignmentDirectional.center
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
       isExpanded: true,
     ));
-    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dx, 388.0);
-    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dy, 300.0);
+    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
     // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
       isExpanded: true,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 250.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
       isExpanded: true,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 292.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
       isExpanded: true,
     ));
-    expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
-    expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dy, 350.0);
+    expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
   });
 
   testWidgets('DropdownButton hint alignment with selectedItemBuilder', (WidgetTester tester) async {
@@ -3783,56 +3787,56 @@ void main() {
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 292.0);
+    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.topStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 250.0);
+    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.bottomStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
-    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dy, 350.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dx, 348.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
     // AlignmentDirectional.center
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dx, 388.0);
-    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dy, 300.0);
+    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
     // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 250.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 292.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 334.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 334.0);
 
     // DropdownButton with `isExpanded: true`
     // AlignmentDirectional.centerStart (default)
@@ -3841,56 +3845,56 @@ void main() {
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 292.0);
+    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.topStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
-    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 250.0);
+    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.bottomStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
-    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dy, 350.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dx, 0.0);
+    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
     // AlignmentDirectional.center
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dx, 388.0);
-    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dy, 300.0);
+    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
     // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 250.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
     // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
-    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 292.0);
+    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
-    expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dy, 350.0);
+    expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
+    expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
   });
 
   testWidgets('BorderRadius property clips dropdown button and dropdown menu', (WidgetTester tester) async {
