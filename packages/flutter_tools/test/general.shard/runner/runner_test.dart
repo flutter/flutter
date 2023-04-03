@@ -488,16 +488,12 @@ class FakeAnalytics extends Fake implements Analytics {
   String get getConsentMessage => 'message';
 
   @override
-  bool get shouldShowMessage {
-    final bool result = _fakeShowMessage;
-    if (result) {
-      _fakeShowMessage = false;
-    }
-    return result;
-  }
+  bool get shouldShowMessage => _fakeShowMessage;
 
   @override
-  void clientShowedMessage() {}
+  void clientShowedMessage() {
+    _fakeShowMessage = false;
+  }
 
   @override
   Future<void> setTelemetry(bool reportingBool) {
