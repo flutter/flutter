@@ -6,6 +6,9 @@
 
 #include <fstream>
 
+static const double kMaxDiffPixelsPercent = 0.01;
+static const int32_t kMaxColorDelta = 8;
+
 namespace impeller {
 namespace testing {
 
@@ -24,7 +27,8 @@ void GoldenDigest::AddImage(const std::string& test_name,
                             const std::string& filename,
                             int32_t width,
                             int32_t height) {
-  entries_.push_back({test_name, filename, width, height});
+  entries_.push_back({test_name, filename, width, height, kMaxDiffPixelsPercent,
+                      kMaxColorDelta});
 }
 
 bool GoldenDigest::Write(WorkingDirectory* working_directory) {
@@ -46,8 +50,19 @@ bool GoldenDigest::Write(WorkingDirectory* working_directory) {
          << "\"testName\" : \"" << entry.test_name << "\", "
          << "\"filename\" : \"" << entry.filename << "\", "
          << "\"width\" : " << entry.width << ", "
-         << "\"height\" : " << entry.height << " "
-         << "}";
+         << "\"height\" : " << entry.height << ", ";
+
+    if (entry.max_diff_pixels_percent ==
+        static_cast<int64_t>(entry.max_diff_pixels_percent)) {
+      fout << "\"maxDiffPixelsPercent\" : " << entry.max_diff_pixels_percent
+           << ".0, ";
+    } else {
+      fout << "\"maxDiffPixelsPercent\" : " << entry.max_diff_pixels_percent
+           << ", ";
+    }
+
+    fout << "\"maxColorDelta\":" << entry.max_color_delta << " ";
+    fout << "}";
   }
   fout << std::endl << "]" << std::endl;
 

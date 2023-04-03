@@ -43,6 +43,7 @@ bool SaveScreenshot(std::unique_ptr<MetalScreenshot> screenshot) {
   return screenshot->WriteToPNG(
       WorkingDirectory::Instance()->GetFilenamePath(filename));
 }
+
 }  // namespace
 
 class GoldenTests : public ::testing::Test {

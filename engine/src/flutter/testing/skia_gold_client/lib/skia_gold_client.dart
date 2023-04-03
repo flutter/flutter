@@ -178,15 +178,21 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated.
   ///
-  /// [pixelColorDelta] defines maximum acceptable difference in RGB channels of each pixel,
-  /// such that:
+  /// [pixelColorDelta] defines maximum acceptable difference in RGB channels of
+  /// each pixel, such that:
   ///
   /// ```
-  /// abs(r(image) - r(golden)) + abs(g(image) - g(golden)) + abs(b(image) - b(golden)) <= pixelDeltaThreshold
+  /// bool isSame(Color image, Color golden, int pixelDeltaThreshold) {
+  ///   return abs(image.r - golden.r)
+  ///     + abs(image.g - golden.g)
+  ///     + abs(image.b - golden.b) <= pixelDeltaThreshold;
+  /// }
   /// ```
   ///
-  /// [differentPixelsRate] is the fraction of accepted pixels to be wrong in the range [0.0, 1.0].
-  /// Defaults to 0.01. A value of 0.01 means that 1% of the pixels are allowed to change.
+  /// [differentPixelsRate] is the fraction of pixels that can differ, as
+  /// determined by the [pixelColorDelta] parameter. It's in the range [0.0,
+  /// 1.0] and defaults to 0.01. A value of 0.01 means that 1% of the pixels are
+  /// allowed to be different.
   Future<void> addImg(
     String testName,
     File goldenFile, {

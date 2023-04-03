@@ -42,10 +42,9 @@ bool SaveScreenshot(std::unique_ptr<testing::MetalScreenshot> screenshot) {
 }  // namespace
 
 struct GoldenPlaygroundTest::GoldenPlaygroundTestImpl {
-  GoldenPlaygroundTestImpl()
-      : screenshoter_(new testing::MetalScreenshoter()) {}
-  std::unique_ptr<testing::MetalScreenshoter> screenshoter_;
-  ISize window_size_ = ISize{1024, 768};
+  GoldenPlaygroundTestImpl() : screenshoter(new testing::MetalScreenshoter()) {}
+  std::unique_ptr<testing::MetalScreenshoter> screenshoter;
+  ISize window_size = ISize{1024, 768};
 };
 
 GoldenPlaygroundTest::GoldenPlaygroundTest()
@@ -93,7 +92,7 @@ PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {
 
 bool GoldenPlaygroundTest::OpenPlaygroundHere(const Picture& picture) {
   auto screenshot =
-      pimpl_->screenshoter_->MakeScreenshot(picture, pimpl_->window_size_);
+      pimpl_->screenshoter->MakeScreenshot(picture, pimpl_->window_size);
   return SaveScreenshot(std::move(screenshot));
 }
 
@@ -116,11 +115,11 @@ std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
-  return pimpl_->screenshoter_->GetContext().GetContext();
+  return pimpl_->screenshoter->GetContext().GetContext();
 }
 
 Point GoldenPlaygroundTest::GetContentScale() const {
-  return pimpl_->screenshoter_->GetPlayground().GetContentScale();
+  return pimpl_->screenshoter->GetPlayground().GetContentScale();
 }
 
 Scalar GoldenPlaygroundTest::GetSecondsElapsed() const {
@@ -128,7 +127,7 @@ Scalar GoldenPlaygroundTest::GetSecondsElapsed() const {
 }
 
 ISize GoldenPlaygroundTest::GetWindowSize() const {
-  return pimpl_->window_size_;
+  return pimpl_->window_size;
 }
 
 }  // namespace impeller
