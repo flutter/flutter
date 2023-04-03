@@ -1183,6 +1183,50 @@ void main() {
     expect(find.text(helperText), findsNothing);
     expect(find.text(errorText), findsOneWidget);
   });
+
+  testWidgets('DropdownMenu can respect helperText when helperText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String helperText = 'I am helperText';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              helperText: helperText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text(helperText), findsOneWidget);
+  });
+
+  testWidgets('DropdownMenu can respect errorText when errorText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String errorText = 'I am errorText';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              errorText: errorText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text(errorText), findsOneWidget);
+  });
 }
 
 enum TestMenu {
