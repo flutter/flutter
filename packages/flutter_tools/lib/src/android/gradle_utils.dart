@@ -186,7 +186,8 @@ Future<String?> getGradleVersion(
     // Expected content format (with lines above and below).
     // Version can have 2 or 3 numbers.
     // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
-    final RegExp distributionUrlRegex = RegExp(r'distributionUrl\s?=\s?.*\.zip');
+    final RegExp distributionUrlRegex =
+        RegExp(r'distributionUrl\s?=\s?.*\.zip');
 
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);
@@ -194,8 +195,14 @@ Future<String?> getGradleVersion(
       // Expected content: 'gradle-7.4.2-all.zip'
       final String? gradleZip = distributionUrl.group(0);
       if (gradleZip != null) {
-        final String gradleVersion = gradleZip.split('-')[1];
-        return gradleVersion;
+        final List<String> zipParts = gradleZip.split('-');
+        if (zipParts.length > 2) {
+          final String gradleVersion = zipParts[1];
+          return gradleVersion;
+        } else {
+          // Did not find gradle zip url. Likley this is a bug in our parsing.
+          logger.printWarning(_formatParseWarning(wrapperFileContent));
+        }
       } else {
         // Did not find gradle zip url. Likley this is a bug in our parsing.
         logger.printWarning(_formatParseWarning(wrapperFileContent));
@@ -235,7 +242,7 @@ OS:           Mac OS X 13.2.1 aarch64
     // Inner parentheticals `(\.\d+)?` denote the optional third value.
     // Outter parentheticals `Gradle (...)` denote a grouping used to extract
     // the version number.
-    final RegExp gradleVersionRegex = RegExp(r'Gradle (\d+\.\d+(\.\d+)?)');
+    final RegExp gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
     final RegExpMatch? version =
         gradleVersionRegex.firstMatch(gradleVersionVerbose);
     if (version == null) {

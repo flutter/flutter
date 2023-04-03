@@ -262,6 +262,29 @@ zipStorePath=wrapper/dists
       );
     });
 
+    testWithoutContext('does not crash on hypothetical new format', () async {
+      const String expectedVersion = '7.4.2';
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      final Directory wrapperDirectory = androidDirectory
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+        ..createSync(recursive: true);
+      // Distribution url is not the last line.
+      // Whitespace around distribution url.
+      wrapperDirectory
+          .childFile('gradle-wrapper.properties')
+          .writeAsStringSync(r'distributionUrl=https\://services.gradle.org/distributions/gradle_7.4.2_all.zip');
+
+      // FakeProcessManager.any is used here and not in other getGradleVersion
+      // tests because this test does not care about process fallback logic.
+      expect(
+        await getGradleVersion(
+            androidDirectory, BufferLogger.test(), FakeProcessManager.any()),
+        isNull,
+      );
+    });
+
     testWithoutContext('returns the installed gradle version', () async {
       const String expectedVersion = '7.4.2';
       const String gradleOutput = '''
@@ -295,6 +318,27 @@ OS:           Mac OS X 13.2.1 aarch64
         expectedVersion,
       );
     });
+
+    testWithoutContext('returns the installed gradle with whitespace formatting', () async {
+      const String expectedVersion = '7.4.2';
+      const String gradleOutput = 'Gradle   $expectedVersion';
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      final ProcessManager processManager = FakeProcessManager.empty()
+        ..addCommand(const FakeCommand(
+            command: <String>['gradle', gradleVersionFlag],
+            stdout: gradleOutput));
+
+      expect(
+        await getGradleVersion(
+          androidDirectory,
+          BufferLogger.test(),
+          processManager,
+        ),
+        expectedVersion,
+      );
+    });
+
     testWithoutContext('returns the AGP version when set', () async {
       const String expectedVersion = '7.3.0';
       final Directory androidDirectory = fileSystem.directory('/android')
