@@ -16,6 +16,7 @@ import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import 'test_time_recorder.dart';
 
 /// A request to the [TestCompiler] for recompilation.
 class CompilationRequest {
@@ -40,10 +41,12 @@ class TestCompiler {
   ///
   /// If [precompiledDillPath] is passed, it will be used to initialize the
   /// compiler.
+  ///
+  /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(
     this.buildInfo,
     this.flutterProject,
-    { String? precompiledDillPath }
+    { String? precompiledDillPath, this.testTimeRecorder }
   ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject!.directory.path,
         getBuildDirectory(),
@@ -73,6 +76,7 @@ class TestCompiler {
   final BuildInfo buildInfo;
   final String testFilePath;
   final bool shouldCopyDillFile;
+  final TestTimeRecorder? testTimeRecorder;
 
 
   ResidentCompiler? compiler;
@@ -112,7 +116,6 @@ class TestCompiler {
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       initializeFromDill: testFilePath,
-      unsafePackageSerialization: false,
       dartDefines: buildInfo.dartDefines,
       packagesPath: buildInfo.packagesPath,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
@@ -139,6 +142,7 @@ class TestCompiler {
       final CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
       final Stopwatch compilerTime = Stopwatch()..start();
+      final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
       bool firstCompile = false;
       if (compiler == null) {
         compiler = await createCompiler();
@@ -200,6 +204,7 @@ class TestCompiler {
         compiler!.reset();
       }
       globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
+      testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }

@@ -756,7 +756,7 @@ void main() {
     expect(appBarBackground.color, Colors.white);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, themeData.textTheme.bodyLarge!.color);
     expect(textField.style!.color, isNot(equals(Colors.white)));
   });
 
@@ -784,7 +784,7 @@ void main() {
     expect(appBarBackground.color, themeData.primaryColor);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.style!.color, themeData.textTheme.bodyText1!.color);
+    expect(textField.style!.color, themeData.textTheme.bodyLarge!.color);
     expect(textField.style!.color, isNot(equals(themeData.primaryColor)));
   });
 

@@ -1,11 +1,10 @@
 {
-  "version": "v0_101",
+  "version": "v0_143",
 
   "md.comp.filled-text-field.active-indicator.color": "onSurfaceVariant",
   "md.comp.filled-text-field.active-indicator.height": 1.0,
   "md.comp.filled-text-field.caret.color": "primary",
   "md.comp.filled-text-field.container.color": "surfaceVariant",
-  "md.comp.filled-text-field.container.height": 56.0,
   "md.comp.filled-text-field.container.shape": "md.sys.shape.corner.extra-small.top",
   "md.comp.filled-text-field.disabled.active-indicator.color": "onSurface",
   "md.comp.filled-text-field.disabled.active-indicator.height": 1.0,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -28,7 +26,7 @@ final Uint8List imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
 void main() {
 
   group('Test that TestGoldenComparator', () {
-    FakeProcessManager processManager;
+    late FakeProcessManager processManager;
 
     setUp(() {
       processManager = FakeProcessManager.empty();
@@ -63,7 +61,7 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, null);
     });
 
@@ -92,7 +90,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
       );
 
-      final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, 'some message');
     });
 
@@ -125,10 +123,10 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result1, 'some message');
 
-      final String result2 = await comparator.compareGoldens(testUri, imageBytes, goldenKey2, false);
+      final String? result2 = await comparator.compareGoldens(testUri, imageBytes, goldenKey2, false);
       expect(result2, 'some other message');
     });
 
@@ -170,10 +168,10 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
       );
 
-      final String result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result1, 'some message');
 
-      final String result2 = await comparator.compareGoldens(testUri2, imageBytes, goldenKey2, false);
+      final String? result2 = await comparator.compareGoldens(testUri2, imageBytes, goldenKey2, false);
       expect(result2, 'some other message');
     });
 
@@ -205,7 +203,7 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
       expect(result, null);
 
       await comparator.close();

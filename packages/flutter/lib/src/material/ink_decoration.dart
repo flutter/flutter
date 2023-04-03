@@ -225,7 +225,7 @@ class Ink extends StatefulWidget {
   /// The decoration to paint on the nearest ancestor [Material] widget.
   ///
   /// A shorthand for specifying just a solid color is available in the
-  /// constructor: set the `color` argument instead of the `decoration`
+  /// constructor: set the `color` argument instead of the [decoration]
   /// argument.
   ///
   /// A shorthand for specifying just an image is also available using the
@@ -284,7 +284,7 @@ class _InkState extends State<Ink> {
       _ink = InkDecoration(
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
-        controller: Material.of(context)!,
+        controller: Material.of(context),
         referenceBox: _boxKey.currentContext!.findRenderObject()! as RenderBox,
         onRemoved: _handleRemoved,
       );
@@ -292,7 +292,7 @@ class _InkState extends State<Ink> {
       _ink!.decoration = widget.decoration;
       _ink!.configuration = createLocalImageConfiguration(context);
     }
-    return widget.child ?? Container();
+    return widget.child ?? const SizedBox();
   }
 
   @override
@@ -334,12 +334,11 @@ class InkDecoration extends InkFeature {
   InkDecoration({
     required Decoration? decoration,
     required ImageConfiguration configuration,
-    required MaterialInkController controller,
+    required super.controller,
     required super.referenceBox,
     super.onRemoved,
   }) : assert(configuration != null),
-       _configuration = configuration,
-       super(controller: controller) {
+       _configuration = configuration {
     this.decoration = decoration;
     controller.addInkFeature(this);
   }

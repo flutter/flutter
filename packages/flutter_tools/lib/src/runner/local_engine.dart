@@ -18,7 +18,7 @@ import '../dart/package_map.dart';
 /// The flutter tool can be run with the output files of one or more engine builds
 /// replacing the cached artifacts. Typically this is done by setting the
 /// `--local-engine` command line flag to the name of the desired engine variant
-/// (e.g. "host_debug_unopt").  Provided that the `flutter/` and `engine/` directories
+/// (e.g. "host_debug_unopt"). Provided that the `flutter/` and `engine/` directories
 /// are located adjacent to one another, the output folder will be located
 /// automatically.
 ///
@@ -150,6 +150,13 @@ class LocalEngineLocator {
   // Determine the host engine directory associated with the local engine:
   // Strip '_sim_' since there are no host simulator builds.
   String _getHostEngineBasename(String localEngineBasename) {
+    if (localEngineBasename.startsWith('web_') ||
+        localEngineBasename.startsWith('wasm_') ||
+        localEngineBasename.startsWith('host_')) {
+      // Don't modify the web or host local engine's basename.
+      return localEngineBasename;
+    }
+
     String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
     tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
     // Strip suffix for various archs.

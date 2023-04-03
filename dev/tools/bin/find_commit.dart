@@ -10,11 +10,12 @@
 
 import 'dart:io';
 
-const bool debugLogging = false;
+const bool debugLogging = true;
 
 void log(String message) {
-  if (debugLogging)
+  if (debugLogging) {
     print(message);
+  }
 }
 
 class Commit {
@@ -49,33 +50,42 @@ String findCommit({
   } else {
     final List<Commit> branchCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryBranch, '--']));
     final List<Commit> trunkCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryTrunk, '--']));
-    if (branchCommits.isEmpty || trunkCommits.isEmpty || branchCommits.first.hash != trunkCommits.first.hash)
+    if (branchCommits.isEmpty || trunkCommits.isEmpty || branchCommits.first.hash != trunkCommits.first.hash) {
       throw StateError('Branch $primaryBranch does not seem to have a common history with trunk $primaryTrunk.');
+    }
     if (branchCommits.last.hash == trunkCommits.last.hash) {
       log('$primaryBranch is even with $primaryTrunk, using last commit as anchor');
       anchor = trunkCommits.last;
     } else {
       int index = 0;
-      while (branchCommits.length > index && trunkCommits.length > index && branchCommits[index].hash == trunkCommits[index].hash)
+      while (branchCommits.length > index && trunkCommits.length > index && branchCommits[index].hash == trunkCommits[index].hash) {
         index += 1;
+      }
       log('$primaryBranch branched from $primaryTrunk ${branchCommits.length - index} commits ago, trunk has advanced by ${trunkCommits.length - index} commits since then.');
       anchor = trunkCommits[index - 1];
     }
   }
+  final String currentBranch = git(secondaryRepoDirectory, <String>[
+    'rev-parse',
+    '--abbrev-ref',
+    'HEAD'
+  ]).trim();
+
   return git(secondaryRepoDirectory, <String>[
     'log',
     '--format=%H',
     '--until=${anchor.timestamp.toIso8601String()}',
     '--max-count=1',
-    secondaryBranch,
+    currentBranch,
     '--',
   ]);
 }
 
 String git(String workingDirectory, List<String> arguments) {
   final ProcessResult result = Process.runSync('git', arguments, workingDirectory: workingDirectory);
-  if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty)
-    throw ProcessException('git', arguments, '${result.stdout}${result.stderr}', result.exitCode);
+  if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty) {
+    throw ProcessException('git', arguments, 'working directory: "$workingDirectory"\n${result.stdout}\n${result.stderr}', result.exitCode);
+  }
   return '${result.stdout}';
 }
 

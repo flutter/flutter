@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show stderr, FileSystemException;
+import 'dart:io' show FileSystemException, stderr;
 
 /// Standard error thrown by Flutter Driver API.
 class DriverError extends Error {

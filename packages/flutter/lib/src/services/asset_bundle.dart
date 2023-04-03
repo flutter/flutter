@@ -81,9 +81,6 @@ abstract class AssetBundle {
   /// isolate to avoid jank on the main thread.
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
-    if (data == null) {
-      throw FlutterError('Unable to load asset: $key');
-    }
     // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
     // on a Pixel 4.
     if (data.lengthInBytes < 50 * 1024) {
@@ -139,7 +136,7 @@ class NetworkAssetBundle extends AssetBundle {
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unable to load asset: $key'),
+        _errorSummaryWithKey(key),
         IntProperty('HTTP status code', response.statusCode),
       ]);
     }
@@ -250,14 +247,24 @@ abstract class CachingAssetBundle extends AssetBundle {
 /// An [AssetBundle] that loads resources using platform messages.
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
-  Future<ByteData> load(String key) async {
+  Future<ByteData> load(String key) {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
-    final ByteData? asset =
-        await ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
-    if (asset == null) {
-      throw FlutterError('Unable to load asset: $key');
+    final Future<ByteData>? future = ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData())?.then((ByteData? asset) {
+      if (asset == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          _errorSummaryWithKey(key),
+          ErrorDescription('The asset does not exist or has empty data.'),
+        ]);
+      }
+      return asset;
+    });
+    if (future == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+          _errorSummaryWithKey(key),
+          ErrorDescription('The asset does not exist or has empty data.'),
+        ]);
     }
-    return asset;
+    return future;
   }
 
   @override
@@ -284,14 +291,21 @@ class PlatformAssetBundle extends CachingAssetBundle {
     }
     try {
       return await ui.ImmutableBuffer.fromAsset(key);
-    } on Exception {
-      throw FlutterError('Unable to load asset: $key.');
+    } on Exception catch (e) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        _errorSummaryWithKey(key),
+        ErrorDescription(e.toString()),
+      ]);
     }
   }
 }
 
 AssetBundle _initRootBundle() {
   return PlatformAssetBundle();
+}
+
+ErrorSummary _errorSummaryWithKey(String key) {
+  return ErrorSummary('Unable to load asset: "$key".');
 }
 
 /// The [AssetBundle] from which this application was loaded.

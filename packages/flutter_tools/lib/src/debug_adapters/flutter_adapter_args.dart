@@ -20,12 +20,14 @@ class FlutterAttachRequestArguments
     super.restart,
     super.name,
     super.cwd,
+    super.env,
     super.additionalProjectPaths,
     super.debugSdkLibraries,
     super.debugExternalPackageLibraries,
     super.evaluateGettersInDebugViews,
     super.evaluateToStringInDebugViews,
     super.sendLogsToClient,
+    super.sendCustomProgressEvents,
   });
 
   FlutterAttachRequestArguments.fromMap(super.obj)
@@ -91,12 +93,14 @@ class FlutterLaunchRequestArguments
     super.restart,
     super.name,
     super.cwd,
+    super.env,
     super.additionalProjectPaths,
     super.debugSdkLibraries,
     super.debugExternalPackageLibraries,
     super.evaluateGettersInDebugViews,
     super.evaluateToStringInDebugViews,
     super.sendLogsToClient,
+    super.sendCustomProgressEvents,
   });
 
   FlutterLaunchRequestArguments.fromMap(super.obj)

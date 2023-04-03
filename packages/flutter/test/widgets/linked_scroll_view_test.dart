@@ -286,8 +286,8 @@ class _TestState extends State<Test> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _beforeController.setParent(PrimaryScrollController.of(context));
-    _afterController.setParent(PrimaryScrollController.of(context));
+    _beforeController.setParent(PrimaryScrollController.maybeOf(context));
+    _afterController.setParent(PrimaryScrollController.maybeOf(context));
   }
 
   @override

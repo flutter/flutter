@@ -35,6 +35,9 @@ import 'viewport.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Signature used by [Scrollable] to build the viewport through which the
 /// scrollable content is displayed.
 typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset position);
@@ -286,7 +289,29 @@ class Scrollable extends StatefulWidget {
     properties.add(StringProperty('restorationId', restorationId));
   }
 
-  /// The state from the closest instance of this class that encloses the given context.
+  /// The state from the closest instance of this class that encloses the given
+  /// context, or null if none is found.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScrollableState? scrollable = Scrollable.maybeOf(context);
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest [Scrollable]
+  /// in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [Scrollable.of], which is similar to this method, but asserts
+  ///   if no [Scrollable] ancestor is found.
+  static ScrollableState? maybeOf(BuildContext context) {
+    final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
+    return widget?.scrollable;
+  }
+
+  /// The state from the closest instance of this class that encloses the given
+  /// context.
   ///
   /// Typical usage is as follows:
   ///
@@ -295,10 +320,33 @@ class Scrollable extends StatefulWidget {
   /// ```
   ///
   /// Calling this method will create a dependency on the closest [Scrollable]
-  /// in the [context], if there is one.
-  static ScrollableState? of(BuildContext context) {
-    final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
-    return widget?.scrollable;
+  /// in the [context].
+  ///
+  /// If no [Scrollable] ancestor is found, then this method will assert in
+  /// debug mode, and throw an exception in release mode.
+  ///
+  /// See also:
+  ///
+  /// * [Scrollable.maybeOf], which is similar to this method, but returns null
+  ///   if no [Scrollable] ancestor is found.
+  static ScrollableState of(BuildContext context) {
+    final ScrollableState? scrollableState = maybeOf(context);
+    assert(() {
+      if (scrollableState == null) {
+        throw FlutterError(
+          'Scrollable.of() was called with a context that does not contain a '
+          'Scrollable widget.\n'
+          'No Scrollable widget ancestor could be found starting from the '
+          'context that was passed to Scrollable.of(). This can happen '
+          'because you are using a widget that looks for a Scrollable '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return scrollableState!;
   }
 
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
@@ -340,7 +388,7 @@ class Scrollable extends StatefulWidget {
     // the `targetRenderObject` invisible.
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject? targetRenderObject;
-    ScrollableState? scrollable = Scrollable.of(context);
+    ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
         context.findRenderObject()!,
@@ -353,7 +401,7 @@ class Scrollable extends StatefulWidget {
 
       targetRenderObject = targetRenderObject ?? context.findRenderObject();
       context = scrollable.context;
-      scrollable = Scrollable.of(context);
+      scrollable = Scrollable.maybeOf(context);
     }
 
     if (futures.isEmpty || duration == Duration.zero) {
@@ -731,6 +779,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       if (delta != 0.0 && targetScrollOffset != position.pixels) {
         GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
       }
+    } else if (event is PointerScrollInertiaCancelEvent) {
+      position.pointerScroll(0);
+      // Don't use the pointer signal resolver, all hit-tested scrollables should stop.
     }
   }
 
@@ -983,6 +1034,11 @@ class EdgeDraggingAutoScroller {
         scrollRenderBox.getTransformTo(null),
         Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height)
     );
+    assert(
+      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
+      globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
+      'Drag target size is larger than scrollable size, which may cause bouncing',
+    );
     _scrolling = true;
     double? newOffset;
     const double overDragMax = 20.0;
@@ -994,23 +1050,27 @@ class EdgeDraggingAutoScroller {
 
     final double proxyStart = _offsetExtent(_dragTargetRelatedToScrollOrigin.topLeft, _scrollDirection);
     final double proxyEnd = _offsetExtent(_dragTargetRelatedToScrollOrigin.bottomRight, _scrollDirection);
-    late double overDrag;
-    if (_axisDirection == AxisDirection.up || _axisDirection == AxisDirection.left) {
-      if (proxyEnd > viewportEnd && scrollable.position.pixels > scrollable.position.minScrollExtent) {
-        overDrag = math.max(proxyEnd - viewportEnd, overDragMax);
-        newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels - overDrag);
-      } else if (proxyStart < viewportStart && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-        overDrag = math.max(viewportStart - proxyStart, overDragMax);
-        newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
-      }
-    } else {
-      if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
-        overDrag = math.max(viewportStart - proxyStart, overDragMax);
-        newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels -  overDrag);
-      } else if (proxyEnd > viewportEnd && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-        overDrag = math.max(proxyEnd - viewportEnd, overDragMax);
-        newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
-      }
+    switch (_axisDirection) {
+      case AxisDirection.up:
+      case AxisDirection.left:
+        if (proxyEnd > viewportEnd && scrollable.position.pixels > scrollable.position.minScrollExtent) {
+          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
+          newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels - overDrag);
+        } else if (proxyStart < viewportStart && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
+          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
+          newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
+        }
+        break;
+      case AxisDirection.right:
+      case AxisDirection.down:
+        if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
+          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
+          newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels -  overDrag);
+        } else if (proxyEnd > viewportEnd && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
+          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
+          newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
+        }
+        break;
     }
 
     if (newOffset == null || (newOffset - scrollable.position.pixels).abs() < 1.0) {
@@ -1049,7 +1109,10 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     _position.addListener(_scheduleLayoutChange);
   }
 
-  static const double _kDefaultDragTargetSize = 200;
+  // Pointer drag is a single point, it should not have a size.
+  static const double _kDefaultDragTargetSize = 0;
+
+  // An eye-balled value for a smooth scrolling speed.
   static const double _kDefaultSelectToScrollVelocityScalar = 30;
 
   final ScrollableState state;
@@ -1185,11 +1248,11 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   /// selection is triggered by none drag events. The
   /// [_currentDragStartRelatedToOrigin] and [_currentDragEndRelatedToOrigin]
   /// are essential to handle future [SelectionEdgeUpdateEvent]s.
-  void _updateDragLocationsFromGeometries() {
+  void _updateDragLocationsFromGeometries({bool forceUpdateStart = true, bool forceUpdateEnd = true}) {
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
     final Matrix4 transform = box.getTransformTo(null);
-    if (currentSelectionStartIndex != -1) {
+    if (currentSelectionStartIndex != -1 && (_currentDragStartRelatedToOrigin == null || forceUpdateStart)) {
       final SelectionGeometry geometry = selectables[currentSelectionStartIndex].value;
       assert(geometry.hasSelection);
       final SelectionPoint start = geometry.startSelectionPoint!;
@@ -1200,7 +1263,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       );
       _currentDragStartRelatedToOrigin = MatrixUtils.transformPoint(transform, localDragStart + deltaToOrigin);
     }
-    if (currentSelectionEndIndex != -1) {
+    if (currentSelectionEndIndex != -1 && (_currentDragEndRelatedToOrigin == null || forceUpdateEnd)) {
       final SelectionGeometry geometry = selectables[currentSelectionEndIndex].value;
       assert(geometry.hasSelection);
       final SelectionPoint end = geometry.endSelectionPoint!;
@@ -1232,6 +1295,116 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     return result;
   }
 
+  @override
+  SelectionResult handleGranularlyExtendSelection(GranularlyExtendSelectionEvent event) {
+    final SelectionResult result = super.handleGranularlyExtendSelection(event);
+    // The selection geometry may not have the accurate offset for the edges
+    // that are outside of the viewport whose transform may not be valid. Only
+    // the edge this event is updating is sure to be accurate.
+    _updateDragLocationsFromGeometries(
+      forceUpdateStart: !event.isEnd,
+      forceUpdateEnd: event.isEnd,
+    );
+    if (_selectionStartsInScrollable) {
+      _jumpToEdge(event.isEnd);
+    }
+    return result;
+  }
+
+  @override
+  SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
+    final SelectionResult result = super.handleDirectionallyExtendSelection(event);
+    // The selection geometry may not have the accurate offset for the edges
+    // that are outside of the viewport whose transform may not be valid. Only
+    // the edge this event is updating is sure to be accurate.
+    _updateDragLocationsFromGeometries(
+      forceUpdateStart: !event.isEnd,
+      forceUpdateEnd: event.isEnd,
+    );
+    if (_selectionStartsInScrollable) {
+      _jumpToEdge(event.isEnd);
+    }
+    return result;
+  }
+
+  void _jumpToEdge(bool isExtent) {
+    final Selectable selectable;
+    final double? lineHeight;
+    final SelectionPoint? edge;
+    if (isExtent) {
+      selectable = selectables[currentSelectionEndIndex];
+      edge = selectable.value.endSelectionPoint;
+      lineHeight = selectable.value.endSelectionPoint!.lineHeight;
+    } else {
+      selectable = selectables[currentSelectionStartIndex];
+      edge = selectable.value.startSelectionPoint;
+      lineHeight = selectable.value.startSelectionPoint?.lineHeight;
+    }
+    if (lineHeight == null || edge == null) {
+      return;
+    }
+    final RenderBox scrollableBox = state.context.findRenderObject()! as RenderBox;
+    final Matrix4 transform = selectable.getTransformTo(scrollableBox);
+    final Offset edgeOffsetInScrollableCoordinates = MatrixUtils.transformPoint(transform, edge.localPosition);
+    final Rect scrollableRect = Rect.fromLTRB(0, 0, scrollableBox.size.width, scrollableBox.size.height);
+    switch (state.axisDirection) {
+      case AxisDirection.up:
+        final double edgeBottom = edgeOffsetInScrollableCoordinates.dy;
+        final double edgeTop = edgeOffsetInScrollableCoordinates.dy - lineHeight;
+        if (edgeBottom >= scrollableRect.bottom && edgeTop <= scrollableRect.top) {
+          return;
+        }
+        if (edgeBottom > scrollableRect.bottom) {
+          position.jumpTo(position.pixels + scrollableRect.bottom - edgeBottom);
+          return;
+        }
+        if (edgeTop < scrollableRect.top) {
+          position.jumpTo(position.pixels + scrollableRect.top - edgeTop);
+        }
+        return;
+      case AxisDirection.right:
+        final double edge = edgeOffsetInScrollableCoordinates.dx;
+        if (edge >= scrollableRect.right && edge <= scrollableRect.left) {
+          return;
+        }
+        if (edge > scrollableRect.right) {
+          position.jumpTo(position.pixels + edge - scrollableRect.right);
+          return;
+        }
+        if (edge < scrollableRect.left) {
+          position.jumpTo(position.pixels + edge - scrollableRect.left);
+        }
+        return;
+      case AxisDirection.down:
+        final double edgeBottom = edgeOffsetInScrollableCoordinates.dy;
+        final double edgeTop = edgeOffsetInScrollableCoordinates.dy - lineHeight;
+        if (edgeBottom >= scrollableRect.bottom && edgeTop <= scrollableRect.top) {
+          return;
+        }
+        if (edgeBottom > scrollableRect.bottom) {
+          position.jumpTo(position.pixels + edgeBottom - scrollableRect.bottom);
+          return;
+        }
+        if (edgeTop < scrollableRect.top) {
+          position.jumpTo(position.pixels + edgeTop - scrollableRect.top);
+        }
+        return;
+      case AxisDirection.left:
+        final double edge = edgeOffsetInScrollableCoordinates.dx;
+        if (edge >= scrollableRect.right && edge <= scrollableRect.left) {
+          return;
+        }
+        if (edge > scrollableRect.right) {
+          position.jumpTo(position.pixels + scrollableRect.right - edge);
+          return;
+        }
+        if (edge < scrollableRect.left) {
+          position.jumpTo(position.pixels + scrollableRect.left - edge);
+        }
+        return;
+    }
+  }
+
   bool _globalPositionInScrollable(Offset globalPosition) {
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
@@ -1253,6 +1426,12 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       case SelectionEventType.endEdgeUpdate:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         ensureChildUpdated(selectable);
+        break;
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        ensureChildUpdated(selectable);
+        _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
+        _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         break;
       case SelectionEventType.clear:
         _selectableEndEdgeUpdateRecords.remove(selectable);
@@ -1600,24 +1779,24 @@ class ScrollAction extends Action<ScrollIntent> {
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
       // Check for primary scrollable within the current context
-      if (Scrollable.of(focus.context!) != null) {
+      if (Scrollable.maybeOf(focus.context!) != null) {
         return true;
       }
       // Check for fallback scrollable with context from PrimaryScrollController
-      final ScrollController? primaryScrollController = PrimaryScrollController.of(focus.context!);
+      final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(focus.context!);
       return primaryScrollController != null && primaryScrollController.hasClients;
     }
     return false;
   }
 
-  // Returns the scroll increment for a single scroll request, for use when
-  // scrolling using a hardware keyboard.
-  //
-  // Must not be called when the position is null, or when any of the position
-  // metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
-  // null. The type and state arguments must not be null, and the widget must
-  // have already been laid out so that the position fields are valid.
-  double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
+  /// Returns the scroll increment for a single scroll request, for use when
+  /// scrolling using a hardware keyboard.
+  ///
+  /// Must not be called when the position is null, or when any of the position
+  /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
+  /// null. The type and state arguments must not be null, and the widget must
+  /// have already been laid out so that the position fields are valid.
+  static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(type != null);
     assert(state.position != null);
     assert(state.position.hasPixels);
@@ -1641,9 +1820,9 @@ class ScrollAction extends Action<ScrollIntent> {
     }
   }
 
-  // Find out how much of an increment to move by, taking the different
-  // directions into account.
-  double _getIncrement(ScrollableState state, ScrollIntent intent) {
+  /// Find out how much of an increment to move by, taking the different
+  /// directions into account.
+  static double getDirectionalIncrement(ScrollableState state, ScrollIntent intent) {
     final double increment = _calculateScrollIncrement(state, type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
@@ -1691,11 +1870,11 @@ class ScrollAction extends Action<ScrollIntent> {
 
   @override
   void invoke(ScrollIntent intent) {
-    ScrollableState? state = Scrollable.of(primaryFocus!.context!);
+    ScrollableState? state = Scrollable.maybeOf(primaryFocus!.context!);
     if (state == null) {
-      final ScrollController? primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
+      final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
       assert (() {
-        if (primaryScrollController!.positions.length != 1) {
+        if (primaryScrollController.positions.length != 1) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'A ScrollAction was invoked with the PrimaryScrollController, but '
@@ -1717,11 +1896,11 @@ class ScrollAction extends Action<ScrollIntent> {
         return true;
       }());
 
-      if (primaryScrollController!.position.context.notificationContext == null
-          && Scrollable.of(primaryScrollController.position.context.notificationContext!) == null) {
+      if (primaryScrollController.position.context.notificationContext == null
+          && Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!) == null) {
         return;
       }
-      state = Scrollable.of(primaryScrollController.position.context.notificationContext!);
+      state = Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!);
     }
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
@@ -1733,7 +1912,7 @@ class ScrollAction extends Action<ScrollIntent> {
     if (state!._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {
       return;
     }
-    final double increment = _getIncrement(state, intent);
+    final double increment = getDirectionalIncrement(state, intent);
     if (increment == 0.0) {
       return;
     }

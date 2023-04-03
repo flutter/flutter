@@ -161,7 +161,7 @@ class XcodeProjectInterpreter {
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
     final List<String> xcrunCommand = <String>[];
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm) {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>[
         '/usr/bin/arch',
@@ -198,7 +198,11 @@ class XcodeProjectInterpreter {
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
-      if (deviceId != null)
+      if (buildContext.isWatch == true && buildContext.environmentType == EnvironmentType.physical)
+        'generic/platform=watchOS'
+      else if (buildContext.isWatch == true)
+        'generic/platform=watchOS Simulator'
+      else if (deviceId != null)
         'id=$deviceId'
       else if (buildContext.environmentType == EnvironmentType.physical)
         'generic/platform=iOS'
@@ -306,7 +310,7 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
@@ -376,12 +380,14 @@ class XcodeProjectBuildContext {
     this.configuration,
     this.environmentType = EnvironmentType.physical,
     this.deviceId,
+    this.isWatch = false,
   });
 
   final String? scheme;
   final String? configuration;
   final EnvironmentType environmentType;
   final String? deviceId;
+  final bool isWatch;
 
   @override
   int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
@@ -395,7 +401,8 @@ class XcodeProjectBuildContext {
         other.scheme == scheme &&
         other.configuration == configuration &&
         other.deviceId == deviceId &&
-        other.environmentType == environmentType;
+        other.environmentType == environmentType &&
+        other.isWatch == isWatch;
   }
 }
 

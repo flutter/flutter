@@ -26,6 +26,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'localizations.dart';
+import 'shader_compiler.dart';
 
 /// Whether the application has web plugins.
 const String kHasWebPlugins = 'HasWebPlugins';
@@ -34,6 +35,12 @@ const String kHasWebPlugins = 'HasWebPlugins';
 ///
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
+
+/// If `--dump-info` should be passed to dart2js.
+const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
+
+// If `--no-frequency-based-minification` should be based to dart2js
+const String kDart2jsNoFrequencyBasedMinification = 'Dart2jsNoFrequencyBasedMinification';
 
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
@@ -201,21 +208,26 @@ class Dart2JSTarget extends Target {
         '--no-source-maps',
     ];
 
-    // Run the dart2js compilation in two stages, so that icon tree shaking can
-    // parse the kernel file for web builds.
-    final ProcessResult kernelResult = await globals.processManager.run(<String>[
+    final List<String> compilationArgs = <String>[
       ...sharedCommandOptions,
       '-o',
       environment.buildDir.childFile('app.dill').path,
       '--packages=.dart_tool/package_config.json',
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path, // dartfile
-    ]);
+    ];
+    globals.printTrace('compiling dart code to kernel with command "${compilationArgs.join(' ')}"');
+
+    // Run the dart2js compilation in two stages, so that icon tree shaking can
+    // parse the kernel file for web builds.
+    final ProcessResult kernelResult = await globals.processManager.run(compilationArgs);
     if (kernelResult.exitCode != 0) {
       throw Exception(_collectOutput(kernelResult));
     }
 
     final String? dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final bool dumpInfo = environment.defines[kDart2jsDumpInfo] == 'true';
+    final bool noFrequencyBasedMinification = environment.defines[kDart2jsNoFrequencyBasedMinification] == 'true';
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
     final bool csp = environment.defines[kCspMode] == 'true';
 
@@ -223,6 +235,8 @@ class Dart2JSTarget extends Target {
       ...sharedCommandOptions,
       if (dart2jsOptimization != null) '-$dart2jsOptimization' else '-O4',
       if (buildMode == BuildMode.profile) '--no-minify',
+      if (dumpInfo) '--dump-info',
+      if (noFrequencyBasedMinification) '--no-frequency-based-minification',
       if (csp) '--csp',
       '-o',
       outputJSFile.path,
@@ -306,6 +320,7 @@ class WebReleaseBundle extends Target {
       environment,
       environment.outputDir.childDirectory('assets'),
       targetPlatform: TargetPlatform.web_javascript,
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,

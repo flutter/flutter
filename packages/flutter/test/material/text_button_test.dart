@@ -1249,7 +1249,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 0));
       await gesture.up();
@@ -1260,7 +1260,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: InkRipple.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 1));
       await gesture.up();
@@ -1549,7 +1549,7 @@ void main() {
     expect(material.textStyle!.color, Colors.white);
   });
 
-  testWidgets('TextButton statesController', (WidgetTester tester) async {
+  Future<void> testStatesController(Widget? icon, WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
@@ -1560,11 +1560,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: TextButton(
-            statesController: controller,
-            onPressed: () { },
-            child: const Text('button'),
-          ),
+          child: icon == null
+            ? TextButton(
+                statesController: controller,
+                onPressed: () { },
+                child: const Text('button'),
+              )
+            : TextButton.icon(
+                statesController: controller,
+                onPressed: () { },
+                icon: icon,
+                label: const Text('button'),
+              ),
         ),
       ),
     );
@@ -1572,7 +1579,7 @@ void main() {
     expect(controller.value, <MaterialState>{});
     expect(count, 0);
 
-    final Offset center = tester.getCenter(find.byType(TextButton));
+    final Offset center = tester.getCenter(find.byType(Text));
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
@@ -1623,24 +1630,37 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: TextButton(
-            statesController: controller,
-            onPressed: null,
-            child: const Text('button'),
-          ),
+        child: icon == null
+          ? TextButton(
+              statesController: controller,
+              onPressed: null,
+              child: const Text('button'),
+            )
+          : TextButton.icon(
+              statesController: controller,
+              onPressed: null,
+              icon: icon,
+              label: const Text('button'),
+            ),
         ),
       ),
     );
     await tester.pumpAndSettle();
     expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
     expect(count, 10); // removes pressed and adds disabled - two changes
-
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
     expect(controller.value, <MaterialState>{MaterialState.disabled});
     expect(count, 11);
-
     await gesture.removePointer();
+  }
+
+  testWidgets('TextButton statesController', (WidgetTester tester) async {
+    testStatesController(null, tester);
+  });
+
+  testWidgets('TextButton.icon statesController', (WidgetTester tester) async {
+    testStatesController(const Icon(Icons.add), tester);
   });
 
   testWidgets('Disabled TextButton statesController', (WidgetTester tester) async {
@@ -1664,6 +1684,62 @@ void main() {
     );
     expect(controller.value, <MaterialState>{MaterialState.disabled});
     expect(count, 1);
+  });
+
+  testWidgets('icon color can be different from the text color', (WidgetTester tester) async {
+    final Key iconButtonKey = UniqueKey();
+    const ColorScheme colorScheme = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton.icon(
+            key: iconButtonKey,
+            style: TextButton.styleFrom(iconColor: Colors.red),
+            icon: const Icon(Icons.add),
+            onPressed: () {},
+            label: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    Finder buttonMaterial = find.descendant(
+      of: find.byKey(iconButtonKey),
+      matching: find.byType(Material),
+    );
+
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle!.color, colorScheme.primary);
+
+    Color? iconColor() => _iconStyle(tester, Icons.add)?.color;
+    expect(iconColor(), equals(Colors.red));
+
+    // disabled button
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Center(
+          child: TextButton.icon(
+            key: iconButtonKey,
+            style: TextButton.styleFrom(iconColor: Colors.red, disabledIconColor: Colors.blue),
+            icon: const Icon(Icons.add),
+            onPressed: null,
+            label: const Text('button'),
+          ),
+        ),
+      ),
+    );
+
+    buttonMaterial = find.descendant(
+      of: find.byKey(iconButtonKey),
+      matching: find.byType(Material),
+    );
+
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
+    expect(iconColor(), equals(Colors.blue));
   });
 }
 

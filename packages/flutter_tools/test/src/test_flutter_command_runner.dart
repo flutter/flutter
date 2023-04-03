@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
-export 'package:test_api/test_api.dart' hide test, isInstanceOf; // ignore: deprecated_member_use
+export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand? command ]) {
   final FlutterCommandRunner runner = TestFlutterCommandRunner();
@@ -35,7 +35,7 @@ Future<String> createProject(Directory temp, { List<String>? arguments }) async 
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
-  // Created `.packages` since it's not created when the flag `--no-pub` is passed.
+  // Create `.packages` since it's not created when the flag `--no-pub` is passed.
   globals.fs.file(globals.fs.path.join(projectPath, '.packages')).createSync();
   return projectPath;
 }

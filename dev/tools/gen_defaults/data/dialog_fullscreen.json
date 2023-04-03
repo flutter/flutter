@@ -1,5 +1,5 @@
 {
-  "version": "v0_101",
+  "version": "v0_143",
 
   "md.comp.full-screen-dialog.container.color": "surface",
   "md.comp.full-screen-dialog.container.elevation": "md.sys.elevation.level0",
@@ -23,7 +23,5 @@
   "md.comp.full-screen-dialog.header.headline.text-style": "titleLarge",
   "md.comp.full-screen-dialog.header.icon.color": "onSurface",
   "md.comp.full-screen-dialog.header.icon.size": 24.0,
-  "md.comp.full-screen-dialog.header.on-scroll.container.elevation": "md.sys.elevation.level2",
-  "md.comp.full-screen-dialog.with-divider.divider.color": "surfaceVariant",
-  "md.comp.full-screen-dialog.with-divider.divider.height": 1.0
+  "md.comp.full-screen-dialog.header.on-scroll.container.elevation": "md.sys.elevation.level2"
 }

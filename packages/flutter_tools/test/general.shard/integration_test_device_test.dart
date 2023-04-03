@@ -26,7 +26,6 @@ final vm_service.Isolate isolate = vm_service.Isolate(
       timestamp: 0
   ),
   breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
   libraries: <vm_service.LibraryRef>[
     vm_service.LibraryRef(
       id: '1',
@@ -78,6 +77,7 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      compileExpression: null,
     );
 
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
@@ -174,6 +174,7 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      compileExpression: null,
     );
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
@@ -202,6 +203,7 @@ void main() {
         BuildInfo.debug,
       ),
       userIdentifier: '',
+      compileExpression: null,
     );
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));

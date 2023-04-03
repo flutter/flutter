@@ -1,6 +1,25 @@
 name: {{projectName}}
 description: {{description}}
+{{#withEmptyMain}}
+publish_to: 'none'
+version: 0.1.0
 
+environment:
+  sdk: {{dartSdkVersionBounds}}
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+{{/withEmptyMain}}
+{{^withEmptyMain}}
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -100,3 +119,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+{{/withEmptyMain}}

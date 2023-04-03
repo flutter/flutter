@@ -73,6 +73,8 @@ class AnnotationResult<T> {
   }
 }
 
+const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
+
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
@@ -135,6 +137,17 @@ class AnnotationResult<T> {
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+  /// Creates an instance of Layer.
+  Layer() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterRenderingLibrary,
+        className: '$Layer',
+        object: this,
+      );
+    }
+  }
+
   final Map<int, VoidCallback> _callbacks = <int, VoidCallback>{};
   static int _nextCallbackId = 0;
 
@@ -167,6 +180,18 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   bool _debugMutationsLocked = false;
+
+  /// Whether or not this layer, or any child layers, can be rasterized with
+  /// [Scene.toImage] or [Scene.toImageSync].
+  ///
+  /// If `false`, calling the above methods may yield an image which is
+  /// incomplete.
+  ///
+  /// This value may change throughout the lifetime of the object, as the
+  /// child layers themselves are added or removed.
+  bool supportsRasterization() {
+    return true;
+  }
 
   /// Describes the clip that would be applied to contents of this layer,
   /// if any.
@@ -308,6 +333,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       _debugDisposed = true;
       return true;
     }());
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _engineLayer?.dispose();
     _engineLayer = null;
   }
@@ -622,9 +650,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Override this method to upload this layer to the engine.
-  ///
-  /// Return the engine layer for retained rendering. When there's no
-  /// corresponding engine layer, null is returned.
   @protected
   void addToScene(ui.SceneBuilder builder);
 
@@ -926,6 +951,11 @@ class PlatformViewLayer extends Layer {
   final int viewId;
 
   @override
+  bool supportsRasterization() {
+    return false;
+  }
+
+  @override
   void addToScene(ui.SceneBuilder builder) {
     builder.addPlatformView(
       viewId,
@@ -1042,6 +1072,16 @@ class ContainerLayer extends Layer {
 
   /// Returns whether this layer has at least one child layer.
   bool get hasChildren => _firstChild != null;
+
+  @override
+  bool supportsRasterization() {
+    for (Layer? child = lastChild; child != null; child = child.previousSibling) {
+      if (!child.supportsRasterization()) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
@@ -1385,6 +1425,16 @@ class OffsetLayer extends ContainerLayer {
     properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 
+  ui.Scene _createSceneForImage(Rect bounds, { double pixelRatio = 1.0 }) {
+    assert(bounds != null);
+    assert(pixelRatio != null);
+    final ui.SceneBuilder builder = ui.SceneBuilder();
+    final Matrix4 transform = Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1);
+    transform.translate(-(bounds.left + offset.dx), -(bounds.top + offset.dy));
+    builder.pushTransform(transform.storage);
+    return buildScene(builder);
+  }
+
   /// Capture an image of the current state of this layer and its children.
   ///
   /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
@@ -1397,27 +1447,54 @@ class OffsetLayer extends ContainerLayer {
   /// (the default) will give you a 1:1 mapping between logical pixels and the
   /// output pixels in the image.
   ///
+  /// This API functions like [toImageSync], except that it only returns after
+  /// rasterization is complete.
+  ///
   /// See also:
   ///
   ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage(Rect bounds, { double pixelRatio = 1.0 }) async {
-    assert(bounds != null);
-    assert(pixelRatio != null);
-    final ui.SceneBuilder builder = ui.SceneBuilder();
-    final Matrix4 transform = Matrix4.translationValues(
-      (-bounds.left  - offset.dx) * pixelRatio,
-      (-bounds.top - offset.dy) * pixelRatio,
-      0.0,
-    );
-    transform.scale(pixelRatio, pixelRatio);
-    builder.pushTransform(transform.storage);
-    final ui.Scene scene = buildScene(builder);
+    final ui.Scene scene = _createSceneForImage(bounds, pixelRatio: pixelRatio);
 
     try {
       // Size is rounded up to the next pixel to make sure we don't clip off
       // anything.
       return await scene.toImage(
+        (pixelRatio * bounds.width).ceil(),
+        (pixelRatio * bounds.height).ceil(),
+      );
+    } finally {
+      scene.dispose();
+    }
+  }
+
+  /// Capture an image of the current state of this layer and its children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes, will be offset
+  /// by the top-left corner of [bounds], and have dimensions equal to the size
+  /// of [bounds] multiplied by [pixelRatio].
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [dart:ui.FlutterView.devicePixelRatio] for the device, so specifying 1.0
+  /// (the default) will give you a 1:1 mapping between logical pixels and the
+  /// output pixels in the image.
+  ///
+  /// This API functions like [toImage], except that rasterization begins eagerly
+  /// on the raster thread and the image is returned before this is completed.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  ui.Image toImageSync(Rect bounds, { double pixelRatio = 1.0 }) {
+    final ui.Scene scene = _createSceneForImage(bounds, pixelRatio: pixelRatio);
+
+    try {
+      // Size is rounded up to the next pixel to make sure we don't clip off
+      // anything.
+      return scene.toImageSync(
         (pixelRatio * bounds.width).ceil(),
         (pixelRatio * bounds.height).ceil(),
       );
@@ -1739,13 +1816,14 @@ class ColorFilterLayer extends ContainerLayer {
 }
 
 /// A composite layer that applies an [ImageFilter] to its children.
-class ImageFilterLayer extends ContainerLayer {
+class ImageFilterLayer extends OffsetLayer {
   /// Creates a layer that applies an [ImageFilter] to its children.
   ///
   /// The [imageFilter] property must be non-null before the compositing phase
   /// of the pipeline.
   ImageFilterLayer({
     ui.ImageFilter? imageFilter,
+    super.offset,
   }) : _imageFilter = imageFilter;
 
   /// The image filter to apply to children.
@@ -1767,6 +1845,7 @@ class ImageFilterLayer extends ContainerLayer {
     assert(imageFilter != null);
     engineLayer = builder.pushImageFilter(
       imageFilter!,
+      offset: offset,
       oldLayer: _engineLayer as ui.ImageFilterEngineLayer?,
     );
     addChildrenToScene(builder);
@@ -2339,7 +2418,9 @@ class LayerLink {
   Size? leaderSize;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+  }
 }
 
 /// A composited layer that can be followed by a [FollowerLayer].
@@ -2421,6 +2502,8 @@ class LeaderLayer extends ContainerLayer {
         Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage,
         oldLayer: _engineLayer as ui.TransformEngineLayer?,
       );
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder);
     if (offset != Offset.zero) {

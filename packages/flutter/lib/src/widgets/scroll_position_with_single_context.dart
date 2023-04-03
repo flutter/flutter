@@ -141,7 +141,12 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     assert(hasPixels);
     final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
-      beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
+      beginActivity(BallisticScrollActivity(
+        this,
+        simulation,
+        context.vsync,
+        activity?.shouldIgnorePointer ?? true,
+      ));
     } else {
       goIdle();
     }
@@ -207,7 +212,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // _NestedScrollCoordinator.pointerScroll.
-    assert(delta != 0.0);
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
 
     final double targetPixels =
         math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
@@ -217,8 +225,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
           -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
       );
       final double oldPixels = pixels;
-      forcePixels(targetPixels);
+      // Set the notifier before calling force pixels.
+      // This is set to false again after going ballistic below.
       isScrollingNotifier.value = true;
+      forcePixels(targetPixels);
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();

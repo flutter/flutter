@@ -61,12 +61,17 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))');
-    expect(description[1], 'fillColor: MaterialStatePropertyAll(Color(0xfffffff0))');
-    expect(description[2], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff1))');
-    expect(description[3], 'splashRadius: 1.0');
-    expect(description[4], 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap');
-    expect(description[5], equalsIgnoringHashCodes('visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)'));
+    expect(
+      description,
+      equalsIgnoringHashCodes(<String>[
+        'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))',
+        'fillColor: MaterialStatePropertyAll(Color(0xfffffff0))',
+        'overlayColor: MaterialStatePropertyAll(Color(0xfffffff1))',
+        'splashRadius: 1.0',
+        'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
+        'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
+      ]),
+    );
   });
 
   testWidgets('Radio is themeable', (WidgetTester tester) async {

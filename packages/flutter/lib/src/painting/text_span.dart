@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder, Locale, StringAttribute, LocaleStringAttribute, SpellOutStringAttribute;
+import 'dart:ui' as ui show Locale, LocaleStringAttribute, ParagraphBuilder, SpellOutStringAttribute, StringAttribute;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -11,6 +11,9 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
+
+// Examples can assume:
+// late TextSpan myTextSpan;
 
 /// An immutable span of text.
 ///
@@ -214,7 +217,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// text value:
   ///
   /// ```dart
-  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
+  /// const TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
   /// ```
   final String? semanticsLabel;
 

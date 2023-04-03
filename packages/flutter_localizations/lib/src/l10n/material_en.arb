@@ -151,17 +151,17 @@
     "plural": "selectedRowCount"
   },
 
-  "cancelButtonLabel": "CANCEL",
+  "cancelButtonLabel": "Cancel",
   "@cancelButtonLabel": {
     "description": "The label for cancel buttons and menu items."
   },
 
-  "closeButtonLabel": "CLOSE",
+  "closeButtonLabel": "Close",
   "@closeButtonLabel": {
     "description": "The label for close buttons and menu items."
   },
 
-  "continueButtonLabel": "CONTINUE",
+  "continueButtonLabel": "Continue",
   "@continueButtonLabel": {
     "description": "The label for continue buttons and menu items."
   },
@@ -191,7 +191,7 @@
     "description": "The label for select-all buttons and menu items."
   },
 
-  "viewLicensesButtonLabel": "VIEW LICENSES",
+  "viewLicensesButtonLabel": "View licenses",
   "@viewLicensesButtonLabel": {
     "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."
   },
@@ -288,17 +288,17 @@
     "description": "Error message displayed to the user when they have entered a date that is outside the valid range for the date picker."
   },
 
-  "saveButtonLabel": "SAVE",
+  "saveButtonLabel": "Save",
   "@saveButtonLabel": {
-    "description": "Label for a 'SAVE' button used in full screen dialogs."
+    "description": "Label for a 'Save' button used in full screen dialogs."
   },
 
-  "datePickerHelpText": "SELECT DATE",
+  "datePickerHelpText": "Select date",
   "@datePickerHelpText": {
     "description": "Label used in the header of the date picker dialog"
   },
 
-  "dateRangePickerHelpText": "SELECT RANGE",
+  "dateRangePickerHelpText": "Select range",
   "@dateRangePickerHelpText": {
     "description": "Label used in the header of the date range picker dialog."
   },
@@ -313,12 +313,12 @@
     "description": "Tooltip used for the text input mode button of the date pickers."
   },
 
-  "timePickerDialHelpText": "SELECT TIME",
+  "timePickerDialHelpText": "Select time",
   "@timePickerDialHelpText": {
     "description": "Label used in the header of the time picker dialog when using the clock dial to select a time."
   },
 
-  "timePickerInputHelpText": "ENTER TIME",
+  "timePickerInputHelpText": "Enter time",
   "@timePickerInputHelpText": {
     "description": "Label used in the header of the time picker dialog when using the text input to enter a time."
   },

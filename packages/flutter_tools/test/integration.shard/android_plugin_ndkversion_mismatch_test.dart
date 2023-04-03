@@ -77,7 +77,7 @@ void main() {
 One or more plugins require a higher Android NDK version.
 Fix this issue by adding the following to ${projectGradleFile.path}:
 android {
-  ndkVersion 21.4.7075529
+  ndkVersion "21.4.7075529"
   ...
 }
 

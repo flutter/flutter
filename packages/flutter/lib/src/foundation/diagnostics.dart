@@ -16,6 +16,32 @@ import 'object.dart';
 // late int rows, columns;
 // late String _name;
 // late bool inherit;
+// abstract class ExampleSuperclass with Diagnosticable { }
+// late String message;
+// late double stepWidth;
+// late double scale;
+// late double hitTestExtent;
+// late double paintExtent;
+// late double maxWidth;
+// late double progress;
+// late int maxLines;
+// late Duration duration;
+// late int depth;
+// late bool primary;
+// late bool isCurrent;
+// late bool keepAlive;
+// late bool obscureText;
+// late TextAlign textAlign;
+// late ImageRepeat repeat;
+// late Widget widget;
+// late List<BoxShadow> boxShadow;
+// late Size size;
+// late bool hasSize;
+// late Matrix4 transform;
+// late Color color;
+// late Map<Listenable, VoidCallback>? handles;
+// late DiagnosticsTreeStyle style;
+// late IconData icon;
 
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
@@ -383,30 +409,29 @@ class TextTreeConfiguration {
 /// Default text tree configuration.
 ///
 /// Example:
-/// ```
-/// <root_name>: <root_description>
-///  │ <property1>
-///  │ <property2>
-///  │ ...
-///  │ <propertyN>
-///  ├─<child_name>: <child_description>
-///  │ │ <property1>
-///  │ │ <property2>
-///  │ │ ...
-///  │ │ <propertyN>
-///  │ │
-///  │ └─<child_name>: <child_description>
-///  │     <property1>
-///  │     <property2>
-///  │     ...
-///  │     <propertyN>
-///  │
-///  └─<child_name>: <child_description>'
-///    <property1>
-///    <property2>
-///    ...
-///    <propertyN>
-/// ```
+///
+///     <root_name>: <root_description>
+///      │ <property1>
+///      │ <property2>
+///      │ ...
+///      │ <propertyN>
+///      ├─<child_name>: <child_description>
+///      │ │ <property1>
+///      │ │ <property2>
+///      │ │ ...
+///      │ │ <propertyN>
+///      │ │
+///      │ └─<child_name>: <child_description>
+///      │     <property1>
+///      │     <property2>
+///      │     ...
+///      │     <propertyN>
+///      │
+///      └─<child_name>: <child_description>'
+///        <property1>
+///        <property2>
+///        ...
+///        <propertyN>
 ///
 /// See also:
 ///
@@ -425,42 +450,41 @@ final TextTreeConfiguration sparseTextConfiguration = TextTreeConfiguration(
 /// parent to children are dashed.
 ///
 /// Example:
-/// ```
-/// <root_name>: <root_description>
-///  │ <property1>
-///  │ <property2>
-///  │ ...
-///  │ <propertyN>
-///  ├─<normal_child_name>: <child_description>
-///  ╎ │ <property1>
-///  ╎ │ <property2>
-///  ╎ │ ...
-///  ╎ │ <propertyN>
-///  ╎ │
-///  ╎ └─<child_name>: <child_description>
-///  ╎     <property1>
-///  ╎     <property2>
-///  ╎     ...
-///  ╎     <propertyN>
-///  ╎
-///  ╎╌<dashed_child_name>: <child_description>
-///  ╎ │ <property1>
-///  ╎ │ <property2>
-///  ╎ │ ...
-///  ╎ │ <propertyN>
-///  ╎ │
-///  ╎ └─<child_name>: <child_description>
-///  ╎     <property1>
-///  ╎     <property2>
-///  ╎     ...
-///  ╎     <propertyN>
-///  ╎
-///  └╌<dashed_child_name>: <child_description>'
-///    <property1>
-///    <property2>
-///    ...
-///    <propertyN>
-/// ```
+///
+///     <root_name>: <root_description>
+///      │ <property1>
+///      │ <property2>
+///      │ ...
+///      │ <propertyN>
+///      ├─<normal_child_name>: <child_description>
+///      ╎ │ <property1>
+///      ╎ │ <property2>
+///      ╎ │ ...
+///      ╎ │ <propertyN>
+///      ╎ │
+///      ╎ └─<child_name>: <child_description>
+///      ╎     <property1>
+///      ╎     <property2>
+///      ╎     ...
+///      ╎     <propertyN>
+///      ╎
+///      ╎╌<dashed_child_name>: <child_description>
+///      ╎ │ <property1>
+///      ╎ │ <property2>
+///      ╎ │ ...
+///      ╎ │ <propertyN>
+///      ╎ │
+///      ╎ └─<child_name>: <child_description>
+///      ╎     <property1>
+///      ╎     <property2>
+///      ╎     ...
+///      ╎     <propertyN>
+///      ╎
+///      └╌<dashed_child_name>: <child_description>'
+///        <property1>
+///        <property2>
+///        ...
+///        <propertyN>
 ///
 /// See also:
 ///
@@ -480,11 +504,10 @@ final TextTreeConfiguration dashedTextConfiguration = TextTreeConfiguration(
 /// Dense text tree configuration that minimizes horizontal whitespace.
 ///
 /// Example:
-/// ```
-/// <root_name>: <root_description>(<property1>; <property2> <propertyN>)
-/// ├<child_name>: <child_description>(<property1>, <property2>, <propertyN>)
-/// └<child_name>: <child_description>(<property1>, <property2>, <propertyN>)
-/// ```
+///
+///     <root_name>: <root_description>(<property1>; <property2> <propertyN>)
+///     ├<child_name>: <child_description>(<property1>, <property2>, <propertyN>)
+///     └<child_name>: <child_description>(<property1>, <property2>, <propertyN>)
 ///
 /// See also:
 ///
@@ -511,19 +534,18 @@ final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
 /// contents of a node.
 ///
 /// Example:
-/// ```
-///  <parent_node>
-///  ╞═╦══ <name> ═══
-///  │ ║  <description>:
-///  │ ║    <body>
-///  │ ║    ...
-///  │ ╚═══════════
-///  ╘═╦══ <name> ═══
-///    ║  <description>:
-///    ║    <body>
-///    ║    ...
-///    ╚═══════════
-/// ```
+///
+///     <parent_node>
+///     ╞═╦══ <name> ═══
+///     │ ║  <description>:
+///     │ ║    <body>
+///     │ ║    ...
+///     │ ╚═══════════
+///     ╘═╦══ <name> ═══
+///       ║  <description>:
+///       ║    <body>
+///       ║    ...
+///       ╚═══════════
 ///
 /// See also:
 ///
@@ -563,37 +585,36 @@ final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
 /// Used to draw a decorative box around detailed descriptions of an exception.
 ///
 /// Example:
-/// ```
-/// ══╡ <name>: <description> ╞═════════════════════════════════════
-/// <body>
-/// ...
-/// ├─<normal_child_name>: <child_description>
-/// ╎ │ <property1>
-/// ╎ │ <property2>
-/// ╎ │ ...
-/// ╎ │ <propertyN>
-/// ╎ │
-/// ╎ └─<child_name>: <child_description>
-/// ╎     <property1>
-/// ╎     <property2>
-/// ╎     ...
-/// ╎     <propertyN>
-/// ╎
-/// ╎╌<dashed_child_name>: <child_description>
-/// ╎ │ <property1>
-/// ╎ │ <property2>
-/// ╎ │ ...
-/// ╎ │ <propertyN>
-/// ╎ │
-/// ╎ └─<child_name>: <child_description>
-/// ╎     <property1>
-/// ╎     <property2>
-/// ╎     ...
-/// ╎     <propertyN>
-/// ╎
-/// └╌<dashed_child_name>: <child_description>'
-/// ════════════════════════════════════════════════════════════════
-/// ```
+///
+///     ══╡ <name>: <description> ╞═════════════════════════════════════
+///     <body>
+///     ...
+///     ├─<normal_child_name>: <child_description>
+///     ╎ │ <property1>
+///     ╎ │ <property2>
+///     ╎ │ ...
+///     ╎ │ <propertyN>
+///     ╎ │
+///     ╎ └─<child_name>: <child_description>
+///     ╎     <property1>
+///     ╎     <property2>
+///     ╎     ...
+///     ╎     <propertyN>
+///     ╎
+///     ╎╌<dashed_child_name>: <child_description>
+///     ╎ │ <property1>
+///     ╎ │ <property2>
+///     ╎ │ ...
+///     ╎ │ <propertyN>
+///     ╎ │
+///     ╎ └─<child_name>: <child_description>
+///     ╎     <property1>
+///     ╎     <property2>
+///     ╎     ...
+///     ╎     <propertyN>
+///     ╎
+///     └╌<dashed_child_name>: <child_description>'
+///     ════════════════════════════════════════════════════════════════
 ///
 /// See also:
 ///
@@ -626,15 +647,14 @@ final TextTreeConfiguration errorTextConfiguration = TextTreeConfiguration(
 /// draws line art would be visually distracting for those cases.
 ///
 /// Example:
-/// ```
-/// <parent_node>
-///   <name>: <description>:
-///     <properties>
-///     <children>
-///   <name>: <description>:
-///     <properties>
-///     <children>
-/// ```
+///
+///     <parent_node>
+///       <name>: <description>:
+///         <properties>
+///         <children>
+///       <name>: <description>:
+///         <properties>
+///         <children>
 ///
 /// See also:
 ///
@@ -660,15 +680,14 @@ final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
 /// children as in the case of a [DiagnosticsStackTrace].
 ///
 /// Example:
-/// ```
-/// <parent_node>
-/// <name>: <description>:
-/// <properties>
-/// <children>
-/// <name>: <description>:
-/// <properties>
-/// <children>
-/// ```
+///
+///     <parent_node>
+///     <name>: <description>:
+///     <properties>
+///     <children>
+///     <name>: <description>:
+///     <properties>
+///     <children>
 ///
 /// See also:
 ///
@@ -716,10 +735,9 @@ final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
 /// line omitting the children.
 ///
 /// Example:
-/// ```
-/// <name>:
-///   <description>(<property1>, <property2>, ..., <propertyN>)
-/// ```
+///
+///     <name>:
+///       <description>(<property1>, <property2>, ..., <propertyN>)
 ///
 /// See also:
 ///
@@ -1517,7 +1535,7 @@ abstract class DiagnosticsNode {
   ///
   /// Typically this only makes sense to set to a different value than
   /// [DiagnosticLevel.info] for diagnostics representing properties. Some
-  /// subclasses have a `level` argument to their constructor which influences
+  /// subclasses have a [level] argument to their constructor which influences
   /// the value returned here but other factors also influence it. For example,
   /// whether an exception is thrown computing a property value
   /// [DiagnosticLevel.error] is returned.
@@ -2851,7 +2869,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
   ///
-  /// The property level defaults to the value specified by the `level`
+  /// The property level defaults to the value specified by the [level]
   /// constructor argument. The level is raised to [DiagnosticLevel.error] if
   /// an [exception] was thrown getting the property [value]. The level is
   /// raised to [DiagnosticLevel.warning] if the property [value] is null and
@@ -3162,7 +3180,7 @@ mixin Diagnosticable {
   ///    Shows using `showSeparator` to get output `child(3, 4) is null` which
   ///    is more polished than `child(3, 4): is null`.
   ///    ```dart
-  ///    DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false)).toString()
+  ///    DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false).toString()
   ///    ```
   ///    Shows using `showName` to omit the property name as in this context the
   ///    property name does not add useful information.
@@ -3238,7 +3256,7 @@ mixin Diagnosticable {
   ///     properties.add(DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
   ///
   ///     // maxWidth of double.infinity indicates the width is unconstrained and
-  ///     // so maxWidth has no impact.,
+  ///     // so maxWidth has no impact.
   ///     properties.add(DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
   ///
   ///     // Progress is a value between 0 and 1 or null. Showing it as a

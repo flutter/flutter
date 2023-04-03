@@ -16,9 +16,6 @@ Future<void> main() async {
   await task(const NewGalleryChromeRunTest().run);
 }
 
-/// URI for the New Flutter Gallery repository.
-const String galleryRepo = 'https://github.com/flutter/gallery.git';
-
 /// After the gallery loads, a duration of [durationToWaitForError]
 /// is waited, allowing any possible exceptions to be thrown.
 const Duration durationToWaitForError = Duration(seconds: 5);

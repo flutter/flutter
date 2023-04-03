@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for IconButton with toggle feature
+/// Flutter code sample for [IconButton] with toggle feature.
 
 import 'package:flutter/material.dart';
 
@@ -19,10 +19,6 @@ class IconButtonToggleApp extends StatelessWidget {
       theme: ThemeData(
         colorSchemeSeed: const Color(0xff6750a4),
         useMaterial3: true,
-        // Desktop and web platforms have a compact visual density by default.
-        // To see buttons with circular background on desktop/web, the "visualDensity"
-        // needs to be set to "VisualDensity.standard".
-        visualDensity: VisualDensity.standard,
       ),
       title: 'Icon Button Types',
       home: const Scaffold(

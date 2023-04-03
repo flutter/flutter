@@ -110,11 +110,11 @@ class RangeSlider extends StatefulWidget {
   /// The range slider widget itself does not maintain any state. Instead, when
   /// the state of the slider changes, the widget calls the [onChanged] callback.
   /// Most widgets that use a range slider will listen for the [onChanged] callback
-  /// and rebuild the slider with a new [value] to update the visual appearance of
+  /// and rebuild the slider with new [values] to update the visual appearance of
   /// the slider. To know when the value starts to change, or when it is done
   /// changing, set the optional callbacks [onChangeStart] and/or [onChangeEnd].
   ///
-  /// * [values], which  determines currently selected values for this range
+  /// * [values], which determines currently selected values for this range
   ///   slider.
   /// * [onChanged], which is called while the user is selecting a new value for
   ///   the range slider.
@@ -190,7 +190,7 @@ class RangeSlider extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [onChangeStart], which  is called when the user starts  changing the
+  ///  * [onChangeStart], which is called when the user starts changing the
   ///    values.
   ///  * [onChangeEnd], which is called when the user stops changing the values.
   final ValueChanged<RangeValues>? onChanged;
@@ -292,7 +292,7 @@ class RangeSlider extends StatefulWidget {
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
   /// Each label is rendered using the active [ThemeData]'s
-  /// [TextTheme.bodyText1] text style, with the theme data's
+  /// [TextTheme.bodyLarge] text style, with the theme data's
   /// [ColorScheme.onPrimary] color. The label's text style can be overridden
   /// with [SliderThemeData.valueIndicatorTextStyle].
   ///
@@ -609,7 +609,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       rangeValueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1!.copyWith(
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyLarge!.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
       minThumbSeparation: sliderTheme.minThumbSeparation ?? defaultMinThumbSeparation,
@@ -655,7 +655,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           );
         },
       );
-      Overlay.of(context)!.insert(overlayEntry!);
+      Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
     }
   }
 }
@@ -840,6 +840,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   late TapGestureRecognizer _tap;
   bool _active = false;
   late RangeValues _newValues;
+  late Offset _startThumbCenter;
+  late Offset _endThumbCenter;
 
   bool get isEnabled => onChanged != null;
 
@@ -1090,6 +1092,13 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     super.detach();
   }
 
+  @override
+  void dispose() {
+    _startLabelPainter.dispose();
+    _endLabelPainter.dispose();
+    super.dispose();
+  }
+
   double _getValueFromVisualPosition(double visualPosition) {
     switch (textDirection) {
       case TextDirection.rtl:
@@ -1296,8 +1305,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         sliderTheme: _sliderTheme,
         isDiscrete: isDiscrete,
     );
-    final Offset startThumbCenter = Offset(trackRect.left + startVisualPosition * trackRect.width, trackRect.center.dy);
-    final Offset endThumbCenter = Offset(trackRect.left + endVisualPosition * trackRect.width, trackRect.center.dy);
+    _startThumbCenter = Offset(trackRect.left + startVisualPosition * trackRect.width, trackRect.center.dy);
+    _endThumbCenter = Offset(trackRect.left + endVisualPosition * trackRect.width, trackRect.center.dy);
 
     _sliderTheme.rangeTrackShape!.paint(
         context,
@@ -1306,8 +1315,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         sliderTheme: _sliderTheme,
         enableAnimation: _enableAnimation,
         textDirection: _textDirection,
-        startThumbCenter: startThumbCenter,
-        endThumbCenter: endThumbCenter,
+        startThumbCenter: _startThumbCenter,
+        endThumbCenter: _endThumbCenter,
         isDiscrete: isDiscrete,
         isEnabled: isEnabled,
     );
@@ -1320,7 +1329,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       if (startThumbSelected) {
         _sliderTheme.overlayShape!.paint(
           context,
-          startThumbCenter,
+          _startThumbCenter,
           activationAnimation: _overlayAnimation,
           enableAnimation: _enableAnimation,
           isDiscrete: isDiscrete,
@@ -1336,7 +1345,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       if (endThumbSelected) {
         _sliderTheme.overlayShape!.paint(
           context,
-          endThumbCenter,
+          _endThumbCenter,
           activationAnimation: _overlayAnimation,
           enableAnimation: _enableAnimation,
           isDiscrete: isDiscrete,
@@ -1374,21 +1383,21 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
             sliderTheme: _sliderTheme,
             enableAnimation: _enableAnimation,
             textDirection: _textDirection,
-            startThumbCenter: startThumbCenter,
-            endThumbCenter: endThumbCenter,
+            startThumbCenter: _startThumbCenter,
+            endThumbCenter: _endThumbCenter,
             isEnabled: isEnabled,
           );
         }
       }
     }
 
-    final double thumbDelta = (endThumbCenter.dx - startThumbCenter.dx).abs();
+    final double thumbDelta = (_endThumbCenter.dx - _startThumbCenter.dx).abs();
 
     final bool isLastThumbStart = _lastThumbSelection == Thumb.start;
     final Thumb bottomThumb = isLastThumbStart ? Thumb.end : Thumb.start;
     final Thumb topThumb = isLastThumbStart ? Thumb.start : Thumb.end;
-    final Offset bottomThumbCenter = isLastThumbStart ? endThumbCenter : startThumbCenter;
-    final Offset topThumbCenter = isLastThumbStart ? startThumbCenter : endThumbCenter;
+    final Offset bottomThumbCenter = isLastThumbStart ? _endThumbCenter : _startThumbCenter;
+    final Offset topThumbCenter = isLastThumbStart ? _startThumbCenter : _endThumbCenter;
     final TextPainter bottomLabelPainter = isLastThumbStart ? _endLabelPainter : _startLabelPainter;
     final TextPainter topLabelPainter = isLastThumbStart ? _startLabelPainter : _endLabelPainter;
     final double bottomValue = isLastThumbStart ? endValue : startValue;
@@ -1434,7 +1443,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     if (shouldPaintValueIndicators) {
       final double startOffset = sliderTheme.rangeValueIndicatorShape!.getHorizontalShift(
         parentBox: this,
-        center: startThumbCenter,
+        center: _startThumbCenter,
         labelPainter: _startLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
         textScaleFactor: textScaleFactor,
@@ -1442,7 +1451,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       );
       final double endOffset = sliderTheme.rangeValueIndicatorShape!.getHorizontalShift(
         parentBox: this,
-        center: endThumbCenter,
+        center: _endThumbCenter,
         labelPainter: _endLabelPainter,
         activationAnimation: _valueIndicatorAnimation,
         textScaleFactor: textScaleFactor,
@@ -1568,8 +1577,16 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     );
 
     // Split the semantics node area between the start and end nodes.
-    final Rect leftRect = Rect.fromPoints(node.rect.topLeft, node.rect.bottomCenter);
-    final Rect rightRect = Rect.fromPoints(node.rect.topCenter, node.rect.bottomRight);
+    final Rect leftRect = Rect.fromCenter(
+      center: _startThumbCenter,
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
+    );
+    final Rect rightRect = Rect.fromCenter(
+      center: _endThumbCenter,
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
+    );
     switch (textDirection) {
       case TextDirection.ltr:
         _startSemanticsNode!.rect = leftRect;

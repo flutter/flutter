@@ -14,11 +14,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Platform;
-import 'dart:typed_data';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show Platform, LocalPlatform;
+import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
 
 const String gsBase = 'gs://flutter_infra_release';
@@ -209,8 +208,6 @@ class ProcessRunner {
     return utf8.decoder.convert(output).trim();
   }
 }
-
-typedef HttpReader = Future<Uint8List> Function(Uri url, {Map<String, String> headers});
 
 class ArchiveUnpublisher {
   ArchiveUnpublisher(
@@ -432,7 +429,7 @@ Future<void> main(List<String> rawArguments) async {
     'confirm',
     help: 'If set, will actually remove the archive from Google Cloud Storage '
         'upon successful execution of this script. Published archives will be '
-        'removed from this directory: $baseUrl$releaseFolder.  This option '
+        'removed from this directory: $baseUrl$releaseFolder. This option '
         'must be set to perform any action on the server, otherwise only a dry '
         'run is performed.',
   );
@@ -482,7 +479,7 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   if (!(parsedArguments['confirm'] as bool)) {
-    _printBanner('This will be just a dry run.  To actually perform the changes below, re-run with --confirm argument.');
+    _printBanner('This will be just a dry run. To actually perform the changes below, re-run with --confirm argument.');
   }
 
   final List<String> channelArg = parsedArguments['channel'] as List<String>;
@@ -521,7 +518,7 @@ Future<void> main(List<String> rawArguments) async {
       errorExit('$message\n$stack', exitCode: exitCode);
     }
     if (!(parsedArguments['confirm'] as bool)) {
-      _printBanner('This was just a dry run.  To actually perform the above changes, re-run with --confirm argument.');
+      _printBanner('This was just a dry run. To actually perform the above changes, re-run with --confirm argument.');
     }
     exit(0);
   }

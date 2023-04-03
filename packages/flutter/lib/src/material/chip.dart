@@ -77,7 +77,7 @@ abstract class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// The default label style is [TextTheme.bodyText1] from the overall
+  /// The default label style is [TextTheme.bodyLarge] from the overall
   /// theme's [ThemeData.textTheme].
   //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
@@ -1164,11 +1164,15 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final Brightness brightness = chipTheme.brightness ?? theme.brightness;
-    final ChipThemeData chipDefaults = widget.defaultProperties ?? ChipThemeData.fromDefaults(
-      brightness: brightness,
-      secondaryColor: brightness == Brightness.dark ? Colors.tealAccent[200]! : theme.primaryColor,
-      labelStyle: theme.textTheme.bodyText1!,
-    );
+    final ChipThemeData chipDefaults = widget.defaultProperties ??
+      (theme.useMaterial3
+        ? _ChipDefaultsM3(context, widget.isEnabled)
+        : ChipThemeData.fromDefaults(
+            brightness: brightness,
+            secondaryColor: brightness == Brightness.dark ? Colors.tealAccent[200]! : theme.primaryColor,
+            labelStyle: theme.textTheme.bodyLarge!,
+          )
+        );
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final OutlinedBorder resolvedShape = _getShape(theme, chipTheme, chipDefaults);
 
@@ -1310,9 +1314,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         child: result,
       ),
     );
-    // if (height != null) {
-    //   result = SizedBox(height: height, child: result);
-    // }
     return Semantics(
       button: widget.tapEnabled,
       container: true,
@@ -1323,7 +1324,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 }
 
-/// Redirects the [position.dy] passed to [RenderBox.hitTest] to the vertical
+/// Redirects the [buttonRect.dy] passed to [RenderBox.hitTest] to the vertical
 /// center of the widget.
 ///
 /// The primary purpose of this widget is to allow padding around the [RawChip]
@@ -2071,7 +2072,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   // Set this to true to have outlines of the tap targets drawn over
-  // the chip.  This should never be checked in while set to 'true'.
+  // the chip. This should never be checked in while set to 'true'.
   static const bool _debugShowTapTargetOutlines = false;
 
   @override
@@ -2187,3 +2188,77 @@ bool _hitIsOnDeleteIcon({
       return adjustedPosition.dx <= accessibleDeleteButtonWidth;
   }
 }
+
+// BEGIN GENERATED TOKEN PROPERTIES - Chip
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_143
+
+class _ChipDefaultsM3 extends ChipThemeData {
+  const _ChipDefaultsM3(this.context, this.isEnabled)
+    : super(
+        elevation: 0.0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
+        showCheckmark: true,
+      );
+
+  final BuildContext context;
+  final bool isEnabled;
+
+  @override
+  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+
+  @override
+  Color? get backgroundColor => null;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
+
+  @override
+  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+
+  @override
+  Color? get selectedColor => null;
+
+  @override
+  Color? get checkmarkColor => null;
+
+  @override
+  Color? get disabledColor => null;
+
+  @override
+  Color? get deleteIconColor => null;
+
+  @override
+  BorderSide? get side => isEnabled
+    ? BorderSide(color: Theme.of(context).colorScheme.outline)
+    : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
+
+  @override
+  IconThemeData? get iconTheme => IconThemeData(
+    color: isEnabled
+      ? Theme.of(context).colorScheme.primary
+      : Theme.of(context).colorScheme.onSurface,
+    size: 18.0,
+  );
+
+  @override
+  EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
+
+  /// The chip at text scale 1 starts with 8px on each side and as text scaling
+  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+  /// Once the widget has a text scaling of 2 or higher than the label padding
+  /// remains 4px.
+  @override
+  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
+    const EdgeInsets.symmetric(horizontal: 8.0),
+    const EdgeInsets.symmetric(horizontal: 4.0),
+    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+  )!;
+}
+
+// END GENERATED TOKEN PROPERTIES - Chip

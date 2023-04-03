@@ -611,7 +611,6 @@ void main() {
         expect(find.text('Select all'), findsNothing);
         expect(find.byType(IconButton), findsNothing);
 
-
         // The menu appears at the top of the visible selection.
         final Offset selectionOffset = tester
             .getTopLeft(find.byType(TextSelectionToolbarTextButton).first);

@@ -67,7 +67,7 @@ def install_flutter_plugin_pods(flutter_application_path)
 
   # Keep pod path relative so it can be checked into Podfile.lock.
   relative = flutter_relative_path_from_podfile(ios_application_path)
-  pod 'FlutterPluginRegistrant', :path => File.join(relative, 'Flutter', 'FlutterPluginRegistrant'), :inhibit_warnings => true
+  pod 'FlutterPluginRegistrant', path: File.join(relative, 'Flutter', 'FlutterPluginRegistrant'), inhibit_warnings: true
 end
 
 # Install Flutter application pod.
@@ -87,27 +87,25 @@ def install_flutter_application_pod(flutter_application_path)
   # Keep script phase paths relative so they can be checked into source control.
   relative = flutter_relative_path_from_podfile(export_script_directory)
 
-  flutter_export_environment_path = File.join('${SRCROOT}', relative, 'flutter_export_environment.sh');
+  flutter_export_environment_path = File.join('${SRCROOT}', relative, 'flutter_export_environment.sh')
 
   # Compile App.framework and move it and Flutter.framework to "BUILT_PRODUCTS_DIR"
-  script_phase :name => 'Run Flutter Build {{projectName}} Script',
-    :script => "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build",
-    :execution_position => :before_compile
+  script_phase name: 'Run Flutter Build {{projectName}} Script',
+    script: "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build",
+    execution_position: :before_compile
 
   # Embed App.framework AND Flutter.framework.
-  script_phase :name => 'Embed Flutter Build {{projectName}} Script',
-    :script => "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin",
-    :execution_position => :after_compile
+  script_phase name: 'Embed Flutter Build {{projectName}} Script',
+    script: "set -e\nset -u\nsource \"#{flutter_export_environment_path}\"\nexport VERBOSE_SCRIPT_LOGGING=1 && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh embed_and_thin",
+    execution_position: :after_compile
 end
 
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', '..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
-  end
+  raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first" unless File.exist?(generated_xcode_build_settings_path)
 
   File.foreach(generated_xcode_build_settings_path) do |line|
-    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    matches = line.match(/FLUTTER_ROOT=(.*)/)
     return matches[1].strip if matches
   end
   # This should never happen...
@@ -127,7 +125,7 @@ def flutter_post_install(installer, skip: false)
   return if skip
 
   installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |build_configuration|
+    target.build_configurations.each do |_build_configuration|
       # flutter_additional_ios_build_settings is in Flutter root podhelper.rb
       flutter_additional_ios_build_settings(target)
     end

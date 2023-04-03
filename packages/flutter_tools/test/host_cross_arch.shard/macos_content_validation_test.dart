@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/io.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import '../src/darwin_common.dart';
 
 void main() {
   final String flutterBin = fileSystem.path.join(
@@ -67,18 +66,18 @@ void main() {
       expect(result.exitCode, 0);
 
       expect(result.stdout, contains('Running pod install'));
+      expect(podfile.lastModifiedSync().isBefore(podfileLock.lastModifiedSync()), isTrue);
 
-      final Directory outputApp = fileSystem.directory(fileSystem.path.join(
+      final Directory buildPath = fileSystem.directory(fileSystem.path.join(
         workingDirectory,
         'build',
         'macos',
         'Build',
         'Products',
         buildMode,
-        'flutter_gallery.app',
       ));
-      expect(podfile.lastModifiedSync().isBefore(podfileLock.lastModifiedSync()), isTrue);
 
+      final Directory outputApp = buildPath.childDirectory('Flutter Gallery.app');
       final Directory outputAppFramework =
           fileSystem.directory(fileSystem.path.join(
         outputApp.path,
@@ -87,19 +86,27 @@ void main() {
         'App.framework',
       ));
 
-      final File outputAppFrameworkBinary = outputAppFramework.childFile('App');
-      final String archs = processManager.runSync(
-        <String>['file', outputAppFrameworkBinary.path],
-      ).stdout as String;
+      final File libBinary = outputAppFramework.childFile('App');
+      final File libDsymBinary =
+        buildPath.childFile('App.framework.dSYM/Contents/Resources/DWARF/App');
 
-      final bool containsX64 = archs.contains('Mach-O 64-bit dynamically linked shared library x86_64');
-      final bool containsArm = archs.contains('Mach-O 64-bit dynamically linked shared library arm64');
-      if (buildModeLower == 'debug') {
-        // Only build the architecture matching the machine running this test, not both.
-        expect(containsX64 ^ containsArm, isTrue, reason: 'Unexpected architecture $archs');
+      _checkFatBinary(libBinary, buildModeLower, 'dynamically linked shared library');
+
+      final List<String> libSymbols = AppleTestUtils.getExportedSymbols(libBinary.path);
+
+      if (buildMode == 'Debug') {
+        // dSYM is not created for a debug build.
+        expect(libDsymBinary.existsSync(), isFalse);
+        expect(libSymbols, isEmpty);
       } else {
-        expect(containsX64, isTrue, reason: 'Unexpected architecture $archs');
-        expect(containsArm, isTrue, reason: 'Unexpected architecture $archs');
+        _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
+        expect(libSymbols, equals(AppleTestUtils.requiredSymbols));
+        final List<String> dSymSymbols =
+            AppleTestUtils.getExportedSymbols(libDsymBinary.path);
+        expect(dSymSymbols, containsAll(AppleTestUtils.requiredSymbols));
+        // The actual number of symbols is going to vary but there should
+        // be "many" in the dSYM. At the time of writing, it was 19195.
+        expect(dSymSymbols.length, greaterThanOrEqualTo(15000));
       }
 
       expect(outputAppFramework.childLink('Resources'), exists);
@@ -142,18 +149,6 @@ void main() {
       expect(outputFlutterFramework.childLink('Modules'), isNot(exists));
       expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
 
-      // Archiving should contain a bitcode blob, but not building.
-      // This mimics Xcode behavior and prevents a developer from having to install a
-      // 300+MB app.
-      final File outputFlutterFrameworkBinary = outputFlutterFramework
-          .childDirectory('Versions')
-          .childDirectory('A')
-          .childFile('FlutterMacOS');
-      expect(
-        containsBitcode(outputFlutterFrameworkBinary.path, processManager),
-        isFalse,
-      );
-
       // Build again without cleaning.
       final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
 
@@ -170,5 +165,21 @@ void main() {
         'clean',
       ], workingDirectory: workingDirectory);
     }, skip: !platform.isMacOS); // [intended] only makes sense for macos platform.
+  }
+}
+
+void _checkFatBinary(File file, String buildModeLower, String expectedType) {
+  final String archs = processManager.runSync(
+    <String>['file', file.path],
+  ).stdout as String;
+
+  final bool containsX64 = archs.contains('Mach-O 64-bit $expectedType x86_64');
+  final bool containsArm = archs.contains('Mach-O 64-bit $expectedType arm64');
+  if (buildModeLower == 'debug') {
+    // Only build the architecture matching the machine running this test, not both.
+    expect(containsX64 ^ containsArm, isTrue, reason: 'Unexpected architecture $archs');
+  } else {
+    expect(containsX64, isTrue, reason: 'Unexpected architecture $archs');
+    expect(containsArm, isTrue, reason: 'Unexpected architecture $archs');
   }
 }

@@ -102,7 +102,7 @@ class AnimationSheetBuilder {
   /// subtree of [record].
   ///
   /// If [allLayers] is false, then the [record] widget will capture the image
-  /// composited by its subtree.  If [allLayers] is true, then the [record] will
+  /// composited by its subtree. If [allLayers] is true, then the [record] will
   /// capture the entire tree composited and clipped by [record]'s region.
   ///
   /// The two modes are identical if there is nothing in front of [record].

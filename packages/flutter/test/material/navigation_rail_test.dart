@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -78,7 +81,7 @@ void main() {
       ),
     );
 
-    expect(_railMaterial(tester).color, equals(Colors.white));
+    expect(_railMaterial(tester).color, equals(const Color(0xFFFFFBFE))); // default surface color in M3 colorScheme
 
     await _pumpNavigationRail(
       tester,
@@ -1143,7 +1146,7 @@ void main() {
     );
 
     // Since the rail is icon only, its preferred width should not be affected
-    // by  textScaleFactor.
+    // by textScaleFactor.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, compactWidth);
 
@@ -1221,7 +1224,7 @@ void main() {
     );
 
     // Since the rail is icon only, its preferred width should not be affected
-    // by  textScaleFactor.
+    // by textScaleFactor.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, compactWidth);
 
@@ -2314,9 +2317,25 @@ void main() {
       ),
     );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+    final Iterable<Widget> indicatorInkWells = tester.allWidgets.where((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell');
+    final Padding firstItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(0).runtimeType, 'Abc'),
+        matching: find.widgetWithText(Padding, 'Abc'),
+      )
+    );
+    final Padding secondItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(1).runtimeType, 'Def'),
+        matching: find.widgetWithText(Padding, 'Def'),
+      )
+    );
+    final Padding thirdItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(2).runtimeType, 'Ghi'),
+        matching: find.widgetWithText(Padding, 'Ghi'),
+      )
+    );
 
     expect(firstItem.padding, defaultPadding);
     expect(secondItem.padding, secondItemPadding);
@@ -2355,9 +2374,25 @@ void main() {
       ),
     );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+    final Iterable<Widget> indicatorInkWells = tester.allWidgets.where((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell');
+    final Padding firstItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(0).runtimeType, 'Abc'),
+        matching: find.widgetWithText(Padding, 'Abc'),
+      )
+    );
+    final Padding secondItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(1).runtimeType, 'Def'),
+        matching: find.widgetWithText(Padding, 'Def'),
+      )
+    );
+    final Padding thirdItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(2).runtimeType, 'Ghi'),
+        matching: find.widgetWithText(Padding, 'Ghi'),
+      )
+    );
 
     expect(firstItem.padding, defaultPadding);
     expect(secondItem.padding, secondItemPadding);
@@ -2396,9 +2431,25 @@ void main() {
       ),
     );
 
-    final Padding firstItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Abc'));
-    final Padding secondItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Def'));
-    final Padding thirdItem = tester.widget<Padding>(find.widgetWithText(Padding, 'Ghi'));
+    final Iterable<Widget> indicatorInkWells = tester.allWidgets.where((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell');
+    final Padding firstItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(0).runtimeType, 'Abc'),
+        matching: find.widgetWithText(Padding, 'Abc'),
+      )
+    );
+    final Padding secondItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(1).runtimeType, 'Def'),
+        matching: find.widgetWithText(Padding, 'Def'),
+      )
+    );
+    final Padding thirdItem = tester.widget<Padding>(
+      find.descendant(
+        of: find.widgetWithText(indicatorInkWells.elementAt(2).runtimeType, 'Ghi'),
+        matching: find.widgetWithText(Padding, 'Ghi'),
+      )
+    );
 
     expect(firstItem.padding, defaultPadding);
     expect(secondItem.padding, secondItemPadding);
@@ -2635,6 +2686,422 @@ void main() {
     // Indicator without Stack widget
     final RenderBox lastIndicator = tester.renderObject(find.byType(Icon).last);
     expect(lastIndicator.localToGlobal(Offset.zero).dx, 28.0);
+  });
+
+  testWidgets('NavigationRail respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+    const double safeAreaPadding = 40.0;
+    NavigationRail navigationRail() {
+      return NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+      );
+    }
+
+    await tester.pumpWidget(_buildWidget(navigationRail()));
+    final double defaultWidth = tester.getSize(find.byType(NavigationRail)).width;
+    expect(defaultWidth, 80);
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.only(left: safeAreaPadding),
+          ),
+          child: navigationRail(),
+        ),
+      ),
+    );
+    final double updatedWidth = tester.getSize(find.byType(NavigationRail)).width;
+    expect(updatedWidth, defaultWidth + safeAreaPadding);
+
+    // test width when text direction is RTL.
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.only(right: safeAreaPadding),
+          ),
+          child: navigationRail(),
+        ),
+        isRTL: true,
+      ),
+    );
+    final double updatedWidthRTL = tester.getSize(find.byType(NavigationRail)).width;
+    expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
+  });
+
+  testWidgets('NavigationRail indicator renders ripple', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(12.0, 0.0, 68.0, 32.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(12.0, 72.0, 68.0, 104.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgets('NavigationRail indicator renders ripple - extended', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/117126
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.none,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(12.0, 6.0, 68.0, 38.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(12.0, 58.0, 68.0, 90.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgets('NavigationRail indicator renders properly when padding is applied', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/117126
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            padding: EdgeInsets.all(10),
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            padding: EdgeInsets.all(18),
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.none,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(22.0, 16.0, 78.0, 48.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(30.0, 96.0, 86.0, 128.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgets('Indicator renders properly when NavigationRai.minWidth < default minWidth', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/117126
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        minWidth: 50,
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.none,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(-3.0, 6.0, 53.0, 38.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 58.0, 50.0, 90.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgets('NavigationRail indicator renders properly with custom padding and minWidth', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/117126
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        minWidth: 300,
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            padding: EdgeInsets.all(10),
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            padding: EdgeInsets.all(18),
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.none,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(132.0, 16.0, 188.0, 48.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(140.0, 96.0, 196.0, 128.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgets('NavigationRail indicator scale transform', (WidgetTester tester) async {
+    int selectedIndex = 0;
+    Future<void> buildWidget() async {
+      await _pumpNavigationRail(
+        tester,
+        navigationRail: NavigationRail(
+          selectedIndex: selectedIndex,
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Def'),
+            ),
+          ],
+          labelType: NavigationRailLabelType.all,
+        ),
+      );
+    }
+
+    await buildWidget();
+    await tester.pumpAndSettle();
+    final Finder transformFinder = find.descendant(
+      of: find.byType(NavigationIndicator),
+      matching: find.byType(Transform),
+    ).last;
+    Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], 0.0);
+
+    selectedIndex = 1;
+    await buildWidget();
+    await tester.pump(const Duration(milliseconds: 100));
+    transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], closeTo(0.9705023956298828, precisionErrorTolerance));
+
+    await tester.pump(const Duration(milliseconds: 100));
+    transform = tester.widget<Transform>(transformFinder).transform;
+    expect(transform.getColumn(0)[0], 1.0);
   });
 
   group('Material 2', () {
@@ -3532,7 +3999,7 @@ void main() {
       );
 
       // Since the rail is icon only, its preferred width should not be affected
-      // by  textScaleFactor.
+      // by textScaleFactor.
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
       expect(renderBox.size.width, 56.0);
 
@@ -3603,7 +4070,7 @@ void main() {
       );
 
       // Since the rail is icon only, its preferred width should not be affected
-      // by  textScaleFactor.
+      // by textScaleFactor.
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
       expect(renderBox.size.width, 56.0);
 
@@ -4392,6 +4859,61 @@ void main() {
       expect(lastIndicator.localToGlobal(Offset.zero).dx, 24.0);
     });
 
+    testWidgets('NavigationRail respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+      const double safeAreaPadding = 40.0;
+      NavigationRail navigationRail() {
+        return NavigationRail(
+          selectedIndex: 0,
+          destinations: const <NavigationRailDestination>[
+            NavigationRailDestination(
+              icon: Icon(Icons.favorite_border),
+              selectedIcon: Icon(Icons.favorite),
+              label: Text('Abc'),
+            ),
+            NavigationRailDestination(
+              icon: Icon(Icons.bookmark_border),
+              selectedIcon: Icon(Icons.bookmark),
+              label: Text('Def'),
+            ),
+          ],
+        );
+      }
+
+      await tester.pumpWidget(_buildWidget(navigationRail(), useMaterial3: false));
+      final double defaultWidth = tester.getSize(find.byType(NavigationRail)).width;
+      expect(defaultWidth, 72);
+
+      await tester.pumpWidget(
+        _buildWidget(
+            MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.only(left: safeAreaPadding),
+              ),
+              child: navigationRail(),
+            ),
+            useMaterial3: false
+        ),
+      );
+      final double updatedWidth = tester.getSize(find.byType(NavigationRail)).width;
+      expect(updatedWidth, defaultWidth + safeAreaPadding);
+
+      // test width when text direction is RTL.
+      await tester.pumpWidget(
+        _buildWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(right: safeAreaPadding),
+            ),
+            child: navigationRail(),
+          ),
+          useMaterial3: false,
+          isRTL: true,
+        ),
+      );
+      final double updatedWidthRTL = tester.getSize(find.byType(NavigationRail)).width;
+      expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
+    });
+
   }); // End Material 2 group
 }
 
@@ -4567,14 +5089,14 @@ Finder _opacityAboveLabel(String text) {
 
 // Only valid when labelType != all.
 double? _labelOpacity(WidgetTester tester, String text) {
-  // We search for both Opacity and FadeTransition since in some
+  // We search for both Visibility and FadeTransition since in some
   // cases opacity is animated, in other it's not.
-  final Iterable<Opacity> opacityWidgets = tester.widgetList<Opacity>(find.ancestor(
+  final Iterable<Visibility> visibilityWidgets = tester.widgetList<Visibility>(find.ancestor(
     of: find.text(text),
-    matching: find.byType(Opacity),
+    matching: find.byType(Visibility),
   ));
-  if (opacityWidgets.isNotEmpty) {
-    return opacityWidgets.single.opacity;
+  if (visibilityWidgets.isNotEmpty) {
+    return visibilityWidgets.single.visible ? 1.0 : 0.0;
   }
 
   final FadeTransition fadeTransitionWidget = tester.widget<FadeTransition>(
@@ -4592,6 +5114,25 @@ Material _railMaterial(WidgetTester tester) {
     find.descendant(
       of: find.byType(NavigationRail),
       matching: find.byType(Material),
+    ),
+  );
+}
+
+Widget _buildWidget(Widget child, {bool useMaterial3 = true, bool isRTL = false}) {
+  return MaterialApp(
+    theme: ThemeData(useMaterial3: useMaterial3),
+    home: Directionality(
+      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        body: Row(
+          children: <Widget>[
+            child,
+            const Expanded(
+              child: Text('body'),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }

@@ -46,7 +46,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;
 
-  /// Whether or not to apply the image filter opation to the child of this
+  /// Whether or not to apply the image filter operation to the child of this
   /// widget.
   ///
   /// Prefer setting enabled to `false` instead of creating a "no-op" filter
@@ -105,12 +105,13 @@ class _ImageFilterRenderObject extends RenderProxyBox {
     }
 
     if (layer == null) {
-      layer = ImageFilterLayer(imageFilter: imageFilter);
+      layer = ImageFilterLayer(imageFilter: imageFilter, offset: offset);
     } else {
       final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
       filterLayer.imageFilter = imageFilter;
+      filterLayer.offset = offset;
     }
-    context.pushLayer(layer!, super.paint, offset);
+    context.pushLayer(layer!, super.paint, Offset.zero);
     assert(() {
       layer!.debugCreator = debugCreator;
       return true;

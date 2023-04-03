@@ -18,6 +18,7 @@ import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
   BuildAppBundleCommand({
+    required super.logger,
     bool verboseHelp = false,
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();

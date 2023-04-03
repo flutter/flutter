@@ -120,7 +120,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
         debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
         built = ErrorWidget.builder(
-          _debugReportException(
+          _reportException(
             ErrorDescription('building $widget'),
             e,
             stack,
@@ -136,7 +136,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
         assert(_child != null);
       } catch (e, stack) {
         built = ErrorWidget.builder(
-          _debugReportException(
+          _reportException(
             ErrorDescription('building $widget'),
             e,
             stack,
@@ -270,9 +270,6 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   }) : assert(builder != null);
 
   @override
-  LayoutWidgetBuilder get builder => super.builder;
-
-  @override
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 }
 
@@ -358,7 +355,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 }
 
-FlutterErrorDetails _debugReportException(
+FlutterErrorDetails _reportException(
   DiagnosticsNode context,
   Object exception,
   StackTrace stack, {

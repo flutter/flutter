@@ -29,6 +29,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     super.flutterVersion,
     required super.buildSystem,
     required super.verboseHelp,
+    required super.logger,
     super.cache,
     super.platform,
   });
@@ -128,7 +129,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
               gitTagVersion.z == null ||
               gitTagVersion.commits != 0)) {
         throwToolExit(
-            '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${flutterVersion.frameworkVersion}');
+            '--cocoapods is only supported on the beta or stable channel. Detected version is ${flutterVersion.frameworkVersion}');
       }
 
       // Podspecs use semantic versioning, which don't support hotfixes.
@@ -162,7 +163,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
-  s.osx.deployment_target = '10.11'
+  s.osx.deployment_target = '10.14'
   s.vendored_frameworks   = 'FlutterMacOS.framework'
   s.prepare_command       = 'unzip FlutterMacOS.framework -d FlutterMacOS.framework'
 end
@@ -193,10 +194,9 @@ end
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.darwin),
-          kDarwinArchs: <DarwinArch>[
-            DarwinArch.x86_64,
-            DarwinArch.arm64,
-          ].map(getNameForDarwinArch).join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(globals.artifacts!)
+              .map(getNameForDarwinArch)
+              .join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,
@@ -204,6 +204,7 @@ end
         logger: globals.logger,
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         engineVersion: globals.artifacts!.isLocalEngine ? null : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );

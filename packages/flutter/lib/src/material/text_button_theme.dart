@@ -8,12 +8,15 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// A [ButtonStyle] that overrides the default appearance of
 /// [TextButton]s when it's used with [TextButtonTheme] or with the
 /// overall [Theme]'s [ThemeData.textButtonTheme].
 ///
 /// The [style]'s properties override [TextButton]'s default style,
-/// i.e.  the [ButtonStyle] returned by [TextButton.defaultStyleOf]. Only
+/// i.e. the [ButtonStyle] returned by [TextButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
 /// [MaterialStateProperty] values are used.
 ///

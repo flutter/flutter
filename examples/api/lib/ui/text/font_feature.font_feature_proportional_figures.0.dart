@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature.FontFeature.proportionalFigures
+/// Flutter code sample for [FontFeature.FontFeature.proportionalFigures].
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -26,7 +26,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Kufam font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The Kufam font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'Call 311-555-2368 now!',
       style: TextStyle(

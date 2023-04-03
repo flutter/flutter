@@ -26,11 +26,11 @@ import 'android_sdk.dart';
 //
 // For more information about the latest version, check:
 // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-// https://kotlinlang.org/docs/gradle.html#plugin-and-versions
-const String templateDefaultGradleVersion = '7.4';
-const String templateAndroidGradlePluginVersion = '7.1.2';
-const String templateDefaultGradleVersionForModule = '7.1.2';
-const String templateKotlinGradlePluginVersion = '1.6.10';
+// https://kotlinlang.org/docs/releases.html#release-details
+const String templateDefaultGradleVersion = '7.5';
+const String templateAndroidGradlePluginVersion = '7.2.0';
+const String templateDefaultGradleVersionForModule = '7.2.0';
+const String templateKotlinGradlePluginVersion = '1.7.10';
 
 // These versions should match the values in flutter.gradle (FlutterExtension).
 // The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
@@ -41,7 +41,7 @@ const String templateKotlinGradlePluginVersion = '1.6.10';
 const String compileSdkVersion = '31';
 const String minSdkVersion = '16';
 const String targetSdkVersion = '31';
-const String ndkVersion = '21.1.6352462';
+const String ndkVersion = '21.4.7075529';
 
 final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
 
@@ -204,8 +204,8 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (_isWithinVersionRange(androidPluginVersion, min: '4.0.0', max: '4.1.0')) {
     return '6.7';
   }
-  if (_isWithinVersionRange(androidPluginVersion, min: '7.0', max: '7.4')) {
-    return '7.4';
+  if (_isWithinVersionRange(androidPluginVersion, min: '7.0', max: '7.5')) {
+    return '7.5';
   }
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
 }

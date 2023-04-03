@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
@@ -23,10 +21,10 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FakeAndroidStudio fakeAndroidStudio;
-  FakeAndroidSdk fakeAndroidSdk;
-  FakeFlutterVersion fakeFlutterVersion;
-  TestUsage testUsage;
+  late FakeAndroidStudio fakeAndroidStudio;
+  late FakeAndroidSdk fakeAndroidSdk;
+  late FakeFlutterVersion fakeFlutterVersion;
+  late TestUsage testUsage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -288,7 +286,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
   @override
-  String channel;
+  late String channel;
 
   @override
   void ensureVersionFile() {}

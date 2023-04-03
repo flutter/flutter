@@ -22,7 +22,7 @@ const Set<TargetPlatform> _kMobilePlatforms = <TargetPlatform>{
 /// subtree.
 ///
 /// A ScrollView that doesn't have a controller or the primary flag set will
-/// inherit the PrimarySCrollController, if [shouldInherit] allows it. By
+/// inherit the PrimaryScrollController, if [shouldInherit] allows it. By
 /// default [shouldInherit] is true for mobile platforms when the ScrollView has
 /// a scroll direction of [Axis.vertical]. This automatic inheritance can be
 /// configured with [automaticallyInheritForPlatforms] and [scrollDirection].
@@ -125,9 +125,50 @@ class PrimaryScrollController extends InheritedWidget {
   ///
   /// Returns null if there is no [ScrollController] associated with the given
   /// context.
-  static ScrollController? of(BuildContext context) {
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [PrimaryScrollController] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [PrimaryScrollController.maybeOf], which is similar to this method, but
+  ///   asserts if no [PrimaryScrollController] ancestor is found.
+  static ScrollController? maybeOf(BuildContext context) {
     final PrimaryScrollController? result = context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
     return result?.controller;
+  }
+
+  /// Returns the [ScrollController] most closely associated with the given
+  /// context.
+  ///
+  /// If no ancestor is found, this method will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [PrimaryScrollController] in the [context].
+  ///
+  /// See also:
+  ///
+  /// * [PrimaryScrollController.maybeOf], which is similar to this method, but
+  ///   returns null if no [PrimaryScrollController] ancestor is found.
+  static ScrollController of(BuildContext context) {
+    final ScrollController? controller = maybeOf(context);
+    assert(() {
+      if (controller == null) {
+        throw FlutterError(
+          'PrimaryScrollController.of() was called with a context that does not contain a '
+          'PrimaryScrollController widget.\n'
+          'No PrimaryScrollController widget ancestor could be found starting from the '
+          'context that was passed to PrimaryScrollController.of(). This can happen '
+          'because you are using a widget that looks for a PrimaryScrollController '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return controller!;
   }
 
   @override

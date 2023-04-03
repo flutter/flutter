@@ -101,8 +101,9 @@ import 'package:intl/date_symbols.dart' as intl;
       final Map<String, Object?> objData =  json.decode(data.readAsStringSync()) as Map<String, Object?>;
       buffer.writeln("'$locale': intl.DateSymbols(");
       objData.forEach((String key, Object? value) {
-        if (value == null)
+        if (value == null) {
           return;
+        }
         buffer.writeln(_jsonToConstructorEntry(key, value));
       });
       buffer.writeln('),');
@@ -157,11 +158,13 @@ String _jsonToMapEntry(String key, dynamic value) {
 }
 
 String _jsonToObject(dynamic json) {
-  if (json == null || json is num || json is bool)
+  if (json == null || json is num || json is bool) {
     return '$json';
+  }
 
-  if (json is String)
+  if (json is String) {
     return generateEncodedString(currentLocale, json);
+  }
 
   if (json is Iterable<Object?>) {
     final String type = json.first.runtimeType.toString();
@@ -186,11 +189,13 @@ String _jsonToObject(dynamic json) {
 }
 
 String _jsonToMap(dynamic json) {
-  if (json == null || json is num || json is bool)
+  if (json == null || json is num || json is bool) {
     return '$json';
+  }
 
-  if (json is String)
+  if (json is String) {
     return generateEncodedString(currentLocale, json);
+  }
 
   if (json is Iterable) {
     final StringBuffer buffer = StringBuffer('<String>[');

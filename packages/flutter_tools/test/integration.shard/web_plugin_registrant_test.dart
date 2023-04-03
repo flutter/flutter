@@ -44,16 +44,17 @@ void main() {
   testUsingContext('generated plugin registrant passes analysis', () async {
     await _createProject(projectDir, <String>[]);
     // We need a dependency so the plugin registrant is not completely empty.
-    await _editPubspecFile(projectDir, _addDependencyEditor('shared_preferences',
-        version: '^2.0.0'));
+    await _editPubspecFile(projectDir,
+        _addDependencyEditor('shared_preferences', version: '^2.0.0'));
     // The plugin registrant is created on build...
     await _buildWebProject(projectDir);
 
     // Find the web_plugin_registrant, now that it lives outside "lib":
     final Directory buildDir = projectDir
-        .childDirectory('.dart_tool/flutter_build')
-        .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+            .childDirectory('.dart_tool/flutter_build')
+            .listSync()
+            .firstWhere((FileSystemEntity entity) => entity is Directory)
+        as Directory;
 
     // Ensure the file exists, and passes analysis.
     final File registrant = buildDir.childFile('web_plugin_registrant.dart');
@@ -63,31 +64,40 @@ void main() {
     // Ensure the contents match what we expect for a non-empty plugin registrant.
     final String contents = registrant.readAsStringSync();
     expect(contents, contains('// @dart = 2.13'));
-    expect(contents, contains("import 'package:shared_preferences_web/shared_preferences_web.dart';"));
-    expect(contents, contains('void registerPlugins([final Registrar? pluginRegistrar]) {'));
-    expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
+    expect(
+        contents,
+        contains(
+            "import 'package:shared_preferences_web/shared_preferences_web.dart';"));
+    expect(contents,
+        contains('void registerPlugins([final Registrar? pluginRegistrar]) {'));
+    expect(
+        contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
           usage: globals.flutterUsage,
           botDetector: globals.botDetector,
           platform: globals.platform,
+          stdio: globals.stdio,
         ),
   });
 
-  testUsingContext('generated plugin registrant passes analysis without null safety', () async {
+  testUsingContext(
+      'generated plugin registrant passes analysis without null safety',
+      () async {
     await _createProject(projectDir, <String>[]);
     // We need a dependency so the plugin registrant is not completely empty.
-    await _editPubspecFile(projectDir,
-      _composeEditors(<PubspecEditor>[
-        _addDependencyEditor('shared_preferences', version: '^2.0.0'),
+    await _editPubspecFile(
+        projectDir,
+        _composeEditors(<PubspecEditor>[
+          _addDependencyEditor('shared_preferences', version: '^2.0.0'),
 
-        // This turns null safety off
-        _setDartSDKVersionEditor('>=2.11.0 <3.0.0'),
-      ]));
+          // This turns null safety off
+          _setDartSDKVersionEditor('>=2.11.0 <3.0.0'),
+        ]));
 
     // The generated main.dart file has a bunch of stuff that is invalid without null safety, so
     // replace it with a no-op dummy main file. We aren't testing it in this scenario anyway.
@@ -98,9 +108,10 @@ void main() {
 
     // Find the web_plugin_registrant, now that it lives outside "lib":
     final Directory buildDir = projectDir
-        .childDirectory('.dart_tool/flutter_build')
-        .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+            .childDirectory('.dart_tool/flutter_build')
+            .listSync()
+            .firstWhere((FileSystemEntity entity) => entity is Directory)
+        as Directory;
 
     // Ensure the file exists, and passes analysis.
     final File registrant = buildDir.childFile('web_plugin_registrant.dart');
@@ -110,32 +121,39 @@ void main() {
     // Ensure the contents match what we expect for a non-empty plugin registrant.
     final String contents = registrant.readAsStringSync();
     expect(contents, contains('// @dart = 2.13'));
-    expect(contents, contains("import 'package:shared_preferences_web/shared_preferences_web.dart';"));
-    expect(contents, contains('void registerPlugins([final Registrar? pluginRegistrar]) {'));
-    expect(contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
+    expect(
+        contents,
+        contains(
+            "import 'package:shared_preferences_web/shared_preferences_web.dart';"));
+    expect(contents,
+        contains('void registerPlugins([final Registrar? pluginRegistrar]) {'));
+    expect(
+        contents, contains('SharedPreferencesPlugin.registerWith(registrar);'));
     expect(contents, contains('registrar.registerMessageHandler();'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
           usage: globals.flutterUsage,
           botDetector: globals.botDetector,
           platform: globals.platform,
+          stdio: globals.stdio,
         ),
   });
 
-
-  testUsingContext('(no-op) generated plugin registrant passes analysis', () async {
+  testUsingContext('(no-op) generated plugin registrant passes analysis',
+      () async {
     await _createProject(projectDir, <String>[]);
     // No dependencies on web plugins this time!
     await _buildWebProject(projectDir);
 
     // Find the web_plugin_registrant, now that it lives outside "lib":
     final Directory buildDir = projectDir
-        .childDirectory('.dart_tool/flutter_build')
-        .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+            .childDirectory('.dart_tool/flutter_build')
+            .listSync()
+            .firstWhere((FileSystemEntity entity) => entity is Directory)
+        as Directory;
 
     // Ensure the file exists, and passes analysis.
     final File registrant = buildDir.childFile('web_plugin_registrant.dart');
@@ -146,21 +164,24 @@ void main() {
     final String contents = registrant.readAsStringSync();
     expect(contents, contains('void registerPlugins() {}'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
           usage: globals.flutterUsage,
           botDetector: globals.botDetector,
           platform: globals.platform,
+          stdio: globals.stdio,
         ),
   });
 
   // See: https://github.com/dart-lang/dart-services/pull/874
-  testUsingContext('generated plugin registrant for dartpad is created on pub get', () async {
+  testUsingContext(
+      'generated plugin registrant for dartpad is created on pub get',
+      () async {
     await _createProject(projectDir, <String>[]);
     await _editPubspecFile(projectDir,
-      _addDependencyEditor('shared_preferences', version: '^2.0.0'));
+        _addDependencyEditor('shared_preferences', version: '^2.0.0'));
     // The plugin registrant for dartpad is created on flutter pub get.
     await _doFlutterPubGet(projectDir);
 
@@ -173,16 +194,18 @@ void main() {
     await _analyzeEntity(registrant);
 
     // Assert the full build hasn't happened!
-    final Directory buildDir = projectDir.childDirectory('.dart_tool/flutter_build');
+    final Directory buildDir =
+        projectDir.childDirectory('.dart_tool/flutter_build');
     expect(buildDir, isNot(exists));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
           usage: globals.flutterUsage,
           botDetector: globals.botDetector,
           platform: globals.platform,
+          stdio: globals.stdio,
         ),
   });
 
@@ -204,20 +227,20 @@ void main() {
     // file does not fail analysis (this is a regression test - an ignore was
     // added to cover this case).
     await _editPubspecFile(
-      projectDir,
-      _addDependencyEditor(
-        'test_web_plugin_with_a_purposefully_extremely_long_package_name',
-        path: '../test_plugin',
-      )
-    );
+        projectDir,
+        _addDependencyEditor(
+          'test_web_plugin_with_a_purposefully_extremely_long_package_name',
+          path: '../test_plugin',
+        ));
     // The plugin registrant is only created after a build...
     await _buildWebProject(projectDir);
 
     // Find the web_plugin_registrant, now that it lives outside "lib":
     final Directory buildDir = projectDir
-        .childDirectory('.dart_tool/flutter_build')
-        .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+            .childDirectory('.dart_tool/flutter_build')
+            .listSync()
+            .firstWhere((FileSystemEntity entity) => entity is Directory)
+        as Directory;
 
     expect(
       buildDir.childFile('web_plugin_registrant.dart'),
@@ -225,13 +248,14 @@ void main() {
     );
     await _analyzeEntity(buildDir.childFile('web_plugin_registrant.dart'));
   }, overrides: <Type, Generator>{
-    Pub: () => Pub(
+    Pub: () => Pub.test(
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
           usage: globals.flutterUsage,
           botDetector: globals.botDetector,
           platform: globals.platform,
+          stdio: globals.stdio,
         ),
   });
 }
@@ -285,8 +309,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
     ),
   );
 
-  final File snapshotBackup =
-      globals.fs.file('$flutterToolsSnapshotPath.bak');
+  final File snapshotBackup = globals.fs.file('$flutterToolsSnapshotPath.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;
@@ -325,7 +348,8 @@ Future<void> _replaceMainFile(Directory projectDir, String fileContents) async {
   await mainFile.writeAsString(fileContents);
 }
 
-PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String? path}) {
+PubspecEditor _addDependencyEditor(String packageToAdd,
+    {String? version, String? path}) {
   assert(version != null || path != null,
       'Need to define a source for the package.');
   assert(version == null || path == null,
@@ -342,6 +366,7 @@ PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String
       }
     }
   }
+
   return editor;
 }
 
@@ -353,11 +378,11 @@ PubspecEditor _setDartSDKVersionEditor(String version) {
         for (i++; i < lines.length; i++) {
           final String innerLine = lines[i];
           final String sdkLine = "  sdk: '$version'";
-          if(innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
+          if (innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
             lines.insert(i, sdkLine);
             break;
           }
-          if(innerLine.startsWith('  sdk:')) {
+          if (innerLine.startsWith('  sdk:')) {
             lines[i] = sdkLine;
             break;
           }
@@ -366,6 +391,7 @@ PubspecEditor _setDartSDKVersionEditor(String version) {
       }
     }
   }
+
   return editor;
 }
 
@@ -375,6 +401,7 @@ PubspecEditor _composeEditors(Iterable<PubspecEditor> editors) {
       editor(lines);
     }
   }
+
   return composedEditor;
 }
 
@@ -429,7 +456,8 @@ Future<void> _doFlutterPubGet(Directory workingDir) async {
 // `flutterCommandArgs` are the arguments passed to flutter, like: ['build', 'web']
 // to run `flutter build web`.
 // `workingDir` is the directory on which the flutter command will be run.
-Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory workingDir) async {
+Future<void> _runFlutterSnapshot(
+    List<String> flutterCommandArgs, Directory workingDir) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
     globals.fs.path.join(
       '..',

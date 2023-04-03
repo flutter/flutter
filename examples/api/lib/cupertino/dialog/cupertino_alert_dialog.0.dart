@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for CupertinoAlertDialog
+/// Flutter code sample for [CupertinoAlertDialog].
 
 import 'package:flutter/cupertino.dart';
 

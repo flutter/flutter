@@ -5,11 +5,13 @@
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/convert.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import '../src/darwin_common.dart';
+import '../src/fake_process_manager.dart';
 
 void main() {
   group('iOS app validation', () {
@@ -75,7 +77,7 @@ void main() {
 
     for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
       group('build in ${buildMode.name} mode', () {
-        late Directory buildPath;
+        late Directory outputPath;
         late Directory outputApp;
         late Directory frameworkDirectory;
         late Directory outputFlutterFramework;
@@ -83,6 +85,9 @@ void main() {
         late Directory outputAppFramework;
         late File outputAppFrameworkBinary;
         late File outputPluginFrameworkBinary;
+        late Directory buildPath;
+        late Directory buildAppFrameworkDsym;
+        late File buildAppFrameworkDsymBinary;
         late ProcessResult buildResult;
 
         setUpAll(() {
@@ -98,14 +103,14 @@ void main() {
             '--split-debug-info=foo debug info/',
           ], workingDirectory: projectRoot);
 
-          buildPath = fileSystem.directory(fileSystem.path.join(
+          outputPath = fileSystem.directory(fileSystem.path.join(
             projectRoot,
             'build',
             'ios',
             'iphoneos',
           ));
 
-          outputApp = buildPath.childDirectory('Runner.app');
+          outputApp = outputPath.childDirectory('Runner.app');
 
           frameworkDirectory = outputApp.childDirectory('Frameworks');
           outputFlutterFramework = frameworkDirectory.childDirectory('Flutter.framework');
@@ -115,6 +120,16 @@ void main() {
           outputAppFrameworkBinary = outputAppFramework.childFile('App');
 
           outputPluginFrameworkBinary = frameworkDirectory.childDirectory('hello.framework').childFile('hello');
+
+          buildPath = fileSystem.directory(fileSystem.path.join(
+            projectRoot,
+            'build',
+            'ios',
+            '${sentenceCase(buildMode.name)}-iphoneos',
+          ));
+
+          buildAppFrameworkDsym = buildPath.childDirectory('App.framework.dSYM');
+          buildAppFrameworkDsymBinary = buildAppFrameworkDsym.childFile('Contents/Resources/DWARF/App');
         });
 
         testWithoutContext('flutter build ios builds a valid app', () {
@@ -128,6 +143,8 @@ void main() {
           expect(outputAppFrameworkBinary, exists);
           expect(outputAppFramework.childFile('Info.plist'), exists);
 
+          expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
+
           final File vmSnapshot = fileSystem.file(fileSystem.path.join(
             outputAppFramework.path,
             'flutter_assets',
@@ -136,10 +153,8 @@ void main() {
 
           expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
 
-          // Archiving should contain a bitcode blob, but not building.
-          // This mimics Xcode behavior and prevents a developer from having to install a
-          // 300+MB app.
-          expect(containsBitcode(outputFlutterFrameworkBinary.path, processManager), isFalse);
+          // Builds should not contain deprecated bitcode.
+          expect(_containsBitcode(outputFlutterFrameworkBinary.path, processManager), isFalse);
         });
 
         testWithoutContext('Info.plist dart observatory Bonjour service', () {
@@ -177,17 +192,27 @@ void main() {
         });
 
         testWithoutContext('check symbols', () {
-          final ProcessResult symbols = processManager.runSync(
-            <String>[
-              'nm',
-              '-g',
-              outputAppFrameworkBinary.path,
-              '-arch',
-              'arm64',
-            ],
-          );
-          final bool aotSymbolsFound = (symbols.stdout as String).contains('_kDartVmSnapshot');
-          expect(aotSymbolsFound, buildMode != BuildMode.debug);
+          final List<String> symbols =
+              AppleTestUtils.getExportedSymbols(outputAppFrameworkBinary.path);
+          if (buildMode == BuildMode.debug) {
+            expect(symbols, isEmpty);
+          } else {
+            expect(symbols, equals(AppleTestUtils.requiredSymbols));
+          }
+        });
+
+        testWithoutContext('check symbols in dSYM', () {
+          if (buildMode == BuildMode.debug) {
+            // dSYM is not created for a debug build.
+            expect(buildAppFrameworkDsymBinary.existsSync(), isFalse);
+          } else {
+            final List<String> symbols =
+                AppleTestUtils.getExportedSymbols(buildAppFrameworkDsymBinary.path);
+            expect(symbols, containsAll(AppleTestUtils.requiredSymbols));
+            // The actual number of symbols is going to vary but there should
+            // be "many" in the dSYM. At the time of writing, it was 7656.
+            expect(symbols.length, greaterThanOrEqualTo(5000));
+          }
         });
 
         testWithoutContext('xcode_backend embed_and_thin', () {
@@ -219,7 +244,7 @@ void main() {
                 'ios',
                 'Release-iphoneos',
               ),
-              'TARGET_BUILD_DIR': buildPath.path,
+              'TARGET_BUILD_DIR': outputPath.path,
               'FRAMEWORKS_FOLDER_PATH': 'Runner.app/Frameworks',
               'VERBOSE_SCRIPT_LOGGING': '1',
               'FLUTTER_BUILD_MODE': 'release',
@@ -331,4 +356,47 @@ void main() {
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
      timeout: const Timeout(Duration(minutes: 7))
   );
+}
+
+bool _containsBitcode(String pathToBinary, ProcessManager processManager) {
+  // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
+  final ProcessResult result = processManager.runSync(<String>[
+    'otool',
+    '-l',
+    '-arch',
+    'arm64',
+    pathToBinary,
+  ]);
+  final String loadCommands = result.stdout as String;
+  if (!loadCommands.contains('__LLVM')) {
+    return false;
+  }
+  // Presence of the section may mean a bitcode marker was embedded (size=1), but there is no content.
+  if (!loadCommands.contains('size 0x0000000000000001')) {
+    return true;
+  }
+  // Check the false positives: size=1 wasn't referencing the __LLVM section.
+
+  bool emptyBitcodeMarkerFound = false;
+  //  Section
+  //  sectname __bundle
+  //  segname __LLVM
+  //  addr 0x003c4000
+  //  size 0x0042b633
+  //  offset 3932160
+  //  ...
+  final List<String> lines = LineSplitter.split(loadCommands).toList();
+  lines.asMap().forEach((int index, String line) {
+    if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
+      final bool bitcodeMarkerFound = lines
+          .skip(index - 1)
+          .take(4)
+          .any((String line) => line.contains(' size 0x0000000000000001'));
+      if (bitcodeMarkerFound) {
+        emptyBitcodeMarkerFound = true;
+        return;
+      }
+    }
+  });
+  return !emptyBitcodeMarkerFound;
 }

@@ -16,7 +16,7 @@ void main() {
 
     expect(find.widgetWithText(AppBar, 'AppBar Demo'), findsOneWidget);
     Material appbarMaterial = _getAppBarMaterial(tester);
-    expect(appbarMaterial.shadowColor, null);
+    expect(appbarMaterial.shadowColor, Colors.transparent);
     expect(appbarMaterial.elevation, 0);
 
     await tester.drag(find.text('Item 4'), _kOffset, touchSlopY: 0, warnIfMissed: false);

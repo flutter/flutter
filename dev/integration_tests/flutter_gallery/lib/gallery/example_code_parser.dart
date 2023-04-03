@@ -10,8 +10,9 @@ const String _kEndTag = '// END';
 Map<String?, String>? _exampleCode;
 
 Future<String?> getExampleCode(String? tag, AssetBundle bundle) async {
-  if (_exampleCode == null)
+  if (_exampleCode == null) {
     await _parseExampleCode(bundle);
+  }
   return _exampleCode![tag];
 }
 
