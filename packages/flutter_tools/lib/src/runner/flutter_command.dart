@@ -1141,27 +1141,7 @@ abstract class FlutterCommand extends Command<void> {
 
     NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
-      final bool wasNullSafetyFlagParsed = argResults?.wasParsed(FlutterOptions.kNullSafety) ?? false;
-      if (!wasNullSafetyFlagParsed && (argParser.options.containsKey('target') || forcedTargetFile != null)) {
-        final File entrypointFile = forcedTargetFile ?? globals.fs.file(targetFile);
-        final LanguageVersion languageVersion = determineLanguageVersion(
-          entrypointFile,
-          packageConfig.packageOf(entrypointFile.absolute.uri),
-          Cache.flutterRoot!,
-        );
-        // Extra frontend options are only provided if explicitly
-        // requested.
-        if ((languageVersion.major > nullSafeVersion.major) ||
-            (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
-          nullSafetyMode = NullSafetyMode.sound;
-        } else {
-          throwToolExit(
-            'This application does not support sound null-safety (its language version is $languageVersion).\n'
-            'To build this application, you must provide the CLI flag --no-sound-null-safety. Dart 3 will only '
-            'support sound null safety, see https://dart.dev/null-safety.',
-          );
-        }
-      } else if (boolArg(FlutterOptions.kNullSafety)) {
+      if (boolArg(FlutterOptions.kNullSafety)) {
         nullSafetyMode = NullSafetyMode.sound;
         extraFrontEndOptions.add('--sound-null-safety');
       } else {
