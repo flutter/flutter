@@ -882,17 +882,17 @@ class _LargeTitleNavigationBarSliverDelegate
 
     // this is added for declare ios version as int, i can get it directly, if you can please replace it
     if (Platform.isIOS) {
-      final iosVersion = int.tryParse(
+      final int iosVersion = int.tryParse(
           Platform.operatingSystemVersion.split(' ')[1].split('.').first);
-      _iosSpecificLargeTitleResizer = ((_iosVersion ?? 15) < 14 ? 0 : 4);
+      iosSpecificLargeTitleResizer = ((iosVersion ?? 15) < 14 ? 0 : 4);
     }
 
     //and here i have changed fontSize of textStyle for ios 14+ 
     TextStyle transitionableNavigationBarTextStyle =
         CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle;
-    _transitionableNavigationBarTextStyle =
-        _transitionableNavigationBarTextStyle.copyWith(
-            fontSize: _transitionableNavigationBarTextStyle.fontSize! + 4);
+    transitionableNavigationBarTextStyle =
+        transitionableNavigationBarTextStyle.copyWith(
+            fontSize: transitionableNavigationBarTextStyle.fontSize! + 4);
 
     return Hero(
       tag: heroTag == _defaultHeroTag
@@ -912,7 +912,7 @@ class _LargeTitleNavigationBarSliverDelegate
         backButtonTextStyle:
             CupertinoTheme.of(context).textTheme.navActionTextStyle,
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-        largeTitleTextStyle: _transitionableNavigationBarTextStyle,
+        largeTitleTextStyle: transitionableNavigationBarTextStyle,
         border: border,
         hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
