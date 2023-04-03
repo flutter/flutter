@@ -3569,12 +3569,9 @@ extension JsConstructorExtension on JsConstructor {
 @JS('window.FinalizationRegistry')
 @staticInterop
 class SkObjectFinalizationRegistry {
-  factory SkObjectFinalizationRegistry(JSFunction cleanup) {
-    return js_util.callConstructor(
-      _finalizationRegistryConstructor!.toObjectShallow,
-      <Object>[cleanup],
-    );
-  }
+  // TODO(hterkelsen): Add a type for the `cleanup` function when
+  // native constructors support type parameters.
+  external factory SkObjectFinalizationRegistry(JSFunction cleanup);
 }
 
 extension SkObjectFinalizationRegistryExtension on SkObjectFinalizationRegistry {
