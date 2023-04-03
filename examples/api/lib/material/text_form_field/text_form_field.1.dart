@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [TextFormField].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [TextFormField].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const TextFormFieldExampleApp());
+
+class TextFormFieldExampleApp extends StatelessWidget {
+  const TextFormFieldExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -18,19 +18,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: TextFormFieldExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class TextFormFieldExample extends StatefulWidget {
+  const TextFormFieldExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<TextFormFieldExample> createState() => _TextFormFieldExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _TextFormFieldExampleState extends State<TextFormFieldExample> {
   @override
   Widget build(BuildContext context) {
     return Material(

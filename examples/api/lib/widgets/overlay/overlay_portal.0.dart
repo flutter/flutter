@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for OverlayPortal
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for OverlayPortal
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const OverlayPortalExampleApp());
+
+class OverlayPortalExampleApp extends StatelessWidget {
+  const OverlayPortalExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {

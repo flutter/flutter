@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverAnimatedOpacity].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SliverAnimatedOpacity].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SliverAnimatedOpacityExampleApp());
+
+class SliverAnimatedOpacityExampleApp extends StatelessWidget {
+  const SliverAnimatedOpacityExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,21 +20,21 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: SliverAnimatedOpacityExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SliverAnimatedOpacityExample extends StatefulWidget {
+  const SliverAnimatedOpacityExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SliverAnimatedOpacityExample> createState() => _SliverAnimatedOpacityExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExample>
     with SingleTickerProviderStateMixin {
   bool _visible = true;
 

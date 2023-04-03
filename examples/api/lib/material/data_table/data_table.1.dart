@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [DataTable].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [DataTable].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const DataTableExampleApp());
+
+class DataTableExampleApp extends StatelessWidget {
+  const DataTableExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,20 +19,20 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        body: const DataTableExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class DataTableExample extends StatefulWidget {
+  const DataTableExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DataTableExample> createState() => _DataTableExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _DataTableExampleState extends State<DataTableExample> {
   static const int numItems = 10;
   List<bool> selected = List<bool>.generate(numItems, (int index) => false);
 

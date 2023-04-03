@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverFadeTransition].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SliverFadeTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SliverFadeTransitionExampleApp());
+
+class SliverFadeTransitionExampleApp extends StatelessWidget {
+  const SliverFadeTransitionExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,21 +20,21 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: SliverFadeTransitionExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SliverFadeTransitionExample extends StatefulWidget {
+  const SliverFadeTransitionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SliverFadeTransitionExample> createState() => _SliverFadeTransitionExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExample>
     with SingleTickerProviderStateMixin {
   late final AnimationController controller = AnimationController(
     duration: const Duration(milliseconds: 1000),

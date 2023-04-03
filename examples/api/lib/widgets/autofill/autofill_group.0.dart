@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AutofillGroup].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AutofillGroup].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AutofillGroupExampleApp());
+
+class AutofillGroupExampleApp extends StatelessWidget {
+  const AutofillGroupExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,20 +19,20 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        body: const AutofillGroupExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AutofillGroupExample extends StatefulWidget {
+  const AutofillGroupExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AutofillGroupExample> createState() => _AutofillGroupExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _AutofillGroupExampleState extends State<AutofillGroupExample> {
   bool isSameAddress = true;
   final TextEditingController shippingAddress1 = TextEditingController();
   final TextEditingController shippingAddress2 = TextEditingController();

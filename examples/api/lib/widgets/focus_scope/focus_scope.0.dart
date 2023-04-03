@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FocusScope].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FocusScope].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FocusScopeExampleApp());
+
+class FocusScopeExampleApp extends StatelessWidget {
+  const FocusScopeExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: FocusScopeExample(),
     );
   }
 }
@@ -66,14 +66,14 @@ class Pane extends StatelessWidget {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class FocusScopeExample extends StatefulWidget {
+  const FocusScopeExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<FocusScopeExample> createState() => _FocusScopeExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _FocusScopeExampleState extends State<FocusScopeExample> {
   bool backdropIsVisible = false;
   FocusNode backdropNode = FocusNode(debugLabel: 'Close Backdrop Button');
   FocusNode foregroundNode = FocusNode(debugLabel: 'Option Button');

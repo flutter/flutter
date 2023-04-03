@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [InkWell].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [InkWell].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const InkWellExampleApp());
+
+class InkWellExampleApp extends StatelessWidget {
+  const InkWellExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,21 +20,21 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: InkWellExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class InkWellExample extends StatefulWidget {
+  const InkWellExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<InkWellExample> createState() => _InkWellExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _InkWellExampleState extends State<InkWellExample> {
   double sideLength = 50;
 
   @override

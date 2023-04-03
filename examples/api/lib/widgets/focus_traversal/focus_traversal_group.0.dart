@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FocusTraversalGroup].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FocusTraversalGroup].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FocusTraversalGroupExampleApp());
+
+class FocusTraversalGroupExampleApp extends StatelessWidget {
+  const FocusTraversalGroupExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatelessWidget(),
+      home: FocusTraversalGroupExample(),
     );
   }
 }
@@ -120,8 +120,8 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class FocusTraversalGroupExample extends StatelessWidget {
+  const FocusTraversalGroupExample({super.key});
 
   @override
   Widget build(BuildContext context) {

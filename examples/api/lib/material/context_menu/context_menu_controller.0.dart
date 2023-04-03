@@ -9,19 +9,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ContextMenuControllerExampleApp());
 
 /// A builder that includes an Offset to draw the context menu at.
 typedef ContextMenuBuilder = Widget Function(BuildContext context, Offset offset);
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class ContextMenuControllerExampleApp extends StatefulWidget {
+  const ContextMenuControllerExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<ContextMenuControllerExampleApp> createState() => _ContextMenuControllerExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _ContextMenuControllerExampleAppState extends State<ContextMenuControllerExampleApp> {
   void _showDialog (BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(

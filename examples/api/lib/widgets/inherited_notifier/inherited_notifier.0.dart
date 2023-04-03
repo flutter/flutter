@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [InheritedNotifier].
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [InheritedNotifier].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const InheritedNotifierExampleApp());
+
+class InheritedNotifierExampleApp extends StatelessWidget {
+  const InheritedNotifierExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: InheritedNotifierExample(),
     );
   }
 }
@@ -58,16 +58,16 @@ class Spinner extends StatelessWidget {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class InheritedNotifierExample extends StatefulWidget {
+  const InheritedNotifierExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<InheritedNotifierExample> createState() => _InheritedNotifierExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _InheritedNotifierExampleState extends State<InheritedNotifierExample>
     with TickerProviderStateMixin {
   late AnimationController _controller;
 

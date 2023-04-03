@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RawScrollbar].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RawScrollbar].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RawScrollbarExampleApp());
+
+class RawScrollbarExampleApp extends StatelessWidget {
+  const RawScrollbarExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,20 +19,20 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        body: const RawScrollbarExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class RawScrollbarExample extends StatefulWidget {
+  const RawScrollbarExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RawScrollbarExample> createState() => _RawScrollbarExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RawScrollbarExampleState extends State<RawScrollbarExample> {
   final ScrollController _controllerOne = ScrollController();
 
   @override

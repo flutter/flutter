@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [ListTile] selection in a [ListView] or [GridView].
 /// Long press any ListTile to enable selection mode.
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ListViewSelectExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ListViewSelectExampleApp extends StatelessWidget {
+  const ListViewSelectExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 

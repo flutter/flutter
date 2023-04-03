@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FocusNode.unfocus].
-
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FocusNode.unfocus].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const UnfocusExampleApp());
+
+class UnfocusExampleApp extends StatelessWidget {
+  const UnfocusExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -18,19 +18,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: UnfocusExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class UnfocusExample extends StatefulWidget {
+  const UnfocusExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<UnfocusExample> createState() => _UnfocusExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _UnfocusExampleState extends State<UnfocusExample> {
   UnfocusDisposition disposition = UnfocusDisposition.scope;
 
   @override

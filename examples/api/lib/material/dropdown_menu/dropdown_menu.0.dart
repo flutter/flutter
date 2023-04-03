@@ -1,11 +1,11 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-// Flutter code sample for [DropdownMenu]s. The first dropdown menu has an outlined border
 // which is the default configuration, and the second one has a filled input decoration.
 
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [DropdownMenu]s. The first dropdown menu has an outlined border
 
 void main() => runApp(const DropdownMenuExample());
 

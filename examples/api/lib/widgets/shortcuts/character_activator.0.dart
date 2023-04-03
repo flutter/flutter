@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CharacterActivator].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [CharacterActivator].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const CharacterActivatorExampleApp());
+
+class CharacterActivatorExampleApp extends StatelessWidget {
+  const CharacterActivatorExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: CharacterActivatorExample(),
         ),
       ),
     );
@@ -31,14 +31,14 @@ class HelpMenuIntent extends Intent {
   const HelpMenuIntent();
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class CharacterActivatorExample extends StatefulWidget {
+  const CharacterActivatorExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<CharacterActivatorExample> createState() => _CharacterActivatorExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _CharacterActivatorExampleState extends State<CharacterActivatorExample> {
   @override
   Widget build(BuildContext context) {
     return Shortcuts(

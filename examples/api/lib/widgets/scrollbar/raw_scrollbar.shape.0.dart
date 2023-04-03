@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RawScrollbar.shape].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RawScrollbar.shape].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ShapeExampleApp());
+
+class ShapeExampleApp extends StatelessWidget {
+  const ShapeExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,13 +17,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatelessWidget(),
+      home: ShapeExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ShapeExample extends StatelessWidget {
+  const ShapeExample({super.key});
 
   @override
   Widget build(BuildContext context) {

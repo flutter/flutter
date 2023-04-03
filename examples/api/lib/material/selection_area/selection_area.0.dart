@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SelectionArea].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SelectionArea].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SelectionAreaExampleApp());
+
+class SelectionAreaExampleApp extends StatelessWidget {
+  const SelectionAreaExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 

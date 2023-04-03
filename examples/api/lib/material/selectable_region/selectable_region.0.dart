@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SelectableRegion].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SelectableRegion].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SelectableRegionExampleApp());
+
+class SelectableRegionExampleApp extends StatelessWidget {
+  const SelectableRegionExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 

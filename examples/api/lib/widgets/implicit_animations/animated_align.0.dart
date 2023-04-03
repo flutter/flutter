@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AnimatedAlign].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedAlign].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AnimatedAlignExampleApp());
+
+class AnimatedAlignExampleApp extends StatelessWidget {
+  const AnimatedAlignExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,20 +19,20 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        body: const AnimatedAlignExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AnimatedAlignExample extends StatefulWidget {
+  const AnimatedAlignExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedAlignExample> createState() => _AnimatedAlignExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _AnimatedAlignExampleState extends State<AnimatedAlignExample> {
   bool selected = false;
 
   @override

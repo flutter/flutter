@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SlideTransition].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SlideTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SlideTransitionExampleApp());
+
+class SlideTransitionExampleApp extends StatelessWidget {
+  const SlideTransitionExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,21 +20,21 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: SlideTransitionExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SlideTransitionExample extends StatefulWidget {
+  const SlideTransitionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SlideTransitionExample> createState() => _SlideTransitionExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _SlideTransitionExampleState extends State<SlideTransitionExample>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),

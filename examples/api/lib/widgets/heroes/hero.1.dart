@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Hero].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+
+/// Flutter code sample for [Hero].
 
 void main() {
   // Slow down time to see Hero flight animation.

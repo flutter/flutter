@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Image.frameBuilder].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Image.frameBuilder].
 
 void main() {
   runApp(MaterialApp(
@@ -12,7 +12,7 @@ void main() {
     home: Scaffold(
       appBar: AppBar(title: const Text('Flutter Code Sample')),
       body: const Center(
-        child: MyStatelessWidget(
+        child: ImageClipExample(
           image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg'),
         ),
       ),
@@ -20,8 +20,8 @@ void main() {
   ));
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key, required this.image});
+class ImageClipExample extends StatelessWidget {
+  const ImageClipExample({super.key, required this.image});
 
   final ImageProvider image;
 

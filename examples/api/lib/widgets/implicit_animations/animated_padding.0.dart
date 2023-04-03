@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AnimatedPadding].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedPadding].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AnimatedPaddingExampleApp());
+
+class AnimatedPaddingExampleApp extends StatelessWidget {
+  const AnimatedPaddingExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,20 +19,20 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        body: const AnimatedPaddingExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AnimatedPaddingExample extends StatefulWidget {
+  const AnimatedPaddingExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedPaddingExample> createState() => _AnimatedPaddingExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _AnimatedPaddingExampleState extends State<AnimatedPaddingExample> {
   double padValue = 0.0;
   void _updatePadding(double value) {
     setState(() {

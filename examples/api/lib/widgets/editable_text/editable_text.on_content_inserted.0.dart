@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for EditableText.onContentInserted
-
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for EditableText.onContentInserted
 
 void main() => runApp(const KeyboardInsertedContentApp());
 

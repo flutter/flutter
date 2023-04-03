@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [BorderSide.strokeAlign].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [BorderSide.strokeAlign].
 
 void main() => runApp(const StrokeAlignApp());
 
