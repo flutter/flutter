@@ -188,14 +188,14 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Text that provides context about the [DropdownMenu]'s value, such
   /// as how the value will be used.
   ///
-  /// If non-null, the text is displayed below the [DropdownMenu], in
+  /// If non-null, the text is displayed below the input field, in
   /// the same location as [errorText]. If a non-null [errorText] value is
   /// specified then the helper text is not shown.
   ///
   /// Defaults to null;
   final String? helperText;
 
-  /// Text that appears below the [DropdownMenu] and the border to show the error message.
+  /// Text that appears below the input field and the border to show the error message.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is not shown.
   ///
