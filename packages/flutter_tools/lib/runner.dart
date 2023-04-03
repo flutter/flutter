@@ -77,7 +77,7 @@ Future<int> run(
 
         // Disable analytics if user passes in the `--disable-telemetry` option
         // `flutter --disable-telemetry`
-        // 
+        //
         // Same functionality as `flutter config --no-analytics` for disabling
         // except with the `value` hard coded as false
         if (args.contains('--disable-telemetry')) {
