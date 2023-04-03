@@ -31,10 +31,14 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 
-/** For apps only. Provides the flutter extension used in app/build.gradle.
- * The versions specified here should match the values used in
- * ../lib/src/android/gradle_utils.dart, so when bumping, make sure to update
- * the versions specified there.
+/**
+ * For apps only. Provides the flutter extension used in app/build.gradle.
+ * The versions specified here should match the values in
+ * packages/flutter_tools/lib/src/android/gradle_utils.dart, so when bumping,
+ * make sure to update the versions specified there.
+ *
+ * Learn more about extensions in Gradle:
+ *  * https://docs.gradle.org/8.0.2/userguide/custom_plugins.html#sec:getting_input_from_the_build
 */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
