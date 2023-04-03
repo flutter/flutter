@@ -61,6 +61,19 @@ Future<int> run(
     StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
+        // Ensure that the consent message has been displayed
+        if (globals.analytics.shouldShowMessage) {
+          globals.logger.printStatus(globals.analytics.getConsentMessage);
+
+          // Invoking this will onboard the flutter tool onto
+          // the package on the developer's machine and will
+          // allow for events to be sent to Google Analytics
+          // on subsequent runs of the flutter tool (ie. no events
+          // will be sent on the first run to allow developers to
+          // opt out of collection)
+          globals.analytics.clientShowedMessage();
+        }
+
         await runner.run(args);
 
         // Triggering [runZoned]'s error callback does not necessarily mean that
