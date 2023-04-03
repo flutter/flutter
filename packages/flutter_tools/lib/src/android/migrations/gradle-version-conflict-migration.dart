@@ -8,9 +8,9 @@ import '../../base/version.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
 
-final Version _androidStudioFlamingo = Version(2022, 2, 1);
+final Version _androidStudioFlamingo = Version(2022, 2, 0);
 final RegExp _gradleVersionMatch = RegExp(
-  r'distributionUrl=https\\://services.gradle.org/distributions/gradle-(\d|\.)+-(?:all|bin).zip\n');
+  r'distributionUrl=https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(?:all|bin)\.zip');
 final Version _lowestSupportedGradleVersion = Version(7, 3, 0);
 const String _newVersionFullDependency = r'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-all.zip';
 
@@ -23,14 +23,14 @@ class GradleVersionConflictMigration extends ProjectMigrator {
   GradleVersionConflictMigration(
       AndroidProject project,
       super.logger,
-      ) : _gradleWrapperProperties = project.hostAppGradleRoot
+      ) : _gradleWrapperPropertiesFile = project.hostAppGradleRoot
       .childDirectory('gradle').childDirectory('wrapper').childFile('gradle-wrapper.properties');
   
-  final File _gradleWrapperProperties;
+  final File _gradleWrapperPropertiesFile;
 
   @override
   void migrate() {
-    if (!_gradleWrapperProperties.existsSync()) {
+    if (!_gradleWrapperPropertiesFile.existsSync()) {
       logger.printTrace('gradle-wrapper.properties not found, skipping gradle version compatibility check.');
       return;
     }
@@ -44,7 +44,7 @@ class GradleVersionConflictMigration extends ProjectMigrator {
       return;
     }
 
-    processFileLines(_gradleWrapperProperties);
+    processFileLines(_gradleWrapperPropertiesFile);
   }
 
   @override
@@ -53,13 +53,17 @@ class GradleVersionConflictMigration extends ProjectMigrator {
     if (match == null) {
       return line;
     }
-    final String existingVersionString = match[1]!; //TODO: make sure this is safe
+    if (match.groupCount < 1) {
+      logger.printTrace('Failed to parse gradle version, skipping gradle version compatibility check.');
+    }
+    final String existingVersionString = match[1]!;
     final Version existingVersion = Version.parse(existingVersionString)!;
     if (existingVersion.compareTo(_lowestSupportedGradleVersion) < 0) {
       logger.printTrace('Conflict detected between versions of Android Studio '
           'and gradle, upgrading gradle version from $existingVersion to 7.4');
       return _newVersionFullDependency;
     } else {
+      //Version of gradle is already high enough, no migration necessary.
       return line;
     }
   }
