@@ -316,9 +316,7 @@ void main() {
     });
   });
 
-    testUsingContext(
-    'runner disable telemetry with flag',
-    () async {
+    testUsingContext('runner disable telemetry with flag', () async {
       io.setExitFunctionForTests((int exitCode) {});
       fileSystem = MemoryFileSystem.test();
 
