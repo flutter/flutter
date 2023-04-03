@@ -25,7 +25,7 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
   NSMutableDictionary<NSString *, UIImage *> *_capturedScreenshotsByName;
 }
 
-+ (IntegrationTestPlugin *)instance {
++ (instancetype)instance {
   static dispatch_once_t onceToken;
   static IntegrationTestPlugin *sInstance;
   dispatch_once(&onceToken, ^{
@@ -45,19 +45,9 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-  // No initialization happens here because of the way XCTest loads the testing
-  // bundles.  Setup on static variables can be disregarded when a new static
-  // instance of IntegrationTestPlugin is allocated when the bundle is reloaded.
-  // See also: https://github.com/flutter/plugins/pull/2465
-}
-
-- (void)setupChannels:(id<FlutterBinaryMessenger>)binaryMessenger {
-  FlutterMethodChannel *channel =
-  [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
-                              binaryMessenger:binaryMessenger];
-  [channel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
-    [self handleMethodCall:call result:result];
-  }];
+  FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
+                                                              binaryMessenger:registrar.messenger];
+  [registrar addMethodCallDelegate:[self instance] channel:channel];
 }
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {

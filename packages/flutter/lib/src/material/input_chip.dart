@@ -30,8 +30,8 @@ import 'theme_data.dart';
 /// Input chips work together with other UI elements. They can appear:
 ///
 ///  * In a [Wrap] widget.
-///  * In a horizontally scrollable list, like a [ListView] whose
-///    scrollDirection is [Axis.horizontal].
+///  * In a horizontally scrollable list, for example configured such as a
+///    [ListView] with [ListView.scrollDirection] set to [Axis.horizontal].
 ///
 /// {@tool dartpad}
 /// This example shows how to create [InputChip]s with [onSelected] and

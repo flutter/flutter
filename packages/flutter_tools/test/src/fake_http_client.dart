@@ -457,7 +457,7 @@ class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientRes
   int get statusCode => _response.statusCode;
 }
 
-class _FakeHttpHeaders extends HttpHeaders {
+class _FakeHttpHeaders implements HttpHeaders {
   _FakeHttpHeaders(this._backingData);
 
   final Map<String, List<String>> _backingData;
@@ -472,12 +472,30 @@ class _FakeHttpHeaders extends HttpHeaders {
   }
 
   @override
+  late bool chunkedTransferEncoding;
+
+  @override
   void clear() {
     _backingData.clear();
   }
 
   @override
+  int contentLength = -1;
+
+  @override
+  ContentType? contentType;
+
+  @override
+  DateTime? date;
+
+  @override
+  DateTime? expires;
+
+  @override
   void forEach(void Function(String name, List<String> values) action) { }
+
+  @override
+  String? host;
 
   @override
   void noFolding(String name) {  }
@@ -501,4 +519,13 @@ class _FakeHttpHeaders extends HttpHeaders {
   String? value(String name) {
     return _backingData[name]?.join('; ');
   }
+
+  @override
+  DateTime? ifModifiedSince;
+
+  @override
+  late bool persistentConnection;
+
+  @override
+  int? port;
 }

@@ -2005,6 +2005,14 @@ class TextSelectionGestureDetectorBuilder {
   // cursor will not move on drag update.
   bool? _dragBeganOnPreviousSelection;
 
+  // For iOS long press behavior when the field is not focused. iOS uses this value
+  // to determine if a long press began on a field that was not focused.
+  //
+  // If the field was not focused when the long press began, a long press will select
+  // the word and a long press move will select word-by-word. If the field was
+  // focused, the cursor moves to the long press position.
+  bool _longPressStartedWithoutFocus = false;
+
   /// Handler for [TextSelectionGestureDetector.onTapDown].
   ///
   /// By default, it forwards the tap to [RenderEditable.handleTapDown] and sets
@@ -2179,10 +2187,17 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.trackpad:
             case PointerDeviceKind.stylus:
             case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
+              // TODO(camsim99): Determine spell check toolbar behavior in these cases:
+              // https://github.com/flutter/flutter/issues/119573.
+              // Precise devices should place the cursor at a precise position if the
+              // word at the text position is not misspelled.
               renderEditable.selectPosition(cause: SelectionChangedCause.tap);
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
+              // If the word that was tapped is misspelled, select the word and show the spell check suggestions
+              // toolbar once. If additional taps are made on a misspelled word, toggle the toolbar. If the word
+              // is not misspelled, default to the following behavior:
+              //
               // Toggle the toolbar if the `previousSelection` is collapsed, the tap is on the selection, the
               // TextAffinity remains the same, and the editable is focused. The TextAffinity is important when the
               // cursor is on the boundary of a line wrap, if the affinity is different (i.e. it is downstream), the
@@ -2197,9 +2212,17 @@ class TextSelectionGestureDetectorBuilder {
               final TextSelection previousSelection = renderEditable.selection ?? editableText.textEditingValue.selection;
               final TextPosition textPosition = renderEditable.getPositionForPoint(details.globalPosition);
               final bool isAffinityTheSame = textPosition.affinity == previousSelection.affinity;
-              if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed)
-                  || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame))
-                  && renderEditable.hasFocus) {
+              final bool wordAtCursorIndexIsMisspelled = editableText.findSuggestionSpanAtCursorIndex(textPosition.offset) != null;
+
+              if (wordAtCursorIndexIsMisspelled) {
+                renderEditable.selectWord(cause: SelectionChangedCause.tap);
+                if (previousSelection != editableText.textEditingValue.selection) {
+                  editableText.showSpellCheckSuggestionsToolbar();
+                } else {
+                  editableText.toggleToolbar(false);
+                }
+              }
+              else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed) || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame)) && renderEditable.hasFocus) {
                 editableText.toggleToolbar(false);
               } else {
                 renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
@@ -2240,10 +2263,15 @@ class TextSelectionGestureDetectorBuilder {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
+          if (!renderEditable.hasFocus) {
+            _longPressStartedWithoutFocus = true;
+            renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          } else {
+            renderEditable.selectPositionAt(
+              from: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            );
+          }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -2291,10 +2319,18 @@ class TextSelectionGestureDetectorBuilder {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
+          if (_longPressStartedWithoutFocus) {
+            renderEditable.selectWordsInRange(
+              from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
+              to: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            );
+          } else {
+            renderEditable.selectPositionAt(
+              from: details.globalPosition,
+              cause: SelectionChangedCause.longPress,
+            );
+          }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -2342,6 +2378,7 @@ class TextSelectionGestureDetectorBuilder {
     if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
     }
+    _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
   }
