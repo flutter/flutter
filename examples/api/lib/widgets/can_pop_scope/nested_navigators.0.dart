@@ -5,9 +5,7 @@
 // This sample demonstrates using CanPopScope to get the correct behavior from
 // system back gestures when there are nested Navigator widgets.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() => runApp(const MyApp());
 
@@ -19,14 +17,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) => HomePage(),
+        '/': (BuildContext context) => _HomePage(),
         '/nested_navigators': (BuildContext context) => const NestedNavigatorsPage(),
       },
     );
   }
 }
 
-class HomePage extends StatelessWidget {
+class _HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +60,7 @@ class NestedNavigatorsPage extends StatefulWidget {
 }
 
 class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
-  final GlobalKey nestedNavigatorKey = GlobalKey();
+  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
   bool popEnabled = true;
 
   @override
@@ -73,23 +71,22 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
         if (popEnabled) {
           return;
         }
-        final NavigatorState nestedNavigatorState = nestedNavigatorKey.currentState as NavigatorState;
-        nestedNavigatorState.pop();
-        setState(() {
-          popEnabled = true;
-        });
+        _nestedNavigatorKey.currentState!.pop();
       },
       child: Navigator(
-        key: nestedNavigatorKey,
+        key: _nestedNavigatorKey,
+        onHistoryChanged: () {
+          final bool nextPopEnabled = !_nestedNavigatorKey.currentState!.canPop();
+          if (nextPopEnabled != popEnabled) {
+            setState(() {
+              popEnabled = nextPopEnabled;
+            });
+          }
+        },
         initialRoute: 'nested_navigators/one',
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case 'nested_navigators/one':
-              if (!popEnabled) {
-                setState(() {
-                  popEnabled = true;
-                });
-              }
               final BuildContext rootContext = context;
               return MaterialPageRoute(
                 builder: (BuildContext context) => NestedNavigatorsPageOne(
@@ -99,19 +96,8 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
                 ),
               );
             case 'nested_navigators/one/another_one':
-              if (popEnabled) {
-                setState(() {
-                  popEnabled = false;
-                });
-              }
               return MaterialPageRoute(
-                builder: (BuildContext context) => NestedNavigatorsPageTwo(
-                  onBack: () {
-                    Navigator.of(context).pop();
-                    setState(() {
-                      popEnabled = true;
-                    });
-                  },
+                builder: (BuildContext context) => const NestedNavigatorsPageTwo(
                 ),
               );
             default:
@@ -164,10 +150,7 @@ class NestedNavigatorsPageOne extends StatelessWidget {
 class NestedNavigatorsPageTwo extends StatelessWidget {
   const NestedNavigatorsPageTwo({
     super.key,
-    required this.onBack,
   });
-
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +163,9 @@ class NestedNavigatorsPageTwo extends StatelessWidget {
             const Text('Nested Navigators Page Two'),
             const Text('A system back here will go back to Nested Navigators Page One'),
             TextButton(
-              onPressed: onBack,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
               child: const Text('Go back'),
             ),
           ],
