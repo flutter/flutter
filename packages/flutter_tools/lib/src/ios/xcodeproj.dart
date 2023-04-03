@@ -449,12 +449,12 @@ class XcodeProjectInfo {
   final List<String> schemes;
   final Logger _logger;
 
-  bool get definesCustomSchemes => !(schemes.contains('Runner') && schemes.length == 1);
+  bool get definesCustomSchemes => !(schemes.contains('TestName') && schemes.length == 1);
 
   /// The expected scheme for [buildInfo].
   @visibleForTesting
   static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return sentenceCase(buildInfo?.flavor ?? 'runner');
+    return sentenceCase(buildInfo?.flavor ?? 'TestName');
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].
