@@ -291,8 +291,4 @@ bool ContextMTL::UpdateOffscreenLayerPixelFormat(PixelFormat format) {
   return true;
 }
 
-id<MTLCommandBuffer> ContextMTL::CreateMTLCommandBuffer() const {
-  return [command_queue_ commandBuffer];
-}
-
 }  // namespace impeller

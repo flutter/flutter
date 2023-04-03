@@ -64,8 +64,6 @@ class ContextMTL final : public Context,
   // |Context|
   bool UpdateOffscreenLayerPixelFormat(PixelFormat format) override;
 
-  id<MTLCommandBuffer> CreateMTLCommandBuffer() const;
-
  private:
   id<MTLDevice> device_ = nullptr;
   id<MTLCommandQueue> command_queue_ = nullptr;
