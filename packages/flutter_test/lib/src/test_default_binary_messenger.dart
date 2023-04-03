@@ -8,8 +8,9 @@ import 'dart:ui' as ui;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 
-import 'mock_event_channel.dart';
 import 'widget_tester.dart';
+
+part 'mock_event_channel.dart';
 
 /// A function which takes the name of the method channel, it's handler,
 /// platform message and asynchronously returns an encoded response.
@@ -354,7 +355,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     setMockMethodCallHandler(MethodChannel(channel.name, channel.codec), (MethodCall call) async {
       switch (call.method) {
         case 'listen':
-          return handler.onListen(call.arguments, MockStreamHandlerEventSink(controller.sink));
+          return handler.onListen(call.arguments, MockStreamHandlerEventSink._(controller.sink));
         case 'cancel':
           return handler.onCancel(call.arguments);
         default:
