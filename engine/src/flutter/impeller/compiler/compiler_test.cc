@@ -69,7 +69,8 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
                                         SourceType source_type,
                                         SourceLanguage source_language,
                                         const char* entry_point_name) const {
-  auto fixture = flutter::testing::OpenFixtureAsMapping(fixture_name);
+  std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping(fixture_name);
   if (!fixture || !fixture->GetMapping()) {
     VALIDATION_LOG << "Could not find shader in fixtures: " << fixture_name;
     return false;
@@ -88,7 +89,7 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
   reflector_options.header_file_name = ReflectionHeaderName(fixture_name);
   reflector_options.shader_name = "shader_name";
 
-  Compiler compiler(*fixture.get(), source_options, reflector_options);
+  Compiler compiler(fixture, source_options, reflector_options);
   if (!compiler.IsValid()) {
     VALIDATION_LOG << "Compilation failed: " << compiler.GetErrorMessages();
     return false;

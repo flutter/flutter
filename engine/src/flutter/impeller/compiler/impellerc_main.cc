@@ -50,7 +50,7 @@ bool Main(const fml::CommandLine& command_line) {
     return false;
   }
 
-  auto source_file_mapping =
+  std::shared_ptr<fml::FileMapping> source_file_mapping =
       fml::FileMapping::CreateReadOnly(switches.source_file_name);
   if (!source_file_mapping) {
     std::cerr << "Could not open input file." << std::endl;
@@ -95,7 +95,7 @@ bool Main(const fml::CommandLine& command_line) {
     sksl_reflector_options.target_platform = TargetPlatform::kSkSL;
 
     Compiler sksl_compiler =
-        Compiler(*source_file_mapping, sksl_options, sksl_reflector_options);
+        Compiler(source_file_mapping, sksl_options, sksl_reflector_options);
     if (!sksl_compiler.IsValid()) {
       std::cerr << "Compilation to SkSL failed." << std::endl;
       std::cerr << sksl_compiler.GetErrorMessages() << std::endl;
@@ -104,7 +104,7 @@ bool Main(const fml::CommandLine& command_line) {
     sksl_mapping = sksl_compiler.GetSLShaderSource();
   }
 
-  Compiler compiler(*source_file_mapping, options, reflector_options);
+  Compiler compiler(source_file_mapping, options, reflector_options);
   if (!compiler.IsValid()) {
     std::cerr << "Compilation failed." << std::endl;
     std::cerr << compiler.GetErrorMessages() << std::endl;
