@@ -978,6 +978,13 @@ void main() {
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
     expect(pub.calledGet, 1);
+    expect(
+      pub.invocations.first,
+      predicate<FakePubInvocation>(
+        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        'Pub invoked with PubOutputMode.none',
+      ),
+    );
   });
 
   testUsingContext('Check current DevTools version', () async {
@@ -1172,8 +1179,17 @@ class FakeVersionedPackageResolver extends Fake implements VersionedPackageResol
   }
 }
 
+class FakePubInvocation {
+  FakePubInvocation({
+    required this.outputMode,
+  });
+
+  final PubOutputMode outputMode;
+}
+
 class FakePub extends Fake implements Pub {
-  int calledGet = 0;
+  final List<FakePubInvocation> invocations = <FakePubInvocation>[];
+  int get calledGet => invocations.length;
 
   @override
   Future<void> get({
@@ -1188,7 +1204,7 @@ class FakePub extends Fake implements Pub {
     bool printProgress = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    calledGet += 1;
+    invocations.add(FakePubInvocation(outputMode: outputMode));
   }
 }
 

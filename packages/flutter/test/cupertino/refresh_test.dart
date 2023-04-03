@@ -211,10 +211,15 @@ void main() {
       final TestGesture gesture = await tester.startGesture(Offset.zero);
       await gesture.moveBy(const Offset(0.0, 99.0));
       await tester.pump();
-      await gesture.moveBy(const Offset(0.0, -30.0));
+      if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+        await gesture.moveBy(const Offset(0.0, -3.0));
+      }
+      else {
+        await gesture.moveBy(const Offset(0.0, -30.0));
+      }
       await tester.pump();
       if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-        await gesture.moveBy(const Offset(0.0, 70.0));
+        await gesture.moveBy(const Offset(0.0, 90.0));
       }
       else {
         await gesture.moveBy(const Offset(0.0, 50.0));
@@ -230,7 +235,7 @@ void main() {
         ),
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) matchesBuilder(
           refreshState: RefreshIndicatorMode.drag,
-          pulledExtent: moreOrLessEquals(97.3552275),
+          pulledExtent: moreOrLessEquals(96),
           refreshTriggerPullDistance: 100,  // default value.
           refreshIndicatorExtent: 60,  // default value.
         )
@@ -242,7 +247,7 @@ void main() {
         ),
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) matchesBuilder(
           refreshState: RefreshIndicatorMode.armed,
-          pulledExtent: moreOrLessEquals(100.79409877743257),
+          pulledExtent: moreOrLessEquals(100.44528),
           refreshTriggerPullDistance: 100,  // default value.
           refreshIndicatorExtent: 60,  // default value.
         )
@@ -460,7 +465,7 @@ void main() {
       );
 
       if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-        await tester.drag(find.text('0'), const Offset(0.0, -600.0), touchSlopY: 0, warnIfMissed: false); // hits the list
+        await tester.drag(find.text('0'), const Offset(0.0, -130.0), touchSlopY: 0, warnIfMissed: false); // hits the list
       }
       else {
         await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0, warnIfMissed: false); // hits the list
@@ -479,15 +484,15 @@ void main() {
       if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
         expect(
           tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-          moreOrLessEquals(-38.625),
+          moreOrLessEquals(-40),
         );
         expect(
           tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-          moreOrLessEquals(21.375),
+          moreOrLessEquals(20),
         );
         expect(
           tester.getTopLeft(find.widgetWithText(Center, '0')).dy,
-          moreOrLessEquals(21.375),
+          moreOrLessEquals(20),
         );
       }
       else {
@@ -1195,7 +1200,7 @@ void main() {
         );
 
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-          await gesture.moveBy(const Offset(0.0, -310.0)); // Overscrolling, need to move more than -40.
+          await gesture.moveBy(const Offset(0.0, -41.0)); // Overscrolling, need to move more than -40.
         }
         else {
           await gesture.moveBy(const Offset(0.0, -80.0)); // Overscrolling, need to move more than -40.
@@ -1204,7 +1209,7 @@ void main() {
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
           expect(
             tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
-            moreOrLessEquals(49.469222222222214), // Below 50 now.
+            moreOrLessEquals(49), // Below 50 now.
           );
         }
         else {
@@ -1303,7 +1308,7 @@ void main() {
 
         // Now back in overscroll mode.
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-          await gesture.moveBy(const Offset(0.0, -590.0));
+          await gesture.moveBy(const Offset(0.0, -125.0));
         }
         else {
           await gesture.moveBy(const Offset(0.0, -200.0));
@@ -1312,7 +1317,7 @@ void main() {
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
           expect(
             tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
-            moreOrLessEquals(25.916444444444423),
+            moreOrLessEquals(25),
           );
         }
         else {
@@ -1328,7 +1333,7 @@ void main() {
         );
 
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-          await gesture.moveBy(const Offset(0.0, -160.0));
+          await gesture.moveBy(const Offset(0.0, -15.0));
         }
         else {
           await gesture.moveBy(const Offset(0.0, -35.0));
@@ -1337,7 +1342,7 @@ void main() {
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
           expect(
             tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
-            moreOrLessEquals(9.15133037440173),
+            moreOrLessEquals(10),
           );
         }
         else {
@@ -1380,13 +1385,10 @@ void main() {
         );
         await tester.pump(); // Sliver scroll offset correction is applied one frame later.
 
+        await gesture.moveBy(const Offset(0.0, -300.0));
         double indicatorDestinationPosition = -145.0332383665717;
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-          await gesture.moveBy(const Offset(0.0, -600.0));
-          indicatorDestinationPosition = -164.33475946989466;
-        }
-        else {
-          await gesture.moveBy(const Offset(0.0, -300.0));
+          indicatorDestinationPosition = -150.0;
         }
         await tester.pump();
         // The refresh indicator is offscreen now.

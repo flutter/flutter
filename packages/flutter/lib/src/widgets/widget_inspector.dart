@@ -914,8 +914,8 @@ mixin WidgetInspectorService {
   @protected
   Future<void> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance;
-    if (binding.renderViewElement != null) {
-      binding.buildOwner!.reassemble(binding.renderViewElement!, null);
+    if (binding.rootElement != null) {
+      binding.buildOwner!.reassemble(binding.rootElement!, null);
       return binding.endOfFrame;
     }
     return Future<void>.value();
@@ -1832,7 +1832,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootWidget(String groupName) {
-    return _nodeToJson(WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(WidgetsBinding.instance.rootElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -1846,7 +1846,7 @@ mixin WidgetInspectorService {
     Map<String, Object>? Function(DiagnosticsNode, InspectorSerializationDelegate)? addAdditionalPropertiesCallback,
   }) {
     return _nodeToJson(
-      WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
+      WidgetsBinding.instance.rootElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(
         groupName: groupName,
         subtreeDepth: 1000000,
@@ -2118,7 +2118,7 @@ mixin WidgetInspectorService {
               if (parentData is FlexParentData) {
                 additionalJson['flexFactor'] = parentData.flex!;
                 additionalJson['flexFit'] =
-                    describeEnum(parentData.fit ?? FlexFit.tight);
+                    (parentData.fit ?? FlexFit.tight).name;
               } else if (parentData is BoxParentData) {
                 final Offset offset = parentData.offset;
                 additionalJson['parentData'] = <String, Object>{

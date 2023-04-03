@@ -545,10 +545,8 @@ void main() {
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip!);
-          break;
         case null:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none);
-          break;
       }
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       box.paint(context, Offset.zero);

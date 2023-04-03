@@ -204,6 +204,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
+    this.clipBehavior,
   }) : assert(elevation == null || elevation >= 0.0),
        preferredSize = _PreferredAppBarSize(toolbarHeight, bottom?.preferredSize.height);
 
@@ -678,7 +679,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final TextStyle? titleTextStyle;
 
   /// {@template flutter.material.appbar.systemOverlayStyle}
-  /// Specifies the style to use for the system overlays that overlap the AppBar.
+  /// Specifies the style to use for the system overlays (e.g. the status bar on
+  /// Android or iOS, the system navigation bar on Android).
   ///
   /// If this property is null, then [AppBarTheme.systemOverlayStyle] of
   /// [ThemeData.appBarTheme] is used. If that is also null, an appropriate
@@ -692,7 +694,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@endtemplate}
   //
   /// See also:
-  ///  * [SystemChrome.setSystemUIOverlayStyle]
+  ///
+  ///  * [AnnotatedRegion], for placing [SystemUiOverlayStyle] in the layer tree.
+  ///  * [SystemChrome.setSystemUIOverlayStyle], the imperative API for setting
+  ///    system overlays style.
   final SystemUiOverlayStyle? systemOverlayStyle;
 
   /// {@template flutter.material.appbar.forceMaterialTransparency}
@@ -709,6 +714,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to false.
   /// {@endtemplate}
   final bool forceMaterialTransparency;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  final Clip? clipBehavior;
 
   bool _getEffectiveCenterTitle(ThemeData theme) {
     bool platformCenter() {
@@ -755,17 +763,16 @@ class _AppBarState extends State<AppBar> {
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
+    if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)
+      && Scaffold.isBodyDescendant(notification.context!)) {
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
       switch (metrics.axisDirection) {
         case AxisDirection.up:
           // Scroll view is reversed
           _scrolledUnder = metrics.extentAfter > 0;
-          break;
         case AxisDirection.down:
           _scrolledUnder = metrics.extentBefore > 0;
-          break;
         case AxisDirection.right:
         case AxisDirection.left:
           // Scrolled under is only supported in the vertical axis, and should
@@ -951,7 +958,6 @@ class _AppBarState extends State<AppBar> {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           namesRoute = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           break;
@@ -1043,6 +1049,7 @@ class _AppBarState extends State<AppBar> {
     // If the toolbar is allocated less than toolbarHeight make it
     // appear to scroll upwards within its shrinking container.
     Widget appBar = ClipRect(
+      clipBehavior: widget.clipBehavior ?? Clip.hardEdge,
       child: CustomSingleChildLayout(
         delegate: _ToolbarContainerLayout(toolbarHeight),
         child: IconTheme.merge(
@@ -1185,6 +1192,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.titleTextStyle,
     required this.systemOverlayStyle,
     required this.forceMaterialTransparency,
+    required this.clipBehavior
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
@@ -1220,6 +1228,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final SystemUiOverlayStyle? systemOverlayStyle;
   final double _bottomHeight;
   final bool forceMaterialTransparency;
+  final Clip? clipBehavior;
 
   @override
   double get minExtent => collapsedHeight;
@@ -1258,6 +1267,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       toolbarOpacity: toolbarOpacity,
       isScrolledUnder: isScrolledUnder,
       child: AppBar(
+        clipBehavior: clipBehavior,
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
@@ -1462,6 +1472,7 @@ class SliverAppBar extends StatefulWidget {
     this.titleTextStyle,
     this.systemOverlayStyle,
     this.forceMaterialTransparency = false,
+    this.clipBehavior,
   }) : assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
        assert(collapsedHeight == null || collapsedHeight >= toolbarHeight, 'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].');
@@ -1928,6 +1939,9 @@ class SliverAppBar extends StatefulWidget {
   /// This property is used to configure an [AppBar].
   final bool forceMaterialTransparency;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  final Clip? clipBehavior;
+
   @override
   State<SliverAppBar> createState() => _SliverAppBarState();
 }
@@ -2034,6 +2048,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           titleTextStyle: widget.titleTextStyle,
           systemOverlayStyle: widget.systemOverlayStyle,
           forceMaterialTransparency: widget.forceMaterialTransparency,
+          clipBehavior: widget.clipBehavior,
         ),
       ),
     );
@@ -2117,10 +2132,8 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     switch (variant) {
       case _ScrollUnderFlexibleVariant.medium:
         config = _MediumScrollUnderFlexibleConfig(context);
-        break;
       case _ScrollUnderFlexibleVariant.large:
         config = _LargeScrollUnderFlexibleConfig(context);
-        break;
     }
 
     late final Widget? collapsedTitle;
@@ -2253,7 +2266,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)

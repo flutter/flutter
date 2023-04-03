@@ -2599,6 +2599,8 @@ void main() {
     );
 
     testWidgets('PlatformViewLink includes offset in create call when using texture layer', (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
       late FakeAndroidViewController controller;
 
       final PlatformViewLink platformViewLink = PlatformViewLink(
@@ -2622,8 +2624,8 @@ void main() {
         },
       );
 
-      TestWidgetsFlutterBinding.instance.window.physicalSizeTestValue = const Size(400, 200);
-      TestWidgetsFlutterBinding.instance.window.devicePixelRatioTestValue = 1.0;
+      tester.view.physicalSize= const Size(400, 200);
+      tester.view.devicePixelRatio = 1.0;
 
       await tester.pumpWidget(
         Container(
@@ -2638,9 +2640,6 @@ void main() {
       );
 
       expect(controller.createPosition, const Offset(150, 75));
-
-      TestWidgetsFlutterBinding.instance.window.clearPhysicalSizeTestValue();
-      TestWidgetsFlutterBinding.instance.window.clearDevicePixelRatioTestValue();
     });
 
     testWidgets(

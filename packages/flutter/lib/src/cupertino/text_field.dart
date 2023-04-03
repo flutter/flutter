@@ -15,6 +15,7 @@ import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'magnifier.dart';
+import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -214,6 +215,7 @@ class CupertinoTextField extends StatefulWidget {
     super.key,
     this.controller,
     this.focusNode,
+    this.undoController,
     this.decoration = _kDefaultRoundedBorderDecoration,
     this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
@@ -262,6 +264,7 @@ class CupertinoTextField extends StatefulWidget {
     this.cursorWidth = 2.0,
     this.cursorHeight,
     this.cursorRadius = const Radius.circular(2.0),
+    this.cursorOpacityAnimates = true,
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
@@ -347,6 +350,7 @@ class CupertinoTextField extends StatefulWidget {
     super.key,
     this.controller,
     this.focusNode,
+    this.undoController,
     this.decoration,
     this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
@@ -392,6 +396,7 @@ class CupertinoTextField extends StatefulWidget {
     this.cursorWidth = 2.0,
     this.cursorHeight,
     this.cursorRadius = const Radius.circular(2.0),
+    this.cursorOpacityAnimates = true,
     this.cursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
@@ -658,6 +663,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius cursorRadius;
 
+  /// {@macro flutter.widgets.editableText.cursorOpacityAnimates}
+  final bool cursorOpacityAnimates;
+
   /// The color to use when painting the cursor.
   ///
   /// Defaults to the [DefaultSelectionStyle.cursorColor]. If that color is
@@ -780,6 +788,35 @@ class CupertinoTextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.dotted,
   );
 
+  /// Default builder for the spell check suggestions toolbar in the Cupertino
+  /// style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
+  ///     builder configured to show a spell check suggestions toolbar.
+  ///  * [TextField.defaultSpellCheckSuggestionsToolbarBuilder], the builder
+  ///    configured to show the Material style spell check suggestions toolbar.
+  @visibleForTesting
+  static Widget defaultSpellCheckSuggestionsToolbarBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    final List<ContextMenuButtonItem>? buttonItems =
+      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+
+    if (buttonItems == null || buttonItems.isEmpty){
+      return const SizedBox.shrink();
+    }
+
+    return CupertinoSpellCheckSuggestionsToolbar(
+      anchors: editableTextState.contextMenuAnchors,
+      buttonItems: buttonItems,
+    );
+  }
+
+  /// {@macro flutter.widgets.undoHistory.controller}
+  final UndoHistoryController? undoController;
+
   @override
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
@@ -788,6 +825,7 @@ class CupertinoTextField extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
@@ -812,6 +850,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('cursorOpacityAnimates', cursorOpacityAnimates, defaultValue: true));
     properties.add(createCupertinoColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
     properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
@@ -999,7 +1038,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         if (cause == SelectionChangedCause.longPress) {
           _editableText.bringIntoView(selection.extent);
         }
-        break;
     }
 
     switch (defaultTargetPlatform) {
@@ -1013,7 +1051,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         if (cause == SelectionChangedCause.drag) {
           _editableText.hideToolbar();
         }
-        break;
     }
   }
 
@@ -1180,7 +1217,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
-        break;
 
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -1191,7 +1227,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
     }
 
     final bool enabled = widget.enabled ?? true;
@@ -1266,7 +1301,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? CupertinoTextField.cupertinoMisspelledTextStyle)
+              ?? CupertinoTextField.cupertinoMisspelledTextStyle,
+            spellCheckSuggestionsToolbarBuilder:
+              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
+                ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+          )
         : const SpellCheckConfiguration.disabled();
 
     final Widget paddedEditable = Padding(
@@ -1277,6 +1316,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           child: EditableText(
             key: editableTextKey,
             controller: controller,
+            undoController: widget.undoController,
             readOnly: widget.readOnly,
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
@@ -1315,7 +1355,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             cursorHeight: widget.cursorHeight,
             cursorRadius: widget.cursorRadius,
             cursorColor: cursorColor,
-            cursorOpacityAnimates: true,
+            cursorOpacityAnimates: widget.cursorOpacityAnimates,
             cursorOffset: cursorOffset,
             paintCursorAboveText: true,
             autocorrectionTextRectColor: selectionColor,

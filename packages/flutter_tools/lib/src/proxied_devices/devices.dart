@@ -57,11 +57,14 @@ class ProxiedDevices extends DeviceDiscovery {
   List<Device>? _devices;
 
   @override
-  Future<List<Device>> get devices async =>
-      _devices ?? await discoverDevices();
+  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async =>
+      _filterDevices(_devices ?? await discoverDevices(), filter);
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout}) async {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter
+  }) async {
     final List<Map<String, Object?>> discoveredDevices = _cast<List<dynamic>>(await connection.sendRequest('device.discoverDevices')).cast<Map<String, Object?>>();
     final List<ProxiedDevice> devices = <ProxiedDevice>[
       for (final Map<String, Object?> device in discoveredDevices)
@@ -69,7 +72,14 @@ class ProxiedDevices extends DeviceDiscovery {
     ];
 
     _devices = devices;
-    return devices;
+    return _filterDevices(devices, filter);
+  }
+
+  Future<List<Device>> _filterDevices(List<Device> devices, DeviceDiscoveryFilter? filter) async {
+    if (filter == null) {
+      return devices;
+    }
+    return filter.filterDevices(devices);
   }
 
   @override
@@ -245,7 +255,8 @@ class ProxiedDevice extends Device {
       'userIdentifier': userIdentifier,
     }));
     final bool started = _cast<bool>(result['started']);
-    final String? vmServiceUriStr = _cast<String?>(result['vmServiceUri']);
+    // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
+    final String? vmServiceUriStr = _cast<String?>(result['vmServiceUri']) ?? _cast<String?>(result['observatoryUri']);
     final Uri? vmServiceUri = vmServiceUriStr == null ? null : Uri.parse(vmServiceUriStr);
     if (started) {
       if (vmServiceUri != null) {

@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -241,7 +240,7 @@ void main() {
           logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
-          interfaceType: IOSDeviceConnectionInterface.network,
+          connectionInterface: DeviceConnectionInterface.wireless,
         );
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
@@ -313,7 +312,7 @@ void main() {
           logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
-          interfaceType: IOSDeviceConnectionInterface.network,
+          connectionInterface: DeviceConnectionInterface.wireless,
         );
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
@@ -389,7 +388,7 @@ void main() {
           logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
-          interfaceType: IOSDeviceConnectionInterface.network,
+          connectionInterface: DeviceConnectionInterface.wireless,
         );
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
@@ -1138,6 +1137,7 @@ class StreamLogger extends Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
@@ -1238,7 +1238,14 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
+  @override
   bool isSupported() => true;
+
+  @override
+  bool get isConnected => true;
 
   @override
   bool get supportsHotRestart => true;
@@ -1288,7 +1295,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     DevicePortForwarder? portForwarder,
     DeviceLogReader? logReader,
     this.onGetLogReader,
-    this.interfaceType = IOSDeviceConnectionInterface.none,
+    this.connectionInterface = DeviceConnectionInterface.attached,
     this.majorSdkVersion = 0,
   }) : _portForwarder = portForwarder, _logReader = logReader;
 
@@ -1297,7 +1304,11 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   int majorSdkVersion;
 
   @override
-  final IOSDeviceConnectionInterface interfaceType;
+  final DeviceConnectionInterface connectionInterface;
+
+  @override
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder!;
@@ -1340,6 +1351,12 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   bool isSupportedForProject(FlutterProject project) => true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  bool get ephemeral => true;
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {

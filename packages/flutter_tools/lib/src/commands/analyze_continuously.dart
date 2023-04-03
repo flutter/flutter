@@ -21,6 +21,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     required super.platform,
     required super.processManager,
     required super.artifacts,
+    required super.suppressAnalytics,
   }) : super(
         repoPackages: repoPackages,
         repoRoots: repoRoots,
@@ -63,6 +64,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       processManager: processManager,
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
+      suppressAnalytics: suppressAnalytics,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);

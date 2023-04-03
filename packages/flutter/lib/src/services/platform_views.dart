@@ -78,7 +78,6 @@ class PlatformViewsService {
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
-        break;
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
     }
@@ -625,19 +624,14 @@ class _AndroidMotionEventConverter {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.trackpad:
         toolType = AndroidPointerProperties.kToolTypeFinger;
-        break;
       case PointerDeviceKind.mouse:
         toolType = AndroidPointerProperties.kToolTypeMouse;
-        break;
       case PointerDeviceKind.stylus:
         toolType = AndroidPointerProperties.kToolTypeStylus;
-        break;
       case PointerDeviceKind.invertedStylus:
         toolType = AndroidPointerProperties.kToolTypeEraser;
-        break;
       case PointerDeviceKind.unknown:
         toolType = AndroidPointerProperties.kToolTypeUnknown;
-        break;
     }
     return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }

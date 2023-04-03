@@ -66,6 +66,9 @@ enum Artifact {
 
   /// The location of file generators.
   flutterToolsFileGenerators,
+
+  /// The path to the CanvasKit files built by the flutter engine.
+  canvasKitPath,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -207,6 +210,7 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
     case Artifact.flutterToolsFileGenerators:
+    case Artifact.canvasKitPath:
       return '';
   }
 }
@@ -530,9 +534,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterToolsFileGenerators:
-        return _getFileGeneratorsPath();
+      case Artifact.canvasKitPath:
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
@@ -569,9 +573,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterToolsFileGenerators:
-        return _getFileGeneratorsPath();
+      case Artifact.canvasKitPath:
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
@@ -620,9 +624,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterToolsFileGenerators:
-        return _getFileGeneratorsPath();
+      case Artifact.canvasKitPath:
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
@@ -699,6 +703,8 @@ class CachedArtifacts implements Artifacts {
         throw StateError('Artifact $artifact not available for platform $platform.');
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
+      case Artifact.canvasKitPath:
+        return _fileSystem.path.join(_cache.getWebSdkDirectory().path, 'canvaskit');
     }
   }
 
@@ -968,6 +974,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
+      case Artifact.canvasKitPath:
+        return _fileSystem.path.join(localEngineInfo.engineOutPath, 'canvaskit');
     }
   }
 
@@ -1095,6 +1103,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
             _getDartSdkPath(), 'bin', 'snapshots',
             _artifactToFileName(artifact, _platform, mode),
           );
+        case Artifact.canvasKitPath:
+          return _fileSystem.path.join(_webSdkPath, 'canvaskit');
         case Artifact.genSnapshot:
         case Artifact.flutterTester:
         case Artifact.flutterFramework:

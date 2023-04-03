@@ -753,10 +753,8 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           positionController.value -= delta;
-          break;
         case TextDirection.ltr:
           positionController.value += delta;
-          break;
       }
     }
   }
@@ -1279,10 +1277,8 @@ class _SwitchPainter extends ToggleablePainter {
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - currentValue;
-        break;
       case TextDirection.ltr:
         visualPosition = currentValue;
-        break;
     }
     if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
       _stopPressAnimation = true;
@@ -1695,13 +1691,13 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _SwitchDefaultsM3 extends SwitchThemeData {
-  _SwitchDefaultsM3(BuildContext context)
-    : _colors = Theme.of(context).colorScheme;
+  _SwitchDefaultsM3(this.context);
 
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   MaterialStateProperty<Color> get thumbColor {

@@ -201,7 +201,6 @@ void main() {
     switch(defaultTargetPlatform) {
       case TargetPlatform.android:
         expectedLabel = 'Back';
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -245,7 +244,6 @@ void main() {
     switch(defaultTargetPlatform) {
       case TargetPlatform.android:
         expectedLabel = 'Close';
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:

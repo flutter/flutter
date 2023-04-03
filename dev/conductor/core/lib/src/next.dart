@@ -141,7 +141,6 @@ class NextContext extends Context {
         }
 
         await pushWorkingBranch(engine, state.engine);
-        break;
       case pb.ReleasePhase.CODESIGN_ENGINE_BINARIES:
         stdio.printStatus(<String>[
           'You must validate pre-submit CI for your engine PR, merge it, and codesign',
@@ -158,22 +157,7 @@ class NextContext extends Context {
             return;
           }
         }
-        break;
       case pb.ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
-        if (state.engine.cherrypicks.isEmpty && state.engine.dartRevision.isEmpty) {
-          stdio.printStatus(
-              'This release has no engine cherrypicks, and thus the engine.version file\n'
-              'in the framework does not need to be updated.',
-          );
-
-          if (state.framework.cherrypicks.isEmpty) {
-            stdio.printStatus(
-                'This release also has no framework cherrypicks. Therefore, a framework\n'
-                'pull request is not required.',
-            );
-            break;
-          }
-        }
         final Remote engineUpstreamRemote = Remote(
             name: RemoteName.upstream,
             url: state.engine.upstream.url,
@@ -265,7 +249,6 @@ class NextContext extends Context {
         }
 
         await pushWorkingBranch(framework, state.framework);
-        break;
       case pb.ReleasePhase.PUBLISH_VERSION:
         stdio.printStatus('Please ensure that you have merged your framework PR and that');
         stdio.printStatus('post-submit CI has finished successfully.\n');
@@ -306,7 +289,6 @@ class NextContext extends Context {
         }
         await framework.tag(frameworkHead, state.releaseVersion, frameworkUpstream.name);
         await engine.tag(engineHead, state.releaseVersion, engineUpstream.name);
-        break;
       case pb.ReleasePhase.PUBLISH_CHANNEL:
         final Remote upstream = Remote(
             name: RemoteName.upstream,
@@ -345,7 +327,6 @@ class NextContext extends Context {
             remote: state.framework.upstream.url,
             force: force,
         );
-        break;
       case pb.ReleasePhase.VERIFY_RELEASE:
         stdio.printStatus(
             'The current status of packaging builds can be seen at:\n'
@@ -360,7 +341,6 @@ class NextContext extends Context {
             return;
           }
         }
-        break;
       case pb.ReleasePhase.RELEASE_COMPLETED:
         throw ConductorException('This release is finished.');
     }

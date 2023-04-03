@@ -251,7 +251,7 @@ void main() {
 
     const double inset = 3;
     const double scaleFactor = 2;
-    final Size screenSize = tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio;
+    final Size screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
 
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(

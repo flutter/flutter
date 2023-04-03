@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import 'gen_l10n_types.dart';
@@ -71,12 +72,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
             case 'CN':
             case 'SG':
               scriptCode = 'Hans';
-              break;
             case 'TW':
             case 'HK':
             case 'MO':
               scriptCode = 'Hant';
-              break;
           }
           break;
         }
@@ -201,13 +200,10 @@ void precacheLanguageAndRegionTags() {
       switch (type) {
         case 'language':
           _languages[subtag] = description;
-          break;
         case 'region':
           _regions[subtag] = description;
-          break;
         case 'script':
           _scripts[subtag] = description;
-          break;
       }
     }
   }
@@ -436,7 +432,12 @@ LocalizationOptions parseLocalizationsOptions({
   if (contents.trim().isEmpty) {
     return const LocalizationOptions();
   }
-  final YamlNode yamlNode = loadYamlNode(file.readAsStringSync());
+  final YamlNode yamlNode;
+  try {
+    yamlNode = loadYamlNode(file.readAsStringSync());
+  } on YamlException catch (err) {
+    throwToolExit(err.message);
+  }
   if (yamlNode is! YamlMap) {
     logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
     throw Exception();

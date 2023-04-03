@@ -129,29 +129,23 @@ class TestTextInput {
         final List<dynamic> arguments = methodCall.arguments as List<dynamic>;
         _client = arguments[0] as int;
         setClientArgs = arguments[1] as Map<String, dynamic>;
-        break;
       case 'TextInput.updateConfig':
         setClientArgs = methodCall.arguments as Map<String, dynamic>;
-        break;
       case 'TextInput.clearClient':
         _client = null;
         _isVisible = false;
         _keyHandler = null;
         onCleared?.call();
-        break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments as Map<String, dynamic>;
-        break;
       case 'TextInput.show':
         _isVisible = true;
         if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
           _keyHandler ??= MacOSTestTextInputKeyHandler(_client ?? -1);
         }
-        break;
       case 'TextInput.hide':
         _isVisible = false;
         _keyHandler = null;
-        break;
     }
   }
 
@@ -296,6 +290,21 @@ class TestTextInput {
     );
   }
 
+  /// Simulates a scribble interaction finishing.
+  Future<void> finishScribbleInteraction() async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall(
+          'TextInputClient.scribbleInteractionFinished',
+           <dynamic>[_client ?? -1,]
+        ),
+      ),
+      (ByteData? data) { /* response from framework is discarded */ },
+    );
+  }
+
   /// Simulates a Scribble focus.
   Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
     assert(isRegistered);
@@ -369,5 +378,17 @@ class TestTextInput {
   /// Gives text input chance to respond to unhandled key up event.
   Future<void> handleKeyUpEvent(LogicalKeyboardKey key) async {
     await _keyHandler?.handleKeyUpEvent(key);
+  }
+
+  /// Simulates iOS responding to an undo or redo gesture or button.
+  Future<void> handleKeyboardUndo(String direction) async {
+    assert(isRegistered);
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        MethodCall('TextInputClient.handleUndo', <dynamic>[direction]),
+      ),
+      (ByteData? data) {/* response from framework is discarded */},
+    );
   }
 }

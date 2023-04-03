@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'actions.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
-import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 

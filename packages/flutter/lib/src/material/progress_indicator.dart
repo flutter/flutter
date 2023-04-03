@@ -194,10 +194,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       switch (textDirection) {
         case TextDirection.rtl:
           left = size.width - width - x;
-          break;
         case TextDirection.ltr:
           left = x;
-          break;
       }
       canvas.drawRect(Offset(left, 0.0) & Size(width, size.height), paint);
     }
@@ -924,7 +922,7 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context);

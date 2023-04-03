@@ -298,6 +298,16 @@ class FakePlistParser implements PlistParser {
   String? getStringValueFromFile(String plistFilePath, String key) {
     return _underlyingValues[key] as String?;
   }
+
+  @override
+  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+    if (value == null) {
+      _underlyingValues.remove(key);
+      return true;
+    }
+    setProperty(key, value);
+    return true;
+  }
 }
 
 class FakeBotDetector implements BotDetector {
@@ -413,6 +423,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
+    this.isFlutterWebWasmEnabled = false,
   });
 
   @override
@@ -441,6 +452,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool areCustomDevicesEnabled;
+
+  @override
+  final bool isFlutterWebWasmEnabled;
 
   @override
   bool isEnabled(Feature feature) {

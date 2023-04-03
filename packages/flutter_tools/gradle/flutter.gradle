@@ -911,8 +911,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
-                destinationDir libJar.parentFile
-                archiveName libJar.name
+                destinationDirectory = libJar.parentFile
+                archiveFileName = libJar.name
                 dependsOn compileTask
                 targetPlatforms.each { targetPlatform ->
                     String abi = PLATFORM_ARCH_MAP[targetPlatform]
@@ -960,6 +960,12 @@ class FlutterPlugin implements Plugin<Project> {
                 def processResources = variantOutput.hasProperty("processResourcesProvider") ?
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
+            }
+            // Task compressAssets uses the output of copyFlutterAssetsTask,
+            // so it's necessary to declare it as an dependency.
+            def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
+            if (compressAssetsTask) {
+                compressAssetsTask.dependsOn copyFlutterAssetsTask
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps

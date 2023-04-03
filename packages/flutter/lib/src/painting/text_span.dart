@@ -406,14 +406,14 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
+    final String? text = this.text;
     if (text == null) {
       return null;
     }
-    if (index - offset.value < text!.length) {
-      return text!.codeUnitAt(index - offset.value);
-    }
-    offset.increment(text!.length);
-    return null;
+    final int localOffset = index - offset.value;
+    assert(localOffset >= 0);
+    offset.increment(text.length);
+    return localOffset < text.length ? text.codeUnitAt(localOffset) : null;
   }
 
   /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data

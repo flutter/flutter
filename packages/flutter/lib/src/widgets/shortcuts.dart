@@ -869,6 +869,13 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 /// when invoking an [Action] via a keyboard key combination that maps to an
 /// [Intent].
 ///
+/// This is similar to but more powerful than the [CallbackShortcuts] widget.
+/// Unlike [CallbackShortcuts], this widget separates key bindings and their
+/// implementations. This separation allows [Shortcuts] to have key bindings
+/// that adapt to the focused context. For example, the desired action for a
+/// deletion intent may be to delete a character in a text input, or to delete
+/// a file in a file menu.
+///
 /// See the article on [Using Actions and
 /// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
 /// for a detailed explanation.
@@ -903,8 +910,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 ///
 /// See also:
 ///
-///  * [CallbackShortcuts], a less complicated (but less flexible) way of
-///    defining key bindings that just invoke callbacks.
+///  * [CallbackShortcuts], a simpler but less flexible widget that defines key
+///    bindings that invoke callbacks.
 ///  * [Intent], a class for containing a description of a user action to be
 ///    invoked.
 ///  * [Action], a class for defining an invocation of a user action.
@@ -1038,32 +1045,32 @@ class _ShortcutsState extends State<Shortcuts> {
   }
 }
 
-/// A widget that provides an uncomplicated mechanism for binding a key
-/// combination to a specific callback.
+/// A widget that binds key combinations to specific callbacks.
 ///
-/// This is similar to the functionality provided by the [Shortcuts] widget, but
-/// instead of requiring a mapping to an [Intent], and an [Actions] widget
-/// somewhere in the widget tree to bind the [Intent] to, it just takes a set of
-/// bindings that bind the key combination directly to a [VoidCallback].
+/// This is similar to but simpler than the [Shortcuts] widget as it doesn't
+/// require [Intent]s and [Actions] widgets. Instead, it accepts a map
+/// of [ShortcutActivator]s to [VoidCallback]s.
 ///
-/// Because it is a simpler mechanism, it doesn't provide the ability to disable
-/// the callbacks, or to separate the definition of the shortcuts from the
-/// definition of the code that is triggered by them (the role that actions play
-/// in the [Shortcuts]/[Actions] system).
-///
-/// However, for some applications the complexity and flexibility of the
-/// [Shortcuts] and [Actions] mechanism is overkill, and this widget is here for
-/// those apps.
+/// Unlike [Shortcuts], this widget does not separate key bindings and their
+/// implementations. This separation allows [Shortcuts] to have key bindings
+/// that adapt to the focused context. For example, the desired action for a
+/// deletion intent may be to delete a character in a text input, or to delete
+/// a file in a file menu.
 ///
 /// [Shortcuts] and [CallbackShortcuts] can both be used in the same app. As
 /// with any key handling widget, if this widget handles a key event then
 /// widgets above it in the focus chain will not receive the event. This means
 /// that if this widget handles a key, then an ancestor [Shortcuts] widget (or
-/// any other key handling widget) will not receive that key, and similarly, if
+/// any other key handling widget) will not receive that key. Similarly, if
 /// a descendant of this widget handles the key, then the key event will not
 /// reach this widget for handling.
 ///
+/// See the article on [Using Actions and
+/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// for a detailed explanation.
+///
 /// See also:
+///  * [Shortcuts], a more powerful widget for defining key bindings.
 ///  * [Focus], a widget that defines which widgets can receive keyboard focus.
 class CallbackShortcuts extends StatelessWidget {
   /// Creates a const [CallbackShortcuts] widget.

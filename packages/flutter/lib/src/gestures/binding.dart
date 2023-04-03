@@ -288,7 +288,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
     try {
-      _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
+      _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, platformDispatcher.implicitView!.devicePixelRatio));
       if (!locked) {
         _flushPointerEventQueue();
       }

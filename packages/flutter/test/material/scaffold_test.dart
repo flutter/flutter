@@ -2454,7 +2454,7 @@ void main() {
       '     MediaQuery\n'
       '     _MediaQueryFromView\n'
       '     _ViewScope\n'
-      '     View-[GlobalObjectKey TestWindow#e6136]\n'
+      '     View-[GlobalObjectKey TestFlutterView#e6136]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n',
@@ -2697,6 +2697,22 @@ void main() {
     expect(find.byKey(bottomSheetKey2), findsNothing);
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Scaffold.isBodyDescendant checks if given context is descendant of the body', (WidgetTester tester) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+    final GlobalKey bodyChildKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: SizedBox(key: bodyChildKey),
+        ),
+      ),
+    );
+
+    expect(Scaffold.isBodyDescendant(scaffoldKey.currentContext!), false);
+    expect(Scaffold.isBodyDescendant(bodyChildKey.currentContext!), true);
   });
 }
 
