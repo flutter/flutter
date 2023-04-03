@@ -285,16 +285,9 @@ class TestFlutterTree extends FlutterTree {
     // Warm the rest of the cache directly in the test tree.
     assert(flutterToolsStampFile.readStringLikeShell() == null);
     final String stampValue = flutterToolsStampValue(
-      revision: baseRevision, toolArgs: Platform.environment['FLUTTER_TOOL_ARGS'] ?? '');
-    final List<String> log = ensureToolWithFakeDart();
-    final String? actualStamp = flutterToolsStampFile.readStringLikeShell();
-    if (actualStamp != stampValue) {
-      print('stamp contents: $actualStamp');
-      print('stamp expected: $stampValue');
-      print('fake-dart log:\n${log.join('\n')}\n================================');
-      print('cacheDir contents:\n${runSyncSuccess(<String>['ls', '-Alrt', binCacheDir.path]).stdout}');
-    }
-    assert(actualStamp == stampValue);
+        revision: baseRevision, toolArgs: Platform.environment['FLUTTER_TOOL_ARGS'] ?? '');
+    ensureToolWithFakeDart();
+    assert(flutterToolsStampFile.readStringLikeShell() == stampValue);
 
     _warmTree = fileSystem
       .systemTempDirectory.createTempSync('flutter_test_tree_warm.').absolute;
