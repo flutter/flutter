@@ -22,7 +22,7 @@ final FlutterTree hostFlutterTree = FlutterTree(
 ///
 /// The [toolArgs] parameter corresponds to `FLUTTER_TOOL_ARGS`
 /// in the entrypoint scripts.
-String flutterToolsStampValue({required String revision, String toolArgs = ''}) {
+String flutterToolsStampValue({required String revision, required String toolArgs}) {
   return '$revision:$toolArgs';
 }
 
@@ -284,7 +284,8 @@ class TestFlutterTree extends FlutterTree {
 
     // Warm the rest of the cache directly in the test tree.
     assert(flutterToolsStampFile.readStringLikeShell() == null);
-    final String stampValue = flutterToolsStampValue(revision: baseRevision);
+    final String stampValue = flutterToolsStampValue(
+      revision: baseRevision, toolArgs: Platform.environment['FLUTTER_TOOL_ARGS'] ?? '');
     final List<String> log = ensureToolWithFakeDart();
     final String? actualStamp = flutterToolsStampFile.readStringLikeShell();
     if (actualStamp != stampValue) {
