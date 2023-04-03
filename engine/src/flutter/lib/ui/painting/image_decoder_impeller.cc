@@ -406,7 +406,10 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
        result,
        supports_wide_gamut = supports_wide_gamut_  //
   ]() {
-        FML_CHECK(context) << "No valid impeller context";
+        if (!context) {
+          result(nullptr);
+          return;
+        }
         auto max_size_supported =
             context->GetResourceAllocator()->GetMaxTextureSizeSupported();
 
