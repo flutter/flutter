@@ -60,6 +60,12 @@ class IOSDevices extends PollingDeviceDiscovery {
   bool get requiresExtendedWirelessDeviceDiscovery => true;
 
   StreamSubscription<XCDeviceEventNotification>? _observedDeviceEventsSubscription;
+
+  /// Cache for all devices found by `xcdevice list`, including not connected
+  /// devices. Used to minimize the need to call `xcdevice list`.
+  ///
+  /// Separate from `deviceNotifier` since `deviceNotifier` should only contain
+  /// connected devices.
   final Map<String, IOSDevice> _cachedPolledDevices = <String, IOSDevice>{};
 
   /// Maps device id to a map of the device's observed connections. When the
@@ -76,7 +82,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   ///     wifi: false,
   ///   },
   /// }
-  final Map<String, Map<XCDeviceEventInterface, bool>> _observedConnectionsForDevice =
+  final Map<String, Map<XCDeviceEventInterface, bool>> _observedConnectionsByDeviceId =
       <String, Map<XCDeviceEventInterface, bool>>{};
 
   @override
@@ -127,7 +133,7 @@ class IOSDevices extends PollingDeviceDiscovery {
     }
 
     final Map<XCDeviceEventInterface, bool> deviceObservedConnections =
-        _observedConnectionsForDevice[event.deviceIdentifier] ??
+        _observedConnectionsByDeviceId[event.deviceIdentifier] ??
             <XCDeviceEventInterface, bool>{
               XCDeviceEventInterface.usb: false,
               XCDeviceEventInterface.wifi: false,
@@ -136,7 +142,7 @@ class IOSDevices extends PollingDeviceDiscovery {
     if (event.eventType == XCDeviceEvent.attach) {
       // Update device's observed connections.
       deviceObservedConnections[event.eventInterface] = true;
-      _observedConnectionsForDevice[event.deviceIdentifier] = deviceObservedConnections;
+      _observedConnectionsByDeviceId[event.deviceIdentifier] = deviceObservedConnections;
 
       // If device was not already in notifier, add it.
       if (knownDevice == null) {
@@ -150,7 +156,7 @@ class IOSDevices extends PollingDeviceDiscovery {
     } else {
       // Update device's observed connections.
       deviceObservedConnections[event.eventInterface] = false;
-      _observedConnectionsForDevice[event.deviceIdentifier] = deviceObservedConnections;
+      _observedConnectionsByDeviceId[event.deviceIdentifier] = deviceObservedConnections;
 
       // If device is in the notifier and does not have other observed
       // connections, remove it.
@@ -182,7 +188,7 @@ class IOSDevices extends PollingDeviceDiscovery {
     // or it has not been observed but was found as connected in the cache.
     final List<Device> connectedDevices = _cachedPolledDevices.values.where((Device device) {
       final Map<XCDeviceEventInterface, bool>? deviceObservedConnections =
-          _observedConnectionsForDevice[device.id];
+          _observedConnectionsByDeviceId[device.id];
       return (deviceObservedConnections != null &&
               _deviceHasObservedConnection(deviceObservedConnections)) ||
           (deviceObservedConnections == null && device.isConnected);
