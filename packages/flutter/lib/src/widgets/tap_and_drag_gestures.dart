@@ -689,13 +689,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
 /// pointer does travel enough distance then the recognizer that entered the arena
 /// first will win. The gesture detected in this case is a drag.
-/// 
+///
 /// {@tool snippet}
 ///
 /// This example shows how to hook up [TapAndPanGestureRecognizer]s' to nested
 /// [RawGestureDetector]s'. It assumes that the code is being used inside a [State]
 /// object with a `_last` field that is then displayed as the child of the gesture detector.
-/// 
+///
 /// In this example, if the pointer has moved past the drag threshold, then the
 /// the first [TapAndPanGestureRecognizer] instance to receive the [PointerEvent]
 /// will win the arena because the recognizer will immediately declare victory.
@@ -705,7 +705,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// area of both containers, then the inner-most widget will receive the event first.
 /// If your pointer begins in the yellow container then it will be the first to
 /// receive the event.
-/// 
+///
 /// If the pointer has not moved past the drag threshold, then the first recognizer
 /// to enter the arena will win (i.e. they both tie and the gesture arena will call
 /// [GestureArenaManager.sweep] so the first member of the arena will win).
