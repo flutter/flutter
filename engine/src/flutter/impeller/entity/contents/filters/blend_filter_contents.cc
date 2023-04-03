@@ -12,6 +12,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
+#include "impeller/entity/contents/foreground_blend_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/path_builder.h"
@@ -373,6 +374,20 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
   }
 
   if (blend_mode_ <= Entity::kLastAdvancedBlendMode) {
+    auto potential_alpha = GetAlpha().value_or(1.0);
+    if (inputs.size() == 1 && foreground_color_.has_value() &&
+        potential_alpha >= 1.0 - kEhCloseEnough) {
+      auto contents = std::make_shared<AdvancedForegroundBlendContents>();
+      contents->SetBlendMode(blend_mode_);
+      contents->SetCoverage(coverage);
+      contents->SetSrcInput(inputs[0]);
+      contents->SetForegroundColor(foreground_color_.value());
+      Entity entity;
+      entity.SetTransformation(Matrix::MakeTranslation(coverage.origin));
+      entity.SetContents(std::move(contents));
+      return entity;
+    }
+
     return advanced_blend_proc_(inputs, renderer, entity, coverage,
                                 foreground_color_, GetAbsorbOpacity(),
                                 GetAlpha());
