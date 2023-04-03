@@ -43,12 +43,9 @@ class SurfaceMTL final : public Surface {
   id<MTLDrawable> drawable() const { return drawable_; }
 
  private:
-  std::weak_ptr<Context> context_;
   id<MTLDrawable> drawable_ = nil;
 
-  SurfaceMTL(const std::weak_ptr<Context>& context,
-             const RenderTarget& target,
-             id<MTLDrawable> drawable);
+  SurfaceMTL(const RenderTarget& target, id<MTLDrawable> drawable);
 
   // |Surface|
   bool Present() const override;
