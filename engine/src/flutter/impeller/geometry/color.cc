@@ -13,6 +13,28 @@
 
 namespace impeller {
 
+#define _IMPELLER_ASSERT_BLEND_MODE(blend_mode)                            \
+  auto enum_##blend_mode = static_cast<std::underlying_type_t<BlendMode>>( \
+      BlendMode::k##blend_mode);                                           \
+  if (i != enum_##blend_mode) {                                            \
+    return false;                                                          \
+  }                                                                        \
+  ++i;
+
+static constexpr inline bool ValidateBlendModes() {
+  std::underlying_type_t<BlendMode> i = 0;
+  // Ensure the order of the blend modes match.
+  IMPELLER_FOR_EACH_BLEND_MODE(_IMPELLER_ASSERT_BLEND_MODE)
+  // Ensure the total number of blend modes match.
+  if (i - 1 !=
+      static_cast<std::underlying_type_t<BlendMode>>(BlendMode::kLast)) {
+    return false;
+  }
+  return true;
+}
+static_assert(ValidateBlendModes(),
+              "IMPELLER_FOR_EACH_BLEND_MODE must match impeller::BlendMode.");
+
 ColorHSB ColorHSB::FromRGB(Color rgb) {
   Scalar R = rgb.red;
   Scalar G = rgb.green;

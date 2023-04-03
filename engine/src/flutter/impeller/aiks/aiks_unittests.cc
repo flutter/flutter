@@ -1287,6 +1287,8 @@ TEST_P(AiksTest, PaintBlendModeIsRespected) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+#define BLEND_MODE_TUPLE(blend_mode) {#blend_mode, BlendMode::k##blend_mode},
+
 TEST_P(AiksTest, ColorWheel) {
   // Compare with https://fiddle.skia.org/c/@BlendModes
 
@@ -1294,38 +1296,7 @@ TEST_P(AiksTest, ColorWheel) {
   std::vector<BlendMode> blend_mode_values;
   {
     const std::vector<std::tuple<const char*, BlendMode>> blends = {
-        // Pipeline blends (Porter-Duff alpha compositing)
-        {"Clear", BlendMode::kClear},
-        {"Source", BlendMode::kSource},
-        {"Destination", BlendMode::kDestination},
-        {"SourceOver", BlendMode::kSourceOver},
-        {"DestinationOver", BlendMode::kDestinationOver},
-        {"SourceIn", BlendMode::kSourceIn},
-        {"DestinationIn", BlendMode::kDestinationIn},
-        {"SourceOut", BlendMode::kSourceOut},
-        {"DestinationOut", BlendMode::kDestinationOut},
-        {"SourceATop", BlendMode::kSourceATop},
-        {"DestinationATop", BlendMode::kDestinationATop},
-        {"Xor", BlendMode::kXor},
-        {"Plus", BlendMode::kPlus},
-        {"Modulate", BlendMode::kModulate},
-        // Advanced blends (color component blends)
-        {"Screen", BlendMode::kScreen},
-        {"Overlay", BlendMode::kOverlay},
-        {"Darken", BlendMode::kDarken},
-        {"Lighten", BlendMode::kLighten},
-        {"ColorDodge", BlendMode::kColorDodge},
-        {"ColorBurn", BlendMode::kColorBurn},
-        {"HardLight", BlendMode::kHardLight},
-        {"SoftLight", BlendMode::kSoftLight},
-        {"Difference", BlendMode::kDifference},
-        {"Exclusion", BlendMode::kExclusion},
-        {"Multiply", BlendMode::kMultiply},
-        {"Hue", BlendMode::kHue},
-        {"Saturation", BlendMode::kSaturation},
-        {"Color", BlendMode::kColor},
-        {"Luminosity", BlendMode::kLuminosity},
-    };
+        IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TUPLE)};
     assert(blends.size() ==
            static_cast<size_t>(Entity::kLastAdvancedBlendMode) + 1);
     for (const auto& [name, mode] : blends) {
@@ -1938,6 +1909,23 @@ TEST_P(AiksTest, DrawPaintAbsorbsClears) {
   ASSERT_EQ(picture.pass->GetElementCount(), 0u);
   ASSERT_EQ(picture.pass->GetClearColor(), Color::CornflowerBlue());
 }
+
+static Picture BlendModeSaveLayerTest(BlendMode blend_mode) {
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color::CornflowerBlue().WithAlpha(0.75)});
+  canvas.SaveLayer({.blend_mode = blend_mode});
+  for (auto& color : {Color::White(), Color::LimeGreen(), Color::Black()}) {
+    canvas.DrawRect({100, 100, 200, 200}, {.color = color.WithAlpha(0.75)});
+    canvas.Translate(Vector2(150, 100));
+  }
+  return canvas.EndRecordingAsPicture();
+}
+
+#define BLEND_MODE_TEST(blend_mode)                                       \
+  TEST_P(AiksTest, BlendModeSaveLayer##blend_mode) {                      \
+    OpenPlaygroundHere(BlendModeSaveLayerTest(BlendMode::k##blend_mode)); \
+  }
+IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
 
 }  // namespace testing
 }  // namespace impeller
