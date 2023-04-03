@@ -107,7 +107,7 @@ void main() {
       lessThan(1.0),
     );
   });
-  
+
   testWidgets('positions itself at the anchor', (WidgetTester tester) async {
     // An arbitrary point on the screen to position at.
     const Offset anchor = Offset(30.0, 40.0);
@@ -129,7 +129,8 @@ void main() {
     );
 
     expect(
-      tester.getTopLeft(find.byType(CupertinoDesktopTextSelectionToolbarButton)),
+      tester
+          .getTopLeft(find.byType(CupertinoDesktopTextSelectionToolbarButton)),
       // Greater than due to padding internal to the toolbar.
       greaterThan(anchor),
     );

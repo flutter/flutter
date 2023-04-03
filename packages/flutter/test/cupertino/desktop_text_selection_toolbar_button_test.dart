@@ -76,7 +76,7 @@ void main() {
         home: Center(
           child: CupertinoDesktopTextSelectionToolbarButton(
             child: const Text('Tap me'),
-            onPressed: () { },
+            onPressed: () {},
           ),
         ),
       ),
@@ -90,7 +90,8 @@ void main() {
     expect(opacity.opacity.value, 1.0);
 
     // Make a "down" gesture on the button.
-    final Offset center = tester.getCenter(find.byType(CupertinoDesktopTextSelectionToolbarButton));
+    final Offset center = tester
+        .getCenter(find.byType(CupertinoDesktopTextSelectionToolbarButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
