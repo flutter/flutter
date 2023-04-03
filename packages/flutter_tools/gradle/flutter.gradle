@@ -4,5 +4,5 @@
 // This file exists solely for the compatibility with projects that have
 // not migrated to the declarative apply of the Flutter Gradle Plugin.
 
-def pathToThisFile = buildscript.sourceFile.parentFile
-apply from: "$pathToThisFile/src/main/groovy/flutter.groovy"
+def pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: "$pathToThisDirectory/src/main/groovy/flutter.groovy"
