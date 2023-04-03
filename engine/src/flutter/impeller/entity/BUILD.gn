@@ -180,6 +180,8 @@ impeller_component("entity") {
     "contents/filters/srgb_to_linear_filter_contents.h",
     "contents/filters/yuv_to_rgb_filter_contents.cc",
     "contents/filters/yuv_to_rgb_filter_contents.h",
+    "contents/foreground_blend_contents.cc",
+    "contents/foreground_blend_contents.h",
     "contents/framebuffer_blend_contents.cc",
     "contents/framebuffer_blend_contents.h",
     "contents/gradient_generator.cc",
