@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/migrations/gradle-version-conflict-migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -76,6 +77,56 @@ tasks.register("clean", Delete) {
 }
 '''));
       });
+    });
+
+    group('migrate the gradle version to one that does not conflict with the '
+        'Android Studio-provided java version', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger bufferLogger;
+      late FakeAndroidProject project;
+      late File gradleWrapperPropertiesFile;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem.test();
+        bufferLogger = BufferLogger.test();
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android')..createSync(),
+        );
+        project.hostAppGradleRoot.childDirectory('gradle').childDirectory('wrapper').createSync(recursive: true);
+        gradleWrapperPropertiesFile = project.hostAppGradleRoot.childFile('build.gradle');
+      });
+
+      testUsingContext('skipped if files are missing', () {
+        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+            project,
+            bufferLogger
+        );
+        migration.migrate();
+        expect(gradleWrapperPropertiesFile.existsSync(), isFalse);
+        expect(bufferLogger.traceText, contains('gradle-wrapper.properties not found, skipping gradle version compatibility check.'));
+      });
+
+      testUsingContext('skipped if android studio version cannot be detected', () {
+
+      });
+/*
+      testUsingContext('skipped if android studio version is less than flamingo', () {
+
+      });
+
+      testUsingContext('nothing is changed if gradle version is high enough', () {
+
+      });
+
+      testUsingContext('change is made with sub 7 gradle', () {
+
+      });
+
+      testUsingContext('change is made with gradle version >7 but <7.3', () {
+
+      });
+
+ */
     });
   });
 }
