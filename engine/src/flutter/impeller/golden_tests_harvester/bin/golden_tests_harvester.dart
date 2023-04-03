@@ -23,7 +23,7 @@ class FakeSkiaGoldClient implements SkiaGoldClient {
       {double differentPixelsRate = 0.01,
       int pixelColorDelta = 0,
       required int screenshotSize}) async {
-    Logger.instance.log('addImg $testName ${goldenFile.path} $screenshotSize');
+    Logger.instance.log('addImg testName:$testName goldenFile:${goldenFile.path} screenshotSize:$screenshotSize differentPixelsRate:$differentPixelsRate pixelColorDelta:$pixelColorDelta');
   }
 
   @override

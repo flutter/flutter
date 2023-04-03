@@ -1243,9 +1243,6 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
 }
 
 TEST_P(AiksTest, TextRotated) {
-#ifdef IMPELLER_GOLDEN_TESTS
-  GTEST_SKIP() << "Test has small differences on different mac hosts";
-#endif
   Canvas canvas;
   canvas.Transform(Matrix(0.5, -0.3, 0, -0.002,  //
                           0, 1, 0, 0,            //
