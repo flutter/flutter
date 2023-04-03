@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/shortcuts/callback_shortcuts.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('WidgetsApp test', (WidgetTester tester) async {
+  testWidgets('CallbackShortcutsApp increments and decrements', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CallbackShortcutsApp(),
     );
