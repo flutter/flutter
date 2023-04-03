@@ -2,40 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CallbackShortcuts].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [CallbackShortcuts].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const CallbackShortcutsApp());
 
-  static const String _title = 'Flutter Code Sample';
+class CallbackShortcutsApp extends StatelessWidget {
+  const CallbackShortcutsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('CallbackShortcuts Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: CallbackShortcutsExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class CallbackShortcutsExample extends StatefulWidget {
+  const CallbackShortcutsExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<CallbackShortcutsExample> createState() => _CallbackShortcutsExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _CallbackShortcutsExampleState extends State<CallbackShortcutsExample> {
   int count = 0;
 
   @override
@@ -53,9 +50,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         autofocus: true,
         child: Column(
           children: <Widget>[
-            const Text('Add to the counter by pressing the up arrow key'),
-            const Text(
-                'Subtract from the counter by pressing the down arrow key'),
+            const Text('Press the up arrow key to add to the counter'),
+            const Text('Press the down arrow key to subtract from the counter'),
             Text('count: $count'),
           ],
         ),
