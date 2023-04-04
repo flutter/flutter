@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import '../dom.dart';
-import '../safe_browser_api.dart';
 import 'text_editing.dart';
 
 /// Provides default functionality for listening to HTML composition events.
@@ -30,11 +31,11 @@ mixin CompositionAwareMixin {
   static const String _kCompositionEnd = 'compositionend';
 
   late final DomEventListener _compositionStartListener =
-      allowInterop(_handleCompositionStart);
+      createDomEventListener(_handleCompositionStart);
   late final DomEventListener _compositionUpdateListener =
-      allowInterop(_handleCompositionUpdate);
+      createDomEventListener(_handleCompositionUpdate);
   late final DomEventListener _compositionEndListener =
-      allowInterop(_handleCompositionEnd);
+      createDomEventListener(_handleCompositionEnd);
 
   /// The currently composing text in the `domElement`.
   ///
@@ -55,17 +56,17 @@ mixin CompositionAwareMixin {
     domElement.removeEventListener(_kCompositionEnd, _compositionEndListener);
   }
 
-  void _handleCompositionStart(DomEvent event) {
+  JSVoid _handleCompositionStart(DomEvent event) {
     composingText = null;
   }
 
-  void _handleCompositionUpdate(DomEvent event) {
+  JSVoid _handleCompositionUpdate(DomEvent event) {
     if (domInstanceOfString(event, 'CompositionEvent')) {
       composingText = (event as DomCompositionEvent).data;
     }
   }
 
-  void _handleCompositionEnd(DomEvent event) {
+  JSVoid _handleCompositionEnd(DomEvent event) {
     composingText = null;
   }
 

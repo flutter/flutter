@@ -13,7 +13,6 @@ import 'package:ui/src/engine.dart' show flutterViewEmbedder;
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/initialization.dart';
-import 'package:ui/src/engine/safe_browser_api.dart';
 import 'package:ui/src/engine/services.dart';
 import 'package:ui/src/engine/text_editing/autofill_hint.dart';
 import 'package:ui/src/engine/text_editing/input_type.dart';
@@ -903,7 +902,7 @@ Future<void> testMain() async {
           defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
       final Completer<bool> submittedForm = Completer<bool>();
       formElement.addEventListener(
-          'submit', allowInterop((DomEvent event) =>
+          'submit', createDomEventListener((DomEvent event) =>
               submittedForm.complete(true)));
 
       const MethodCall clearClient = MethodCall('TextInput.clearClient');
@@ -956,7 +955,7 @@ Future<void> testMain() async {
           defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
       final Completer<bool> submittedForm = Completer<bool>();
       formElement.addEventListener(
-          'submit', allowInterop((DomEvent event) =>
+          'submit', createDomEventListener((DomEvent event) =>
               submittedForm.complete(true)));
 
       // Clear client is not called. The used requested context to be finalized.

@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../configuration.dart';
 import '../dom.dart';
 import '../platform_dispatcher.dart';
-import '../safe_browser_api.dart';
 import '../util.dart';
 import '../window.dart';
 import 'canvas.dart';
@@ -67,7 +68,7 @@ class Surface {
   /// We must cache this function because each time we access the tear-off it
   /// creates a new object, meaning we won't be able to remove this listener
   /// later.
-  void Function(DomEvent)? _cachedContextLostListener;
+  DomEventListener? _cachedContextLostListener;
 
   /// A cached copy of the most recently created `webglcontextrestored`
   /// listener.
@@ -75,7 +76,7 @@ class Surface {
   /// We must cache this function because each time we access the tear-off it
   /// creates a new object, meaning we won't be able to remove this listener
   /// later.
-  void Function(DomEvent)? _cachedContextRestoredListener;
+  DomEventListener? _cachedContextRestoredListener;
 
   SkGrContext? _grContext;
   int? _glContext;
@@ -268,7 +269,7 @@ class Surface {
     htmlCanvas!.style.transform = 'translate(0, -${offset}px)';
   }
 
-  void _contextRestoredListener(DomEvent event) {
+  JSVoid _contextRestoredListener(DomEvent event) {
     assert(
         _contextLost,
         'Received "webglcontextrestored" event but never received '
@@ -280,7 +281,7 @@ class Surface {
     event.preventDefault();
   }
 
-  void _contextLostListener(DomEvent event) {
+  JSVoid _contextLostListener(DomEvent event) {
     assert(event.target == htmlCanvas,
         'Received a context lost event for a disposed canvas');
     final SurfaceFactory factory = SurfaceFactory.instance;
@@ -344,8 +345,8 @@ class Surface {
     // notification. When we receive this notification we force a new context.
     //
     // See also: https://www.khronos.org/webgl/wiki/HandlingContextLost
-    _cachedContextRestoredListener = allowInterop(_contextRestoredListener);
-    _cachedContextLostListener = allowInterop(_contextLostListener);
+    _cachedContextRestoredListener = createDomEventListener(_contextRestoredListener);
+    _cachedContextLostListener = createDomEventListener(_contextLostListener);
     htmlCanvas.addEventListener(
       'webglcontextlost',
       _cachedContextLostListener,

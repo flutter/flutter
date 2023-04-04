@@ -194,7 +194,7 @@ class EngineAutofillForm {
     formElement.noValidate = true;
     formElement.method = 'post';
     formElement.action = '#';
-    formElement.addEventListener('submit', allowInterop((DomEvent e) {
+    formElement.addEventListener('submit', createDomEventListener((DomEvent e) {
       e.preventDefault();
     }));
 
@@ -304,7 +304,7 @@ class EngineAutofillForm {
         final DomElement element = elements![key]!;
         subscriptions.add(
             DomSubscription(element, 'input',
-                allowInterop((DomEvent e) {
+                (DomEvent e) {
                   if (items![key] == null) {
                     throw StateError(
                         'AutofillInfo must have a valid uniqueIdentifier.');
@@ -312,7 +312,7 @@ class EngineAutofillForm {
                     final AutofillInfo autofillInfo = items![key]!;
                     handleChange(element, autofillInfo);
                   }
-                })));
+                }));
     }
 
     keys.forEach(addSubscriptionForKey);
@@ -1231,23 +1231,23 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
 
     // Subscribe to text and selection changes.
     subscriptions.add(DomSubscription(activeDomElement, 'input',
-            allowInterop(handleChange)));
+            handleChange));
 
     subscriptions.add(DomSubscription(activeDomElement, 'keydown',
-            allowInterop(maybeSendAction)));
+            maybeSendAction));
 
     subscriptions.add(DomSubscription(domDocument, 'selectionchange',
-            allowInterop(handleChange)));
+            handleChange));
 
     activeDomElement.addEventListener('beforeinput',
-        allowInterop(handleBeforeInput));
+        createDomEventListener(handleBeforeInput));
 
     addCompositionEventHandlers(activeDomElement);
 
     // Refocus on the activeDomElement after blur, so that user can keep editing the
     // text field.
     subscriptions.add(DomSubscription(activeDomElement, 'blur',
-            allowInterop((_) { activeDomElement.focus(); })));
+            (_) { activeDomElement.focus(); }));
 
     preventDefaultForMouseEvents();
   }
@@ -1420,19 +1420,19 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
   /// flickering during selection by mouse.
   void preventDefaultForMouseEvents() {
     subscriptions.add(
-        DomSubscription(activeDomElement, 'mousedown', allowInterop((_) {
+        DomSubscription(activeDomElement, 'mousedown', (_) {
       _.preventDefault();
-    })));
+    }));
 
     subscriptions.add(
-        DomSubscription(activeDomElement, 'mouseup', allowInterop((_) {
+        DomSubscription(activeDomElement, 'mouseup', (_) {
       _.preventDefault();
-    })));
+    }));
 
     subscriptions.add(
-        DomSubscription(activeDomElement, 'mousemove', allowInterop((_) {
+        DomSubscription(activeDomElement, 'mousemove', (_) {
       _.preventDefault();
-    })));
+    }));
   }
 }
 
@@ -1525,25 +1525,25 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     // Subscribe to text and selection changes.
     subscriptions.add(DomSubscription(activeDomElement, 'input',
-            allowInterop(handleChange)));
+            handleChange));
 
     subscriptions.add(DomSubscription(activeDomElement, 'keydown',
-            allowInterop(maybeSendAction)));
+            maybeSendAction));
 
     subscriptions.add(DomSubscription(domDocument, 'selectionchange',
-            allowInterop(handleChange)));
+            handleChange));
 
     activeDomElement.addEventListener('beforeinput',
-        allowInterop(handleBeforeInput));
+        createDomEventListener(handleBeforeInput));
 
     addCompositionEventHandlers(activeDomElement);
 
     // Position the DOM element after it is focused.
     subscriptions.add(DomSubscription(activeDomElement, 'focus',
-            allowInterop((_) {
+            (_) {
               // Cancel previous timer if exists.
               _schedulePlacement();
-            })));
+            }));
 
     _addTapListener();
 
@@ -1567,14 +1567,14 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     //    input field was activated. If the time is too short, we re-focus the
     //    input element.
     subscriptions.add(DomSubscription(activeDomElement, 'blur',
-            allowInterop((_) {
+            (_) {
               final bool isFastCallback = blurWatch.elapsed < _blurFastCallbackInterval;
               if (windowHasFocus && isFastCallback) {
                 activeDomElement.focus();
               } else {
                 owner.sendTextConnectionClosedToFrameworkIfAny();
               }
-            })));
+            }));
   }
 
   @override
@@ -1610,7 +1610,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   /// [_positionInputElementTimer] timer is restarted. The element will be
   /// placed to its correct position after [_delayBeforePlacement].
   void _addTapListener() {
-    subscriptions.add(DomSubscription(activeDomElement, 'click', allowInterop((_) {
+    subscriptions.add(DomSubscription(activeDomElement, 'click', (_) {
       // Check if the element is already positioned. If not this does not fall
       // under `The user was using the long press, now they want to enter text
       // via keyboard` journey.
@@ -1621,7 +1621,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
         // Re-configure the timer to place the element.
         _schedulePlacement();
       }
-    })));
+    }));
   }
 
   void _schedulePlacement() {
@@ -1676,24 +1676,24 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     // Subscribe to text and selection changes.
     subscriptions.add(
-        DomSubscription(activeDomElement, 'input', allowInterop(handleChange)));
+        DomSubscription(activeDomElement, 'input', handleChange));
 
     subscriptions.add(
         DomSubscription(activeDomElement, 'keydown',
-            allowInterop(maybeSendAction)));
+            maybeSendAction));
 
     subscriptions.add(
         DomSubscription(domDocument, 'selectionchange',
-            allowInterop(handleChange)));
+            handleChange));
 
     activeDomElement.addEventListener('beforeinput',
-        allowInterop(handleBeforeInput));
+        createDomEventListener(handleBeforeInput));
 
     addCompositionEventHandlers(activeDomElement);
 
     subscriptions.add(
         DomSubscription(activeDomElement, 'blur',
-            allowInterop((_) {
+            (_) {
               if (windowHasFocus) {
                 // Chrome on Android will hide the onscreen keyboard when you tap outside
                 // the text box. Instead, we want the framework to tell us to hide the
@@ -1703,7 +1703,7 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
               } else {
                 owner.sendTextConnectionClosedToFrameworkIfAny();
               }
-            })));
+            }));
   }
 
   @override
@@ -1742,14 +1742,14 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     // Subscribe to text and selection changes.
     subscriptions.add(
-        DomSubscription(activeDomElement, 'input', allowInterop(handleChange)));
+        DomSubscription(activeDomElement, 'input', handleChange));
 
     subscriptions.add(
         DomSubscription(
-            activeDomElement, 'keydown', allowInterop(maybeSendAction)));
+            activeDomElement, 'keydown', maybeSendAction));
 
     activeDomElement.addEventListener('beforeinput',
-        allowInterop(handleBeforeInput));
+        createDomEventListener(handleBeforeInput));
 
     addCompositionEventHandlers(activeDomElement);
 
@@ -1770,16 +1770,16 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
         DomSubscription(
             activeDomElement,
             'keyup',
-            allowInterop((DomEvent event) {
+            (DomEvent event) {
               handleChange(event);
-            })));
+            }));
 
     // In Firefox the context menu item "Select All" does not work without
     // listening to onSelect. On the other browsers onSelectionChange is
     // enough for covering "Select All" functionality.
     subscriptions.add(
         DomSubscription(
-            activeDomElement, 'select', allowInterop(handleChange)));
+            activeDomElement, 'select', handleChange));
 
     // Refocus on the activeDomElement after blur, so that user can keep editing the
     // text field.
@@ -1787,9 +1787,9 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
         DomSubscription(
             activeDomElement,
             'blur',
-            allowInterop((_) {
+            (_) {
               _postponeFocus();
-            })));
+            }));
 
     preventDefaultForMouseEvents();
   }

@@ -10,7 +10,6 @@ import 'dom.dart';
 import 'html/bitmap_canvas.dart';
 import 'html/recording_canvas.dart';
 import 'html_image_codec.dart';
-import 'safe_browser_api.dart';
 import 'util.dart';
 
 /// An implementation of [ui.PictureRecorder] backed by a [RecordingCanvas].
@@ -74,13 +73,13 @@ class EnginePicture implements ui.Picture {
     // Ignoring the returned futures from onError and onLoad because we're
     // communicating through the `onImageLoaded` completer.
     late final DomEventListener errorListener;
-    errorListener = allowInterop((DomEvent event) {
+    errorListener = createDomEventListener((DomEvent event) {
       onImageLoaded.completeError(event);
       imageElement.removeEventListener('error', errorListener);
     });
     imageElement.addEventListener('error', errorListener);
     late final DomEventListener loadListener;
-    loadListener = allowInterop((DomEvent event) {
+    loadListener = createDomEventListener((DomEvent event) {
       onImageLoaded.complete(HtmlImage(
         imageElement,
         width,

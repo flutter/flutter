@@ -184,7 +184,7 @@ MultiChannel<dynamic> _connectToServer() {
   final DomWebSocket webSocket = createDomWebSocket(_currentUrl.queryParameters['managerUrl']!);
 
   final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
-  webSocket.addEventListener('message', allowInterop((DomEvent message) {
+  webSocket.addEventListener('message', createDomEventListener((DomEvent message) {
     final String data = (message as DomMessageEvent).data as String;
     controller.local.sink.add(jsonDecode(data));
   }));
@@ -221,7 +221,7 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
   _domSubscriptions[id] = domSubscriptions;
   _streamSubscriptions[id] = streamSubscriptions;
   domSubscriptions.add(DomSubscription(domWindow, 'message',
-          allowInterop((DomEvent event) {
+          (DomEvent event) {
     final DomMessageEvent message = event as DomMessageEvent;
     // A message on the Window can theoretically come from any website. It's
     // very unlikely that a malicious site would care about hacking someone's
@@ -249,13 +249,13 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
       // loading the test.
       controller.local.sink.add(message.data['data']);
     }
-  })));
+  }));
 
   channel.port1.start();
   domSubscriptions.add(DomSubscription(channel.port1, 'message',
-          allowInterop((DomEvent message) {
+          (DomEvent message) {
     controller.local.sink.add((message as DomMessageEvent).data['data']);
-  })));
+  }));
 
   streamSubscriptions.add(controller.local.stream.listen((dynamic message) async {
     await readyCompleter.future;

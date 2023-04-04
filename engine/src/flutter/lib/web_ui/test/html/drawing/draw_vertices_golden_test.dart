@@ -397,7 +397,7 @@ Future<HtmlImage> createTestImage({int width = 50, int height = 40}) {
   ctx.fill();
   final DomHTMLImageElement imageElement = createDomHTMLImageElement();
   final Completer<HtmlImage> completer = Completer<HtmlImage>();
-  imageElement.addEventListener('load', allowInterop((DomEvent event) {
+  imageElement.addEventListener('load', createDomEventListener((DomEvent event) {
     completer.complete(HtmlImage(imageElement, width, height));
   }));
   imageElement.src = js_util.callMethod<String>(canvas, 'toDataURL', <dynamic>[]);

@@ -6,7 +6,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../platform_dispatcher.dart';
-import '../safe_browser_api.dart';
 import 'semantics.dart';
 
 /// Adds increment/decrement event handling to a semantics object.
@@ -25,7 +24,7 @@ class Incrementable extends RoleManager {
     _element.type = 'range';
     _element.setAttribute('role', 'slider');
 
-    _element.addEventListener('change', allowInterop((_) {
+    _element.addEventListener('change', createDomEventListener((_) {
       if (_element.disabled!) {
         return;
       }

@@ -53,7 +53,7 @@ void testMain() {
     final JsUrlStrategy jsUrlStrategy = JsUrlStrategy(
         getPath: allowInterop(() => '/initial'),
         getState: allowInterop(() => state),
-        addPopStateListener: allowInterop((DomEventListener listener) => allowInterop(() {})),
+        addPopStateListener: allowInterop((DartDomEventListener listener) => allowInterop(() {})),
         prepareExternalUrl: allowInterop((String value) => ''),
         pushState: allowInterop((Object? newState, String title, String url) {
           expect(newState is Map, true);
