@@ -36311,7 +36311,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'தாவல் $tabIndex / $tabCount';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
   String get timePickerDialHelpText => 'நேரத்தைத் தேர்ந்தெடுக்கவும்';
