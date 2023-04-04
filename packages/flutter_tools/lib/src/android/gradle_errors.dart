@@ -671,7 +671,10 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
   eventLabel: 'ssl-exception-tag-mismatch',
 );
 
-final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+([0-9]+)');
+/// If an incompatible Java and Gradle versions error is caught, we expect an
+/// error specifying that the Java major class file version, one of
+/// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+([0-9]{2})');
 
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
@@ -694,11 +697,11 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
         .childFile('build.gradle');
     globals.printBox(
       "${globals.logger.terminal.warningMark} Your project's Gradle and AGP version "
-      'is incompatible with the Java version that Flutter uses.\n\n'
+      'is incompatible with the Java version that Flutter is using.\n\n'
       'To fix this issue, first, check the Java version used by Flutter by '
       'running `flutter doctor --verbose`.\n\n'
-      'Then, update the Gradle version specified in ${gradlePropertiesFile.path}'
-      ' to be compatible with that Java version. '
+      'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
+      'to be compatible with that Java version. '
       'See the link below for more information on compatible Java/Gradle versions:\n'
       'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n'
       'Then, ensure the AGP version specified in ${gradleFile.path} is '

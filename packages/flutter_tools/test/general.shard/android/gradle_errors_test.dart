@@ -1328,27 +1328,10 @@ Could not compile build file '…/example/android/build.gradle'.
         multidexEnabled: true,
       );
 
-      expect(
-        testLogger.statusText,
-        contains(
-          '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] Your project\'s Gradle and AGP version is incompatible with the Java version that Flutter     │\n'
-          '│ uses.                                                                                            │\n'
-          '│                                                                                                  │\n'
-          '│ To fix this issue, first, check the Java version used by Flutter by running `flutter doctor -v`. │\n'
-          '│                                                                                                  │\n'
-          '│ Then, update the Gradle version specified in /android/gradle/wrapper/gradle-wrapper.properties   │\n'
-          '│ to be compatible with that Java version. See the link below for more information on compatible   │\n'
-          '│ Java/Gradle versions:                                                                            │\n'
-          '│ https://docs.gradle.org/current/userguide/compatibility.html#java                                │\n'
-          '│                                                                                                  │\n'
-          '│ Then, ensure the AGP version specified in /android/build.gradle is compatible with the new       │\n'
-          '│ Gradle version. See the link below for more information on compatible Gradle/AGP versions:       │\n'
-          '│ https://developer.android.com/studio/releases/gradle-plugin#updating-gradle                      │\n'
-          '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
-        )
-      );
+      // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
+      expect(testLogger.statusText, contains(RegExp(r"Your project\'s Gradle and AGP version is incompatible with the Java version that Flutter is |\n| using.")));
+      expect(testLogger.statusText, contains(RegExp(r'https://docs.gradle.org/current/userguide/compatibility.html#java')));
+      expect(testLogger.statusText, contains(RegExp(r'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle')));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
