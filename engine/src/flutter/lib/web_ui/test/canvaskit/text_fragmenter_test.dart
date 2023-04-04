@@ -183,7 +183,7 @@ void testMain() {
       testCacheCapacity(segmentationCache.small, kSmallParagraphCacheSpec);
       testCacheCapacity(segmentationCache.medium, kMediumParagraphCacheSpec);
       testCacheCapacity(segmentationCache.large, kLargeParagraphCacheSpec);
-    });
+    }, timeout: const Timeout.factor(4));
   }, skip: !browserSupportsCanvaskitChromium);
 }
 

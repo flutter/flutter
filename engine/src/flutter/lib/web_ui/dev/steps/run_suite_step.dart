@@ -115,9 +115,15 @@ class RunSuiteStep implements PipelineStep {
 
     await browserEnvironment.cleanup();
 
+    // Since we are just calling `main()` on the test executable, it will modify
+    // the exit code. We use this as a signal that there were some tests that failed.
     if (io.exitCode != 0) {
       print('[${suite.name.ansiCyan}] ${'Some tests failed.'.ansiRed}');
+      // Change the exit code back to 0 when we're done. Failures will be bubbled up
+      // at the end of the pipeline and we'll exit abnormally if there were any
+      // failures in the pipeline.
       io.exitCode = 0;
+      throw ToolExit('Some unit tests failed in suite ${suite.name.ansiCyan}.');
     } else {
       print('[${suite.name.ansiCyan}] ${'All tests passed!'.ansiGreen}');
     }
