@@ -427,6 +427,7 @@ class AndroidSdk {
       platform: platform,
     );
     if (javaBinary == null) {
+      globals.printTrace('Could not find java binary to get version.');
       return null;
     }
     final RunResult result = processUtils.runSync(
@@ -469,6 +470,7 @@ class AndroidSdk {
     required Platform platform,
   }) {
     if (androidStudio?.javaPath != null) {
+      globals.printTrace("Using Android Studio's java.");
       return fileSystem.path.join(androidStudio!.javaPath!, 'bin', 'java');
     }
 
@@ -476,6 +478,7 @@ class AndroidSdk {
         platform.environment[_javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
       // Trust JAVA_HOME.
+      globals.printTrace('Using JAVA_HOME.');
       return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
     }
 
@@ -497,13 +500,20 @@ class AndroidSdk {
             .trim();
         if (javaHomeOutput.isNotEmpty) {
           final String javaHome = javaHomeOutput.split('\n').last.trim();
+          globals.printTrace('Using mac JAVA_HOME.');
           return fileSystem.path.join(javaHome, 'bin', 'java');
         }
       } on Exception {/* ignore */}
     }
 
     // Fallback to PATH based lookup.
-    return operatingSystemUtils.which(_javaExecutable)?.path;
+    final String? pathJava = operatingSystemUtils.which(_javaExecutable)?.path;
+    if (pathJava != null) {
+      globals.printTrace('Using path java.');
+    } else {
+      globals.printTrace('Could not find java path.');
+    }
+    return pathJava;
   }
 
   // Returns a user visible String that says the tool failed to parse
