@@ -24,9 +24,10 @@ String? findJavaHome({
   }
 
   final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
+
   if (javaHomeEnv != null) {
     // Trust JAVA_HOME.
-    return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
+    return javaHomeEnv;
   }
 
   // Fallback to PATH based lookup.
