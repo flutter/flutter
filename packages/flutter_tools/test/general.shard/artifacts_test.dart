@@ -145,10 +145,6 @@ void main() {
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         fileSystem.path.join('root', 'bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'frontend_server.dart.snapshot')
       );
-      expect(
-        artifacts.getArtifactPath(Artifact.canvasKitPath),
-        fileSystem.path.join('root', 'bin', 'cache', 'flutter_web_sdk', 'canvaskit'),
-      );
     });
 
     testWithoutContext('precompiled web artifact paths are correct', () {
@@ -345,10 +341,6 @@ void main() {
       expect(
         artifacts.getHostArtifact(HostArtifact.libtessellator).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'),
-      );
-      expect(
-        artifacts.getArtifactPath(Artifact.canvasKitPath, platform: TargetPlatform.web_javascript),
-        fileSystem.path.join('/out', 'wasm_release', 'canvaskit'),
       );
     });
 

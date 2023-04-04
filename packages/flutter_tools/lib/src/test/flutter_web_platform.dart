@@ -221,9 +221,9 @@ class FlutterWebPlatform extends PlatformPlugin {
   ));
 
   File _canvasKitFile(String relativePath) {
-    final String canvasKitPath = _artifacts!.getArtifactPath(
-      Artifact.canvasKitPath,
-      platform: TargetPlatform.web_javascript,
+    final String canvasKitPath = _fileSystem.path.join(
+      _artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+      'canvaskit',
     );
     final File canvasKitFile = _fileSystem.file(_fileSystem.path.join(
       canvasKitPath,
