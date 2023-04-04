@@ -3915,8 +3915,8 @@ Future<bool> _downloadCanvasKitJs(String url) {
     canvasKitLoadCompleter.complete(false);
   }
 
-  loadCallback = allowInterop(loadEventHandler);
-  errorCallback = allowInterop(errorEventHandler);
+  loadCallback = createDomEventListener(loadEventHandler);
+  errorCallback = createDomEventListener(errorEventHandler);
 
   canvasKitScript.addEventListener('load', loadCallback);
   canvasKitScript.addEventListener('error', errorCallback);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_locale_keymap/web_locale_keymap.dart' as locale_keymap;
@@ -11,7 +13,6 @@ import 'browser_detection.dart';
 import 'dom.dart';
 import 'key_map.g.dart';
 import 'platform_dispatcher.dart';
-import 'safe_browser_api.dart';
 import 'semantics.dart';
 
 typedef _VoidCallback = void Function();
@@ -100,13 +101,13 @@ ValueGetter<T> _cached<T>(ValueGetter<T> body) {
 
 class KeyboardBinding {
   KeyboardBinding._() {
-    _addEventListener('keydown', allowInterop((DomEvent domEvent) {
+    _addEventListener('keydown', (DomEvent domEvent) {
       final FlutterHtmlKeyboardEvent event = FlutterHtmlKeyboardEvent(domEvent as DomKeyboardEvent);
-      return _converter.handleEvent(event);
-    }));
-    _addEventListener('keyup', allowInterop((DomEvent event) {
-      return _converter.handleEvent(FlutterHtmlKeyboardEvent(event as DomKeyboardEvent));
-    }));
+      _converter.handleEvent(event);
+    });
+    _addEventListener('keyup', (DomEvent event) {
+      _converter.handleEvent(FlutterHtmlKeyboardEvent(event as DomKeyboardEvent));
+    });
   }
 
   /// The singleton instance of this object.
@@ -138,18 +139,17 @@ class KeyboardBinding {
   );
   final Map<String, DomEventListener> _listeners = <String, DomEventListener>{};
 
-  void _addEventListener(String eventName, DomEventListener handler) {
-    dynamic loggedHandler(DomEvent event) {
+  void _addEventListener(String eventName, DartDomEventListener handler) {
+    JSVoid loggedHandler(DomEvent event) {
       if (_debugLogKeyEvents) {
         print(event.type);
       }
       if (EngineSemanticsOwner.instance.receiveGlobalEvent(event)) {
-        return handler(event);
+        handler(event);
       }
-      return null;
     }
 
-    final DomEventListener wrappedHandler = allowInterop(loggedHandler);
+    final DomEventListener wrappedHandler = createDomEventListener(loggedHandler);
     assert(!_listeners.containsKey(eventName));
     _listeners[eventName] = wrappedHandler;
     domWindow.addEventListener(eventName, wrappedHandler, true);

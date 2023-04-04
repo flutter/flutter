@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/safe_browser_api.dart';
 import 'package:ui/src/engine/view_embedder/hot_restart_cache_handler.dart';
 
 import 'custom_element_embedding_strategy.dart';
@@ -65,7 +64,7 @@ mixin _ContextMenu {
 
   /// Listener for contextmenu events that prevents the browser's context menu
   /// from being shown.
-  final DomEventListener _disablingContextMenuListener = allowInterop((DomEvent event) {
+  final DomEventListener _disablingContextMenuListener = createDomEventListener((DomEvent event) {
     event.preventDefault();
   });
 

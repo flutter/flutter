@@ -39,7 +39,7 @@ import 'browser_detection.dart';
 /// `JSUndefined`.
 extension ObjectToJSAnyExtension on Object {
   JSAny get toJSAnyShallow {
-    if (isWasm)  {
+    if (isWasm) {
       return toJSAnyDeep;
     } else {
       // TODO(joshualitt): remove this cast when we reify JS types on JS
@@ -334,6 +334,13 @@ extension DomEventTargetExtension on DomEventTarget {
     }
   }
 
+  @JS('addEventListener')
+  external JSVoid _addEventListener3(
+      JSString type, DomEventListener listener, JSAny options);
+  void addEventListenerWithOptions(String type, DomEventListener listener,
+          Map<String, Object> options) =>
+      _addEventListener3(type.toJS, listener, options.toJSAnyDeep);
+
   @JS('removeEventListener')
   external JSVoid _removeEventListener1(
       JSString type, DomEventListener listener);
@@ -356,7 +363,14 @@ extension DomEventTargetExtension on DomEventTarget {
   bool dispatchEvent(DomEvent event) => _dispatchEvent(event).toDart;
 }
 
-typedef DomEventListener = void Function(DomEvent event);
+typedef DartDomEventListener = JSVoid Function(DomEvent event);
+
+@JS()
+@staticInterop
+class DomEventListener {}
+
+DomEventListener createDomEventListener(DartDomEventListener listener) =>
+    listener.toJS as DomEventListener;
 
 @JS()
 @staticInterop
@@ -2260,10 +2274,10 @@ extension DomMediaQueryListExtension on DomMediaQueryList {
   bool get matches => _matches.toDart;
 
   @JS('addListener')
-  external JSVoid addListener(JSFunction? listener);
+  external JSVoid addListener(DomEventListener? listener);
 
   @JS('removeListener')
-  external JSVoid removeListener(JSFunction? listener);
+  external JSVoid removeListener(DomEventListener? listener);
 }
 
 @JS()
@@ -2829,8 +2843,10 @@ extension DomScreenOrientationExtension on DomScreenOrientation {
 // remove the listener. Caller is still responsible for calling [allowInterop]
 // on the listener before creating the subscription.
 class DomSubscription {
-  DomSubscription(this.target, String typeString, this.listener)
-      : type = typeString.toJS {
+  DomSubscription(
+      this.target, String typeString, DartDomEventListener dartListener)
+      : type = typeString.toJS,
+        listener = createDomEventListener(dartListener) {
     target._addEventListener1(type, listener);
   }
 

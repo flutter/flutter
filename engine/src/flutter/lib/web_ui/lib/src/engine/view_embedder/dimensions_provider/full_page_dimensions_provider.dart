@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:js/js.dart';
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/window.dart';
@@ -33,7 +32,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     _domResizeSubscription = DomSubscription(
       resizeEventTarget,
       'resize',
-      allowInterop(_onVisualViewportResize),
+      _onVisualViewportResize,
     );
   }
 
