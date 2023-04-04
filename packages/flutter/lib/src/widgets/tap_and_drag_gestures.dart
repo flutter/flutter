@@ -1109,7 +1109,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       if (_dragState == _DragState.possible) {
         // The drag has not been accepted before a [PointerUpEvent], therefore the recognizer
         // attempts to recognize a tap.
-        // _acceptedActivePointers.remove(event.pointer);
         stopTrackingIfPointerNoLongerDown(event);
       } else if (_dragState == _DragState.accepted) {
         _giveUpPointer(event.pointer);
