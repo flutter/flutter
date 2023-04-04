@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 #include <impeller/blending.glsl>
+#include <impeller/types.glsl>
 
-vec3 Blend(vec3 dst, vec3 src) {
+f16vec3 Blend(f16vec3 dst, f16vec3 src) {
   return IPBlendLuminosity(dst, src);
 }
 

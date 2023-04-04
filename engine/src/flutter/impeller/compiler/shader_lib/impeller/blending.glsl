@@ -7,46 +7,48 @@
 
 #include <impeller/branching.glsl>
 #include <impeller/constants.glsl>
+#include <impeller/types.glsl>
 
 //------------------------------------------------------------------------------
 /// HSV utilities.
 ///
 
-float IPLuminosity(vec3 color) {
-  return color.r * 0.3 + color.g * 0.59 + color.b * 0.11;
+float16_t IPLuminosity(f16vec3 color) {
+  return color.r * 0.3hf + color.g * 0.59hf + color.b * 0.11hf;
 }
 
 /// Scales the color's luma by the amount necessary to place the color
 /// components in a 1-0 range.
-vec3 IPClipColor(vec3 color) {
-  float lum = IPLuminosity(color);
-  float mn = min(min(color.r, color.g), color.b);
-  float mx = max(max(color.r, color.g), color.b);
+f16vec3 IPClipColor(f16vec3 color) {
+  float16_t lum = IPLuminosity(color);
+  float16_t mn = min(min(color.r, color.g), color.b);
+  float16_t mx = max(max(color.r, color.g), color.b);
   // `lum - mn` and `mx - lum` will always be >= 0 in the following conditions,
   // so adding a tiny value is enough to make these divisions safe.
-  if (mn < 0) {
-    color = lum + (((color - lum) * lum) / (lum - mn + kEhCloseEnough));
+  if (mn < 0.0hf) {
+    color = lum + (((color - lum) * lum) / (lum - mn + kEhCloseEnoughHalf));
   }
-  if (mx > 1) {
-    color = lum + (((color - lum) * (1 - lum)) / (mx - lum + kEhCloseEnough));
+  if (mx > 1.0hf) {
+    color = lum +
+            (((color - lum) * (1.0hf - lum)) / (mx - lum + kEhCloseEnoughHalf));
   }
   return color;
 }
 
-vec3 IPSetLuminosity(vec3 color, float luminosity) {
-  float relative_lum = luminosity - IPLuminosity(color);
+f16vec3 IPSetLuminosity(f16vec3 color, float16_t luminosity) {
+  float16_t relative_lum = luminosity - IPLuminosity(color);
   return IPClipColor(color + relative_lum);
 }
 
-float IPSaturation(vec3 color) {
+float16_t IPSaturation(f16vec3 color) {
   return max(max(color.r, color.g), color.b) -
          min(min(color.r, color.g), color.b);
 }
 
-vec3 IPSetSaturation(vec3 color, float saturation) {
-  float mn = min(min(color.r, color.g), color.b);
-  float mx = max(max(color.r, color.g), color.b);
-  return (mn < mx) ? ((color - mn) * saturation) / (mx - mn) : vec3(0);
+f16vec3 IPSetSaturation(f16vec3 color, float16_t saturation) {
+  float16_t mn = min(min(color.r, color.g), color.b);
+  float16_t mx = max(max(color.r, color.g), color.b);
+  return (mn < mx) ? ((color - mn) * saturation) / (mx - mn) : f16vec3(0.0hf);
 }
 
 //------------------------------------------------------------------------------
@@ -58,134 +60,136 @@ vec3 IPSetSaturation(vec3 color, float saturation) {
 /// applied to the destination using `SourceOver` alpha compositing.
 ///
 
-vec3 IPBlendScreen(vec3 dst, vec3 src) {
+f16vec3 IPBlendScreen(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingscreen
   return dst + src - (dst * src);
 }
 
-vec3 IPBlendHardLight(vec3 dst, vec3 src) {
+f16vec3 IPBlendHardLight(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendinghardlight
-  return IPVec3Choose(dst * (2 * src), IPBlendScreen(dst, 2 * src - 1), src);
+  return IPHalfVec3Choose(dst * (2.0hf * src),
+                          IPBlendScreen(dst, 2.0hf * src - 1.0hf), src);
 }
 
-vec3 IPBlendOverlay(vec3 dst, vec3 src) {
+f16vec3 IPBlendOverlay(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingoverlay
   // HardLight, but with reversed parameters.
   return IPBlendHardLight(src, dst);
 }
 
-vec3 IPBlendDarken(vec3 dst, vec3 src) {
+f16vec3 IPBlendDarken(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingdarken
   return min(dst, src);
 }
 
-vec3 IPBlendLighten(vec3 dst, vec3 src) {
+f16vec3 IPBlendLighten(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendinglighten
   return max(dst, src);
 }
 
-vec3 IPBlendColorDodge(vec3 dst, vec3 src) {
+f16vec3 IPBlendColorDodge(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingcolordodge
 
-  vec3 color = min(vec3(1), dst / (1 - src));
+  f16vec3 color = min(f16vec3(1.0hf), dst / (1.0hf - src));
 
-  if (dst.r < kEhCloseEnough) {
-    color.r = 0;
+  if (dst.r < kEhCloseEnoughHalf) {
+    color.r = 0.0hf;
   }
-  if (dst.g < kEhCloseEnough) {
-    color.g = 0;
+  if (dst.g < kEhCloseEnoughHalf) {
+    color.g = 0.0hf;
   }
-  if (dst.b < kEhCloseEnough) {
-    color.b = 0;
+  if (dst.b < kEhCloseEnoughHalf) {
+    color.b = 0.0hf;
   }
 
-  if (1 - src.r < kEhCloseEnough) {
-    color.r = 1;
+  if (1.0hf - src.r < kEhCloseEnoughHalf) {
+    color.r = 1.0hf;
   }
-  if (1 - src.g < kEhCloseEnough) {
-    color.g = 1;
+  if (1.0hf - src.g < kEhCloseEnoughHalf) {
+    color.g = 1.0hf;
   }
-  if (1 - src.b < kEhCloseEnough) {
-    color.b = 1;
+  if (1.0hf - src.b < kEhCloseEnoughHalf) {
+    color.b = 1.0hf;
   }
 
   return color;
 }
 
-vec3 IPBlendColorBurn(vec3 dst, vec3 src) {
+f16vec3 IPBlendColorBurn(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingcolorburn
 
-  vec3 color = 1 - min(vec3(1), (1 - dst) / src);
+  f16vec3 color = 1.0hf - min(f16vec3(1.0hf), (1.0hf - dst) / src);
 
-  if (1 - dst.r < kEhCloseEnough) {
-    color.r = 1;
+  if (1.0hf - dst.r < kEhCloseEnoughHalf) {
+    color.r = 1.0hf;
   }
-  if (1 - dst.g < kEhCloseEnough) {
-    color.g = 1;
+  if (1.0hf - dst.g < kEhCloseEnoughHalf) {
+    color.g = 1.0hf;
   }
-  if (1 - dst.b < kEhCloseEnough) {
-    color.b = 1;
+  if (1.0hf - dst.b < kEhCloseEnoughHalf) {
+    color.b = 1.0hf;
   }
 
-  if (src.r < kEhCloseEnough) {
-    color.r = 0;
+  if (src.r < kEhCloseEnoughHalf) {
+    color.r = 0.0hf;
   }
-  if (src.g < kEhCloseEnough) {
-    color.g = 0;
+  if (src.g < kEhCloseEnoughHalf) {
+    color.g = 0.0hf;
   }
-  if (src.b < kEhCloseEnough) {
-    color.b = 0;
+  if (src.b < kEhCloseEnoughHalf) {
+    color.b = 0.0hf;
   }
 
   return color;
 }
 
-vec3 IPBlendSoftLight(vec3 dst, vec3 src) {
+f16vec3 IPBlendSoftLight(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingsoftlight
 
-  vec3 D = IPVec3ChooseCutoff(((16 * dst - 12) * dst + 4) * dst,  //
-                              sqrt(dst),                          //
-                              dst,                                //
-                              0.25);
+  f16vec3 D =
+      IPHalfVec3ChooseCutoff(((16.0hf * dst - 12.0hf) * dst + 4.0hf) * dst,  //
+                             sqrt(dst),                                      //
+                             dst,                                            //
+                             0.25hf);
 
-  return IPVec3Choose(dst - (1 - 2 * src) * dst * (1 - dst),  //
-                      dst + (2 * src - 1) * (D - dst),        //
-                      src);
+  return IPHalfVec3Choose(dst - (1.0hf - 2.0hf * src) * dst * (1.0hf - dst),  //
+                          dst + (2.0hf * src - 1.0hf) * (D - dst),            //
+                          src);
 }
 
-vec3 IPBlendDifference(vec3 dst, vec3 src) {
+f16vec3 IPBlendDifference(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingdifference
   return abs(dst - src);
 }
 
-vec3 IPBlendExclusion(vec3 dst, vec3 src) {
+f16vec3 IPBlendExclusion(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingexclusion
-  return dst + src - 2 * dst * src;
+  return dst + src - 2.0hf * dst * src;
 }
 
-vec3 IPBlendMultiply(vec3 dst, vec3 src) {
+f16vec3 IPBlendMultiply(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingmultiply
   return dst * src;
 }
 
-vec3 IPBlendHue(vec3 dst, vec3 src) {
+f16vec3 IPBlendHue(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendinghue
   return IPSetLuminosity(IPSetSaturation(src, IPSaturation(dst)),
                          IPLuminosity(dst));
 }
 
-vec3 IPBlendSaturation(vec3 dst, vec3 src) {
+f16vec3 IPBlendSaturation(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingsaturation
   return IPSetLuminosity(IPSetSaturation(dst, IPSaturation(src)),
                          IPLuminosity(dst));
 }
 
-vec3 IPBlendColor(vec3 dst, vec3 src) {
+f16vec3 IPBlendColor(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingcolor
   return IPSetLuminosity(src, IPLuminosity(dst));
 }
 
-vec3 IPBlendLuminosity(vec3 dst, vec3 src) {
+f16vec3 IPBlendLuminosity(f16vec3 dst, f16vec3 src) {
   // https://www.w3.org/TR/compositing-1/#blendingluminosity
   return IPSetLuminosity(dst, IPLuminosity(src));
 }
