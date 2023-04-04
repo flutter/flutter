@@ -695,8 +695,10 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
     globals.printBox(
       "${globals.logger.terminal.warningMark} Your project's Gradle and AGP version "
       'is incompatible with the Java version that Flutter uses.\n\n'
-      'To fix this issue, first, update the Gradle version specified in '
-      '${gradlePropertiesFile.path} to be compatible with the Java version. '
+      'To fix this issue, first, check the Java version used by Flutter by '
+      'running `flutter doctor -v`.\n\n'
+      'Then, update the Gradle version specified in ${gradlePropertiesFile.path}'
+      ' to be compatible with that Java version. '
       'See the link below for more information on compatible Java/Gradle versions:\n'
       'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n'
       'Then, ensure the AGP version specified in ${gradleFile.path} is '
