@@ -6,7 +6,7 @@
   "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "PG",
-  "postMeridiemAbbreviation": "P/M",
+  "postMeridiemAbbreviation": "PTG",
   "todayLabel": "Hari ini",
   "alertDialogLabel": "Makluman",
   "timerPickerHourLabelOne": "jam",
