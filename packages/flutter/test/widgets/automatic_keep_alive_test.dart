@@ -577,6 +577,18 @@ void main() {
     handle.notifyListeners();
     expect(handle.hasListeners, false);
   });
+
+  testWidgets('Dispatching multiple KeepAliveNotifications does not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        itemCount: 1,
+        itemBuilder: (BuildContext context, int index) {
+          return const MultiKeepAliveNotificationDispatchWidget();
+        },
+      ),
+    ));
+  });
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
@@ -673,6 +685,30 @@ class _KeepAliveListenableLeakCheckerState extends State<KeepAliveListenableLeak
 
   @override
   Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+class MultiKeepAliveNotificationDispatchWidget extends StatefulWidget {
+  const MultiKeepAliveNotificationDispatchWidget({super.key});
+
+  @override
+  State<MultiKeepAliveNotificationDispatchWidget> createState() => _MultiKeepAliveNotificationDispatchWidgetState();
+}
+
+class _MultiKeepAliveNotificationDispatchWidgetState extends State<MultiKeepAliveNotificationDispatchWidget> {
+  final KeepAliveHandle _handle = KeepAliveHandle();
+
+  @override
+  void deactivate() {
+    _handle.dispose();
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    KeepAliveNotification(_handle).dispatch(context);
+    KeepAliveNotification(_handle).dispatch(context);
     return const Placeholder();
   }
 }

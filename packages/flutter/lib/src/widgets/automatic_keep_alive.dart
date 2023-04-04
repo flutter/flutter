@@ -79,9 +79,11 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   bool _addClient(KeepAliveNotification notification) {
     final Listenable handle = notification.handle;
     _handles ??= <Listenable, VoidCallback>{};
-    assert(!_handles!.containsKey(handle));
-    _handles![handle] = _createCallback(handle);
-    handle.addListener(_handles![handle]!);
+    if (!_handles!.containsKey(handle)) {
+      _handles![handle] = _createCallback(handle);
+      handle.addListener(_handles![handle]!);
+    }
+
     if (!_keepingAlive) {
       _keepingAlive = true;
       final ParentDataElement<KeepAliveParentDataMixin>? childElement = _getChildElement();
