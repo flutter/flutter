@@ -382,7 +382,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   }
 
   /// Handles the app.start event from Flutter.
-  Future<void> _handleAppStart(Map<String, Object?> params) async {
+  void _handleAppStart(Map<String, Object?> params) {
     _appId = params['appId'] as String?;
     if (_appId == null) {
       throw DebugAdapterException('Unexpected null `appId` in app.start event');
