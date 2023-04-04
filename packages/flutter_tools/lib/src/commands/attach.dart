@@ -140,6 +140,7 @@ class AttachCommand extends FlutterCommand {
     addDevToolsOptions(verboseHelp: verboseHelp);
     addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   final HotRunnerFactory _hotRunnerFactory;

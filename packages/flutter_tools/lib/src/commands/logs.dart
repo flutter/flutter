@@ -19,6 +19,7 @@ class LogsCommand extends FlutterCommand {
       help: 'Clear log history before reading from logs.',
     );
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   @override

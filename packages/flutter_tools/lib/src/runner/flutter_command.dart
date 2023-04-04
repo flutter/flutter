@@ -112,6 +112,7 @@ class FlutterOptions {
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
+  static const String kDeviceConnection = 'device-connection';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kCodeSizeDirectory = 'code-size-directory';
   static const String kNullAssertions = 'null-assertions';
@@ -694,6 +695,19 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesDeviceConnectionOption() {
+    argParser.addOption(FlutterOptions.kDeviceConnection,
+      defaultsTo: 'both',
+      help: 'Discover devices based on connection type.',
+      allowed: <String>['attached', 'wireless', 'both'],
+      allowedHelp: <String, String>{
+        'both': 'Searches for both attached and wireless devices.',
+        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
+        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.'
+      },
+    );
+  }
+
   void usesApplicationBinaryOption() {
     argParser.addOption(
       FlutterOptions.kUseApplicationBinary,
@@ -722,10 +736,24 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }();
 
+  DeviceConnectionInterface? get deviceConnectionInterface  {
+    if ((argResults?.options.contains(FlutterOptions.kDeviceConnection) ?? false)
+        && (argResults?.wasParsed(FlutterOptions.kDeviceConnection) ?? false)) {
+      final String? connectionType = stringArg(FlutterOptions.kDeviceConnection);
+      if (connectionType == 'attached') {
+        return DeviceConnectionInterface.attached;
+      } else if (connectionType == 'wireless') {
+        return DeviceConnectionInterface.wireless;
+      }
+    }
+    return null;
+  }
+
   late final TargetDevices _targetDevices = TargetDevices(
     platform: globals.platform,
     deviceManager: globals.deviceManager!,
     logger: globals.logger,
+    deviceConnectionInterface: deviceConnectionInterface,
   );
 
   void addBuildModeFlags({
