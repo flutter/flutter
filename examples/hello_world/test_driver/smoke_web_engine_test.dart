@@ -44,6 +44,6 @@ void main() {
         <dynamic>[],
       ) as WebElement?;
       expect(fltSemantics, isNotNull);
-    }, skip: true);
+    }, skip: 'skipped until DOM structure changes are merged');
   });
 }
