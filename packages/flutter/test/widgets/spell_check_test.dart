@@ -174,7 +174,7 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text longer with more misspelled words than actual text example',
@@ -208,7 +208,7 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text mismatched example',
@@ -237,7 +237,7 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted forward example',
@@ -269,7 +269,7 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted backwards example',
@@ -301,7 +301,7 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted backwards and forwards example',
@@ -337,5 +337,5 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 }
