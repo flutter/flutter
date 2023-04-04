@@ -21,7 +21,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: example.MyStatelessWidget(
+          body: example.ImageClipExample(
             image: MemoryImage(Uint8List.fromList(kTransparentImage)),
           ),
         ),
