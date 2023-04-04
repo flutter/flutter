@@ -573,8 +573,6 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (isWithinVersionRange(androidPluginVersion, min: maxKnownAgpVersion, max: '100.100')) {
     return _maxKnownAndSupportedGradleVersion;
   }
-  // TODO(reidbaker): should this be a regular thow so that @christopherfujino
-  // can see these in crash logging.
   throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
 }
 
