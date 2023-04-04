@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -49,6 +50,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       ))
           .run(<String>['build', 'web', '--no-pub']);
@@ -71,6 +73,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       ))
           .run(<String>['build', 'web', '--no-pub']);
@@ -92,6 +95,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       ))
           .run(<String>['build', 'web', '--no-pub']);
@@ -112,6 +116,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       ))
           .run(<String>['build', 'web', '--no-pub']);
@@ -134,6 +139,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: buildSystem,
         fileSystem: fileSystem,
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
       ))
           .run(<String>['build', 'web', '--no-pub']);

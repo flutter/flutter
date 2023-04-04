@@ -5946,7 +5946,6 @@ void main() {
                 0 + kMinInteractiveDimension,
               ),
             );
-            break;
           case HandlePositionInViewport.rightEdge:
             expect(
               pos,
@@ -5955,7 +5954,6 @@ void main() {
                 viewport.width + kMinInteractiveDimension,
               ),
             );
-            break;
           case HandlePositionInViewport.within:
             expect(
               pos,
@@ -5964,7 +5962,6 @@ void main() {
                 viewport.width + kMinInteractiveDimension,
               ),
             );
-            break;
         }
       }
       expect(state.selectionOverlay!.handlesAreVisible, isTrue);
@@ -6391,7 +6388,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS expand by line.
       case TargetPlatform.iOS:
@@ -6407,7 +6403,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     // Select All
@@ -6565,7 +6560,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
       // On macOS/iOS expand selection.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -6579,7 +6573,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     // Move to start again.
@@ -7370,7 +7363,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
@@ -7384,7 +7376,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     expect(controller.text, equals(testText), reason: 'on $platform');
@@ -7412,7 +7403,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
@@ -7427,7 +7417,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
     expect(controller.text, equals(testText), reason: 'on $platform');
   },
@@ -7521,7 +7510,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
@@ -7535,7 +7523,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     expect(controller.text, equals(testText), reason: 'on $platform');
@@ -7563,7 +7550,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux does nothing at a wordwrap with subsequent presses.
       case TargetPlatform.linux:
@@ -7576,7 +7562,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows jumps to the previous wordwrapped line.
       case TargetPlatform.windows:
@@ -7589,7 +7574,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -7682,7 +7666,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms go to the line start/end.
       case TargetPlatform.linux:
@@ -7697,7 +7680,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
     expect(controller.text, equals(testText), reason: 'on $platform');
 
@@ -7724,7 +7706,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux does nothing at a wordwrap with subsequent presses.
       case TargetPlatform.linux:
@@ -7738,7 +7719,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows jumps to the next wordwrapped line.
       case TargetPlatform.windows:
@@ -7752,7 +7732,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -7875,7 +7854,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux extends to the line start/end.
       case TargetPlatform.linux:
@@ -7900,7 +7878,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows expands to the line start/end.
       case TargetPlatform.windows:
@@ -7924,7 +7901,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS go to the start/end of the document.
       case TargetPlatform.iOS:
@@ -7950,7 +7926,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -8214,7 +8189,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS select to the start of the document.
       case TargetPlatform.iOS:
@@ -8229,7 +8203,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms select to the line start.
       case TargetPlatform.linux:
@@ -8244,7 +8217,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
 
     expect(controller.text, equals(testText), reason: 'on $platform');
@@ -8271,7 +8243,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS select to the start of the document.
       case TargetPlatform.iOS:
@@ -8286,7 +8257,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux does nothing at a wordwrap with subsequent presses.
       case TargetPlatform.linux:
@@ -8300,7 +8270,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows jumps to the previous wordwrapped line.
       case TargetPlatform.windows:
@@ -8314,7 +8283,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -8406,7 +8374,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS select to the end of the document.
       case TargetPlatform.iOS:
@@ -8421,7 +8388,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // These platforms select to the line end.
       case TargetPlatform.linux:
@@ -8437,7 +8403,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
     expect(controller.text, equals(testText), reason: 'on $platform');
 
@@ -8463,7 +8428,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Mac and iOS stay at the end of the document.
       case TargetPlatform.iOS:
@@ -8478,7 +8442,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Linux does nothing at a wordwrap with subsequent presses.
       case TargetPlatform.linux:
@@ -8493,7 +8456,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
 
       // Windows jumps to the previous wordwrapped line.
       case TargetPlatform.windows:
@@ -8508,7 +8470,6 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
@@ -9049,7 +9010,6 @@ void main() {
                 0 + kMinInteractiveDimension,
               ),
             );
-            break;
           case HandlePositionInViewport.rightEdge:
             expect(
               pos,
@@ -9058,7 +9018,6 @@ void main() {
                 viewport.width + kMinInteractiveDimension,
               ),
             );
-            break;
           case HandlePositionInViewport.within:
             expect(
               pos,
@@ -9067,7 +9026,6 @@ void main() {
                 viewport.width + kMinInteractiveDimension,
               ),
             );
-            break;
         }
       }
       expect(state.selectionOverlay!.handlesAreVisible, isTrue);
@@ -11650,14 +11608,12 @@ void main() {
       case TargetPlatform.windows:
         expect(controller.selection.baseOffset, 17);
         expect(controller.selection.extentOffset, 15);
-        break;
 
       // Mac and iOS expand by line.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         expect(controller.selection.baseOffset, 15);
         expect(controller.selection.extentOffset, 24);
-        break;
     }
 
     // Set the caret to the end of a line.
@@ -13866,7 +13822,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               selection: TextSelection.collapsed(offset: 6),
             ),
           );
-          break;
         // Composing changes are ignored on all other platforms.
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -13880,7 +13835,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               selection: TextSelection.collapsed(offset: 4),
             ),
           );
-          break;
       }
       await sendUndo(tester);
       expect(
@@ -13925,7 +13879,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               selection: TextSelection.collapsed(offset: 6),
             ),
           );
-          break;
         // Composing changes are ignored on all other platforms.
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -13939,7 +13892,6 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
               selection: TextSelection.collapsed(offset: 4),
             ),
           );
-          break;
       }
       await sendRedo(tester);
       expect(
@@ -14886,28 +14838,34 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     });
 
     testWidgets(
-      'Error thrown when spell check enabled but no default spell check service available',
+      'Spell check disabled when spell check configuration specified but no default spell check service available',
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         false;
 
       await tester.pumpWidget(
-          EditableText(
-              controller: TextEditingController(text: 'A'),
-              focusNode: FocusNode(),
-              style: const TextStyle(),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              cursorOpacityAnimates: true,
-              autofillHints: null,
-              spellCheckConfiguration:
-                const SpellCheckConfiguration(
-                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
-              ),
-          ));
+        MaterialApp(
+          home: EditableText(
+            controller: TextEditingController(text: 'A'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        )
+      );
 
-        expect(tester.takeException(), isA<AssertionError>());
-        tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
+      expect(tester.takeException(), isA<AssertionError>());
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+      tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
 
     testWidgets(
@@ -15087,23 +15045,23 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
       );
       controller.value = value;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: EditableText(
-              backgroundCursorColor: Colors.grey,
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-              selectionControls: materialTextSelectionControls,
-              spellCheckConfiguration:
-                const SpellCheckConfiguration(
-                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
-                  spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
-                ),
-            ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
           ),
-        );
+        ),
+      );
 
       final EditableTextState state =
           tester.state<EditableTextState>(find.byType(EditableText));
@@ -15127,16 +15085,81 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         from: Offset.zero,
         cause: SelectionChangedCause.tap,
       );
+
       await tester.pumpAndSettle();
-      expect(state.showSpellCheckSuggestionsToolbar(), true);
+      // Toolbar will only show on non-web platforms.
+      expect(state.showSpellCheckSuggestionsToolbar(), !kIsWeb);
       await tester.pumpAndSettle();
-      expect(find.text('test'), findsOneWidget);
-      expect(find.text('sets'), findsOneWidget);
-      expect(find.text('set'), findsOneWidget);
-      expect(find.text('DELETE'), findsOneWidget);
+
+      const Matcher matcher = kIsWeb ? findsNothing : findsOneWidget;
+      expect(find.text('test'), matcher);
+      expect(find.text('sets'), matcher);
+      expect(find.text('set'), matcher);
+      expect(find.text('DELETE'), matcher);
     });
 
-    testWidgets('spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+    testWidgets('cupertino spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      const TextEditingValue value = TextEditingValue(
+        text: 'tset test test',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      controller.value = value;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: cupertinoTextSelectionControls,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      state.spellCheckResults = const SpellCheckResults('tset test test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>['test', 'sets', 'set'])]);
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+      await tester.pumpAndSettle();
+
+      // Set last tap down position so that selecting the word edge will be
+      // a valid operation.
+      final Offset pos1 = textOffsetToPosition(tester, 1);
+      final TestGesture gesture = await tester.startGesture(pos1);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(1));
+
+      // Test that tapping misspelled word replacement buttons will replace
+      // the correct word and select the word edge.
+      state.showSpellCheckSuggestionsToolbar();
+      await tester.pumpAndSettle();
+
+      if (kIsWeb) {
+        expect(find.text('sets'), findsNothing);
+      }
+      else {
+        expect(find.text('sets'), findsOneWidget);
+        await tester.tap(find.text('sets'));
+        await tester.pumpAndSettle();
+        expect(state.currentTextEditingValue.text, equals('sets test test'));
+        expect(state.currentTextEditingValue.selection.baseOffset, equals(4));
+      }
+    });
+
+    testWidgets('material spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(
@@ -15171,21 +15194,34 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         cause: SelectionChangedCause.tap,
       );
       await tester.pumpAndSettle();
+      expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
 
       // Test misspelled word replacement buttons.
       state.showSpellCheckSuggestionsToolbar();
       await tester.pumpAndSettle();
-      expect(find.text('sets'), findsOneWidget);
-      await tester.tap(find.text('sets'));
-      await tester.pumpAndSettle();
-      expect(state.currentTextEditingValue.text, equals('sets test test'));
+
+      if (kIsWeb) {
+        expect(find.text('sets'), findsNothing);
+      } else {
+        expect(find.text('sets'), findsOneWidget);
+        await tester.tap(find.text('sets'));
+        await tester.pumpAndSettle();
+        expect(state.currentTextEditingValue.text, equals('sets test test'));
+        expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
+      }
 
       // Test delete button.
       state.showSpellCheckSuggestionsToolbar();
       await tester.pumpAndSettle();
-      await tester.tap(find.text('DELETE'));
-      await tester.pumpAndSettle();
-      expect(state.currentTextEditingValue.text, equals(' test test'));
+      if (kIsWeb) {
+        expect(find.text('DELETE'), findsNothing);
+      } else {
+        expect(find.text('DELETE'), findsOneWidget);
+        await tester.tap(find.text('DELETE'));
+        await tester.pumpAndSettle();
+        expect(state.currentTextEditingValue.text, equals(' test test'));
+        expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
+      }
     });
   });
 

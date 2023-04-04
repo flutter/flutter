@@ -2,11 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for a [ChangeNotifier] with a [ListenableBuilder].
+// Flutter code sample for a [ValueNotifier] with a [ListenableBuilder].
 
 import 'package:flutter/material.dart';
 
 void main() { runApp(const ListenableBuilderExample()); }
+
+class ListenableBuilderExample extends StatefulWidget {
+  const ListenableBuilderExample({super.key});
+
+  @override
+  State<ListenableBuilderExample> createState() => _ListenableBuilderExampleState();
+}
+
+class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
+  final ValueNotifier<int> _counter = ValueNotifier<int>(0);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text('ListenableBuilder Example')),
+        body: CounterBody(counterValueNotifier: _counter),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _counter.value++,
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+}
 
 class CounterBody extends StatelessWidget {
   const CounterBody({super.key, required this.counterValueNotifier});
@@ -31,31 +56,6 @@ class CounterBody extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
-  }
-}
-
-class ListenableBuilderExample extends StatefulWidget {
-  const ListenableBuilderExample({super.key});
-
-  @override
-  State<ListenableBuilderExample> createState() => _ListenableBuilderExampleState();
-}
-
-class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
-  final ValueNotifier<int> _counter = ValueNotifier<int>(0);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('ListenableBuilder Example')),
-        body: CounterBody(counterValueNotifier: _counter),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _counter.value++,
-          child: const Icon(Icons.add),
-        ),
       ),
     );
   }

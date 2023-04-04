@@ -46,12 +46,10 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
           applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
-        break;
       case MenuSelection.showMessage:
         setState(() {
           _showMessage = !_showMessage;
         });
-        break;
     }
   }
 

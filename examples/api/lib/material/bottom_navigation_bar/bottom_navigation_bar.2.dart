@@ -80,10 +80,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   curve: Curves.easeOut,
                 );
               }
-              break;
             case 1:
               showModal(context);
-              break;
           }
           setState(
             () {

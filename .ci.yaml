@@ -343,7 +343,6 @@ targets:
 
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
-    bringup: true # New target: https://github.com/flutter/flutter/pull/115511
     timeout: 60
     properties:
       dependencies: >-
@@ -399,7 +398,6 @@ targets:
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2441,6 +2439,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
+  - name: Linux_android animated_blur_backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: animated_blur_backdrop_filter_perf__timeline_summary
+
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
@@ -2727,7 +2735,6 @@ targets:
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2736,7 +2743,6 @@ targets:
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2975,6 +2981,19 @@ targets:
         ]
       task_name: platform_view_macos__start_up
 
+  - name: Mac platform_channel_sample_test_macos
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "xcode", "version": "14a5294e"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: platform_channel_sample_test_macos
+
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3128,7 +3147,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3154,7 +3172,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3180,7 +3197,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3206,7 +3222,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3299,7 +3314,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -4039,6 +4053,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_impeller_ios
+
+  - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
@@ -4886,7 +4910,6 @@ targets:
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
-    bringup: true
     properties:
       task_name: flutter_packaging
       tags: >

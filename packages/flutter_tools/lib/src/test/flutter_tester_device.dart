@@ -119,6 +119,8 @@ class FlutterTesterTestDevice extends TestDevice {
       '--packages=${debuggingOptions.buildInfo.packagesPath}',
       if (testAssetDirectory != null)
         '--flutter-assets-dir=$testAssetDirectory',
+      if (debuggingOptions.nullAssertions)
+        '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
       entrypointPath,
     ];

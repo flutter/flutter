@@ -16,6 +16,7 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
+    required super.logger,
     required FileSystem fileSystem,
     required bool verboseHelp,
   }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
@@ -28,6 +29,7 @@ class BuildWebCommand extends BuildSubCommand {
     addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     addNativeNullAssertions();
 
     //
@@ -58,6 +60,7 @@ class BuildWebCommand extends BuildSubCommand {
       },
     );
     usesWebRendererOption();
+    usesWebResourcesCdnFlag();
 
     //
     // JavaScript compilation options
@@ -164,6 +167,7 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
+    displayNullSafetyMode(buildInfo);
     await buildWeb(
       flutterProject,
       target,

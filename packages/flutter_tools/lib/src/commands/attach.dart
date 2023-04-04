@@ -90,6 +90,7 @@ class AttachCommand extends FlutterCommand {
     usesDartDefineOption();
     usesDeviceUserOption();
     addEnableExperimentation(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
     argParser
       ..addOption(
@@ -173,6 +174,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   @override
   final String category = FlutterCommandCategory.tools;
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   int? get debugPort {
     if (argResults!['debug-port'] == null) {

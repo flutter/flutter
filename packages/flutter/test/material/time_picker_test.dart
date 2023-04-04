@@ -27,12 +27,10 @@ void main() {
         selectTimeString = 'SELECT TIME';
         enterTimeString = 'ENTER TIME';
         cancelString = 'CANCEL';
-        break;
       case MaterialType.material3:
         selectTimeString = 'Select time';
         enterTimeString = 'Enter time';
         cancelString = 'Cancel';
-        break;
     }
 
     group('Dial (${materialType.name})', () {
@@ -413,7 +411,6 @@ void main() {
             // ignore: avoid_dynamic_calls
             expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
           });
-          break;
         case MaterialType.material3:
           testWidgets('Dialog size - dial mode', (WidgetTester tester) async {
             addTearDown(tester.view.reset);
@@ -519,7 +516,6 @@ void main() {
             // ignore: avoid_dynamic_calls
             expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
           });
-          break;
       }
 
       testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {
@@ -752,13 +748,11 @@ void main() {
             expect(tester.getBottomRight(find.text(okString)).dx, 644);
             expect(tester.getBottomLeft(find.text(okString)).dx, 616);
             expect(tester.getBottomRight(find.text(cancelString)).dx, 582);
-            break;
           case MaterialType.material3:
             expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
             expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(292.0, 143.0)));
             expect(tester.getBottomLeft(find.text(okString)).dx, 616);
             expect(tester.getBottomRight(find.text(cancelString)).dx, 578);
-            break;
         }
 
         await tester.tap(find.text(okString));
@@ -775,14 +769,12 @@ void main() {
             expect(tester.getBottomLeft(find.text(okString)).dx, 156);
             expect(tester.getBottomRight(find.text(okString)).dx, 184);
             expect(tester.getBottomLeft(find.text(cancelString)).dx, 218);
-            break;
           case MaterialType.material3:
             expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(508, 129)));
             expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 143)));
             expect(tester.getBottomLeft(find.text(okString)).dx, 156);
             expect(tester.getBottomRight(find.text(okString)).dx, 184);
             expect(tester.getBottomLeft(find.text(cancelString)).dx, 222);
-            break;
         }
 
         await tester.tap(find.text(okString));

@@ -173,14 +173,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
         final bool isFullRestart = request.command == 'hotRestart';
         await _performRestart(isFullRestart, args?.args['reason'] as String?);
         sendResponse(null);
-        break;
 
       // Handle requests (from the client) that provide responses to reverse-requests
       // that we forwarded from `flutter run --machine`.
       case 'flutter.sendForwardedRequestResponse':
         _handleForwardedResponse(args);
         sendResponse(null);
-        break;
 
       default:
         await super.customRequest(request, args, sendResponse);
@@ -196,12 +194,9 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
         switch (event.extensionKind) {
           case 'Flutter.ServiceExtensionStateChanged':
             _sendServiceExtensionStateChanged(event.extensionData);
-            break;
           case 'Flutter.Error':
             _handleFlutterErrorEvent(event.extensionData);
-            break;
         }
-        break;
     }
   }
 
@@ -457,16 +452,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     switch (event) {
       case 'daemon.connected':
         _handleDaemonConnected(params);
-        break;
       case 'app.debugPort':
         _handleDebugPort(params);
-        break;
       case 'app.start':
         _handleAppStart(params);
-        break;
       case 'app.started':
         _handleAppStarted();
-        break;
     }
 
     if (_eventsToForwardToClient.contains(event)) {

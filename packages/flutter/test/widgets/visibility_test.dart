@@ -471,4 +471,108 @@ void main() {
     expect(tester.layers, isNot(contains(isA<OpacityLayer>())));
     expect(tester.layers.last, isA<PictureLayer>());
   });
+
+  testWidgets('Visibility.of returns correct value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: _ShowVisibility(),
+      ),
+    );
+    expect(find.text('is visible ? true', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          maintainState: true,
+          child: _ShowVisibility(),
+        ),
+      ),
+    );
+    expect(find.text('is visible ? true', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          visible: false,
+          maintainState: true,
+          child: _ShowVisibility(),
+        ),
+      ),
+    );
+    expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('Visibility.of works when multiple Visibility widgets are in hierarchy', (WidgetTester tester) async {
+    bool didChangeDependencies = false;
+    void handleDidChangeDependencies() {
+      didChangeDependencies = true;
+    }
+
+    Widget newWidget({required bool ancestorIsVisible, required bool descendantIsVisible}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          visible: ancestorIsVisible,
+          maintainState: true,
+          child: Center(
+            child: Visibility(
+              visible: descendantIsVisible,
+              maintainState: true,
+              child: _ShowVisibility(
+                onDidChangeDependencies: handleDidChangeDependencies,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: true, descendantIsVisible: true));
+    expect(didChangeDependencies, isTrue);
+    expect(find.text('is visible ? true', skipOffstage: false), findsOneWidget);
+    didChangeDependencies = false;
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: true, descendantIsVisible: false));
+    expect(didChangeDependencies, isTrue);
+    expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+    didChangeDependencies = false;
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: true, descendantIsVisible: false));
+    expect(didChangeDependencies, isFalse);
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: false, descendantIsVisible: false));
+    expect(didChangeDependencies, isTrue);
+    didChangeDependencies = false;
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: false, descendantIsVisible: true));
+    expect(didChangeDependencies, isTrue);
+    expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+  });
+}
+
+class _ShowVisibility extends StatefulWidget {
+  const _ShowVisibility({this.onDidChangeDependencies});
+
+  final VoidCallback? onDidChangeDependencies;
+
+  @override
+  State<_ShowVisibility> createState() => _ShowVisibilityState();
+}
+
+class _ShowVisibilityState extends State<_ShowVisibility> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.onDidChangeDependencies != null) {
+      widget.onDidChangeDependencies!();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('is visible ? ${Visibility.of(context)}');
+  }
 }

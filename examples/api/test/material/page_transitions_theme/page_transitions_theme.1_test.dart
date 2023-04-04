@@ -25,14 +25,12 @@ void main() {
           expect(theme.builders[platform], isA<ZoomPageTransitionsBuilder>());
           final ZoomPageTransitionsBuilder builder = theme.builders[platform]! as ZoomPageTransitionsBuilder;
           expect(builder.allowSnapshotting, isFalse);
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
           expect(theme.builders[platform], isNull);
-          break;
       }
     }
 
