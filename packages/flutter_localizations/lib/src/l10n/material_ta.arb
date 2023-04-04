@@ -1,6 +1,6 @@
 {
   "scriptCategory": "dense",
-  "timeOfDayFormat": "ah:mm",
+  "timeOfDayFormat": "h:mm a",
   "showAccountsLabel": "கணக்குகளைக் காட்டும்",
   "hideAccountsLabel": "கணக்குகளை மறைக்கும்",
   "okButtonLabel": "சரி",
