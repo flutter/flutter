@@ -51,16 +51,16 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Terug';
 
   @override
-  String get bottomSheetLabel => 'Onderste blad';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Skakel oor na kalender';
 
   @override
-  String get cancelButtonLabel => 'Kanselleer';
+  String get cancelButtonLabel => 'KANSELLEER';
 
   @override
-  String get closeButtonLabel => 'Maak toe';
+  String get closeButtonLabel => 'MAAK TOE';
 
   @override
   String get closeButtonTooltip => 'Maak toe';
@@ -69,13 +69,13 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Vou uit';
 
   @override
-  String get continueButtonLabel => 'Gaan voort';
+  String get continueButtonLabel => 'GAAN VOORT';
 
   @override
   String get copyButtonLabel => 'Kopieer';
 
   @override
-  String get currentDateLabel => 'Vandag';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Knip';
@@ -90,7 +90,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Buite reeks.';
 
   @override
-  String get datePickerHelpText => 'Kies datum';
+  String get datePickerHelpText => 'KIES DATUM';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Einddatum $fullDate';
@@ -99,7 +99,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Einddatum';
 
   @override
-  String get dateRangePickerHelpText => 'Kies reeks';
+  String get dateRangePickerHelpText => 'KIES REEKS';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Begindatum $fullDate';
@@ -396,13 +396,13 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rye per bladsy:';
 
   @override
-  String get saveButtonLabel => 'Stoor';
+  String get saveButtonLabel => 'STOOR';
 
   @override
-  String get scrimLabel => 'Skerm';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Maak $modalRouteContentName toe';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -450,7 +450,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Kies tyd';
+  String get timePickerDialHelpText => 'KIES TYD';
 
   @override
   String get timePickerHourLabel => 'Uur';
@@ -459,7 +459,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Kies ure';
 
   @override
-  String get timePickerInputHelpText => 'Voer tyd in';
+  String get timePickerInputHelpText => 'VOER TYD IN';
 
   @override
   String get timePickerMinuteLabel => 'Minuut';
@@ -474,7 +474,7 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Datumreeks';
 
   @override
-  String get viewLicensesButtonLabel => 'Bekyk lisensies';
+  String get viewLicensesButtonLabel => 'BEKYK LISENSIES';
 }
 
 /// The translations for Amharic (`am`).
@@ -508,7 +508,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ተመለስ';
 
   @override
-  String get bottomSheetLabel => 'የግርጌ ሉህ';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'ወደ የቀን መቁጠሪያ ቀይር';
@@ -532,7 +532,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ቅዳ';
 
   @override
-  String get currentDateLabel => 'ዛሬ';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ቁረጥ';
@@ -544,7 +544,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get dateInputLabel => 'ቀን ያስገቡ';
 
   @override
-  String get dateOutOfRangeLabel => 'ከክልል ውጭ።';
+  String get dateOutOfRangeLabel => 'ከክልል ውጪ።';
 
   @override
   String get datePickerHelpText => 'ቀን ይምረጡ';
@@ -592,7 +592,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'ወደ ግቤት ቀይር';
 
   @override
-  String get inputTimeModeButtonLabel => 'ወደ ጽሁፍ ግቤት ሁነታ ቀይር';
+  String get inputTimeModeButtonLabel => 'ወደ ጽሑፍ ግቤት ሁነታ ቀይር';
 
   @override
   String get invalidDateFormatLabel => 'ልክ ያልሆነ ቅርጸት።';
@@ -739,7 +739,7 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'ምረጥ';
 
   @override
-  String get keyboardKeyShift => 'ቀያይር';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'ክፍተት';
@@ -856,10 +856,10 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'አስቀምጥ';
 
   @override
-  String get scrimLabel => 'ገዳቢ';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentNameን ዝጋ';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -965,16 +965,16 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'رجوع';
 
   @override
-  String get bottomSheetLabel => 'بطاقة سفلية';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'التبديل إلى التقويم';
 
   @override
-  String get cancelButtonLabel => 'الإلغاء';
+  String get cancelButtonLabel => 'إلغاء';
 
   @override
-  String get closeButtonLabel => 'الإغلاق';
+  String get closeButtonLabel => 'إغلاق';
 
   @override
   String get closeButtonTooltip => 'إغلاق';
@@ -983,13 +983,13 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'توسيع';
 
   @override
-  String get continueButtonLabel => 'المتابعة';
+  String get continueButtonLabel => 'متابعة';
 
   @override
   String get copyButtonLabel => 'نسخ';
 
   @override
-  String get currentDateLabel => 'تاريخ اليوم';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'قص';
@@ -1310,13 +1310,13 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'عدد الصفوف في الصفحة:';
 
   @override
-  String get saveButtonLabel => 'الحفظ';
+  String get saveButtonLabel => 'حفظ';
 
   @override
-  String get scrimLabel => 'تمويه';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'إغلاق "$modalRouteContentName"';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -1422,7 +1422,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'উভতি যাওক';
 
   @override
-  String get bottomSheetLabel => 'তলৰ শ্বীট';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'কেলেণ্ডাৰলৈ সলনি কৰক';
@@ -1446,7 +1446,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
 
   @override
-  String get currentDateLabel => 'আজি';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'কাট কৰক';
@@ -1653,7 +1653,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'ছিলেক্ট';
 
   @override
-  String get keyboardKeyShift => 'শ্বিফ্ট';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'স্পেচ';
@@ -1770,10 +1770,10 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ছেভ কৰক';
 
   @override
-  String get scrimLabel => 'স্ক্ৰিম';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName বন্ধ কৰক';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -1879,16 +1879,16 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Geri';
 
   @override
-  String get bottomSheetLabel => 'Aşağıdakı Vərəq';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Təqvimə keçin';
 
   @override
-  String get cancelButtonLabel => 'Ləğv edin';
+  String get cancelButtonLabel => 'LƏĞV EDİN';
 
   @override
-  String get closeButtonLabel => 'Bağlayın';
+  String get closeButtonLabel => 'BAĞLAYIN';
 
   @override
   String get closeButtonTooltip => 'Bağlayın';
@@ -1897,13 +1897,13 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Genişləndirin';
 
   @override
-  String get continueButtonLabel => 'Davam edin';
+  String get continueButtonLabel => 'DAVAM EDİN';
 
   @override
   String get copyButtonLabel => 'Kopyalayın';
 
   @override
-  String get currentDateLabel => 'Bugün';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kəsin';
@@ -1918,7 +1918,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Aralıqdan kənar.';
 
   @override
-  String get datePickerHelpText => 'Tarix seçin';
+  String get datePickerHelpText => 'TARİX SEÇİN';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Bitmə tarixi: $fullDate';
@@ -1927,7 +1927,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Bitmə tarixi';
 
   @override
-  String get dateRangePickerHelpText => 'Aralıq seçin';
+  String get dateRangePickerHelpText => 'ARALIQ SEÇİN';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Başlama tarixi: $fullDate';
@@ -2224,13 +2224,13 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Hər səhifə üzrə sıra:';
 
   @override
-  String get saveButtonLabel => 'Yadda saxlayın';
+  String get saveButtonLabel => 'YADDA SAXLAYIN';
 
   @override
-  String get scrimLabel => 'Kətan';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Bağlayın: $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -2278,7 +2278,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Vaxt seçin';
+  String get timePickerDialHelpText => 'VAXT SEÇİN';
 
   @override
   String get timePickerHourLabel => 'Saat';
@@ -2287,7 +2287,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Saat seçin';
 
   @override
-  String get timePickerInputHelpText => 'Vaxt daxil edin';
+  String get timePickerInputHelpText => 'VAXTI DAXİL EDİN';
 
   @override
   String get timePickerMinuteLabel => 'Dəqiqə';
@@ -2302,7 +2302,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Tarix aralığı';
 
   @override
-  String get viewLicensesButtonLabel => 'Lisenziyalara baxın';
+  String get viewLicensesButtonLabel => 'LİSENZİYALARA BAXIN';
 }
 
 /// The translations for Belarusian (`be`).
@@ -2336,16 +2336,16 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
-  String get bottomSheetLabel => 'Ніжні аркуш';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Пераключыцца на каляндар';
 
   @override
-  String get cancelButtonLabel => 'Скасаваць';
+  String get cancelButtonLabel => 'СКАСАВАЦЬ';
 
   @override
-  String get closeButtonLabel => 'Закрыць';
+  String get closeButtonLabel => 'ЗАКРЫЦЬ';
 
   @override
   String get closeButtonTooltip => 'Закрыць';
@@ -2354,13 +2354,13 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Разгарнуць';
 
   @override
-  String get continueButtonLabel => 'Працягнуць';
+  String get continueButtonLabel => 'ПРАЦЯГНУЦЬ';
 
   @override
   String get copyButtonLabel => 'Капіраваць';
 
   @override
-  String get currentDateLabel => 'Сёння';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Выразаць';
@@ -2375,7 +2375,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Па-за межамі дыяпазону.';
 
   @override
-  String get datePickerHelpText => 'Выберыце дату';
+  String get datePickerHelpText => 'ВЫБАР ДАТЫ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Дата заканчэння: $fullDate';
@@ -2384,7 +2384,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Дата заканчэння';
 
   @override
-  String get dateRangePickerHelpText => 'Выберыце дыяпазон дат';
+  String get dateRangePickerHelpText => 'ВЫБАР ДЫЯПАЗОНУ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Дата пачатку: $fullDate';
@@ -2681,13 +2681,13 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Радкоў на старонку:';
 
   @override
-  String get saveButtonLabel => 'Захаваць';
+  String get saveButtonLabel => 'ЗАХАВАЦЬ';
 
   @override
-  String get scrimLabel => 'Палатно';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Закрыць: $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -2735,7 +2735,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Выберыце час';
+  String get timePickerDialHelpText => 'ВЫБЕРЫЦЕ ЧАС';
 
   @override
   String get timePickerHourLabel => 'Гадзіна';
@@ -2744,7 +2744,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Выберыце гадзіны';
 
   @override
-  String get timePickerInputHelpText => 'Увядзіце час';
+  String get timePickerInputHelpText => 'УВЯДЗІЦЕ ЧАС';
 
   @override
   String get timePickerMinuteLabel => 'Хвіліна';
@@ -2759,7 +2759,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Дыяпазон дат';
 
   @override
-  String get viewLicensesButtonLabel => 'Праглядзець ліцэнзіі';
+  String get viewLicensesButtonLabel => 'ПАКАЗАЦЬ ЛІЦЭНЗІІ';
 }
 
 /// The translations for Bulgarian (`bg`).
@@ -2793,16 +2793,16 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
-  String get bottomSheetLabel => 'Долен лист';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Превключване към календара';
 
   @override
-  String get cancelButtonLabel => 'Отказ';
+  String get cancelButtonLabel => 'ОТКАЗ';
 
   @override
-  String get closeButtonLabel => 'Затваряне';
+  String get closeButtonLabel => 'ЗАТВАРЯНЕ';
 
   @override
   String get closeButtonTooltip => 'Затваряне';
@@ -2811,13 +2811,13 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Разгъване';
 
   @override
-  String get continueButtonLabel => 'Напред';
+  String get continueButtonLabel => 'НАПРЕД';
 
   @override
   String get copyButtonLabel => 'Копиране';
 
   @override
-  String get currentDateLabel => 'Днес';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Изрязване';
@@ -2832,7 +2832,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Извън валидния период от време.';
 
   @override
-  String get datePickerHelpText => 'Избиране на дата';
+  String get datePickerHelpText => 'ИЗБИРАНЕ НА ДАТА';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Крайна дата: $fullDate';
@@ -2841,7 +2841,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Крайна дата';
 
   @override
-  String get dateRangePickerHelpText => 'Избиране на период от време';
+  String get dateRangePickerHelpText => 'ИЗБИРАНЕ НА ПЕРИОД ОТ ВРЕМЕ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Начална дата: $fullDate';
@@ -3138,13 +3138,13 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Редове на страница:';
 
   @override
-  String get saveButtonLabel => 'Запазване';
+  String get saveButtonLabel => 'ЗАПАЗВАНЕ';
 
   @override
-  String get scrimLabel => 'Скрим';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Затваряне на $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -3192,7 +3192,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Избиране на час';
+  String get timePickerDialHelpText => 'ИЗБЕРЕТЕ ЧАС';
 
   @override
   String get timePickerHourLabel => 'Час';
@@ -3201,7 +3201,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Избиране на часове';
 
   @override
-  String get timePickerInputHelpText => 'Въведете час';
+  String get timePickerInputHelpText => 'ВЪВЕДЕТЕ ЧАС';
 
   @override
   String get timePickerMinuteLabel => 'Минута';
@@ -3216,7 +3216,7 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Период от време';
 
   @override
-  String get viewLicensesButtonLabel => 'Преглед на лицензите';
+  String get viewLicensesButtonLabel => 'ПРЕГЛЕД НА ЛИЦЕНЗИТЕ';
 }
 
 /// The translations for Bengali Bangla (`bn`).
@@ -3250,7 +3250,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ফিরে যান';
 
   @override
-  String get bottomSheetLabel => 'স্ক্রিনের নিচে অ্যাটাচ করা শিট';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'ক্যালেন্ডার মোডে বদল করুন';
@@ -3274,7 +3274,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'কপি করুন';
 
   @override
-  String get currentDateLabel => 'আজ';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'কাট করুন';
@@ -3298,7 +3298,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'শেষ হওয়ার তারিখ';
 
   @override
-  String get dateRangePickerHelpText => 'তারিখের রেঞ্জ বেছে নিন';
+  String get dateRangePickerHelpText => 'তারিখের ব্যাপ্তি বেছে নিন';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'শুরুর তারিখ $fullDate';
@@ -3598,10 +3598,10 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'সেভ করুন';
 
   @override
-  String get scrimLabel => 'স্ক্রিম';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName বন্ধ করুন';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -3649,7 +3649,7 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'সময় বেছে নিন';
+  String get timePickerDialHelpText => 'সময় বেছে নিন';
 
   @override
   String get timePickerHourLabel => 'ঘণ্টা';
@@ -3707,16 +3707,16 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Nazad';
 
   @override
-  String get bottomSheetLabel => 'Donja tabela';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Prebacite na kalendar';
 
   @override
-  String get cancelButtonLabel => 'Otkaži';
+  String get cancelButtonLabel => 'OTKAŽI';
 
   @override
-  String get closeButtonLabel => 'Zatvori';
+  String get closeButtonLabel => 'ZATVORI';
 
   @override
   String get closeButtonTooltip => 'Zatvaranje';
@@ -3725,13 +3725,13 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Proširi';
 
   @override
-  String get continueButtonLabel => 'Nastavi';
+  String get continueButtonLabel => 'NASTAVI';
 
   @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
-  String get currentDateLabel => 'Danas';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izreži';
@@ -3746,7 +3746,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Izvan raspona.';
 
   @override
-  String get datePickerHelpText => 'Odaberite datum';
+  String get datePickerHelpText => 'ODABERITE DATUM';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Datum završetka: $fullDate';
@@ -3755,7 +3755,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Datum završetka';
 
   @override
-  String get dateRangePickerHelpText => 'Odaberite period';
+  String get dateRangePickerHelpText => 'ODABERITE RASPON';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Datum početka: $fullDate';
@@ -4052,13 +4052,13 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Broj redova po stranici:';
 
   @override
-  String get saveButtonLabel => 'Sačuvaj';
+  String get saveButtonLabel => 'SAČUVAJ';
 
   @override
-  String get scrimLabel => 'Rubno';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Zatvori: $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -4106,7 +4106,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Odaberite vrijeme';
+  String get timePickerDialHelpText => 'ODABERITE VRIJEME';
 
   @override
   String get timePickerHourLabel => 'Sat';
@@ -4115,7 +4115,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Odaberite sat';
 
   @override
-  String get timePickerInputHelpText => 'Unesite vrijeme';
+  String get timePickerInputHelpText => 'UNESITE VRIJEME';
 
   @override
   String get timePickerMinuteLabel => 'Minuta';
@@ -4130,7 +4130,7 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Raspon datuma';
 
   @override
-  String get viewLicensesButtonLabel => 'Prikaži licence';
+  String get viewLicensesButtonLabel => 'PRIKAŽI LICENCE';
 }
 
 /// The translations for Catalan Valencian (`ca`).
@@ -4164,16 +4164,16 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Enrere';
 
   @override
-  String get bottomSheetLabel => 'Full inferior';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Canvia al calendari';
 
   @override
-  String get cancelButtonLabel => 'Cancel·la';
+  String get cancelButtonLabel => 'CANCEL·LA';
 
   @override
-  String get closeButtonLabel => 'Tanca';
+  String get closeButtonLabel => 'TANCA';
 
   @override
   String get closeButtonTooltip => 'Tanca';
@@ -4182,13 +4182,13 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Desplega';
 
   @override
-  String get continueButtonLabel => 'Continua';
+  String get continueButtonLabel => 'CONTINUA';
 
   @override
   String get copyButtonLabel => 'Copia';
 
   @override
-  String get currentDateLabel => 'Avui';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Retalla';
@@ -4203,7 +4203,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => "Fora de l'abast.";
 
   @override
-  String get datePickerHelpText => 'Selecciona la data';
+  String get datePickerHelpText => 'SELECCIONA LA DATA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Data de finalització $fullDate';
@@ -4212,7 +4212,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Data de finalització';
 
   @override
-  String get dateRangePickerHelpText => "Selecciona l'interval";
+  String get dateRangePickerHelpText => "SELECCIONA L'INTERVAL";
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r"Data d'inici $fullDate";
@@ -4395,7 +4395,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Selecciona';
 
   @override
-  String get keyboardKeyShift => 'Maj';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espai';
@@ -4509,13 +4509,13 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Files per pàgina:';
 
   @override
-  String get saveButtonLabel => 'Desa';
+  String get saveButtonLabel => 'DESA';
 
   @override
-  String get scrimLabel => 'Fons atenuat';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Tanca $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -4563,7 +4563,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => "Selecciona l'hora";
+  String get timePickerDialHelpText => "SELECCIONA L'HORA";
 
   @override
   String get timePickerHourLabel => 'Hora';
@@ -4572,7 +4572,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Selecciona les hores';
 
   @override
-  String get timePickerInputHelpText => "Introdueix l'hora";
+  String get timePickerInputHelpText => "INTRODUEIX L'HORA";
 
   @override
   String get timePickerMinuteLabel => 'Minut';
@@ -4587,7 +4587,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Interval de dates';
 
   @override
-  String get viewLicensesButtonLabel => 'Mostra les llicències';
+  String get viewLicensesButtonLabel => 'MOSTRA LES LLICÈNCIES';
 }
 
 /// The translations for Czech (`cs`).
@@ -4621,16 +4621,16 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Zpět';
 
   @override
-  String get bottomSheetLabel => 'Spodní tabulka';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Přepnout na kalendář';
 
   @override
-  String get cancelButtonLabel => 'Zrušit';
+  String get cancelButtonLabel => 'ZRUŠIT';
 
   @override
-  String get closeButtonLabel => 'Zavřít';
+  String get closeButtonLabel => 'ZAVŘÍT';
 
   @override
   String get closeButtonTooltip => 'Zavřít';
@@ -4639,13 +4639,13 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Rozbalit';
 
   @override
-  String get continueButtonLabel => 'Pokračovat';
+  String get continueButtonLabel => 'POKRAČOVAT';
 
   @override
   String get copyButtonLabel => 'Kopírovat';
 
   @override
-  String get currentDateLabel => 'Dnes';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Vyjmout';
@@ -4660,7 +4660,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Mimo rozsah.';
 
   @override
-  String get datePickerHelpText => 'Vyberte datum';
+  String get datePickerHelpText => 'VYBERTE DATUM';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Datum ukončení $fullDate';
@@ -4669,7 +4669,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Datum ukončení';
 
   @override
-  String get dateRangePickerHelpText => 'Vyberte rozsah';
+  String get dateRangePickerHelpText => 'VYBERTE ROZSAH';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Datum zahájení $fullDate';
@@ -4966,13 +4966,13 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Počet řádků na stránku:';
 
   @override
-  String get saveButtonLabel => 'Uložit';
+  String get saveButtonLabel => 'ULOŽIT';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Zavřít $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -5020,7 +5020,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Vyberte čas';
+  String get timePickerDialHelpText => 'VYBERTE ČAS';
 
   @override
   String get timePickerHourLabel => 'Hodina';
@@ -5029,7 +5029,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Vyberte hodiny';
 
   @override
-  String get timePickerInputHelpText => 'Zadejte čas';
+  String get timePickerInputHelpText => 'ZADEJTE ČAS';
 
   @override
   String get timePickerMinuteLabel => 'Minuta';
@@ -5044,464 +5044,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Období';
 
   @override
-  String get viewLicensesButtonLabel => 'Zobrazit licence';
-}
-
-/// The translations for Welsh (`cy`).
-class MaterialLocalizationCy extends GlobalMaterialLocalizations {
-  /// Create an instance of the translation bundle for Welsh.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalizationCy({
-    super.localeName = 'cy',
-    required super.fullYearFormat,
-    required super.compactDateFormat,
-    required super.shortDateFormat,
-    required super.mediumDateFormat,
-    required super.longDateFormat,
-    required super.yearMonthFormat,
-    required super.shortMonthDayFormat,
-    required super.decimalFormat,
-    required super.twoDigitZeroPaddedFormat,
-  });
-
-  @override
-  String get aboutListTileTitleRaw => r'Ynghylch $applicationName';
-
-  @override
-  String get alertDialogLabel => 'Rhybudd';
-
-  @override
-  String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonTooltip => 'Nôl';
-
-  @override
-  String get bottomSheetLabel => 'Taflen Gwaelod';
-
-  @override
-  String get calendarModeButtonLabel => 'Newid i galendr';
-
-  @override
-  String get cancelButtonLabel => 'Canslo';
-
-  @override
-  String get closeButtonLabel => 'Cau';
-
-  @override
-  String get closeButtonTooltip => 'Cau';
-
-  @override
-  String get collapsedIconTapHint => 'Ehangu';
-
-  @override
-  String get continueButtonLabel => 'Parhau';
-
-  @override
-  String get copyButtonLabel => 'Copïo';
-
-  @override
-  String get currentDateLabel => 'Heddiw';
-
-  @override
-  String get cutButtonLabel => 'Torri';
-
-  @override
-  String get dateHelpText => 'dd/mm/bbbb';
-
-  @override
-  String get dateInputLabel => 'Rhowch Ddyddiad';
-
-  @override
-  String get dateOutOfRangeLabel => "Allan o'r ystod.";
-
-  @override
-  String get datePickerHelpText => 'Dewiswch ddyddiad';
-
-  @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Dyddiad gorffen $fullDate';
-
-  @override
-  String get dateRangeEndLabel => 'Dyddiad Gorffen';
-
-  @override
-  String get dateRangePickerHelpText => 'Dewis ystod';
-
-  @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Dyddiad dechrau $fullDate';
-
-  @override
-  String get dateRangeStartLabel => 'Dyddiad Dechrau';
-
-  @override
-  String get dateSeparator => '/';
-
-  @override
-  String get deleteButtonTooltip => 'Dileu';
-
-  @override
-  String get dialModeButtonLabel => 'Newid i fodd deialu dewiswr';
-
-  @override
-  String get dialogLabel => 'Deialog';
-
-  @override
-  String get drawerLabel => 'Dewislen llywio';
-
-  @override
-  String get expandedIconTapHint => 'Crebachu';
-
-  @override
-  String get firstPageTooltip => 'Tudalen gyntaf';
-
-  @override
-  String get hideAccountsLabel => 'Cuddio cyfrifon';
-
-  @override
-  String get inputDateModeButtonLabel => 'Newid i fewnbwn';
-
-  @override
-  String get inputTimeModeButtonLabel => 'Newid i fodd mewnbwn testun';
-
-  @override
-  String get invalidDateFormatLabel => 'Fformat annilys.';
-
-  @override
-  String get invalidDateRangeLabel => 'Ystod annilys.';
-
-  @override
-  String get invalidTimeLabel => 'Rhowch amser dilys';
-
-  @override
-  String get keyboardKeyAlt => 'Alt';
-
-  @override
-  String get keyboardKeyAltGraph => 'AltGr';
-
-  @override
-  String get keyboardKeyBackspace => 'Backspace';
-
-  @override
-  String get keyboardKeyCapsLock => 'Caps Lock';
-
-  @override
-  String get keyboardKeyChannelDown => 'Channel Down';
-
-  @override
-  String get keyboardKeyChannelUp => 'Channel Up';
-
-  @override
-  String get keyboardKeyControl => 'Ctrl';
-
-  @override
-  String get keyboardKeyDelete => 'Del';
-
-  @override
-  String get keyboardKeyEject => 'Eject';
-
-  @override
-  String get keyboardKeyEnd => 'Gorffen';
-
-  @override
-  String get keyboardKeyEscape => 'Esc';
-
-  @override
-  String get keyboardKeyFn => 'Fn';
-
-  @override
-  String get keyboardKeyHome => 'Home';
-
-  @override
-  String get keyboardKeyInsert => 'Insert';
-
-  @override
-  String get keyboardKeyMeta => 'Meta';
-
-  @override
-  String get keyboardKeyMetaMacOs => 'Command';
-
-  @override
-  String get keyboardKeyMetaWindows => 'Win';
-
-  @override
-  String get keyboardKeyNumLock => 'Num Lock';
-
-  @override
-  String get keyboardKeyNumpad0 => 'Num 0';
-
-  @override
-  String get keyboardKeyNumpad1 => 'Num 1';
-
-  @override
-  String get keyboardKeyNumpad2 => 'Num 2';
-
-  @override
-  String get keyboardKeyNumpad3 => 'Num 3';
-
-  @override
-  String get keyboardKeyNumpad4 => 'Num 4';
-
-  @override
-  String get keyboardKeyNumpad5 => 'Num 5';
-
-  @override
-  String get keyboardKeyNumpad6 => 'Num 6';
-
-  @override
-  String get keyboardKeyNumpad7 => 'Num 7';
-
-  @override
-  String get keyboardKeyNumpad8 => 'Num 8';
-
-  @override
-  String get keyboardKeyNumpad9 => 'Num 9';
-
-  @override
-  String get keyboardKeyNumpadAdd => 'Num +';
-
-  @override
-  String get keyboardKeyNumpadComma => 'Num ,';
-
-  @override
-  String get keyboardKeyNumpadDecimal => 'Num .';
-
-  @override
-  String get keyboardKeyNumpadDivide => 'Num /';
-
-  @override
-  String get keyboardKeyNumpadEnter => 'Num Enter';
-
-  @override
-  String get keyboardKeyNumpadEqual => 'Num =';
-
-  @override
-  String get keyboardKeyNumpadMultiply => 'Num *';
-
-  @override
-  String get keyboardKeyNumpadParenLeft => 'Num (';
-
-  @override
-  String get keyboardKeyNumpadParenRight => 'Num )';
-
-  @override
-  String get keyboardKeyNumpadSubtract => 'Num -';
-
-  @override
-  String get keyboardKeyPageDown => 'PgDown';
-
-  @override
-  String get keyboardKeyPageUp => 'PgUp';
-
-  @override
-  String get keyboardKeyPower => 'Power';
-
-  @override
-  String get keyboardKeyPowerOff => 'Power Off';
-
-  @override
-  String get keyboardKeyPrintScreen => 'Print Screen';
-
-  @override
-  String get keyboardKeyScrollLock => 'Scroll Lock';
-
-  @override
-  String get keyboardKeySelect => 'Select';
-
-  @override
-  String get keyboardKeyShift => 'Shift';
-
-  @override
-  String get keyboardKeySpace => 'Space';
-
-  @override
-  String get lastPageTooltip => 'Tudalen olaf';
-
-  @override
-  String? get licensesPackageDetailTextFew => r'$licenseCount trwydded';
-
-  @override
-  String? get licensesPackageDetailTextMany => r'$licenseCount thrwydded';
-
-  @override
-  String? get licensesPackageDetailTextOne => '1 trwydded';
-
-  @override
-  String get licensesPackageDetailTextOther => r'$licenseCount trwydded';
-
-  @override
-  String? get licensesPackageDetailTextTwo => r'$licenseCount drwydded';
-
-  @override
-  String? get licensesPackageDetailTextZero => 'Dim trwydded';
-
-  @override
-  String get licensesPageTitle => 'Trwyddedau';
-
-  @override
-  String get menuBarMenuLabel => 'Dewislen bar dewislen';
-
-  @override
-  String get modalBarrierDismissLabel => 'Diystyru';
-
-  @override
-  String get moreButtonTooltip => 'Rhagor';
-
-  @override
-  String get nextMonthTooltip => 'Mis nesaf';
-
-  @override
-  String get nextPageTooltip => 'Tudalen nesaf';
-
-  @override
-  String get okButtonLabel => 'Iawn';
-
-  @override
-  String get openAppDrawerTooltip => 'Agor y ddewislen llywio';
-
-  @override
-  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow o $rowCount';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow o tua $rowCount';
-
-  @override
-  String get pasteButtonLabel => 'Gludo';
-
-  @override
-  String get popupMenuLabel => 'Dewislen ffenestr naid';
-
-  @override
-  String get postMeridiemAbbreviation => 'PM';
-
-  @override
-  String get previousMonthTooltip => 'Mis blaenorol';
-
-  @override
-  String get previousPageTooltip => 'Tudalen flaenorol';
-
-  @override
-  String get refreshIndicatorSemanticLabel => 'Ail-lwytho';
-
-  @override
-  String? get remainingTextFieldCharacterCountFew => r'$remainingCount nod ar ôl';
-
-  @override
-  String? get remainingTextFieldCharacterCountMany => r'$remainingCount nod ar ôl';
-
-  @override
-  String? get remainingTextFieldCharacterCountOne => '1 nod ar ôl';
-
-  @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount nod ar ôl';
-
-  @override
-  String? get remainingTextFieldCharacterCountTwo => r'$remainingCount nod ar ôl';
-
-  @override
-  String? get remainingTextFieldCharacterCountZero => 'Dim nodau ar ôl';
-
-  @override
-  String get reorderItemDown => 'Symud i lawr';
-
-  @override
-  String get reorderItemLeft => "Symud i'r chwith";
-
-  @override
-  String get reorderItemRight => "Symud i'r dde";
-
-  @override
-  String get reorderItemToEnd => "Symud i'r diwedd";
-
-  @override
-  String get reorderItemToStart => "Symud i'r dechrau";
-
-  @override
-  String get reorderItemUp => 'Symud i fyny';
-
-  @override
-  String get rowsPerPageTitle => 'Rhesi fesul tudalen:';
-
-  @override
-  String get saveButtonLabel => 'Cadw';
-
-  @override
-  String get scrimLabel => 'Scrim';
-
-  @override
-  String get scrimOnTapHintRaw => r'Cau $modalRouteContentName';
-
-  @override
-  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
-
-  @override
-  String get searchFieldLabel => 'Chwilio';
-
-  @override
-  String get selectAllButtonLabel => 'Dewis y Cyfan';
-
-  @override
-  String get selectYearSemanticsLabel => 'Dewiswch flwyddyn';
-
-  @override
-  String? get selectedRowCountTitleFew => r"Mae $selectedRowCount eitem wedi'u dewis";
-
-  @override
-  String? get selectedRowCountTitleMany => r"Mae $selectedRowCount eitem wedi'u dewis";
-
-  @override
-  String? get selectedRowCountTitleOne => "Mae 1 eitem wedi'i dewis";
-
-  @override
-  String get selectedRowCountTitleOther => r"Mae $selectedRowCount eitem wedi'u dewis";
-
-  @override
-  String? get selectedRowCountTitleTwo => r"Mae $selectedRowCount eitem wedi'u dewis";
-
-  @override
-  String? get selectedRowCountTitleZero => "Nid oes unrhyw eitemau wedi'u dewis";
-
-  @override
-  String get showAccountsLabel => 'Dangos cyfrifon';
-
-  @override
-  String get showMenuTooltip => 'Dangos y ddewislen';
-
-  @override
-  String get signedInLabel => 'Wedi mewngofnodi';
-
-  @override
-  String get tabLabelRaw => r'Tab $tabIndex o $tabCount';
-
-  @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
-
-  @override
-  String get timePickerDialHelpText => 'Dewiswch amser';
-
-  @override
-  String get timePickerHourLabel => 'Awr';
-
-  @override
-  String get timePickerHourModeAnnouncement => 'Dewis oriau';
-
-  @override
-  String get timePickerInputHelpText => 'Rhowch amser';
-
-  @override
-  String get timePickerMinuteLabel => 'Munud';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => 'Dewis munudau';
-
-  @override
-  String get unspecifiedDate => 'Dyddiad';
-
-  @override
-  String get unspecifiedDateRange => 'Ystod Dyddiadau';
-
-  @override
-  String get viewLicensesButtonLabel => 'Gweld trwyddedau';
+  String get viewLicensesButtonLabel => 'ZOBRAZIT LICENCE';
 }
 
 /// The translations for Danish (`da`).
@@ -5535,16 +5078,16 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tilbage';
 
   @override
-  String get bottomSheetLabel => 'Felt i bunden';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Skift til kalender';
 
   @override
-  String get cancelButtonLabel => 'Annuller';
+  String get cancelButtonLabel => 'ANNULLER';
 
   @override
-  String get closeButtonLabel => 'Luk';
+  String get closeButtonLabel => 'LUK';
 
   @override
   String get closeButtonTooltip => 'Luk';
@@ -5553,13 +5096,13 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Udvid';
 
   @override
-  String get continueButtonLabel => 'Fortsæt';
+  String get continueButtonLabel => 'FORTSÆT';
 
   @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
-  String get currentDateLabel => 'I dag';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klip';
@@ -5574,7 +5117,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Uden for rækkevidde.';
 
   @override
-  String get datePickerHelpText => 'Vælg dato';
+  String get datePickerHelpText => 'VÆLG DATO';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Slutdato $fullDate';
@@ -5583,7 +5126,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Slutdato';
 
   @override
-  String get dateRangePickerHelpText => 'Vælg interval';
+  String get dateRangePickerHelpText => 'VÆLG OMRÅDE';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Startdato $fullDate';
@@ -5880,13 +5423,13 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rækker pr. side:';
 
   @override
-  String get saveButtonLabel => 'Gem';
+  String get saveButtonLabel => 'GEM';
 
   @override
-  String get scrimLabel => 'Dæmpeskærm';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Luk $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -5934,7 +5477,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Vælg tidspunkt';
+  String get timePickerDialHelpText => 'VÆLG TIDSPUNKT';
 
   @override
   String get timePickerHourLabel => 'Time';
@@ -5943,7 +5486,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Vælg timer';
 
   @override
-  String get timePickerInputHelpText => 'Angiv tidspunkt';
+  String get timePickerInputHelpText => 'ANGIV TIDSPUNKT';
 
   @override
   String get timePickerMinuteLabel => 'Minut';
@@ -5958,7 +5501,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Datointerval';
 
   @override
-  String get viewLicensesButtonLabel => 'Se licenser';
+  String get viewLicensesButtonLabel => 'SE LICENSER';
 }
 
 /// The translations for German (`de`).
@@ -5992,16 +5535,16 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Zurück';
 
   @override
-  String get bottomSheetLabel => 'Ansicht am unteren Rand';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Zum Kalender wechseln';
 
   @override
-  String get cancelButtonLabel => 'Abbrechen';
+  String get cancelButtonLabel => 'ABBRECHEN';
 
   @override
-  String get closeButtonLabel => 'Schließen';
+  String get closeButtonLabel => 'SCHLIEẞEN';
 
   @override
   String get closeButtonTooltip => 'Schließen';
@@ -6010,13 +5553,13 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Maximieren';
 
   @override
-  String get continueButtonLabel => 'Weiter';
+  String get continueButtonLabel => 'WEITER';
 
   @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
-  String get currentDateLabel => 'Heute';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
@@ -6031,7 +5574,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Außerhalb des Zeitraums.';
 
   @override
-  String get datePickerHelpText => 'Datum auswählen';
+  String get datePickerHelpText => 'DATUM AUSWÄHLEN';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Enddatum $fullDate';
@@ -6040,7 +5583,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Enddatum';
 
   @override
-  String get dateRangePickerHelpText => 'Zeitraum auswählen';
+  String get dateRangePickerHelpText => 'ZEITRAUM AUSWÄHLEN';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Startdatum $fullDate';
@@ -6223,7 +5766,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Auswählen';
 
   @override
-  String get keyboardKeyShift => 'Umschalttaste';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Leertaste';
@@ -6337,13 +5880,13 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Zeilen pro Seite:';
 
   @override
-  String get saveButtonLabel => 'Speichern';
+  String get saveButtonLabel => 'SPEICHERN';
 
   @override
-  String get scrimLabel => 'Gitter';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName schließen';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -6391,7 +5934,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Uhrzeit auswählen';
+  String get timePickerDialHelpText => 'UHRZEIT AUSWÄHLEN';
 
   @override
   String get timePickerHourLabel => 'Stunde';
@@ -6400,7 +5943,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Stunden auswählen';
 
   @override
-  String get timePickerInputHelpText => 'Uhrzeit eingeben';
+  String get timePickerInputHelpText => 'ZEIT EINGEBEN';
 
   @override
   String get timePickerMinuteLabel => 'Minute';
@@ -6415,7 +5958,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Zeitraum';
 
   @override
-  String get viewLicensesButtonLabel => 'Lizenzen ansehen';
+  String get viewLicensesButtonLabel => 'LIZENZEN ANZEIGEN';
 }
 
 /// The translations for German, as used in Switzerland (`de_CH`).
@@ -6437,22 +5980,7 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
   });
 
   @override
-  String get timePickerDialHelpText => 'UHRZEIT AUSWÄHLEN';
-
-  @override
-  String get timePickerInputHelpText => 'ZEIT EINGEBEN';
-
-  @override
   String get invalidTimeLabel => 'Gib eine gültige Uhrzeit ein';
-
-  @override
-  String get dateRangePickerHelpText => 'ZEITRAUM AUSWÄHLEN';
-
-  @override
-  String get datePickerHelpText => 'DATUM AUSWÄHLEN';
-
-  @override
-  String get saveButtonLabel => 'SPEICHERN';
 
   @override
   String get dateOutOfRangeLabel => 'Ausserhalb des Zeitraums.';
@@ -6465,18 +5993,6 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
 
   @override
   String get lastPageTooltip => 'Last page';
-
-  @override
-  String get cancelButtonLabel => 'ABBRECHEN';
-
-  @override
-  String get closeButtonLabel => 'SCHLIEẞEN';
-
-  @override
-  String get continueButtonLabel => 'WEITER';
-
-  @override
-  String get viewLicensesButtonLabel => 'LIZENZEN ANZEIGEN';
 
   @override
   String get modalBarrierDismissLabel => 'Schliessen';
@@ -6513,16 +6029,16 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Πίσω';
 
   @override
-  String get bottomSheetLabel => 'Φύλλο κάτω μέρους';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Εναλλαγή σε ημερολόγιο';
 
   @override
-  String get cancelButtonLabel => 'Ακύρωση';
+  String get cancelButtonLabel => 'ΑΚΥΡΩΣΗ';
 
   @override
-  String get closeButtonLabel => 'Κλείσιμο';
+  String get closeButtonLabel => 'ΚΛΕΙΣΙΜΟ';
 
   @override
   String get closeButtonTooltip => 'Κλείσιμο';
@@ -6531,13 +6047,13 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Ανάπτυξη';
 
   @override
-  String get continueButtonLabel => 'Συνέχεια';
+  String get continueButtonLabel => 'ΣΥΝΕΧΕΙΑ';
 
   @override
   String get copyButtonLabel => 'Αντιγραφή';
 
   @override
-  String get currentDateLabel => 'Σήμερα';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Αποκοπή';
@@ -6552,7 +6068,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Εκτός εύρους τιμών.';
 
   @override
-  String get datePickerHelpText => 'Επιλογή ημερομηνίας';
+  String get datePickerHelpText => 'ΕΠΙΛΟΓΗ ΗΜΕΡΟΜΗΝΙΑΣ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Ημερομηνία λήξης $fullDate';
@@ -6561,7 +6077,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Ημερομηνία λήξης';
 
   @override
-  String get dateRangePickerHelpText => 'Επιλογή εύρους';
+  String get dateRangePickerHelpText => 'ΕΠΙΛΟΓΗ ΕΥΡΟΥΣ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Ημερομηνία έναρξης $fullDate';
@@ -6858,13 +6374,13 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Σειρές ανά σελίδα:';
 
   @override
-  String get saveButtonLabel => 'Αποθήκευση';
+  String get saveButtonLabel => 'ΑΠΟΘΗΚΕΥΣΗ';
 
   @override
-  String get scrimLabel => 'Επικάλυψη';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Κλείσιμο $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -6912,7 +6428,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Επιλογή ώρας';
+  String get timePickerDialHelpText => 'ΕΠΙΛΟΓΗ ΩΡΑΣ';
 
   @override
   String get timePickerHourLabel => 'Ώρα';
@@ -6921,7 +6437,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Επιλογή ωρών';
 
   @override
-  String get timePickerInputHelpText => 'Εισαγωγή ώρας';
+  String get timePickerInputHelpText => 'ΕΙΣΑΓΩΓΗ ΩΡΑΣ';
 
   @override
   String get timePickerMinuteLabel => 'Λεπτό';
@@ -6936,7 +6452,7 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Εύρος ημερομηνιών';
 
   @override
-  String get viewLicensesButtonLabel => 'Προβολή αδειών';
+  String get viewLicensesButtonLabel => 'ΠΡΟΒΟΛΗ ΑΔΕΙΩΝ';
 }
 
 /// The translations for English (`en`).
@@ -7415,9 +6931,6 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   });
 
   @override
-  String get bottomSheetLabel => 'Bottom sheet';
-
-  @override
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
@@ -7442,7 +6955,22 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
   String get dateInputLabel => 'Enter date';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT RANGE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7452,9 +6980,6 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
 
   @override
   String get unspecifiedDateRange => 'Date range';
-
-  @override
-  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -7469,7 +6994,16 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
-  String get viewLicensesButtonLabel => 'View licences';
+  String get cancelButtonLabel => 'CANCEL';
+
+  @override
+  String get closeButtonLabel => 'CLOSE';
+
+  @override
+  String get continueButtonLabel => 'CONTINUE';
+
+  @override
+  String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -7554,9 +7088,6 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   String get unspecifiedDateRange => 'Date range';
 
   @override
-  String get dateHelpText => 'dd/mm/yyyy';
-
-  @override
   String get licensesPageTitle => 'Licences';
 
   @override
@@ -7612,9 +7143,6 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   });
 
   @override
-  String get bottomSheetLabel => 'Bottom sheet';
-
-  @override
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
@@ -7639,7 +7167,22 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
   String get dateInputLabel => 'Enter date';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT RANGE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7651,13 +7194,10 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   String get unspecifiedDateRange => 'Date range';
 
   @override
-  String get dateHelpText => 'dd/mm/yyyy';
-
-  @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get viewLicensesButtonLabel => 'View licences';
+  String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -7670,6 +7210,15 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
+
+  @override
+  String get closeButtonLabel => 'CLOSE';
+
+  @override
+  String get continueButtonLabel => 'CONTINUE';
+
+  @override
+  String get cancelButtonLabel => 'CANCEL';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -7703,9 +7252,6 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   });
 
   @override
-  String get bottomSheetLabel => 'Bottom sheet';
-
-  @override
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
@@ -7730,7 +7276,22 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
   String get dateInputLabel => 'Enter date';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT RANGE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7742,13 +7303,10 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   String get unspecifiedDateRange => 'Date range';
 
   @override
-  String get dateHelpText => 'dd/mm/yyyy';
-
-  @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get viewLicensesButtonLabel => 'View licences';
+  String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -7761,6 +7319,15 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
+
+  @override
+  String get closeButtonLabel => 'CLOSE';
+
+  @override
+  String get continueButtonLabel => 'CONTINUE';
+
+  @override
+  String get cancelButtonLabel => 'CANCEL';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -7794,9 +7361,6 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   });
 
   @override
-  String get bottomSheetLabel => 'Bottom sheet';
-
-  @override
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
@@ -7821,7 +7385,22 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
   String get dateInputLabel => 'Enter date';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT RANGE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7831,9 +7410,6 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 
   @override
   String get unspecifiedDateRange => 'Date range';
-
-  @override
-  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -7848,7 +7424,16 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
-  String get viewLicensesButtonLabel => 'View licences';
+  String get cancelButtonLabel => 'CANCEL';
+
+  @override
+  String get closeButtonLabel => 'CLOSE';
+
+  @override
+  String get continueButtonLabel => 'CONTINUE';
+
+  @override
+  String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -7882,9 +7467,6 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   });
 
   @override
-  String get bottomSheetLabel => 'Bottom sheet';
-
-  @override
   String get keyboardKeyChannelDown => 'Channel down';
 
   @override
@@ -7909,7 +7491,22 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
   String get dateInputLabel => 'Enter date';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT RANGE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -7919,9 +7516,6 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
 
   @override
   String get unspecifiedDateRange => 'Date range';
-
-  @override
-  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -7936,7 +7530,16 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
-  String get viewLicensesButtonLabel => 'View licences';
+  String get cancelButtonLabel => 'CANCEL';
+
+  @override
+  String get closeButtonLabel => 'CLOSE';
+
+  @override
+  String get continueButtonLabel => 'CONTINUE';
+
+  @override
+  String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -7970,9 +7573,6 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   });
 
   @override
-  String get bottomSheetLabel => 'Bottom sheet';
-
-  @override
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
@@ -7997,7 +7597,22 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
   String get dateInputLabel => 'Enter date';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT RANGE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -8007,9 +7622,6 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 
   @override
   String get unspecifiedDateRange => 'Date range';
-
-  @override
-  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -8024,7 +7636,16 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
 
   @override
-  String get viewLicensesButtonLabel => 'View licences';
+  String get cancelButtonLabel => 'CANCEL';
+
+  @override
+  String get closeButtonLabel => 'CLOSE';
+
+  @override
+  String get continueButtonLabel => 'CONTINUE';
+
+  @override
+  String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -8058,9 +7679,6 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   });
 
   @override
-  String get bottomSheetLabel => 'Bottom sheet';
-
-  @override
   String get keyboardKeyCapsLock => 'Caps lock';
 
   @override
@@ -8085,7 +7703,22 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   String get keyboardKeyNumpadEnter => 'Num enter';
 
   @override
+  String get timePickerDialHelpText => 'SELECT TIME';
+
+  @override
+  String get timePickerInputHelpText => 'ENTER TIME';
+
+  @override
   String get dateInputLabel => 'Enter date';
+
+  @override
+  String get dateRangePickerHelpText => 'SELECT RANGE';
+
+  @override
+  String get datePickerHelpText => 'SELECT DATE';
+
+  @override
+  String get saveButtonLabel => 'SAVE';
 
   @override
   String get dateRangeEndLabel => 'End date';
@@ -8097,13 +7730,10 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   String get unspecifiedDateRange => 'Date range';
 
   @override
-  String get dateHelpText => 'dd/mm/yyyy';
-
-  @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get viewLicensesButtonLabel => 'View licences';
+  String get viewLicensesButtonLabel => 'VIEW LICENCES';
 
   @override
   String get licensesPageTitle => 'Licences';
@@ -8116,6 +7746,15 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount licences';
+
+  @override
+  String get closeButtonLabel => 'CLOSE';
+
+  @override
+  String get continueButtonLabel => 'CONTINUE';
+
+  @override
+  String get cancelButtonLabel => 'CANCEL';
 
   @override
   String get popupMenuLabel => 'Pop-up menu';
@@ -8161,16 +7800,16 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atrás';
 
   @override
-  String get bottomSheetLabel => 'Hoja inferior';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Cambiar a calendario';
 
   @override
-  String get cancelButtonLabel => 'Cancelar';
+  String get cancelButtonLabel => 'CANCELAR';
 
   @override
-  String get closeButtonLabel => 'Cerrar';
+  String get closeButtonLabel => 'CERRAR';
 
   @override
   String get closeButtonTooltip => 'Cerrar';
@@ -8179,19 +7818,19 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Mostrar';
 
   @override
-  String get continueButtonLabel => 'Continuar';
+  String get continueButtonLabel => 'CONTINUAR';
 
   @override
   String get copyButtonLabel => 'Copiar';
 
   @override
-  String get currentDateLabel => 'Hoy';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cortar';
 
   @override
-  String get dateHelpText => 'dd/mm/aaaa';
+  String get dateHelpText => 'mm/dd/aaaa';
 
   @override
   String get dateInputLabel => 'Introduce una fecha';
@@ -8200,7 +7839,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Fuera del periodo válido.';
 
   @override
-  String get datePickerHelpText => 'Seleccionar fecha';
+  String get datePickerHelpText => 'SELECCIONAR FECHA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización $fullDate';
@@ -8209,7 +7848,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Fecha de finalización';
 
   @override
-  String get dateRangePickerHelpText => 'Seleccionar periodo';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERIODO';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio $fullDate';
@@ -8392,7 +8031,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Selección';
 
   @override
-  String get keyboardKeyShift => 'Mayús';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espacio';
@@ -8506,13 +8145,13 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Filas por página:';
 
   @override
-  String get saveButtonLabel => 'Guardar';
+  String get saveButtonLabel => 'GUARDAR';
 
   @override
-  String get scrimLabel => 'Sombreado';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Cerrar $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -8560,7 +8199,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Seleccionar hora';
+  String get timePickerDialHelpText => 'SELECCIONAR HORA';
 
   @override
   String get timePickerHourLabel => 'Hora';
@@ -8569,7 +8208,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Seleccionar horas';
 
   @override
-  String get timePickerInputHelpText => 'Introducir hora';
+  String get timePickerInputHelpText => 'INTRODUCIR HORA';
 
   @override
   String get timePickerMinuteLabel => 'Minuto';
@@ -8584,7 +8223,7 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Periodo';
 
   @override
-  String get viewLicensesButtonLabel => 'Ver licencias';
+  String get viewLicensesButtonLabel => 'VER LICENCIAS';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -8604,12 +8243,6 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
-
-  @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
 
   @override
   String get keyboardKeyChannelDown => 'Canal anterior';
@@ -8657,10 +8290,7 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -8678,10 +8308,7 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -8703,6 +8330,9 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -8775,12 +8405,6 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -8826,10 +8450,7 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -8847,10 +8468,7 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -8872,6 +8490,9 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -8944,12 +8565,6 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -8995,10 +8610,7 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -9016,10 +8628,7 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -9041,6 +8650,9 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -9113,12 +8725,6 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -9164,10 +8770,7 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -9185,10 +8788,7 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -9210,6 +8810,9 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -9282,12 +8885,6 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -9333,10 +8930,7 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -9354,10 +8948,7 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -9379,6 +8970,9 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -9451,12 +9045,6 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -9502,10 +9090,7 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -9523,10 +9108,7 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -9548,6 +9130,9 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -9620,12 +9205,6 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -9671,10 +9250,7 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -9692,10 +9268,7 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -9717,6 +9290,9 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -9789,12 +9365,6 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -9840,10 +9410,7 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -9861,10 +9428,7 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -9886,6 +9450,9 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -9958,12 +9525,6 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -10009,10 +9570,7 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -10030,10 +9588,7 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -10055,6 +9610,9 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -10127,12 +9685,6 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -10178,10 +9730,7 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -10199,10 +9748,7 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -10224,6 +9770,9 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -10296,12 +9845,6 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -10347,10 +9890,7 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -10368,10 +9908,7 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -10393,6 +9930,9 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -10465,12 +10005,6 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -10516,10 +10050,7 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -10537,10 +10068,7 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -10562,6 +10090,9 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -10634,12 +10165,6 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -10685,10 +10210,7 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -10706,10 +10228,7 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -10731,6 +10250,9 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -10803,12 +10325,6 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -10854,10 +10370,7 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -10875,10 +10388,7 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -10900,6 +10410,9 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -10972,12 +10485,6 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -11023,10 +10530,7 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -11044,10 +10548,7 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -11069,6 +10570,9 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -11141,12 +10645,6 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -11192,10 +10690,7 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -11213,10 +10708,7 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -11238,6 +10730,9 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -11310,12 +10805,6 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -11361,10 +10850,7 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -11382,10 +10868,7 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -11407,6 +10890,9 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -11479,12 +10965,6 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -11530,10 +11010,7 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -11551,10 +11028,7 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -11576,6 +11050,9 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -11651,12 +11128,6 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -11702,10 +11173,7 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -11723,10 +11191,7 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -11748,6 +11213,9 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -11820,12 +11288,6 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   });
 
   @override
-  String get scrimLabel => 'Lámina';
-
-  @override
-  String get keyboardKeyShift => 'Mayúsculas';
-
-  @override
   String get keyboardKeyChannelDown => 'Canal anterior';
 
   @override
@@ -11871,10 +11333,7 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   String? get licensesPackageDetailTextOne => '1 licencia';
 
   @override
-  String get timePickerDialHelpText => 'Selecciona una hora';
-
-  @override
-  String get timePickerInputHelpText => 'Ingresa una hora';
+  String get timePickerInputHelpText => 'INGRESAR HORA';
 
   @override
   String get invalidTimeLabel => 'Ingresa una hora válida';
@@ -11892,10 +11351,7 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   String get calendarModeButtonLabel => 'Cambiar al calendario';
 
   @override
-  String get dateRangePickerHelpText => 'Selecciona un período';
-
-  @override
-  String get datePickerHelpText => 'Selecciona una fecha';
+  String get dateRangePickerHelpText => 'SELECCIONAR PERÍODO';
 
   @override
   String get dateOutOfRangeLabel => 'Fuera de rango';
@@ -11917,6 +11373,9 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get dateHelpText => 'dd/mm/aaaa';
 
   @override
   String get reorderItemToStart => 'Mover al inicio';
@@ -12001,16 +11460,16 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tagasi';
 
   @override
-  String get bottomSheetLabel => 'Alumine leht';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Kalendrile lülitumine';
 
   @override
-  String get cancelButtonLabel => 'Tühista';
+  String get cancelButtonLabel => 'TÜHISTA';
 
   @override
-  String get closeButtonLabel => 'Sule';
+  String get closeButtonLabel => 'SULE';
 
   @override
   String get closeButtonTooltip => 'Sule';
@@ -12019,13 +11478,13 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Laienda';
 
   @override
-  String get continueButtonLabel => 'Jätka';
+  String get continueButtonLabel => 'JÄTKA';
 
   @override
   String get copyButtonLabel => 'Kopeeri';
 
   @override
-  String get currentDateLabel => 'Täna';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Lõika';
@@ -12040,7 +11499,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Vahemikust väljas.';
 
   @override
-  String get datePickerHelpText => 'Valige kuupäev';
+  String get datePickerHelpText => 'VALIGE KUUPÄEV';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Lõppkuupäev: $fullDate';
@@ -12049,7 +11508,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Lõppkuupäev';
 
   @override
-  String get dateRangePickerHelpText => 'Valige vahemik';
+  String get dateRangePickerHelpText => 'VALIGE VAHEMIK';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Alguskuupäev: $fullDate';
@@ -12232,7 +11691,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Vali';
 
   @override
-  String get keyboardKeyShift => 'Tõstuklahv';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Tühik';
@@ -12346,13 +11805,13 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Ridu lehe kohta:';
 
   @override
-  String get saveButtonLabel => 'Salvesta';
+  String get saveButtonLabel => 'SALVESTA';
 
   @override
-  String get scrimLabel => 'Sirm';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Sule $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -12400,7 +11859,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Valige aeg';
+  String get timePickerDialHelpText => 'VALIGE AEG';
 
   @override
   String get timePickerHourLabel => 'Tund';
@@ -12409,7 +11868,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Tundide valimine';
 
   @override
-  String get timePickerInputHelpText => 'Sisestage aeg';
+  String get timePickerInputHelpText => 'SISESTAGE AEG';
 
   @override
   String get timePickerMinuteLabel => 'Minut';
@@ -12424,7 +11883,7 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Kuupäevavahemik';
 
   @override
-  String get viewLicensesButtonLabel => 'Kuva litsentsid';
+  String get viewLicensesButtonLabel => 'KUVA LITSENTSID';
 }
 
 /// The translations for Basque (`eu`).
@@ -12458,16 +11917,16 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atzera';
 
   @override
-  String get bottomSheetLabel => 'Behealdeko orria';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Aldatu egutegiaren modura';
 
   @override
-  String get cancelButtonLabel => 'Utzi';
+  String get cancelButtonLabel => 'UTZI';
 
   @override
-  String get closeButtonLabel => 'Itxi';
+  String get closeButtonLabel => 'ITXI';
 
   @override
   String get closeButtonTooltip => 'Itxi';
@@ -12476,13 +11935,13 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Zabaldu';
 
   @override
-  String get continueButtonLabel => 'Egin aurrera';
+  String get continueButtonLabel => 'EGIN AURRERA';
 
   @override
   String get copyButtonLabel => 'Kopiatu';
 
   @override
-  String get currentDateLabel => 'Gaur';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ebaki';
@@ -12497,7 +11956,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Barrutitik kanpo.';
 
   @override
-  String get datePickerHelpText => 'Hautatu data';
+  String get datePickerHelpText => 'HAUTATU DATA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Amaiera-data: $fullDate';
@@ -12506,7 +11965,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Amaiera-data';
 
   @override
-  String get dateRangePickerHelpText => 'Hautatu barrutia';
+  String get dateRangePickerHelpText => 'HAUTATU BARRUTIA';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Hasiera-data: $fullDate';
@@ -12689,7 +12148,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Hautatu';
 
   @override
-  String get keyboardKeyShift => 'Maius';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Zuriune-barra';
@@ -12803,13 +12262,13 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Errenkadak orriko:';
 
   @override
-  String get saveButtonLabel => 'Gorde';
+  String get saveButtonLabel => 'GORDE';
 
   @override
-  String get scrimLabel => 'Barrera';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Itxi $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -12857,7 +12316,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Hautatu ordua';
+  String get timePickerDialHelpText => 'HAUTATU ORDUA';
 
   @override
   String get timePickerHourLabel => 'Ordua';
@@ -12866,7 +12325,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Hautatu orduak';
 
   @override
-  String get timePickerInputHelpText => 'Idatzi ordua';
+  String get timePickerInputHelpText => 'IDATZI ORDUA';
 
   @override
   String get timePickerMinuteLabel => 'Minutua';
@@ -12881,7 +12340,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Data tartea';
 
   @override
-  String get viewLicensesButtonLabel => 'Ikusi lizentziak';
+  String get viewLicensesButtonLabel => 'IKUSI LIZENTZIAK';
 }
 
 /// The translations for Persian (`fa`).
@@ -12915,7 +12374,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'برگشت';
 
   @override
-  String get bottomSheetLabel => 'برگ زیرین';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'رفتن به تقویم';
@@ -12939,7 +12398,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'کپی';
 
   @override
-  String get currentDateLabel => 'امروز';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'برش';
@@ -13146,7 +12605,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'انتخاب';
 
   @override
-  String get keyboardKeyShift => 'کلید تبدیل';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'فاصله';
@@ -13218,7 +12677,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get previousPageTooltip => 'صفحه قبل';
 
   @override
-  String get refreshIndicatorSemanticLabel => 'بازآوری';
+  String get refreshIndicatorSemanticLabel => 'بازخوانی';
 
   @override
   String? get remainingTextFieldCharacterCountFew => null;
@@ -13263,10 +12722,10 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ذخیره';
 
   @override
-  String get scrimLabel => 'رویه';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'بستن $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -13323,7 +12782,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'انتخاب ساعت';
 
   @override
-  String get timePickerInputHelpText => 'وارد کردن زمان';
+  String get timePickerInputHelpText => 'زمان را وارد کنید';
 
   @override
   String get timePickerMinuteLabel => 'دقیقه';
@@ -13338,7 +12797,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'محدوده تاریخ';
 
   @override
-  String get viewLicensesButtonLabel => 'مشاهده پروانه‌ها';
+  String get viewLicensesButtonLabel => 'مشاهده مجوزها';
 }
 
 /// The translations for Finnish (`fi`).
@@ -13372,16 +12831,16 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Takaisin';
 
   @override
-  String get bottomSheetLabel => 'Alapaneeli';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Vaihda kalenteriin';
 
   @override
-  String get cancelButtonLabel => 'Peru';
+  String get cancelButtonLabel => 'PERUUTA';
 
   @override
-  String get closeButtonLabel => 'Sulje';
+  String get closeButtonLabel => 'SULJE';
 
   @override
   String get closeButtonTooltip => 'Sulje';
@@ -13390,13 +12849,13 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Laajenna';
 
   @override
-  String get continueButtonLabel => 'Jatka';
+  String get continueButtonLabel => 'JATKA';
 
   @override
   String get copyButtonLabel => 'Kopioi';
 
   @override
-  String get currentDateLabel => 'Tänään';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Leikkaa';
@@ -13411,7 +12870,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Päivämäärä ei kelpaa';
 
   @override
-  String get datePickerHelpText => 'Valitse päivämäärä';
+  String get datePickerHelpText => 'VALITSE PÄIVÄMÄÄRÄ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Päättymispäivä $fullDate';
@@ -13420,7 +12879,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Päättymispäivä';
 
   @override
-  String get dateRangePickerHelpText => 'Valitse jakso';
+  String get dateRangePickerHelpText => 'VALITSE PÄIVÄMÄÄRÄVÄLI';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Alkamispäivä $fullDate';
@@ -13603,7 +13062,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Valitse';
 
   @override
-  String get keyboardKeyShift => 'Vaihto';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Välilyönti';
@@ -13717,13 +13176,13 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Riviä/sivu:';
 
   @override
-  String get saveButtonLabel => 'Tallenna';
+  String get saveButtonLabel => 'TALLENNA';
 
   @override
-  String get scrimLabel => 'Sermi';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Sulje $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -13771,7 +13230,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
-  String get timePickerDialHelpText => 'Valitse aika';
+  String get timePickerDialHelpText => 'VALITSE AIKA';
 
   @override
   String get timePickerHourLabel => 'Tunti';
@@ -13780,7 +13239,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Valitse tunnit';
 
   @override
-  String get timePickerInputHelpText => 'Lisää aika';
+  String get timePickerInputHelpText => 'LISÄÄ AIKA';
 
   @override
   String get timePickerMinuteLabel => 'Minuutti';
@@ -13795,7 +13254,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Ajanjakso';
 
   @override
-  String get viewLicensesButtonLabel => 'Näytä käyttöoikeudet';
+  String get viewLicensesButtonLabel => 'NÄYTÄ KÄYTTÖOIKEUDET';
 }
 
 /// The translations for Filipino Pilipino (`fil`).
@@ -13835,10 +13294,10 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get calendarModeButtonLabel => 'Lumipat sa kalendaryo';
 
   @override
-  String get cancelButtonLabel => 'Kanselahin';
+  String get cancelButtonLabel => 'KANSELAHIN';
 
   @override
-  String get closeButtonLabel => 'Isara';
+  String get closeButtonLabel => 'ISARA';
 
   @override
   String get closeButtonTooltip => 'Isara';
@@ -13847,13 +13306,13 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'I-expand';
 
   @override
-  String get continueButtonLabel => 'Magpatuloy';
+  String get continueButtonLabel => 'MAGPATULOY';
 
   @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
-  String get currentDateLabel => 'Ngayon';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'I-cut';
@@ -13868,7 +13327,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Wala sa hanay.';
 
   @override
-  String get datePickerHelpText => 'Pumili ng petsa';
+  String get datePickerHelpText => 'PUMILI NG PETSA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Petsa ng pagtatapos $fullDate';
@@ -13877,7 +13336,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Petsa ng Pagtatapos';
 
   @override
-  String get dateRangePickerHelpText => 'Pumili ng hanay';
+  String get dateRangePickerHelpText => 'PUMILI NG HANAY';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Petsa ng pagsisimula $fullDate';
@@ -14174,13 +13633,13 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Mga row bawat page:';
 
   @override
-  String get saveButtonLabel => 'I-save';
+  String get saveButtonLabel => 'I-SAVE';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Isara ang $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -14228,7 +13687,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Pumili ng oras';
+  String get timePickerDialHelpText => 'PUMILI NG ORAS';
 
   @override
   String get timePickerHourLabel => 'Oras';
@@ -14237,7 +13696,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Pumili ng mga oras';
 
   @override
-  String get timePickerInputHelpText => 'Maglagay ng oras';
+  String get timePickerInputHelpText => 'MAGLAGAY NG ORAS';
 
   @override
   String get timePickerMinuteLabel => 'Minuto';
@@ -14252,7 +13711,7 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Hanay ng Petsa';
 
   @override
-  String get viewLicensesButtonLabel => 'Tingnan ang mga lisensya';
+  String get viewLicensesButtonLabel => 'TINGNAN ANG MGA LISENSYA';
 }
 
 /// The translations for French (`fr`).
@@ -14286,16 +13745,16 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Retour';
 
   @override
-  String get bottomSheetLabel => 'Bottom sheet';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => "Passer à l'agenda";
 
   @override
-  String get cancelButtonLabel => 'Annuler';
+  String get cancelButtonLabel => 'ANNULER';
 
   @override
-  String get closeButtonLabel => 'Fermer';
+  String get closeButtonLabel => 'FERMER';
 
   @override
   String get closeButtonTooltip => 'Fermer';
@@ -14304,13 +13763,13 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Développer';
 
   @override
-  String get continueButtonLabel => 'Continuer';
+  String get continueButtonLabel => 'CONTINUER';
 
   @override
   String get copyButtonLabel => 'Copier';
 
   @override
-  String get currentDateLabel => "Aujourd'hui";
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Couper';
@@ -14325,7 +13784,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Hors de portée.';
 
   @override
-  String get datePickerHelpText => 'Sélectionner une date';
+  String get datePickerHelpText => 'SÉLECTIONNER UNE DATE';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Date de fin : $fullDate';
@@ -14334,7 +13793,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Date de fin';
 
   @override
-  String get dateRangePickerHelpText => 'Sélectionner une plage';
+  String get dateRangePickerHelpText => 'SÉLECTIONNER UNE PLAGE';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Date de début : $fullDate';
@@ -14517,7 +13976,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Sélectionner';
 
   @override
-  String get keyboardKeyShift => 'Maj';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espace';
@@ -14631,13 +14090,13 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Lignes par page :';
 
   @override
-  String get saveButtonLabel => 'Enregistrer';
+  String get saveButtonLabel => 'ENREGISTRER';
 
   @override
-  String get scrimLabel => 'Fond';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Fermer $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -14685,7 +14144,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Sélectionner une heure';
+  String get timePickerDialHelpText => 'SÉLECTIONNER UNE HEURE';
 
   @override
   String get timePickerHourLabel => 'Heure';
@@ -14694,7 +14153,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Sélectionner une heure';
 
   @override
-  String get timePickerInputHelpText => 'Saisir une heure';
+  String get timePickerInputHelpText => 'SAISIR UNE HEURE';
 
   @override
   String get timePickerMinuteLabel => 'Minute';
@@ -14709,7 +14168,7 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Plage de dates';
 
   @override
-  String get viewLicensesButtonLabel => 'Afficher les licences';
+  String get viewLicensesButtonLabel => 'AFFICHER LES LICENCES';
 }
 
 /// The translations for French, as used in Canada (`fr_CA`).
@@ -14729,12 +14188,6 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
-
-  @override
-  String get scrimLabel => 'Grille';
-
-  @override
-  String get bottomSheetLabel => "Zone de contenu dans le bas de l'écran";
 
   @override
   String get keyboardKeyChannelDown => 'Chaîne préc.';
@@ -14785,10 +14238,10 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   String get invalidTimeLabel => 'Entrez une heure valide';
 
   @override
-  String get timePickerDialHelpText => "Sélectionner l'heure";
+  String get timePickerDialHelpText => "SÉLECTIONNER L'HEURE";
 
   @override
-  String get timePickerInputHelpText => "Entrer l'heure";
+  String get timePickerInputHelpText => "ENTRER L'HEURE";
 
   @override
   String get timePickerMinuteLabel => 'Minutes';
@@ -14800,10 +14253,10 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   String get inputTimeModeButtonLabel => "Passer au mode d'entrée Texte";
 
   @override
-  String get dateRangePickerHelpText => 'Sélectionner la plage';
+  String get dateRangePickerHelpText => 'SÉLECTIONNER LA PLAGE';
 
   @override
-  String get datePickerHelpText => 'Sélectionner la date';
+  String get datePickerHelpText => 'SÉLECTIONNER LA DATE';
 
   @override
   String get invalidDateRangeLabel => 'Plage incorrecte.';
@@ -14885,16 +14338,16 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atrás';
 
   @override
-  String get bottomSheetLabel => 'Panel inferior';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Cambiar ao modo de calendario';
 
   @override
-  String get cancelButtonLabel => 'Cancelar';
+  String get cancelButtonLabel => 'CANCELAR';
 
   @override
-  String get closeButtonLabel => 'Pechar';
+  String get closeButtonLabel => 'PECHAR';
 
   @override
   String get closeButtonTooltip => 'Pechar';
@@ -14903,13 +14356,13 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Despregar';
 
   @override
-  String get continueButtonLabel => 'Continuar';
+  String get continueButtonLabel => 'CONTINUAR';
 
   @override
   String get copyButtonLabel => 'Copiar';
 
   @override
-  String get currentDateLabel => 'Hoxe';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cortar';
@@ -14924,7 +14377,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'A data está fóra do intervalo.';
 
   @override
-  String get datePickerHelpText => 'Seleccionar data';
+  String get datePickerHelpText => 'SELECCIONAR UNHA DATA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Data de finalización: $fullDate';
@@ -14933,7 +14386,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Data de finalización';
 
   @override
-  String get dateRangePickerHelpText => 'Seleccionar intervalo de datas';
+  String get dateRangePickerHelpText => 'SELECCIONAR UN INTERVALO DE DATAS';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data de inicio: $fullDate';
@@ -15116,7 +14569,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seleccionar';
 
   @override
-  String get keyboardKeyShift => 'Maiús';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Espazo';
@@ -15230,13 +14683,13 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Filas por páxina:';
 
   @override
-  String get saveButtonLabel => 'Gardar';
+  String get saveButtonLabel => 'GARDAR';
 
   @override
-  String get scrimLabel => 'Sombreado';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Pechar $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -15284,7 +14737,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Seleccionar hora';
+  String get timePickerDialHelpText => 'SELECCIONA A HORA';
 
   @override
   String get timePickerHourLabel => 'Hora';
@@ -15293,7 +14746,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Seleccionar horas';
 
   @override
-  String get timePickerInputHelpText => 'Indicar hora';
+  String get timePickerInputHelpText => 'INDICA A HORA';
 
   @override
   String get timePickerMinuteLabel => 'Minuto';
@@ -15308,7 +14761,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Intervalo de datas';
 
   @override
-  String get viewLicensesButtonLabel => 'Ver licenzas';
+  String get viewLicensesButtonLabel => 'VER LICENZAS';
 }
 
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
@@ -15342,16 +14795,16 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Zurück';
 
   @override
-  String get bottomSheetLabel => 'Ansicht am unteren Rand';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Zum Kalender wechseln';
 
   @override
-  String get cancelButtonLabel => 'Abbrechen';
+  String get cancelButtonLabel => 'ABBRECHEN';
 
   @override
-  String get closeButtonLabel => 'Schließen';
+  String get closeButtonLabel => 'SCHLIEẞEN';
 
   @override
   String get closeButtonTooltip => 'Schließen';
@@ -15360,13 +14813,13 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Maximieren';
 
   @override
-  String get continueButtonLabel => 'Weiter';
+  String get continueButtonLabel => 'WEITER';
 
   @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
-  String get currentDateLabel => 'Heute';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
@@ -15381,7 +14834,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Außerhalb des Zeitraums.';
 
   @override
-  String get datePickerHelpText => 'Datum auswählen';
+  String get datePickerHelpText => 'DATUM AUSWÄHLEN';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Enddatum $fullDate';
@@ -15390,7 +14843,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Enddatum';
 
   @override
-  String get dateRangePickerHelpText => 'Zeitraum auswählen';
+  String get dateRangePickerHelpText => 'ZEITRAUM AUSWÄHLEN';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Startdatum $fullDate';
@@ -15573,7 +15026,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Auswählen';
 
   @override
-  String get keyboardKeyShift => 'Umschalttaste';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Leertaste';
@@ -15687,13 +15140,13 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Zeilen pro Seite:';
 
   @override
-  String get saveButtonLabel => 'Speichern';
+  String get saveButtonLabel => 'SPEICHERN';
 
   @override
-  String get scrimLabel => 'Gitter';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName schließen';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -15741,7 +15194,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Uhrzeit auswählen';
+  String get timePickerDialHelpText => 'UHRZEIT AUSWÄHLEN';
 
   @override
   String get timePickerHourLabel => 'Stunde';
@@ -15750,7 +15203,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Stunden auswählen';
 
   @override
-  String get timePickerInputHelpText => 'Uhrzeit eingeben';
+  String get timePickerInputHelpText => 'ZEIT EINGEBEN';
 
   @override
   String get timePickerMinuteLabel => 'Minute';
@@ -15765,7 +15218,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Zeitraum';
 
   @override
-  String get viewLicensesButtonLabel => 'Lizenzen ansehen';
+  String get viewLicensesButtonLabel => 'LIZENZEN ANZEIGEN';
 }
 
 /// The translations for Gujarati (`gu`).
@@ -15799,7 +15252,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'પાછળ';
 
   @override
-  String get bottomSheetLabel => 'બોટમ શીટ';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'કૅલેન્ડર મોડ પર સ્વિચ કરો';
@@ -15823,7 +15276,7 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'કૉપિ કરો';
 
   @override
-  String get currentDateLabel => 'આજે';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'કાપો';
@@ -16147,10 +15600,10 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'સાચવો';
 
   @override
-  String get scrimLabel => 'સ્ક્રિમ';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentNameને બંધ કરો';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -16256,7 +15709,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'הקודם';
 
   @override
-  String get bottomSheetLabel => 'גיליון תחתון';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'מעבר למצב היומן';
@@ -16280,7 +15733,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'העתקה';
 
   @override
-  String get currentDateLabel => 'היום';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'גזירה';
@@ -16604,10 +16057,10 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'שמירה';
 
   @override
-  String get scrimLabel => 'מיסוך';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'סגירת $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -16664,7 +16117,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'בחירת שעות';
 
   @override
-  String get timePickerInputHelpText => 'יש להזין שעה';
+  String get timePickerInputHelpText => 'הזנת שעה';
 
   @override
   String get timePickerMinuteLabel => 'דקות';
@@ -16679,7 +16132,7 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'טווח תאריכים';
 
   @override
-  String get viewLicensesButtonLabel => 'לעיון ברישיונות';
+  String get viewLicensesButtonLabel => 'הצגת הרישיונות';
 }
 
 /// The translations for Hindi (`hi`).
@@ -16713,7 +16166,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'वापस जाएं';
 
   @override
-  String get bottomSheetLabel => 'बॉटम शीट';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'कैलेंडर पर जाएं';
@@ -16737,7 +16190,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'कॉपी करें';
 
   @override
-  String get currentDateLabel => 'आज';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'काटें';
@@ -16761,13 +16214,13 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'खत्म होने की तारीख';
 
   @override
-  String get dateRangePickerHelpText => 'रेंज चुनें';
+  String get dateRangePickerHelpText => 'सीमा चुनें';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'शुरू होने की तारीख $fullDate';
 
   @override
-  String get dateRangeStartLabel => 'पेमेंट करने की तारीख';
+  String get dateRangeStartLabel => 'शुरू होने की तारीख';
 
   @override
   String get dateSeparator => '/';
@@ -16779,7 +16232,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get dialModeButtonLabel => 'डायल पिकर मोड पर स्विच करें';
 
   @override
-  String get dialogLabel => 'डायलॉग';
+  String get dialogLabel => 'संवाद';
 
   @override
   String get drawerLabel => 'नेविगेशन मेन्यू';
@@ -17061,10 +16514,10 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेव करें';
 
   @override
-  String get scrimLabel => 'स्क्रिम';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName को बंद करें';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -17112,7 +16565,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'समय चुनें';
+  String get timePickerDialHelpText => 'समय क्षेत्र चुनें';
 
   @override
   String get timePickerHourLabel => 'घंटा';
@@ -17170,16 +16623,16 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Natrag';
 
   @override
-  String get bottomSheetLabel => 'Donja tablica';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Prijeđite na kalendar';
 
   @override
-  String get cancelButtonLabel => 'Odustani';
+  String get cancelButtonLabel => 'ODUSTANI';
 
   @override
-  String get closeButtonLabel => 'Zatvori';
+  String get closeButtonLabel => 'ZATVORI';
 
   @override
   String get closeButtonTooltip => 'Zatvaranje';
@@ -17188,13 +16641,13 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Proširi';
 
   @override
-  String get continueButtonLabel => 'Nastavi';
+  String get continueButtonLabel => 'NASTAVI';
 
   @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
-  String get currentDateLabel => 'Danas';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izreži';
@@ -17209,7 +16662,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Izvan raspona.';
 
   @override
-  String get datePickerHelpText => 'Odaberi datum';
+  String get datePickerHelpText => 'ODABERITE DATUM';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Datum završetka $fullDate';
@@ -17218,7 +16671,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Datum završetka';
 
   @override
-  String get dateRangePickerHelpText => 'Odaberi raspon';
+  String get dateRangePickerHelpText => 'ODABERITE RASPON';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Datum početka $fullDate';
@@ -17515,13 +16968,13 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Redaka po stranici:';
 
   @override
-  String get saveButtonLabel => 'Spremi';
+  String get saveButtonLabel => 'SPREMI';
 
   @override
-  String get scrimLabel => 'Rubno';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Zatvori $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -17569,7 +17022,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Odaberi vrijeme';
+  String get timePickerDialHelpText => 'ODABERITE VRIJEME';
 
   @override
   String get timePickerHourLabel => 'Sat';
@@ -17578,7 +17031,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Odaberite sate';
 
   @override
-  String get timePickerInputHelpText => 'Unesi vrijeme';
+  String get timePickerInputHelpText => 'UNESITE VRIJEME';
 
   @override
   String get timePickerMinuteLabel => 'Minuta';
@@ -17593,7 +17046,7 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Datumski raspon';
 
   @override
-  String get viewLicensesButtonLabel => 'Prikaži licence';
+  String get viewLicensesButtonLabel => 'PRIKAŽI LICENCE';
 }
 
 /// The translations for Hungarian (`hu`).
@@ -17627,16 +17080,16 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Vissza';
 
   @override
-  String get bottomSheetLabel => 'Alsó lap';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Váltás naptárra';
 
   @override
-  String get cancelButtonLabel => 'Mégse';
+  String get cancelButtonLabel => 'MÉGSE';
 
   @override
-  String get closeButtonLabel => 'Bezárás';
+  String get closeButtonLabel => 'BEZÁRÁS';
 
   @override
   String get closeButtonTooltip => 'Bezárás';
@@ -17645,13 +17098,13 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Kibontás';
 
   @override
-  String get continueButtonLabel => 'Folytatás';
+  String get continueButtonLabel => 'TOVÁBB';
 
   @override
   String get copyButtonLabel => 'Másolás';
 
   @override
-  String get currentDateLabel => 'Ma';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kivágás';
@@ -17666,7 +17119,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Tartományon kívül.';
 
   @override
-  String get datePickerHelpText => 'Dátum kiválasztása';
+  String get datePickerHelpText => 'DÁTUM KIVÁLASZTÁSA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Befejezés dátuma: $fullDate';
@@ -17675,7 +17128,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Befejezés dátuma';
 
   @override
-  String get dateRangePickerHelpText => 'Dátumtartomány kiválasztása';
+  String get dateRangePickerHelpText => 'TARTOMÁNY KIJELÖLÉSE';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Kezdés dátuma: $fullDate';
@@ -17972,13 +17425,13 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Oldalankénti sorszám:';
 
   @override
-  String get saveButtonLabel => 'Mentés';
+  String get saveButtonLabel => 'MENTÉS';
 
   @override
-  String get scrimLabel => 'Borítás';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName bezárása';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -18026,7 +17479,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Időpont kiválasztása';
+  String get timePickerDialHelpText => 'IDŐPONT KIVÁLASZTÁSA';
 
   @override
   String get timePickerHourLabel => 'Óra';
@@ -18035,7 +17488,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Óra kiválasztása';
 
   @override
-  String get timePickerInputHelpText => 'Időpont megadása';
+  String get timePickerInputHelpText => 'IDŐPONT MEGADÁSA';
 
   @override
   String get timePickerMinuteLabel => 'Perc';
@@ -18050,7 +17503,7 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Dátumtartomány';
 
   @override
-  String get viewLicensesButtonLabel => 'Licencek megtekintése';
+  String get viewLicensesButtonLabel => 'LICENCEK MEGTEKINTÉSE';
 }
 
 /// The translations for Armenian (`hy`).
@@ -18084,16 +17537,16 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Հետ';
 
   @override
-  String get bottomSheetLabel => 'Ներքևի էկրան';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Անցնել օրացույցին';
 
   @override
-  String get cancelButtonLabel => 'Չեղարկել';
+  String get cancelButtonLabel => 'ՉԵՂԱՐԿԵԼ';
 
   @override
-  String get closeButtonLabel => 'Փակել';
+  String get closeButtonLabel => 'ՓԱԿԵԼ';
 
   @override
   String get closeButtonTooltip => 'Փակել';
@@ -18102,13 +17555,13 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Ծավալել';
 
   @override
-  String get continueButtonLabel => 'Շարունակել';
+  String get continueButtonLabel => 'ՇԱՐՈՒՆԱԿԵԼ';
 
   @override
   String get copyButtonLabel => 'Պատճենել';
 
   @override
-  String get currentDateLabel => 'Այսօր';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Կտրել';
@@ -18123,7 +17576,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Թույլատրելի ընդգրկույթից դուրս է։';
 
   @override
-  String get datePickerHelpText => 'Ընտրեք ամսաթիվը';
+  String get datePickerHelpText => 'ԸՆՏՐԵԼ ԱՄՍԱԹԻՎ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Ավարտի ամսաթիվը՝ $fullDate';
@@ -18132,7 +17585,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Ավարտի ամսաթիվը';
 
   @override
-  String get dateRangePickerHelpText => 'Ընտրեք ժամանակահատվածը';
+  String get dateRangePickerHelpText => 'ԸՆՏՐԵԼ ԺԱՄԱՆԱԿԱՀԱՏՎԱԾ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Մեկնարկի ամսաթիվը՝ $fullDate';
@@ -18429,13 +17882,13 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Մեկ էջի տողերը՝';
 
   @override
-  String get saveButtonLabel => 'Պահել';
+  String get saveButtonLabel => 'ՊԱՀԵԼ';
 
   @override
-  String get scrimLabel => 'Դիմակ';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Փակել՝ $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -18483,7 +17936,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Ընտրեք ժամը';
+  String get timePickerDialHelpText => 'ԸՆՏՐԵՔ ԺԱՄԸ';
 
   @override
   String get timePickerHourLabel => 'Ժամ';
@@ -18492,7 +17945,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Ընտրեք ժամը';
 
   @override
-  String get timePickerInputHelpText => 'Մուտքագրեք ժամը';
+  String get timePickerInputHelpText => 'ՄՈՒՏՔԱԳՐԵՔ ԺԱՄԸ';
 
   @override
   String get timePickerMinuteLabel => 'Րոպե';
@@ -18507,7 +17960,7 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Ժամանակահատված';
 
   @override
-  String get viewLicensesButtonLabel => 'Դիտել լիցենզիաները';
+  String get viewLicensesButtonLabel => 'ԴԻՏԵԼ ԱՐՏՈՆԱԳՐԵՐԸ';
 }
 
 /// The translations for Indonesian (`id`).
@@ -18541,16 +17994,16 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Kembali';
 
   @override
-  String get bottomSheetLabel => 'Sheet Bawah';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Beralih ke kalender';
 
   @override
-  String get cancelButtonLabel => 'Batal';
+  String get cancelButtonLabel => 'BATAL';
 
   @override
-  String get closeButtonLabel => 'Tutup';
+  String get closeButtonLabel => 'TUTUP';
 
   @override
   String get closeButtonTooltip => 'Tutup';
@@ -18559,13 +18012,13 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Luaskan';
 
   @override
-  String get continueButtonLabel => 'Lanjutkan';
+  String get continueButtonLabel => 'LANJUTKAN';
 
   @override
   String get copyButtonLabel => 'Salin';
 
   @override
-  String get currentDateLabel => 'Hari ini';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Potong';
@@ -18580,7 +18033,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Di luar rentang.';
 
   @override
-  String get datePickerHelpText => 'Pilih tanggal';
+  String get datePickerHelpText => 'PILIH TANGGAL';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Tanggal akhir $fullDate';
@@ -18589,7 +18042,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Tanggal Akhir';
 
   @override
-  String get dateRangePickerHelpText => 'Pilih rentang';
+  String get dateRangePickerHelpText => 'PILIH RENTANG';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Tanggal mulai $fullDate';
@@ -18886,13 +18339,13 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Baris per halaman:';
 
   @override
-  String get saveButtonLabel => 'Simpan';
+  String get saveButtonLabel => 'SIMPAN';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Tutup $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -18940,7 +18393,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
-  String get timePickerDialHelpText => 'Pilih waktu';
+  String get timePickerDialHelpText => 'PILIH WAKTU';
 
   @override
   String get timePickerHourLabel => 'Jam';
@@ -18949,7 +18402,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Pilih jam';
 
   @override
-  String get timePickerInputHelpText => 'Masukkan waktu';
+  String get timePickerInputHelpText => 'MASUKKAN WAKTU';
 
   @override
   String get timePickerMinuteLabel => 'Menit';
@@ -18964,7 +18417,7 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Rentang tanggal';
 
   @override
-  String get viewLicensesButtonLabel => 'Lihat lisensi';
+  String get viewLicensesButtonLabel => 'LIHAT LISENSI';
 }
 
 /// The translations for Icelandic (`is`).
@@ -18998,16 +18451,16 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Til baka';
 
   @override
-  String get bottomSheetLabel => 'Blað neðst';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Skipta yfir í dagatal';
 
   @override
-  String get cancelButtonLabel => 'Hætta við';
+  String get cancelButtonLabel => 'HÆTTA';
 
   @override
-  String get closeButtonLabel => 'Loka';
+  String get closeButtonLabel => 'LOKA';
 
   @override
   String get closeButtonTooltip => 'Loka';
@@ -19016,13 +18469,13 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Stækka';
 
   @override
-  String get continueButtonLabel => 'Áfram';
+  String get continueButtonLabel => 'HALDA ÁFRAM';
 
   @override
   String get copyButtonLabel => 'Afrita';
 
   @override
-  String get currentDateLabel => 'Í dag';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klippa';
@@ -19037,7 +18490,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Utan sviðs.';
 
   @override
-  String get datePickerHelpText => 'Velja dagsetningu';
+  String get datePickerHelpText => 'VELJA DAGSETNINGU';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Lokadagur $fullDate';
@@ -19046,7 +18499,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Lokadagur';
 
   @override
-  String get dateRangePickerHelpText => 'Velja svið';
+  String get dateRangePickerHelpText => 'VELJA SVIÐ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Upphafsdagur $fullDate';
@@ -19343,13 +18796,13 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Línur á síðu:';
 
   @override
-  String get saveButtonLabel => 'Vista';
+  String get saveButtonLabel => 'VISTA';
 
   @override
-  String get scrimLabel => 'Möskvi';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Loka $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -19397,7 +18850,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Velja tíma';
+  String get timePickerDialHelpText => 'VELJA TÍMA';
 
   @override
   String get timePickerHourLabel => 'Klukkustund';
@@ -19406,7 +18859,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Velja klukkustundir';
 
   @override
-  String get timePickerInputHelpText => 'Færa inn tíma';
+  String get timePickerInputHelpText => 'FÆRA INN TÍMA';
 
   @override
   String get timePickerMinuteLabel => 'Mínúta';
@@ -19421,7 +18874,7 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Tímabil';
 
   @override
-  String get viewLicensesButtonLabel => 'Skoða leyfi';
+  String get viewLicensesButtonLabel => 'SKOÐA LEYFI';
 }
 
 /// The translations for Italian (`it`).
@@ -19455,16 +18908,16 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Indietro';
 
   @override
-  String get bottomSheetLabel => 'Riquadro inferiore';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Passa al calendario';
 
   @override
-  String get cancelButtonLabel => 'Annulla';
+  String get cancelButtonLabel => 'ANNULLA';
 
   @override
-  String get closeButtonLabel => 'Chiudi';
+  String get closeButtonLabel => 'CHIUDI';
 
   @override
   String get closeButtonTooltip => 'Chiudi';
@@ -19473,13 +18926,13 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Espandi';
 
   @override
-  String get continueButtonLabel => 'Continua';
+  String get continueButtonLabel => 'CONTINUA';
 
   @override
   String get copyButtonLabel => 'Copia';
 
   @override
-  String get currentDateLabel => 'Oggi';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Taglia';
@@ -19494,7 +18947,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Fuori intervallo.';
 
   @override
-  String get datePickerHelpText => 'Seleziona data';
+  String get datePickerHelpText => 'SELEZIONA DATA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Data di fine $fullDate';
@@ -19503,7 +18956,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Data di fine';
 
   @override
-  String get dateRangePickerHelpText => 'Seleziona intervallo';
+  String get dateRangePickerHelpText => 'SELEZIONA INTERVALLO';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data di inizio $fullDate';
@@ -19686,7 +19139,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seleziona';
 
   @override
-  String get keyboardKeyShift => 'Maiusc';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Barra spaziatrice';
@@ -19800,13 +19253,13 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Righe per pagina:';
 
   @override
-  String get saveButtonLabel => 'Salva';
+  String get saveButtonLabel => 'SALVA';
 
   @override
-  String get scrimLabel => 'Rete';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Chiudi $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -19854,7 +19307,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Seleziona ora';
+  String get timePickerDialHelpText => "SELEZIONA L'ORA";
 
   @override
   String get timePickerHourLabel => 'Ora';
@@ -19863,7 +19316,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Seleziona le ore';
 
   @override
-  String get timePickerInputHelpText => 'Inserisci ora';
+  String get timePickerInputHelpText => "INSERISCI L'ORA";
 
   @override
   String get timePickerMinuteLabel => 'Minuto';
@@ -19878,7 +19331,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Intervallo di date';
 
   @override
-  String get viewLicensesButtonLabel => 'Visualizza licenze';
+  String get viewLicensesButtonLabel => 'VISUALIZZA LICENZE';
 }
 
 /// The translations for Japanese (`ja`).
@@ -19912,7 +19365,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '戻る';
 
   @override
-  String get bottomSheetLabel => 'ボトムシート';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'カレンダーに切り替え';
@@ -19936,7 +19389,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'コピー';
 
   @override
-  String get currentDateLabel => '今日';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '切り取り';
@@ -20260,10 +19713,10 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => '保存';
 
   @override
-  String get scrimLabel => 'スクリム';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName を閉じる';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -20311,7 +19764,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => '時間の選択';
+  String get timePickerDialHelpText => '時刻の選択';
 
   @override
   String get timePickerHourLabel => '時';
@@ -20320,7 +19773,7 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => '時間を選択';
 
   @override
-  String get timePickerInputHelpText => '時間の入力';
+  String get timePickerInputHelpText => '時刻の入力';
 
   @override
   String get timePickerMinuteLabel => '分';
@@ -20369,7 +19822,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'უკან';
 
   @override
-  String get bottomSheetLabel => 'ქვედა ფურცელი';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'კალენდარზე გადართვა';
@@ -20393,7 +19846,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'კოპირება';
 
   @override
-  String get currentDateLabel => 'დღეს';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ამოჭრა';
@@ -20408,7 +19861,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'დიაპაზონს მიღმაა.';
 
   @override
-  String get datePickerHelpText => 'თარიღის არჩევა';
+  String get datePickerHelpText => 'აირჩიეთ თარიღი';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'დასრულების თარიღია $fullDate';
@@ -20417,7 +19870,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'დასრულების თარიღი';
 
   @override
-  String get dateRangePickerHelpText => 'დიაპაზონის არჩევა';
+  String get dateRangePickerHelpText => 'აირჩიეთ დიაპაზონი';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'დაწყების თარიღია $fullDate';
@@ -20600,7 +20053,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeyShift => 'ცვლა';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -20717,10 +20170,10 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'შენახვა';
 
   @override
-  String get scrimLabel => 'სკრიმი';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName-ის დახურვა';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -20768,7 +20221,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'დროის არჩევა';
+  String get timePickerDialHelpText => 'აირჩიეთ დრო';
 
   @override
   String get timePickerHourLabel => 'საათი';
@@ -20777,7 +20230,7 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'აირჩიეთ საათები';
 
   @override
-  String get timePickerInputHelpText => 'დროის შეყვანა';
+  String get timePickerInputHelpText => 'შეიყვანეთ დრო';
 
   @override
   String get timePickerMinuteLabel => 'წუთი';
@@ -20826,16 +20279,16 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Артқа';
 
   @override
-  String get bottomSheetLabel => 'Төменгі парақша';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Күнтізбеге ауысу';
 
   @override
-  String get cancelButtonLabel => 'Бас тарту';
+  String get cancelButtonLabel => 'БАС ТАРТУ';
 
   @override
-  String get closeButtonLabel => 'Жабу';
+  String get closeButtonLabel => 'ЖАБУ';
 
   @override
   String get closeButtonTooltip => 'Жабу';
@@ -20844,13 +20297,13 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Жаю';
 
   @override
-  String get continueButtonLabel => 'Жалғастыру';
+  String get continueButtonLabel => 'ЖАЛҒАСТЫРУ';
 
   @override
   String get copyButtonLabel => 'Көшіру';
 
   @override
-  String get currentDateLabel => 'Бүгін';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Қию';
@@ -20865,7 +20318,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Ауқымнан тыc.';
 
   @override
-  String get datePickerHelpText => 'Күнді таңдау';
+  String get datePickerHelpText => 'КҮНДІ ТАҢДАУ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Аяқталу күні $fullDate';
@@ -20874,7 +20327,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Аяқталу күні';
 
   @override
-  String get dateRangePickerHelpText => 'Аралықты таңдау';
+  String get dateRangePickerHelpText => 'АУҚЫМДЫ ТАҢДАУ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Басталу күні $fullDate';
@@ -21171,13 +20624,13 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Әр беттегі жолдар саны:';
 
   @override
-  String get saveButtonLabel => 'Сақтау';
+  String get saveButtonLabel => 'САҚТАУ';
 
   @override
-  String get scrimLabel => 'Кенеп';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName жабу';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -21225,7 +20678,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Уақытты таңдау';
+  String get timePickerDialHelpText => 'УАҚЫТТЫ ТАҢДАҢЫЗ';
 
   @override
   String get timePickerHourLabel => 'Сағат';
@@ -21234,7 +20687,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Сағаттарды таңдаңыз';
 
   @override
-  String get timePickerInputHelpText => 'Уақытты енгізу';
+  String get timePickerInputHelpText => 'УАҚЫТТЫ ЕНГІЗІҢІЗ';
 
   @override
   String get timePickerMinuteLabel => 'Mинут';
@@ -21249,7 +20702,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Күндер ауқымы';
 
   @override
-  String get viewLicensesButtonLabel => 'Лицензияларды көру';
+  String get viewLicensesButtonLabel => 'ЛИЦЕНЗИЯЛАРДЫ КӨРУ';
 }
 
 /// The translations for Khmer Central Khmer (`km`).
@@ -21283,7 +20736,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ថយក្រោយ';
 
   @override
-  String get bottomSheetLabel => 'សន្លឹក​ខាងក្រោម';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'ប្ដូរទៅ​ប្រតិទិន';
@@ -21307,7 +20760,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ចម្លង';
 
   @override
-  String get currentDateLabel => 'ថ្ងៃនេះ';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'កាត់';
@@ -21331,7 +20784,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'កាលបរិច្ឆេទ​បញ្ចប់';
 
   @override
-  String get dateRangePickerHelpText => 'ជ្រើសរើសចន្លោះ';
+  String get dateRangePickerHelpText => 'ជ្រើស​រើស​ចន្លោះ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'កាលបរិច្ឆេទ​ចាប់ផ្ដើម $fullDate';
@@ -21631,10 +21084,10 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'រក្សាទុក';
 
   @override
-  String get scrimLabel => 'ផ្ទាំងស្រអាប់';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'បិទ $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -21682,7 +21135,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
-  String get timePickerDialHelpText => 'ជ្រើសរើសម៉ោង';
+  String get timePickerDialHelpText => 'ជ្រើសរើស​ពេលវេលា';
 
   @override
   String get timePickerHourLabel => 'ម៉ោង';
@@ -21691,7 +21144,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'ជ្រើសរើស​ម៉ោង';
 
   @override
-  String get timePickerInputHelpText => 'បញ្ចូលម៉ោង';
+  String get timePickerInputHelpText => 'បញ្ចូលពេលវេលា';
 
   @override
   String get timePickerMinuteLabel => 'នាទី​';
@@ -21740,7 +21193,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca4}\u{cbf}\u{cb0}\u{cc1}\u{c97}\u{cbf}';
 
   @override
-  String get bottomSheetLabel => '\u{c95}\u{cc6}\u{cb3}\u{cad}\u{cbe}\u{c97}\u{ca6}\u{20}\u{cb6}\u{cc0}\u{c9f}\u{ccd}';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => '\u{c95}\u{ccd}\u{caf}\u{cbe}\u{cb2}\u{cc6}\u{c82}\u{ca1}\u{cb0}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
@@ -21764,7 +21217,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get currentDateLabel => '\u{c87}\u{c82}\u{ca6}\u{cc1}';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -21788,7 +21241,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => '\u{c85}\u{c82}\u{ca4}\u{cbf}\u{cae}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
 
   @override
-  String get dateRangePickerHelpText => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{ca6}\u{20}\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}\u{caf}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get dateRangePickerHelpText => '\u{cb6}\u{ccd}\u{cb0}\u{cc7}\u{ca3}\u{cbf}\u{caf}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
@@ -22088,10 +21541,10 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get saveButtonLabel => '\u{c89}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get scrimLabel => '\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{cae}\u{ccd}';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => '\u{24}\u{6d}\u{6f}\u{64}\u{61}\u{6c}\u{52}\u{6f}\u{75}\u{74}\u{65}\u{43}\u{6f}\u{6e}\u{74}\u{65}\u{6e}\u{74}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{c85}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -22197,7 +21650,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '뒤로';
 
   @override
-  String get bottomSheetLabel => '하단 시트';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => '캘린더 모드로 전환';
@@ -22221,7 +21674,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => '복사';
 
   @override
-  String get currentDateLabel => '오늘';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '잘라냄';
@@ -22245,7 +21698,7 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => '종료일';
 
   @override
-  String get dateRangePickerHelpText => '기간 선택';
+  String get dateRangePickerHelpText => '범위 선택';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'시작일 $fullDate';
@@ -22545,10 +21998,10 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get saveButtonLabel => '저장';
 
   @override
-  String get scrimLabel => '스크림';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName 닫기';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -22654,16 +22107,16 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Артка';
 
   @override
-  String get bottomSheetLabel => 'Ылдыйкы экран';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Жылнаамага которулуңуз';
 
   @override
-  String get cancelButtonLabel => 'Токтотуу';
+  String get cancelButtonLabel => 'ЖОККО ЧЫГАРУУ';
 
   @override
-  String get closeButtonLabel => 'Жабуу';
+  String get closeButtonLabel => 'ЖАБУУ';
 
   @override
   String get closeButtonTooltip => 'Жабуу';
@@ -22672,13 +22125,13 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Жайып көрсөтүү';
 
   @override
-  String get continueButtonLabel => 'Улантуу';
+  String get continueButtonLabel => 'УЛАНТУУ';
 
   @override
   String get copyButtonLabel => 'Көчүрүү';
 
   @override
-  String get currentDateLabel => 'Бүгүн';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Кесүү';
@@ -22693,16 +22146,16 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Аракет чегинен тышкары.';
 
   @override
-  String get datePickerHelpText => 'Күндү тандоо';
+  String get datePickerHelpText => 'КҮНДҮ ТАНДОО';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Качан аяктайт $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Аяктоо күнү $fullDate';
 
   @override
-  String get dateRangeEndLabel => 'Качан аяктайт';
+  String get dateRangeEndLabel => 'Аяктоо күнү';
 
   @override
-  String get dateRangePickerHelpText => 'Даталар диапазонун тандоо';
+  String get dateRangePickerHelpText => 'ДИАПАЗОНДУ ТАНДОО';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Баштоо күнү $fullDate';
@@ -22741,7 +22194,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get inputTimeModeButtonLabel => 'Текст киргизүү режимине которулуу';
 
   @override
-  String get invalidDateFormatLabel => 'Туура эмес формат.';
+  String get invalidDateFormatLabel => 'Жараксыз формат.';
 
   @override
   String get invalidDateRangeLabel => 'Жараксыз диапазон.';
@@ -22996,16 +22449,16 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get reorderItemUp => 'Жогору жылдыруу';
 
   @override
-  String get rowsPerPageTitle => 'Бир беттеги саптардын саны:';
+  String get rowsPerPageTitle => 'Бир бетте көрсөтүлүүчү саптардын саны:';
 
   @override
-  String get saveButtonLabel => 'Сактоо';
+  String get saveButtonLabel => 'САКТОО';
 
   @override
-  String get scrimLabel => 'Кенеп';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName жабуу';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -23053,7 +22506,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Убакытты тандоо';
+  String get timePickerDialHelpText => 'УБАКЫТ ТАНДОО';
 
   @override
   String get timePickerHourLabel => 'Саат';
@@ -23062,7 +22515,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Саатты тандаңыз';
 
   @override
-  String get timePickerInputHelpText => 'Убакытты киргизүү';
+  String get timePickerInputHelpText => 'УБАКЫТ КИРГИЗҮҮ';
 
   @override
   String get timePickerMinuteLabel => 'Мүнөт';
@@ -23077,7 +22530,7 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Даталар диапазону';
 
   @override
-  String get viewLicensesButtonLabel => 'Уруксаттамаларды көрүү';
+  String get viewLicensesButtonLabel => 'УРУКСАТТАМАЛАРДЫ КӨРҮҮ';
 }
 
 /// The translations for Lao (`lo`).
@@ -23111,7 +22564,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ກັບຄືນ';
 
   @override
-  String get bottomSheetLabel => 'ຊີດລຸ່ມສຸດ';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'ສະຫຼັບໄປປະຕິທິນ';
@@ -23135,7 +22588,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ສຳເນົາ';
 
   @override
-  String get currentDateLabel => 'ມື້ນີ້';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ຕັດ';
@@ -23462,7 +22915,7 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'ປິດ $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -23568,16 +23021,16 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atgal';
 
   @override
-  String get bottomSheetLabel => 'Apatinis lapas';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Perjungti į kalendorių';
 
   @override
-  String get cancelButtonLabel => 'Atšaukti';
+  String get cancelButtonLabel => 'ATŠAUKTI';
 
   @override
-  String get closeButtonLabel => 'Uždaryti';
+  String get closeButtonLabel => 'UŽDARYTI';
 
   @override
   String get closeButtonTooltip => 'Uždaryti';
@@ -23586,13 +23039,13 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Išskleisti';
 
   @override
-  String get continueButtonLabel => 'Tęsti';
+  String get continueButtonLabel => 'TĘSTI';
 
   @override
   String get copyButtonLabel => 'Kopijuoti';
 
   @override
-  String get currentDateLabel => 'Šiandien';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Iškirpti';
@@ -23607,7 +23060,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Nepatenka į diapazoną.';
 
   @override
-  String get datePickerHelpText => 'Pasirinkite datą';
+  String get datePickerHelpText => 'PASIRINKITE DATĄ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Pabaigos data: $fullDate';
@@ -23616,7 +23069,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Pabaigos data';
 
   @override
-  String get dateRangePickerHelpText => 'Pasirinkite diapazoną';
+  String get dateRangePickerHelpText => 'PASIRINKITE DIAPAZONĄ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Pradžios data: $fullDate';
@@ -23913,13 +23366,13 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Eilučių puslapyje:';
 
   @override
-  String get saveButtonLabel => 'Išsaugoti';
+  String get saveButtonLabel => 'IŠSAUGOTI';
 
   @override
-  String get scrimLabel => 'Užsklanda';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Uždaryti „$modalRouteContentName“';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -23967,7 +23420,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Pasirinkite laiką';
+  String get timePickerDialHelpText => 'PASIRINKITE LAIKĄ';
 
   @override
   String get timePickerHourLabel => 'Valandos';
@@ -23976,7 +23429,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Pasirinkite valandas';
 
   @override
-  String get timePickerInputHelpText => 'Įveskite laiką';
+  String get timePickerInputHelpText => 'ĮVESKITE LAIKĄ';
 
   @override
   String get timePickerMinuteLabel => 'Minutės';
@@ -23991,7 +23444,7 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Dienų seka';
 
   @override
-  String get viewLicensesButtonLabel => 'Peržiūrėti licencijas';
+  String get viewLicensesButtonLabel => 'PERŽIŪRĖTI LICENCIJAS';
 }
 
 /// The translations for Latvian (`lv`).
@@ -24025,16 +23478,16 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Atpakaļ';
 
   @override
-  String get bottomSheetLabel => 'Ekrāna apakšdaļas lapa';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Pārslēgties uz kalendāru';
 
   @override
-  String get cancelButtonLabel => 'Atcelt';
+  String get cancelButtonLabel => 'ATCELT';
 
   @override
-  String get closeButtonLabel => 'Aizvērt';
+  String get closeButtonLabel => 'AIZVĒRT';
 
   @override
   String get closeButtonTooltip => 'Aizvērt';
@@ -24043,13 +23496,13 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Izvērst';
 
   @override
-  String get continueButtonLabel => 'Turpināt';
+  String get continueButtonLabel => 'TURPINĀT';
 
   @override
   String get copyButtonLabel => 'Kopēt';
 
   @override
-  String get currentDateLabel => 'Šodien';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izgriezt';
@@ -24064,7 +23517,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Ārpus diapazona.';
 
   @override
-  String get datePickerHelpText => 'Atlasiet datumu';
+  String get datePickerHelpText => 'ATLASIET DATUMU';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Beigu datums: $fullDate';
@@ -24073,7 +23526,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Beigu datums';
 
   @override
-  String get dateRangePickerHelpText => 'Atlasiet diapazonu';
+  String get dateRangePickerHelpText => 'ATLASIET DIAPAZONU';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Sākuma datums: $fullDate';
@@ -24256,7 +23709,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Atlasīt';
 
   @override
-  String get keyboardKeyShift => 'Pārslēgšanas taustiņš';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Atstarpes taustiņš';
@@ -24370,13 +23823,13 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rindas lapā:';
 
   @override
-  String get saveButtonLabel => 'Saglabāt';
+  String get saveButtonLabel => 'SAGLABĀT';
 
   @override
-  String get scrimLabel => 'Pārklājums';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Aizvērt $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -24424,7 +23877,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Atlasiet laiku';
+  String get timePickerDialHelpText => 'ATLASIET LAIKU';
 
   @override
   String get timePickerHourLabel => 'Stunda';
@@ -24433,7 +23886,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Atlasiet stundas';
 
   @override
-  String get timePickerInputHelpText => 'Ievadiet laiku';
+  String get timePickerInputHelpText => 'IEVADIET LAIKU';
 
   @override
   String get timePickerMinuteLabel => 'Minūte';
@@ -24448,7 +23901,7 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Datumu diapazons';
 
   @override
-  String get viewLicensesButtonLabel => 'Skatīt licences';
+  String get viewLicensesButtonLabel => 'SKATĪT LICENCES';
 }
 
 /// The translations for Macedonian (`mk`).
@@ -24482,16 +23935,16 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
-  String get bottomSheetLabel => 'Долен лист';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Префрли на календар';
 
   @override
-  String get cancelButtonLabel => 'Откажи';
+  String get cancelButtonLabel => 'ОТКАЖИ';
 
   @override
-  String get closeButtonLabel => 'Затвори';
+  String get closeButtonLabel => 'ЗАТВОРИ';
 
   @override
   String get closeButtonTooltip => 'Затвори';
@@ -24500,13 +23953,13 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Прошири';
 
   @override
-  String get continueButtonLabel => 'Продолжи';
+  String get continueButtonLabel => 'ПРОДОЛЖИ';
 
   @override
   String get copyButtonLabel => 'Копирај';
 
   @override
-  String get currentDateLabel => 'Денес';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Исечи';
@@ -24521,7 +23974,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Надвор од опсег.';
 
   @override
-  String get datePickerHelpText => 'Изберете датум';
+  String get datePickerHelpText => 'ИЗБЕРЕТЕ ДАТУМ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Краен датум $fullDate';
@@ -24530,7 +23983,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Краен датум';
 
   @override
-  String get dateRangePickerHelpText => 'Изберете опсег';
+  String get dateRangePickerHelpText => 'ИЗБЕРЕТЕ ОПСЕГ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Датум на започнување $fullDate';
@@ -24827,13 +24280,13 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Редови на страница:';
 
   @override
-  String get saveButtonLabel => 'Зачувај';
+  String get saveButtonLabel => 'ЗАЧУВАЈ';
 
   @override
-  String get scrimLabel => 'Скрим';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Затворете ја $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -24881,7 +24334,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Изберете време';
+  String get timePickerDialHelpText => 'ИЗБЕРЕТЕ ВРЕМЕ';
 
   @override
   String get timePickerHourLabel => 'Час';
@@ -24890,7 +24343,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Изберете часови';
 
   @override
-  String get timePickerInputHelpText => 'Внесете време';
+  String get timePickerInputHelpText => 'ВНЕСЕТЕ ВРЕМЕ';
 
   @override
   String get timePickerMinuteLabel => 'Минута';
@@ -24905,7 +24358,7 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Временски период';
 
   @override
-  String get viewLicensesButtonLabel => 'Прикажи ги лиценците';
+  String get viewLicensesButtonLabel => 'ПРИКАЖИ ЛИЦЕНЦИ';
 }
 
 /// The translations for Malayalam (`ml`).
@@ -24939,7 +24392,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'മടങ്ങുക';
 
   @override
-  String get bottomSheetLabel => 'ബോട്ടം ഷീറ്റ്';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'കലണ്ടറിലേക്ക് മാറുക';
@@ -24948,7 +24401,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'റദ്ദാക്കുക';
 
   @override
-  String get closeButtonLabel => 'അടയ്ക്കുക';
+  String get closeButtonLabel => 'അടയ്‌ക്കുക';
 
   @override
   String get closeButtonTooltip => 'അടയ്‌ക്കുക';
@@ -24963,7 +24416,7 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'പകർത്തുക';
 
   @override
-  String get currentDateLabel => 'ഇന്ന്';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'മുറിക്കുക';
@@ -25287,10 +24740,10 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'സംരക്ഷിക്കുക';
 
   @override
-  String get scrimLabel => 'സ്ക്രിം';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName അടയ്ക്കുക';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -25396,16 +24849,16 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Буцах';
 
   @override
-  String get bottomSheetLabel => 'Доод хүснэгт';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Календарь луу сэлгэх';
 
   @override
-  String get cancelButtonLabel => 'Цуцлах';
+  String get cancelButtonLabel => 'БОЛИХ';
 
   @override
-  String get closeButtonLabel => 'Хаах';
+  String get closeButtonLabel => 'ХААХ';
 
   @override
   String get closeButtonTooltip => 'Хаах';
@@ -25414,13 +24867,13 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Дэлгэх';
 
   @override
-  String get continueButtonLabel => 'Үргэлжлүүлэх';
+  String get continueButtonLabel => 'ҮРГЭЛЖЛҮҮЛЭХ';
 
   @override
   String get copyButtonLabel => 'Хуулах';
 
   @override
-  String get currentDateLabel => 'Өнөөдөр';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Таслах';
@@ -25435,7 +24888,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Интервалаас гадуур байна.';
 
   @override
-  String get datePickerHelpText => 'Огноо сонгох';
+  String get datePickerHelpText => 'ОГНОО СОНГОХ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Дуусах огноо $fullDate';
@@ -25444,7 +24897,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Дуусах огноо';
 
   @override
-  String get dateRangePickerHelpText => 'Хугацааны интервал сонгох';
+  String get dateRangePickerHelpText => 'ИНТЕРВАЛ СОНГОХ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Эхлэх огноо $fullDate';
@@ -25741,13 +25194,13 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Хуудсан дахь мөрийн тоо:';
 
   @override
-  String get saveButtonLabel => 'Хадгалах';
+  String get saveButtonLabel => 'ХАДГАЛАХ';
 
   @override
-  String get scrimLabel => 'Скрим';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName-г хаах';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -25795,7 +25248,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Хугацаа сонгох';
+  String get timePickerDialHelpText => 'ЦАГ СОНГОХ';
 
   @override
   String get timePickerHourLabel => 'Цаг';
@@ -25804,7 +25257,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Цаг сонгоно уу';
 
   @override
-  String get timePickerInputHelpText => 'Хугацаа оруулах';
+  String get timePickerInputHelpText => 'ЦАГ ОРУУЛАХ';
 
   @override
   String get timePickerMinuteLabel => 'Минут';
@@ -25819,7 +25272,7 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Хугацааны интервал';
 
   @override
-  String get viewLicensesButtonLabel => 'Лиценз харах';
+  String get viewLicensesButtonLabel => 'ЛИЦЕНЗИЙГ ХАРАХ';
 }
 
 /// The translations for Marathi (`mr`).
@@ -25853,7 +25306,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'मागे';
 
   @override
-  String get bottomSheetLabel => 'तळाशी असलेली शीट';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'कॅलेंडरवर स्विच करा';
@@ -25871,13 +25324,13 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'विस्तार करा';
 
   @override
-  String get continueButtonLabel => 'पुढे सुरू ठेवा';
+  String get continueButtonLabel => 'सुरू ठेवा';
 
   @override
   String get copyButtonLabel => 'कॉपी करा';
 
   @override
-  String get currentDateLabel => 'आज';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'कट करा';
@@ -25901,7 +25354,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'संपण्याची तारीख';
 
   @override
-  String get dateRangePickerHelpText => 'रेंज निवडा';
+  String get dateRangePickerHelpText => 'श्रेणी निवडा';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'सुरू होण्याची तारीख $fullDate';
@@ -26084,7 +25537,7 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'निवडा';
 
   @override
-  String get keyboardKeyShift => 'शिफ्ट';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'स्पेस';
@@ -26201,10 +25654,10 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेव्ह करा';
 
   @override
-  String get scrimLabel => 'स्क्रिम';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName बंद करा';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -26310,16 +25763,16 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Kembali';
 
   @override
-  String get bottomSheetLabel => 'Helaian Bawah';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Tukar kepada kalendar';
 
   @override
-  String get cancelButtonLabel => 'Batal';
+  String get cancelButtonLabel => 'BATAL';
 
   @override
-  String get closeButtonLabel => 'Tutup';
+  String get closeButtonLabel => 'TUTUP';
 
   @override
   String get closeButtonTooltip => 'Tutup';
@@ -26328,13 +25781,13 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Kembangkan';
 
   @override
-  String get continueButtonLabel => 'Teruskan';
+  String get continueButtonLabel => 'TERUSKAN';
 
   @override
   String get copyButtonLabel => 'Salin';
 
   @override
-  String get currentDateLabel => 'Hari ini';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Potong';
@@ -26349,7 +25802,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Di luar julat.';
 
   @override
-  String get datePickerHelpText => 'Pilih tarikh';
+  String get datePickerHelpText => 'PILIH TARIKH';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Tarikh tamat ialah $fullDate';
@@ -26358,7 +25811,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Tarikh Tamat';
 
   @override
-  String get dateRangePickerHelpText => 'Pilih julat';
+  String get dateRangePickerHelpText => 'PILIH JULAT';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Tarikh mula ialah $fullDate';
@@ -26604,7 +26057,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get popupMenuLabel => 'Menu pop timbul';
 
   @override
-  String get postMeridiemAbbreviation => 'P/M';
+  String get postMeridiemAbbreviation => 'PTG';
 
   @override
   String get previousMonthTooltip => 'Bulan sebelumnya';
@@ -26655,13 +26108,13 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Baris setiap halaman:';
 
   @override
-  String get saveButtonLabel => 'Simpan';
+  String get saveButtonLabel => 'SIMPAN';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Tutup $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -26709,7 +26162,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
-  String get timePickerDialHelpText => 'Pilih masa';
+  String get timePickerDialHelpText => 'PILIH MASA';
 
   @override
   String get timePickerHourLabel => 'Jam';
@@ -26718,7 +26171,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Pilih jam';
 
   @override
-  String get timePickerInputHelpText => 'Masukkan masa';
+  String get timePickerInputHelpText => 'MASUKKAN MASA';
 
   @override
   String get timePickerMinuteLabel => 'Minit';
@@ -26733,7 +26186,7 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Julat Tarikh';
 
   @override
-  String get viewLicensesButtonLabel => 'Lihat lesen';
+  String get viewLicensesButtonLabel => 'LIHAT LESEN';
 }
 
 /// The translations for Burmese (`my`).
@@ -26767,7 +26220,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'နောက်သို့';
 
   @override
-  String get bottomSheetLabel => 'အောက်ခြေအပိုဆောင်း စာမျက်နှာ';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'ပြက္ခဒိန်သို့ ပြောင်းရန်';
@@ -26791,7 +26244,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
 
   @override
-  String get currentDateLabel => 'ယနေ့';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ဖြတ်ယူရန်';
@@ -26806,7 +26259,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'အပိုင်းအခြား ပြင်ပတွင်ဖြစ်နေသည်။';
 
   @override
-  String get datePickerHelpText => 'ရက်စွဲရွေးရန်';
+  String get datePickerHelpText => 'ရက်စွဲရွေးပါ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'ပြီးဆုံးရက်စွဲ $fullDate';
@@ -26815,7 +26268,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'ပြီးဆုံးရက်စွဲ';
 
   @override
-  String get dateRangePickerHelpText => 'အပိုင်းအခြားရွေးရန်';
+  String get dateRangePickerHelpText => 'အပိုင်းအခြား ရွေးရန်';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'စတင်သည့် ရက်စွဲ $fullDate';
@@ -27118,7 +26571,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName ပိတ်ရန်';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -27175,7 +26628,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'နာရီကို ရွေးပါ';
 
   @override
-  String get timePickerInputHelpText => 'အချိန်ထည့်ရန်';
+  String get timePickerInputHelpText => 'အချိန်ထည့်ရန်';
 
   @override
   String get timePickerMinuteLabel => 'မိနစ်';
@@ -27190,7 +26643,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'ရက်အပိုင်းအခြား';
 
   @override
-  String get viewLicensesButtonLabel => 'လိုင်စင်များကြည့်ရန်';
+  String get viewLicensesButtonLabel => 'လိုင်စင်များကို ကြည့်ရန်';
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
@@ -27224,16 +26677,16 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tilbake';
 
   @override
-  String get bottomSheetLabel => 'Felt nederst';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Bytt til kalender';
 
   @override
-  String get cancelButtonLabel => 'Avbryt';
+  String get cancelButtonLabel => 'AVBRYT';
 
   @override
-  String get closeButtonLabel => 'Lukk';
+  String get closeButtonLabel => 'LUKK';
 
   @override
   String get closeButtonTooltip => 'Lukk';
@@ -27242,13 +26695,13 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Vis';
 
   @override
-  String get continueButtonLabel => 'Fortsett';
+  String get continueButtonLabel => 'FORTSETT';
 
   @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
-  String get currentDateLabel => 'I dag';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
@@ -27263,7 +26716,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Utenfor perioden.';
 
   @override
-  String get datePickerHelpText => 'Velg dato';
+  String get datePickerHelpText => 'VELG DATOEN';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Sluttdato $fullDate';
@@ -27272,7 +26725,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Sluttdato';
 
   @override
-  String get dateRangePickerHelpText => 'Velg datoperiode';
+  String get dateRangePickerHelpText => 'VELG PERIODEN';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Startdato $fullDate';
@@ -27569,13 +27022,13 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rader per side:';
 
   @override
-  String get saveButtonLabel => 'Lagre';
+  String get saveButtonLabel => 'LAGRE';
 
   @override
-  String get scrimLabel => 'Vev';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Lukk $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -27623,7 +27076,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Velg tidspunkt';
+  String get timePickerDialHelpText => 'VELG KLOKKESLETT';
 
   @override
   String get timePickerHourLabel => 'Time';
@@ -27632,7 +27085,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Angi timer';
 
   @override
-  String get timePickerInputHelpText => 'Angi et tidspunkt';
+  String get timePickerInputHelpText => 'ANGI ET KLOKKESLETT';
 
   @override
   String get timePickerMinuteLabel => 'Minutt';
@@ -27647,7 +27100,7 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Datoperiode';
 
   @override
-  String get viewLicensesButtonLabel => 'Se lisenser';
+  String get viewLicensesButtonLabel => 'SE LISENSER';
 }
 
 /// The translations for Nepali (`ne`).
@@ -27681,7 +27134,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'पछाडि जानुहोस्';
 
   @override
-  String get bottomSheetLabel => 'पुछारको पाना';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'पात्रो मोड प्रयोग गर्नुहोस्';
@@ -27705,7 +27158,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'प्रतिलिपि गर्नुहोस्';
 
   @override
-  String get currentDateLabel => 'आज';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'काट्नुहोस्';
@@ -27729,7 +27182,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'समाप्त हुने मिति';
 
   @override
-  String get dateRangePickerHelpText => 'मितिको दायरा चयन गर्नुहोस्';
+  String get dateRangePickerHelpText => 'दायरा चयन गर्नुहोस्';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'सुरु हुने मिति $fullDate';
@@ -28029,10 +27482,10 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'सेभ गर्नुहोस्';
 
   @override
-  String get scrimLabel => 'स्क्रिम';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName बन्द गर्नुहोस्';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -28089,7 +27542,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'घन्टा चयन गर्नुहोस्';
 
   @override
-  String get timePickerInputHelpText => 'समय हाल्नुहोस्';
+  String get timePickerInputHelpText => 'समय प्रविष्टि गर्नुहोस्';
 
   @override
   String get timePickerMinuteLabel => 'मिनेट';
@@ -28104,7 +27557,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'मितिको दायरा';
 
   @override
-  String get viewLicensesButtonLabel => 'लाइसेन्सहरू हेर्नुहोस्';
+  String get viewLicensesButtonLabel => 'इजाजतपत्रहरू हेर्नुहोस्';
 }
 
 /// The translations for Dutch Flemish (`nl`).
@@ -28138,16 +27591,16 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Terug';
 
   @override
-  String get bottomSheetLabel => 'Blad onderaan';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Overschakelen naar kalender';
 
   @override
-  String get cancelButtonLabel => 'Annuleren';
+  String get cancelButtonLabel => 'ANNULEREN';
 
   @override
-  String get closeButtonLabel => 'Sluiten';
+  String get closeButtonLabel => 'SLUITEN';
 
   @override
   String get closeButtonTooltip => 'Sluiten';
@@ -28156,13 +27609,13 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Uitvouwen';
 
   @override
-  String get continueButtonLabel => 'Doorgaan';
+  String get continueButtonLabel => 'DOORGAAN';
 
   @override
   String get copyButtonLabel => 'Kopiëren';
 
   @override
-  String get currentDateLabel => 'Vandaag';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Knippen';
@@ -28177,7 +27630,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Buiten bereik.';
 
   @override
-  String get datePickerHelpText => 'Datum selecteren';
+  String get datePickerHelpText => 'DATUM SELECTEREN';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Einddatum $fullDate';
@@ -28186,7 +27639,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Einddatum';
 
   @override
-  String get dateRangePickerHelpText => 'Periode selecteren';
+  String get dateRangePickerHelpText => 'PERIODE SELECTEREN';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Startdatum $fullDate';
@@ -28483,13 +27936,13 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rijen per pagina:';
 
   @override
-  String get saveButtonLabel => 'Opslaan';
+  String get saveButtonLabel => 'OPSLAAN';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName sluiten';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -28537,7 +27990,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Tijd selecteren';
+  String get timePickerDialHelpText => 'TIJD SELECTEREN';
 
   @override
   String get timePickerHourLabel => 'Uur';
@@ -28546,7 +27999,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Uren selecteren';
 
   @override
-  String get timePickerInputHelpText => 'Tijd opgeven';
+  String get timePickerInputHelpText => 'TIJD OPGEVEN';
 
   @override
   String get timePickerMinuteLabel => 'Minuut';
@@ -28561,7 +28014,7 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Periode';
 
   @override
-  String get viewLicensesButtonLabel => 'Licenties bekijken';
+  String get viewLicensesButtonLabel => 'LICENTIES BEKIJKEN';
 }
 
 /// The translations for Norwegian (`no`).
@@ -28595,16 +28048,16 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tilbake';
 
   @override
-  String get bottomSheetLabel => 'Felt nederst';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Bytt til kalender';
 
   @override
-  String get cancelButtonLabel => 'Avbryt';
+  String get cancelButtonLabel => 'AVBRYT';
 
   @override
-  String get closeButtonLabel => 'Lukk';
+  String get closeButtonLabel => 'LUKK';
 
   @override
   String get closeButtonTooltip => 'Lukk';
@@ -28613,13 +28066,13 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Vis';
 
   @override
-  String get continueButtonLabel => 'Fortsett';
+  String get continueButtonLabel => 'FORTSETT';
 
   @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
-  String get currentDateLabel => 'I dag';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
@@ -28634,7 +28087,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Utenfor perioden.';
 
   @override
-  String get datePickerHelpText => 'Velg dato';
+  String get datePickerHelpText => 'VELG DATOEN';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Sluttdato $fullDate';
@@ -28643,7 +28096,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Sluttdato';
 
   @override
-  String get dateRangePickerHelpText => 'Velg datoperiode';
+  String get dateRangePickerHelpText => 'VELG PERIODEN';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Startdato $fullDate';
@@ -28940,13 +28393,13 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rader per side:';
 
   @override
-  String get saveButtonLabel => 'Lagre';
+  String get saveButtonLabel => 'LAGRE';
 
   @override
-  String get scrimLabel => 'Vev';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Lukk $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -28994,7 +28447,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Velg tidspunkt';
+  String get timePickerDialHelpText => 'VELG KLOKKESLETT';
 
   @override
   String get timePickerHourLabel => 'Time';
@@ -29003,7 +28456,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Angi timer';
 
   @override
-  String get timePickerInputHelpText => 'Angi et tidspunkt';
+  String get timePickerInputHelpText => 'ANGI ET KLOKKESLETT';
 
   @override
   String get timePickerMinuteLabel => 'Minutt';
@@ -29018,7 +28471,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Datoperiode';
 
   @override
-  String get viewLicensesButtonLabel => 'Se lisenser';
+  String get viewLicensesButtonLabel => 'SE LISENSER';
 }
 
 /// The translations for Oriya (`or`).
@@ -29052,13 +28505,13 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ପଛକୁ ଫେରନ୍ତୁ';
 
   @override
-  String get bottomSheetLabel => 'ବଟମ ସିଟ';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'କ୍ୟାଲେଣ୍ଡରକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ';
 
   @override
-  String get cancelButtonLabel => 'ବାତିଲ କରନ୍ତୁ';
+  String get cancelButtonLabel => 'ବାତିଲ୍ କରନ୍ତୁ';
 
   @override
   String get closeButtonLabel => 'ବନ୍ଦ କରନ୍ତୁ';
@@ -29076,7 +28529,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
 
   @override
-  String get currentDateLabel => 'ଆଜି';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
@@ -29100,7 +28553,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'ଶେଷ ତାରିଖ';
 
   @override
-  String get dateRangePickerHelpText => 'ରେଞ୍ଜ ଚୟନ କରନ୍ତୁ';
+  String get dateRangePickerHelpText => 'ସୀମା ଚୟନ କରନ୍ତୁ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'ଆରମ୍ଭ ତାରିଖ $fullDate';
@@ -29397,13 +28850,13 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'ପୃଷ୍ଠା ପିଛା ଧାଡ଼ି:';
 
   @override
-  String get saveButtonLabel => 'ସେଭ କରନ୍ତୁ';
+  String get saveButtonLabel => 'ସେଭ୍ କରନ୍ତୁ';
 
   @override
-  String get scrimLabel => 'ସ୍କ୍ରିମ';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentNameକୁ ବନ୍ଦ କରନ୍ତୁ';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -29475,7 +28928,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'ତାରିଖ ସୀମା';
 
   @override
-  String get viewLicensesButtonLabel => 'ଲାଇସେନ୍ସ ଦେଖନ୍ତୁ';
+  String get viewLicensesButtonLabel => 'ଲାଇସେନ୍ସ ଦେଖାନ୍ତୁ';
 }
 
 /// The translations for Panjabi Punjabi (`pa`).
@@ -29509,7 +28962,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ਪਿੱਛੇ';
 
   @override
-  String get bottomSheetLabel => 'ਹੇਠਲੀ ਸ਼ੀਟ';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => "ਕੈਲੰਡਰ 'ਤੇ ਜਾਓ";
@@ -29533,7 +28986,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
 
   @override
-  String get currentDateLabel => 'ਅੱਜ';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ਕੱਟ ਕਰੋ';
@@ -29857,10 +29310,10 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'ਰੱਖਿਅਤ ਕਰੋ';
 
   @override
-  String get scrimLabel => 'ਸਕ੍ਰਿਮ';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName ਨੂੰ ਬੰਦ ਕਰੋ';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -29966,16 +29419,16 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Wstecz';
 
   @override
-  String get bottomSheetLabel => 'Plansza dolna';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Przełącz na kalendarz';
 
   @override
-  String get cancelButtonLabel => 'Anuluj';
+  String get cancelButtonLabel => 'ANULUJ';
 
   @override
-  String get closeButtonLabel => 'Zamknij';
+  String get closeButtonLabel => 'ZAMKNIJ';
 
   @override
   String get closeButtonTooltip => 'Zamknij';
@@ -29984,13 +29437,13 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Rozwiń';
 
   @override
-  String get continueButtonLabel => 'Dalej';
+  String get continueButtonLabel => 'DALEJ';
 
   @override
   String get copyButtonLabel => 'Kopiuj';
 
   @override
-  String get currentDateLabel => 'Dziś';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Wytnij';
@@ -30005,7 +29458,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Poza zakresem.';
 
   @override
-  String get datePickerHelpText => 'Wybierz datę';
+  String get datePickerHelpText => 'WYBIERZ DATĘ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Data zakończenia: $fullDate';
@@ -30014,7 +29467,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Data zakończenia';
 
   @override
-  String get dateRangePickerHelpText => 'Wybierz zakres';
+  String get dateRangePickerHelpText => 'WYBIERZ ZAKRES';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data rozpoczęcia: $fullDate';
@@ -30311,13 +29764,13 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Wiersze na stronie:';
 
   @override
-  String get saveButtonLabel => 'Zapisz';
+  String get saveButtonLabel => 'ZAPISZ';
 
   @override
-  String get scrimLabel => 'Siatka';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Zamknij: $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -30365,7 +29818,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Wybierz godzinę';
+  String get timePickerDialHelpText => 'WYBIERZ GODZINĘ';
 
   @override
   String get timePickerHourLabel => 'Godzina';
@@ -30374,7 +29827,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Wybierz godziny';
 
   @override
-  String get timePickerInputHelpText => 'Wpisz godzinę';
+  String get timePickerInputHelpText => 'WPISZ GODZINĘ';
 
   @override
   String get timePickerMinuteLabel => 'Minuta';
@@ -30389,7 +29842,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Zakres dat';
 
   @override
-  String get viewLicensesButtonLabel => 'Wyświetl licencje';
+  String get viewLicensesButtonLabel => 'WYŚWIETL LICENCJE';
 }
 
 /// The translations for Pushto Pashto (`ps`).
@@ -30880,16 +30333,16 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Voltar';
 
   @override
-  String get bottomSheetLabel => 'Página inferior';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Mudar para agenda';
 
   @override
-  String get cancelButtonLabel => 'Cancelar';
+  String get cancelButtonLabel => 'CANCELAR';
 
   @override
-  String get closeButtonLabel => 'Fechar';
+  String get closeButtonLabel => 'FECHAR';
 
   @override
   String get closeButtonTooltip => 'Fechar';
@@ -30898,13 +30351,13 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Abrir';
 
   @override
-  String get continueButtonLabel => 'Continuar';
+  String get continueButtonLabel => 'CONTINUAR';
 
   @override
   String get copyButtonLabel => 'Copiar';
 
   @override
-  String get currentDateLabel => 'Hoje';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cortar';
@@ -30919,7 +30372,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Fora de alcance.';
 
   @override
-  String get datePickerHelpText => 'Selecione a data';
+  String get datePickerHelpText => 'SELECIONAR DATA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Data de término $fullDate';
@@ -30928,7 +30381,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Data de término';
 
   @override
-  String get dateRangePickerHelpText => 'Selecione o intervalo';
+  String get dateRangePickerHelpText => 'SELECIONAR INTERVALO';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data de início $fullDate';
@@ -31225,13 +30678,13 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Linhas por página:';
 
   @override
-  String get saveButtonLabel => 'Salvar';
+  String get saveButtonLabel => 'SALVAR';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Fechar $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -31279,7 +30732,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Selecione o horário';
+  String get timePickerDialHelpText => 'SELECIONAR HORÁRIO';
 
   @override
   String get timePickerHourLabel => 'Hora';
@@ -31288,7 +30741,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Selecione as horas';
 
   @override
-  String get timePickerInputHelpText => 'Insira o horário';
+  String get timePickerInputHelpText => 'INSERIR HORÁRIO';
 
   @override
   String get timePickerMinuteLabel => 'Minuto';
@@ -31303,7 +30756,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Período';
 
   @override
-  String get viewLicensesButtonLabel => 'Acessar licenças';
+  String get viewLicensesButtonLabel => 'VER LICENÇAS';
 }
 
 /// The translations for Portuguese, as used in Portugal (`pt_PT`).
@@ -31323,9 +30776,6 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
-
-  @override
-  String get bottomSheetLabel => 'Secção inferior';
 
   @override
   String get menuBarMenuLabel => 'Menu da barra de menu';
@@ -31355,10 +30805,10 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get dialModeButtonLabel => 'Mude para o modo de seletor de mostrador';
 
   @override
-  String get timePickerDialHelpText => 'Selecionar hora';
+  String get timePickerDialHelpText => 'SELECIONAR HORA';
 
   @override
-  String get timePickerInputHelpText => 'Introduzir hora';
+  String get timePickerInputHelpText => 'INTRODUZIR HORA';
 
   @override
   String get invalidTimeLabel => 'Introduza uma hora válida.';
@@ -31373,13 +30823,7 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get calendarModeButtonLabel => 'Mude para o calendário';
 
   @override
-  String get dateRangePickerHelpText => 'Selecionar intervalo';
-
-  @override
-  String get datePickerHelpText => 'Selecionar data';
-
-  @override
-  String get saveButtonLabel => 'Guardar';
+  String get saveButtonLabel => 'GUARDAR';
 
   @override
   String get dateOutOfRangeLabel => 'Fora do intervalo.';
@@ -31431,9 +30875,6 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
 
   @override
   String get pageRowsInfoTitleApproximateRaw => r'$firstRow a $lastRow de cerca de $rowCount';
-
-  @override
-  String get viewLicensesButtonLabel => 'Ver licenças';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorar';
@@ -31488,16 +30929,16 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Înapoi';
 
   @override
-  String get bottomSheetLabel => 'Foaie din partea de jos';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Comutați la calendar';
 
   @override
-  String get cancelButtonLabel => 'Anulați';
+  String get cancelButtonLabel => 'ANULAȚI';
 
   @override
-  String get closeButtonLabel => 'Închideți';
+  String get closeButtonLabel => 'ÎNCHIDEȚI';
 
   @override
   String get closeButtonTooltip => 'Închideți';
@@ -31506,13 +30947,13 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Extindeți';
 
   @override
-  String get continueButtonLabel => 'Continuați';
+  String get continueButtonLabel => 'CONTINUAȚI';
 
   @override
   String get copyButtonLabel => 'Copiați';
 
   @override
-  String get currentDateLabel => 'Azi';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Decupați';
@@ -31527,7 +30968,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Fără acoperire.';
 
   @override
-  String get datePickerHelpText => 'Selectați data';
+  String get datePickerHelpText => 'SELECTAȚI DATA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Data de încheiere: $fullDate';
@@ -31536,7 +30977,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Data de încheiere';
 
   @override
-  String get dateRangePickerHelpText => 'Selectați intervalul';
+  String get dateRangePickerHelpText => 'SELECTAȚI UN INTERVAL';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data de începere: $fullDate';
@@ -31833,13 +31274,13 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rânduri pe pagină:';
 
   @override
-  String get saveButtonLabel => 'Salvați';
+  String get saveButtonLabel => 'SALVAȚI';
 
   @override
-  String get scrimLabel => 'Material';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Închideți $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -31887,7 +31328,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Selectați ora';
+  String get timePickerDialHelpText => 'SELECTAȚI ORA';
 
   @override
   String get timePickerHourLabel => 'Oră';
@@ -31896,7 +31337,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Selectați orele';
 
   @override
-  String get timePickerInputHelpText => 'Introduceți ora';
+  String get timePickerInputHelpText => 'INTRODUCEȚI ORA';
 
   @override
   String get timePickerMinuteLabel => 'Minut';
@@ -31911,7 +31352,7 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Interval de date';
 
   @override
-  String get viewLicensesButtonLabel => 'Vedeți licențele';
+  String get viewLicensesButtonLabel => 'VEDEȚI LICENȚELE';
 }
 
 /// The translations for Russian (`ru`).
@@ -31945,16 +31386,16 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
-  String get bottomSheetLabel => 'Нижний экран';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Переключиться на календарь';
 
   @override
-  String get cancelButtonLabel => 'Отмена';
+  String get cancelButtonLabel => 'ОТМЕНА';
 
   @override
-  String get closeButtonLabel => 'Закрыть';
+  String get closeButtonLabel => 'ЗАКРЫТЬ';
 
   @override
   String get closeButtonTooltip => 'Закрыть';
@@ -31963,13 +31404,13 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Развернуть';
 
   @override
-  String get continueButtonLabel => 'Продолжить';
+  String get continueButtonLabel => 'ПРОДОЛЖИТЬ';
 
   @override
   String get copyButtonLabel => 'Копировать';
 
   @override
-  String get currentDateLabel => 'Сегодня';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Вырезать';
@@ -31984,7 +31425,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Дата находится вне допустимого диапазона.';
 
   @override
-  String get datePickerHelpText => 'Выберите дату';
+  String get datePickerHelpText => 'ВЫБЕРИТЕ ДАТУ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Дата окончания: $fullDate';
@@ -31993,7 +31434,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Дата окончания';
 
   @override
-  String get dateRangePickerHelpText => 'Выберите диапазон дат';
+  String get dateRangePickerHelpText => 'ВЫБЕРИТЕ ДИАПАЗОН ДАТ';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Дата начала: $fullDate';
@@ -32290,13 +31731,13 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Строк на странице:';
 
   @override
-  String get saveButtonLabel => 'Сохранить';
+  String get saveButtonLabel => 'СОХРАНИТЬ';
 
   @override
-  String get scrimLabel => 'Маска';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Закрыть $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -32344,7 +31785,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Выберите время';
+  String get timePickerDialHelpText => 'ВЫБЕРИТЕ ВРЕМЯ';
 
   @override
   String get timePickerHourLabel => 'Часы';
@@ -32353,7 +31794,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Выберите часы';
 
   @override
-  String get timePickerInputHelpText => 'Укажите время';
+  String get timePickerInputHelpText => 'ВВЕДИТЕ ВРЕМЯ';
 
   @override
   String get timePickerMinuteLabel => 'Минуты';
@@ -32368,7 +31809,7 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Диапазон дат';
 
   @override
-  String get viewLicensesButtonLabel => 'Посмотреть лицензии';
+  String get viewLicensesButtonLabel => 'ЛИЦЕНЗИИ';
 }
 
 /// The translations for Sinhala Sinhalese (`si`).
@@ -32402,7 +31843,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'ආපසු';
 
   @override
-  String get bottomSheetLabel => 'පහළම පත්‍රය';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'දින දර්ශනය වෙත මාරු වන්න';
@@ -32420,13 +31861,13 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'දිග හරින්න';
 
   @override
-  String get continueButtonLabel => 'ඉදිරියට යන්න';
+  String get continueButtonLabel => 'ඉදිරියට';
 
   @override
   String get copyButtonLabel => 'පිටපත් කරන්න';
 
   @override
-  String get currentDateLabel => 'අද';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'කපන්න';
@@ -32750,10 +32191,10 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'සුරකින්න';
 
   @override
-  String get scrimLabel => 'ස්ක්‍රිම්';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName වසන්න';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -32810,7 +32251,7 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'පැය ගණන තෝරන්න';
 
   @override
-  String get timePickerInputHelpText => 'කාලය ඇතුළු කරන්න';
+  String get timePickerInputHelpText => 'දිනය ඇතුළු කරන්න';
 
   @override
   String get timePickerMinuteLabel => 'මිනිත්තු';
@@ -32859,16 +32300,16 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Späť';
 
   @override
-  String get bottomSheetLabel => 'Dolný hárok';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Prepnúť na kalendár';
 
   @override
-  String get cancelButtonLabel => 'Zrušiť';
+  String get cancelButtonLabel => 'ZRUŠIŤ';
 
   @override
-  String get closeButtonLabel => 'Zavrieť';
+  String get closeButtonLabel => 'ZAVRIEŤ';
 
   @override
   String get closeButtonTooltip => 'Zavrieť';
@@ -32877,13 +32318,13 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Rozbaliť';
 
   @override
-  String get continueButtonLabel => 'Pokračovať';
+  String get continueButtonLabel => 'POKRAČOVAŤ';
 
   @override
   String get copyButtonLabel => 'Kopírovať';
 
   @override
-  String get currentDateLabel => 'Dnes';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Vystrihnúť';
@@ -32898,7 +32339,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Mimo rozsahu.';
 
   @override
-  String get datePickerHelpText => 'Vybrať dátum';
+  String get datePickerHelpText => 'VYBERTE DÁTUM';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Dátum ukončenia $fullDate';
@@ -32907,7 +32348,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Dátum ukončenia';
 
   @override
-  String get dateRangePickerHelpText => 'Vybrať rozsah';
+  String get dateRangePickerHelpText => 'VYBERTE ROZSAH';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Dátum začatia $fullDate';
@@ -33204,13 +32645,13 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Počet riadkov na stránku:';
 
   @override
-  String get saveButtonLabel => 'Uložiť';
+  String get saveButtonLabel => 'ULOŽIŤ';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Zavrieť $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -33258,7 +32699,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Vybrať čas';
+  String get timePickerDialHelpText => 'VYBERTE ČAS';
 
   @override
   String get timePickerHourLabel => 'Hodina';
@@ -33267,7 +32708,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Vybrať hodiny';
 
   @override
-  String get timePickerInputHelpText => 'Zadať čas';
+  String get timePickerInputHelpText => 'ZADAJTE ČAS';
 
   @override
   String get timePickerMinuteLabel => 'Minúta';
@@ -33282,7 +32723,7 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Obdobie';
 
   @override
-  String get viewLicensesButtonLabel => 'Zobraziť licencie';
+  String get viewLicensesButtonLabel => 'ZOBRAZIŤ LICENCIE';
 }
 
 /// The translations for Slovenian (`sl`).
@@ -33316,16 +32757,16 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Nazaj';
 
   @override
-  String get bottomSheetLabel => 'Razdelek na dnu zaslona';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Preklop na koledar';
 
   @override
-  String get cancelButtonLabel => 'Prekliči';
+  String get cancelButtonLabel => 'PREKLIČI';
 
   @override
-  String get closeButtonLabel => 'Zapri';
+  String get closeButtonLabel => 'ZAPRI';
 
   @override
   String get closeButtonTooltip => 'Zapiranje';
@@ -33334,13 +32775,13 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Razširiti';
 
   @override
-  String get continueButtonLabel => 'Naprej';
+  String get continueButtonLabel => 'NAPREJ';
 
   @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
-  String get currentDateLabel => 'Danes';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Izreži';
@@ -33355,7 +32796,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Zunaj dovoljenega obdobja';
 
   @override
-  String get datePickerHelpText => 'Izberite datum';
+  String get datePickerHelpText => 'IZBIRA DATUMA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Končni datum $fullDate';
@@ -33364,7 +32805,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Končni datum';
 
   @override
-  String get dateRangePickerHelpText => 'Izberite obdobje';
+  String get dateRangePickerHelpText => 'IZBIRA OBDOBJA';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Začetni datum $fullDate';
@@ -33661,13 +33102,13 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Vrstice na stran:';
 
   @override
-  String get saveButtonLabel => 'Shrani';
+  String get saveButtonLabel => 'SHRANI';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Zapiranje »$modalRouteContentName«';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -33715,7 +33156,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Izberite uro';
+  String get timePickerDialHelpText => 'IZBERITE ČAS';
 
   @override
   String get timePickerHourLabel => 'Ura';
@@ -33724,7 +33165,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Izberite ure';
 
   @override
-  String get timePickerInputHelpText => 'Vnesite čas';
+  String get timePickerInputHelpText => 'VNESITE ČAS';
 
   @override
   String get timePickerMinuteLabel => 'Minuta';
@@ -33739,7 +33180,7 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Časovno obdobje';
 
   @override
-  String get viewLicensesButtonLabel => 'Prikaži licence';
+  String get viewLicensesButtonLabel => 'PRIKAŽI LICENCE';
 }
 
 /// The translations for Albanian (`sq`).
@@ -33773,16 +33214,16 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Prapa';
 
   @override
-  String get bottomSheetLabel => 'Fleta e poshtme';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Kalo te kalendari';
 
   @override
-  String get cancelButtonLabel => 'Anulo';
+  String get cancelButtonLabel => 'ANULO';
 
   @override
-  String get closeButtonLabel => 'Mbyll';
+  String get closeButtonLabel => 'MBYLL';
 
   @override
   String get closeButtonTooltip => 'Mbyll';
@@ -33791,13 +33232,13 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Zgjero';
 
   @override
-  String get continueButtonLabel => 'Vazhdo';
+  String get continueButtonLabel => 'VAZHDO';
 
   @override
   String get copyButtonLabel => 'Kopjo';
 
   @override
-  String get currentDateLabel => 'Sot';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Prit';
@@ -33812,7 +33253,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Jashtë rrezes.';
 
   @override
-  String get datePickerHelpText => 'Zgjidh datën';
+  String get datePickerHelpText => 'ZGJIDH DATËN';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Data e mbarimit: $fullDate';
@@ -33821,7 +33262,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Data e mbarimit';
 
   @override
-  String get dateRangePickerHelpText => 'Zgjidh gamën';
+  String get dateRangePickerHelpText => 'ZGJIDH GAMËN';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data e fillimit: $fullDate';
@@ -34118,13 +33559,13 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rreshtat për faqe:';
 
   @override
-  String get saveButtonLabel => 'Ruaj';
+  String get saveButtonLabel => 'RUAJ';
 
   @override
-  String get scrimLabel => 'Kanavacë';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Mbyll $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -34172,7 +33613,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Zgjidh orën';
+  String get timePickerDialHelpText => 'ZGJIDH ORËN';
 
   @override
   String get timePickerHourLabel => 'Ora';
@@ -34181,7 +33622,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Zgjidh orët';
 
   @override
-  String get timePickerInputHelpText => 'Fut orën';
+  String get timePickerInputHelpText => 'VENDOS ORËN';
 
   @override
   String get timePickerMinuteLabel => 'Minuta';
@@ -34196,7 +33637,7 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Gama e datave';
 
   @override
-  String get viewLicensesButtonLabel => 'Shiko licencat';
+  String get viewLicensesButtonLabel => 'SHIKO LICENCAT';
 }
 
 /// The translations for Serbian (`sr`).
@@ -34230,16 +33671,16 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
-  String get bottomSheetLabel => 'Доња табела';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Пређите на календар';
 
   @override
-  String get cancelButtonLabel => 'Откажи';
+  String get cancelButtonLabel => 'ОТКАЖИ';
 
   @override
-  String get closeButtonLabel => 'Затвори';
+  String get closeButtonLabel => 'ЗАТВОРИ';
 
   @override
   String get closeButtonTooltip => 'Затворите';
@@ -34248,13 +33689,13 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Прошири';
 
   @override
-  String get continueButtonLabel => 'Настави';
+  String get continueButtonLabel => 'НАСТАВИ';
 
   @override
   String get copyButtonLabel => 'Копирај';
 
   @override
-  String get currentDateLabel => 'Данас';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Исеци';
@@ -34269,7 +33710,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Изван периода.';
 
   @override
-  String get datePickerHelpText => 'Изаберите датум';
+  String get datePickerHelpText => 'ИЗАБЕРИТЕ ДАТУМ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Датум завршетка: $fullDate';
@@ -34278,7 +33719,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Датум завршетка';
 
   @override
-  String get dateRangePickerHelpText => 'Изаберите период';
+  String get dateRangePickerHelpText => 'ИЗАБЕРИТЕ ПЕРИОД';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Датум почетка: $fullDate';
@@ -34572,16 +34013,16 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get reorderItemUp => 'Померите нагоре';
 
   @override
-  String get rowsPerPageTitle => 'Редова на страници:';
+  String get rowsPerPageTitle => 'Редова по страници:';
 
   @override
-  String get saveButtonLabel => 'Сачувај';
+  String get saveButtonLabel => 'САЧУВАЈ';
 
   @override
-  String get scrimLabel => 'Скрим';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Затвори: $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -34629,7 +34070,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Изаберите време';
+  String get timePickerDialHelpText => 'ИЗАБЕРИТЕ ВРЕМЕ';
 
   @override
   String get timePickerHourLabel => 'Сат';
@@ -34638,7 +34079,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Изаберите сате';
 
   @override
-  String get timePickerInputHelpText => 'Унесите време';
+  String get timePickerInputHelpText => 'УНЕСИТЕ ВРЕМЕ';
 
   @override
   String get timePickerMinuteLabel => 'Минут';
@@ -34653,7 +34094,7 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Период';
 
   @override
-  String get viewLicensesButtonLabel => 'Прикажи лиценце';
+  String get viewLicensesButtonLabel => 'ПРИКАЖИ ЛИЦЕНЦЕ';
 }
 
 /// The translations for Serbian, using the Cyrillic script (`sr_Cyrl`).
@@ -34706,16 +34147,13 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get backButtonTooltip => 'Nazad';
 
   @override
-  String get bottomSheetLabel => 'Donja tabela';
-
-  @override
   String get calendarModeButtonLabel => 'Pređite na kalendar';
 
   @override
-  String get cancelButtonLabel => 'Otkaži';
+  String get cancelButtonLabel => 'OTKAŽI';
 
   @override
-  String get closeButtonLabel => 'Zatvori';
+  String get closeButtonLabel => 'ZATVORI';
 
   @override
   String get closeButtonTooltip => 'Zatvorite';
@@ -34724,13 +34162,10 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get collapsedIconTapHint => 'Proširi';
 
   @override
-  String get continueButtonLabel => 'Nastavi';
+  String get continueButtonLabel => 'NASTAVI';
 
   @override
   String get copyButtonLabel => 'Kopiraj';
-
-  @override
-  String get currentDateLabel => 'Danas';
 
   @override
   String get cutButtonLabel => 'Iseci';
@@ -34745,7 +34180,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get dateOutOfRangeLabel => 'Izvan perioda.';
 
   @override
-  String get datePickerHelpText => 'Izaberite datum';
+  String get datePickerHelpText => 'IZABERITE DATUM';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Datum završetka: $fullDate';
@@ -34754,7 +34189,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get dateRangeEndLabel => 'Datum završetka';
 
   @override
-  String get dateRangePickerHelpText => 'Izaberite period';
+  String get dateRangePickerHelpText => 'IZABERITE PERIOD';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Datum početka: $fullDate';
@@ -34901,16 +34336,10 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get reorderItemUp => 'Pomerite nagore';
 
   @override
-  String get rowsPerPageTitle => 'Redova na stranici:';
+  String get rowsPerPageTitle => 'Redova po stranici:';
 
   @override
-  String get saveButtonLabel => 'Sačuvaj';
-
-  @override
-  String get scrimLabel => 'Skrim';
-
-  @override
-  String get scrimOnTapHintRaw => r'Zatvori: $modalRouteContentName';
+  String get saveButtonLabel => 'SAČUVAJ';
 
   @override
   String get searchFieldLabel => 'Pretražite';
@@ -34943,7 +34372,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get tabLabelRaw => r'$tabIndex. kartica od $tabCount';
 
   @override
-  String get timePickerDialHelpText => 'Izaberite vreme';
+  String get timePickerDialHelpText => 'IZABERITE VREME';
 
   @override
   String get timePickerHourLabel => 'Sat';
@@ -34952,7 +34381,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get timePickerHourModeAnnouncement => 'Izaberite sate';
 
   @override
-  String get timePickerInputHelpText => 'Unesite vreme';
+  String get timePickerInputHelpText => 'UNESITE VREME';
 
   @override
   String get timePickerMinuteLabel => 'Minut';
@@ -34967,7 +34396,7 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get unspecifiedDateRange => 'Period';
 
   @override
-  String get viewLicensesButtonLabel => 'Prikaži licence';
+  String get viewLicensesButtonLabel => 'PRIKAŽI LICENCE';
 }
 
 /// The translations for Swedish (`sv`).
@@ -35001,16 +34430,16 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Tillbaka';
 
   @override
-  String get bottomSheetLabel => 'Ark på nedre delen av skärmen';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Byt till kalender';
 
   @override
-  String get cancelButtonLabel => 'Avbryt';
+  String get cancelButtonLabel => 'AVBRYT';
 
   @override
-  String get closeButtonLabel => 'Stäng';
+  String get closeButtonLabel => 'STÄNG';
 
   @override
   String get closeButtonTooltip => 'Stäng';
@@ -35019,13 +34448,13 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Utöka';
 
   @override
-  String get continueButtonLabel => 'Fortsätt';
+  String get continueButtonLabel => 'FORTSÄTT';
 
   @override
   String get copyButtonLabel => 'Kopiera';
 
   @override
-  String get currentDateLabel => 'I dag';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
@@ -35040,7 +34469,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Utanför intervallet.';
 
   @override
-  String get datePickerHelpText => 'Välj datum';
+  String get datePickerHelpText => 'VÄLJ DATUM';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Slutdatum $fullDate';
@@ -35049,7 +34478,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Slutdatum';
 
   @override
-  String get dateRangePickerHelpText => 'Välj intervall';
+  String get dateRangePickerHelpText => 'VÄLJ INTERVALL';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Startdatum $fullDate';
@@ -35217,7 +34646,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'Av/på';
+  String get keyboardKeyPower => 'Strömbrytare';
 
   @override
   String get keyboardKeyPowerOff => 'Stäng av';
@@ -35232,7 +34661,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Välj';
 
   @override
-  String get keyboardKeyShift => 'Skift';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Blanksteg';
@@ -35346,13 +34775,13 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Rader per sida:';
 
   @override
-  String get saveButtonLabel => 'Spara';
+  String get saveButtonLabel => 'SPARA';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Stäng $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -35400,7 +34829,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Välj tid';
+  String get timePickerDialHelpText => 'VÄLJ TID';
 
   @override
   String get timePickerHourLabel => 'Timme';
@@ -35409,7 +34838,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Välj timmar';
 
   @override
-  String get timePickerInputHelpText => 'Ange tid';
+  String get timePickerInputHelpText => 'ANGE TID';
 
   @override
   String get timePickerMinuteLabel => 'Minut';
@@ -35424,7 +34853,7 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Datumintervall';
 
   @override
-  String get viewLicensesButtonLabel => 'Visa licenser';
+  String get viewLicensesButtonLabel => 'VISA LICENSER';
 }
 
 /// The translations for Swahili (`sw`).
@@ -35458,16 +34887,16 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Rudi Nyuma';
 
   @override
-  String get bottomSheetLabel => 'Safu ya Chini';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Badili utumie hali ya kalenda';
 
   @override
-  String get cancelButtonLabel => 'Ghairi';
+  String get cancelButtonLabel => 'GHAIRI';
 
   @override
-  String get closeButtonLabel => 'Funga';
+  String get closeButtonLabel => 'FUNGA';
 
   @override
   String get closeButtonTooltip => 'Funga';
@@ -35476,13 +34905,13 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Panua';
 
   @override
-  String get continueButtonLabel => 'Endelea';
+  String get continueButtonLabel => 'ENDELEA';
 
   @override
   String get copyButtonLabel => 'Nakili';
 
   @override
-  String get currentDateLabel => 'Leo';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kata';
@@ -35497,7 +34926,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Umechagua tarehe iliyo nje ya kipindi.';
 
   @override
-  String get datePickerHelpText => 'Chagua tarehe';
+  String get datePickerHelpText => 'CHAGUA TAREHE';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Tarehe ya kumalizika $fullDate';
@@ -35506,7 +34935,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Tarehe ya Kumalizika';
 
   @override
-  String get dateRangePickerHelpText => 'Chagua kipindi';
+  String get dateRangePickerHelpText => 'CHAGUA KIPINDI';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Tarehe ya kuanza $fullDate';
@@ -35803,13 +35232,13 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Safu mlalo kwa kila ukurasa:';
 
   @override
-  String get saveButtonLabel => 'Hifadhi';
+  String get saveButtonLabel => 'HIFADHI';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Funga $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -35857,7 +35286,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
-  String get timePickerDialHelpText => 'Chagua muda';
+  String get timePickerDialHelpText => 'CHAGUA SAA';
 
   @override
   String get timePickerHourLabel => 'Saa';
@@ -35866,7 +35295,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Chagua saa';
 
   @override
-  String get timePickerInputHelpText => 'Weka muda';
+  String get timePickerInputHelpText => 'WEKA SAA';
 
   @override
   String get timePickerMinuteLabel => 'Dakika';
@@ -35881,7 +35310,7 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Kipindi';
 
   @override
-  String get viewLicensesButtonLabel => 'Angalia leseni';
+  String get viewLicensesButtonLabel => 'ANGALIA LESENI';
 }
 
 /// The translations for Tamil (`ta`).
@@ -35909,13 +35338,13 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get alertDialogLabel => 'விழிப்பூட்டல்';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => 'முற்பகல்';
 
   @override
   String get backButtonTooltip => 'முந்தைய பக்கம்';
 
   @override
-  String get bottomSheetLabel => 'கீழ்த் திரை';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'கேலெண்டருக்கு மாற்று';
@@ -35933,13 +35362,13 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'விரிக்கும்';
 
   @override
-  String get continueButtonLabel => 'தொடர்';
+  String get continueButtonLabel => 'தொடர்க';
 
   @override
   String get copyButtonLabel => 'நகலெடு';
 
   @override
-  String get currentDateLabel => 'இன்று';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'வெட்டு';
@@ -35954,7 +35383,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'வரம்பிற்கு வெளியே உள்ளது.';
 
   @override
-  String get datePickerHelpText => 'தேதியைத் தேர்வுசெய்க';
+  String get datePickerHelpText => 'தேதியைத் தேர்ந்தெடுக்கவும்';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'முடிவுத் தேதி $fullDate';
@@ -36209,7 +35638,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get popupMenuLabel => 'பாப்-அப் மெனு';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => 'பிற்பகல்';
 
   @override
   String get previousMonthTooltip => 'முந்தைய மாதம்';
@@ -36263,10 +35692,10 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'சேமி';
 
   @override
-  String get scrimLabel => 'ஸ்க்ரிம்';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName ஐ மூடுக';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -36314,7 +35743,7 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'நேரத்தைத் தேர்ந்தெடுக்கவும்';
+  String get timePickerDialHelpText => 'நேரத்தைத் தேர்வுசெய்க';
 
   @override
   String get timePickerHourLabel => 'மணிநேரம்';
@@ -36372,16 +35801,16 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'వెనుకకు';
 
   @override
-  String get bottomSheetLabel => 'దిగువున ఉన్న షీట్';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'క్యాలెండర్‌కు మారండి';
 
   @override
-  String get cancelButtonLabel => 'రద్దు చేయండి';
+  String get cancelButtonLabel => 'రద్దు చేయి';
 
   @override
-  String get closeButtonLabel => 'మూసివేయండి';
+  String get closeButtonLabel => 'మూసివేయి';
 
   @override
   String get closeButtonTooltip => 'మూసివేయి';
@@ -36390,16 +35819,16 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'విస్తరించు';
 
   @override
-  String get continueButtonLabel => 'కొనసాగించండి';
+  String get continueButtonLabel => 'కొనసాగించు';
 
   @override
   String get copyButtonLabel => 'కాపీ చేయి';
 
   @override
-  String get currentDateLabel => 'నేడు';
+  String get currentDateLabel => 'Date of today';
 
   @override
-  String get cutButtonLabel => 'కత్తిరించండి';
+  String get cutButtonLabel => 'కత్తిరించు';
 
   @override
   String get dateHelpText => 'mm/dd/yyyy';
@@ -36411,7 +35840,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'పరిధి వెలుపల ఉంది.';
 
   @override
-  String get datePickerHelpText => 'తేదీ ఎంచుకోండి';
+  String get datePickerHelpText => 'తేదీని ఎంచుకోండి';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'ముగింపు తేదీ $fullDate';
@@ -36432,7 +35861,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get dateSeparator => '/';
 
   @override
-  String get deleteButtonTooltip => 'తొలగించండి';
+  String get deleteButtonTooltip => 'తొలగించు';
 
   @override
   String get dialModeButtonLabel => 'డయల్ పికర్ మోడ్‌కు మారుస్తుంది';
@@ -36660,7 +36089,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleApproximateRaw => r'$rowCountలో $firstRow–$lastRow';
 
   @override
-  String get pasteButtonLabel => 'పేస్ట్ చేయండి';
+  String get pasteButtonLabel => 'అతికించు';
 
   @override
   String get popupMenuLabel => 'పాప్‌అప్ మెనూ';
@@ -36675,7 +36104,7 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get previousPageTooltip => 'మునుపటి పేజీ';
 
   @override
-  String get refreshIndicatorSemanticLabel => 'రిఫ్రెష్ చేయండి';
+  String get refreshIndicatorSemanticLabel => 'రిఫ్రెష్ చేయి';
 
   @override
   String? get remainingTextFieldCharacterCountFew => null;
@@ -36717,19 +36146,19 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'పేజీకి ఉండే అడ్డు వరుసలు:';
 
   @override
-  String get saveButtonLabel => 'సేవ్ చేయండి';
+  String get saveButtonLabel => 'సేవ్ చేయి';
 
   @override
-  String get scrimLabel => 'స్క్రిమ్';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName‌ను మూసివేయండి';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'వెతకండి';
+  String get searchFieldLabel => 'వెతుకు';
 
   @override
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
@@ -36853,7 +36282,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'คัดลอก';
 
   @override
-  String get currentDateLabel => 'วันนี้';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'ตัด';
@@ -37180,7 +36609,7 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'ปิด $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -37292,10 +36721,10 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get calendarModeButtonLabel => 'Lumipat sa kalendaryo';
 
   @override
-  String get cancelButtonLabel => 'Kanselahin';
+  String get cancelButtonLabel => 'KANSELAHIN';
 
   @override
-  String get closeButtonLabel => 'Isara';
+  String get closeButtonLabel => 'ISARA';
 
   @override
   String get closeButtonTooltip => 'Isara';
@@ -37304,13 +36733,13 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'I-expand';
 
   @override
-  String get continueButtonLabel => 'Magpatuloy';
+  String get continueButtonLabel => 'MAGPATULOY';
 
   @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
-  String get currentDateLabel => 'Ngayon';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'I-cut';
@@ -37325,7 +36754,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Wala sa hanay.';
 
   @override
-  String get datePickerHelpText => 'Pumili ng petsa';
+  String get datePickerHelpText => 'PUMILI NG PETSA';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Petsa ng pagtatapos $fullDate';
@@ -37334,7 +36763,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Petsa ng Pagtatapos';
 
   @override
-  String get dateRangePickerHelpText => 'Pumili ng hanay';
+  String get dateRangePickerHelpText => 'PUMILI NG HANAY';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Petsa ng pagsisimula $fullDate';
@@ -37631,13 +37060,13 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Mga row bawat page:';
 
   @override
-  String get saveButtonLabel => 'I-save';
+  String get saveButtonLabel => 'I-SAVE';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Isara ang $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -37685,7 +37114,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Pumili ng oras';
+  String get timePickerDialHelpText => 'PUMILI NG ORAS';
 
   @override
   String get timePickerHourLabel => 'Oras';
@@ -37694,7 +37123,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Pumili ng mga oras';
 
   @override
-  String get timePickerInputHelpText => 'Maglagay ng oras';
+  String get timePickerInputHelpText => 'MAGLAGAY NG ORAS';
 
   @override
   String get timePickerMinuteLabel => 'Minuto';
@@ -37709,7 +37138,7 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Hanay ng Petsa';
 
   @override
-  String get viewLicensesButtonLabel => 'Tingnan ang mga lisensya';
+  String get viewLicensesButtonLabel => 'TINGNAN ANG MGA LISENSYA';
 }
 
 /// The translations for Turkish (`tr`).
@@ -37743,16 +37172,16 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Geri';
 
   @override
-  String get bottomSheetLabel => 'alt sayfa';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Takvime geç';
 
   @override
-  String get cancelButtonLabel => 'İptal';
+  String get cancelButtonLabel => 'İPTAL';
 
   @override
-  String get closeButtonLabel => 'Kapat';
+  String get closeButtonLabel => 'KAPAT';
 
   @override
   String get closeButtonTooltip => 'Kapat';
@@ -37761,13 +37190,13 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Genişlet';
 
   @override
-  String get continueButtonLabel => 'Devam';
+  String get continueButtonLabel => 'DEVAM';
 
   @override
   String get copyButtonLabel => 'Kopyala';
 
   @override
-  String get currentDateLabel => 'Bugün';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kes';
@@ -37782,7 +37211,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Kapsama alanı dışında.';
 
   @override
-  String get datePickerHelpText => 'Tarih seçin';
+  String get datePickerHelpText => 'TARİH SEÇİN';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Bitiş tarihi $fullDate';
@@ -37791,7 +37220,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Bitiş Tarihi';
 
   @override
-  String get dateRangePickerHelpText => 'Aralık seçin';
+  String get dateRangePickerHelpText => 'ARALIK SEÇİN';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Başlangıç tarihi $fullDate';
@@ -37974,7 +37403,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Seç';
 
   @override
-  String get keyboardKeyShift => 'üst karakter';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Boşluk';
@@ -38088,13 +37517,13 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Sayfa başına satır sayısı:';
 
   @override
-  String get saveButtonLabel => 'Kaydet';
+  String get saveButtonLabel => 'KAYDET';
 
   @override
-  String get scrimLabel => 'opaklık katmanı';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName içeriğini kapat';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -38142,7 +37571,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Saat seçin';
+  String get timePickerDialHelpText => 'SAATİ SEÇİN';
 
   @override
   String get timePickerHourLabel => 'Saat';
@@ -38151,7 +37580,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Saati seçin';
 
   @override
-  String get timePickerInputHelpText => 'Saat girin';
+  String get timePickerInputHelpText => 'SAATİ GİRİN';
 
   @override
   String get timePickerMinuteLabel => 'Dakika';
@@ -38166,7 +37595,7 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Tarih Aralığı';
 
   @override
-  String get viewLicensesButtonLabel => 'Lisansları göster';
+  String get viewLicensesButtonLabel => 'LİSANSLARI GÖSTER';
 }
 
 /// The translations for Ukrainian (`uk`).
@@ -38200,16 +37629,16 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Назад';
 
   @override
-  String get bottomSheetLabel => 'Нижній екран';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Перейти до календаря';
 
   @override
-  String get cancelButtonLabel => 'Скасувати';
+  String get cancelButtonLabel => 'СКАСУВАТИ';
 
   @override
-  String get closeButtonLabel => 'Закрити';
+  String get closeButtonLabel => 'ЗАКРИТИ';
 
   @override
   String get closeButtonTooltip => 'Закрити';
@@ -38218,13 +37647,13 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Розгорнути';
 
   @override
-  String get continueButtonLabel => 'Продовжити';
+  String get continueButtonLabel => 'ПРОДОВЖИТИ';
 
   @override
   String get copyButtonLabel => 'Копіювати';
 
   @override
-  String get currentDateLabel => 'Сьогодні';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Вирізати';
@@ -38239,7 +37668,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'За межами діапазону.';
 
   @override
-  String get datePickerHelpText => 'Вибрати дату';
+  String get datePickerHelpText => 'ВИБРАТИ ДАТУ';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Дата завершення $fullDate';
@@ -38248,7 +37677,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Дата завершення';
 
   @override
-  String get dateRangePickerHelpText => 'Вибрати діапазон дат';
+  String get dateRangePickerHelpText => 'ВИБРАТИ ДІАПАЗОН';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Дата початку $fullDate';
@@ -38545,13 +37974,13 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Рядків на сторінці:';
 
   @override
-  String get saveButtonLabel => 'Зберегти';
+  String get saveButtonLabel => 'ЗБЕРЕГТИ';
 
   @override
-  String get scrimLabel => 'Маскувальний фон';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Закрити: $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -38599,7 +38028,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Вибрати час';
+  String get timePickerDialHelpText => 'ВИБЕРІТЬ ЧАС';
 
   @override
   String get timePickerHourLabel => 'Години';
@@ -38608,7 +38037,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Виберіть години';
 
   @override
-  String get timePickerInputHelpText => 'Ввести час';
+  String get timePickerInputHelpText => 'ВВЕДІТЬ ЧАС';
 
   @override
   String get timePickerMinuteLabel => 'Хвилини';
@@ -38623,7 +38052,7 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Діапазон дат';
 
   @override
-  String get viewLicensesButtonLabel => 'Переглянути ліцензії';
+  String get viewLicensesButtonLabel => 'ПЕРЕГЛЯНУТИ ЛІЦЕНЗІЇ';
 }
 
 /// The translations for Urdu (`ur`).
@@ -38657,7 +38086,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'پیچھے';
 
   @override
-  String get bottomSheetLabel => 'نیچے کی شیٹ';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'کیلنڈر پر سوئچ کریں';
@@ -38681,7 +38110,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get copyButtonLabel => 'کاپی کریں';
 
   @override
-  String get currentDateLabel => 'آج';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'کٹ کریں';
@@ -39005,10 +38434,10 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'محفوظ کریں';
 
   @override
-  String get scrimLabel => 'اسکریم';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'$modalRouteContentName بند کریں';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -39114,16 +38543,16 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Orqaga';
 
   @override
-  String get bottomSheetLabel => 'Quyi ekran';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Taqvimda ochish';
 
   @override
-  String get cancelButtonLabel => 'Bekor qilish';
+  String get cancelButtonLabel => 'BEKOR QILISH';
 
   @override
-  String get closeButtonLabel => 'Yopish';
+  String get closeButtonLabel => 'YOPISH';
 
   @override
   String get closeButtonTooltip => 'Yopish';
@@ -39132,13 +38561,13 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Yoyish';
 
   @override
-  String get continueButtonLabel => 'Davom etish';
+  String get continueButtonLabel => 'DAVOM ETISH';
 
   @override
   String get copyButtonLabel => 'Nusxa olish';
 
   @override
-  String get currentDateLabel => 'Bugun';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Kesib olish';
@@ -39153,7 +38582,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Diapazondan tashqarida.';
 
   @override
-  String get datePickerHelpText => 'Sanani tanlang';
+  String get datePickerHelpText => 'SANANI TANLANG';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Tugash sanasi: $fullDate';
@@ -39162,7 +38591,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Tugash sanasi';
 
   @override
-  String get dateRangePickerHelpText => 'Oraliqni tanlang';
+  String get dateRangePickerHelpText => 'ORALIQNI TANLANG';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Boshlanish sanasi: $fullDate';
@@ -39459,13 +38888,13 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Har bir sahifadagi qatorlar soni:';
 
   @override
-  String get saveButtonLabel => 'Saqlash';
+  String get saveButtonLabel => 'SAQLASH';
 
   @override
-  String get scrimLabel => 'Kanop';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Yopish: $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -39513,7 +38942,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Vaqtni tanlang';
+  String get timePickerDialHelpText => 'VAQTNI TANLANG';
 
   @override
   String get timePickerHourLabel => 'Soat';
@@ -39522,7 +38951,7 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Soatni tanlang';
 
   @override
-  String get timePickerInputHelpText => 'Vaqtni kiriting';
+  String get timePickerInputHelpText => 'VAQTNI KIRITING';
 
   @override
   String get timePickerMinuteLabel => 'Daqiqa';
@@ -39571,16 +39000,16 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Quay lại';
 
   @override
-  String get bottomSheetLabel => 'Bảng dưới cùng';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Chuyển sang lịch';
 
   @override
-  String get cancelButtonLabel => 'Huỷ';
+  String get cancelButtonLabel => 'HỦY';
 
   @override
-  String get closeButtonLabel => 'Đóng';
+  String get closeButtonLabel => 'ĐÓNG';
 
   @override
   String get closeButtonTooltip => 'Đóng';
@@ -39589,13 +39018,13 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Mở rộng';
 
   @override
-  String get continueButtonLabel => 'Tiếp tục';
+  String get continueButtonLabel => 'TIẾP TỤC';
 
   @override
   String get copyButtonLabel => 'Sao chép';
 
   @override
-  String get currentDateLabel => 'Hôm nay';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Cắt';
@@ -39610,7 +39039,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Ngoài phạm vi.';
 
   @override
-  String get datePickerHelpText => 'Chọn ngày';
+  String get datePickerHelpText => 'CHỌN NGÀY';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Ngày kết thúc $fullDate';
@@ -39619,7 +39048,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Ngày kết thúc';
 
   @override
-  String get dateRangePickerHelpText => 'Chọn phạm vi';
+  String get dateRangePickerHelpText => 'CHỌN PHẠM VI';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Ngày bắt đầu $fullDate';
@@ -39916,13 +39345,13 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Số hàng mỗi trang:';
 
   @override
-  String get saveButtonLabel => 'Lưu';
+  String get saveButtonLabel => 'LƯU';
 
   @override
   String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Đóng $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -39970,7 +39399,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Chọn thời gian';
+  String get timePickerDialHelpText => 'CHỌN THỜI GIAN';
 
   @override
   String get timePickerHourLabel => 'Giờ';
@@ -39979,7 +39408,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Chọn giờ';
 
   @override
-  String get timePickerInputHelpText => 'Nhập thời gian';
+  String get timePickerInputHelpText => 'NHẬP THỜI GIAN';
 
   @override
   String get timePickerMinuteLabel => 'Phút';
@@ -39994,7 +39423,7 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get unspecifiedDateRange => 'Phạm vi ngày';
 
   @override
-  String get viewLicensesButtonLabel => 'Xem giấy phép';
+  String get viewLicensesButtonLabel => 'XEM GIẤY PHÉP';
 }
 
 /// The translations for Chinese (`zh`).
@@ -40028,7 +39457,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get backButtonTooltip => '返回';
 
   @override
-  String get bottomSheetLabel => '底部动作条';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => '切换到日历模式';
@@ -40052,7 +39481,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get copyButtonLabel => '复制';
 
   @override
-  String get currentDateLabel => '今天';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => '剪切';
@@ -40376,10 +39805,10 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get saveButtonLabel => '保存';
 
   @override
-  String get scrimLabel => '纱罩';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'关闭 $modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.dense;
@@ -40498,9 +39927,6 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get alertDialogLabel => '通知';
 
   @override
-  String get bottomSheetLabel => '頁底面板';
-
-  @override
   String get calendarModeButtonLabel => '切換至日曆';
 
   @override
@@ -40540,7 +39966,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get dateRangeEndLabel => '結束日期';
 
   @override
-  String get dateRangePickerHelpText => '請選擇範圍';
+  String get dateRangePickerHelpText => '選取範圍';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'開始日期係 $fullDate';
@@ -40756,12 +40182,6 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get saveButtonLabel => '儲存';
 
   @override
-  String get scrimLabel => 'Scrim';
-
-  @override
-  String get scrimOnTapHintRaw => r'關閉 $modalRouteContentName';
-
-  @override
   String get searchFieldLabel => '搜尋';
 
   @override
@@ -40789,7 +40209,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
 
   @override
-  String get timePickerDialHelpText => '請選取時間';
+  String get timePickerDialHelpText => '選取時間';
 
   @override
   String get timePickerHourLabel => '小時';
@@ -40798,7 +40218,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get timePickerHourModeAnnouncement => '揀選小時';
 
   @override
-  String get timePickerInputHelpText => '請輸入時間';
+  String get timePickerInputHelpText => '輸入時間';
 
   @override
   String get timePickerMinuteLabel => '分鐘';
@@ -40851,28 +40271,10 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   });
 
   @override
-  String get scrimLabel => '紗罩';
-
-  @override
-  String get bottomSheetLabel => '底部功能表';
-
-  @override
-  String get scrimOnTapHintRaw => r'關閉「$modalRouteContentName」';
-
-  @override
-  String get keyboardKeyShift => 'Shift 鍵';
-
-  @override
   String get dialModeButtonLabel => '切換至鐘面挑選器模式';
 
   @override
   String? get licensesPackageDetailTextOne => '1 個授權';
-
-  @override
-  String get timePickerDialHelpText => '選取時間';
-
-  @override
-  String get timePickerInputHelpText => '輸入時間';
 
   @override
   String get timePickerHourLabel => '時';
@@ -40885,9 +40287,6 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
 
   @override
   String get calendarModeButtonLabel => '切換到日曆模式';
-
-  @override
-  String get dateRangePickerHelpText => '選取日期範圍';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'結束日期為 $fullDate';
@@ -40978,16 +40377,16 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Emuva';
 
   @override
-  String get bottomSheetLabel => 'Ishidi Eliphansi';
+  String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
   String get calendarModeButtonLabel => 'Shintshela kukhalenda';
 
   @override
-  String get cancelButtonLabel => 'Khansela';
+  String get cancelButtonLabel => 'KHANSELA';
 
   @override
-  String get closeButtonLabel => 'Vala';
+  String get closeButtonLabel => 'VALA';
 
   @override
   String get closeButtonTooltip => 'Vala';
@@ -40996,13 +40395,13 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get collapsedIconTapHint => 'Nweba';
 
   @override
-  String get continueButtonLabel => 'Qhubeka';
+  String get continueButtonLabel => 'QHUBEKA';
 
   @override
   String get copyButtonLabel => 'Kopisha';
 
   @override
-  String get currentDateLabel => 'Namuhla';
+  String get currentDateLabel => 'Date of today';
 
   @override
   String get cutButtonLabel => 'Sika';
@@ -41017,7 +40416,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'Ikude kubanga.';
 
   @override
-  String get datePickerHelpText => 'Khetha usuku';
+  String get datePickerHelpText => 'KHETHA IDETHI';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'Idethi yokuphela umhla ka-$fullDate';
@@ -41026,7 +40425,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get dateRangeEndLabel => 'Idethi yokugcina';
 
   @override
-  String get dateRangePickerHelpText => 'Khetha Ibanga';
+  String get dateRangePickerHelpText => 'KHETHA IBANGA';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Idethi yokuqala umhla ka-$fullDate';
@@ -41209,7 +40608,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'Khetha';
 
   @override
-  String get keyboardKeyShift => 'U-Shift';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';
@@ -41323,13 +40722,13 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => 'Imigqa ekhasini ngalinye:';
 
   @override
-  String get saveButtonLabel => 'Londoloza';
+  String get saveButtonLabel => 'LONDOLOZA';
 
   @override
-  String get scrimLabel => 'I-Scrim';
+  String get scrimLabel => 'Scrim';
 
   @override
-  String get scrimOnTapHintRaw => r'Vala i-$modalRouteContentName';
+  String get scrimOnTapHintRaw => r'Close $modalRouteName';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -41377,7 +40776,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => 'Khetha isikhathi';
+  String get timePickerDialHelpText => 'KHETHA ISIKHATHI';
 
   @override
   String get timePickerHourLabel => 'Ihora';
@@ -41386,7 +40785,7 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get timePickerHourModeAnnouncement => 'Khetha amahora';
 
   @override
-  String get timePickerInputHelpText => 'Faka isikhathi';
+  String get timePickerInputHelpText => 'FAKA ISIKHATHI';
 
   @override
   String get timePickerMinuteLabel => 'Iminithi';
@@ -41427,7 +40826,6 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'bs', // Bosnian
   'ca', // Catalan Valencian
   'cs', // Czech
-  'cy', // Welsh
   'da', // Danish
   'de', // German
   'el', // Modern Greek
@@ -41518,7 +40916,6 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
-///  * `cy` - Welsh
 ///  * `da` - Danish
 ///  * `de` - German (plus one country variation)
 ///  * `el` - Modern Greek
@@ -41625,8 +41022,6 @@ GlobalMaterialLocalizations? getMaterialTranslation(
       return MaterialLocalizationCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'cs':
       return MaterialLocalizationCs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'cy':
-      return MaterialLocalizationCy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'da':
       return MaterialLocalizationDa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'de': {
