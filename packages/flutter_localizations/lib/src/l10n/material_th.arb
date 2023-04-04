@@ -130,9 +130,9 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "เมนูในแถบเมนู",
-  "currentDateLabel": "วันนี้",
+  "currentDateLabel": "Date of today",
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "ปิด $modalRouteContentName",
+  "scrimOnTapHint": "Close $modalRouteName",
   "keyboardKeyShift": "Shift"
 }
