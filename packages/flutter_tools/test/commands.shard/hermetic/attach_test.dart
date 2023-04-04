@@ -591,7 +591,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('exits when ipv6 is specified and debug-port is not', () async {
+      testUsingContext('exits when ipv6 is specified and debug-port is not on non-iOS device', () async {
         testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand(
@@ -615,7 +615,63 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => testDeviceManager,
-      },);
+      });
+
+      testUsingContext('succeeds when ipv6 is specified and debug-port is not on iOS device', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          logReader: fakeLogReader,
+          portForwarder: portForwarder,
+          majorSdkVersion: 12,
+          onGetLogReader: () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('The Dart VM service is listening on http://[::1]:$devicePort');
+            return fakeLogReader;
+          },
+        );
+        testDeviceManager.devices = <Device>[device];
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] VM Service URL on device: http://[::1]:$devicePort') {
+            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+            completer.complete();
+          }
+        });
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForVmService = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          artifacts: artifacts,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach', '--ipv6']);
+        await completer.future;
+
+        expect(portForwarder.devicePort, devicePort);
+        expect(portForwarder.hostPort, hostPort);
+
+        await fakeLogReader.dispose();
+        await loggerSubscription.cancel();
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
 
       testUsingContext('exits when vm-service-port is specified and debug-port is not', () async {
         device.onGetLogReader = () {

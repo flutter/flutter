@@ -20,9 +20,10 @@ class ProtocolDiscovery {
     required this.throttleDuration,
     this.hostPort,
     this.devicePort,
-    required this.ipv6,
+    required bool ipv6,
     required Logger logger,
-  }) : _logger = logger {
+  }) : _logger = logger,
+       _ipv6 = ipv6 {
     _deviceLogSubscription = logReader.logLines.listen(
       _handleLine,
       onDone: _stopScrapingLogs,
@@ -56,7 +57,7 @@ class ProtocolDiscovery {
   final DevicePortForwarder? portForwarder;
   final int? hostPort;
   final int? devicePort;
-  final bool ipv6;
+  final bool _ipv6;
   final Logger _logger;
 
   /// The time to wait before forwarding a new VM Service URIs from [logReader].
@@ -144,7 +145,7 @@ class ProtocolDiscovery {
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
-    if (InternetAddress(hostUri.host).isLoopback && ipv6) {
+    if (InternetAddress(hostUri.host).isLoopback && _ipv6) {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }
     return hostUri;
