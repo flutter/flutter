@@ -465,61 +465,90 @@ bool validateJavaGradle(Logger logger,
   }
 
   // Begin known Java <-> Gradle evaluation.
-  if (isWithinVersionRange(javaV, min: '19', max: '20', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '7.6', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '18', max: '19', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '7.5', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '17', max: '18', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '7.3', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '16', max: '17', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '7.0', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '15', max: '16', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '6.7', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '14', max: '15', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '6.3', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '13', max: '14', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '6.0', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '12', max: '13', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '5.4', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '11', max: '12', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '5.0', max: _maxKnownAndSupportedGradleVersion);
-  }
-  // 1.11 is a made up java version to cover everything in 1.10.*
-  if (isWithinVersionRange(javaV, min: '1.10', max: '1.11', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '4.7', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '1.9', max: '1.10', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '4.3', max: _maxKnownAndSupportedGradleVersion);
-  }
-  if (isWithinVersionRange(javaV, min: '1.8', max: '1.9', inclusiveMax: false)) {
-    return isWithinVersionRange(gradleV,
-        min: '2.0', max: _maxKnownAndSupportedGradleVersion);
+    final List<JavaGradleCompat> compatList = <JavaGradleCompat>[
+    JavaGradleCompat(
+      javaMin: '19',
+      javaMax: '20',
+      gradleMin: '7.6',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '18',
+      javaMax: '19',
+      gradleMin: '7.5',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '17',
+      javaMax: '18',
+      gradleMin: '7.3',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '16',
+      javaMax: '17',
+      gradleMin: '7.0',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '15',
+      javaMax: '16',
+      gradleMin: '6.7',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '14',
+      javaMax: '15',
+      gradleMin: '6.3',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '13',
+      javaMax: '14',
+      gradleMin: '6.0',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '12',
+      javaMax: '13',
+      gradleMin: '5.4',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '11',
+      javaMax: '12',
+      gradleMin: '5.0',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    // 1.11 is a made up java version to cover everything in 1.10.*
+    JavaGradleCompat(
+      javaMin: '1.10',
+      javaMax: '1.11',
+      gradleMin: '4.7',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '1.9',
+      javaMax: '1.10',
+      gradleMin: '4.3',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+    JavaGradleCompat(
+      javaMin: '1.8',
+      javaMax: '1.9',
+      gradleMin: '2.0',
+      gradleMax: _maxKnownAndSupportedGradleVersion,
+    ),
+  ];
+  for (final JavaGradleCompat data in compatList) {
+    if (isWithinVersionRange(javaV, min: data.javaMin, max: data.javaMax, inclusiveMax: false)) {
+      return isWithinVersionRange(gradleV, min: data.gradleMin, max: data.gradleMax);
+    }
   }
 
   logger.printTrace('Unknown Java-Gradle compatability $javaV, $gradleV');
   return false;
 }
-
-
 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
 /// by picking the largest compatible version from
@@ -659,4 +688,18 @@ void exitWithNoSdkMessage() {
       .send();
   throwToolExit('${globals.logger.terminal.warningMark} No Android SDK found. '
       'Try setting the ANDROID_SDK_ROOT environment variable.');
+}
+
+// Data class to hold normal/defined Java <-> Gradle compatability criteria.
+class JavaGradleCompat {
+  JavaGradleCompat({
+    required this.javaMin,
+    required this.javaMax,
+    required this.gradleMin,
+    required this.gradleMax,
+  });
+  final String javaMin;
+  final String javaMax;
+  final String gradleMin;
+  final String gradleMax;
 }
