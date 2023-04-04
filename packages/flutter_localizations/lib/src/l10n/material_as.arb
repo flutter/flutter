@@ -129,9 +129,9 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "মেনু বাৰ মেনু",
-  "currentDateLabel": "Date of today",
-  "scrimLabel": "Scrim",
-  "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "Close $modalRouteName",
-  "keyboardKeyShift": "Shift"
+  "currentDateLabel": "আজি",
+  "scrimLabel": "স্ক্ৰিম",
+  "bottomSheetLabel": "তলৰ শ্বীট",
+  "scrimOnTapHint": "$modalRouteContentName বন্ধ কৰক",
+  "keyboardKeyShift": "শ্বিফ্ট"
 }
