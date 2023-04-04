@@ -1750,7 +1750,6 @@
 ../../../third_party/dart/utils/OWNERS
 ../../../third_party/dart/utils/compiler/.gitignore
 ../../../third_party/dart/utils/dartanalyzer/.gitignore
-../../../third_party/dart/utils/tests
 ../../../third_party/expat/.git
 ../../../third_party/expat/.github
 ../../../third_party/expat/.gitignore
