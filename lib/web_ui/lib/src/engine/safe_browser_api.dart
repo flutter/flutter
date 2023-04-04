@@ -27,16 +27,6 @@ import 'vector_math.dart';
 
 export 'package:js/js.dart' show allowInterop;
 
-/// Creates JavaScript object populated with [properties].
-///
-/// This is equivalent to writing `{}` in plain JavaScript.
-Object createPlainJsObject([Map<String, Object?>? properties]) {
-  if (properties != null) {
-    return js_util.jsify(properties) as Object;
-  } else {
-    return js_util.newObject<Object>();
-  }
-}
 
 /// Returns true if [object] has property [name], false otherwise.
 ///
@@ -79,37 +69,6 @@ Future<T> promiseToFuture<T>(Object jsPromise) {
 
 /// A function that receives a benchmark [value] labeleb by [name].
 typedef OnBenchmark = void Function(String name, double value);
-
-/// Adds an event [listener] of type [type] to the [target].
-///
-/// [eventOptions] supply additional configuration parameters.
-///
-/// This is different from [DomElement.addEventListener] in that the listener
-/// is added as a plain JavaScript function, as opposed to a Dart function.
-///
-/// To remove the listener, call [removeJsEventListener].
-void addJsEventListener(Object target, String type, Function listener, Object eventOptions) {
-  js_util.callMethod<void>(
-    target,
-    'addEventListener', <dynamic>[
-      type,
-      listener,
-      eventOptions,
-    ]
-  );
-}
-
-/// Removes an event listener that was added using [addJsEventListener].
-void removeJsEventListener(Object target, String type, Function listener, Object eventOptions) {
-  js_util.callMethod<void>(
-    target,
-    'removeEventListener', <dynamic>[
-      type,
-      listener,
-      eventOptions,
-    ]
-  );
-}
 
 /// Parses a string [source] into a double.
 ///
@@ -1076,7 +1035,7 @@ class OffScreenCanvas {
     if (offScreenCanvas != null) {
       offScreenCanvas!.convertToBlob().then((DomBlob value) {
         final DomFileReader fileReader = createDomFileReader();
-        fileReader.addEventListener('load', allowInterop((DomEvent event) {
+        fileReader.addEventListener('load', createDomEventListener((DomEvent event) {
           completer.complete(
             js_util.getProperty<String>(js_util.getProperty<Object>(event, 'target'), 'result'),
           );

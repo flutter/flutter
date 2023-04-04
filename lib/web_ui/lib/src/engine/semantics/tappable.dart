@@ -6,7 +6,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../platform_dispatcher.dart';
-import '../safe_browser_api.dart';
 import 'semantics.dart';
 
 /// Listens to HTML "click" gestures detected by the browser.
@@ -44,7 +43,7 @@ class Tappable extends RoleManager {
       if (semanticsObject.hasAction(ui.SemanticsAction.tap) &&
           !semanticsObject.hasFlag(ui.SemanticsFlag.isTextField)) {
         if (_clickListener == null) {
-          _clickListener = allowInterop((_) {
+          _clickListener = createDomEventListener((_) {
             if (semanticsObject.owner.gestureMode !=
                 GestureMode.browserGestures) {
               return;

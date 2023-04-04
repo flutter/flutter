@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -74,7 +75,7 @@ class SafariPointerEventWorkaround {
   static SafariPointerEventWorkaround instance = SafariPointerEventWorkaround();
 
   void workAroundMissingPointerEvents() {
-    domDocument.addEventListener('touchstart', allowInterop((DomEvent event) {}));
+    domDocument.addEventListener('touchstart', createDomEventListener((DomEvent event) {}));
   }
 }
 
@@ -204,10 +205,10 @@ class _Listener {
   factory _Listener.register({
     required String event,
     required DomEventTarget target,
-    required DomEventListener handler,
+    required DartDomEventListener handler,
     bool capture = false,
   }) {
-    final DomEventListener jsHandler = allowInterop((DomEvent event) => handler(event));
+    final DomEventListener jsHandler = createDomEventListener(handler);
     final _Listener listener = _Listener._(
       event: event,
       target: target,
@@ -223,15 +224,14 @@ class _Listener {
   factory _Listener.registerNative({
     required String event,
     required DomEventTarget target,
-    required DomEventListener handler,
+    required DomEventListener jsHandler,
     bool capture = false,
     bool passive = false,
   }) {
-    final Object eventOptions = createPlainJsObject(<String, Object?>{
+    final Map<String, Object> eventOptions = <String, Object>{
       'capture': capture,
       'passive': passive,
-    });
-    final DomEventListener jsHandler = allowInterop((DomEvent event) => handler(event));
+    };
     final _Listener listener = _Listener._(
       event: event,
       target: target,
@@ -239,7 +239,7 @@ class _Listener {
       useCapture: capture,
       isNative: true,
     );
-    addJsEventListener(target, event, jsHandler, eventOptions);
+    target.addEventListenerWithOptions(event, jsHandler, eventOptions);
     return listener;
   }
 
@@ -253,7 +253,7 @@ class _Listener {
 
   void unregister() {
     if (isNative) {
-      removeJsEventListener(target, event, handler, useCapture);
+      target.removeEventListener(event, handler, useCapture);
     } else {
       target.removeEventListener(event, handler, useCapture);
     }
@@ -306,10 +306,10 @@ abstract class _BaseAdapter {
   void addEventListener(
     DomEventTarget target,
     String eventName,
-    DomEventListener handler, {
+    DartDomEventListener handler, {
     bool useCapture = true,
   }) {
-    dynamic loggedHandler(DomEvent event) {
+    JSVoid loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
         if (domInstanceOfString(event, 'PointerEvent')) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
@@ -495,11 +495,11 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     return data;
   }
 
-  void _addWheelEventListener(DomEventListener handler) {
+  void _addWheelEventListener(DartDomEventListener handler) {
     _listeners.add(_Listener.registerNative(
       event: 'wheel',
       target: glassPaneElement,
-      handler: (DomEvent event) => handler(event),
+      jsHandler: createDomEventListener(handler),
     ));
   }
 

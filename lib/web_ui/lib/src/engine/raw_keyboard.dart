@@ -9,18 +9,17 @@ import '../engine.dart'  show registerHotRestartListener;
 import 'dom.dart';
 import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
-import 'safe_browser_api.dart';
 import 'services.dart';
 
 /// Provides keyboard bindings, such as the `flutter/keyevent` channel.
 class RawKeyboard {
   RawKeyboard._(this._onMacOs) {
-    _keydownListener = allowInterop((DomEvent event) {
+    _keydownListener = createDomEventListener((DomEvent event) {
       _handleHtmlEvent(event);
     });
     domWindow.addEventListener('keydown', _keydownListener);
 
-    _keyupListener = allowInterop((DomEvent event) {
+    _keyupListener = createDomEventListener((DomEvent event) {
       _handleHtmlEvent(event);
     });
     domWindow.addEventListener('keyup', _keyupListener);
