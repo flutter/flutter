@@ -240,9 +240,9 @@ class Drawer extends StatelessWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// The [clipBehavior] argument is used the clip shape of the drawer.
+  /// The [clipBehavior] argument specifies how to clip the drawer's [shape].
   ///
-  /// If the drawer has a shape, it defaults to [Clip.hardEdge]. Otherwise,
+  /// If the drawer has a [shape], it defaults to [Clip.hardEdge]. Otherwise,
   /// defaults to [Clip.none].
   final Clip? clipBehavior;
 
