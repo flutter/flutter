@@ -186,6 +186,23 @@ targets:
       validation: analyze
       validation_name: Analyze
 
+  - name: Linux analyzer_benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true # Newly switched to a vm bot: https://github.com/flutter/flutter/issues/124065
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "curl", "version": "version:7.64.0"}
+        ]
+      cores: "32"
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: analyzer_benchmark
+
   - name: Linux coverage
     bringup: true
     recipe: flutter/coverage
@@ -1423,15 +1440,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-
-  - name: Linux_android analyzer_benchmark
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: analyzer_benchmark
 
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
