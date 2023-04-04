@@ -85,15 +85,6 @@ def to_command_line(gn_args):
   return [merge(x, y) for x, y in gn_args.items()]
 
 
-def cpu_for_target_arch(arch):
-  if arch in ['ia32', 'x86', 'arm', 'armv6', 'armv5te', 'mips', 'simarm',
-              'simarmv6', 'simarmv5te', 'simmips', 'simdbc', 'armsimdbc']:
-    return 'x86'
-  if arch in ['x64', 'arm64', 'simarm64', 'simdbc64', 'armsimdbc64']:
-    return 'x64'
-  return None
-
-
 def is_host_build(args):
   # If target_os == None, then this is a host build.
   if args.target_os is None:
@@ -1040,8 +1031,29 @@ def parse_args(args):
   return parser.parse_args(args)
 
 
+def validate_args(args):
+  valid = True
+  if args.simulator:
+    if args.mac_cpu != 'x64':
+      print(
+          'Specified a non-default mac-cpu for a simulator build. Did you mean '
+          'to use `--simulator-cpu`?'
+      )
+      valid = False
+    if args.ios_cpu != 'arm64':
+      print(
+          'Specified a non-default ios-cpu for a simulator build. Did you mean '
+          'to use `--simulator-cpu`?'
+      )
+      valid = False
+
+  if not valid:
+    sys.exit(-1)
+
+
 def main(argv):
   args = parse_args(argv)
+  validate_args(args)
 
   exe = '.exe' if sys.platform.startswith(('cygwin', 'win')) else ''
 
