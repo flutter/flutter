@@ -12,9 +12,9 @@ import 'package:flutter/services.dart';
 /// {@template flutter.flutter_test.MockStreamHandler}
 /// The [onListen] callback is provided a [MockStreamHandlerEventSink] with
 /// the following API:
-/// - [events.success] sends a success event.
-/// - [events.error] sends an error event.
-/// - [events.endOfStream] sends an end of stream event.
+/// - [MockStreamHandlerEventSink.success] sends a success event.
+/// - [MockStreamHandlerEventSink.error] sends an error event.
+/// - [MockStreamHandlerEventSink.endOfStream] sends an end of stream event.
 /// {@endtemplate}
 abstract class MockStreamHandler {
   /// Create a new [MockStreamHandler].
