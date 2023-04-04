@@ -20,7 +20,7 @@ bool VertexDescriptor::SetStageInputs(
   return true;
 }
 
-bool VertexDescriptor::SetDescriptorSetLayouts(
+bool VertexDescriptor::RegisterDescriptorSetLayouts(
     const DescriptorSetLayout desc_set_layout[],
     size_t count) {
   desc_set_layouts_.reserve(desc_set_layouts_.size() + count);
