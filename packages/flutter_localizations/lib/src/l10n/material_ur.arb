@@ -130,9 +130,9 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "مینو بار کا مینو",
-  "currentDateLabel": "Date of today",
-  "scrimLabel": "Scrim",
-  "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "Close $modalRouteName",
+  "currentDateLabel": "آج",
+  "scrimLabel": "اسکریم",
+  "bottomSheetLabel": "نیچے کی شیٹ",
+  "scrimOnTapHint": "$modalRouteContentName بند کریں",
   "keyboardKeyShift": "Shift"
 }
