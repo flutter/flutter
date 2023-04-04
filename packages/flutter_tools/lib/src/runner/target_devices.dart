@@ -31,31 +31,46 @@ class TargetDevices {
     required Platform platform,
     required DeviceManager deviceManager,
     required Logger logger,
+    DeviceConnectionInterface? deviceConnectionInterface,
   }) {
     if (platform.isMacOS) {
       return TargetDevicesWithExtendedWirelessDeviceDiscovery(
         deviceManager: deviceManager,
         logger: logger,
+        deviceConnectionInterface: deviceConnectionInterface,
       );
     }
     return TargetDevices._private(
       deviceManager: deviceManager,
       logger: logger,
+      deviceConnectionInterface: deviceConnectionInterface,
     );
   }
 
   TargetDevices._private({
     required DeviceManager deviceManager,
     required Logger logger,
+    required this.deviceConnectionInterface,
   })  : _deviceManager = deviceManager,
         _logger = logger;
 
   final DeviceManager _deviceManager;
   final Logger _logger;
+  final DeviceConnectionInterface? deviceConnectionInterface;
+
+  bool get _includeAttachedDevices =>
+      deviceConnectionInterface == null ||
+      deviceConnectionInterface == DeviceConnectionInterface.attached;
+  bool get _includeWirelessDevices =>
+      deviceConnectionInterface == null ||
+      deviceConnectionInterface == DeviceConnectionInterface.wireless;
 
   Future<List<Device>> _getAttachedDevices({
     DeviceDiscoverySupportFilter? supportFilter,
   }) async {
+    if (!_includeAttachedDevices) {
+      return <Device>[];
+    }
     return _deviceManager.getDevices(
       filter: DeviceDiscoveryFilter(
         deviceConnectionInterface: DeviceConnectionInterface.attached,
@@ -67,6 +82,9 @@ class TargetDevices {
   Future<List<Device>> _getWirelessDevices({
     DeviceDiscoverySupportFilter? supportFilter,
   }) async {
+    if (!_includeWirelessDevices) {
+      return <Device>[];
+    }
     return _deviceManager.getDevices(
       filter: DeviceDiscoveryFilter(
         deviceConnectionInterface: DeviceConnectionInterface.wireless,
@@ -85,6 +103,7 @@ class TargetDevices {
         supportFilter: _deviceManager.deviceSupportFilter(
           includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         ),
+        deviceConnectionInterface: deviceConnectionInterface,
       ),
     );
   }
@@ -166,7 +185,11 @@ class TargetDevices {
   /// unsupported devices found.
   Future<List<Device>?> _handleNoDevices() async {
     // Get connected devices from cache, including unsupported ones.
-    final List<Device> unsupportedDevices = await _deviceManager.getAllDevices();
+    final List<Device> unsupportedDevices = await _deviceManager.getAllDevices(
+      filter: DeviceDiscoveryFilter(
+        deviceConnectionInterface: deviceConnectionInterface,
+      )
+    );
 
     if (_deviceManager.hasSpecifiedDeviceId) {
       _logger.printStatus(
@@ -344,6 +367,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   TargetDevicesWithExtendedWirelessDeviceDiscovery({
     required super.deviceManager,
     required super.logger,
+    super.deviceConnectionInterface,
   })  : super._private();
 
   Future<void>? _wirelessDevicesRefresh;
@@ -358,7 +382,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   void startExtendedWirelessDeviceDiscovery({
     Duration? deviceDiscoveryTimeout,
   }) {
-    if (deviceDiscoveryTimeout == null) {
+    if (deviceDiscoveryTimeout == null && _includeWirelessDevices) {
       _wirelessDevicesRefresh ??= _deviceManager.refreshExtendedWirelessDeviceDiscoverers(
         timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
       );
@@ -369,6 +393,9 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   Future<List<Device>> _getRefreshedWirelessDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
+    if (!_includeWirelessDevices) {
+      return <Device>[];
+    }
     startExtendedWirelessDeviceDiscovery();
     return () async {
       await _wirelessDevicesRefresh;
@@ -428,9 +455,10 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       return null;
     }
 
-    // When a user defines the timeout, use the super function that does not do
-    // longer wireless device discovery and does not wait for devices to connect.
-    if (deviceDiscoveryTimeout != null) {
+    // When a user defines the timeout or filters to only attached devices,
+    // use the super function that does not do longer wireless device
+    // discovery and does not wait for devices to connect.
+    if (deviceDiscoveryTimeout != null || deviceConnectionInterface == DeviceConnectionInterface.attached) {
       return super.findAllTargetDevices(
         deviceDiscoveryTimeout: deviceDiscoveryTimeout,
         includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
@@ -497,7 +525,11 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     List<Device> attachedDevices,
     Future<List<Device>> futureWirelessDevices,
   ) async {
-    _logger.printStatus(_noAttachedCheckForWireless);
+    if (_includeAttachedDevices) {
+      _logger.printStatus(_noAttachedCheckForWireless);
+    } else {
+      _logger.printStatus(_checkingForWirelessDevicesMessage);
+    }
 
     final List<Device> wirelessDevices = await futureWirelessDevices;
     final List<Device> allDevices = attachedDevices + wirelessDevices;
