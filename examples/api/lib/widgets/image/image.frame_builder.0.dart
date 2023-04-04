@@ -11,7 +11,7 @@ void main() => runApp(const FrameBuilderExampleApp());
 class FrameBuilderExampleApp extends StatelessWidget {
   const FrameBuilderExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'FrameBuilder Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const ShowBottomSheetExampleApp());
 class ShowBottomSheetExampleApp extends StatelessWidget {
   const ShowBottomSheetExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'ScaffoldState Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const TextButtonExampleApp());
 class TextButtonExampleApp extends StatelessWidget {
   const TextButtonExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'TextButton Sample';
 
   @override
   Widget build(BuildContext context) {

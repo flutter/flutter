@@ -11,7 +11,7 @@ void main() => runApp(const ConstrainedExampleApp());
 class ConstrainedExampleApp extends StatelessWidget {
   const ConstrainedExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Constrained Sample';
 
   @override
   Widget build(BuildContext context) {

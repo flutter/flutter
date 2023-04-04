@@ -11,7 +11,7 @@ void main() => runApp(const AutofillGroupExampleApp());
 class AutofillGroupExampleApp extends StatelessWidget {
   const AutofillGroupExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'AutofillGroup Sample';
 
   @override
   Widget build(BuildContext context) {

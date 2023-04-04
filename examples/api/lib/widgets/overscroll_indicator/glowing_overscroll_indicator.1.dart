@@ -11,7 +11,7 @@ void main() => runApp(const GlowingOverscrollIndicatorExampleApp());
 class GlowingOverscrollIndicatorExampleApp extends StatelessWidget {
   const GlowingOverscrollIndicatorExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'GlowingOverscrollIndicator Sample';
 
   @override
   Widget build(BuildContext context) {

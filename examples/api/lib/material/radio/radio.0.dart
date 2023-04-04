@@ -11,7 +11,7 @@ void main() => runApp(const RadioExampleApp());
 class RadioExampleApp extends StatelessWidget {
   const RadioExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Radio Sample';
 
   @override
   Widget build(BuildContext context) {

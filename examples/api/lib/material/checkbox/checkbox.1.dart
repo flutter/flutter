@@ -11,7 +11,7 @@ void main() => runApp(const CheckboxExampleApp());
 class CheckboxExampleApp extends StatelessWidget {
   const CheckboxExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Checkbox Sample';
 
   @override
   Widget build(BuildContext context) {

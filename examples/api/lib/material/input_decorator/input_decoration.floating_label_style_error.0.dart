@@ -11,7 +11,7 @@ void main() => runApp(const FloatingLabelStyleErrorExampleApp());
 class FloatingLabelStyleErrorExampleApp extends StatelessWidget {
   const FloatingLabelStyleErrorExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'InputDecorator Sample';
 
   @override
   Widget build(BuildContext context) {

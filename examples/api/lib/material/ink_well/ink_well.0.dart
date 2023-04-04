@@ -11,7 +11,7 @@ void main() => runApp(const InkWellExampleApp());
 class InkWellExampleApp extends StatelessWidget {
   const InkWellExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'InkWell Sample';
 
   @override
   Widget build(BuildContext context) {

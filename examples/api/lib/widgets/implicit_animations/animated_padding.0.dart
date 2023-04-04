@@ -11,7 +11,7 @@ void main() => runApp(const AnimatedPaddingExampleApp());
 class AnimatedPaddingExampleApp extends StatelessWidget {
   const AnimatedPaddingExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'AnimatedPadding Sample';
 
   @override
   Widget build(BuildContext context) {

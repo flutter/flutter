@@ -11,7 +11,7 @@ void main() => runApp(const OnDeletedExampleApp());
 class OnDeletedExampleApp extends StatelessWidget {
   const OnDeletedExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'DeletableChipAttributes.onDeleted Sample';
 
   @override
   Widget build(BuildContext context) {

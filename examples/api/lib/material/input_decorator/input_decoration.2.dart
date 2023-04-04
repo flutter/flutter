@@ -11,7 +11,7 @@ void main() => runApp(const InputDecorationExampleApp());
 class InputDecorationExampleApp extends StatelessWidget {
   const InputDecorationExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'InputDecoration Sample';
 
   @override
   Widget build(BuildContext context) {

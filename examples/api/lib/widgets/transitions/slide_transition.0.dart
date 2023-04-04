@@ -11,7 +11,7 @@ void main() => runApp(const SlideTransitionExampleApp());
 class SlideTransitionExampleApp extends StatelessWidget {
   const SlideTransitionExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SlideTransition Sample';
 
   @override
   Widget build(BuildContext context) {

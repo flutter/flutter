@@ -11,7 +11,7 @@ void main() => runApp(const SnackBarExampleApp());
 class SnackBarExampleApp extends StatelessWidget {
   const SnackBarExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SnackBar Sample';
 
   @override
   Widget build(BuildContext context) {

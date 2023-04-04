@@ -11,7 +11,7 @@ void main() => runApp(const EndDrawerExampleApp());
 class EndDrawerExampleApp extends StatelessWidget {
   const EndDrawerExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Scaffold Sample';
 
   @override
   Widget build(BuildContext context) {

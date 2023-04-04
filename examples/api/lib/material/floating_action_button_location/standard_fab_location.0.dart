@@ -11,7 +11,7 @@ void main() => runApp(const StandardFabLocationExampleApp());
 class StandardFabLocationExampleApp extends StatelessWidget {
   const StandardFabLocationExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'StandardFabLocation Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const CharacterActivatorExampleApp());
 class CharacterActivatorExampleApp extends StatelessWidget {
   const CharacterActivatorExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'CharacterActivator Sample';
 
   @override
   Widget build(BuildContext context) {

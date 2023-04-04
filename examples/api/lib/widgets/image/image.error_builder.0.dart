@@ -11,7 +11,7 @@ void main() => runApp(const ErrorBuilderExampleApp());
 class ErrorBuilderExampleApp extends StatelessWidget {
   const ErrorBuilderExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'ErrorBuilder Sample';
 
   @override
   Widget build(BuildContext context) {

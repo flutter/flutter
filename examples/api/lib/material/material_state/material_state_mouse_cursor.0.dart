@@ -11,7 +11,7 @@ void main() => runApp(const MaterialStateMouseCursorExampleApp());
 class MaterialStateMouseCursorExampleApp extends StatelessWidget {
   const MaterialStateMouseCursorExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'MaterialStateMouseCursor Sample';
 
   @override
   Widget build(BuildContext context) {

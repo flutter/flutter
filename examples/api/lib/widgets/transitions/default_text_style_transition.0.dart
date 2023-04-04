@@ -11,7 +11,7 @@ void main() => runApp(const DefaultTextStyleTransitionExampleApp());
 class DefaultTextStyleTransitionExampleApp extends StatelessWidget {
   const DefaultTextStyleTransitionExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'DefaultTextStyleTransition Sample';
 
   @override
   Widget build(BuildContext context) {

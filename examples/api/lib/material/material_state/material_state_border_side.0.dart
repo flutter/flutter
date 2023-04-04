@@ -11,7 +11,7 @@ void main() => runApp(const MaterialStateBorderSideExampleApp());
 class MaterialStateBorderSideExampleApp extends StatelessWidget {
   const MaterialStateBorderSideExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'MaterialStateBorderSide Sample';
 
   @override
   Widget build(BuildContext context) {

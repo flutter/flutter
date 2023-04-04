@@ -11,7 +11,7 @@ void main() => runApp(const ColorFilteredExampleApp());
 class ColorFilteredExampleApp extends StatelessWidget {
   const ColorFilteredExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'ColorFiltered Sample';
 
   @override
   Widget build(BuildContext context) {

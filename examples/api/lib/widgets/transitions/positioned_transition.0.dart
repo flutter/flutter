@@ -11,7 +11,7 @@ void main() => runApp(const PositionedTransitionExampleApp());
 class PositionedTransitionExampleApp extends StatelessWidget {
   const PositionedTransitionExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'PositionedTransition Sample';
 
   @override
   Widget build(BuildContext context) {

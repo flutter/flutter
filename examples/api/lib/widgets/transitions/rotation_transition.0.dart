@@ -11,7 +11,7 @@ void main() => runApp(const RotationTransitionExampleApp());
 class RotationTransitionExampleApp extends StatelessWidget {
   const RotationTransitionExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'RotationTransition Sample';
 
   @override
   Widget build(BuildContext context) {

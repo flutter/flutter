@@ -11,7 +11,7 @@ void main() => runApp(const OfExampleApp());
 class OfExampleApp extends StatelessWidget {
   const OfExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Of Sample';
 
   @override
   Widget build(BuildContext context) {

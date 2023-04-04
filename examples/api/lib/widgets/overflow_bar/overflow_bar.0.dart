@@ -11,7 +11,7 @@ void main() => runApp(const OverflowBarExampleApp());
 class OverflowBarExampleApp extends StatelessWidget {
   const OverflowBarExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'OverflowBar Sample';
 
   @override
   Widget build(BuildContext context) {

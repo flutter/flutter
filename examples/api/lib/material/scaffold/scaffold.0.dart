@@ -11,7 +11,7 @@ void main() => runApp(const ScaffoldExampleApp());
 class ScaffoldExampleApp extends StatelessWidget {
   const ScaffoldExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Scaffold Sample';
 
   @override
   Widget build(BuildContext context) {

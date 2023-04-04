@@ -12,7 +12,7 @@ void main() => runApp(const SingleActivatorExampleApp());
 class SingleActivatorExampleApp extends StatelessWidget {
   const SingleActivatorExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SingleActivator Sample';
 
   @override
   Widget build(BuildContext context) {

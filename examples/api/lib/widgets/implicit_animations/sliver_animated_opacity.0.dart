@@ -11,7 +11,7 @@ void main() => runApp(const SliverAnimatedOpacityExampleApp());
 class SliverAnimatedOpacityExampleApp extends StatelessWidget {
   const SliverAnimatedOpacityExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SliverAnimatedOpacity Sample';
 
   @override
   Widget build(BuildContext context) {

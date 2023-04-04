@@ -11,7 +11,7 @@ void main() => runApp(const NestedScrollViewStateExampleApp());
 class NestedScrollViewStateExampleApp extends StatelessWidget {
   const NestedScrollViewStateExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'NestedScrollViewState Sample';
 
   @override
   Widget build(BuildContext context) {

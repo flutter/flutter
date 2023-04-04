@@ -11,7 +11,7 @@ void main() => runApp(const SelectionContainerDisabledExampleApp());
 class SelectionContainerDisabledExampleApp extends StatelessWidget {
   const SelectionContainerDisabledExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SelectionContainer.disabled Sample';
 
   @override
   Widget build(BuildContext context) {

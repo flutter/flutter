@@ -11,7 +11,7 @@ void main() => runApp(const LoadingBuilderExampleApp());
 class LoadingBuilderExampleApp extends StatelessWidget {
   const LoadingBuilderExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'LoadingBuilder Sample';
 
   @override
   Widget build(BuildContext context) {

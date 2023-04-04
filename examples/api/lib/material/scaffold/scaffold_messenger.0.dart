@@ -11,7 +11,7 @@ void main() => runApp(const ScaffoldMessengerExampleApp());
 class ScaffoldMessengerExampleApp extends StatelessWidget {
   const ScaffoldMessengerExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'ScaffoldMessenger Sample';
 
   @override
   Widget build(BuildContext context) {

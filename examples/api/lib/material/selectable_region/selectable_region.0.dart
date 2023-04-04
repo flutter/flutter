@@ -12,7 +12,7 @@ void main() => runApp(const SelectableRegionExampleApp());
 class SelectableRegionExampleApp extends StatelessWidget {
   const SelectableRegionExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SelectableRegion Sample';
 
   @override
   Widget build(BuildContext context) {

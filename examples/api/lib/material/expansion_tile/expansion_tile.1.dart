@@ -23,10 +23,9 @@ class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp>
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Code Sample for ExpansionTileController.',
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text('ExpansionTileController Example')),
+        appBar: AppBar(title: const Text('ExpansionTileController Sample')),
         body: Column(
           children: <Widget>[
             // A controller has been provided to the ExpansionTile because it's

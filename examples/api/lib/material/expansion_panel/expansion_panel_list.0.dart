@@ -11,7 +11,7 @@ void main() => runApp(const ExpansionPanelListExampleApp());
 class ExpansionPanelListExampleApp extends StatelessWidget {
   const ExpansionPanelListExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'ExpansionPanelList Sample';
 
   @override
   Widget build(BuildContext context) {

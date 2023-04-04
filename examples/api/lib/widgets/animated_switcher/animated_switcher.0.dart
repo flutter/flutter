@@ -11,7 +11,7 @@ void main() => runApp(const AnimatedSwitcherExampleApp());
 class AnimatedSwitcherExampleApp extends StatelessWidget {
   const AnimatedSwitcherExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'AnimatedSwitcher Sample';
 
   @override
   Widget build(BuildContext context) {

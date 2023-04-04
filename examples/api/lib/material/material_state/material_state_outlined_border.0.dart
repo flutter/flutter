@@ -11,7 +11,7 @@ void main() => runApp(const MaterialStateOutlinedBorderExampleApp());
 class MaterialStateOutlinedBorderExampleApp extends StatelessWidget {
   const MaterialStateOutlinedBorderExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'MaterialStateOutlinedBorder Sample';
 
   @override
   Widget build(BuildContext context) {

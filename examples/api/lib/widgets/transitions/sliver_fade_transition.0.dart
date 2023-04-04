@@ -11,7 +11,7 @@ void main() => runApp(const SliverFadeTransitionExampleApp());
 class SliverFadeTransitionExampleApp extends StatelessWidget {
   const SliverFadeTransitionExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SliverFadeTransition Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const DataTableExampleApp());
 class DataTableExampleApp extends StatelessWidget {
   const DataTableExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'DataTable Sample';
 
   @override
   Widget build(BuildContext context) {

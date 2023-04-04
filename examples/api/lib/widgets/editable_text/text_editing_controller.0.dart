@@ -11,7 +11,7 @@ void main() => runApp(const TextEditingControllerExampleApp());
 class TextEditingControllerExampleApp extends StatelessWidget {
   const TextEditingControllerExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'TextEditingController Sample';
 
   @override
   Widget build(BuildContext context) {

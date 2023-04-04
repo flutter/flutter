@@ -11,7 +11,7 @@ void main() => runApp(const InteractiveViewerExampleApp());
 class InteractiveViewerExampleApp extends StatelessWidget {
   const InteractiveViewerExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'InteractiveViewer Sample';
 
   @override
   Widget build(BuildContext context) {

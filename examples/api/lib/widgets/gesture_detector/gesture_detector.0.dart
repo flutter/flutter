@@ -11,7 +11,7 @@ void main() => runApp(const GestureDetectorExampleApp());
 class GestureDetectorExampleApp extends StatelessWidget {
   const GestureDetectorExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'GestureDetector Sample';
 
   @override
   Widget build(BuildContext context) {

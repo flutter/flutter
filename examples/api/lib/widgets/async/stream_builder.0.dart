@@ -13,7 +13,7 @@ void main() => runApp(const StreamBuilderExampleApp());
 class StreamBuilderExampleApp extends StatelessWidget {
   const StreamBuilderExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'StreamBuilder Sample';
 
   @override
   Widget build(BuildContext context) {

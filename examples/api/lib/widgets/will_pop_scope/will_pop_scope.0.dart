@@ -11,7 +11,7 @@ void main() => runApp(const WillPopScopeExampleApp());
 class WillPopScopeExampleApp extends StatelessWidget {
   const WillPopScopeExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'WillPopScope Sample';
 
   @override
   Widget build(BuildContext context) {

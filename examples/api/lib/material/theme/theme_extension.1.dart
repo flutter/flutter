@@ -50,7 +50,7 @@ void main() {
 class ThemeExtensionExampleApp extends StatefulWidget {
   const ThemeExtensionExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'ThemeExtension Sample';
 
   @override
   State<ThemeExtensionExampleApp> createState() => _ThemeExtensionExampleAppState();

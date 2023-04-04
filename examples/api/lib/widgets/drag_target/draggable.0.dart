@@ -11,7 +11,7 @@ void main() => runApp(const DraggableExampleApp());
 class DraggableExampleApp extends StatelessWidget {
   const DraggableExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Draggable Sample';
 
   @override
   Widget build(BuildContext context) {

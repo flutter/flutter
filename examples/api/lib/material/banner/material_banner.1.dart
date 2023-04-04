@@ -11,7 +11,7 @@ void main() => runApp(const MaterialBannerExampleApp());
 class MaterialBannerExampleApp extends StatelessWidget {
   const MaterialBannerExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'MaterialBanner Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const SystemGestureInsetsExampleApp());
 class SystemGestureInsetsExampleApp extends StatelessWidget {
   const SystemGestureInsetsExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'MediaQueryData Sample';
 
   @override
   Widget build(BuildContext context) {

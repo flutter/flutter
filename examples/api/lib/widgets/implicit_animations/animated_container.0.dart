@@ -11,7 +11,7 @@ void main() => runApp(const AnimatedContainerExampleApp());
 class AnimatedContainerExampleApp extends StatelessWidget {
   const AnimatedContainerExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'AnimatedContainer Sample';
 
   @override
   Widget build(BuildContext context) {

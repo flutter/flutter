@@ -11,7 +11,7 @@ void main() => runApp(const AlignTransitionExampleApp());
 class AlignTransitionExampleApp extends StatelessWidget {
   const AlignTransitionExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'AlignTransition Sample';
 
   @override
   Widget build(BuildContext context) {

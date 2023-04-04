@@ -11,7 +11,7 @@ void main() => runApp(const BottomNavigationBarExampleApp());
 class BottomNavigationBarExampleApp extends StatelessWidget {
   const BottomNavigationBarExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'BottomNavigationBar Sample';
 
   @override
   Widget build(BuildContext context) {

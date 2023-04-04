@@ -13,7 +13,7 @@ void main() => runApp(const AnimatedBuilderExampleApp());
 class AnimatedBuilderExampleApp extends StatelessWidget {
   const AnimatedBuilderExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'AnimatedBuilder Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const AnimatedPositionedExampleApp());
 class AnimatedPositionedExampleApp extends StatelessWidget {
   const AnimatedPositionedExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'AnimatedPositioned Sample';
 
   @override
   Widget build(BuildContext context) {

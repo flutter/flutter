@@ -11,7 +11,7 @@ void main() => runApp(const DismissibleExampleApp());
 class DismissibleExampleApp extends StatelessWidget {
   const DismissibleExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Dismissible Sample';
 
   @override
   Widget build(BuildContext context) {

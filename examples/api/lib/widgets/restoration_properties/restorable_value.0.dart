@@ -14,7 +14,7 @@ class RestorableValueExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      title: 'Flutter Code Sample',
+      title: 'RestorableValue Sample',
       color: const Color(0xffffffff),
       builder: (BuildContext context, Widget? child) {
         return const Center(

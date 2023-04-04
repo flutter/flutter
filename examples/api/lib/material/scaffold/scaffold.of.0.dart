@@ -15,7 +15,7 @@ class OfExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Code Sample for Scaffold.of.',
+      title: 'Scaffold Sample',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

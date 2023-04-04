@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 
 void main() {
   runApp(MaterialApp(
-    title: 'Flutter Code Sample',
+    title: 'Image.frameBuilder Sample',
     home: Scaffold(
-      appBar: AppBar(title: const Text('Flutter Code Sample')),
+      appBar: AppBar(title: const Text('Image.frameBuilder Sample')),
       body: const Center(
         child: ImageClipExample(
           image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg'),

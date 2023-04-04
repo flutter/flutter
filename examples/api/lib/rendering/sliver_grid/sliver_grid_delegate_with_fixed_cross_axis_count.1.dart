@@ -11,7 +11,7 @@ void main() => runApp(const SliverGridDelegateWithFixedCrossAxisCountExampleApp(
 class SliverGridDelegateWithFixedCrossAxisCountExampleApp extends StatelessWidget {
   const SliverGridDelegateWithFixedCrossAxisCountExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SliverGridDelegateWithFixedCrossAxisCount Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const OrderedTraversalPolicyExampleApp());
 class OrderedTraversalPolicyExampleApp extends StatelessWidget {
   const OrderedTraversalPolicyExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'OrderedTraversalPolicy Sample';
 
   @override
   Widget build(BuildContext context) {

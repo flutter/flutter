@@ -11,7 +11,7 @@ void main() => runApp(const FocusTraversalGroupExampleApp());
 class FocusTraversalGroupExampleApp extends StatelessWidget {
   const FocusTraversalGroupExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'FocusTraversalGroup Sample';
 
   @override
   Widget build(BuildContext context) {

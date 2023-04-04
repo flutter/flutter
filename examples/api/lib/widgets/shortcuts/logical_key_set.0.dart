@@ -12,7 +12,7 @@ void main() => runApp(const LogicalKeySetExampleApp());
 class LogicalKeySetExampleApp extends StatelessWidget {
   const LogicalKeySetExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'LogicalKeySet Sample';
 
   @override
   Widget build(BuildContext context) {

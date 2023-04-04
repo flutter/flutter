@@ -13,7 +13,7 @@ void main() {
 class UndoHistoryControllerExampleApp extends StatelessWidget {
   const UndoHistoryControllerExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'UndoHistoryController Sample';
 
   @override
   Widget build(BuildContext context) {

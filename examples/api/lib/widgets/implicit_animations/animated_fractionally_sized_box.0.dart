@@ -11,7 +11,7 @@ void main() => runApp(const AnimatedFractionallySizedBoxExampleApp());
 class AnimatedFractionallySizedBoxExampleApp extends StatelessWidget {
   const AnimatedFractionallySizedBoxExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'AnimatedFractionallySizedBox Sample';
 
   @override
   Widget build(BuildContext context) {

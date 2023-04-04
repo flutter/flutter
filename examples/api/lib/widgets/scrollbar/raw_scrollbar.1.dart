@@ -11,7 +11,7 @@ void main() => runApp(const RawScrollbarExampleApp());
 class RawScrollbarExampleApp extends StatelessWidget {
   const RawScrollbarExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'RawScrollbar Sample';
 
   @override
   Widget build(BuildContext context) {

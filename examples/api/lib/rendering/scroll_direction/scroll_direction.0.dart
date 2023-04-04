@@ -12,7 +12,7 @@ void main() => runApp(const ExampleApp());
 class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'ScrollDirection Sample';
 
   @override
   Widget build(BuildContext context) {

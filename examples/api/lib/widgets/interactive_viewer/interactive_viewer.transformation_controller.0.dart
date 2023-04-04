@@ -11,7 +11,7 @@ void main() => runApp(const TransformationControllerExampleApp());
 class TransformationControllerExampleApp extends StatelessWidget {
   const TransformationControllerExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'TransformationController Sample';
 
   @override
   Widget build(BuildContext context) {

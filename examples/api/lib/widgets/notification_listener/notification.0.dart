@@ -11,7 +11,7 @@ void main() => runApp(const NotificationExampleApp());
 class NotificationExampleApp extends StatelessWidget {
   const NotificationExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Notification Sample';
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class NotificationExample extends StatelessWidget {
                 (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverAppBar(
-                  title: const Text('Flutter Code Sample'),
+                  title: const Text('Notification Sample'),
                   pinned: true,
                   floating: true,
                   bottom: TabBar(

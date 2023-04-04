@@ -11,7 +11,7 @@ void main() => runApp(const FormExampleApp());
 class FormExampleApp extends StatelessWidget {
   const FormExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'Form Sample';
 
   @override
   Widget build(BuildContext context) {

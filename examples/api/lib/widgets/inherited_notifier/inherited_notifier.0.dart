@@ -13,7 +13,7 @@ void main() => runApp(const InheritedNotifierExampleApp());
 class InheritedNotifierExampleApp extends StatelessWidget {
   const InheritedNotifierExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'InheritedNotifier Sample';
 
   @override
   Widget build(BuildContext context) {

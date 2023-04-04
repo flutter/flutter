@@ -11,7 +11,7 @@ void main() => runApp(const LabelExampleApp());
 class LabelExampleApp extends StatelessWidget {
   const LabelExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'InputDecoration.label Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const RangeSliderExampleApp());
 class RangeSliderExampleApp extends StatelessWidget {
   const RangeSliderExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'RangeSlider Sample';
 
   @override
   Widget build(BuildContext context) {

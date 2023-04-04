@@ -11,7 +11,7 @@ void main() => runApp(const SelectionAreaExampleApp());
 class SelectionAreaExampleApp extends StatelessWidget {
   const SelectionAreaExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SelectionArea Sample';
 
   @override
   Widget build(BuildContext context) {

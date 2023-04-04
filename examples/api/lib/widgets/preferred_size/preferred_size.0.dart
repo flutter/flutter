@@ -11,7 +11,7 @@ void main() => runApp(const PreferredSizeExampleApp());
 class PreferredSizeExampleApp extends StatelessWidget {
   const PreferredSizeExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'PreferredSize Sample';
 
   @override
   Widget build(BuildContext context) {

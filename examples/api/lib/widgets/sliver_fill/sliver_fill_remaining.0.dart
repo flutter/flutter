@@ -11,7 +11,7 @@ void main() => runApp(const SliverFillRemainingExampleApp());
 class SliverFillRemainingExampleApp extends StatelessWidget {
   const SliverFillRemainingExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'SliverFillRemaining Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ void main() => runApp(const TweenAnimationBuilderExampleApp());
 class TweenAnimationBuilderExampleApp extends StatelessWidget {
   const TweenAnimationBuilderExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'TweenAnimationBuilder Sample';
 
   @override
   Widget build(BuildContext context) {

@@ -13,7 +13,7 @@ void main() => runApp(const PointerSignalResolverExampleApp());
 class PointerSignalResolverExampleApp extends StatelessWidget {
   const PointerSignalResolverExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'PointerSignalResolver Sample';
 
   @override
   Widget build(BuildContext context) {

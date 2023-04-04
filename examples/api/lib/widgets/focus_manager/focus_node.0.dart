@@ -12,7 +12,7 @@ void main() => runApp(const FocusNodeExampleApp());
 class FocusNodeExampleApp extends StatelessWidget {
   const FocusNodeExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'FocusNode Sample';
 
   @override
   Widget build(BuildContext context) {

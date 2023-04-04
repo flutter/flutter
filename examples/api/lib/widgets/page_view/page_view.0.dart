@@ -11,7 +11,7 @@ void main() => runApp(const PageViewExampleApp());
 class PageViewExampleApp extends StatelessWidget {
   const PageViewExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
+  static const String _title = 'PageView Sample';
 
   @override
   Widget build(BuildContext context) {
