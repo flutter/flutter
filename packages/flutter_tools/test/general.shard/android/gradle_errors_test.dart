@@ -48,6 +48,7 @@ void main() {
           outdatedGradleHandler,
           sslExceptionHandler,
           zipExceptionHandler,
+          incompatibleJavaAndGradleVersionsHandler,
         ])
       );
     });
@@ -1301,6 +1302,59 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       ProcessManager: () => processManager,
       AnsiTerminal: () => _TestPromptTerminal('n'),
       BotDetector: () => const FakeBotDetector(false),
+    });
+  });
+
+  group('incompatible java and gradle versions error', () {
+    const String errorMessage = '''
+Could not compile build file '…/example/android/build.gradle'.
+> startup failed:
+  General error during conversion: Unsupported class file major version 61
+  java.lang.IllegalArgumentException: Unsupported class file major version 61
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        incompatibleJavaAndGradleVersionsHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await incompatibleJavaAndGradleVersionsHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────┐\n'
+          "│ [!] Your project's Gradle and AGP version is incompatible with the Java version  │\n"
+          '│ that Flutter uses.                                                               │\n'
+          '|                                                                                  |\n'
+          '│ To fix this issue, first, update the Gradle version specified in                 │\n'
+          '│ /android/gradle/wrapper/gradle-wrapper.properties to be compatible with the      │\n'
+          '│ Java version. See the link below for more information on compatible Java/Gradle  │\n'
+          '│ versions:                                                                        │\n'
+          '│ https://docs.gradle.org/current/userguide/compatibility.html#java                │\n'
+          '|                                                                                  |\n'
+          '│ Then, ensure the AGP version specified in                                        │\n'
+          '| /android/build.gradle is compatible with the new                                 |\n'
+          '| Gradle version. See the link below for more information on compatible Gradle/AGP |\n'
+          '| versions:                                                                        |\n'
+          '| https://developer.android.com/studio/releases/gradle-plugin#updating-gradle      |\n'
+          '└──────────────────────────────────────────────────────────────────────────────────┘\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 }

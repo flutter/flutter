@@ -82,6 +82,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   outdatedGradleHandler,
   sslExceptionHandler,
   zipExceptionHandler,
+  incompatibleJavaAndGradleVersionsHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -668,4 +669,43 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'ssl-exception-tag-mismatch',
+);
+
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version ([0-9]+)');
+
+@visibleForTesting
+final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
+  test: (String line) {
+    return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final File gradlePropertiesFile = project.directory
+        .childDirectory('android')
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
+    final File gradleFile = project.directory
+        .childDirectory('android')
+        .childFile('build.gradle');
+    globals.printBox(
+      "${globals.logger.terminal.warningMark} Your project's Gradle and AGP version "
+      'is incompatible with the Java version that Flutter uses.\n\n'
+      'To fix this issue, first, update the Gradle version specified in '
+      '${gradlePropertiesFile.path} to be compatible with the Java version. '
+      'See the link below for more information on compatible Java/Gradle versions:\n'
+      'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n'
+      'Then, ensure the AGP version specified in ${gradleFile.path} is '
+      'compatible with the new Gradle version. See the link below for more '
+      'information on compatible Gradle/AGP versions:\n'
+      'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-java-gradle-version',
 );
