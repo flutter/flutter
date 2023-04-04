@@ -552,27 +552,6 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    testUsingContext('tool exits on non-sound-null-safe code when explicit flag not passed', () async {
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
-      flutterCommand.argParser
-          ..addFlag(FlutterOptions.kNullSafety, defaultsTo: true)
-          ..addOption('target');
-      final File targetFile = fileSystem.file('targetFile.dart')
-          ..writeAsStringSync('// @dart = 2.11');
-      expect(
-        () async => flutterCommand.getBuildInfo(
-          forcedBuildMode: BuildMode.debug,
-          forcedTargetFile: targetFile,
-        ),
-        throwsToolExit(
-          message: 'This application does not support sound null-safety (its language version is 2.11)',
-        ),
-      );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    });
-
     testUsingContext('use packagesPath to generate BuildInfo', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
       final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);

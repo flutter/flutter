@@ -413,7 +413,7 @@ void main() {
     });
 
     testWithoutContext('start polling', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final TestIOSDevices iosDevices = TestIOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -447,25 +447,68 @@ void main() {
       expect(iosDevices.deviceNotifier!.items, isEmpty);
       expect(xcdevice.deviceEventController.hasListener, isTrue);
 
-      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.attach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
-      });
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEvent.attach,
+          XCDeviceEventInterface.usb,
+          'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        ),
+      );
       await added.future;
       expect(iosDevices.deviceNotifier!.items.length, 2);
       expect(iosDevices.deviceNotifier!.items, contains(device1));
       expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.eventsReceived, 1);
 
-      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
-      });
+      iosDevices.resetEventCompleter();
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEvent.attach,
+          XCDeviceEventInterface.wifi,
+          'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        ),
+      );
+      await iosDevices.receivedEvent.future;
+      expect(iosDevices.deviceNotifier!.items.length, 2);
+      expect(iosDevices.deviceNotifier!.items, contains(device1));
+      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.eventsReceived, 2);
+
+      iosDevices.resetEventCompleter();
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEvent.detach,
+          XCDeviceEventInterface.usb,
+          'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        ),
+      );
+      await iosDevices.receivedEvent.future;
+      expect(iosDevices.deviceNotifier!.items.length, 2);
+      expect(iosDevices.deviceNotifier!.items, contains(device1));
+      expect(iosDevices.deviceNotifier!.items, contains(device2));
+      expect(iosDevices.eventsReceived, 3);
+
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEvent.detach,
+          XCDeviceEventInterface.wifi,
+          'd83d5bc53967baa0ee18626ba87b6254b2ab5418'
+        ),
+      );
       await removed.future;
       expect(iosDevices.deviceNotifier!.items, <Device>[device2]);
+      expect(iosDevices.eventsReceived, 4);
 
-      // Remove stream will throw over-completion if called more than once
-      // which proves this is ignored.
-      xcdevice.deviceEventController.add(<XCDeviceEvent, String>{
-        XCDeviceEvent.detach: 'bogus',
-      });
+      iosDevices.resetEventCompleter();
+      xcdevice.deviceEventController.add(
+        XCDeviceEventNotification(
+          XCDeviceEvent.detach,
+          XCDeviceEventInterface.usb,
+          'bogus'
+        ),
+      );
+      await iosDevices.receivedEvent.future;
+      expect(iosDevices.eventsReceived, 5);
 
       expect(addedCount, 2);
 
@@ -485,7 +528,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
       xcdevice.devices.add(<IOSDevice>[]);
 
-      final StreamController<Map<XCDeviceEvent, String>> rescheduledStream = StreamController<Map<XCDeviceEvent, String>>();
+      final StreamController<XCDeviceEventNotification> rescheduledStream = StreamController<XCDeviceEventNotification>();
 
       unawaited(xcdevice.deviceEventController.done.whenComplete(() {
         xcdevice.deviceEventController = rescheduledStream;
@@ -723,13 +766,35 @@ class FakeIOSApp extends Fake implements IOSApp {
   final String name;
 }
 
+class TestIOSDevices extends IOSDevices {
+  TestIOSDevices({required super.platform, required super.xcdevice, required super.iosWorkflow, required super.logger,});
+
+  Completer<void> receivedEvent = Completer<void>();
+  int eventsReceived = 0;
+
+  void resetEventCompleter() {
+    receivedEvent = Completer<void>();
+  }
+
+  @override
+  Future<void> onDeviceEvent(XCDeviceEventNotification event) async {
+    await super.onDeviceEvent(event);
+    if (!receivedEvent.isCompleted) {
+      receivedEvent.complete();
+    }
+    eventsReceived++;
+    return;
+  }
+}
+
 class FakeIOSWorkflow extends Fake implements IOSWorkflow { }
 
 class FakeXcdevice extends Fake implements XCDevice {
   int getAvailableIOSDevicesCount = 0;
   final List<List<IOSDevice>> devices = <List<IOSDevice>>[];
   final List<String> diagnostics = <String>[];
-  StreamController<Map<XCDeviceEvent, String>> deviceEventController = StreamController<Map<XCDeviceEvent, String>>();
+  StreamController<XCDeviceEventNotification> deviceEventController = StreamController<XCDeviceEventNotification>();
+
   XCDeviceEventNotification? waitForDeviceEvent;
 
   @override
@@ -741,7 +806,7 @@ class FakeXcdevice extends Fake implements XCDevice {
   }
 
   @override
-  Stream<Map<XCDeviceEvent, String>> observedDeviceEvents() {
+  Stream<XCDeviceEventNotification> observedDeviceEvents() {
     return deviceEventController.stream;
   }
 
