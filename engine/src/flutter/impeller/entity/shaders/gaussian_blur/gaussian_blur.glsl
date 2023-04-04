@@ -60,14 +60,23 @@ void main() {
   f16vec4 total_color = f16vec4(0.0hf);
   float16_t gaussian_integral = 0.0hf;
 
-  for (float16_t i = -blur_info.blur_radius; i <= blur_info.blur_radius; i++) {
-    float16_t gaussian = IPGaussian(i, blur_info.blur_sigma);
+  for (float16_t i = -blur_info.blur_radius; i <= blur_info.blur_radius;
+       i += 2.0hf) {
+    float16_t w1 = IPGaussian(i, blur_info.blur_sigma);
+    float16_t w2 = IPGaussian(i + 1.0hf, blur_info.blur_sigma);
+    float16_t gaussian = w1 + w2;
+
+    f16vec2 offset_1 = blur_info.blur_uv_offset * i;
+    f16vec2 offset_2 = offset_1 + blur_info.blur_uv_offset;
+    vec2 pos_c1 = v_texture_coords + offset_1;
+    vec2 pos_c2 = v_texture_coords + offset_2;
+
+    vec2 coords = (w1 * pos_c1 + w2 * pos_c2) / gaussian;
+
     gaussian_integral += gaussian;
-    total_color +=
-        gaussian * Sample(texture_sampler,  // sampler
-                          v_texture_coords + blur_info.blur_uv_offset *
-                                                 i  // texture coordinates
-                   );
+    total_color += gaussian * Sample(texture_sampler,  // sampler
+                                     coords            // texture coordinates
+                              );
   }
 
   frag_color = total_color / gaussian_integral;
