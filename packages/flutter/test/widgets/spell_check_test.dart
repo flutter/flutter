@@ -17,38 +17,38 @@ void main() {
     misspelledTextStyle = TextField.materialMisspelledTextStyle;
   });
 
-  test(
-      'buildTextSpanWithSpellCheckSuggestions ignores composing region when composing region out of range',
-      () {
-    const String text = 'Hello, wrold! Hey';
-    const TextEditingValue value = TextEditingValue(text: text);
-    const bool composingRegionOutOfRange = true;
-    const SpellCheckResults spellCheckResults =
-      SpellCheckResults(text, <SuggestionSpan>[
-        SuggestionSpan(
-            TextRange(start: 7, end: 12), <String>['world', 'word', 'old'])
-    ]);
+  testWidgets(
+    'buildTextSpanWithSpellCheckSuggestions ignores composing region when composing region out of range',
+      (WidgetTester tester) async {
+      const String text = 'Hello, wrold! Hey';
+      const TextEditingValue value = TextEditingValue(text: text);
+      const bool composingRegionOutOfRange = true;
+      const SpellCheckResults spellCheckResults =
+        SpellCheckResults(text, <SuggestionSpan>[
+          SuggestionSpan(
+              TextRange(start: 7, end: 12), <String>['world', 'word', 'old'])
+      ]);
 
-    final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
-      const TextSpan(text: 'Hello, '),
-      TextSpan(style: misspelledTextStyle, text: 'wrold'),
-      const TextSpan(text: '! Hey')
-    ]);
-    final TextSpan textSpanTree =
-      buildTextSpanWithSpellCheckSuggestions(
-        value,
-        composingRegionOutOfRange,
-        null,
-        misspelledTextStyle,
-        spellCheckResults,
-    );
+      final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
+        const TextSpan(text: 'Hello, '),
+        TextSpan(style: misspelledTextStyle, text: 'wrold'),
+        const TextSpan(text: '! Hey')
+      ]);
+      final TextSpan textSpanTree =
+        buildTextSpanWithSpellCheckSuggestions(
+          value,
+          composingRegionOutOfRange,
+          null,
+          misspelledTextStyle,
+          spellCheckResults,
+      );
 
       expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions, isolated misspelled word with separate composing region example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const TextEditingValue value = TextEditingValue(
         text: text, composing: TextRange(start: 14, end: 17));
@@ -75,11 +75,11 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions, composing region and misspelled words overlap example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Right worng worng right';
     const TextEditingValue value = TextEditingValue(
         text: text, composing: TextRange(start: 12, end: 17));
@@ -109,11 +109,11 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android}));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions, consecutive misspelled words example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Right worng worng right';
     const TextEditingValue value = TextEditingValue(text: text);
     const bool composingRegionOutOfRange = true;
@@ -142,11 +142,11 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text shorter than actual text example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const String resultsText = 'Hello, wrold!';
     const TextEditingValue value = TextEditingValue(
@@ -174,11 +174,11 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text longer with more misspelled words than actual text example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const String resultsText = 'Hello, wrold Hey feirnd!';
     const TextEditingValue value = TextEditingValue(
@@ -208,11 +208,11 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text mismatched example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const String resultsText = 'Hello, wrild! Hey';
     const TextEditingValue value = TextEditingValue(
@@ -237,11 +237,11 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted forward example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Hello, there wrold! Hey';
     const String resultsText = 'Hello, wrold! Hey';
     const TextEditingValue value = TextEditingValue(
@@ -269,11 +269,11 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted backwards example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const String resultsText = 'Hello, great wrold! Hey';
     const TextEditingValue value = TextEditingValue(
@@ -301,11 +301,11 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  test(
+  testWidgets(
       'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted backwards and forwards example',
-      () {
+      (WidgetTester tester) async {
     const String text = 'Hello, wrold! And Hye!';
     const String resultsText = 'Hello, great wrold! Hye!';
     const TextEditingValue value = TextEditingValue(
@@ -337,5 +337,5 @@ void main() {
     );
 
     expect(textSpanTree, equals(expectedTextSpanTree));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 }
