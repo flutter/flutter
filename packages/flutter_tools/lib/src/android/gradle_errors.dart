@@ -674,7 +674,7 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
 /// If an incompatible Java and Gradle versions error is caught, we expect an
 /// error specifying that the Java major class file version, one of
 /// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
-final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+([0-9]{2})');
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+([0-9]+)');
 
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
