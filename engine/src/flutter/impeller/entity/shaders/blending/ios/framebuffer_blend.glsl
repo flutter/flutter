@@ -31,14 +31,14 @@ in vec2 v_src_texture_coords;
 out vec4 frag_color;
 
 void main() {
-  vec4 dst_sample = ReadDestination();
-  vec4 dst = IPUnpremultiply(dst_sample);
-  vec4 src =
-      IPUnpremultiply(texture(texture_sampler_src,  // sampler
-                              v_src_texture_coords  // texture coordinates
-                              ));
+  f16vec4 dst_sample = f16vec4(ReadDestination());
+  f16vec4 dst = IPHalfUnpremultiply(dst_sample);
+  f16vec4 src = IPHalfUnpremultiply(
+      f16vec4(texture(texture_sampler_src,  // sampler
+                      v_src_texture_coords  // texture coordinates
+                      )));
 
-  vec4 blended = vec4(Blend(dst.rgb, src.rgb), 1) * dst.a;
+  f16vec4 blended = f16vec4(Blend(dst.rgb, src.rgb), 1.0hf) * dst.a;
 
-  frag_color = mix(dst_sample, blended, src.a);
+  frag_color = vec4(mix(dst_sample, blended, src.a));
 }
