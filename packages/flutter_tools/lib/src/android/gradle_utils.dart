@@ -562,7 +562,7 @@ bool validateJavaGradle(Logger logger,
 /// by picking the largest compatible version from
 /// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 String getGradleVersionFor(String androidPluginVersion) {
-  List<GradleForAgp> compatList = <GradleForAgp> [
+  final List<GradleForAgp> compatList = <GradleForAgp> [
     GradleForAgp(agpMin: '1.0.0', agpMax: '1.1.3', minRequiredGradle: '2.3'),
     GradleForAgp(agpMin: '1.2.0', agpMax: '1.3.1', minRequiredGradle: '2.9'),
     GradleForAgp(agpMin: '1.5.0', agpMax: '1.5.0', minRequiredGradle: '2.2.1'),
