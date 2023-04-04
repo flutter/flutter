@@ -58,19 +58,11 @@ void GoldenPlaygroundTest::SetUp() {
 
   std::string test_name = GetTestName();
   if (test_name ==
-          "impeller_Play_AiksTest_CanRenderLinearGradientWithOverlappingStops_"
-          "Metal" ||
-      test_name ==
-          "impeller_Play_AiksTest_CanRenderLinearGradientWayManyColors_Metal" ||
-      test_name ==
           "impeller_Play_AiksTest_CanRenderLinearGradientManyColorsUnevenStops_"
           "Metal" ||
       test_name == "impeller_Play_AiksTest_CanRenderRadialGradient_Metal" ||
       test_name ==
           "impeller_Play_AiksTest_CanRenderRadialGradientManyColors_Metal" ||
-      test_name ==
-          "impeller_Play_AiksTest_CanRenderSweepGradientManyColors_Metal" ||
-      test_name == "impeller_Play_AiksTest_CanPictureConvertToImage_Metal" ||
       test_name == "impeller_Play_AiksTest_TextFrameSubpixelAlignment_Metal" ||
       test_name == "impeller_Play_AiksTest_ColorWheel_Metal" ||
       test_name == "impeller_Play_AiksTest_SolidStrokesRenderCorrectly_Metal" ||
