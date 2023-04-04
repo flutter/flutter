@@ -21,7 +21,7 @@
   "selectedRowCountTitleOne": "ഒരു ഇനം തിരഞ്ഞെടുത്തു",
   "selectedRowCountTitleOther": "$selectedRowCount ഇനങ്ങൾ തിരഞ്ഞെടുത്തു",
   "cancelButtonLabel": "റദ്ദാക്കുക",
-  "closeButtonLabel": "അടയ്‌ക്കുക",
+  "closeButtonLabel": "അടയ്ക്കുക",
   "continueButtonLabel": "തുടരുക",
   "copyButtonLabel": "പകർത്തുക",
   "cutButtonLabel": "മുറിക്കുക",
@@ -129,9 +129,9 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "മെനു ബാർ മെനു",
-  "currentDateLabel": "Date of today",
-  "scrimLabel": "Scrim",
-  "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "Close $modalRouteName",
+  "currentDateLabel": "ഇന്ന്",
+  "scrimLabel": "സ്ക്രിം",
+  "bottomSheetLabel": "ബോട്ടം ഷീറ്റ്",
+  "scrimOnTapHint": "$modalRouteContentName അടയ്ക്കുക",
   "keyboardKeyShift": "Shift"
 }

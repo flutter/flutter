@@ -129,9 +129,9 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "ເມນູແຖບເມນູ",
-  "currentDateLabel": "Date of today",
+  "currentDateLabel": "ມື້ນີ້",
   "scrimLabel": "Scrim",
-  "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "Close $modalRouteName",
+  "bottomSheetLabel": "ຊີດລຸ່ມສຸດ",
+  "scrimOnTapHint": "ປິດ $modalRouteContentName",
   "keyboardKeyShift": "Shift"
 }
