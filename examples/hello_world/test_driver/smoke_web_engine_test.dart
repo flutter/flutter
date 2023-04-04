@@ -32,7 +32,6 @@ void main() {
       expect(await driver.getText(titleFinder), 'Hello, world!');
     });
 
-    // TODO(htoor3): Remove skip once https://github.com/flutter/engine/pull/40904 merged.
     test('enable accessibility', () async {
       await driver.setSemantics(true);
 
@@ -44,6 +43,6 @@ void main() {
         <dynamic>[],
       ) as WebElement?;
       expect(fltSemantics, isNotNull);
-    }, skip: 'skipped until DOM structure changes are merged');
+    }, skip: true); // TODO(htoor3): Remove once https://github.com/flutter/engine/pull/40904 merged.
   });
 }
