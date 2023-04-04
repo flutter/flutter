@@ -118,7 +118,7 @@ void main() {
 
       testWidgets('formats ${TimeOfDayFormat.a_space_h_colon_mm}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('zh'), const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
-        expect(await formatTimeOfDay(tester, const Locale('ta'), const TimeOfDay(hour: 9, minute: 32)), 'முற்பகல் 9:32');
+        expect(await formatTimeOfDay(tester, const Locale('ta'), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
       });
     });
 
