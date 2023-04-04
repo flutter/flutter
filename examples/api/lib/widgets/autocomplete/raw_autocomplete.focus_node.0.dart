@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [RawAutocomplete.focusNode].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [RawAutocomplete.focusNode].
 
 void main() => runApp(const AutocompleteExampleApp());
 
@@ -64,9 +64,11 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
               return option.contains(textEditingValue.text.toLowerCase());
             }).toList();
           },
-          optionsViewBuilder: (BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options) {
+          optionsViewBuilder: (
+            BuildContext context,
+            AutocompleteOnSelected<String> onSelected,
+            Iterable<String> options,
+          ) {
             return Material(
               elevation: 4.0,
               child: ListView(
