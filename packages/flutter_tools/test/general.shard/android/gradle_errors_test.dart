@@ -1332,22 +1332,19 @@ Could not compile build file '…/example/android/build.gradle'.
         testLogger.statusText,
         contains(
           '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────┐\n'
-          "│ [!] Your project's Gradle and AGP version is incompatible with the Java version  │\n"
-          '│ that Flutter uses.                                                               │\n'
-          '|                                                                                  |\n'
-          '│ To fix this issue, first, update the Gradle version specified in                 │\n'
-          '│ /android/gradle/wrapper/gradle-wrapper.properties to be compatible with the      │\n'
-          '│ Java version. See the link below for more information on compatible Java/Gradle  │\n'
-          '│ versions:                                                                        │\n'
-          '│ https://docs.gradle.org/current/userguide/compatibility.html#java                │\n'
-          '|                                                                                  |\n'
-          '│ Then, ensure the AGP version specified in                                        │\n'
-          '| /android/build.gradle is compatible with the new                                 |\n'
-          '| Gradle version. See the link below for more information on compatible Gradle/AGP |\n'
-          '| versions:                                                                        |\n'
-          '| https://developer.android.com/studio/releases/gradle-plugin#updating-gradle      |\n'
-          '└──────────────────────────────────────────────────────────────────────────────────┘\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project\'s Gradle and AGP version is incompatible with the Java version that Flutter  │\n'
+          '│ uses.                                                                                         │\n'
+          '│                                                                                               │\n'
+          '│ To fix this issue, first, update the Gradle version specified in                              │\n'
+          '│ /android/gradle/wrapper/gradle-wrapper.properties to be compatible with the Java version. See │\n'
+          '│ the link below for more information on compatible Java/Gradle versions:                       │\n'
+          '│ https://docs.gradle.org/current/userguide/compatibility.html#java                             │\n'
+          '│                                                                                               │\n'
+          '│ Then, ensure the AGP version specified in /android/build.gradle is compatible with the new    │\n'
+          '│ Gradle version. See the link below for more information on compatible Gradle/AGP versions:    │\n'
+          '│ https://developer.android.com/studio/releases/gradle-plugin#updating-gradle                   │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
