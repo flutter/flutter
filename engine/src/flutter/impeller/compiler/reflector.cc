@@ -205,7 +205,8 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     if (auto uniform_buffers_json =
             ReflectResources(shader_resources.uniform_buffers);
         uniform_buffers_json.has_value()) {
-      for (const auto& uniform_buffer : uniform_buffers_json.value()) {
+      for (auto uniform_buffer : uniform_buffers_json.value()) {
+        uniform_buffer["descriptor_type"] = "DescriptorType::kUniformBuffer";
         buffers.emplace_back(std::move(uniform_buffer));
       }
     } else {
@@ -214,7 +215,8 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     if (auto storage_buffers_json =
             ReflectResources(shader_resources.storage_buffers);
         storage_buffers_json.has_value()) {
-      for (const auto& uniform_buffer : storage_buffers_json.value()) {
+      for (auto uniform_buffer : storage_buffers_json.value()) {
+        uniform_buffer["descriptor_type"] = "DescriptorType::kStorageBuffer";
         buffers.emplace_back(std::move(uniform_buffer));
       }
     } else {
@@ -244,12 +246,15 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     }
     auto& sampled_images = root["sampled_images"] = nlohmann::json::array_t{};
     for (auto value : combined_sampled_images.value()) {
+      value["descriptor_type"] = "DescriptorType::kSampledImage";
       sampled_images.emplace_back(std::move(value));
     }
     for (auto value : images.value()) {
+      value["descriptor_type"] = "DescriptorType::kImage";
       sampled_images.emplace_back(std::move(value));
     }
     for (auto value : samplers.value()) {
+      value["descriptor_type"] = "DescriptorType::kSampledSampler";
       sampled_images.emplace_back(std::move(value));
     }
   }

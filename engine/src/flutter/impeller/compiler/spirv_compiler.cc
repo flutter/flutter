@@ -208,14 +208,22 @@ static void SetDefaultLimitations(shaderc::CompileOptions& compiler_opts) {
 }
 
 static void SetBindingBaseOffset(shaderc::CompileOptions& options) {
-  constexpr uint32_t kFragBindingBase = 128;
-  constexpr size_t kNumUniformKinds =
-      static_cast<int>(shaderc_uniform_kind::shaderc_uniform_kind_buffer) + 1;
-  for (size_t uniform_kind = 0; uniform_kind < kNumUniformKinds;
-       uniform_kind++) {
+  constexpr uint32_t kBindingBaseOffset = 64;
+  static const shaderc_uniform_kind kUniformKinds[] = {
+      shaderc_uniform_kind::shaderc_uniform_kind_sampler,
+      shaderc_uniform_kind::shaderc_uniform_kind_texture,
+      shaderc_uniform_kind::shaderc_uniform_kind_image,
+      shaderc_uniform_kind::shaderc_uniform_kind_buffer,          // UBOs
+      shaderc_uniform_kind::shaderc_uniform_kind_storage_buffer,  // SSBOs
+  };
+
+  for (size_t i = 0u; i < sizeof(kUniformKinds) / sizeof(shaderc_uniform_kind);
+       i++) {
     options.SetBindingBaseForStage(
-        ToShaderCShaderKind(SourceType::kFragmentShader),
-        static_cast<shaderc_uniform_kind>(uniform_kind), kFragBindingBase);
+        shaderc_shader_kind::shaderc_fragment_shader,  //
+        kUniformKinds[i],                              //
+        kBindingBaseOffset                             //
+    );
   }
 }
 

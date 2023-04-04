@@ -310,7 +310,7 @@ bool CapabilitiesVK::SupportsOffscreenMSAA() const {
 
 // |Capabilities|
 bool CapabilitiesVK::SupportsSSBO() const {
-  return false;
+  return true;
 }
 
 // |Capabilities|
