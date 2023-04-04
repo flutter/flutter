@@ -1248,13 +1248,11 @@ void main() {
         theme: ThemeData(platform: platform),
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return RadioListTile<int>.adaptive(
-                value: 1,
-                groupValue: 2,
-                onChanged: (_) {},
-              );
-            }),
+            child: RadioListTile<int>.adaptive(
+              value: 1,
+              groupValue: 2,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );

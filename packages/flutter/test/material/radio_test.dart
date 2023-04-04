@@ -1380,13 +1380,11 @@ void main() {
         theme: ThemeData(platform: platform),
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Radio<int>.adaptive(
-                value: 1,
-                groupValue: 2,
-                onChanged: (_) {},
-              );
-            }),
+            child: Radio<int>.adaptive(
+              value: 1,
+              groupValue: 2,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );
