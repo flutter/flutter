@@ -27,7 +27,6 @@ class GradleVersionConflictMigration extends ProjectMigrator {
       ) : _androidStudio = androidStudio,
           _gradleWrapperPropertiesFile = project.hostAppGradleRoot
       .childDirectory('gradle').childDirectory('wrapper').childFile('gradle-wrapper.properties');
-  
   final File _gradleWrapperPropertiesFile;
   final AndroidStudio? _androidStudio;
 

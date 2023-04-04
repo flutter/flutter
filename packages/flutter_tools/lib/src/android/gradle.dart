@@ -32,7 +32,7 @@ import 'android_builder.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
-import 'migrations/gradle-version-conflict-migration.dart';
+import 'migrations/gradle_version_conflict_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
 

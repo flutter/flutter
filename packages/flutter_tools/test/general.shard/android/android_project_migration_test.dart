@@ -5,7 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/android/migrations/gradle-version-conflict-migration.dart';
+import 'package:flutter_tools/src/android/migrations/gradle_version_conflict_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
