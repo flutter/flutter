@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
@@ -740,6 +741,55 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       );
       expect(didInstall, isTrue);
       expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(logger.traceText, contains('CocoaPods Pods-Runner-frameworks.sh script not found'));
+    });
+
+    testUsingContext('runs CocoaPods Pod runner script migrator', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      pretendPodIsInstalled();
+      pretendPodVersionIs('100.0.0');
+      projectUnderTest.ios.podfile
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
+      projectUnderTest.ios.podfileLock
+        ..createSync()
+        ..writeAsStringSync('Existing lock file.');
+      projectUnderTest.ios.podManifestLock
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Existing lock file.');
+      projectUnderTest.ios.podRunnerFrameworksScript
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'source="$(readlink "${source}")"');
+
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(
+          command: <String>['pod', 'install', '--verbose'],
+          workingDirectory: 'project/ios',
+          environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
+        ),
+        FakeCommand(
+          command: <String>['touch', 'project/ios/Podfile.lock'],
+        ),
+      ]);
+
+      final CocoaPods cocoaPodsUnderTestXcode143 = CocoaPods(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager, version: Version(14, 3, 0)),
+        usage: usage,
+      );
+
+      final bool didInstall = await cocoaPodsUnderTestXcode143.processPods(
+        xcodeProject: projectUnderTest.ios,
+        buildMode: BuildMode.debug,
+      );
+      expect(didInstall, isTrue);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      // Now has readlink -f flag.
+      expect(projectUnderTest.ios.podRunnerFrameworksScript.readAsStringSync(), contains(r'source="$(readlink -f "${source}")"'));
+      expect(logger.statusText, contains('Upgrading Pods-Runner-frameworks.sh'));
     });
 
     testUsingContext('runs pod install, if Podfile.lock is older than Podfile', () async {

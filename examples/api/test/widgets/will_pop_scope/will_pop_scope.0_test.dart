@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('pressing shouldPop button changes shouldPop', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.WillPopScopeExampleApp(),
     );
 
     final Finder buttonFinder = find.text('shouldPop: true');
@@ -19,14 +19,14 @@ void main() {
   });
   testWidgets('pressing Push button pushes route', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.WillPopScopeExampleApp(),
     );
 
     final Finder buttonFinder = find.text('Push');
     expect(buttonFinder, findsOneWidget);
-    expect(find.byType(example.MyStatefulWidget), findsOneWidget);
+    expect(find.byType(example.WillPopScopeExample), findsOneWidget);
     await tester.tap(buttonFinder);
     await tester.pumpAndSettle();
-    expect(find.byType(example.MyStatefulWidget, skipOffstage: false), findsNWidgets(2));
+    expect(find.byType(example.WillPopScopeExample, skipOffstage: false), findsNWidgets(2));
   });
 }

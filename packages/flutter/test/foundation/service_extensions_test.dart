@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -240,7 +233,7 @@ void main() {
         r'^'
         r'RenderView#[0-9a-f]{5}\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
-        r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
+        r'   view size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 3\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
         r'$',
@@ -870,6 +863,7 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{});
     expect(binding.reassembled, 1);
+    binding.reassembled = 0;
   });
 
   test('Service extensions - showPerformanceOverlay', () async {

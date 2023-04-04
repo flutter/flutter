@@ -13,7 +13,7 @@ void main() {
       return tester.widget<RawMaterialButton>(finder);
     }
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.FloatingActionButtonExampleApp(),
     );
 
     expect(find.byType(FloatingActionButton), findsOneWidget);
