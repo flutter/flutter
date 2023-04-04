@@ -105,7 +105,11 @@ Future<void> buildWeb(
   } finally {
     status.stop();
   }
-  globals.flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming(
+    'build',
+    isWasm ? 'dart2wasm' : 'dart2js',
+    Duration(milliseconds: sw.elapsedMilliseconds),
+  );
 }
 
 /// Web rendering backend mode.
