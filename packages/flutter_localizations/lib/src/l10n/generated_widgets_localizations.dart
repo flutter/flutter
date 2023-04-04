@@ -304,6 +304,32 @@ class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Přesunout nahoru';
 }
 
+/// The translations for Welsh (`cy`).
+class WidgetsLocalizationCy extends GlobalWidgetsLocalizations {
+  /// Create an instance of the translation bundle for Welsh.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationCy() : super(TextDirection.ltr);
+
+  @override
+  String get reorderItemDown => 'Symud i lawr';
+
+  @override
+  String get reorderItemLeft => "Symud i'r chwith";
+
+  @override
+  String get reorderItemRight => "Symud i'r dde";
+
+  @override
+  String get reorderItemToEnd => "Symud i'r diwedd";
+
+  @override
+  String get reorderItemToStart => "Symud i'r dechrau";
+
+  @override
+  String get reorderItemUp => 'Symud i fyny';
+}
+
 /// The translations for Danish (`da`).
 class WidgetsLocalizationDa extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Danish.
@@ -2524,6 +2550,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'bs', // Bosnian
   'ca', // Catalan Valencian
   'cs', // Czech
+  'cy', // Welsh
   'da', // Danish
   'de', // German
   'el', // Modern Greek
@@ -2614,6 +2641,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
+///  * `cy` - Welsh
 ///  * `da` - Danish
 ///  * `de` - German (plus one country variation)
 ///  * `el` - Modern Greek
@@ -2711,6 +2739,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationCa();
     case 'cs':
       return const WidgetsLocalizationCs();
+    case 'cy':
+      return const WidgetsLocalizationCy();
     case 'da':
       return const WidgetsLocalizationDa();
     case 'de': {
