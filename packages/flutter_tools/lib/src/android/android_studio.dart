@@ -27,8 +27,6 @@ import 'android_studio_validator.dart';
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
-String? get javaPath => globals.androidStudio?.javaPath;
-
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(
     this.directory, {
@@ -141,11 +139,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final String? configured;
   final String? presetPluginsPath;
 
-  String? _javaPath;
+  String? _javaHomePath;
   bool _isValid = false;
   final List<String> _validationMessages = <String>[];
 
-  String? get javaPath => _javaPath;
+  /// The path of the home directory of the JDK bundled with this instance
+  /// of Android Studio.
+  String? get javaHomePath => _javaHomePath;
 
   bool get isValid => _isValid;
 
@@ -471,7 +471,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         final List<String> versionLines = result.stderr.split('\n');
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         _validationMessages.add('Java version $javaVersion');
-        _javaPath = javaPath;
+        _javaHomePath = javaPath;
         _isValid = true;
       } else {
         _validationMessages.add('Unable to determine bundled Java version.');

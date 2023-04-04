@@ -1689,5 +1689,5 @@ class FakeGradleUtils extends Fake implements GradleUtils {
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
-  String get javaPath => 'java';
+  String get javaHomePath => 'java';
 }

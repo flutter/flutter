@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/gradle_utils.dart';
+import 'android/java.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
@@ -285,3 +286,12 @@ const String kDefaultFrameworkChannel = 'master';
 
 // Used to build RegExp instances which can detect the VM service message.
 final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+
+String? _javaPath;
+
+String? get javaHome => _javaPath ??= findJavaHome(
+  androidStudio: androidStudio,
+  fileSystem: fs,
+  operatingSystemUtils: os,
+  platform: platform
+);

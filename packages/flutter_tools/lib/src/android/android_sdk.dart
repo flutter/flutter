@@ -4,13 +4,11 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
-import 'android_studio.dart';
+import 'java.dart';
 
 // ANDROID_HOME is deprecated.
 // See https://developer.android.com/studio/command-line/variables.html#envar
@@ -37,9 +35,6 @@ class AndroidSdk {
   AndroidSdk(this.directory) {
     reinitialize();
   }
-
-  static const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
-  static const String _javaExecutable = 'java';
 
   /// The Android SDK root directory.
   final Directory directory;
@@ -407,43 +402,6 @@ class AndroidSdk {
       return path;
     }
     return null;
-  }
-
-  /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
-  static String? findJavaBinary({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-  }) {
-    if (androidStudio?.javaPath != null) {
-      return fileSystem.path.join(androidStudio!.javaPath!, 'bin', 'java');
-    }
-
-    final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
-    if (javaHomeEnv != null) {
-      // Trust JAVA_HOME.
-      return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
-    }
-
-    // MacOS specific logic to avoid popping up a dialog window.
-    // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
-    if (platform.isMacOS) {
-      try {
-        final String javaHomeOutput = globals.processUtils.runSync(
-          <String>['/usr/libexec/java_home', '-v', '1.8'],
-          throwOnError: true,
-          hideStdout: true,
-        ).stdout.trim();
-        if (javaHomeOutput.isNotEmpty) {
-          final String javaHome = javaHomeOutput.split('\n').last.trim();
-          return fileSystem.path.join(javaHome, 'bin', 'java');
-        }
-      } on Exception { /* ignore */ }
-    }
-
-    // Fallback to PATH based lookup.
-    return operatingSystemUtils.which(_javaExecutable)?.path;
   }
 
   Map<String, String>? _sdkManagerEnv;

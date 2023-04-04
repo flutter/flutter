@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
-import 'android/android_studio.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
@@ -391,8 +390,8 @@ class AndroidMavenArtifacts extends ArtifactSet {
           'resolveDependencies',
         ],
         environment: <String, String>{
-          if (javaPath != null)
-            'JAVA_HOME': javaPath!,
+          if (globals.javaHome != null)
+            'JAVA_HOME': globals.javaHome!,
         },
       );
       if (processResult.exitCode != 0) {

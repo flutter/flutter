@@ -26,10 +26,10 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
-import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
@@ -402,8 +402,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (javaPath != null)
-            'JAVA_HOME': javaPath!,
+          if (globals.javaHome != null)
+            'JAVA_HOME': globals.javaHome!,
         },
         mapFunction: consumeLog,
       );
@@ -671,8 +671,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (javaPath != null)
-            'JAVA_HOME': javaPath!,
+          if (globals.javaHome != null)
+            'JAVA_HOME': globals.javaHome!,
         },
       );
     } finally {

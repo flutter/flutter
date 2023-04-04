@@ -523,7 +523,7 @@ void main() {
         globals.fs.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
-      expect(studio.javaPath, equals(globals.fs.path.join(
+      expect(studio.javaHomePath, equals(globals.fs.path.join(
         studioInApplicationPlistFolder,
         'jre',
         'Contents',
@@ -562,7 +562,7 @@ void main() {
         globals.fs.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
-      expect(studio.javaPath, equals(globals.fs.path.join(
+      expect(studio.javaHomePath, equals(globals.fs.path.join(
         studioInApplicationPlistFolder,
         'jbr',
         'Contents',
@@ -696,7 +696,7 @@ void main() {
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-    expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jre'));
+    expect(studio.javaHomePath, equals(r'C:\Program Files\AndroidStudio\jre'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => windowsFileSystem,
@@ -712,7 +712,7 @@ void main() {
 
     final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-    expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
+    expect(studio.javaHomePath, equals(r'C:\Program Files\AndroidStudio\jbr'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => windowsFileSystem,
@@ -822,7 +822,7 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-      expect(studio.javaPath, equals('$studioInstallPath/jre'));
+      expect(studio.javaHomePath, equals('$studioInstallPath/jre'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -843,7 +843,7 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-      expect(studio.javaPath, equals('$studioInstallPath/jbr'));
+      expect(studio.javaHomePath, equals('$studioInstallPath/jbr'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,

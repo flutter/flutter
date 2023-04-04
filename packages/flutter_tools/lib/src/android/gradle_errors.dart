@@ -11,7 +11,6 @@ import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'android_studio.dart';
 import 'gradle_utils.dart';
 import 'multidex.dart';
 
@@ -377,8 +376,8 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
       environment: <String, String>{
-        if (javaPath != null)
-          'JAVA_HOME': javaPath!,
+        if (globals.javaHome != null)
+          'JAVA_HOME': globals.javaHome!,
       },
     );
     // Extract build types and product flavors.
