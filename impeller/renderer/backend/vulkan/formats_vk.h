@@ -279,6 +279,15 @@ constexpr vk::DescriptorSetLayoutBinding ToVKDescriptorSetLayoutBinding(
     case DescriptorType::kUniformBuffer:
       desc_type = vk::DescriptorType::eUniformBuffer;
       break;
+    case DescriptorType::kStorageBuffer:
+      desc_type = vk::DescriptorType::eStorageBuffer;
+      break;
+    case DescriptorType::kImage:
+      desc_type = vk::DescriptorType::eSampledImage;
+      break;
+    case DescriptorType::kSampler:
+      desc_type = vk::DescriptorType::eSampler;
+      break;
   }
   binding.descriptorType = desc_type;
   binding.stageFlags = ToVkShaderStage(layout.shader_stage);
