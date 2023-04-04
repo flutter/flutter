@@ -2401,7 +2401,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       assert(() {
         if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
           FlutterError.reportError(
-          FlutterErrorDetails(
+            FlutterErrorDetails(
               exception: FlutterError(
                 'Spell check was enabled with spellCheckConfiguration, but the '
                 'current platform does not have a supported spell check '
