@@ -98,7 +98,12 @@ static gboolean register_texture(FlTextureRegistrar* registrar,
       return FALSE;
     }
 
-    int64_t id = self->next_id++;
+    // We ideally would use numeric IDs, but for backwards compatibility with
+    // existing code use the address of the texture. Once all code uses
+    // fl_texture_get_id we can re-enable this method. See
+    // https://github.com/flutter/flutter/issues/124009 int64_t id =
+    // self->next_id++;
+    int64_t id = reinterpret_cast<int64_t>(texture);
     if (fl_engine_register_external_texture(self->engine, id)) {
       fl_texture_set_id(texture, id);
       g_mutex_lock(&self->textures_mutex);
