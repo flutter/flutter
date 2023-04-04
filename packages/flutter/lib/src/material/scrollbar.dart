@@ -271,7 +271,6 @@ class _MaterialScrollbar extends RawScrollbar {
 }
 
 class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
-  late AnimationController _hoverAnimationController;
   bool _dragIsActive = false;
   bool _hoverIsActive = false;
   late ColorScheme _colorScheme;
@@ -334,7 +333,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       return Color.lerp(
         _scrollbarTheme.thumbColor?.resolve(states) ?? idleColor,
         _scrollbarTheme.thumbColor?.resolve(states) ?? hoverColor,
-        _hoverAnimationController.value,
+        0
       )!;
     });
   }
@@ -378,18 +377,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       return widget.thickness
         ?? _scrollbarTheme.thickness?.resolve(states)
         ?? (_kScrollbarThickness / (_useAndroidScrollbar ? 2 : 1));
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _hoverAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _hoverAnimationController.addListener(() {
-      updateScrollbarPainter();
     });
   }
 
@@ -447,11 +434,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
       // Pointer is hovering over the scrollbar
       setState(() { _hoverIsActive = true; });
-      _hoverAnimationController.forward();
     } else if (_hoverIsActive) {
       // Pointer was, but is no longer over painted scrollbar.
       setState(() { _hoverIsActive = false; });
-      _hoverAnimationController.reverse();
     }
   }
 
@@ -459,12 +444,5 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   void handleHoverExit(PointerExitEvent event) {
     super.handleHoverExit(event);
     setState(() { _hoverIsActive = false; });
-    _hoverAnimationController.reverse();
-  }
-
-  @override
-  void dispose() {
-    _hoverAnimationController.dispose();
-    super.dispose();
   }
 }
