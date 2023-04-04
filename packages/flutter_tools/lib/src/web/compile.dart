@@ -50,6 +50,15 @@ Future<void> buildWeb(
   final ProjectMigration migration = ProjectMigration(migrators);
   migration.run();
 
+  if (isWasm) {
+    globals.logger.printBox(
+      '''
+WebAssembly compilation is experimental.
+See $wasmPreviewUri for more information.''',
+      title: 'Experimental feature',
+    );
+  }
+
   final Status status = globals.logger.startProgress('Compiling $target for the Web...');
   final Stopwatch sw = Stopwatch()..start();
   try {
@@ -149,3 +158,5 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
     NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
   },
 };
+
+const String wasmPreviewUri = 'https://flutter.dev/wasm';
