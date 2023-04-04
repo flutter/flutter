@@ -41,7 +41,7 @@ typedef MockStreamHandlerOnListenCallback = void Function(Object? arguments, Moc
 typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
 
 /// Convenience class for creating a [MockStreamHandler] inline.
-/// 
+///
 /// {@macro flutter.flutter_test.MockStreamHandler}
 class InlineMockStreamHandler extends MockStreamHandler {
   InlineMockStreamHandler._({
@@ -61,7 +61,8 @@ class InlineMockStreamHandler extends MockStreamHandler {
 }
 
 /// A mock event sink for a [MockStreamHandler] that mimics the native
-/// EventSink API.
+/// [EventSink](https://api.flutter.dev/javadoc/io/flutter/plugin/common/EventChannel.EventSink.html)
+/// API.
 class MockStreamHandlerEventSink {
   /// Create a new [MockStreamHandlerEventSink] with the given [sink].
   MockStreamHandlerEventSink(EventSink<Object?> sink) : _sink = sink;
