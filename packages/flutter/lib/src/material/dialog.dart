@@ -4,8 +4,8 @@
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show clampDouble;
-import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -23,6 +23,8 @@ import 'theme_data.dart';
 // late BuildContext context;
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
+
+enum _DialogType {material, adaptive }
 
 /// A Material Design dialog.
 ///
@@ -393,7 +395,38 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
-  });
+  }) : _dialogType = _DialogType.material;
+
+  /// Adaptive alert dialog
+  const AlertDialog.adaptive({
+    super.key,
+    this.icon,
+    this.iconPadding,
+    this.iconColor,
+    this.title,
+    this.titlePadding,
+    this.titleTextStyle,
+    this.content,
+    this.contentPadding,
+    this.contentTextStyle,
+    this.actions,
+    this.actionsPadding,
+    this.actionsAlignment,
+    this.actionsOverflowAlignment,
+    this.actionsOverflowDirection,
+    this.actionsOverflowButtonSpacing,
+    this.buttonPadding,
+    this.backgroundColor,
+    this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
+    this.semanticLabel,
+    this.insetPadding = _defaultInsetPadding,
+    this.clipBehavior = Clip.none,
+    this.shape,
+    this.alignment,
+    this.scrollable = false,
+  }) : _dialogType = _DialogType.adaptive;
 
   /// An optional icon to display at the top of the dialog.
   ///
@@ -634,10 +667,32 @@ class AlertDialog extends StatelessWidget {
   /// button bar.
   final bool scrollable;
 
+  final _DialogType _dialogType;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
+    switch (_dialogType) {
+      case _DialogType.material:
+        break;
+
+      case _DialogType.adaptive:
+        switch(theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return CupertinoAlertDialog(
+              title: title,
+              content: content,
+              actions: actions ?? <Widget>[],
+            );
+        }
+    }
     final DialogTheme dialogTheme = DialogTheme.of(context);
     final DialogTheme defaults = theme.useMaterial3 ? _DialogDefaultsM3(context) : _DialogDefaultsM2(context);
 
@@ -1306,6 +1361,51 @@ Future<T?> showDialog<T>({
     anchorPoint: anchorPoint,
     traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
   ));
+}
+
+/// Displays an adaptive dialog.
+Future<T?> showAdaptiveDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool? barrierDismissible,
+  Color? barrierColor = Colors.black54,
+  String? barrierLabel,
+  bool useSafeArea = true,
+  bool useRootNavigator = true,
+  RouteSettings? routeSettings,
+  Offset? anchorPoint,
+  TraversalEdgeBehavior? traversalEdgeBehavior,
+}) {
+  final ThemeData theme = Theme.of(context);
+  switch (theme.platform) {
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+    case TargetPlatform.linux:
+    case TargetPlatform.windows:
+      return showDialog<T>(
+        context: context,
+        builder: builder,
+        barrierDismissible: barrierDismissible ?? true,
+        barrierColor: barrierColor,
+        barrierLabel: barrierLabel,
+        useSafeArea: useSafeArea,
+        useRootNavigator: useRootNavigator,
+        routeSettings: routeSettings,
+        anchorPoint: anchorPoint,
+        traversalEdgeBehavior: traversalEdgeBehavior,
+      );
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return showCupertinoDialog<T>(
+        context: context,
+        builder: builder,
+        barrierDismissible: barrierDismissible ?? false,
+        barrierLabel: barrierLabel,
+        useRootNavigator: useRootNavigator,
+        anchorPoint: anchorPoint,
+        routeSettings: routeSettings,
+      );
+  }
 }
 
 bool _debugIsActive(BuildContext context) {
