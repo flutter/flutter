@@ -5,8 +5,8 @@
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../base/version.dart';
-import '../../globals.dart' as globals;
 import '../../project.dart';
+import '../android_studio.dart';
 
 final Version _androidStudioFlamingo = Version(2022, 2, 0);
 final RegExp _gradleVersionMatch = RegExp(
@@ -23,10 +23,13 @@ class GradleVersionConflictMigration extends ProjectMigrator {
   GradleVersionConflictMigration(
       AndroidProject project,
       super.logger,
-      ) : _gradleWrapperPropertiesFile = project.hostAppGradleRoot
+      AndroidStudio? androidStudio,
+      ) : _androidStudio = androidStudio,
+          _gradleWrapperPropertiesFile = project.hostAppGradleRoot
       .childDirectory('gradle').childDirectory('wrapper').childFile('gradle-wrapper.properties');
   
   final File _gradleWrapperPropertiesFile;
+  final AndroidStudio? _androidStudio;
 
   @override
   void migrate() {
@@ -35,11 +38,11 @@ class GradleVersionConflictMigration extends ProjectMigrator {
       return;
     }
 
-    if (globals.androidStudio == null) {
+    if (_androidStudio == null) {
       logger.printTrace('Android Studio version could not be detected, '
           'skipping gradle version compatibility check.');
       return;
-    } else if (globals.androidStudio!.version.compareTo(_androidStudioFlamingo) < 0) {
+    } else if (_androidStudio!.version.compareTo(_androidStudioFlamingo) < 0) {
       //Version of Android Studio is less than impacted version, no migration necessary.
       return;
     }
@@ -55,6 +58,7 @@ class GradleVersionConflictMigration extends ProjectMigrator {
     }
     if (match.groupCount < 1) {
       logger.printTrace('Failed to parse gradle version, skipping gradle version compatibility check.');
+      return line;
     }
     final String existingVersionString = match[1]!;
     final Version existingVersion = Version.parse(existingVersionString)!;

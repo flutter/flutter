@@ -125,11 +125,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Usage usage,
     required GradleUtils gradleUtils,
     required Platform platform,
+    required AndroidStudio? androidStudio,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _usage = usage,
        _gradleUtils = gradleUtils,
+       _androidStudio = androidStudio,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -140,6 +142,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final Usage _usage;
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
+  final AndroidStudio? _androidStudio;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -244,7 +247,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     final List<ProjectMigrator> migrators = <ProjectMigrator>[
       TopLevelGradleBuildFileMigration(project.android, _logger),
-      GradleVersionConflictMigration(project.android, _logger),
+      GradleVersionConflictMigration(project.android, _logger, _androidStudio),
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);

@@ -4,14 +4,32 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/migrations/gradle-version-conflict-migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+
+const String oldGradleVersionWrapper = r'''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+''';
+
+const String recentGradleVersionWrapper = r'''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-all.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+''';
 
 void main() {
   group('Android migration', () {
@@ -93,40 +111,72 @@ tasks.register("clean", Delete) {
           root: memoryFileSystem.currentDirectory.childDirectory('android')..createSync(),
         );
         project.hostAppGradleRoot.childDirectory('gradle').childDirectory('wrapper').createSync(recursive: true);
-        gradleWrapperPropertiesFile = project.hostAppGradleRoot.childFile('build.gradle');
+        gradleWrapperPropertiesFile = project.hostAppGradleRoot
+            .childDirectory('gradle')
+            .childDirectory('wrapper')
+            .childFile('gradle-wrapper.properties');
       });
 
       testUsingContext('skipped if files are missing', () {
         final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
-            project,
-            bufferLogger
+          project,
+          bufferLogger,
+          FakeAndroidStudioDolphin(),
         );
         migration.migrate();
         expect(gradleWrapperPropertiesFile.existsSync(), isFalse);
         expect(bufferLogger.traceText, contains('gradle-wrapper.properties not found, skipping gradle version compatibility check.'));
       });
 
-      testUsingContext('skipped if android studio version cannot be detected', () {
 
+      testUsingContext('skipped if android studio is null', () {
+        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+          project,
+          bufferLogger,
+          null,
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
+        migration.migrate();
+        expect(bufferLogger.traceText, contains('Android Studio version could not be detected, '
+            'skipping gradle version compatibility check.'));
       });
-/*
-      testUsingContext('skipped if android studio version is less than flamingo', () {
 
+      testUsingContext('skipped if android studio version is less than flamingo', () {
+        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+          project,
+          bufferLogger,
+          FakeAndroidStudioDolphin(),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
+        migration.migrate();
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), oldGradleVersionWrapper);
+        expect(bufferLogger.traceText, isEmpty);
       });
 
       testUsingContext('nothing is changed if gradle version is high enough', () {
-
+        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+          project,
+          bufferLogger,
+          FakeAndroidStudioFlamingo(),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(recentGradleVersionWrapper);
+        migration.migrate();
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), recentGradleVersionWrapper);
+        expect(bufferLogger.traceText, isEmpty);
       });
 
       testUsingContext('change is made with sub 7 gradle', () {
-
+        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+          project,
+          bufferLogger,
+          FakeAndroidStudioFlamingo(),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
+        migration.migrate();
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), recentGradleVersionWrapper);
+        expect(bufferLogger.traceText, contains('Conflict detected between versions of Android Studio '
+            'and gradle, upgrading gradle version from 6.7 to 7.4'));
       });
-
-      testUsingContext('change is made with gradle version >7 but <7.3', () {
-
-      });
-
- */
     });
   });
 }
@@ -136,4 +186,14 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
   @override
   Directory hostAppGradleRoot;
+}
+
+class FakeAndroidStudioDolphin extends Fake implements AndroidStudio {
+  @override
+  Version get version => Version(2021, 3, 1);
+}
+
+class FakeAndroidStudioFlamingo extends Fake implements AndroidStudio {
+  @override
+  Version get version => Version(2022, 2, 1);
 }
