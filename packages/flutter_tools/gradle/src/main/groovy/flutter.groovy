@@ -68,8 +68,10 @@ class FlutterExtension {
     String target
 }
 
-// This buildscript block exists solely for the compatibility with projects that
-// have not migrated to the declarative apply of the Flutter Gradle Plugin.
+// This buildscript block supplies dependencies for this file's own import
+// declarations above. It exists solely for compatibility with projects that
+// have not migrated to declaratively apply the Flutter Gradle Plugin;
+// for those that have, FGP's `build.gradle.kts`  takes care of this.
 buildscript {
     repositories {
         google()
