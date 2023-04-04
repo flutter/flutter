@@ -566,6 +566,7 @@ class _UiKitViewState extends State<UiKitView> {
   bool _initialized = false;
 
   // Exposed for testing only. The state class itself is still private.
+  @visibleForTesting
   FocusNode? focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
