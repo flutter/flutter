@@ -547,8 +547,8 @@ class AndroidProject extends FlutterProjectPlatform {
     );
   }
 
-  /// Ensures Java Sdk is compatible with the project's gradle version and
-  /// the project's gradle version is compatible with the AGP version used
+  /// Ensures Java SDK is compatible with the project's Gradle version and
+  /// the project's Gradle version is compatible with the AGP version used
   /// in build.gradle.
   Future<CompatabilityResult> hasValidJavaGradleAgpVersions() async {
     final String? gradleVersion = await gradle.getGradleVersion(
@@ -577,7 +577,7 @@ class AndroidProject extends FlutterProjectPlatform {
       description = '''
 Incompatible Gradle/AGP versions. \n
 Gradle Version: $gradleVersion, AGP Version: $agpVersion
-Update gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
+Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
 See the link below for more information:
 $gradleAgpCompatUrl
 ''';

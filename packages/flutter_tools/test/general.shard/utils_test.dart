@@ -68,7 +68,6 @@ baz=qux
             isTrue);
       });
 
-
       test('min included by default', () {
         expect(
             isWithinVersionRange('1.0.0', min: '1.0.0', max: '1.1.3'), isTrue);
@@ -95,16 +94,12 @@ baz=qux
 
       test('lower value excluded', () {
         expect(
-            isWithinVersionRange('0.1.0',
-                min: '1.0.0', max: '1.1.3'),
-            isFalse);
+            isWithinVersionRange('0.1.0', min: '1.0.0', max: '1.1.3'), isFalse);
       });
 
       test('higher value excluded', () {
         expect(
-            isWithinVersionRange('1.1.4',
-                min: '1.0.0', max: '1.1.3'),
-            isFalse);
+            isWithinVersionRange('1.1.4', min: '1.0.0', max: '1.1.3'), isFalse);
       });
 
       test('middle value included', () {
