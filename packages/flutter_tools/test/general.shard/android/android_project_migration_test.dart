@@ -150,7 +150,7 @@ tasks.register("clean", Delete) {
         gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
         migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), oldGradleVersionWrapper);
-        expect(bufferLogger.traceText, isEmpty);
+        expect(bufferLogger.traceText, contains('Version of Android Studio is less than impacted version, no migration necessary.'));
       });
 
       testWithoutContext('nothing is changed if gradle version is high enough', () {
@@ -174,7 +174,7 @@ tasks.register("clean", Delete) {
         gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
         migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), recentGradleVersionWrapper);
-        expect(bufferLogger.traceText, contains('Conflict detected between versions of Android Studio '
+        expect(bufferLogger.statusText, contains('Conflict detected between versions of Android Studio '
             'and gradle, upgrading gradle version from 6.7 to 7.4'));
       });
     });
