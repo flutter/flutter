@@ -117,7 +117,7 @@ tasks.register("clean", Delete) {
             .childFile('gradle-wrapper.properties');
       });
 
-      testUsingContext('skipped if files are missing', () {
+      testWithoutContext('skipped if files are missing', () {
         final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
           project,
           bufferLogger,
@@ -129,7 +129,7 @@ tasks.register("clean", Delete) {
       });
 
 
-      testUsingContext('skipped if android studio is null', () {
+      testWithoutContext('skipped if android studio is null', () {
         final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
           project,
           bufferLogger,
@@ -141,7 +141,7 @@ tasks.register("clean", Delete) {
             'skipping gradle version compatibility check.'));
       });
 
-      testUsingContext('skipped if android studio version is less than flamingo', () {
+      testWithoutContext('skipped if android studio version is less than flamingo', () {
         final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
           project,
           bufferLogger,
@@ -153,7 +153,7 @@ tasks.register("clean", Delete) {
         expect(bufferLogger.traceText, isEmpty);
       });
 
-      testUsingContext('nothing is changed if gradle version is high enough', () {
+      testWithoutContext('nothing is changed if gradle version is high enough', () {
         final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
           project,
           bufferLogger,
@@ -165,7 +165,7 @@ tasks.register("clean", Delete) {
         expect(bufferLogger.traceText, isEmpty);
       });
 
-      testUsingContext('change is made with sub 7 gradle', () {
+      testWithoutContext('change is made with sub 7 gradle', () {
         final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
           project,
           bufferLogger,
