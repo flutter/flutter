@@ -225,7 +225,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
 
     debugPort;
-    if (targetDevice is FuchsiaDevice &&
+    // Allow --ipv6 for iOS devices even if --debug-port and --debug-url
+    // are unknown
+    if (!_isIOSDevice(targetDevice) &&
         debugPort == null &&
         debugUri == null &&
         argResults!.wasParsed(FlutterCommand.ipv6Flag)) {
@@ -316,7 +318,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           }
           rethrow;
         }
-      } else if ((device is IOSDevice) || (device is IOSSimulator) || (device is MacOSDesignedForIPadDevice)) {
+      } else if (_isIOSDevice(device)) {
         // Protocol Discovery relies on logging. On iOS earlier than 13, logging is gathered using syslog.
         // syslog is not available for iOS 13+. For iOS 13+, Protocol Discovery gathers logs from the VMService.
         // Since we don't have access to the VMService yet, Protocol Discovery cannot be used for iOS 13+.
@@ -547,6 +549,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _validateArguments() async { }
+
+  bool _isIOSDevice(Device device) {
+    return (device is IOSDevice) ||
+        (device is IOSSimulator) ||
+        (device is MacOSDesignedForIPadDevice);
+  }
 }
 
 class HotRunnerFactory {

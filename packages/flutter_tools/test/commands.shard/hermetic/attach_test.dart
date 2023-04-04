@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
@@ -592,8 +591,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('exits when ipv6 is specified and debug-port is not on FuchsiaDevice', () async {
-        final FakeFuchsiaDevice device = FakeFuchsiaDevice();
+      testUsingContext('exits when ipv6 is specified and debug-port is not on non-iOS device', () async {
         testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand(
@@ -619,12 +617,17 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('succeeds when ipv6 is specified and debug-port is not on non-FuchsiaDevice', () async {
-        device.onGetLogReader = () {
-          fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('The Dart VM service is listening on http://[::1]:$devicePort');
-          return fakeLogReader;
-        };
+      testUsingContext('succeeds when ipv6 is specified and debug-port is not on iOS device', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          logReader: fakeLogReader,
+          portForwarder: portForwarder,
+          majorSdkVersion: 12,
+          onGetLogReader: () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('The Dart VM service is listening on http://[::1]:$devicePort');
+            return fakeLogReader;
+          },
+        );
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
@@ -633,7 +636,20 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand(
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForVmService = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
           artifacts: artifacts,
           stdio: stdio,
           logger: logger,
@@ -649,7 +665,6 @@ void main() {
         expect(portForwarder.hostPort, hostPort);
 
         await fakeLogReader.dispose();
-        await expectLoggerInterruptEndsTask(task, logger);
         await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
@@ -1323,27 +1338,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Category get category => Category.mobile;
-
-  @override
-  bool get ephemeral => true;
-}
-
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
-class FakeFuchsiaDevice extends Fake implements FuchsiaDevice {
-  @override
-  bool get isConnected => true;
-
-  @override
-  bool isSupported() => true;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
-
-  @override
-  DeviceConnectionInterface get connectionInterface =>
-      DeviceConnectionInterface.attached;
 
   @override
   bool get ephemeral => true;
