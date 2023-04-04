@@ -802,7 +802,7 @@ void testMain() {
 
     test('emoji text with skin tone', () async {
       await testSampleText('emoji_with_skin_tone', '👋🏿 👋🏾 👋🏽 👋🏼 👋🏻');
-    });
+    }, skip: isWasm || isSafari || isFirefox); // https://github.com/flutter/flutter/issues/124068
 
     // Make sure we clear the canvas in between frames.
     test('empty frame after contentful frame', () async {
