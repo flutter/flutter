@@ -19,8 +19,8 @@ const String _newVersionFullDependency = r'distributionUrl=https\://services.gra
 ///
 /// For more info see the Gradle-Java compatibility matrix:
 /// https://docs.gradle.org/current/userguide/compatibility.html
-class GradleVersionConflictMigration extends ProjectMigrator {
-  GradleVersionConflictMigration(
+class GradleJavaVersionConflictMigration extends ProjectMigrator {
+  GradleJavaVersionConflictMigration(
       AndroidProject project,
       super.logger,
       AndroidStudio? androidStudio,

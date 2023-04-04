@@ -5,7 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/android/migrations/gradle_version_conflict_migration.dart';
+import 'package:flutter_tools/src/android/migrations/gradle_java_version_conflict_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -118,7 +118,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
           project,
           bufferLogger,
           FakeAndroidStudioDolphin(),
@@ -130,7 +130,7 @@ tasks.register("clean", Delete) {
 
 
       testWithoutContext('skipped if android studio is null', () {
-        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
           project,
           bufferLogger,
           null,
@@ -142,7 +142,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if android studio version is less than flamingo', () {
-        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
           project,
           bufferLogger,
           FakeAndroidStudioDolphin(),
@@ -154,7 +154,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('nothing is changed if gradle version is high enough', () {
-        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
           project,
           bufferLogger,
           FakeAndroidStudioFlamingo(),
@@ -166,7 +166,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('change is made with sub 7 gradle', () {
-        final GradleVersionConflictMigration migration = GradleVersionConflictMigration(
+        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
           project,
           bufferLogger,
           FakeAndroidStudioFlamingo(),
