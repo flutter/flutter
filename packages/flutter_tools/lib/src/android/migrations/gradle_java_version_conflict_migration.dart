@@ -12,7 +12,7 @@ final Version _androidStudioFlamingo = Version(2022, 2, 0);
 final RegExp _gradleVersionMatch = RegExp(
   r'\s*distributionUrl=https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(?:all|bin)\.zip');
 final Version _lowestSupportedGradleVersion = Version(7, 3, 0);
-const String _newVersion = r'7.4';
+const String _newGradleVersionString = r'7.4';
 
 /// Migrate to a newer version of gradle when the existing does not support
 /// the version of Java provided by the detected Android Studio version.
@@ -64,7 +64,7 @@ class GradleJavaVersionConflictMigration extends ProjectMigrator {
     if (existingVersion < _lowestSupportedGradleVersion) {
       logger.printStatus('Conflict detected between versions of Android Studio '
           'and gradle, upgrading gradle version from $existingVersion to 7.4');
-      return line.replaceAll(existingVersionString, _newVersion);
+      return line.replaceAll(existingVersionString, _newGradleVersionString);
     }
     //Version of gradle is already high enough, no migration necessary.
     return line;
