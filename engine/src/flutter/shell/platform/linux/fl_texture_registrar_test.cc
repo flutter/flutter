@@ -71,7 +71,9 @@ static void* add_mock_texture_to_registrar(void* pointer) {
   FlTextureRegistrar* registrar = FL_TEXTURE_REGISTRAR(pointer);
   g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_registrar_texture_new());
   fl_texture_registrar_register_texture(registrar, texture);
-  pthread_exit(NULL);
+  int64_t* id = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+  id[0] = fl_texture_get_id(texture);
+  pthread_exit(id);
 }
 
 // Checks can make a mock registrar.
@@ -121,6 +123,7 @@ TEST(FlTextureRegistrarTest, RegistrarRegisterTextureInMultipleThreads) {
   g_autoptr(FlEngine) engine = make_mock_engine();
   g_autoptr(FlTextureRegistrar) registrar = fl_texture_registrar_new(engine);
   pthread_t threads[kThreadCount];
+  int64_t ids[kThreadCount];
 
   for (uint64_t t = 0; t < kThreadCount; t++) {
     EXPECT_EQ(pthread_create(&threads[t], NULL, add_mock_texture_to_registrar,
@@ -128,11 +131,13 @@ TEST(FlTextureRegistrarTest, RegistrarRegisterTextureInMultipleThreads) {
               0);
   }
   for (uint64_t t = 0; t < kThreadCount; t++) {
-    pthread_join(threads[t], NULL);
+    void* id;
+    pthread_join(threads[t], &id);
+    ids[t] = static_cast<int64_t*>(id)[0];
+    free(id);
   };
-  // Check the texture named from [1, threadCount].
-  for (uint64_t t = 1; t <= kThreadCount; t++) {
-    EXPECT_TRUE(fl_texture_registrar_lookup_texture(registrar, (int64_t)t) !=
-                NULL);
+  // Check all the textures were created.
+  for (uint64_t t = 0; t < kThreadCount; t++) {
+    EXPECT_TRUE(fl_texture_registrar_lookup_texture(registrar, ids[t]) != NULL);
   };
 }
