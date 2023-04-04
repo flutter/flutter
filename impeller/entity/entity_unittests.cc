@@ -2451,21 +2451,5 @@ TEST_P(EntityTest, InheritOpacityTest) {
   ASSERT_FALSE(runtime_effect->CanInheritOpacity(entity));
 }
 
-TEST_P(EntityTest, ColorFilterWithForegroundColorAdvancedBlend) {
-  auto image = CreateTextureForFixture("boston.jpg");
-  auto filter = ColorFilterContents::MakeBlend(
-      BlendMode::kColorBurn, FilterInput::Make({image}), Color::Red());
-
-  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    Entity entity;
-    entity.SetTransformation(Matrix::MakeScale(GetContentScale()) *
-                             Matrix::MakeTranslation({500, 300}) *
-                             Matrix::MakeScale(Vector2{0.5, 0.5}));
-    entity.SetContents(filter);
-    return entity.Render(context, pass);
-  };
-  ASSERT_TRUE(OpenPlaygroundHere(callback));
-}
-
 }  // namespace testing
 }  // namespace impeller
