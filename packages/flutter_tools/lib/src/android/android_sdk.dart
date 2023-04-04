@@ -485,7 +485,7 @@ class AndroidSdk {
       try {
         // -v Filter versions (as if JAVA_VERSION had been set in the environment).
         // It is unlikley that filtering to java version 1.8 is the right
-        // decsion here. That said, trying this on a mac shows the same jdk
+        // decision here. That said, trying this on a mac shows the same jdk
         // path no matter what input is passed.
         final String javaHomeOutput = globals.processUtils
             .runSync(
