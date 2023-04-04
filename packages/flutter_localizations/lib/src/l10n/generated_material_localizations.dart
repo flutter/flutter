@@ -38726,7 +38726,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get dialogLabel => 'ڈائلاگ';
 
   @override
-  String get drawerLabel => 'نیویگیشن مینو';
+  String get drawerLabel => 'نیویگیشن مینیو';
 
   @override
   String get expandedIconTapHint => 'سکیڑیں';
@@ -38918,7 +38918,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'لائسنسز';
 
   @override
-  String get menuBarMenuLabel => 'مینو بار کا مینو';
+  String get menuBarMenuLabel => 'مینیو بار کا مینیو';
 
   @override
   String get modalBarrierDismissLabel => 'برخاست کریں';
@@ -38936,7 +38936,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get okButtonLabel => 'ٹھیک ہے';
 
   @override
-  String get openAppDrawerTooltip => 'نیویگیشن مینو کھولیں';
+  String get openAppDrawerTooltip => 'نیویگیشن مینیو کھولیں';
 
   @override
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow از $rowCount';
@@ -38948,7 +38948,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get pasteButtonLabel => 'پیسٹ کریں';
 
   @override
-  String get popupMenuLabel => 'پاپ اپ مینو';
+  String get popupMenuLabel => 'پاپ اپ مینیو';
 
   @override
   String get postMeridiemAbbreviation => 'PM';
@@ -39044,7 +39044,7 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get showAccountsLabel => 'اکاؤنٹس دکھائیں';
 
   @override
-  String get showMenuTooltip => 'مینو دکھائیں';
+  String get showMenuTooltip => 'مینیو دکھائیں';
 
   @override
   String get signedInLabel => 'سائن ان کردہ ہے';
