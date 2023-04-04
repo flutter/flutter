@@ -244,9 +244,49 @@ class UnderlineInputBorder extends InputBorder {
     TextDirection? textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
-      canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
+      _drawMultipleWidth(canvas, borderRadius.toRRect(rect), borderSide);
+    } else {
+      canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
     }
-    canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
+  }
+
+  void _drawMultipleWidth(Canvas canvas, RRect borderRect, BorderSide bottom) {
+    final Paint paint = Paint()..color = bottom.color;
+
+    final RRect inner = _inflateRRect(
+      borderRect,
+      EdgeInsets.fromLTRB(0, 0, 0, bottom.width * (1 - (1 + bottom.strokeAlign) / 2)));
+
+    final RRect outer = _deflateRRect(
+        borderRect,
+        EdgeInsets.fromLTRB(0, 0, 0, bottom.width * (1 + bottom.strokeAlign) / 2));
+    canvas.drawDRRect(outer, inner, paint);
+  }
+
+  static RRect _inflateRRect(RRect rect, EdgeInsets insets) {
+    return RRect.fromLTRBAndCorners(
+      rect.left - insets.left,
+      rect.top - insets.top,
+      rect.right + insets.right,
+      rect.bottom + insets.bottom,
+      topLeft: (rect.tlRadius + Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight: (rect.trRadius + Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight: (rect.brRadius + Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft: (rect.blRadius + Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+    );
+  }
+
+  static RRect _deflateRRect(RRect rect, EdgeInsets insets) {
+    return RRect.fromLTRBAndCorners(
+      rect.left + insets.left,
+      rect.top + insets.top,
+      rect.right - insets.right,
+      rect.bottom - insets.bottom,
+      topLeft: (rect.tlRadius - Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight: (rect.trRadius - Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight: (rect.brRadius - Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft:(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+    );
   }
 
   @override

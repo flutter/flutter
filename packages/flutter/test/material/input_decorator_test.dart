@@ -6934,4 +6934,25 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
       expect(decoration.isCollapsed, true);
     });
   });
+
+  testWidgets('InputDecorator2 fillColor is clipped by border', (WidgetTester tester) async {
+    const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
+      const UnderlineInputBorder border = UnderlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+      );
+
+      // Fill is the border's outer path, a rounded rectangle
+      expect(
+          (Canvas canvas) => border.paint(canvas, canvasRect),
+          paints
+            ..drrect(
+            inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 101.0,
+                topLeft: const Radius.circular(12.0),
+                topRight: const Radius.circular(12.0),
+                bottomRight: const Radius.elliptical(12.0, 13.0),
+                bottomLeft: const Radius.elliptical(12.0, 13.0)),
+            outer: RRect.fromLTRBR(0.0, 0.0, 100.0, 100.0, const Radius.circular(12.0)),
+          ),
+      );
+  });
 }
