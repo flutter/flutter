@@ -201,9 +201,9 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
       final Rect rect = Offset(left, 0.0) & Size(width, size.height);
       if (indicatorBorderRadius != BorderRadius.zero) {
-        // When the indicator has a value, we override the start border radius
-        // to be zero, so that the radius is only applied to the trailing edge
-        // of the indicator.
+        // When the indicator has a determinate value, we override the start
+        // border radius to be zero, so that the radius is only applied to the
+        // trailing edge of the indicator.
         final BorderRadius borderRadius;
         if (value == null || indicatorBorderRadius == BorderRadius.zero) {
           borderRadius = indicatorBorderRadius;
@@ -301,7 +301,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     this.minHeight,
     super.semanticsLabel,
     super.semanticsValue,
-    this.shape = const RoundedRectangleBorder(),
+    this.outerBorderRadius = BorderRadius.zero,
     this.indicatorBorderRadius = BorderRadius.zero,
   }) : assert(minHeight == null || minHeight > 0);
 
@@ -325,15 +325,10 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// {@endtemplate}
   final double? minHeight;
 
-  /// The physical shape of the widget, as well as its border.
+  /// The border radius of the widget.
   ///
-  /// By default it is [RoundedRectangleBorder], which produces a rectangular
-  /// widget without a border.
-  ///
-  /// See also:
-  ///
-  ///  * [StadiumBorder], which produces a rounded rectangle with semi-circular ends.
-  final ShapeBorder shape;
+  /// By default it is [BorderRadius.zero], which produces a rectangular shape.
+  final BorderRadius outerBorderRadius;
 
   /// The border radius of the indicator.
   ///
@@ -391,10 +386,12 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: (widget.outerBorderRadius != BorderRadius.zero)
+            ? Clip.antiAlias
+            : Clip.none,
         decoration: ShapeDecoration(
           color: trackColor,
-          shape: widget.shape,
+          shape: RoundedRectangleBorder(borderRadius: widget.outerBorderRadius),
         ),
         constraints: BoxConstraints(
           minWidth: double.infinity,
