@@ -733,7 +733,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 ///   child: Container(
 ///     width: 300.0,
 ///     height: 300.0,
-///     color: Colors.yellow,
+///     color: Colors.yellow,
 ///     alignment: Alignment.center,
 ///     child: RawGestureDetector(
 ///       gestures: <Type, GestureRecognizerFactory>{
