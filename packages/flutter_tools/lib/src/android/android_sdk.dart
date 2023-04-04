@@ -411,8 +411,8 @@ class AndroidSdk {
     return null;
   }
 
-  // Returns the version of java in the format \d(.\d)+(.\d)+
-  // Returns null if version not found.
+  /// Returns the version of java in the format \d(.\d)+(.\d)+
+  /// Returns null if version not found.
   String? getJavaVersion({
     required AndroidStudio? androidStudio,
     required FileSystem fileSystem,
@@ -442,7 +442,7 @@ class AndroidSdk {
     return parseJavaVersion(result.stdout);
   }
 
-  // Extracts jdk version from the output of java --version.
+  /// Extracts JDK version from the output of java --version.
   @visibleForTesting
   static String? parseJavaVersion(String rawVersionOutput) {
     // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
@@ -509,7 +509,7 @@ class AndroidSdk {
     // Fallback to PATH based lookup.
     final String? pathJava = operatingSystemUtils.which(_javaExecutable)?.path;
     if (pathJava != null) {
-      globals.printTrace('Using path java.');
+      globals.printTrace('Using java from PATH.');
     } else {
       globals.printTrace('Could not find java path.');
     }
