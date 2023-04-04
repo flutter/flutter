@@ -50,8 +50,6 @@ void main() {
 class ThemeExtensionExampleApp extends StatefulWidget {
   const ThemeExtensionExampleApp({super.key});
 
-  static const String _title = 'ThemeExtension Sample';
-
   @override
   State<ThemeExtensionExampleApp> createState() => _ThemeExtensionExampleAppState();
 }
@@ -66,7 +64,6 @@ class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: ThemeExtensionExampleApp._title,
       theme: ThemeData.light().copyWith(
         extensions: <ThemeExtension<dynamic>>[
           const MyColors(

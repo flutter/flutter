@@ -11,12 +11,9 @@ void main() => runApp(const ListViewExampleApp());
 class ListViewExampleApp extends StatelessWidget {
   const ListViewExampleApp({super.key});
 
-  static const String _title = 'ListView Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: ListTileSelectExample(),
     );
   }

@@ -11,12 +11,9 @@ void main() => runApp(const ScaleTransitionExampleApp());
 class ScaleTransitionExampleApp extends StatelessWidget {
   const ScaleTransitionExampleApp({super.key});
 
-  static const String _title = 'ScaleTransition Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: ScaleTransitionExample(),
     );
   }

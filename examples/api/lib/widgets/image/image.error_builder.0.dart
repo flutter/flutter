@@ -11,12 +11,9 @@ void main() => runApp(const ErrorBuilderExampleApp());
 class ErrorBuilderExampleApp extends StatelessWidget {
   const ErrorBuilderExampleApp({super.key});
 
-  static const String _title = 'ErrorBuilder Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: Scaffold(
         body: Center(
           child: ErrorBuilderExample(),

@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(
     MaterialApp(
-      title: 'Image.frameBuilder Sample',
       home: Scaffold(
         appBar: AppBar(title: const Text('Image.frameBuilder Sample')),
         body: const Center(

@@ -12,12 +12,9 @@ void main() => runApp(const FocusableActionDetectorExampleApp());
 class FocusableActionDetectorExampleApp extends StatelessWidget {
   const FocusableActionDetectorExampleApp({super.key});
 
-  static const String _title = 'FocusableActionDetector Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: FocusableActionDetectorExample(),
     );
   }

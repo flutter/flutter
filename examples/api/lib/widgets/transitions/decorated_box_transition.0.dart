@@ -11,12 +11,9 @@ void main() => runApp(const DecoratedBoxTransitionExampleApp());
 class DecoratedBoxTransitionExampleApp extends StatelessWidget {
   const DecoratedBoxTransitionExampleApp({super.key});
 
-  static const String _title = 'DecoratedBoxTransition Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: DecoratedBoxTransitionExample(),
     );
   }

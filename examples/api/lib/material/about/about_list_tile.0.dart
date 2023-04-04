@@ -11,12 +11,9 @@ void main() => runApp(const AboutListTileExampleApp());
 class AboutListTileExampleApp extends StatelessWidget {
   const AboutListTileExampleApp({super.key});
 
-  static const String _title = 'AboutListTile Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: AboutListTileExample(),
     );
   }

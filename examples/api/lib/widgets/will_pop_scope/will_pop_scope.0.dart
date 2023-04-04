@@ -11,12 +11,9 @@ void main() => runApp(const WillPopScopeExampleApp());
 class WillPopScopeExampleApp extends StatelessWidget {
   const WillPopScopeExampleApp({super.key});
 
-  static const String _title = 'WillPopScope Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: WillPopScopeExample(),
     );
   }

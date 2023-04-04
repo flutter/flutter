@@ -11,12 +11,9 @@ void main() => runApp(const DrawerExampleApp());
 class DrawerExampleApp extends StatelessWidget {
   const DrawerExampleApp({super.key});
 
-  static const String _title = 'Scaffold Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: DrawerExample(),
     );
   }

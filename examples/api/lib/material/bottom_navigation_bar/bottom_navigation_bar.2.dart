@@ -11,12 +11,9 @@ void main() => runApp(const BottomNavigationBarExampleApp());
 class BottomNavigationBarExampleApp extends StatelessWidget {
   const BottomNavigationBarExampleApp({super.key});
 
-  static const String _title = 'BottomNavigationBar Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: BottomNavigationBarExample(),
     );
   }

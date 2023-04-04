@@ -11,12 +11,9 @@ void main() => runApp(const Curve2DExampleApp());
 class Curve2DExampleApp extends StatelessWidget {
   const Curve2DExampleApp({super.key});
 
-  static const String _title = 'Curve2D Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: Curve2DExample(),
     );
   }

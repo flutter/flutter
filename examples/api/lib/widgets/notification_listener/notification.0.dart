@@ -11,12 +11,9 @@ void main() => runApp(const NotificationExampleApp());
 class NotificationExampleApp extends StatelessWidget {
   const NotificationExampleApp({super.key});
 
-  static const String _title = 'Notification Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: NotificationExample(),
     );
   }

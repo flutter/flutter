@@ -14,7 +14,6 @@ class OverlayPortalExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'OverlayPortal Sample',
       home: Scaffold(
         appBar: AppBar(title: const Text('OverlayPortal Example')),
         body: const Center(child: ClickableTooltipWidget()),

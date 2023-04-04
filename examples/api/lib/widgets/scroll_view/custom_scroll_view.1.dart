@@ -11,12 +11,9 @@ void main() => runApp(const CustomScrollViewExampleApp());
 class CustomScrollViewExampleApp extends StatelessWidget {
   const CustomScrollViewExampleApp({super.key});
 
-  static const String _title = 'CustomScrollView Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: CustomScrollViewExample(),
     );
   }

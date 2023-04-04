@@ -13,12 +13,9 @@ void main() => runApp(const KeyboardInsertedContentApp());
 class KeyboardInsertedContentApp extends StatelessWidget {
   const KeyboardInsertedContentApp({super.key});
 
-  static const String _title = 'Keyboard Inserted Content Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: KeyboardInsertedContentDemo(),
     );
   }

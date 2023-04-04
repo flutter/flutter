@@ -16,7 +16,6 @@ class ToggleableExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const ToggleableExample(),

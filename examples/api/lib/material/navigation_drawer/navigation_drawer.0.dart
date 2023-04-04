@@ -29,7 +29,6 @@ const List<ExampleDestination> destinations = <ExampleDestination>[
 void main() {
   runApp(
     MaterialApp(
-      title: 'NavigationDrawer Example',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
       home: const NavigationDrawerExample(),

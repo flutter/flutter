@@ -11,12 +11,9 @@ void main() => runApp(const RestorablePushAndRemoveUntilExampleApp());
 class RestorablePushAndRemoveUntilExampleApp extends StatelessWidget {
   const RestorablePushAndRemoveUntilExampleApp({super.key});
 
-  static const String _title = 'Navigator Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: RestorablePushAndRemoveUntilExample(),
     );
   }

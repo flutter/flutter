@@ -13,12 +13,9 @@ void main() => runApp(const InheritedNotifierExampleApp());
 class InheritedNotifierExampleApp extends StatelessWidget {
   const InheritedNotifierExampleApp({super.key});
 
-  static const String _title = 'InheritedNotifier Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: InheritedNotifierExample(),
     );
   }

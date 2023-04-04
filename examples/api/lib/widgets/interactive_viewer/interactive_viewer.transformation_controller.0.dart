@@ -11,12 +11,9 @@ void main() => runApp(const TransformationControllerExampleApp());
 class TransformationControllerExampleApp extends StatelessWidget {
   const TransformationControllerExampleApp({super.key});
 
-  static const String _title = 'TransformationController Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: TransformationControllerExample(),
     );
   }

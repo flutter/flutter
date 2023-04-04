@@ -11,12 +11,9 @@ void main() => runApp(const RelativePositionedTransitionExampleApp());
 class RelativePositionedTransitionExampleApp extends StatelessWidget {
   const RelativePositionedTransitionExampleApp({super.key});
 
-  static const String _title = 'RelativePositionedTransition Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: RelativePositionedTransitionExample(),
     );
   }

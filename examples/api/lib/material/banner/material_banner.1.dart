@@ -11,12 +11,9 @@ void main() => runApp(const MaterialBannerExampleApp());
 class MaterialBannerExampleApp extends StatelessWidget {
   const MaterialBannerExampleApp({super.key});
 
-  static const String _title = 'MaterialBanner Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: MaterialBannerExample(),
     );
   }

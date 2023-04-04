@@ -12,12 +12,9 @@ void main() => runApp(const ExampleApp());
 class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
-  static const String _title = 'GrowthDirection Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: MyWidget(),
     );
   }

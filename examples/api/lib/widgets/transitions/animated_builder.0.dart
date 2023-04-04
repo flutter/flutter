@@ -13,12 +13,9 @@ void main() => runApp(const AnimatedBuilderExampleApp());
 class AnimatedBuilderExampleApp extends StatelessWidget {
   const AnimatedBuilderExampleApp({super.key});
 
-  static const String _title = 'AnimatedBuilder Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: AnimatedBuilderExample(),
     );
   }

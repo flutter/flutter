@@ -11,12 +11,9 @@ void main() => runApp(const FutureBuilderExampleApp());
 class FutureBuilderExampleApp extends StatelessWidget {
   const FutureBuilderExampleApp({super.key});
 
-  static const String _title = 'FutureBuilder Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: FutureBuilderExample(),
     );
   }

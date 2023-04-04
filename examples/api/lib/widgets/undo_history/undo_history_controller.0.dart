@@ -13,12 +13,9 @@ void main() {
 class UndoHistoryControllerExampleApp extends StatelessWidget {
   const UndoHistoryControllerExampleApp({super.key});
 
-  static const String _title = 'UndoHistoryController Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: MyHomePage(),
     );
   }

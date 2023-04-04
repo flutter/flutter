@@ -11,12 +11,9 @@ void main() => runApp(const FocusScopeExampleApp());
 class FocusScopeExampleApp extends StatelessWidget {
   const FocusScopeExampleApp({super.key});
 
-  static const String _title = 'FocusScope Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: FocusScopeExample(),
     );
   }

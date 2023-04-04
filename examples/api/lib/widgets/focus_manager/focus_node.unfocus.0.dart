@@ -12,12 +12,9 @@ void main() => runApp(const UnfocusExampleApp());
 class UnfocusExampleApp extends StatelessWidget {
   const UnfocusExampleApp({super.key});
 
-  static const String _title = 'FocusNode Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: UnfocusExample(),
     );
   }

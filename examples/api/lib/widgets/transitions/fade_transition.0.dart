@@ -11,12 +11,9 @@ void main() => runApp(const FadeTransitionExampleApp());
 class FadeTransitionExampleApp extends StatelessWidget {
   const FadeTransitionExampleApp({super.key});
 
-  static const String _title = 'FadeTransition Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: FadeTransitionExample(),
     );
   }

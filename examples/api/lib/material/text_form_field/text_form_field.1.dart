@@ -12,12 +12,9 @@ void main() => runApp(const TextFormFieldExampleApp());
 class TextFormFieldExampleApp extends StatelessWidget {
   const TextFormFieldExampleApp({super.key});
 
-  static const String _title = 'TextFormField Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: TextFormFieldExample(),
     );
   }

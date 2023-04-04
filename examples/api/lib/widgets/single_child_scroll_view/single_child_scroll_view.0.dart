@@ -11,12 +11,9 @@ void main() => runApp(const SingleChildScrollViewExampleApp());
 class SingleChildScrollViewExampleApp extends StatelessWidget {
   const SingleChildScrollViewExampleApp({super.key});
 
-  static const String _title = 'SingleChildScrollView Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: SingleChildScrollViewExample(),
     );
   }

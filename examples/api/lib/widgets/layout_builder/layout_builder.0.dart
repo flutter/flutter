@@ -11,12 +11,9 @@ void main() => runApp(const LayoutBuilderExampleApp());
 class LayoutBuilderExampleApp extends StatelessWidget {
   const LayoutBuilderExampleApp({super.key});
 
-  static const String _title = 'LayoutBuilder Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: LayoutBuilderExample(),
     );
   }

@@ -11,12 +11,9 @@ void main() => runApp(const RestorablePushReplacementExampleApp());
 class RestorablePushReplacementExampleApp extends StatelessWidget {
   const RestorablePushReplacementExampleApp({super.key});
 
-  static const String _title = 'Navigator Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: RestorablePushReplacementExample(),
     );
   }

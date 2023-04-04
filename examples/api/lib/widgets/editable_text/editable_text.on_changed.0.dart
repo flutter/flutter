@@ -11,12 +11,9 @@ void main() => runApp(const OnChangedExampleApp());
 class OnChangedExampleApp extends StatelessWidget {
   const OnChangedExampleApp({super.key});
 
-  static const String _title = 'EditableText Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: OnChangedExample(),
     );
   }

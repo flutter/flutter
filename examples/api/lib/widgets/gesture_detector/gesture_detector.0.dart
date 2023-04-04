@@ -11,12 +11,9 @@ void main() => runApp(const GestureDetectorExampleApp());
 class GestureDetectorExampleApp extends StatelessWidget {
   const GestureDetectorExampleApp({super.key});
 
-  static const String _title = 'GestureDetector Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: GestureDetectorExample(),
     );
   }

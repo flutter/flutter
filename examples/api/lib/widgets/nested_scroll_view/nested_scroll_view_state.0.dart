@@ -11,12 +11,9 @@ void main() => runApp(const NestedScrollViewStateExampleApp());
 class NestedScrollViewStateExampleApp extends StatelessWidget {
   const NestedScrollViewStateExampleApp({super.key});
 
-  static const String _title = 'NestedScrollViewState Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: NestedScrollViewStateExample(),
     );
   }

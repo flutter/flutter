@@ -13,12 +13,9 @@ void main() => runApp(const StreamBuilderExampleApp());
 class StreamBuilderExampleApp extends StatelessWidget {
   const StreamBuilderExampleApp({super.key});
 
-  static const String _title = 'StreamBuilder Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: StreamBuilderExample(),
     );
   }

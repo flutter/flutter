@@ -11,12 +11,9 @@ void main() => runApp(const TabControllerExampleApp());
 class TabControllerExampleApp extends StatelessWidget {
   const TabControllerExampleApp({super.key});
 
-  static const String _title = 'TabController Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: TabControllerExample(),
     );
   }

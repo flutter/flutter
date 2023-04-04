@@ -11,12 +11,9 @@ void main() => runApp(const ShapeExampleApp());
 class ShapeExampleApp extends StatelessWidget {
   const ShapeExampleApp({super.key});
 
-  static const String _title = 'Shape Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: ShapeExample(),
     );
   }

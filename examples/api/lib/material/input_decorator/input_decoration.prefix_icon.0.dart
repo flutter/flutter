@@ -14,7 +14,6 @@ class PrefixIconExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Input Decorator Sample',
       home: Scaffold(body: InputDecoratorExample()),
     );
   }

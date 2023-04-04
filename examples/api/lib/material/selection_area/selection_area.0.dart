@@ -16,7 +16,6 @@ class SelectionAreaExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: SelectionArea(
         child: Scaffold(
           appBar: AppBar(title: const Text(_title)),
