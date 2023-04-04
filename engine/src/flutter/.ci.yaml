@@ -304,7 +304,7 @@ targets:
         {"download_emsdk": true}
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:111.0"},
+          {"dependency": "chrome_and_driver", "version": "version:111.0a"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
       framework: "true"

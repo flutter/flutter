@@ -108,25 +108,29 @@ Map<String, dynamic> _getBundleBuildStep(TestBundle bundle) {
 
 Iterable<dynamic> _getAllTestSteps(List<TestSuite> suites) {
   return <dynamic>[
-    ..._getTestStepsForPlatform(suites, 'Linux', <BrowserName>{
-      BrowserName.chrome,
-      BrowserName.firefox,
-    }),
-    ..._getTestStepsForPlatform(suites, 'Mac', <BrowserName>{
-      BrowserName.safari,
-    }),
-    ..._getTestStepsForPlatform(suites, 'Windows', <BrowserName>{
-      BrowserName.chrome,
-    }),
+    ..._getTestStepsForPlatform(suites, 'Linux', (TestSuite suite) =>
+      suite.runConfig.browser == BrowserName.chrome ||
+      suite.runConfig.browser == BrowserName.firefox
+    ),
+    ..._getTestStepsForPlatform(suites, 'Mac', (TestSuite suite) =>
+      suite.runConfig.browser == BrowserName.safari
+    ),
+    ..._getTestStepsForPlatform(suites, 'Windows', (TestSuite suite) =>
+      suite.runConfig.browser == BrowserName.chrome &&
+
+      // TODO(jacksongardner): Enable dart2wasm tests on Windows
+      // https://github.com/flutter/flutter/issues/124082
+      suite.testBundle.compileConfig.compiler != Compiler.dart2wasm
+    ),
   ];
 }
 
 Iterable<dynamic> _getTestStepsForPlatform(
   List<TestSuite> suites,
   String platform,
-  Set<BrowserName> browsers) {
+  bool Function(TestSuite suite) filter) {
   return suites
-    .where((TestSuite suite) => browsers.contains(suite.runConfig.browser))
+    .where(filter)
     .map((TestSuite suite) => <String, dynamic>{
         'name': '$platform run ${suite.name} suite',
         'recipe': 'engine_v2/tester_engine',
@@ -149,7 +153,7 @@ Iterable<dynamic> _getTestStepsForPlatform(
           if (suite.runConfig.browser == BrowserName.chrome)
             <String, dynamic>{
               'dependency': 'chrome_and_driver',
-              'version': 'version:111.0',
+              'version': 'version:111.0a',
             },
           if (suite.runConfig.browser == BrowserName.firefox)
             <String, dynamic>{

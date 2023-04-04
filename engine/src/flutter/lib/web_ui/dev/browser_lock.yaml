@@ -16,8 +16,8 @@ chrome:
   Linux: 1097615
   Mac: 1097624
   Mac_Arm: 1097626
-  Win: 1097664
-  version: '111.0' # CIPD tag for the above Build IDs. Normally "ChromeMajorVersion.UploadAttempt". ;)
+  Win: 1097610
+  version: '111.0a' # CIPD tag for the above Build IDs. Normally "ChromeMajorVersion.UploadAttempt". ;)
 
 firefox:
   version: '106.0'
