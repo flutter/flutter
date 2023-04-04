@@ -470,6 +470,13 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
 void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
                           BlendMode blend_mode,
                           const Paint& paint) {
+  // Override the blend mode with kDestination in order to match the behavior
+  // of Skia's SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER flag, which
+  // is enabled when the Flutter engine builds Skia.
+  if (paint.color_source_type == Paint::ColorSourceType::kColor) {
+    blend_mode = BlendMode::kDestination;
+  }
+
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());
