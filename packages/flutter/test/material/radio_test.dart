@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1371,5 +1372,36 @@ void main() {
         ? (paints..circle(color: colors.primary.withOpacity(0.08))..circle(color: colors.primary.withOpacity(1)))
         : (paints..circle(color: theme.hoverColor)..circle(color: colors.secondary))
     );
+  });
+
+  testWidgets('Radio.adaptive shows the correct platform widget', (WidgetTester tester) async {
+    Widget buildApp(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: Material(
+          child: Center(
+            child: Radio<int>.adaptive(
+              value: 1,
+              groupValue: 2,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildApp(platform));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoRadio<int>), findsOneWidget);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildApp(platform));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoRadio<int>), findsNothing);
+    }
   });
 }

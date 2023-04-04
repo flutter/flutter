@@ -18,6 +18,8 @@ import 'theme_data.dart';
 // enum SingingCharacter { lafayette }
 // late SingingCharacter? _character;
 
+enum _RadioType { material, adaptive }
+
 /// A [ListTile] with a [Radio]. In other words, a radio button with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile selects
@@ -186,7 +188,46 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-  }) : assert(!isThreeLine || subtitle != null);
+  }) : _radioType = _RadioType.material,
+       assert(!isThreeLine || subtitle != null);
+
+  /// Creates a combination of a list tile and a platform adaptive radio.
+  ///
+  /// The checkbox uses [Radio.adaptive] to show a [CupertinoRadio] for
+  /// iOS platforms, or [Radio] for all others.
+  ///
+  /// All other properties are the same as [RadioListTile].
+  const RadioListTile.adaptive({
+    super.key,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+    this.mouseCursor,
+    this.toggleable = false,
+    this.activeColor,
+    this.fillColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashRadius,
+    this.materialTapTargetSize,
+    this.title,
+    this.subtitle,
+    this.isThreeLine = false,
+    this.dense,
+    this.secondary,
+    this.selected = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
+    this.autofocus = false,
+    this.contentPadding,
+    this.shape,
+    this.tileColor,
+    this.selectedTileColor,
+    this.visualDensity,
+    this.focusNode,
+    this.onFocusChange,
+    this.enableFeedback,
+  }) : _radioType = _RadioType.adaptive,
+       assert(!isThreeLine || subtitle != null);
 
   /// The value represented by this radio button.
   final T value;
@@ -392,22 +433,44 @@ class RadioListTile<T> extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  final _RadioType _radioType;
+
   @override
   Widget build(BuildContext context) {
-    final Widget control = Radio<T>(
-      value: value,
-      groupValue: groupValue,
-      onChanged: onChanged,
-      toggleable: toggleable,
-      activeColor: activeColor,
-      materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
-      autofocus: autofocus,
-      fillColor: fillColor,
-      mouseCursor: mouseCursor,
-      hoverColor: hoverColor,
-      overlayColor: overlayColor,
-      splashRadius: splashRadius,
-    );
+    final Widget control;
+    switch (_radioType) {
+      case _RadioType.material:
+        control = Radio<T>(
+          value: value,
+          groupValue: groupValue,
+          onChanged: onChanged,
+          toggleable: toggleable,
+          activeColor: activeColor,
+          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+          autofocus: autofocus,
+          fillColor: fillColor,
+          mouseCursor: mouseCursor,
+          hoverColor: hoverColor,
+          overlayColor: overlayColor,
+          splashRadius: splashRadius,
+        );
+      case _RadioType.adaptive:
+        control = Radio<T>.adaptive(
+          value: value,
+          groupValue: groupValue,
+          onChanged: onChanged,
+          toggleable: toggleable,
+          activeColor: activeColor,
+          materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
+          autofocus: autofocus,
+          fillColor: fillColor,
+          mouseCursor: mouseCursor,
+          hoverColor: hoverColor,
+          overlayColor: overlayColor,
+          splashRadius: splashRadius,
+        );
+    }
+
     Widget? leading, trailing;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
