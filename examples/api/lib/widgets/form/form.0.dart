@@ -11,13 +11,11 @@ void main() => runApp(const FormExampleApp());
 class FormExampleApp extends StatelessWidget {
   const FormExampleApp({super.key});
 
-  static const String _title = 'Form Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Form Sample')),
         body: const FormExample(),
       ),
     );

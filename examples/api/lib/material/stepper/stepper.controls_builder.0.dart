@@ -11,13 +11,11 @@ void main() => runApp(const ControlsBuilderExampleApp());
 class ControlsBuilderExampleApp extends StatelessWidget {
   const ControlsBuilderExampleApp({super.key});
 
-  static const String _title = 'Stepper Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Stepper Sample')),
         body: const ControlsBuilderExample(),
       ),
     );

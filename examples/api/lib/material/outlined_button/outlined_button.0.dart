@@ -11,13 +11,11 @@ void main() => runApp(const OutlinedButtonExampleApp());
 class OutlinedButtonExampleApp extends StatelessWidget {
   const OutlinedButtonExampleApp({super.key});
 
-  static const String _title = 'OutlinedButton Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('OutlinedButton Sample')),
         body: const Center(
           child: OutlinedButtonExample(),
         ),

@@ -11,13 +11,11 @@ void main() => runApp(const MouseCursorExampleApp());
 class MouseCursorExampleApp extends StatelessWidget {
   const MouseCursorExampleApp({super.key});
 
-  static const String _title = 'MouseCursor Code Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('MouseCursor Code Sample')),
         body: const MouseCursorExample(),
       ),
     );

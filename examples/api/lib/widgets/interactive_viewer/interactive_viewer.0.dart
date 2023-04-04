@@ -11,13 +11,11 @@ void main() => runApp(const InteractiveViewerExampleApp());
 class InteractiveViewerExampleApp extends StatelessWidget {
   const InteractiveViewerExampleApp({super.key});
 
-  static const String _title = 'InteractiveViewer Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('InteractiveViewer Sample')),
         body: const InteractiveViewerExample(),
       ),
     );

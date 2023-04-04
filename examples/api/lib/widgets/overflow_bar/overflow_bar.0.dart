@@ -11,13 +11,11 @@ void main() => runApp(const OverflowBarExampleApp());
 class OverflowBarExampleApp extends StatelessWidget {
   const OverflowBarExampleApp({super.key});
 
-  static const String _title = 'OverflowBar Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('OverflowBar Sample')),
         body: const Center(
           child: OverflowBarExample(),
         ),

@@ -11,13 +11,11 @@ void main() => runApp(const FloatingLabelStyleErrorExampleApp());
 class FloatingLabelStyleErrorExampleApp extends StatelessWidget {
   const FloatingLabelStyleErrorExampleApp({super.key});
 
-  static const String _title = 'InputDecorator Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('InputDecorator Sample')),
         body: const Center(
           child: InputDecoratorExample(),
         ),

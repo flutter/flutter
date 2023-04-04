@@ -12,13 +12,11 @@ void main() => runApp(const FocusNodeExampleApp());
 class FocusNodeExampleApp extends StatelessWidget {
   const FocusNodeExampleApp({super.key});
 
-  static const String _title = 'FocusNode Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('FocusNode Sample')),
         body: const FocusNodeExample(),
       ),
     );

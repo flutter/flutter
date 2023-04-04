@@ -11,13 +11,11 @@ void main() => runApp(const GlowingOverscrollIndicatorExampleApp());
 class GlowingOverscrollIndicatorExampleApp extends StatelessWidget {
   const GlowingOverscrollIndicatorExampleApp({super.key});
 
-  static const String _title = 'GlowingOverscrollIndicator Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('GlowingOverscrollIndicator Sample')),
         body: const GlowingOverscrollIndicatorExample(),
       ),
     );

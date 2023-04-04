@@ -11,13 +11,11 @@ void main() => runApp(const OnDeletedExampleApp());
 class OnDeletedExampleApp extends StatelessWidget {
   const OnDeletedExampleApp({super.key});
 
-  static const String _title = 'DeletableChipAttributes.onDeleted Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('DeletableChipAttributes.onDeleted Sample')),
         body: const Center(
           child: OnDeletedExample(),
         ),

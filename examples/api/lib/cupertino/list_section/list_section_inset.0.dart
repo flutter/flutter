@@ -11,12 +11,10 @@ void main() => runApp(const CupertinoListSectionInsetApp());
 class CupertinoListSectionInsetApp extends StatelessWidget {
   const CupertinoListSectionInsetApp({super.key});
 
-  static const String _title = 'CupertinoListSection Sample';
-
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
+      title: 'CupertinoListSection Sample',
       home: ListSectionInsetExample(),
     );
   }

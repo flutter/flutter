@@ -11,13 +11,11 @@ void main() => runApp(const SnackBarExampleApp());
 class SnackBarExampleApp extends StatelessWidget {
   const SnackBarExampleApp({super.key});
 
-  static const String _title = 'SnackBar Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('SnackBar Sample')),
         body: const Center(
           child: SnackBarExample(),
         ),

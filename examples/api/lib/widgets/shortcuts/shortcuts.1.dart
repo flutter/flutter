@@ -12,13 +12,11 @@ void main() => runApp(const ShortcutsExampleApp());
 class ShortcutsExampleApp extends StatelessWidget {
   const ShortcutsExampleApp({super.key});
 
-  static const String _title = 'Shortcuts Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Shortcuts Sample')),
         body: const Center(
           child: ShortcutsExample(),
         ),

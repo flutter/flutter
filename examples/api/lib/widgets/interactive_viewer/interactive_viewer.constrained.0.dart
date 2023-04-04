@@ -11,13 +11,11 @@ void main() => runApp(const ConstrainedExampleApp());
 class ConstrainedExampleApp extends StatelessWidget {
   const ConstrainedExampleApp({super.key});
 
-  static const String _title = 'Constrained Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Constrained Sample')),
         body: const ConstrainedExample(),
       ),
     );

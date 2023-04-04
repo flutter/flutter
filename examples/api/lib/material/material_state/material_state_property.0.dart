@@ -11,13 +11,11 @@ void main() => runApp(const MaterialStatePropertyExampleApp());
 class MaterialStatePropertyExampleApp extends StatelessWidget {
   const MaterialStatePropertyExampleApp({super.key});
 
-  static const String _title = 'MaterialStateProperty Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('MaterialStateProperty Sample')),
         body: const Center(
           child: MaterialStatePropertyExample(),
         ),

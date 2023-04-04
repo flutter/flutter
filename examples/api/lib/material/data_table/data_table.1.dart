@@ -11,13 +11,11 @@ void main() => runApp(const DataTableExampleApp());
 class DataTableExampleApp extends StatelessWidget {
   const DataTableExampleApp({super.key});
 
-  static const String _title = 'DataTable Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('DataTable Sample')),
         body: const DataTableExample(),
       ),
     );

@@ -34,8 +34,6 @@ void main() {
 class ErrorWidgetExampleApp extends StatefulWidget {
   const ErrorWidgetExampleApp({super.key});
 
-  static const String _title = 'ErrorWidget Sample';
-
   @override
   State<ErrorWidgetExampleApp> createState() => _ErrorWidgetExampleAppState();
 }
@@ -56,7 +54,7 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
     } else {
       return MaterialApp(
         home: Scaffold(
-          appBar: AppBar(title: const Text(ErrorWidgetExampleApp._title)),
+          appBar: AppBar(title: const Text('ErrorWidget Sample')),
           body: Center(
             child: TextButton(
                 onPressed: () {

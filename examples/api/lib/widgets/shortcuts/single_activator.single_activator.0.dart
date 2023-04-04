@@ -12,13 +12,11 @@ void main() => runApp(const SingleActivatorExampleApp());
 class SingleActivatorExampleApp extends StatelessWidget {
   const SingleActivatorExampleApp({super.key});
 
-  static const String _title = 'SingleActivator Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('SingleActivator Sample')),
         body: const Center(
           child: SingleActivatorExample(),
         ),

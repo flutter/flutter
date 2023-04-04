@@ -11,13 +11,11 @@ void main() => runApp(const AnimatedContainerExampleApp());
 class AnimatedContainerExampleApp extends StatelessWidget {
   const AnimatedContainerExampleApp({super.key});
 
-  static const String _title = 'AnimatedContainer Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('AnimatedContainer Sample')),
         body: const AnimatedContainerExample(),
       ),
     );

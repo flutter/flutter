@@ -11,13 +11,11 @@ void main() => runApp(const LabelExampleApp());
 class LabelExampleApp extends StatelessWidget {
   const LabelExampleApp({super.key});
 
-  static const String _title = 'InputDecoration.label Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('InputDecoration.label Sample')),
         body: const LabelExample(),
       ),
     );

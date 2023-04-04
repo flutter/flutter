@@ -11,13 +11,11 @@ void main() => runApp(const StepperExampleApp());
 class StepperExampleApp extends StatelessWidget {
   const StepperExampleApp({super.key});
 
-  static const String _title = 'Stepper Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Stepper Sample')),
         body: const Center(
           child: StepperExample(),
         ),

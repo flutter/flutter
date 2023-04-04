@@ -11,13 +11,11 @@ void main() => runApp(const TextButtonExampleApp());
 class TextButtonExampleApp extends StatelessWidget {
   const TextButtonExampleApp({super.key});
 
-  static const String _title = 'TextButton Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('TextButton Sample')),
         body: const TextButtonExample(),
       ),
     );

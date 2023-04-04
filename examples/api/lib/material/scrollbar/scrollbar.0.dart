@@ -11,13 +11,11 @@ void main() => runApp(const ScrollbarExampleApp());
 class ScrollbarExampleApp extends StatelessWidget {
   const ScrollbarExampleApp({super.key});
 
-  static const String _title = 'Scrollbar Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Scrollbar Sample')),
         body: const ScrollbarExample(),
       ),
     );

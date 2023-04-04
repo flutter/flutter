@@ -12,14 +12,12 @@ void main() => runApp(const SelectableRegionExampleApp());
 class SelectableRegionExampleApp extends StatelessWidget {
   const SelectableRegionExampleApp({super.key});
 
-  static const String _title = 'SelectableRegion Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: SelectionArea(
         child: Scaffold(
-          appBar: AppBar(title: const Text(_title)),
+          appBar: AppBar(title: const Text('SelectableRegion Sample')),
           body: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

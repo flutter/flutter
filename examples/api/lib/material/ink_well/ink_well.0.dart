@@ -11,13 +11,11 @@ void main() => runApp(const InkWellExampleApp());
 class InkWellExampleApp extends StatelessWidget {
   const InkWellExampleApp({super.key});
 
-  static const String _title = 'InkWell Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('InkWell Sample')),
         body: const Center(
           child: InkWellExample(),
         ),

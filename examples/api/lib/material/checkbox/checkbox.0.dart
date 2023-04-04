@@ -11,13 +11,11 @@ void main() => runApp(const CheckboxExampleApp());
 class CheckboxExampleApp extends StatelessWidget {
   const CheckboxExampleApp({super.key});
 
-  static const String _title = 'Checkbox Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Checkbox Sample')),
         body: const Center(
           child: CheckboxExample(),
         ),

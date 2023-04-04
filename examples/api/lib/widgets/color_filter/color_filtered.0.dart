@@ -11,13 +11,11 @@ void main() => runApp(const ColorFilteredExampleApp());
 class ColorFilteredExampleApp extends StatelessWidget {
   const ColorFilteredExampleApp({super.key});
 
-  static const String _title = 'ColorFiltered Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('ColorFiltered Sample')),
         body: const ColorFilteredExample(),
       ),
     );

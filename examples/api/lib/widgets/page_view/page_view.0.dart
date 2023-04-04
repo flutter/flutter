@@ -11,13 +11,11 @@ void main() => runApp(const PageViewExampleApp());
 class PageViewExampleApp extends StatelessWidget {
   const PageViewExampleApp({super.key});
 
-  static const String _title = 'PageView Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('PageView Sample')),
         body: const PageViewExample(),
       ),
     );

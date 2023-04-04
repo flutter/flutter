@@ -11,13 +11,11 @@ void main() => runApp(const MaterialStateBorderSideExampleApp());
 class MaterialStateBorderSideExampleApp extends StatelessWidget {
   const MaterialStateBorderSideExampleApp({super.key});
 
-  static const String _title = 'MaterialStateBorderSide Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('MaterialStateBorderSide Sample')),
         body: const Center(
           child: MaterialStateBorderSideExample(),
         ),

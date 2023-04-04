@@ -11,13 +11,11 @@ void main() => runApp(const AnimatedPaddingExampleApp());
 class AnimatedPaddingExampleApp extends StatelessWidget {
   const AnimatedPaddingExampleApp({super.key});
 
-  static const String _title = 'AnimatedPadding Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('AnimatedPadding Sample')),
         body: const AnimatedPaddingExample(),
       ),
     );

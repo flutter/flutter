@@ -29,12 +29,10 @@ void main() => runApp(const ToggleButtonsExampleApp());
 class ToggleButtonsExampleApp extends StatelessWidget {
   const ToggleButtonsExampleApp({super.key});
 
-  static const String _title = 'ToggleButtons Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: ToggleButtonsSample(title: _title),
+      home: ToggleButtonsSample(title: 'ToggleButtons Sample'),
     );
   }
 }

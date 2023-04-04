@@ -11,13 +11,11 @@ void main() => runApp(const SliverGridDelegateWithFixedCrossAxisCountExampleApp(
 class SliverGridDelegateWithFixedCrossAxisCountExampleApp extends StatelessWidget {
   const SliverGridDelegateWithFixedCrossAxisCountExampleApp({super.key});
 
-  static const String _title = 'SliverGridDelegateWithFixedCrossAxisCount Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('SliverGridDelegateWithFixedCrossAxisCount Sample')),
         body: const SliverGridDelegateWithFixedCrossAxisCountExample(),
       ),
     );

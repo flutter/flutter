@@ -11,13 +11,11 @@ void main() => runApp(const CharacterActivatorExampleApp());
 class CharacterActivatorExampleApp extends StatelessWidget {
   const CharacterActivatorExampleApp({super.key});
 
-  static const String _title = 'CharacterActivator Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('CharacterActivator Sample')),
         body: const Center(
           child: CharacterActivatorExample(),
         ),

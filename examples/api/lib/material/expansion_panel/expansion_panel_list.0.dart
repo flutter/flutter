@@ -11,13 +11,11 @@ void main() => runApp(const ExpansionPanelListExampleApp());
 class ExpansionPanelListExampleApp extends StatelessWidget {
   const ExpansionPanelListExampleApp({super.key});
 
-  static const String _title = 'ExpansionPanelList Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('ExpansionPanelList Sample')),
         body: const ExpansionPanelListExample(),
       ),
     );

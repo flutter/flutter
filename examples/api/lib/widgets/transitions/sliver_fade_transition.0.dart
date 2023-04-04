@@ -11,13 +11,11 @@ void main() => runApp(const SliverFadeTransitionExampleApp());
 class SliverFadeTransitionExampleApp extends StatelessWidget {
   const SliverFadeTransitionExampleApp({super.key});
 
-  static const String _title = 'SliverFadeTransition Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('SliverFadeTransition Sample')),
         body: const Center(
           child: SliverFadeTransitionExample(),
         ),

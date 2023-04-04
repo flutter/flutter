@@ -11,13 +11,11 @@ void main() => runApp(const InputDecorationExampleApp());
 class InputDecorationExampleApp extends StatelessWidget {
   const InputDecorationExampleApp({super.key});
 
-  static const String _title = 'InputDecoration Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('InputDecoration Sample')),
         body: const InputDecorationExample(),
       ),
     );

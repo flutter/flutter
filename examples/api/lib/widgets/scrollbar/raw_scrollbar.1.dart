@@ -11,13 +11,11 @@ void main() => runApp(const RawScrollbarExampleApp());
 class RawScrollbarExampleApp extends StatelessWidget {
   const RawScrollbarExampleApp({super.key});
 
-  static const String _title = 'RawScrollbar Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('RawScrollbar Sample')),
         body: const RawScrollbarExample(),
       ),
     );

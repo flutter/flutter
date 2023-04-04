@@ -11,13 +11,11 @@ void main() => runApp(const AnimatedSizeExampleApp());
 class AnimatedSizeExampleApp extends StatelessWidget {
   const AnimatedSizeExampleApp({super.key});
 
-  static const String _title = 'AnimatedSize Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('AnimatedSize Sample')),
         body: const Center(
           child: AnimatedSizeExample(),
         ),

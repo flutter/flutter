@@ -11,13 +11,11 @@ void main() => runApp(const AnimatedAlignExampleApp());
 class AnimatedAlignExampleApp extends StatelessWidget {
   const AnimatedAlignExampleApp({super.key});
 
-  static const String _title = 'AnimatedAlign Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('AnimatedAlign Sample')),
         body: const AnimatedAlignExample(),
       ),
     );

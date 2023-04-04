@@ -11,13 +11,11 @@ void main() => runApp(const DraggableExampleApp());
 class DraggableExampleApp extends StatelessWidget {
   const DraggableExampleApp({super.key});
 
-  static const String _title = 'Draggable Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Draggable Sample')),
         body: const DraggableExample(),
       ),
     );

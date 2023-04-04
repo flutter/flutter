@@ -11,13 +11,11 @@ void main() => runApp(const ActionListenerExampleApp());
 class ActionListenerExampleApp extends StatelessWidget {
   const ActionListenerExampleApp({super.key});
 
-  static const String _title = 'ActionListener Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('ActionListener Sample')),
         body: const Center(
           child: ActionListenerExample(),
         ),

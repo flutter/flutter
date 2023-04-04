@@ -11,13 +11,11 @@ void main() => runApp(const OfExampleApp());
 class OfExampleApp extends StatelessWidget {
   const OfExampleApp({super.key});
 
-  static const String _title = 'ScaffoldMessenger.of Sample';
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('ScaffoldMessenger.of Sample')),
         body: const Center(
           child: OfExample(),
         ),
