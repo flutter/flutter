@@ -477,21 +477,28 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
     final TextTheme textTheme = theme.textTheme;
 
-    // Constrain the textScaleFactor to the largest supported value to prevent
-    // layout issues.
-    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.3);
+    // There's no M3 spec for a landscape layout input (not calendar)
+    // date picker. To ensure that the date displayed in the input
+    // date picker's header fits in landscape mode, we override the M3
+    // default here.
+    TextStyle? headlineStyle;
+    if (useMaterial3) {
+      headlineStyle = datePickerTheme.headerHeadlineStyle ?? defaults.headerHeadlineStyle;
+      switch (_entryMode.value) {
+        case DatePickerEntryMode.input:
+        case DatePickerEntryMode.inputOnly:
+          if (orientation == Orientation.landscape) {
+            headlineStyle = textTheme.headlineSmall;
+          }
+        case DatePickerEntryMode.calendar:
+        case DatePickerEntryMode.calendarOnly:
+          // M3 default is OK.
+      }
+    } else {
+      headlineStyle = orientation == Orientation.landscape ? textTheme.headlineSmall : textTheme.headlineMedium;
+    }
     final Color? headerForegroundColor = datePickerTheme.headerForegroundColor ?? defaults.headerForegroundColor;
-    final TextStyle? headlineStyle = useMaterial3
-      ? (datePickerTheme.headerHeadlineStyle ?? defaults.headerHeadlineStyle)?.copyWith(
-          color: headerForegroundColor,
-        )
-      // Material2 has support for landscape and the current M3 spec doesn't
-      // address this layout, so handling it separately here.
-      : (orientation == Orientation.landscape
-        ? textTheme.headlineSmall?.copyWith(color: headerForegroundColor)
-        : textTheme.headlineMedium?.copyWith(color: headerForegroundColor));
-
-    final String dateText = localizations.formatMediumDate(_selectedDate.value);
+    headlineStyle = headlineStyle?.copyWith(color: headerForegroundColor);
 
     final Widget actions = Container(
       alignment: AlignmentDirectional.centerEnd,
@@ -599,13 +606,16 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           ? localizations.datePickerHelpText
           : localizations.datePickerHelpText.toUpperCase()
       ),
-      titleText: dateText,
+      titleText: localizations.formatMediumDate(_selectedDate.value),
       titleStyle: headlineStyle,
       orientation: orientation,
       isShort: orientation == Orientation.landscape,
       entryModeButton: entryModeButton,
     );
 
+    // Constrain the textScaleFactor to the largest supported value to prevent
+    // layout issues.
+    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.3);
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     final DialogTheme dialogTheme = theme.dialogTheme;
     return Dialog(
@@ -2660,10 +2670,16 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
     final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
 
+    // There's no M3 spec for a landscape layout input (not calendar)
+    // date range picker. To ensure that the date range displayed in the
+    // input date range picker's header fits in landscape mode, we override
+    // the M3 default here.
+    TextStyle? headlineStyle = (orientation == Orientation.portrait)
+      ? datePickerTheme.headerHeadlineStyle ?? defaults.headerHeadlineStyle
+      : Theme.of(context).textTheme.headlineSmall;
+
     final Color? headerForegroundColor = datePickerTheme.headerForegroundColor ?? defaults.headerForegroundColor;
-    final TextStyle? headlineStyle = (datePickerTheme.headerHeadlineStyle ?? defaults.headerHeadlineStyle)?.copyWith(
-      color: headerForegroundColor,
-    );
+    headlineStyle = headlineStyle?.copyWith(color: headerForegroundColor);
 
     final String dateText = _formatDateRange(context, selectedStartDate, selectedEndDate, currentDate!);
     final String semanticDateText = selectedStartDate != null && selectedEndDate != null
