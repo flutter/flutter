@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SnackBar] with Material 3 specifications.
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SnackBar] with Material 3 specifications.
+
+void main() => runApp(const SnackBarExampleApp());
 
 // A Material 3 [SnackBar] demonstrating an optional icon, in either floating
 // or fixed format.
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SnackBarExampleApp extends StatelessWidget {
+  const SnackBarExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ExpansionPanelList].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ExpansionPanelList].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ExpansionPanelListExampleApp());
+
+class ExpansionPanelListExampleApp extends StatelessWidget {
+  const ExpansionPanelListExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        body: const ExpansionPanelListExample(),
       ),
     );
   }
@@ -47,14 +47,14 @@ List<Item> generateItems(int numberOfItems) {
   });
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ExpansionPanelListExample extends StatefulWidget {
+  const ExpansionPanelListExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ExpansionPanelListExample> createState() => _ExpansionPanelListExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
   final List<Item> _data = generateItems(8);
 
   @override

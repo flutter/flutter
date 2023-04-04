@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Radio].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Radio].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RadioExampleApp());
+
+class RadioExampleApp extends StatelessWidget {
+  const RadioExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: RadioExample(),
         ),
       ),
     );
@@ -29,14 +29,14 @@ class MyApp extends StatelessWidget {
 
 enum SingingCharacter { lafayette, jefferson }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class RadioExample extends StatefulWidget {
+  const RadioExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RadioExample> createState() => _RadioExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RadioExampleState extends State<RadioExample> {
   SingingCharacter? _character = SingingCharacter.lafayette;
 
   @override

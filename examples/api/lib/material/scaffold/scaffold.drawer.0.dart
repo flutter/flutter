@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Scaffold.drawer].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Scaffold.drawer].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const DrawerExampleApp());
+
+class DrawerExampleApp extends StatelessWidget {
+  const DrawerExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,19 +17,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: DrawerExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class DrawerExample extends StatefulWidget {
+  const DrawerExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DrawerExample> createState() => _DrawerExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _DrawerExampleState extends State<DrawerExample> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _openDrawer() {

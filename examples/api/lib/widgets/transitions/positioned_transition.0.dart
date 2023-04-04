@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [PositionedTransition].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [PositionedTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const PositionedTransitionExampleApp());
+
+class PositionedTransitionExampleApp extends StatelessWidget {
+  const PositionedTransitionExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,21 +17,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: PositionedTransitionExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class PositionedTransitionExample extends StatefulWidget {
+  const PositionedTransitionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<PositionedTransitionExample> createState() => _PositionedTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _PositionedTransitionExampleState extends State<PositionedTransitionExample>
     with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),

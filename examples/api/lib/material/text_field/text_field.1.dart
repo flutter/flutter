@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [TextField].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [TextField].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const TextFieldExampleApp());
+
+class TextFieldExampleApp extends StatelessWidget {
+  const TextFieldExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,19 +17,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: TextFieldExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class TextFieldExample extends StatefulWidget {
+  const TextFieldExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<TextFieldExample> createState() => _TextFieldExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _TextFieldExampleState extends State<TextFieldExample> {
   late TextEditingController _controller;
 
   @override

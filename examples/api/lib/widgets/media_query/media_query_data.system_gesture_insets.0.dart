@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [MediaQueryData.systemGestureInsets].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [MediaQueryData.systemGestureInsets].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SystemGestureInsetsExampleApp());
+
+class SystemGestureInsetsExampleApp extends StatelessWidget {
+  const SystemGestureInsetsExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,19 +17,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: SystemGestureInsetsExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SystemGestureInsetsExample extends StatefulWidget {
+  const SystemGestureInsetsExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SystemGestureInsetsExample> createState() => _SystemGestureInsetsExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _SystemGestureInsetsExampleState extends State<SystemGestureInsetsExample> {
   double _currentValue = 0.2;
 
   @override

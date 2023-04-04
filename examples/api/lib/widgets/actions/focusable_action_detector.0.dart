@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FocusableActionDetector].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FocusableActionDetector].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FocusableActionDetectorExampleApp());
+
+class FocusableActionDetectorExampleApp extends StatelessWidget {
+  const FocusableActionDetectorExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: FocusableActionDetectorExample(),
     );
   }
 }
@@ -115,14 +115,14 @@ class _FadButtonState extends State<FadButton> {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class FocusableActionDetectorExample extends StatefulWidget {
+  const FocusableActionDetectorExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<FocusableActionDetectorExample> createState() => _FocusableActionDetectorExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _FocusableActionDetectorExampleState extends State<FocusableActionDetectorExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

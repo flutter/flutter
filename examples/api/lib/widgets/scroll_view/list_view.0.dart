@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [ListTile] selection in a [ListView] or [GridView].
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ListViewExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ListViewExampleApp extends StatelessWidget {
+  const ListViewExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Actions].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Actions].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ActionsExampleApp());
+
+class ActionsExampleApp extends StatelessWidget {
+  const ActionsExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: ActionsExample(),
         ),
       ),
     );
@@ -116,14 +116,14 @@ class _SaveButtonState extends State<SaveButton> {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ActionsExample extends StatefulWidget {
+  const ActionsExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ActionsExample> createState() => _ActionsExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ActionsExampleState extends State<ActionsExample> {
   Model model = Model();
   int count = 0;
 

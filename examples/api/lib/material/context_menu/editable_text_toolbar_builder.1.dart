@@ -9,19 +9,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const EditableTextToolbarBuilderExampleApp());
 
 const String emailAddress = 'me@example.com';
 const String text = 'Select the email address and open the menu: $emailAddress';
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
+  const EditableTextToolbarBuilderExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<EditableTextToolbarBuilderExampleApp> createState() => _EditableTextToolbarBuilderExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolbarBuilderExampleApp> {
 
   final TextEditingController _controller = TextEditingController(
     text: text,

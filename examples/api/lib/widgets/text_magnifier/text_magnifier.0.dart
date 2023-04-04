@@ -5,10 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp(text: 'Hello world!'));
+void main() => runApp(const TextMagnifierExampleApp(text: 'Hello world!'));
 
-class MyApp extends StatelessWidget {
-  const MyApp({
+class TextMagnifierExampleApp extends StatelessWidget {
+  const TextMagnifierExampleApp({
     super.key,
     this.textDirection = TextDirection.ltr,
     required this.text,

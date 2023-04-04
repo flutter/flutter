@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Scaffold.of].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Scaffold.of].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const OfExampleApp());
+
+class OfExampleApp extends StatelessWidget {
+  const OfExampleApp({super.key});
 
   // This widget is the root of your application.
   @override

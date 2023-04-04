@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [StandardFabLocation].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [StandardFabLocation].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const StandardFabLocationExampleApp());
+
+class StandardFabLocationExampleApp extends StatelessWidget {
+  const StandardFabLocationExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatelessWidget(),
+      home: StandardFabLocationExample(),
     );
   }
 }
@@ -34,8 +34,8 @@ class AlmostEndFloatFabLocation extends StandardFabLocation
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class StandardFabLocationExample extends StatelessWidget {
+  const StandardFabLocationExample({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SingleActivator.SingleActivator].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SingleActivator.SingleActivator].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SingleActivatorExampleApp());
+
+class SingleActivatorExampleApp extends StatelessWidget {
+  const SingleActivatorExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: SingleActivatorExample(),
         ),
       ),
     );
@@ -32,14 +32,14 @@ class IncrementIntent extends Intent {
   const IncrementIntent();
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class SingleActivatorExample extends StatefulWidget {
+  const SingleActivatorExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<SingleActivatorExample> createState() => _SingleActivatorExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _SingleActivatorExampleState extends State<SingleActivatorExample> {
   int count = 0;
 
   @override

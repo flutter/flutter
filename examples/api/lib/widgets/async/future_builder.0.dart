@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FutureBuilder].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FutureBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FutureBuilderExampleApp());
+
+class FutureBuilderExampleApp extends StatelessWidget {
+  const FutureBuilderExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,19 +17,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: FutureBuilderExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class FutureBuilderExample extends StatefulWidget {
+  const FutureBuilderExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<FutureBuilderExample> createState() => _FutureBuilderExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _FutureBuilderExampleState extends State<FutureBuilderExample> {
   final Future<String> _calculation = Future<String>.delayed(
     const Duration(seconds: 2),
     () => 'Data Loaded',

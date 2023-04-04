@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ExpansionPanelList.ExpansionPanelList.radio].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ExpansionPanelList.ExpansionPanelList.radio].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ExpansionPanelListRadioExampleApp());
+
+class ExpansionPanelListRadioExampleApp extends StatelessWidget {
+  const ExpansionPanelListRadioExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        body: const ExpansionPanelListRadioExample(),
       ),
     );
   }
@@ -48,14 +48,14 @@ List<Item> generateItems(int numberOfItems) {
   });
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ExpansionPanelListRadioExample extends StatefulWidget {
+  const ExpansionPanelListRadioExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ExpansionPanelListRadioExample> createState() => _ExpansionPanelListRadioExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ExpansionPanelListRadioExampleState extends State<ExpansionPanelListRadioExample> {
   final List<Item> _data = generateItems(8);
 
   @override

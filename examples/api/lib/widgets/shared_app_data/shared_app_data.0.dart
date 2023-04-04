@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SharedAppData].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SharedAppData].
 
 class ShowSharedValue extends StatelessWidget {
   const ShowSharedValue({ super.key, required this.appDataKey });

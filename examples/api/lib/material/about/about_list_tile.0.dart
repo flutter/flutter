@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AboutListTile].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AboutListTile].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AboutListTileExampleApp());
+
+class AboutListTileExampleApp extends StatelessWidget {
+  const AboutListTileExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,13 +17,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatelessWidget(),
+      home: AboutListTileExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class AboutListTileExample extends StatelessWidget {
+  const AboutListTileExample({super.key});
 
   @override
   Widget build(BuildContext context) {

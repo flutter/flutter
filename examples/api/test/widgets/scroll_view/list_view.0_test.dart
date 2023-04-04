@@ -11,7 +11,7 @@ void main() {
   testWidgets('long press ListTile should enable edit mode',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.ListViewExampleApp(),
     );
 
     final Finder listView = find.byType(ListView);
@@ -29,7 +29,7 @@ void main() {
   testWidgets('Pressing cross button should disable edit mode',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.ListViewExampleApp(),
     );
 
     final Finder listView = find.byType(ListView);
@@ -52,7 +52,7 @@ void main() {
   testWidgets('tapping ListTile or checkBox should toggle ListTile state',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.ListViewExampleApp(),
     );
 
     final Finder listView = find.byType(ListView);

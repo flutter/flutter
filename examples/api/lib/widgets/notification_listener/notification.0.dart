@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Notification].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Notification].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const NotificationExampleApp());
+
+class NotificationExampleApp extends StatelessWidget {
+  const NotificationExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,13 +17,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatelessWidget(),
+      home: NotificationExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class NotificationExample extends StatelessWidget {
+  const NotificationExample({super.key});
 
   static const List<String> _tabs = <String>['Months', 'Days'];
   static const List<String> _months = <String>[

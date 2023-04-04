@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [MaterialStateBorderSide].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [MaterialStateBorderSide].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const MaterialStateBorderSideExampleApp());
+
+class MaterialStateBorderSideExampleApp extends StatelessWidget {
+  const MaterialStateBorderSideExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,21 +20,21 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: MaterialStateBorderSideExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class MaterialStateBorderSideExample extends StatefulWidget {
+  const MaterialStateBorderSideExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<MaterialStateBorderSideExample> createState() => _MaterialStateBorderSideExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _MaterialStateBorderSideExampleState extends State<MaterialStateBorderSideExample> {
   bool isSelected = true;
 
   @override

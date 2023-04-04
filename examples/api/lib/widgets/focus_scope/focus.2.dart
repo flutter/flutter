@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Focus].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Focus].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FocusExampleApp());
+
+class FocusExampleApp extends StatelessWidget {
+  const FocusExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,19 +17,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: FocusExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class FocusExample extends StatefulWidget {
+  const FocusExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<FocusExample> createState() => _FocusExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _FocusExampleState extends State<FocusExample> {
   int focusedChild = 0;
   List<Widget> children = <Widget>[];
   List<FocusNode> childFocusNodes = <FocusNode>[];

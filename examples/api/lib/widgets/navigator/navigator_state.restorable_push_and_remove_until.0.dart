@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [NavigatorState.restorablePushAndRemoveUntil].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [NavigatorState.restorablePushAndRemoveUntil].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RestorablePushAndRemoveUntilExampleApp());
+
+class RestorablePushAndRemoveUntilExampleApp extends StatelessWidget {
+  const RestorablePushAndRemoveUntilExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -17,23 +17,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: _title,
-      home: MyStatefulWidget(),
+      home: RestorablePushAndRemoveUntilExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class RestorablePushAndRemoveUntilExample extends StatefulWidget {
+  const RestorablePushAndRemoveUntilExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RestorablePushAndRemoveUntilExample> createState() => _RestorablePushAndRemoveUntilExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RestorablePushAndRemoveUntilExampleState extends State<RestorablePushAndRemoveUntilExample> {
   @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const MyStatefulWidget(),
+      builder: (BuildContext context) => const RestorablePushAndRemoveUntilExample(),
     );
   }
 

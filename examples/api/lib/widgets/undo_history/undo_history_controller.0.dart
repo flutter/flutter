@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for UndoHistoryController.
-
 import 'package:flutter/material.dart';
 
+/// Flutter code sample for [UndoHistoryController].
+
 void main() {
-  runApp(const MyApp());
+  runApp(const UndoHistoryControllerExampleApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class UndoHistoryControllerExampleApp extends StatelessWidget {
+  const UndoHistoryControllerExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 

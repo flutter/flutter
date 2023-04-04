@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ErrorWidget].
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ErrorWidget].
 
 void main() {
   // Set the ErrorWidget's builder before the app is started.
@@ -28,19 +28,19 @@ void main() {
   };
 
   // Start the app.
-  runApp(const MyApp());
+  runApp(const ErrorWidgetExampleApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class ErrorWidgetExampleApp extends StatefulWidget {
+  const ErrorWidgetExampleApp({super.key});
 
   static const String _title = 'ErrorWidget Sample';
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<ErrorWidgetExampleApp> createState() => _ErrorWidgetExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
   bool throwError = false;
 
   @override
@@ -55,9 +55,9 @@ class _MyAppState extends State<MyApp> {
       );
     } else {
       return MaterialApp(
-        title: MyApp._title,
+        title: ErrorWidgetExampleApp._title,
         home: Scaffold(
-          appBar: AppBar(title: const Text(MyApp._title)),
+          appBar: AppBar(title: const Text(ErrorWidgetExampleApp._title)),
           body: Center(
             child: TextButton(
                 onPressed: () {

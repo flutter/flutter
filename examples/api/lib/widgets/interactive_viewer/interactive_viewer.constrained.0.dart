@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [InteractiveViewer.constrained].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [InteractiveViewer.constrained].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ConstrainedExampleApp());
+
+class ConstrainedExampleApp extends StatelessWidget {
+  const ConstrainedExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -19,14 +19,14 @@ class MyApp extends StatelessWidget {
       title: _title,
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        body: const ConstrainedExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ConstrainedExample extends StatelessWidget {
+  const ConstrainedExample({super.key});
 
   @override
   Widget build(BuildContext context) {

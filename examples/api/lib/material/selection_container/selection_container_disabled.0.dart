@@ -6,10 +6,10 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const SelectionContainerDisabledExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SelectionContainerDisabledExampleApp extends StatelessWidget {
+  const SelectionContainerDisabledExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 

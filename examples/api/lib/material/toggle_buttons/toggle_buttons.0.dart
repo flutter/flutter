@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ToggleButtons].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ToggleButtons].
 
 const List<Widget> fruits = <Widget>[
   Text('Apple'),
@@ -24,10 +24,10 @@ const List<Widget> icons = <Widget>[
   Icon(Icons.ac_unit),
 ];
 
-void main() => runApp(const MyApp());
+void main() => runApp(const ToggleButtonsExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ToggleButtonsExampleApp extends StatelessWidget {
+  const ToggleButtonsExampleApp({super.key});
 
   static const String _title = 'ToggleButtons Sample';
 

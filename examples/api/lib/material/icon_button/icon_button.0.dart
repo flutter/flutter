@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [IconButton].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [IconButton].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const IconButtonExampleApp());
+
+class IconButtonExampleApp extends StatelessWidget {
+  const IconButtonExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: IconButtonExample(),
         ),
       ),
     );
@@ -29,14 +29,14 @@ class MyApp extends StatelessWidget {
 
 double _volume = 0.0;
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class IconButtonExample extends StatefulWidget {
+  const IconButtonExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<IconButtonExample> createState() => _IconButtonExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _IconButtonExampleState extends State<IconButtonExample> {
   @override
   Widget build(BuildContext context) {
     return Column(

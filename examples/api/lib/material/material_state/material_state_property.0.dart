@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [MaterialStateProperty].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [MaterialStateProperty].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const MaterialStatePropertyExampleApp());
+
+class MaterialStatePropertyExampleApp extends StatelessWidget {
+  const MaterialStatePropertyExampleApp({super.key});
 
   static const String _title = 'Flutter Code Sample';
 
@@ -20,15 +20,15 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text(_title)),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: MaterialStatePropertyExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class MaterialStatePropertyExample extends StatelessWidget {
+  const MaterialStatePropertyExample({super.key});
 
   @override
   Widget build(BuildContext context) {
