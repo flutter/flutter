@@ -263,7 +263,6 @@ zipStorePath=wrapper/dists
     });
 
     testWithoutContext('does not crash on hypothetical new format', () async {
-      const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')
         ..createSync();
       final Directory wrapperDirectory = androidDirectory
