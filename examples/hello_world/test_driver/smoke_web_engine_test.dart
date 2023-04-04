@@ -32,6 +32,7 @@ void main() {
       expect(await driver.getText(titleFinder), 'Hello, world!');
     });
 
+    // TODO(htoor3): Remove skip once https://github.com/flutter/engine/pull/40904 merged.
     test('enable accessibility', () async {
       await driver.setSemantics(true);
 
@@ -39,10 +40,10 @@ void main() {
       await Future<void>.delayed(const Duration(seconds: 2));
 
       final WebElement? fltSemantics = await driver.webDriver.execute(
-        'return document.querySelector("flt-glass-pane")?.shadowRoot.querySelector("flt-semantics")',
+        'return document.querySelector("flutter-view")?.querySelector("flt-semantics")',
         <dynamic>[],
       ) as WebElement?;
       expect(fltSemantics, isNotNull);
-    });
+    }, skip: true);
   });
 }
