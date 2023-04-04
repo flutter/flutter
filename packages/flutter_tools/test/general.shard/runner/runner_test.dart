@@ -318,7 +318,6 @@ void main() {
 
     testUsingContext('runner disable telemetry with flag', () async {
       io.setExitFunctionForTests((int exitCode) {});
-      fileSystem = MemoryFileSystem.test();
 
       expect(globals.analytics.telemetryEnabled, true);
       expect(globals.analytics.shouldShowMessage, true);
@@ -335,7 +334,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Analytics: () => FakeAnalytics(),
-      FileSystem: () => fileSystem,
+      FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
