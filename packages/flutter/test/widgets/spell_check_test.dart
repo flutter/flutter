@@ -218,8 +218,8 @@ void main() {
         SuggestionSpan(TextRange(start: 7, end: 12), <String>['wild', 'world']),
     ]);
 
-    final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
-      const TextSpan(text: 'Hello, wrold! Hey'),
+    const TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
+      TextSpan(text: 'Hello, wrold! Hey'),
     ]);
     final TextSpan textSpanTree =
       buildTextSpanWithSpellCheckSuggestions(
