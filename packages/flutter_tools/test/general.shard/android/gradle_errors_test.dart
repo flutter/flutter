@@ -1329,9 +1329,9 @@ Could not compile build file '…/example/android/build.gradle'.
       );
 
       // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
-      expect(testLogger.statusText, contains(RegExp(r"Your project\'s Gradle and AGP version is incompatible with the Java version that Flutter is |\n| using.")));
-      expect(testLogger.statusText, contains(r'https://docs.gradle.org/current/userguide/compatibility.html#java'));
-      expect(testLogger.statusText, contains(r'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle'));
+      expect(testLogger.statusText, contains('Gradle and AGP version is incompatible with the Java version'));
+      expect(testLogger.statusText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
+      expect(testLogger.statusText, contains('https://developer.android.com/studio/releases/gradle-plugin#updating-gradle'));
     }, overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
