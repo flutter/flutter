@@ -565,7 +565,6 @@ class _UiKitViewState extends State<UiKitView> {
   TextDirection? _layoutDirection;
   bool _initialized = false;
 
-  // Exposed for testing only. The state class itself is still private.
   @visibleForTesting
   FocusNode? focusNode;
 
