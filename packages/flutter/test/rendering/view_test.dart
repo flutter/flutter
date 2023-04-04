@@ -32,7 +32,7 @@ void main() {
     test('does not replace the root layer unnecessarily', () {
       final RenderView view = RenderView(
         configuration: createViewConfiguration(),
-        window: RendererBinding.instance.platformDispatcher.views.single,
+        view: RendererBinding.instance.platformDispatcher.views.single,
       );
       final PipelineOwner owner = PipelineOwner();
       view.attach(owner);
@@ -48,7 +48,7 @@ void main() {
     test('does not replace the root layer unnecessarily when view resizes', () {
       final RenderView view = RenderView(
         configuration: createViewConfiguration(size: const Size(100.0, 100.0)),
-        window: RendererBinding.instance.platformDispatcher.views.single,
+        view: RendererBinding.instance.platformDispatcher.views.single,
       );
       final PipelineOwner owner = PipelineOwner();
       view.attach(owner);
