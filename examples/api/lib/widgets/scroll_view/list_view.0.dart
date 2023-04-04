@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile] selection in a ListView or GridView.
-// Long press any ListTile to enable selection mode.
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ListTile] selection in a [ListView] or [GridView].
 
 void main() => runApp(const MyApp());
 
