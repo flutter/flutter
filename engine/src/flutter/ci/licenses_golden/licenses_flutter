@@ -1200,8 +1200,6 @@ ORIGIN: ../../../flutter/impeller/entity/contents/filters/srgb_to_linear_filter_
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/srgb_to_linear_filter_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/yuv_to_rgb_filter_contents.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/yuv_to_rgb_filter_contents.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/contents/foreground_blend_contents.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/contents/foreground_blend_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/framebuffer_blend_contents.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/framebuffer_blend_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/gradient_generator.cc + ../../../flutter/LICENSE
@@ -3784,8 +3782,6 @@ FILE: ../../../flutter/impeller/entity/contents/filters/srgb_to_linear_filter_co
 FILE: ../../../flutter/impeller/entity/contents/filters/srgb_to_linear_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/yuv_to_rgb_filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/yuv_to_rgb_filter_contents.h
-FILE: ../../../flutter/impeller/entity/contents/foreground_blend_contents.cc
-FILE: ../../../flutter/impeller/entity/contents/foreground_blend_contents.h
 FILE: ../../../flutter/impeller/entity/contents/framebuffer_blend_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/framebuffer_blend_contents.h
 FILE: ../../../flutter/impeller/entity/contents/gradient_generator.cc
