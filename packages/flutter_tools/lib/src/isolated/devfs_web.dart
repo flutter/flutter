@@ -420,12 +420,13 @@ class WebAssetServer implements AssetReader {
     File file = _resolveDartFile(requestPath);
 
     if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
-      final String canvasKitPath = globals.artifacts!.getArtifactPath(
-        Artifact.canvasKitPath,
-        platform: TargetPlatform.web_javascript,
+      final Directory canvasKitDirectory = globals.fs.directory(
+        globals.fs.path.join(
+          globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+          'canvaskit',
+        )
       );
-      final Uri potential = globals.fs
-          .directory(canvasKitPath)
+      final Uri potential = canvasKitDirectory
           .uri
           .resolve(requestPath.replaceFirst('canvaskit/', ''));
       file = globals.fs.file(potential);
