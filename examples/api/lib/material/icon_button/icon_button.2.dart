@@ -45,7 +45,7 @@ class ButtonTypesExample extends StatelessWidget {
 }
 
 class ButtonTypesGroup extends StatelessWidget {
-  const ButtonTypesGroup({ super.key, required this.enabled });
+  const ButtonTypesGroup({super.key, required this.enabled});
 
   final bool enabled;
 

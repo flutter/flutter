@@ -93,15 +93,12 @@ class ContextMenuExample extends StatelessWidget {
                 child: const Text('Delete'),
               ),
             ],
-            builder:(BuildContext context, Animation<double> animation) {
-              final Animation<Decoration> boxDecorationAnimation =
-                _boxDecorationAnimation(animation);
+            builder: (BuildContext context, Animation<double> animation) {
+              final Animation<Decoration> boxDecorationAnimation = _boxDecorationAnimation(animation);
 
               return Container(
                 decoration:
-                  animation.value < CupertinoContextMenu.animationOpensAt
-                  ? boxDecorationAnimation.value
-                  : null,
+                    animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
                 child: Container(
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemYellow,

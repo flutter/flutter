@@ -65,11 +65,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
               error: Text('Home network unavailable'),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Text('Not connected'),
-                  SizedBox(width: 5),
-                  Icon(CupertinoIcons.forward)
-                ],
+                children: <Widget>[Text('Not connected'), SizedBox(width: 5), Icon(CupertinoIcons.forward)],
               ),
             ),
             const CupertinoFormRow(
@@ -93,7 +89,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
                 children: <Widget>[
                   Text('On'),
                   SizedBox(width: 5),
-                  Icon(CupertinoIcons.forward)
+                  Icon(CupertinoIcons.forward),
                 ],
               ),
             ),

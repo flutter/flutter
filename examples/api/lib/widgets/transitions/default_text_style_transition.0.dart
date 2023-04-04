@@ -42,10 +42,8 @@ class _DefaultTextStyleTransitionExampleState extends State<DefaultTextStyleTran
       vsync: this,
     )..repeat(reverse: true);
     _styleTween = TextStyleTween(
-      begin: const TextStyle(
-          fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-      end: const TextStyle(
-          fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
+      begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
+      end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
     );
     _curvedAnimation = CurvedAnimation(
       parent: _controller,

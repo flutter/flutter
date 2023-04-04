@@ -26,8 +26,7 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
-    with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
   late AnimationController controller;
 
   @override

@@ -34,7 +34,8 @@ class MaterialStateExample extends StatelessWidget {
         prefixIconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return Colors.green;
-          } if (states.contains(MaterialState.error)) {
+          }
+          if (states.contains(MaterialState.error)) {
             return Colors.red;
           }
           return Colors.grey;

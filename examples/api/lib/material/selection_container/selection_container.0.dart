@@ -37,10 +37,7 @@ class SelectionContainerExampleApp extends StatelessWidget {
 }
 
 class SelectionAllOrNoneContainer extends StatefulWidget {
-  const SelectionAllOrNoneContainer({
-    super.key,
-    required this.child
-  });
+  const SelectionAllOrNoneContainer({super.key, required this.child});
 
   final Widget child;
 

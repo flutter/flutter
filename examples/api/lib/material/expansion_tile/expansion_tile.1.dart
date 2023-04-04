@@ -11,7 +11,7 @@ void main() {
 }
 
 class ExpansionTileControllerApp extends StatefulWidget {
-  const ExpansionTileControllerApp({ super.key });
+  const ExpansionTileControllerApp({super.key});
 
   @override
   State<ExpansionTileControllerApp> createState() => _ExpansionTileControllerAppState();

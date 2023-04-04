@@ -41,8 +41,7 @@ class _RestorablePushReplacementExampleState extends State<RestorablePushReplace
         title: const Text('Sample Code'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Navigator.restorablePushReplacement(context, _myRouteBuilder),
+        onPressed: () => Navigator.restorablePushReplacement(context, _myRouteBuilder),
         tooltip: 'Increment Counter',
         child: const Icon(Icons.add),
       ),

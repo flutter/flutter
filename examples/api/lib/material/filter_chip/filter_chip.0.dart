@@ -67,8 +67,7 @@ class _FilterChipExampleState extends State<FilterChipExample> {
           ),
           const SizedBox(height: 10.0),
           Text(
-            'Looking for: ${filters.map(
-              (ExerciseFilter e) => e.name).join(', ')}',
+            'Looking for: ${filters.map((ExerciseFilter e) => e.name).join(', ')}',
             style: textTheme.labelLarge,
           ),
         ],

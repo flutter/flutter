@@ -58,7 +58,9 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
           body: Center(
             child: TextButton(
                 onPressed: () {
-                  setState(() { throwError = true; });
+                  setState(() {
+                    throwError = true;
+                  });
                 },
                 child: const Text('Error Prone')),
           ),

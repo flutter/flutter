@@ -19,7 +19,7 @@ class ExpandedApp extends StatelessWidget {
           title: const Text('Expanded Column Sample'),
         ),
         body: const ExpandedExample(),
-      )
+      ),
     );
   }
 }

@@ -42,7 +42,7 @@ class DialogExample extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                   const Text('This is a typical dialog.'),
+                    const Text('This is a typical dialog.'),
                     const SizedBox(height: 15),
                     TextButton(
                       onPressed: () {
@@ -66,7 +66,7 @@ class DialogExample extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                   const Text('This is a fullscreen dialog.'),
+                  const Text('This is a fullscreen dialog.'),
                   const SizedBox(height: 15),
                   TextButton(
                     onPressed: () {

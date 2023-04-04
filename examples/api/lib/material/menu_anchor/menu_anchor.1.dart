@@ -101,16 +101,18 @@ class _MyContextMenuState extends State<MyContextMenu> {
               child: Text(MenuEntry.about.label),
               onPressed: () => _activate(MenuEntry.about),
             ),
-            if (_showingMessage) MenuItemButton(
-              onPressed: () => _activate(MenuEntry.hideMessage),
-              shortcut: MenuEntry.hideMessage.shortcut,
-              child: Text(MenuEntry.hideMessage.label),
-            ),
-            if (!_showingMessage) MenuItemButton(
-              onPressed: () => _activate(MenuEntry.showMessage),
-              shortcut: MenuEntry.showMessage.shortcut,
-              child: Text(MenuEntry.showMessage.label),
-            ),
+            if (_showingMessage)
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.hideMessage),
+                shortcut: MenuEntry.hideMessage.shortcut,
+                child: Text(MenuEntry.hideMessage.label),
+              ),
+            if (!_showingMessage)
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.showMessage),
+                shortcut: MenuEntry.showMessage.shortcut,
+                child: Text(MenuEntry.showMessage.label),
+              ),
             SubmenuButton(
               menuChildren: <Widget>[
                 MenuItemButton(

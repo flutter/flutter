@@ -17,7 +17,7 @@ class CupertinoRadioApp extends StatelessWidget {
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
-          middle: Text('CuptertinoRadio Example'),
+          middle: Text('CupertinoRadio Example'),
         ),
         child: SafeArea(
           child: CupertinoRadioExample(),

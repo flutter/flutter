@@ -69,7 +69,7 @@ class CupertinoIndicatorExample extends StatelessWidget {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }

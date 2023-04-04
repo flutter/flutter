@@ -39,18 +39,18 @@ class DialogExample extends StatelessWidget {
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(
-      BuildContext context, Object? arguments) {
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return DialogRoute<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Basic dialog title'),
           content: const Text(
-              'A dialog is a type of modal window that\n'
-              'appears in front of app content to\n'
-              'provide critical information, or prompt\n'
-              'for a decision to be made.'),
+            'A dialog is a type of modal window that\n'
+            'appears in front of app content to\n'
+            'provide critical information, or prompt\n'
+            'for a decision to be made.',
+          ),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(

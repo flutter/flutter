@@ -62,8 +62,7 @@ class CustomMagnifier extends StatelessWidget {
     // positioning cases.
     return ValueListenableBuilder<MagnifierInfo>(
         valueListenable: magnifierInfo,
-        builder: (BuildContext context,
-            MagnifierInfo currentMagnifierInfo, _) {
+        builder: (BuildContext context, MagnifierInfo currentMagnifierInfo, _) {
           // We want to position the magnifier at the global position of the gesture.
           Offset magnifierPosition = currentMagnifierInfo.globalGesturePosition;
 

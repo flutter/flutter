@@ -47,7 +47,6 @@ class SingleChoice extends StatefulWidget {
 }
 
 class _SingleChoiceState extends State<SingleChoice> {
-
   Calendar calendarView = Calendar.day;
 
   @override
@@ -91,7 +90,10 @@ class _MultipleChoiceState extends State<MultipleChoice> {
         ButtonSegment<Sizes>(value: Sizes.extraSmall, label: Text('XS')),
         ButtonSegment<Sizes>(value: Sizes.small, label: Text('S')),
         ButtonSegment<Sizes>(value: Sizes.medium, label: Text('M')),
-        ButtonSegment<Sizes>(value: Sizes.large, label: Text('L'),),
+        ButtonSegment<Sizes>(
+          value: Sizes.large,
+          label: Text('L'),
+        ),
         ButtonSegment<Sizes>(value: Sizes.extraLarge, label: Text('XL')),
       ],
       selected: selection,

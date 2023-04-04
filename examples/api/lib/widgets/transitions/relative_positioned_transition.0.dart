@@ -55,14 +55,20 @@ class _RelativePositionedTransitionExampleState extends State<RelativePositioned
               size: biggest,
               rect: RectTween(
                 begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
-                end: Rect.fromLTWH(biggest.width - smallLogo,
-                    biggest.height - smallLogo, smallLogo, smallLogo),
+                end: Rect.fromLTWH(
+                  biggest.width - smallLogo,
+                  biggest.height - smallLogo,
+                  smallLogo,
+                  smallLogo,
+                ),
               ).animate(CurvedAnimation(
                 parent: _controller,
                 curve: Curves.elasticInOut,
               )),
               child: const Padding(
-                  padding: EdgeInsets.all(8), child: FlutterLogo()),
+                padding: EdgeInsets.all(8),
+                child: FlutterLogo(),
+              ),
             ),
           ],
         );

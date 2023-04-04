@@ -47,8 +47,7 @@ class AnimatedWidgetExample extends StatefulWidget {
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _AnimatedWidgetExampleState extends State<AnimatedWidgetExample>
-    with TickerProviderStateMixin {
+class _AnimatedWidgetExampleState extends State<AnimatedWidgetExample> with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 10),
     vsync: this,

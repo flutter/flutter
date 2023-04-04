@@ -116,7 +116,7 @@ class Home extends StatelessWidget {
               onPressed: toggleTheme,
             ),
           ],
-        )
+        ),
       ),
     );
   }

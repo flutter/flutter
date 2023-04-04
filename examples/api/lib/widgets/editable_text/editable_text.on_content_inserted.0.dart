@@ -59,10 +59,8 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
               },
             ),
           ),
-          if (bytes != null)
-            const Text("Here's the most recently inserted content:"),
-          if (bytes != null)
-            Image.memory(bytes!),
+          if (bytes != null) const Text("Here's the most recently inserted content:"),
+          if (bytes != null) Image.memory(bytes!),
         ],
       ),
     );

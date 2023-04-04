@@ -22,12 +22,11 @@ class ContextMenuControllerExampleApp extends StatefulWidget {
 }
 
 class _ContextMenuControllerExampleAppState extends State<ContextMenuControllerExampleApp> {
-  void _showDialog (BuildContext context) {
+  void _showDialog(BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) =>
-          const AlertDialog(title: Text('You clicked print!')),
+        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
       ),
     );
   }
@@ -82,7 +81,8 @@ class _ContextMenuControllerExampleAppState extends State<ContextMenuControllerE
           child: ListView(
             children: <Widget>[
               Container(height: 20.0),
-              const Text('Right click (desktop) or long press (mobile) anywhere, not just on this text, to show the custom menu.'),
+              const Text(
+                  'Right click (desktop) or long press (mobile) anywhere, not just on this text, to show the custom menu.'),
             ],
           ),
         ),

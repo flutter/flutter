@@ -61,8 +61,9 @@ class _StepperExampleState extends State<StepperExample> {
         Step(
           title: const Text('Step 1 title'),
           content: Container(
-              alignment: Alignment.centerLeft,
-              child: const Text('Content for Step 1')),
+            alignment: Alignment.centerLeft,
+            child: const Text('Content for Step 1'),
+          ),
         ),
         const Step(
           title: Text('Step 2 title'),

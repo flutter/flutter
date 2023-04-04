@@ -18,7 +18,7 @@ class AppBarLargeApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0xff6750A4)
+        colorSchemeSeed: const Color(0xff6750A4),
       ),
       home: Material(
         child: CustomScrollView(

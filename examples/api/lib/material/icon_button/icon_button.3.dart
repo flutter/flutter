@@ -134,7 +134,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
             ),
           ],
         ),
-      ]
+      ],
     );
   }
 }

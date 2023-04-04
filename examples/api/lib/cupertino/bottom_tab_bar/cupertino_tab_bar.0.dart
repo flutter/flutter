@@ -30,7 +30,7 @@ class CupertinoTabBarExample extends StatelessWidget {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.star_fill),
-            label: 'Favourites',
+            label: 'Favorites',
           ),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.clock_solid),

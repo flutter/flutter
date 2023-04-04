@@ -28,7 +28,7 @@ class CupertinoSliderExample extends StatefulWidget {
 }
 
 class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
-  double _currentSliderValue =  0.0;
+  double _currentSliderValue = 0.0;
   String? _sliderStatus;
 
   @override
@@ -75,8 +75,8 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
             Text(
               _sliderStatus ?? '',
               style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                fontSize: 12,
-              ),
+                    fontSize: 12,
+                  ),
             ),
           ],
         ),

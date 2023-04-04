@@ -59,7 +59,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
     scaffoldKey.currentState!.openEndDrawer();
   }
 
-  Widget buildBottomBarScaffold(){
+  Widget buildBottomBarScaffold() {
     return Scaffold(
       body: Center(
         child: Column(
@@ -76,21 +76,21 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
             screenIndex = index;
           });
         },
-        destinations: destinations
-          .map((ExampleDestination destination) {
+        destinations: destinations.map(
+          (ExampleDestination destination) {
             return NavigationDestination(
               label: destination.label,
               icon: destination.icon,
               selectedIcon: destination.selectedIcon,
               tooltip: destination.label,
             );
-          })
-          .toList(),
+          },
+        ).toList(),
       ),
     );
   }
 
-  Widget buildDrawerScaffold(BuildContext context){
+  Widget buildDrawerScaffold(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
       body: SafeArea(
@@ -102,15 +102,15 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
               padding: const EdgeInsets.symmetric(horizontal: 5),
               child: NavigationRail(
                 minWidth: 50,
-                destinations: destinations
-                  .map((ExampleDestination destination) {
+                destinations: destinations.map(
+                  (ExampleDestination destination) {
                     return NavigationRailDestination(
                       label: Text(destination.label),
                       icon: destination.icon,
                       selectedIcon: destination.selectedIcon,
                     );
-                  })
-                  .toList(),
+                  },
+                ).toList(),
                 selectedIndex: screenIndex,
                 useIndicator: true,
                 onDestinationSelected: (int index) {
@@ -147,14 +147,15 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
               style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
-          ...destinations
-            .map((ExampleDestination destination) {
+          ...destinations.map(
+            (ExampleDestination destination) {
               return NavigationDrawerDestination(
                 label: Text(destination.label),
                 icon: destination.icon,
                 selectedIcon: destination.selectedIcon,
               );
-            }),
+            },
+          ),
           const Padding(
             padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
             child: Divider(),
@@ -167,7 +168,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    showNavigationDrawer =  MediaQuery.of(context).size.width >= 450;
+    showNavigationDrawer = MediaQuery.of(context).size.width >= 450;
   }
 
   @override

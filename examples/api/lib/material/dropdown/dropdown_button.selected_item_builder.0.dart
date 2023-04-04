@@ -61,7 +61,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
                   // Here custom text style, alignment and layout size can be applied
                   // to selected item string.
                   return Container(
-                    alignment:Alignment.centerLeft,
+                    alignment: Alignment.centerLeft,
                     constraints: const BoxConstraints(minWidth: 100),
                     child: Text(
                       item,

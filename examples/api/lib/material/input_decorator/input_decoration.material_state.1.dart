@@ -31,15 +31,18 @@ class MaterialStateExample extends StatelessWidget {
     return Theme(
       data: themeData.copyWith(
         inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
-          prefixIconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.focused)) {
-              return Colors.green;
-            } if (states.contains(MaterialState.error)) {
-              return Colors.red;
-            }
-            return Colors.grey;
-          }),
-        )
+          prefixIconColor: MaterialStateColor.resolveWith(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.focused)) {
+                return Colors.green;
+              }
+              if (states.contains(MaterialState.error)) {
+                return Colors.red;
+              }
+              return Colors.grey;
+            },
+          ),
+        ),
       ),
       child: TextFormField(
         initialValue: 'abc',

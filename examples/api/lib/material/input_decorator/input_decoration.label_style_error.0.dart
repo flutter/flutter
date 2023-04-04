@@ -38,9 +38,10 @@ class InputDecoratorExample extends StatelessWidget {
         // is in its error state.
         labelStyle: MaterialStateTextStyle.resolveWith(
           (Set<MaterialState> states) {
-            final Color color = states.contains(MaterialState.error) ? Theme.of(context).colorScheme.error: Colors.orange;
+            final Color color =
+                states.contains(MaterialState.error) ? Theme.of(context).colorScheme.error : Colors.orange;
             return TextStyle(color: color, letterSpacing: 1.3);
-          }
+          },
         ),
       ),
       validator: (String? value) {

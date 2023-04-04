@@ -17,7 +17,7 @@ class TextInputControlExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: TextInputControlExample(),
-   );
+    );
   }
 }
 

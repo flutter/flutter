@@ -30,8 +30,7 @@ class TransformationControllerExample extends StatefulWidget {
 /// [TickerProviderStateMixin].
 class _TransformationControllerExampleState extends State<TransformationControllerExample>
     with TickerProviderStateMixin {
-  final TransformationController _transformationController =
-      TransformationController();
+  final TransformationController _transformationController = TransformationController();
   Animation<Matrix4>? _animationReset;
   late final AnimationController _controllerReset;
 

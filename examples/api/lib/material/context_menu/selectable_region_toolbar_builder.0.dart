@@ -11,7 +11,8 @@ import 'package:flutter/services.dart';
 
 void main() => runApp(const SelectableRegionToolbarBuilderExampleApp());
 
-const String text = 'I am some text inside of SelectionArea. Right click (desktop) or long press (mobile) me to show the customized context menu.';
+const String text =
+    'I am some text inside of SelectionArea. Right click (desktop) or long press (mobile) me to show the customized context menu.';
 
 class SelectableRegionToolbarBuilderExampleApp extends StatefulWidget {
   const SelectableRegionToolbarBuilderExampleApp({super.key});
@@ -21,12 +22,11 @@ class SelectableRegionToolbarBuilderExampleApp extends StatefulWidget {
 }
 
 class _SelectableRegionToolbarBuilderExampleAppState extends State<SelectableRegionToolbarBuilderExampleApp> {
-  void _showDialog (BuildContext context) {
+  void _showDialog(BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) =>
-          const AlertDialog(title: Text('You clicked print!')),
+        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
       ),
     );
   }

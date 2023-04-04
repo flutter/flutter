@@ -86,8 +86,9 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
                 subtitle: const Text('Tap here for Hero transition'),
                 tileColor: Colors.cyan,
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute<Widget>(
-                    builder: (BuildContext context) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
                       return Scaffold(
                         appBar: AppBar(title: const Text('ListTile Hero')),
                         body: Center(

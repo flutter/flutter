@@ -27,8 +27,7 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
-    with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
   late AnimationController controller;
   bool determinate = false;
 
@@ -86,7 +85,9 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
                       if (determinate) {
                         controller.stop();
                       } else {
-                        controller..forward(from: controller.value)..repeat();
+                        controller
+                          ..forward(from: controller.value)
+                          ..repeat();
                       }
                     });
                   },

@@ -19,8 +19,7 @@ class MaterialStateOutlinedBorderExampleApp extends StatelessWidget {
   }
 }
 
-class SelectedBorder extends RoundedRectangleBorder
-    implements MaterialStateOutlinedBorder {
+class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutlinedBorder {
   const SelectedBorder();
 
   @override

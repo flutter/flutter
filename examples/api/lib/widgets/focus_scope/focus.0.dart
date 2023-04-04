@@ -88,9 +88,7 @@ class _FocusExampleState extends State<FocusExample> {
                     height: 100,
                     alignment: Alignment.center,
                     color: hasFocus ? _color : Colors.white,
-                    child: Text(hasFocus
-                        ? "I'm in color! Press R,G,B!"
-                        : 'Press to focus'),
+                    child: Text(hasFocus ? "I'm in color! Press R,G,B!" : 'Press to focus'),
                   ),
                 ),
               );

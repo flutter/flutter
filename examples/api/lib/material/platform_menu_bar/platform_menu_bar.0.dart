@@ -126,7 +126,7 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
         child: Text(_showMessage
             ? _message
             : 'This space intentionally left blank.\n'
-              'Show a message here using the menu.'),
+                'Show a message here using the menu.'),
       ),
     );
   }

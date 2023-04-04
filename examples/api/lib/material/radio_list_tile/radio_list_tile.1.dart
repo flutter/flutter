@@ -58,7 +58,8 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
               });
             },
             title: const Text('Tomato'),
-            subtitle: const Text('Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.'),
+            subtitle: const Text(
+                'Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.'),
           ),
           RadioListTile<Groceries>(
             value: Groceries.lettuce,
@@ -69,7 +70,8 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
               });
             },
             title: const Text('Lettuce'),
-            subtitle: const Text("Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text."),
+            subtitle: const Text(
+                "Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text."),
             isThreeLine: true,
           ),
         ],

@@ -51,7 +51,7 @@ class _CupertinoTextFieldExampleState extends State<CupertinoTextFieldExample> {
       child: Center(
         child: CupertinoTextField(
           controller: _textController,
-        )
+        ),
       ),
     );
   }

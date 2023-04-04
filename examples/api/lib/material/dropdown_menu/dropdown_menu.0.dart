@@ -28,7 +28,8 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
     final List<DropdownMenuEntry<ColorLabel>> colorEntries = <DropdownMenuEntry<ColorLabel>>[];
     for (final ColorLabel color in ColorLabel.values) {
       colorEntries.add(
-        DropdownMenuEntry<ColorLabel>(value: color, label: color.label, enabled: color.label != 'Grey'));
+        DropdownMenuEntry<ColorLabel>(value: color, label: color.label, enabled: color.label != 'Grey'),
+      );
     }
 
     final List<DropdownMenuEntry<IconLabel>> iconEntries = <DropdownMenuEntry<IconLabel>>[];
@@ -39,7 +40,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.green
+        colorSchemeSeed: Colors.green,
       ),
       home: Scaffold(
         body: SafeArea(
@@ -70,7 +71,8 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                       dropdownMenuEntries: iconEntries,
                       inputDecorationTheme: const InputDecorationTheme(
                         filled: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 5.0)),
+                        contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+                      ),
                       onSelected: (IconLabel? icon) {
                         setState(() {
                           selectedIcon = icon;
@@ -87,12 +89,17 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                     Text('You selected a ${selectedColor?.label} ${selectedIcon?.label}'),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Icon(selectedIcon?.icon, color: selectedColor?.color,))
+                      child: Icon(
+                        selectedIcon?.icon,
+                        color: selectedColor?.color,
+                      ),
+                    )
                   ],
                 )
-              else const Text('Please select a color and an icon.')
+              else
+                const Text('Please select a color and an icon.')
             ],
-          )
+          ),
         ),
       ),
     );
@@ -113,7 +120,10 @@ enum ColorLabel {
 
 enum IconLabel {
   smile('Smile', Icons.sentiment_satisfied_outlined),
-  cloud('Cloud', Icons.cloud_outlined,),
+  cloud(
+    'Cloud',
+    Icons.cloud_outlined,
+  ),
   brush('Brush', Icons.brush_outlined),
   heart('Heart', Icons.favorite);
 

@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for a [ValueNotifier] with a [ListenableBuilder].
 
-void main() { runApp(const ListenableBuilderExample()); }
+void main() {
+  runApp(const ListenableBuilderExample());
+}
 
 class ListenableBuilderExample extends StatefulWidget {
   const ListenableBuilderExample({super.key});

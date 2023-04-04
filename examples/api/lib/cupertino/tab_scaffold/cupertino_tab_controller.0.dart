@@ -64,7 +64,7 @@ class _TabControllerExampleState extends State<TabControllerExample> {
                 child: const Text('Go to first tab'),
               ),
             ],
-          )
+          ),
         );
       },
     );

@@ -20,7 +20,7 @@ class ExampleApp extends StatelessWidget {
 }
 
 class MyWidget extends StatefulWidget {
-  const MyWidget({ super.key });
+  const MyWidget({super.key});
 
   @override
   State<MyWidget> createState() => _MyWidgetState();
@@ -36,30 +36,30 @@ class _MyWidgetState extends State<MyWidget> {
 
   Widget _getArrows() {
     final Widget arrow;
-    switch(_axisDirection) {
+    switch (_axisDirection) {
       case AxisDirection.up:
         arrow = const Icon(Icons.arrow_upward_rounded);
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ],
+          children: <Widget>[arrow, arrow],
         );
       case AxisDirection.down:
         arrow = const Icon(Icons.arrow_downward_rounded);
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ],
+          children: <Widget>[arrow, arrow],
         );
       case AxisDirection.left:
         arrow = const Icon(Icons.arrow_back_rounded);
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ],
+          children: <Widget>[arrow, arrow],
         );
       case AxisDirection.right:
         arrow = const Icon(Icons.arrow_forward_rounded);
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ],
+          children: <Widget>[arrow, arrow],
         );
     }
   }
@@ -179,7 +179,7 @@ class _MyWidgetState extends State<MyWidget> {
                 padding: const EdgeInsets.all(8.0),
                 child: child,
               );
-            }
+            },
           ),
         ],
       ),
