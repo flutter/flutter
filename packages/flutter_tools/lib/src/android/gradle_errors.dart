@@ -671,7 +671,7 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
   eventLabel: 'ssl-exception-tag-mismatch',
 );
 
-final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version ([0-9]+)');
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+([0-9]+)');
 
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
