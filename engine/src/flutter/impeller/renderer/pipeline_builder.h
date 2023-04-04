@@ -93,7 +93,7 @@ struct PipelineBuilder {
             << VertexShader::kLabel << "'.";
         return false;
       }
-      if (!vertex_descriptor->SetDescriptorSetLayouts(
+      if (!vertex_descriptor->RegisterDescriptorSetLayouts(
               VertexShader::kDescriptorSetLayouts)) {
         VALIDATION_LOG << "Cound not configure vertex descriptor set layout for"
                           " pipeline named '"
@@ -101,7 +101,7 @@ struct PipelineBuilder {
         return false;
       }
 
-      if (!vertex_descriptor->SetDescriptorSetLayouts(
+      if (!vertex_descriptor->RegisterDescriptorSetLayouts(
               FragmentShader::kDescriptorSetLayouts)) {
         VALIDATION_LOG << "Cound not configure vertex descriptor set layout for"
                           " pipeline named '"

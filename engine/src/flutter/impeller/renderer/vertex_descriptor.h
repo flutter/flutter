@@ -37,16 +37,16 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   }
 
   template <size_t Size>
-  bool SetDescriptorSetLayouts(
+  bool RegisterDescriptorSetLayouts(
       const std::array<DescriptorSetLayout, Size>& inputs) {
-    return SetDescriptorSetLayouts(inputs.data(), inputs.size());
+    return RegisterDescriptorSetLayouts(inputs.data(), inputs.size());
   }
 
   bool SetStageInputs(const ShaderStageIOSlot* const stage_inputs[],
                       size_t count);
 
-  bool SetDescriptorSetLayouts(const DescriptorSetLayout desc_set_layout[],
-                               size_t count);
+  bool RegisterDescriptorSetLayouts(const DescriptorSetLayout desc_set_layout[],
+                                    size_t count);
 
   const std::vector<ShaderStageIOSlot>& GetStageInputs() const;
 
