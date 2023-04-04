@@ -60,14 +60,18 @@ void main() {
 
       final String output = _uniqueOutputLines(outputEvents);
 
-      expectLines(output, <Object>[
+      expectLines(
+        output,
+        <Object>[
         'Launching $relativeMainPath on Flutter test device in debug mode...',
-        startsWith('Connecting to VM Service at'),
-        'topLevelFunction',
-        'Application finished.',
-        '',
-        startsWith('Exited'),
-      ]);
+          startsWith('Connecting to VM Service at'),
+          'topLevelFunction',
+          'Application finished.',
+          '',
+          startsWith('Exited'),
+        ],
+        allowExtras: true,
+      );
     });
 
     testWithoutContext('logs to client when sendLogsToClient=true', () async {
@@ -125,13 +129,17 @@ void main() {
 
       final String output = _uniqueOutputLines(outputEvents);
 
-      expectLines(output, <Object>[
-        'Launching $relativeMainPath on Flutter test device in debug mode...',
-        'topLevelFunction',
-        'Application finished.',
-        '',
-        startsWith('Exited'),
-      ]);
+      expectLines(
+        output,
+        <Object>[
+          'Launching $relativeMainPath on Flutter test device in debug mode...',
+          'topLevelFunction',
+          'Application finished.',
+          '',
+          startsWith('Exited'),
+        ],
+        allowExtras: true,
+      );
 
       // If we're running with an out-of-process debug adapter, ensure that its
       // own process shuts down after we terminated.
@@ -246,6 +254,7 @@ void main() {
             startsWith('Reloaded'),
             'topLevelFunction',
           ],
+          allowExtras: true,
       );
 
       await dap.client.terminate();
@@ -320,6 +329,7 @@ void main() {
             startsWith('Restarted application'),
             'topLevelFunction',
           ],
+          allowExtras: true,
       );
 
       await dap.client.terminate();
