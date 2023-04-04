@@ -395,6 +395,15 @@ OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
       expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0.2');
     });
 
+    // https://chrome-infra-packages.appspot.com/p/flutter/java/openjdk/
+    testWithoutContext('parses jdk output from ci', () {
+      const String exampleJdkOutput = '''
+openjdk 11.0.2 2019-01-15
+OpenJDK Runtime Environment 18.9 (build 11.0.2+9)
+OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.2');
+    });
 
     testWithoutContext('parses jdk two number versions', () {
       const String exampleJdkOutput = 'openjdk 19.0 2023-01-17';
