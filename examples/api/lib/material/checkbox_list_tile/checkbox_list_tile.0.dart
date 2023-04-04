@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CheckboxListTile].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+
+/// Flutter code sample for [CheckboxListTile].
 
 void main() => runApp(const CheckboxListTileApp());
 

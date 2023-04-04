@@ -11,14 +11,12 @@ void main() => runApp(const CupertinoRadioApp());
 class CupertinoRadioApp extends StatelessWidget {
   const CupertinoRadioApp({super.key});
 
-  static const String _title = 'CuptertinoRadio Toggleable Example';
-
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
       home: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
-          middle: Text(_title),
+          middle: Text('CupertinoRadio Toggleable Example'),
         ),
         child: SafeArea(
           child: CupertinoRadioExample(),
