@@ -2,34 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [BottomNavigationBar].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [BottomNavigationBar].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const BottomNavigationBarExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class BottomNavigationBarExampleApp extends StatelessWidget {
+  const BottomNavigationBarExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: BottomNavigationBarExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class BottomNavigationBarExample extends StatefulWidget {
+  const BottomNavigationBarExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<BottomNavigationBarExample> createState() => _BottomNavigationBarExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample> {
   int _selectedIndex = 0;
   final ScrollController _homeController = ScrollController();
 

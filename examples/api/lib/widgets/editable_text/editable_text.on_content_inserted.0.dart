@@ -2,23 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for EditableText.onContentInserted
-
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [EditableText.onContentInserted].
 
 void main() => runApp(const KeyboardInsertedContentApp());
 
 class KeyboardInsertedContentApp extends StatelessWidget {
   const KeyboardInsertedContentApp({super.key});
 
-  static const String _title = 'Keyboard Inserted Content Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: KeyboardInsertedContentDemo(),
     );
   }
@@ -62,10 +59,8 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
               },
             ),
           ),
-          if (bytes != null)
-            const Text("Here's the most recently inserted content:"),
-          if (bytes != null)
-            Image.memory(bytes!),
+          if (bytes != null) const Text("Here's the most recently inserted content:"),
+          if (bytes != null) Image.memory(bytes!),
         ],
       ),
     );

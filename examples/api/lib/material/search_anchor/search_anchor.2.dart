@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SearchAnchor].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SearchAnchor].
 
 void main() => runApp(const SearchBarApp());
 
@@ -29,7 +29,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
         body: Column(
           children: <Widget>[
             SearchAnchor(
-              searchController: controller,
+                searchController: controller,
                 builder: (BuildContext context, SearchController controller) {
                   return IconButton(
                     icon: const Icon(Icons.search),
@@ -50,12 +50,11 @@ class _SearchBarAppState extends State<SearchBarApp> {
                       },
                     );
                   });
-                }
-              ),
+                }),
             Center(
               child: controller.text.isEmpty
-                ? const Text('No item selected')
-                : Text('Selected item: ${controller.value.text}'),
+                  ? const Text('No item selected')
+                  : Text('Selected item: ${controller.value.text}'),
             ),
           ],
         ),

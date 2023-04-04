@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ActionIconTheme].
-
 import 'package:flutter/material.dart';
 
+/// Flutter code sample for [ActionIconTheme].
+
 void main() {
-  runApp(const MyApp());
+  runApp(const ActionIconThemeExampleApp());
 }
 
 class _CustomEndDrawerIcon extends StatelessWidget {
@@ -36,13 +36,12 @@ class _CustomDrawerIcon extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ActionIconThemeExampleApp extends StatelessWidget {
+  const ActionIconThemeExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

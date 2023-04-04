@@ -4,17 +4,17 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const MagnifierExampleApp());
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class MagnifierExampleApp extends StatefulWidget {
+  const MagnifierExampleApp({super.key});
   static const Size loupeSize = Size(200, 200);
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<MagnifierExampleApp> createState() => _MagnifierExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
   Offset dragGesturePosition = Offset.zero;
 
   @override

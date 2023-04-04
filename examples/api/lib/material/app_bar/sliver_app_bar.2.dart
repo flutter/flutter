@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SliverAppBar.medium].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SliverAppBar.medium].
 
 void main() {
   runApp(const AppBarMediumApp());
@@ -18,7 +18,7 @@ class AppBarMediumApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0xff6750A4)
+        colorSchemeSeed: const Color(0xff6750A4),
       ),
       home: Material(
         child: CustomScrollView(

@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: example.MyApp(),
+          body: example.ShowDialogExampleApp(),
         ),
       ),
     );

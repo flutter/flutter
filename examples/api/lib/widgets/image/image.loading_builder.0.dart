@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Image.loadingBuilder].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Image.loadingBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const LoadingBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class LoadingBuilderExampleApp extends StatelessWidget {
+  const LoadingBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: LoadingBuilderExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class LoadingBuilderExample extends StatelessWidget {
+  const LoadingBuilderExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,16 +32,14 @@ class MyStatelessWidget extends StatelessWidget {
       ),
       child: Image.network(
         'https://flutter.github.io/assets-for-api-docs/assets/widgets/falcon.jpg',
-        loadingBuilder: (BuildContext context, Widget child,
-            ImageChunkEvent? loadingProgress) {
+        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
           if (loadingProgress == null) {
             return child;
           }
           return Center(
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
+                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
                   : null,
             ),
           );

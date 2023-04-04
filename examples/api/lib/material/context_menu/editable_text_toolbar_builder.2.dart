@@ -9,16 +9,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const EditableTextToolbarBuilderExampleApp());
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class EditableTextToolbarBuilderExampleApp extends StatefulWidget {
+  const EditableTextToolbarBuilderExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<EditableTextToolbarBuilderExampleApp> createState() => _EditableTextToolbarBuilderExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolbarBuilderExampleApp> {
   final TextEditingController _controller = TextEditingController(
     text: 'Right click (desktop) or long press (mobile) to see the menu with a custom toolbar.',
   );

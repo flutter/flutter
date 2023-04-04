@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for a [ChangeNotifier] with a [ListenableBuilder].
-
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-void main() { runApp(const ListenableBuilderExample()); }
+/// Flutter code sample for a [ChangeNotifier] with a [ListenableBuilder].
+
+void main() {
+  runApp(const ListenableBuilderExample());
+}
 
 class ListModel with ChangeNotifier {
   final List<int> _values = <int>[];

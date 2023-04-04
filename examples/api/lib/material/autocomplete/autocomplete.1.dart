@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Autocomplete].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Autocomplete].
 
 void main() => runApp(const AutocompleteExampleApp());
 
@@ -73,9 +73,7 @@ class AutocompleteBasicUserExample extends StatelessWidget {
           return const Iterable<User>.empty();
         }
         return _userOptions.where((User option) {
-          return option
-              .toString()
-              .contains(textEditingValue.text.toLowerCase());
+          return option.toString().contains(textEditingValue.text.toLowerCase());
         });
       },
       onSelected: (User selection) {

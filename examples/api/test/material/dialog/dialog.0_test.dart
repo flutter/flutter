@@ -13,7 +13,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: example.MyApp(),
+          body: example.DialogExampleApp(),
         ),
       ),
     );
@@ -35,7 +35,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: example.MyApp(),
+          body: example.DialogExampleApp(),
         ),
       ),
     );

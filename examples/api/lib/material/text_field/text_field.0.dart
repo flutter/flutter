@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TextField
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [TextField].
 
 class ObscuredTextFieldSample extends StatelessWidget {
   const ObscuredTextFieldSample({super.key});
@@ -24,8 +24,8 @@ class ObscuredTextFieldSample extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class TextFieldExampleApp extends StatelessWidget {
+  const TextFieldExampleApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,4 +39,4 @@ class MyApp extends StatelessWidget {
   }
 }
 
-void main() => runApp(const MyApp());
+void main() => runApp(const TextFieldExampleApp());

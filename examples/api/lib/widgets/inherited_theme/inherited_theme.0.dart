@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [InheritedTheme].
-
 import 'package:flutter/material.dart';
 
+/// Flutter code sample for [InheritedTheme].
+
 void main() {
-  runApp(const MyApp());
+  runApp(const InheritedThemeExampleApp());
 }
 
 class MyAppBody extends StatelessWidget {
@@ -23,8 +23,7 @@ class MyAppBody extends StatelessWidget {
     // the new route pushed onto said navigator.
     // Themes are captured outside of the route's builder because when the
     // builder executes, the context may not be valid anymore.
-    final CapturedThemes themes =
-        InheritedTheme.capture(from: context, to: navigator.context);
+    final CapturedThemes themes = InheritedTheme.capture(from: context, to: navigator.context);
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -48,8 +47,8 @@ class MyAppBody extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class InheritedThemeExampleApp extends StatelessWidget {
+  const InheritedThemeExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {

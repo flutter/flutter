@@ -12,7 +12,7 @@ void main() {
     const String tooltipText = 'I am a Tooltip';
 
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.TooltipExampleApp(),
     );
 
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);

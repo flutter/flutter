@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AppBar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [AppBar].
 
 void main() => runApp(const AppBarApp());
 
@@ -32,8 +32,7 @@ class AppBarExample extends StatelessWidget {
             icon: const Icon(Icons.add_alert),
             tooltip: 'Show Snackbar',
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('This is a snackbar')));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This is a snackbar')));
             },
           ),
           IconButton(

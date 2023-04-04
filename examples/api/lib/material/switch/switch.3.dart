@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Switch].
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Switch].
 
 void main() => runApp(const SwitchApp());
 

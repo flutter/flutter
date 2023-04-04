@@ -2,41 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ElevatedButton].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ElevatedButton].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ElevatedButtonExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ElevatedButtonExampleApp extends StatelessWidget {
+  const ElevatedButtonExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('ElevatedButton Sample')),
+        body: const ElevatedButtonExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ElevatedButtonExample extends StatefulWidget {
+  const ElevatedButtonExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ElevatedButtonExample> createState() => _ElevatedButtonExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ElevatedButtonExampleState extends State<ElevatedButtonExample> {
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle style =
-        ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+    final ButtonStyle style = ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
     return Center(
       child: Column(

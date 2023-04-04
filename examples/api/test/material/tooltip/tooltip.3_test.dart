@@ -11,7 +11,7 @@ void main() {
     const String tooltipText = 'I am a Tooltip';
 
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.TooltipExampleApp(),
     );
 
     // Tooltip is not visible before tapping the button.

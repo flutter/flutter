@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for pinned [SearchAnchor] while scrolling.
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for pinned [SearchAnchor] while scrolling.
 
 void main() {
   runApp(const PinnedSearchBarApp());
@@ -21,10 +21,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xff6750a4)
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
       home: Scaffold(
         body: SafeArea(
           child: CustomScrollView(
@@ -38,13 +35,16 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                 floating: true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
                 title: SearchAnchor.bar(
                   suggestionsBuilder: (BuildContext context, SearchController controller) {
-                    return List<Widget>.generate(5, (int index) {
-                      return ListTile(
-                        titleAlignment: ListTileTitleAlignment.center,
-                        title: Text('Initial list item $index'),
-                      );
-                    });
-                  }
+                    return List<Widget>.generate(
+                      5,
+                      (int index) {
+                        return ListTile(
+                          titleAlignment: ListTileTitleAlignment.center,
+                          title: Text('Initial list item $index'),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
               // The listed items below are just for filling the screen

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [PlatformMenuBar].
-
 // THIS SAMPLE ONLY WORKS ON MACOS.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// Flutter code sample for [PlatformMenuBar].
 
 void main() => runApp(const ExampleApp());
 
@@ -126,7 +126,7 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
         child: Text(_showMessage
             ? _message
             : 'This space intentionally left blank.\n'
-              'Show a message here using the menu.'),
+                'Show a message here using the menu.'),
       ),
     );
   }

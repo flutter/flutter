@@ -18,7 +18,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-     const example.MyApp(),
+     const example.WidgetBindingObserverExampleApp(),
     );
 
     expect(find.text('There are no AppLifecycleStates to show.'), findsOneWidget);
