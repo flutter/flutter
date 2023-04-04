@@ -8,10 +8,11 @@
 
 namespace flutter {
 
-fml::CommandLine CommandLineFromNSProcessInfo() {
+fml::CommandLine CommandLineFromNSProcessInfo(NSProcessInfo* processInfoOrNil) {
   std::vector<std::string> args_vector;
+  auto processInfo = processInfoOrNil ? processInfoOrNil : [NSProcessInfo processInfo];
 
-  for (NSString* arg in [NSProcessInfo processInfo].arguments) {
+  for (NSString* arg in processInfo.arguments) {
     args_vector.emplace_back(arg.UTF8String);
   }
 

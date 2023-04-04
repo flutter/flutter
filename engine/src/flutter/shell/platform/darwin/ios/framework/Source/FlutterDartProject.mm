@@ -76,11 +76,11 @@ NS_INLINE NSBundle* FLTFrameworkBundleWithIdentifier(NSString* bundleID) {
   return [NSBundle bundleWithIdentifier:bundleID];
 }
 
-flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
-  auto command_line = flutter::CommandLineFromNSProcessInfo();
+flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* processInfoOrNil) {
+  auto command_line = flutter::CommandLineFromNSProcessInfo(processInfoOrNil);
 
   // Precedence:
-  // 1. Settings from the specified NSBundle.
+  // 1. Settings from the specified NSBundle (except for enable-impeller).
   // 2. Settings passed explicitly via command-line arguments.
   // 3. Settings from the NSBundle with the default bundle ID.
   // 4. Settings from the main NSBundle and default values.
@@ -206,15 +206,21 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   BOOL enableWideGamut = nsEnableWideGamut ? nsEnableWideGamut.boolValue : NO;
   settings.enable_wide_gamut = enableWideGamut;
 
-  // Whether to enable Impeller. First, look in the app bundle.
-  NSNumber* enableImpeller = [bundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
-  if (enableImpeller == nil) {
-    // If it isn't in the app bundle, look in the main bundle.
-    enableImpeller = [mainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
-  }
-  // Change the default only if the option is present.
-  if (enableImpeller != nil) {
-    settings.enable_impeller = enableImpeller.boolValue;
+  // TODO(dnfield): We should reverse the order for all these settings so that command line options
+  // are preferred to plist settings. https://github.com/flutter/flutter/issues/124049
+  // Whether to enable Impeller. If the command line explicitly
+  // specified an option for this, ignore what's in the plist.
+  if (!command_line.HasOption("enable-impeller")) {
+    // Next, look in the app bundle.
+    NSNumber* enableImpeller = [bundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+    if (enableImpeller == nil) {
+      // If it isn't in the app bundle, look in the main bundle.
+      enableImpeller = [mainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+    }
+    // Change the default only if the option is present.
+    if (enableImpeller != nil) {
+      settings.enable_impeller = enableImpeller.boolValue;
+    }
   }
 
   NSNumber* enableTraceSystrace = [mainBundle objectForInfoDictionaryKey:@"FLTTraceSystrace"];

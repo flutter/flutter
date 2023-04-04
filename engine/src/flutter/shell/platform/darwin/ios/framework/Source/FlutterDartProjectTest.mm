@@ -93,6 +93,32 @@ FLUTTER_ASSERT_ARC
   [mockMainBundle stopMocking];
 }
 
+- (void)testEnableImpellerSettingIsCorrectlyOverriddenByCommandLine {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"]).andReturn(@"NO");
+  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+  NSArray* arguments = @[ @"process_name", @"--enable-impeller" ];
+  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+  // Check settings.enable_impeller value is same as the value on command line.
+  XCTAssertEqual(settings.enable_impeller, YES);
+  [mockMainBundle stopMocking];
+}
+
+- (void)testDisableImpellerSettingIsCorrectlyOverriddenByCommandLine {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"]).andReturn(@"YES");
+  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+  NSArray* arguments = @[ @"process_name", @"--enable-impeller=false" ];
+  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+  // Check settings.enable_impeller value is same as the value on command line.
+  XCTAssertEqual(settings.enable_impeller, NO);
+  [mockMainBundle stopMocking];
+}
+
 - (void)testDisableImpellerAppBundleSettingIsCorrectlyParsed {
   NSString* bundleId = [FlutterDartProject defaultBundleIdentifier];
   id mockAppBundle = OCMClassMock([NSBundle class]);

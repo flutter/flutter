@@ -5,13 +5,16 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_COMMAND_LINE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_COMMAND_LINE_H_
 
+#import <Foundation/Foundation.h>
+
 #include "flutter/fml/command_line.h"
 
 #include "flutter/fml/macros.h"
 
 namespace flutter {
 
-fml::CommandLine CommandLineFromNSProcessInfo();
+fml::CommandLine CommandLineFromNSProcessInfo(
+    NSProcessInfo* processInfoOrNil = nil);
 
 }  // namespace flutter
 
