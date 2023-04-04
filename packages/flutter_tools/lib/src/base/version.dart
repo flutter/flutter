@@ -4,7 +4,7 @@
 
 import 'package:meta/meta.dart';
 
-/// TODO(reidbaker): Investigate using pub_semver instead of this class.
+// TODO(reidbaker): Investigate using pub_semver instead of this class.
 @immutable
 class Version implements Comparable<Version> {
   /// Creates a new [Version] object.
