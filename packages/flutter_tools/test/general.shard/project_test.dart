@@ -406,7 +406,7 @@ void main() {
       });
     });
 
-    group('java gradle agp compatability', () {
+    group('java gradle agp compatibility', () {
       Future<FlutterProject?> configureJavaGradleAgpForTest(
         FakeAndroidSdkWithDir androidSdk, {
         required String javaV,
@@ -450,7 +450,7 @@ dependencies {
               gradleV: '8.0',
               agpV: '7.4.2',
             );
-            final CompatabilityResult value =
+            final CompatibilityResult value =
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
@@ -480,7 +480,7 @@ dependencies {
               gradleV: '6.7.1',
               agpV: '4.2.0',
             );
-            final CompatabilityResult value =
+            final CompatibilityResult value =
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
@@ -511,7 +511,7 @@ dependencies {
               gradleV: '7.3.3',
               agpV: '7.2.0',
             );
-            final CompatabilityResult value =
+            final CompatibilityResult value =
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
@@ -533,7 +533,7 @@ dependencies {
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
-          'incompatabile everything',
+          'incompatible everything',
           () async {
             const String javaV = '17.0.2';
             const String gradleV = '6.7.3';
@@ -544,7 +544,7 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatabilityResult value =
+            final CompatibilityResult value =
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string
@@ -581,7 +581,7 @@ dependencies {
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
-          'incompatabile java/gradle only',
+          'incompatible java/gradle only',
           () async {
             const String javaV = '17.0.2';
             const String gradleV = '6.7.3';
@@ -592,7 +592,7 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatabilityResult value =
+            final CompatibilityResult value =
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.
@@ -624,7 +624,7 @@ dependencies {
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
-          'incompatabile gradle/agp only',
+          'incompatible gradle/agp only',
           () async {
             const String javaV = '11.0.2';
             const String gradleV = '7.0.3';
@@ -635,7 +635,7 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatabilityResult value =
+            final CompatibilityResult value =
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isFalse);
             // Should not have the valid string.

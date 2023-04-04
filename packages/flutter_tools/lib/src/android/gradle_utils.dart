@@ -175,7 +175,7 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
 /// [directory] or if not present the version available in local path.
 ///
 /// If gradle version is not found null is returned.
-/// [directory] should be and android directory with an build.gradle file.
+/// [directory] should be and android directory with a build.gradle file.
 Future<String?> getGradleVersion(
     Directory directory, Logger logger, ProcessManager processManager) async {
   final File propertiesFile = directory
@@ -295,7 +295,7 @@ String _formatParseWarning(String content) {
 //
 // Returns true if versions are compatible.
 // Null Gradle version or AGP version returns false.
-// If compatability can not be evaulated returns false.
+// If compatibility can not be evaluated returns false.
 // If versions are newer than the max known version a warning is logged and true
 // returned.
 //
@@ -417,7 +417,7 @@ bool validateGradleAndAgp(Logger logger,
         min: '4.10.1', max: _maxKnownAndSupportedGradleVersion);
   }
 
-  logger.printTrace('Unknown Gradle-Agp compatability, $gradleV, $agpV');
+  logger.printTrace('Unknown Gradle-Agp compatibility, $gradleV, $agpV');
   return false;
 }
 
@@ -430,12 +430,11 @@ bool validateJavaGradle(Logger logger,
     {required String? javaV, required String? gradleV}) {
   // Update these when new major versions of Java are supported by android.
   // Supported means Java <-> Gradle support.
-  const String maxSupportedJavaVersion = '19';
   const String oneMajorVersionHigherJavaVersion = '20';
 
   // https://docs.gradle.org/current/userguide/compatibility.html#java
   const String oldestSupportedJavaVersion = '1.8';
-  const String oldestDocumentedJavaGradleCompatability = '2.0';
+  const String oldestDocumentedJavaGradleCompatibility = '2.0';
 
   // Begin Java <-> Gradle validation.
 
@@ -452,7 +451,7 @@ bool validateJavaGradle(Logger logger,
     return false;
   }
   if (isWithinVersionRange(gradleV,
-      min: '0.0', max: oldestDocumentedJavaGradleCompatability, inclusiveMax: false)) {
+      min: '0.0', max: oldestDocumentedJavaGradleCompatibility, inclusiveMax: false)) {
     logger.printTrace('Gradle Version: $gradleV is too old.');
     return false;
   }
@@ -555,7 +554,7 @@ bool validateJavaGradle(Logger logger,
     }
   }
 
-  logger.printTrace('Unknown Java-Gradle compatability $javaV, $gradleV');
+  logger.printTrace('Unknown Java-Gradle compatibility $javaV, $gradleV');
   return false;
 }
 

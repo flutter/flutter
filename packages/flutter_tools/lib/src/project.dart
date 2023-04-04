@@ -428,7 +428,7 @@ class AndroidProject extends FlutterProjectPlatform {
   static const String gradleAgpCompatUrl =
     'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle';
 
-  // User facing link that describes compatiblity between java and the first
+  // User facing link that describes compatibility between java and the first
   // version of gradle to support it.
   static const String javaGradleCompatUrl =
     'https://docs.gradle.org/current/userguide/compatibility.html#java';
@@ -534,7 +534,7 @@ class AndroidProject extends FlutterProjectPlatform {
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
     const String visibleName = 'Java/Gradle/Android Gradle Plugin';
-    final CompatabilityResult validJavaGradleAgpVersions =
+    final CompatibilityResult validJavaGradleAgpVersions =
         await hasValidJavaGradleAgpVersions();
 
 
@@ -550,7 +550,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Ensures Java SDK is compatible with the project's Gradle version and
   /// the project's Gradle version is compatible with the AGP version used
   /// in build.gradle.
-  Future<CompatabilityResult> hasValidJavaGradleAgpVersions() async {
+  Future<CompatibilityResult> hasValidJavaGradleAgpVersions() async {
     final String? gradleVersion = await gradle.getGradleVersion(
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
@@ -592,7 +592,8 @@ See the link below for more information:
 $javaGradleCompatUrl
 ''';
     }
-    return CompatabilityResult(compatibleJavaGradle && compatibleGradleAgp, description);
+    return CompatibilityResult(
+        compatibleJavaGradle && compatibleGradleAgp, description);
   }
 
   bool get isUsingGradle {
@@ -880,8 +881,8 @@ class FuchsiaProject {
 // Combines success and a description into one object that can be returned
 // together.
 @visibleForTesting
-class CompatabilityResult {
-  CompatabilityResult(this.success, this.description);
+class CompatibilityResult {
+  CompatibilityResult(this.success, this.description);
   final bool success;
   final String description;
 }

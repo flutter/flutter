@@ -510,7 +510,7 @@ allprojects {
         JavaGradleTestData(false, javaVersion: '20', gradleVersion: '7.5'),
         // Newer tools version requires newer gradle version.
         JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.1'),
-        // Max known unsuported java version.
+        // Max known unsupported java version.
         JavaGradleTestData(true, javaVersion: '24', gradleVersion: '8.1'),
 
         // Minimims as defined in
