@@ -540,8 +540,9 @@ allprojects {
         JavaGradleTestData(false, javaVersion: null, gradleVersion: null),
         // Middle Java cases:
         // https://www.java.com/releases/
-        JavaGradleTestData(true, javaVersion: '19.0.2', gradleVersion: '8.0'),
-        JavaGradleTestData(true, javaVersion: '18.0.2', gradleVersion: '8.0'),
+        JavaGradleTestData(true, javaVersion: '19.0.2', gradleVersion: '8.0.2'),
+        JavaGradleTestData(true, javaVersion: '19.0.2', gradleVersion: '8.0.0'),
+        JavaGradleTestData(true, javaVersion: '18.0.2', gradleVersion: '8.0.2'),
         JavaGradleTestData(true, javaVersion: '17.0.3', gradleVersion: '7.5'),
         JavaGradleTestData(true, javaVersion: '16.0.1', gradleVersion: '7.3'),
         JavaGradleTestData(true, javaVersion: '15.0.2', gradleVersion: '7.3'),
