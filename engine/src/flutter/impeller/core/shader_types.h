@@ -125,8 +125,11 @@ struct SampledImageSlot {
 };
 
 enum class DescriptorType {
-  kSampledImage,
   kUniformBuffer,
+  kStorageBuffer,
+  kSampledImage,
+  kImage,
+  kSampler,
 };
 
 struct DescriptorSetLayout {

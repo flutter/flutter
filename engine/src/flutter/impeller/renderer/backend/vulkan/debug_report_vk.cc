@@ -183,7 +183,7 @@ DebugReportVK::Result DebugReportVK::OnDebugCallback(
     VALIDATION_LOG << stream.str();
   }
 
-  return Result::kAbort;
+  return Result::kContinue;
 }
 
 }  // namespace impeller
