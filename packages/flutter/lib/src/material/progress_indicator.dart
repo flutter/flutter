@@ -735,7 +735,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
       ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
       ..lineTo(arrowheadPointX, arrowheadPointY)
       ..close();
-    
+
     final Paint paint = Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
