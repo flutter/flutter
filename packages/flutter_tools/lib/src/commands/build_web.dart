@@ -102,10 +102,19 @@ class BuildWebCommand extends BuildSubCommand {
         help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
         negatable: false,
       );
+      argParser.addFlag(
+        'omit-type-checks',
+        help: 'Omit type checks in Wasm output.',
+        negatable: false,
+      );
     } else {
-      // Add the flag as hidden. Will give a helpful error message in [runCommand] below.
+      // Add the flags as hidden. Will give a helpful error message in [runCommand] below.
       argParser.addFlag(
         FlutterOptions.kWebWasmFlag,
+        hide: true,
+      );
+      argParser.addFlag(
+        'omit-type-checks',
         hide: true,
       );
     }
@@ -139,7 +148,9 @@ class BuildWebCommand extends BuildSubCommand {
       if (!featureFlags.isFlutterWebWasmEnabled) {
         throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
       }
-      compilerConfig = const WasmCompilerConfig();
+      compilerConfig = WasmCompilerConfig(
+        omitTypeChecks: boolArg('omit-type-checks'),
+      );
     } else {
       compilerConfig = JsCompilerConfig(
         csp: boolArg('csp'),
