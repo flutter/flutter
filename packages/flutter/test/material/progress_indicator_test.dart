@@ -443,9 +443,23 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
-  testWidgets('CircularProgressIndicator with a round indicator', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator with strokeCap', (WidgetTester tester) async {
     await tester.pumpWidget(const CircularProgressIndicator());
-    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.square),
+        reason: 'Default indeterminate strokeCap is StrokeCap.square.');
+
+    await tester.pumpWidget(const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CircularProgressIndicator(value: 0.5)));
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.butt),
+        reason: 'Default determinate strokeCap is StrokeCap.butt.');
+
+    await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.butt));
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.butt),
+        reason: 'strokeCap can be set to StrokeCap.butt, and will not be overidden.');
 
     await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.round));
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
@@ -579,9 +593,24 @@ void main() {
 
   testWidgets('RefreshProgressIndicator with a round indicator', (WidgetTester tester) async {
     await tester.pumpWidget(const RefreshProgressIndicator());
-    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
+    expect(find.byType(RefreshProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.square),
+        reason: 'Default indeterminate strokeCap is StrokeCap.square');
 
-    await tester.pumpWidget(const RefreshProgressIndicator(strokeCap: StrokeCap.round));
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: RefreshProgressIndicator(strokeCap: StrokeCap.round),
+            ),
+          ),
+        ),
+      ),
+    );
     expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
