@@ -43,7 +43,6 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-    BuildContext context,
     EditableTextState editableTextState,
   ) {
     // Determine if composing region is misspelled.
