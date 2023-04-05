@@ -528,6 +528,7 @@ void main() {
   });
 
   testWidgets('Drawer width defaults to Material spec', (WidgetTester tester) async {
+    const double edgeScrimWidth = 56;
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -543,11 +544,12 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     final RenderBox box = tester.renderObject(find.byType(Drawer));
-    expect(box.size.width, equals(304.0));
+    expect(box.size.width, equals(304.0 + edgeScrimWidth));
   });
 
   testWidgets('Drawer width can be customized by parameter', (WidgetTester tester) async {
     const double smallWidth = 200;
+    const double edgeScrimWidth = 56;
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -565,7 +567,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderBox box = tester.renderObject(find.byType(Drawer));
-    expect(box.size.width, equals(smallWidth));
+    expect(box.size.width, equals(smallWidth + edgeScrimWidth));
   });
 
   testWidgets('Drawer default shape (ltr)', (WidgetTester tester) async {
