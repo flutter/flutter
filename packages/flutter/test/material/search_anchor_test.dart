@@ -1501,6 +1501,7 @@ void main() {
   });
 
   testWidgets('Search view becomes smaller if the window size is smaller than the view size', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(200.0, 200.0);
     tester.view.devicePixelRatio = 1.0;
 
