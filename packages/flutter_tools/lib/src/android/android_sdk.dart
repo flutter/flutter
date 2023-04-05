@@ -409,7 +409,17 @@ class AndroidSdk {
     return null;
   }
 
+  /// Finds the java binary that is used for all operations across the tool.
+  ///
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
+  ///
+  // TODO(andrewkolos): To prevent confusion when debugging Android-related
+  // issues (see https://github.com/flutter/flutter/issues/122609 for an example),
+  // this logic should be consistently followed by any Java-dependent operation
+  // across the  the tool (building Android apps, interacting with the Android SDK, etc.).
+  // Currently, this consistency is fragile since the logic used for building
+  // Android apps exists independently of this method.
+  // See https://github.com/flutter/flutter/issues/124252.
   static String? findJavaBinary({
     required AndroidStudio? androidStudio,
     required FileSystem fileSystem,
