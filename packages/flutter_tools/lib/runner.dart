@@ -22,6 +22,7 @@ import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
+import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
@@ -61,6 +62,44 @@ Future<int> run(
     StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
+        // Ensure that the consent message has been displayed
+        if (globals.analytics.shouldShowMessage) {
+          globals.logger.printStatus(globals.analytics.getConsentMessage);
+
+          // Invoking this will onboard the flutter tool onto
+          // the package on the developer's machine and will
+          // allow for events to be sent to Google Analytics
+          // on subsequent runs of the flutter tool (ie. no events
+          // will be sent on the first run to allow developers to
+          // opt out of collection)
+          globals.analytics.clientShowedMessage();
+        }
+
+        // Disable analytics if user passes in the `--disable-telemetry` option
+        // `flutter --disable-telemetry`
+        //
+        // Same functionality as `flutter config --no-analytics` for disabling
+        // except with the `value` hard coded as false
+        if (args.contains('--disable-telemetry')) {
+          const bool value = false;
+          // The tool sends the analytics event *before* toggling the flag
+          // intentionally to be sure that opt-out events are sent correctly.
+          AnalyticsConfigEvent(enabled: value).send();
+          if (!value) {
+            // Normally, the tool waits for the analytics to all send before the
+            // tool exits, but only when analytics are enabled. When reporting that
+            // analytics have been disable, the wait must be done here instead.
+            await globals.flutterUsage.ensureAnalyticsSent();
+          }
+          globals.flutterUsage.enabled = value;
+          globals.printStatus('Analytics reporting disabled.');
+
+          // TODO(eliasyishak): Set the telemetry for the unified_analytics
+          //  package as well, the above will be removed once we have
+          //  fully transitioned to using the new package
+          await globals.analytics.setTelemetry(value);
+        }
+
         await runner.run(args);
 
         // Triggering [runZoned]'s error callback does not necessarily mean that

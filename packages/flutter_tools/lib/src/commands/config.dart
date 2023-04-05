@@ -139,6 +139,11 @@ class ConfigCommand extends FlutterCommand {
       }
       globals.flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+
+      // TODO(eliasyishak): Set the telemetry for the unified_analytics
+      //  package as well, the above will be removed once we have
+      //  fully transitioned to using the new package
+      await globals.analytics.setTelemetry(value);
     }
 
     if (argResults?.wasParsed('android-sdk') ?? false) {

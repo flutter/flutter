@@ -18,6 +18,8 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -313,6 +315,29 @@ void main() {
       });
     });
   });
+
+    testUsingContext('runner disable telemetry with flag', () async {
+      io.setExitFunctionForTests((int exitCode) {});
+
+      expect(globals.analytics.telemetryEnabled, true);
+      expect(globals.analytics.shouldShowMessage, true);
+
+      await runner.run(
+        <String>['--disable-telemetry'],
+        () => <FlutterCommand>[],
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        shutdownHooks: ShutdownHooks(),
+      );
+
+      expect(globals.analytics.telemetryEnabled, false);
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => FakeAnalytics(),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
@@ -450,4 +475,31 @@ class WaitingCrashReporter implements CrashReporter {
     _details = details;
     return _future;
   }
+}
+
+/// A fake [Analytics] that will be used to test
+/// the --disable-telemetry flag
+class FakeAnalytics extends Fake implements Analytics {
+  bool _fakeTelemetryStatus = true;
+  bool _fakeShowMessage = true;
+
+  @override
+  String get getConsentMessage => 'message';
+
+  @override
+  bool get shouldShowMessage => _fakeShowMessage;
+
+  @override
+  void clientShowedMessage() {
+    _fakeShowMessage = false;
+  }
+
+  @override
+  Future<void> setTelemetry(bool reportingBool) {
+    _fakeTelemetryStatus = reportingBool;
+    return Future<void>.value();
+  }
+
+  @override
+  bool get telemetryEnabled => _fakeTelemetryStatus;
 }

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
@@ -85,6 +87,22 @@ final BotDetector _defaultBotDetector = BotDetector(
   ),
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+
+// Analytics instance for package:unified_analytics for telemetry
+// reporting for all Flutter and Dart related tooling
+Analytics get analytics => context.get<Analytics>() ?? getDefaultAnalytics();
+Analytics getDefaultAnalytics() {
+
+  initializeDateFormatting();
+  final Analytics defaultAnalytics = Analytics(
+    tool: DashTool.flutterTool,
+    flutterChannel: flutterVersion.channel,
+    flutterVersion: flutterVersion.frameworkVersion,
+    dartVersion: flutterVersion.dartSdkVersion,
+  );
+
+  return defaultAnalytics;
+}
 
 /// Currently active implementation of the file system.
 ///
