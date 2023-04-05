@@ -426,22 +426,6 @@ class AndroidSdk {
       return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
     }
 
-    // MacOS specific logic to avoid popping up a dialog window.
-    // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
-    if (platform.isMacOS) {
-      try {
-        final String javaHomeOutput = globals.processUtils.runSync(
-          <String>['/usr/libexec/java_home', '-v', '1.8'],
-          throwOnError: true,
-          hideStdout: true,
-        ).stdout.trim();
-        if (javaHomeOutput.isNotEmpty) {
-          final String javaHome = javaHomeOutput.split('\n').last.trim();
-          return fileSystem.path.join(javaHome, 'bin', 'java');
-        }
-      } on Exception { /* ignore */ }
-    }
-
     // Fallback to PATH based lookup.
     return operatingSystemUtils.which(_javaExecutable)?.path;
   }
