@@ -42,13 +42,6 @@
   }
 }
 
-// This always returns NSTerminateNow, since by the time we get here, the
-// application has already been asked if it should terminate or not, and if not,
-// then termination never gets this far.
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender {
-  return NSTerminateNow;
-}
-
 #pragma mark Private Methods
 
 - (NSString*)applicationName {
@@ -58,6 +51,24 @@
     applicationName = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleName"];
   }
   return applicationName;
+}
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication* _Nonnull)sender {
+  // If the framework has already told us to terminate, terminate immediately.
+  if ([[self terminationHandler] shouldTerminate]) {
+    return NSTerminateNow;
+  }
+
+  // Send a termination request to the framework.
+  FlutterEngineTerminationHandler* terminationHandler = [self terminationHandler];
+  [terminationHandler requestApplicationTermination:sender
+                                           exitType:kFlutterAppExitTypeCancelable
+                                             result:nil];
+
+  // Cancel termination to allow the framework to handle the request asynchronously. When the
+  // termination request returns from the app, if termination is desired, this method will be
+  // reinvoked with self.terminationHandler.shouldTerminate set to YES.
+  return NSTerminateCancel;
 }
 
 @end
