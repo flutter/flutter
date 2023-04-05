@@ -66,7 +66,7 @@ class GradleJavaVersionConflictMigration extends ProjectMigrator {
           'and gradle, upgrading gradle version from $existingVersion to 7.4');
       return line.replaceAll(existingVersionString, _newGradleVersionString);
     }
-    //Version of gradle is already high enough, no migration necessary.
+    // Version of gradle is already high enough, no migration necessary.
     return line;
   }
 }
