@@ -5412,6 +5412,130 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            maxLines: null,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc\ndef\nghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and move to '|i'.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/122519
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            maxLines: null,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc\ndef\nghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and attempt move
+    // to '|g'. The cursor will not move because the `VerticalDragGestureRecognizer`
+    // in the scrollable will beat the `TapAndHorizontalDragGestureRecognizer`
+    // in the TextField. This is because moving from `|a` to `|g` is a completely
+    // vertical movement.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // Release the pointer.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and move to '|i'.
+    // Unlike our previous attempt to drag to `|g`, this works because moving
+    // to `|i` includes a horizontal movement so the `TapAndHorizontalDragGestureRecognizer`
+    // in TextField can beat the `VerticalDragGestureRecognizer` in the scrollable.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
   testWidgets('Can move cursor when dragging (Android)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
