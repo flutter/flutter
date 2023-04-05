@@ -13,9 +13,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterApplication.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDelegate_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterApplication_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
@@ -176,15 +174,11 @@ constexpr char kTextPlainFormat[] = "text/plain";
   _terminator = terminator ? terminator : ^(id sender) {
     // Default to actually terminating the application. The terminator exists to
     // allow tests to override it so that an actual exit doesn't occur.
-    FlutterApplication* flutterApp = [FlutterApplication sharedApplication];
-    if (flutterApp && [flutterApp respondsToSelector:@selector(terminateApplication:)]) {
-      [[FlutterApplication sharedApplication] terminateApplication:sender];
-    } else if (flutterApp) {
-      [flutterApp terminate:sender];
-    }
+    NSApplication* flutterApp = [NSApplication sharedApplication];
+    [flutterApp terminate:sender];
   };
   FlutterAppDelegate* appDelegate =
-      (FlutterAppDelegate*)[[FlutterApplication sharedApplication] delegate];
+      (FlutterAppDelegate*)[[NSApplication sharedApplication] delegate];
   appDelegate.terminationHandler = self;
   return self;
 }
@@ -202,7 +196,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
   FlutterAppExitType exitType =
       [type isEqualTo:@"cancelable"] ? kFlutterAppExitTypeCancelable : kFlutterAppExitTypeRequired;
 
-  [self requestApplicationTermination:[FlutterApplication sharedApplication]
+  [self requestApplicationTermination:[NSApplication sharedApplication]
                              exitType:exitType
                                result:result];
 }
@@ -212,6 +206,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
 - (void)requestApplicationTermination:(id)sender
                              exitType:(FlutterAppExitType)type
                                result:(nullable FlutterResult)result {
+  _shouldTerminate = YES;
   switch (type) {
     case kFlutterAppExitTypeCancelable: {
       FlutterJSONMethodCodec* codec = [FlutterJSONMethodCodec sharedInstance];
@@ -238,6 +233,8 @@ constexpr char kTextPlainFormat[] = "text/plain";
                    NSDictionary* replyArgs = (NSDictionary*)decoded_reply;
                    if ([replyArgs[@"response"] isEqual:@"exit"]) {
                      _terminator(sender);
+                   } else if ([replyArgs[@"response"] isEqual:@"cancel"]) {
+                     _shouldTerminate = NO;
                    }
                    if (result != nil) {
                      result(replyArgs);
