@@ -516,20 +516,31 @@ class WebBuiltInAssets extends Target {
     Source.hostArtifact(HostArtifact.flutterWebSdk),
   ];
 
+  Directory get _canvasKitDirectory =>
+    globals.fs.directory(
+      fileSystem.path.join(
+        globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+        'canvaskit',
+      )
+    );
+
+  List<File> get _canvasKitFiles => _canvasKitDirectory.listSync(recursive: true).whereType<File>().toList();
+
+  String _filePathRelativeToCanvasKitDirectory(File file) =>
+    fileSystem.path.relative(file.path, from: _canvasKitDirectory.path);
+
   @override
-  List<Source> get outputs => const <Source>[];
+  List<Source> get outputs => <Source>[
+    if (isWasm) const Source.pattern('{BUILD_DIR}/main.dart.js'),
+    const Source.pattern('{BUILD_DIR}/flutter.js'),
+    for (final File file in _canvasKitFiles)
+      Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
-    final Directory canvasKitDirectory = globals.fs.directory(
-      globals.artifacts!.getArtifactPath(
-        Artifact.canvasKitPath,
-        platform: TargetPlatform.web_javascript,
-      ),
-    );
-
-    for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
-      final String relativePath = fileSystem.path.relative(file.path, from: canvasKitDirectory.path);
+    for (final File file in _canvasKitFiles) {
+      final String relativePath = _filePathRelativeToCanvasKitDirectory(file);
       final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
       file.copySync(targetPath);
     }

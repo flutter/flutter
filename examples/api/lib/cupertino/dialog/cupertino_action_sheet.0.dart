@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoActionSheet].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoActionSheet].
 
 void main() => runApp(const ActionSheetApp());
 
