@@ -32,14 +32,31 @@
             "ninja": {
                 "config": "host_debug",
                 "targets": [
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
+                    "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:dart_sdk_archive",
-                    "flutter/build/archives:archive_gen_snapshot",
-                    "flutter/build/archives:flutter_embedder_framework"
+                    "flutter/build/archives:flutter_embedder_framework",
+		    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
+                    "flutter/tools/font-subset",
+                    "flutter:unittests"
                 ]
             },
-            "tests": []
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Host Tests for host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--type",
+                        "dart",
+                        "--engine-capture-core-dump"
+                    ],
+                    "script": "flutter/testing/run_tests.py",
+                    "type": "local"
+                }
+	    ]
         },
         {
             "archives": [
@@ -71,9 +88,10 @@
             "ninja": {
                 "config": "host_profile",
                 "targets": [
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
+		    "flutter/build/dart:copy_dart_sdk",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter:unittests"
                 ]
             },
@@ -85,7 +103,7 @@
                         "--variant",
                         "host_profile",
                         "--type",
-                        "engine",
+                        "dart,engine",
                         "--engine-capture-core-dump"
                     ],
                     "script": "flutter/testing/run_tests.py",
@@ -129,20 +147,22 @@
                 "targets": [
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
+		    "flutter/build/dart:copy_dart_sdk",
                     "flutter/impeller/golden_tests:impeller_golden_tests",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
-                    "flutter/tools/font-subset"
+                    "flutter/tools/font-subset",
+                    "flutter:unittests"
                 ]
             },
             "tests": [
                 {
                     "language": "python3",
-                    "name": "Impeller golden Tests for host_release",
+                    "name": "Impeller-golden, dart and engine tests for host_release",
                     "parameters": [
                         "--variant",
                         "host_release",
                         "--type",
-                        "impeller-golden"
+                        "dart,engine,impeller-golden"
                     ],
                     "script": "flutter/testing/run_tests.py",
                     "type": "local"
@@ -182,9 +202,10 @@
             "ninja": {
                 "config": "mac_debug_arm64",
                 "targets": [
-                    "flutter/build/archives:dart_sdk_archive",
+		    "flutter/tools/font-subset",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
+                    "flutter/build/archives:dart_sdk_archive",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
@@ -195,7 +216,9 @@
                 {
                     "base_path": "out/mac_profile_arm64/zip_archives/",
                     "type": "gcs",
-                    "include_paths": [],
+                    "include_paths": [
+                        "out/mac_profile_arm64/zip_archives/darwin-arm64-profile/artifacts.zip"
+		    ],
                     "name": "mac_profile_arm64"
                 }
             ],
@@ -220,7 +243,7 @@
             "ninja": {
                 "config": "mac_profile_arm64",
                 "targets": [
-                    "flutter/build/archives:archive_gen_snapshot",
+                    "flutter/build/archives:artifacts",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
@@ -232,7 +255,8 @@
                     "base_path": "out/mac_release_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/mac_release_arm64/zip_archives/darwin-arm64/font-subset.zip"
+                        "out/mac_release_arm64/zip_archives/darwin-arm64/font-subset.zip",
+                        "out/mac_release_arm64/zip_archives/darwin-arm64-release/artifacts.zip"
                     ],
                     "name": "mac_release_arm64"
                 }
@@ -258,9 +282,9 @@
             "ninja": {
                 "config": "mac_release_arm64",
                 "targets": [
-                    "flutter/build/archives:archive_gen_snapshot",
-                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
-                    "flutter/tools/font-subset"
+                    "flutter/tools/font-subset",
+                    "flutter/build/archives:artifacts",
+                    "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
             },
             "tests": []
