@@ -212,7 +212,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _debugIsRenderViewInitialized = true;
       return true;
     }());
-    renderView = RenderView(configuration: createViewConfiguration(), window: platformDispatcher.implicitView!);
+    renderView = RenderView(configuration: createViewConfiguration(), view: platformDispatcher.implicitView!);
     renderView.prepareInitialFrame();
   }
   bool _debugIsRenderViewInitialized = false;

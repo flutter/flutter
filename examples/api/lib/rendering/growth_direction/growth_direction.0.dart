@@ -2,29 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [GrowthDirection]s.
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+/// Flutter code sample for [GrowthDirection]s.
 
 void main() => runApp(const ExampleApp());
 
 class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: MyWidget(),
     );
   }
 }
 
 class MyWidget extends StatefulWidget {
-  const MyWidget({ super.key });
+  const MyWidget({super.key});
 
   @override
   State<MyWidget> createState() => _MyWidgetState();
@@ -41,30 +38,30 @@ class _MyWidgetState extends State<MyWidget> {
 
   Widget _getArrows(AxisDirection axisDirection) {
     final Widget arrow;
-    switch(axisDirection) {
+    switch (axisDirection) {
       case AxisDirection.up:
         arrow = const Icon(Icons.arrow_upward_rounded);
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ],
+          children: <Widget>[arrow, arrow],
         );
       case AxisDirection.down:
         arrow = const Icon(Icons.arrow_downward_rounded);
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ],
+          children: <Widget>[arrow, arrow],
         );
       case AxisDirection.left:
         arrow = const Icon(Icons.arrow_back_rounded);
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ],
+          children: <Widget>[arrow, arrow],
         );
       case AxisDirection.right:
         arrow = const Icon(Icons.arrow_forward_rounded);
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[ arrow, arrow ],
+          children: <Widget>[arrow, arrow],
         );
     }
   }
@@ -91,11 +88,12 @@ class _MyWidgetState extends State<MyWidget> {
           _spacer,
           Text(constraints.growthDirection.toString()),
           _spacer,
-          _getArrows(isForward
-            ? _axisDirection
-            // This method is available to conveniently flip an AxisDirection
-            // into its opposite direction.
-            : flipAxisDirection(_axisDirection),
+          _getArrows(
+            isForward
+                ? _axisDirection
+                // This method is available to conveniently flip an AxisDirection
+                // into its opposite direction.
+                : flipAxisDirection(_axisDirection),
           ),
         ],
       ),
@@ -149,7 +147,7 @@ class _MyWidgetState extends State<MyWidget> {
     );
   }
 
-  Widget _getList({ required bool isForward }) {
+  Widget _getList({required bool isForward}) {
     // The SliverLayoutBuilder is not necessary, and is here to allow us to see
     // the SliverConstraints & directional information that is provided to the
     // SliverList when laying out.
@@ -164,8 +162,8 @@ class _MyWidgetState extends State<MyWidget> {
             } else {
               child = Container(
                 color: isForward
-                  ? (index.isEven ? Colors.amber[100] : Colors.amberAccent)
-                  : (index.isEven ? Colors.green[100] : Colors.lightGreen),
+                    ? (index.isEven ? Colors.amber[100] : Colors.amberAccent)
+                    : (index.isEven ? Colors.green[100] : Colors.lightGreen),
                 padding: const EdgeInsets.all(8.0),
                 child: Center(child: Text(_alphabet[index - 1])),
               );
