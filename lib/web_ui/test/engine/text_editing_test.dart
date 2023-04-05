@@ -90,7 +90,8 @@ Future<void> testMain() async {
       );
       // The focus initially is on the body.
       expect(domDocument.activeElement, domDocument.body);
-      expect(defaultTextEditingRoot.activeElement, null);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
+          domDocument.body);
 
       editingStrategy!.enable(
         singlelineConfig,
@@ -105,8 +106,8 @@ Future<void> testMain() async {
       final DomElement input = defaultTextEditingRoot.querySelector('input')!;
       // Now the editing element should have focus.
 
-      expect(domDocument.activeElement, flutterViewEmbedder.glassPaneElement);
-      expect(defaultTextEditingRoot.activeElement, input);
+      expect(domDocument.activeElement, input);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement, input);
 
       expect(editingStrategy!.domElement, input);
       expect(input.getAttribute('type'), null);
@@ -121,7 +122,8 @@ Future<void> testMain() async {
       );
       // The focus is back to the body.
       expect(domDocument.activeElement, domDocument.body);
-      expect(defaultTextEditingRoot.activeElement, null);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
+          domDocument.body);
     });
 
     test('Respects read-only config', () {
@@ -280,7 +282,7 @@ Future<void> testMain() async {
       final DomHTMLTextAreaElement textarea =
           defaultTextEditingRoot.querySelector('textarea')! as DomHTMLTextAreaElement;
       // Now the textarea should have focus.
-      expect(defaultTextEditingRoot.activeElement, textarea);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement, textarea);
       expect(editingStrategy!.domElement, textarea);
 
       textarea.value = 'foo\nbar';
@@ -302,7 +304,8 @@ Future<void> testMain() async {
       // The textarea should be cleaned up.
       expect(defaultTextEditingRoot.querySelectorAll('textarea'), hasLength(0));
       // The focus is back to the body.
-      expect(defaultTextEditingRoot.activeElement, null);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
+          domDocument.body);
 
       // There should be no input action.
       expect(lastInputAction, isNull);
@@ -619,7 +622,7 @@ Future<void> testMain() async {
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
-      expect(defaultTextEditingRoot.activeElement,
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
           textEditing!.strategy.domElement);
     });
 
@@ -679,7 +682,8 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
       // Editing shouldn't have started yet.
-      expect(defaultTextEditingRoot.activeElement, null);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
+          domDocument.body);
 
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
@@ -704,7 +708,7 @@ Future<void> testMain() async {
       expect(spy.messages, hasLength(0));
       await Future<void>.delayed(Duration.zero);
       // DOM element still keeps the focus.
-      expect(defaultTextEditingRoot.activeElement,
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
           textEditing!.strategy.domElement);
     });
 
@@ -722,7 +726,8 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
       // Editing shouldn't have started yet.
-      expect(defaultTextEditingRoot.activeElement, null);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
+          domDocument.body);
 
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
@@ -751,7 +756,8 @@ Future<void> testMain() async {
           spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
       await Future<void>.delayed(Duration.zero);
       // DOM element loses the focus.
-      expect(defaultTextEditingRoot.activeElement, null);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
+          domDocument.body);
     },
         // Test on ios-safari only.
         skip: browserEngine != BrowserEngine.webkit ||
@@ -772,7 +778,8 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
       // Editing shouldn't have started yet.
-      expect(defaultTextEditingRoot.activeElement, null);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
+          domDocument.body);
 
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
@@ -1151,7 +1158,8 @@ Future<void> testMain() async {
         // In Safari Desktop Autofill menu appears as soon as an element is
         // focused, therefore the input element is only focused after the
         // location is received.
-        expect(defaultTextEditingRoot.activeElement, inputElement);
+        expect(
+            defaultTextEditingRoot.ownerDocument?.activeElement, inputElement);
         expect(inputElement.selectionStart, 2);
         expect(inputElement.selectionEnd, 3);
       }
@@ -1164,7 +1172,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(updateSizeAndTransform));
 
       // Check the element still has focus. User can keep editing.
-      expect(defaultTextEditingRoot.activeElement,
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
           textEditing!.strategy.domElement);
 
       // Check the cursor location is the same.
@@ -1764,7 +1772,8 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
       // Editing shouldn't have started yet.
-      expect(defaultTextEditingRoot.activeElement, null);
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement,
+          domDocument.body);
 
       const MethodCall show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
@@ -2646,7 +2655,7 @@ void checkInputEditingState(
   expect(element, isNotNull);
   expect(domInstanceOfString(element, 'HTMLInputElement'), true);
   final DomHTMLInputElement input = element! as DomHTMLInputElement;
-  expect(defaultTextEditingRoot.activeElement, input);
+  expect(defaultTextEditingRoot.ownerDocument?.activeElement, input);
   expect(input.value, text);
   expect(input.selectionStart, start);
   expect(input.selectionEnd, end);
@@ -2672,7 +2681,7 @@ void checkTextAreaEditingState(
   int start,
   int end,
 ) {
-  expect(defaultTextEditingRoot.activeElement, textarea);
+  expect(defaultTextEditingRoot.ownerDocument?.activeElement, textarea);
   expect(textarea.value, text);
   expect(textarea.selectionStart, start);
   expect(textarea.selectionEnd, end);
