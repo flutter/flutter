@@ -4,13 +4,18 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
+import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart' show FakeAndroidStudio, FakeOperatingSystemUtils;
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -340,6 +345,132 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       Platform: () => FakePlatform(operatingSystem: 'windows'),
       Config: () => config,
+    });
+  });
+
+  group('java version', () {
+    const String exampleJdk8Output = '''
+java version "1.8.0_202"
+Java(TM) SE Runtime Environment (build 1.8.0_202-b10)
+Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
+''';
+    // Example strings came from actual terminal output.
+    testWithoutContext('parses jdk 8', () {
+      expect(AndroidSdk.parseJavaVersion(exampleJdk8Output), '1.8.0');
+    });
+
+    testWithoutContext('parses jdk 11 windows', () {
+      const String exampleJdkOutput = '''
+java version "11.0.14"
+Java(TM) SE Runtime Environment (build 11.0.14+10-b13)
+Java HotSpot(TM) 64-Bit Server VM (build 11.0.14+10-b13, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.14');
+    });
+
+    testWithoutContext('parses jdk 11 mac/linux', () {
+      const String exampleJdkOutput = '''
+openjdk version "11.0.18" 2023-01-17 LTS
+OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
+OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.18');
+    });
+
+    testWithoutContext('parses jdk 17', () {
+      const String exampleJdkOutput = '''
+openjdk 17.0.6 2023-01-17
+OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)
+OpenJDK 64-Bit Server VM (build 17.0.6+0-17.0.6b802.4-9586694, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '17.0.6');
+    });
+
+    testWithoutContext('parses jdk 19', () {
+      const String exampleJdkOutput = '''
+openjdk 19.0.2 2023-01-17
+OpenJDK Runtime Environment Homebrew (build 19.0.2)
+OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0.2');
+    });
+
+    // https://chrome-infra-packages.appspot.com/p/flutter/java/openjdk/
+    testWithoutContext('parses jdk output from ci', () {
+      const String exampleJdkOutput = '''
+openjdk 11.0.2 2019-01-15
+OpenJDK Runtime Environment 18.9 (build 11.0.2+9)
+OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
+''';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '11.0.2');
+    });
+
+    testWithoutContext('parses jdk two number versions', () {
+      const String exampleJdkOutput = 'openjdk 19.0 2023-01-17';
+      expect(AndroidSdk.parseJavaVersion(exampleJdkOutput), '19.0');
+    });
+
+    testUsingContext('getJavaBinary with AS install', () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      config.setValue('android-sdk', sdkDir.path);
+      final AndroidStudio androidStudio = FakeAndroidStudio();
+
+      final String javaPath = AndroidSdk.findJavaBinary(
+          androidStudio: androidStudio,
+          fileSystem: fileSystem,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          platform: platform)!;
+      // Built from the implementation of findJavaBinary android studio case.
+      final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+
+      expect(javaPath, expectedJavaPath);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Config: () => config,
+      Platform: () => FakePlatform(environment: <String, String>{}),
+    });
+
+    group('java', () {
+      late AndroidStudio androidStudio;
+      setUp(() {
+        androidStudio = FakeAndroidStudio();
+      });
+      testUsingContext('getJavaVersion finds AS java and parses version', () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final ProcessUtils processUtils = ProcessUtils(
+            processManager: processManager, logger: BufferLogger.test());
+        // Built from the implementation of findJavaBinary android studio case.
+        final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+
+        processManager.addCommand(FakeCommand(
+          command: <String>[
+            expectedJavaPath,
+            '--version',
+          ],
+          stdout: exampleJdk8Output,
+        ));
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+
+        final String? javaVersion = sdk.getJavaVersion(
+          androidStudio: androidStudio,
+          fileSystem: fileSystem,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          platform: FakePlatform(),
+          processUtils: processUtils,
+        );
+
+        expect(javaVersion, '1.8.0');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        AndroidStudio: () => androidStudio,
+        Config: () => config,
+        Platform: () => FakePlatform(environment: <String, String>{}),
+      });
     });
   });
 }

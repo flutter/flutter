@@ -236,7 +236,6 @@ Future<T> runInContext<T>(
         fuchsiaArtifacts: globals.fuchsiaArtifacts!,
       ),
       GradleUtils: () => GradleUtils(
-        fileSystem: globals.fs,
         operatingSystemUtils: globals.os,
         logger: globals.logger,
         platform: globals.platform,

@@ -56,6 +56,57 @@ baz=qux
 
       expect(Version.parse('Preview2.2'), isNull);
     });
+
+    group('isWithinVersionRange', () {
+      test('unknown not included', () {
+        expect(isWithinVersionRange('unknown', min: '1.0.0', max: '1.1.3'),
+            isFalse);
+      });
+
+      test('pre java 8 format included', () {
+        expect(isWithinVersionRange('1.0.0_201', min: '1.0.0', max: '1.1.3'),
+            isTrue);
+      });
+
+      test('min included by default', () {
+        expect(
+            isWithinVersionRange('1.0.0', min: '1.0.0', max: '1.1.3'), isTrue);
+      });
+
+      test('max included by default', () {
+        expect(
+            isWithinVersionRange('1.1.3', min: '1.0.0', max: '1.1.3'), isTrue);
+      });
+
+      test('inclusive min excluded', () {
+        expect(
+            isWithinVersionRange('1.0.0',
+                min: '1.0.0', max: '1.1.3', inclusiveMin: false),
+            isFalse);
+      });
+
+      test('inclusive max excluded', () {
+        expect(
+            isWithinVersionRange('1.1.3',
+                min: '1.0.0', max: '1.1.3', inclusiveMax: false),
+            isFalse);
+      });
+
+      test('lower value excluded', () {
+        expect(
+            isWithinVersionRange('0.1.0', min: '1.0.0', max: '1.1.3'), isFalse);
+      });
+
+      test('higher value excluded', () {
+        expect(
+            isWithinVersionRange('1.1.4', min: '1.0.0', max: '1.1.3'), isFalse);
+      });
+
+      test('middle value included', () {
+        expect(
+            isWithinVersionRange('1.1.0', min: '1.0.0', max: '1.1.3'), isTrue);
+      });
+    });
   });
 
   group('Misc', () {
