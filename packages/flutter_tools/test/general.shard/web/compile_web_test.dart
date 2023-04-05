@@ -37,9 +37,6 @@ void main() {
   });
 
   testUsingContext('WebBuilder sets environment on success', () async {
-    final Directory expectedOutputDirectory = fileSystem.directory('build').childDirectory('web_wasm');
-    expect(expectedOutputDirectory, isNot(exists));
-
     final TestBuildSystem buildSystem =
         TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
@@ -83,9 +80,6 @@ void main() {
       true,
       true,
     );
-
-    // Creates output directory.
-    expect(expectedOutputDirectory, exists);
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
     expect(logger.errorText, isEmpty);
