@@ -21,9 +21,15 @@ wasm_toolchain("canvaskit") {
   }
 }
 
-group("canvaskit_group") {
+copy("canvaskit_group") {
   visibility = [ "//flutter/web_sdk:*" ]
   public_deps = [ "//third_party/skia/modules/canvaskit(:canvaskit)" ]
+
+  sources = [
+    "$root_out_dir/canvaskit/canvaskit.js",
+    "$root_out_dir/canvaskit/canvaskit.wasm",
+  ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
 }
 
 # This toolchain is only to be used by canvaskit_chromium_group below.
@@ -57,5 +63,19 @@ copy("canvaskit_chromium_group") {
     "$root_out_dir/canvaskit_chromium/canvaskit.js",
     "$root_out_dir/canvaskit_chromium/canvaskit.wasm",
   ]
-  outputs = [ "$root_out_dir/canvaskit/chromium/{{source_file_part}}" ]
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/canvaskit/chromium/{{source_file_part}}",
+  ]
+}
+
+copy("skwasm_group") {
+  visibility = [ "//flutter/web_sdk:*" ]
+  public_deps = [ "//flutter/lib/web_ui/skwasm" ]
+
+  sources = [
+    "$root_out_dir/skwasm.js",
+    "$root_out_dir/skwasm.wasm",
+    "$root_out_dir/skwasm.worker.js",
+  ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]
 }
