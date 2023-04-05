@@ -11,7 +11,7 @@ import '../android_studio.dart';
 // Android Studio 2022.2 "Flamingo" is the first to bundle a Java 17 JDK.
 // Previous versions bundled a Java 11 JDK.
 final Version _androidStudioFlamingo = Version(2022, 2, 0);
-final RegExp _distributionUrlMatch = RegExp(r'^\s*distributionUrl');
+final RegExp _distributionUrlMatch = RegExp(r'^\s*distributionUrl\s*=');
 final RegExp _gradleVersionMatch = RegExp(
   r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(?:all|bin)\.zip');
 final Version _lowestSupportedGradleVersion = Version(7, 3, 0); // minimum for JDK 17
