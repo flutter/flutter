@@ -13,7 +13,7 @@ abstract class WebCompilerConfig {
   Map<String, String> toBuildSystemEnvironment();
 }
 
-/// Configuration for the Javascript compiler.
+/// Configuration for the Dart-to-Javascript compiler (dart2js).
 class JsCompilerConfig extends WebCompilerConfig {
   const JsCompilerConfig({
     required this.csp,
@@ -72,26 +72,26 @@ class JsCompilerConfig extends WebCompilerConfig {
   /// Build environment flag for [nativeNullAssertions].
   static const String kNativeNullAssertions = 'NativeNullAssertions';
 
-  /// Whether to disable dynamic generation code to satisfy csp policies.
+  /// Whether to disable dynamic generation code to satisfy CSP policies.
   final bool csp;
 
-  /// If `--dump-info` should be passed to dart2js.
+  /// If `--dump-info` should be passed to the compiler.
   final bool dumpInfo;
 
-  /// Whether the dart2js native null assertions are enabled.
+  /// Whether native null assertions are enabled.
   final bool nativeNullAssertions;
 
   // If `--no-frequency-based-minification` should be passed to dart2js
   // TODO(kevmoo): consider renaming this to be "positive". Double negatives are confusing.
   final bool noFrequencyBasedMinification;
 
-  /// An override for the dart2js build mode.
+  /// The compiler optimization level.
   ///
   /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
   // TODO(kevmoo): consider storing this as an [int] and validating it!
   final String optimizationLevel;
 
-  /// Whether the dart2js build should output source maps.
+  /// `true` if the JavaScript compiler build should output source maps.
   final bool sourceMaps;
 
   @override
@@ -107,13 +107,13 @@ class JsCompilerConfig extends WebCompilerConfig {
         kSourceMapsEnabled: sourceMaps.toString(),
       };
 
-  /// dart2js arguments to use in both phases: full compile and CFE-only.
+  /// Arguments to use in both phases: full JS compile and CFE-only.
   List<String> toSharedCommandOptions() => <String>[
         if (nativeNullAssertions) '--native-null-assertions',
         if (!sourceMaps) '--no-source-maps',
       ];
 
-  /// dart2js arguments to use in the full compile, but not CFE-only.
+  /// Arguments to use in the full JS compile, but not CFE-only.
   ///
   /// Includes the contents of [toSharedCommandOptions].
   List<String> toCommandOptions() => <String>[
