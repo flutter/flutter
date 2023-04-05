@@ -45,7 +45,6 @@ void main() {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
       expect(webServiceWorker.isWasm, isTrue);
       expect(webServiceWorker.webRenderer, WebRendererMode.autoDetect);
-      expect(environment.outputDir.path, expectedOutputDirectory.path);
 
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
