@@ -52,10 +52,10 @@ Future<void> buildWeb(
 
   if (isWasm) {
     globals.logger.printBox(
+      title: 'Experimental feature',
       '''
 WebAssembly compilation is experimental.
 See $kWasmPreviewUri for more information.''',
-      title: 'Experimental feature',
     );
   }
 
