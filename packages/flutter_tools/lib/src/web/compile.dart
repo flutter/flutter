@@ -54,7 +54,7 @@ Future<void> buildWeb(
     globals.logger.printBox(
       '''
 WebAssembly compilation is experimental.
-See $wasmPreviewUri for more information.''',
+See $kWasmPreviewUri for more information.''',
       title: 'Experimental feature',
     );
   }
@@ -159,4 +159,4 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
   },
 };
 
-const String wasmPreviewUri = 'https://flutter.dev/wasm';
+const String kWasmPreviewUri = 'https://flutter.dev/wasm';
