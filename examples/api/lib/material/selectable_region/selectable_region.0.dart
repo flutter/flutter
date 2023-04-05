@@ -2,25 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SelectableRegion].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SelectableRegion].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SelectableRegionExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SelectableRegionExampleApp extends StatelessWidget {
+  const SelectableRegionExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: SelectionArea(
         child: Scaffold(
-          appBar: AppBar(title: const Text(_title)),
+          appBar: AppBar(title: const Text('SelectableRegion Sample')),
           body: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -86,8 +83,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   _RenderSelectableAdapter(
     Color selectionColor,
     SelectionRegistrar registrar,
-  ) : _selectionColor = selectionColor,
-      _geometry = ValueNotifier<SelectionGeometry>(_noSelection) {
+  )   : _selectionColor = selectionColor,
+        _geometry = ValueNotifier<SelectionGeometry>(_noSelection) {
     this.registrar = registrar;
     _geometry.addListener(markNeedsPaint);
   }
@@ -121,12 +118,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   // Adjust this value to enlarge or shrink the selection highlight.
   static const double _padding = 10.0;
   Rect _getSelectionHighlightRect() {
-    return Rect.fromLTWH(
-      0 - _padding,
-      0 - _padding,
-      size.width + _padding * 2,
-      size.height + _padding * 2
-    );
+    return Rect.fromLTWH(0 - _padding, 0 - _padding, size.width + _padding * 2, size.height + _padding * 2);
   }
 
   Offset? _start;
@@ -222,7 +214,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
         final double horizontalBaseLine = globalToLocal(Offset(event.dx, 0)).dx;
         final Offset newOffset;
         final bool forward;
-        switch(extendSelectionEvent.direction) {
+        switch (extendSelectionEvent.direction) {
           case SelectionExtendDirection.backward:
           case SelectionExtendDirection.previousLine:
             forward = false;
@@ -244,7 +236,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
               _start = _end = Offset.zero;
             }
             // Move the corresponding selection edge.
-            if (extendSelectionEvent.direction == SelectionExtendDirection.nextLine || horizontalBaseLine > size.width) {
+            if (extendSelectionEvent.direction == SelectionExtendDirection.nextLine ||
+                horizontalBaseLine > size.width) {
               newOffset = Offset.infinite;
             } else {
               newOffset = Offset.zero;
@@ -305,7 +298,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           link: _startHandle!,
           offset: offset + value.startSelectionPoint!.localPosition,
         ),
-        (PaintingContext context, Offset offset) { },
+        (PaintingContext context, Offset offset) {},
         Offset.zero,
       );
     }
@@ -315,7 +308,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           link: _endHandle!,
           offset: offset + value.endSelectionPoint!.localPosition,
         ),
-        (PaintingContext context, Offset offset) { },
+        (PaintingContext context, Offset offset) {},
         Offset.zero,
       );
     }
