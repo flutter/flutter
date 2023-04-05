@@ -342,32 +342,57 @@ void main() {
               'xcrun',
               'xcdevice',
               'observe',
-              '--both',
-            ], stdout: 'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
+              '--usb',
+            ], stdout: 'Listening for all devices, on USB.\n'
+              'Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418\n'
               'Attach: 00008027-00192736010F802E\n'
               'Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418',
-            stderr: 'Some error',
+            stderr: 'Some usb error',
+          ));
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'observe',
+              '--wifi',
+            ], stdout: 'Listening for all devices, on WiFi.\n'
+              'Attach: 00000001-0000000000000000\n'
+              'Detach: 00000001-0000000000000000',
+            stderr: 'Some wifi error',
           ));
 
           final Completer<void> attach1 = Completer<void>();
           final Completer<void> attach2 = Completer<void>();
           final Completer<void> detach1 = Completer<void>();
+          final Completer<void> attach3 = Completer<void>();
+          final Completer<void> detach2 = Completer<void>();
 
           // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
           // Attach: 00008027-00192736010F802E
           // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-          xcdevice.observedDeviceEvents()!.listen((Map<XCDeviceEvent, String> event) {
-            expect(event.length, 1);
-            if (event.containsKey(XCDeviceEvent.attach)) {
-              if (event[XCDeviceEvent.attach] == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {
+          xcdevice.observedDeviceEvents()!.listen((XCDeviceEventNotification event) {
+            if (event.eventType == XCDeviceEvent.attach) {
+              if (event.deviceIdentifier == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {
                 attach1.complete();
               } else
-              if (event[XCDeviceEvent.attach] == '00008027-00192736010F802E') {
+              if (event.deviceIdentifier == '00008027-00192736010F802E') {
                 attach2.complete();
               }
-            } else if (event.containsKey(XCDeviceEvent.detach)) {
-              expect(event[XCDeviceEvent.detach], 'd83d5bc53967baa0ee18626ba87b6254b2ab5418');
-              detach1.complete();
+              if (event.deviceIdentifier == '00000001-0000000000000000') {
+                attach3.complete();
+              }
+            } else if (event.eventType == XCDeviceEvent.detach) {
+              if (event.deviceIdentifier == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {
+                detach1.complete();
+              }
+              if (event.deviceIdentifier == '00000001-0000000000000000') {
+                detach2.complete();
+              }
             } else {
               fail('Unexpected event');
             }
@@ -375,7 +400,10 @@ void main() {
           await attach1.future;
           await attach2.future;
           await detach1.future;
-          expect(logger.traceText, contains('xcdevice observe error: Some error'));
+          await attach3.future;
+          await detach2.future;
+          expect(logger.errorText, contains('xcdevice observe --usb: Some usb error'));
+          expect(logger.errorText, contains('xcdevice observe --wifi: Some wifi error'));
         });
 
         testUsingContext('handles exit code', () async {
@@ -388,8 +416,21 @@ void main() {
               'xcrun',
               'xcdevice',
               'observe',
-              '--both',
+              '--usb',
             ],
+          ));
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              'script',
+              '-t',
+              '0',
+              '/dev/null',
+              'xcrun',
+              'xcdevice',
+              'observe',
+              '--wifi',
+            ],
+            exitCode: 1,
           ));
 
           final Completer<void> doneCompleter = Completer<void>();
@@ -397,7 +438,8 @@ void main() {
             doneCompleter.complete();
           });
           await doneCompleter.future;
-          expect(logger.traceText, contains('xcdevice exited with code 0'));
+          expect(logger.traceText, contains('xcdevice observe --usb exited with code 0'));
+          expect(logger.traceText, contains('xcdevice observe --wifi exited with code 0'));
         });
 
       });
@@ -418,6 +460,7 @@ void main() {
               '--usb',
               deviceId,
             ],
+            stdout: 'Waiting for $deviceId to appear, on USB.\n',
           ));
           fakeProcessManager.addCommand(const FakeCommand(
             command: <String>[
@@ -431,7 +474,9 @@ void main() {
               '--wifi',
               deviceId,
             ],
-            stdout: 'Attach: 00000001-0000000000000000\n',
+            stdout:
+            'Waiting for $deviceId to appear, on WiFi.\n'
+            'Attach: 00000001-0000000000000000\n',
           ));
 
           // Attach: 00000001-0000000000000000
@@ -459,6 +504,7 @@ void main() {
               deviceId,
             ],
             exitCode: 1,
+            stderr: 'Some error',
           ));
           fakeProcessManager.addCommand(const FakeCommand(
             command: <String>[
@@ -477,6 +523,7 @@ void main() {
           final XCDeviceEventNotification? event = await xcdevice.waitForDeviceToConnect(deviceId);
 
           expect(event, isNull);
+          expect(logger.errorText, contains('xcdevice wait --usb: Some error'));
           expect(logger.traceText, contains('xcdevice wait --usb exited with code 0'));
           expect(logger.traceText, contains('xcdevice wait --wifi exited with code 0'));
           expect(xcdevice.waitStreamController?.isClosed, isTrue);
