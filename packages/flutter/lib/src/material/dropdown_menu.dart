@@ -193,6 +193,10 @@ class DropdownMenu<T> extends StatefulWidget {
   /// specified then the helper text is not shown.
   ///
   /// Defaults to null;
+  ///
+  /// See also:
+  ///
+  /// * [InputDecoration.helperText], which is the text that provides context about the [InputDecorator.child]'s value.
   final String? helperText;
 
   /// Text that appears below the input field and the border to show the error message.
@@ -200,6 +204,10 @@ class DropdownMenu<T> extends StatefulWidget {
   /// If non-null, the border's color animates to red and the [helperText] is not shown.
   ///
   /// Defaults to null;
+  ///
+  /// See also:
+  ///
+  /// * [InputDecoration.errorText], which is the text that appears below the [InputDecorator.child] and the border.
   final String? errorText;
 
   /// An optional icon at the end of the text field to indicate that the text
