@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('InputDecorator label uses error color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.FloatingLabelStyleErrorExampleApp(),
     );
     final Theme theme = tester.firstWidget(find.byType(Theme));
 

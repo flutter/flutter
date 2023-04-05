@@ -153,6 +153,7 @@ Future<TaskResult> runTask(
   bool terminateStrayDartProcesses = false,
   bool silent = false,
   String? localEngine,
+  String? localWebSdk,
   String? localEngineSrcPath,
   String? deviceId,
   List<String>? taskArgs,
@@ -181,6 +182,7 @@ Future<TaskResult> runTask(
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
       if (localEngine != null) '-DlocalEngine=$localEngine',
+      if (localWebSdk != null) '-DlocalWebSdk=$localWebSdk',
       if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
       taskExecutable,
       ...?taskArgs,
