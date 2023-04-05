@@ -15577,9 +15577,10 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             ),
       );
 
-      // Update text with an invalid selection.
+      // Update text without specifying the selection.
       controller.text = 'Updated';
 
+      // As the TextField is focused the selection should be automatically adjusted.
       expect(focusNode.hasFocus, isTrue);
       expect(
         controller.selection,
