@@ -195,6 +195,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     ];
 
     final List<String> compilationArgs = <String>[
+      ...sharedCommandOptions,
       ...compilerConfig.toSharedCommandOptions(),
       '-o',
       environment.buildDir.childFile('app.dill').path,
