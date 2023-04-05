@@ -26,7 +26,7 @@ sk_sp<SkImage> DrawSnapshot(
 
   sk_sp<SkImage> device_snapshot;
   {
-    TRACE_EVENT0("flutter", "MakeDeviceSnpashot");
+    TRACE_EVENT0("flutter", "MakeDeviceSnapshot");
     device_snapshot = surface->makeImageSnapshot();
   }
 
