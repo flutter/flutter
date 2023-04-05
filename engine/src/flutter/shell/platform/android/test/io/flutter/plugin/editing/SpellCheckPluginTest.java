@@ -222,4 +222,29 @@ public class SpellCheckPluginTest {
 
     verify(mockResult).success(expectedResults);
   }
+
+  @Test
+  public void onGetSentenceSuggestionsResultsWithSuccessAndNoResultsWhenSuggestionsAreInvalid() {
+    TextServicesManager fakeTextServicesManager = mock(TextServicesManager.class);
+    SpellCheckChannel fakeSpellCheckChannel = mock(SpellCheckChannel.class);
+    SpellCheckPlugin spellCheckPlugin =
+        spy(new SpellCheckPlugin(fakeTextServicesManager, fakeSpellCheckChannel));
+    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+    spellCheckPlugin.pendingResult = mockResult;
+
+    spellCheckPlugin.onGetSentenceSuggestions(
+        new SentenceSuggestionsInfo[] {
+          new SentenceSuggestionsInfo(
+              (new SuggestionsInfo[] {
+                new SuggestionsInfo(
+                    SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO,
+                    // This is the suggestion that may be provided by the Samsung spell checker:
+                    new String[] {""})
+              }),
+              new int[] {7},
+              new int[] {5})
+        });
+
+    verify(mockResult).success(new ArrayList<HashMap<String, Object>>());
+  }
 }
