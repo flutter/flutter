@@ -2362,7 +2362,7 @@ void main() {
       final ContextMenuButtonItem cutButton = items!.first;
       expect(cutButton.type, ContextMenuButtonType.cut);
 
-      cutButton.onPressed();
+      cutButton.onPressed?.call();
       await tester.pump();
 
       expect(controller.text, isEmpty);
@@ -2430,7 +2430,7 @@ void main() {
       final ContextMenuButtonItem copyButton = items!.first;
       expect(copyButton.type, ContextMenuButtonType.copy);
 
-      copyButton.onPressed();
+      copyButton.onPressed?.call();
       await tester.pump();
 
       expect(controller.text, equals(text));
@@ -2498,7 +2498,7 @@ void main() {
       // Setting data which will be pasted into the clipboard.
       await Clipboard.setData(const ClipboardData(text: text));
 
-      pasteButton.onPressed();
+      pasteButton.onPressed?.call();
       await tester.pump();
 
       expect(controller.text, equals(text + text));
@@ -2557,7 +2557,7 @@ void main() {
       final ContextMenuButtonItem selectAllButton = items!.first;
       expect(selectAllButton.type, ContextMenuButtonType.selectAll);
 
-      selectAllButton.onPressed();
+      selectAllButton.onPressed?.call();
       await tester.pump();
 
       expect(controller.text, equals(text));
