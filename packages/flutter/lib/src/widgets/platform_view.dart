@@ -503,6 +503,8 @@ class _AndroidViewState extends State<AndroidView> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 
@@ -562,7 +564,9 @@ class _UiKitViewState extends State<UiKitView> {
   UiKitViewController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
-  late FocusNode _focusNode;
+
+  @visibleForTesting
+  FocusNode? focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
@@ -574,7 +578,7 @@ class _UiKitViewState extends State<UiKitView> {
       return const SizedBox.expand();
     }
     return Focus(
-      focusNode: _focusNode,
+      focusNode: focusNode,
       onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
       child: _UiKitPlatformView(
         controller: _controller!,
@@ -634,6 +638,9 @@ class _UiKitViewState extends State<UiKitView> {
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
+    focusNode?.dispose();
+    focusNode = null;
     super.dispose();
   }
 
@@ -646,7 +653,7 @@ class _UiKitViewState extends State<UiKitView> {
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {
-        _focusNode.requestFocus();
+        focusNode?.requestFocus();
       }
     );
     if (!mounted) {
@@ -656,7 +663,7 @@ class _UiKitViewState extends State<UiKitView> {
     widget.onPlatformViewCreated?.call(id);
     setState(() {
       _controller = controller;
-      _focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
+      focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
     });
   }
 
@@ -938,6 +945,8 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void dispose() {
     _controller?.dispose();
     _controller = null;
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 }
