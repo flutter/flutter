@@ -436,8 +436,7 @@ void main() {
   testGesture('Beats TapGestureRecognizer when mouse pointer moves past kPrecisePointerPanSlop', (GestureTester tester) {
     setUpTapAndPanGestureRecognizer();
 
-    // Regression test for https://github.com/flutter/flutter/issues/122141 and
-    // https://github.com/flutter/flutter/issues/102084
+    // This is a regression test for https://github.com/flutter/flutter/issues/122141.
     final TapGestureRecognizer taps = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) {
         events.add('tapdown');
