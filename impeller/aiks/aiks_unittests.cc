@@ -47,6 +47,34 @@ using AiksTest = AiksPlayground;
 #endif
 INSTANTIATE_PLAYGROUND_SUITE(AiksTest);
 
+TEST_P(AiksTest, RotateColorFilteredPath) {
+  Canvas canvas;
+  canvas.Concat(Matrix::MakeTranslation({300, 300}));
+  canvas.Concat(Matrix::MakeRotationZ(Radians(kPiOver2)));
+  auto arrow_stem =
+      PathBuilder{}.MoveTo({120, 190}).LineTo({120, 50}).TakePath();
+  auto arrow_head = PathBuilder{}
+                        .MoveTo({50, 120})
+                        .LineTo({120, 190})
+                        .LineTo({190, 120})
+                        .TakePath();
+  auto paint = Paint{
+      .stroke_width = 15.0,
+      .stroke_cap = Cap::kRound,
+      .stroke_join = Join::kRound,
+      .style = Paint::Style::kStroke,
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeBlend(
+                BlendMode::kSourceIn, {std::move(input)}, Color::AliceBlue());
+          },
+  };
+
+  canvas.DrawPath(arrow_stem, paint);
+  canvas.DrawPath(arrow_head, paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
   Canvas canvas;
   Matrix identity;
