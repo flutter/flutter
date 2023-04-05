@@ -12,6 +12,7 @@ const String _javaExecutable = 'java';
 
 /// Attempts to find the home directory of the local Java installation used
 /// by the flutter tool.
+///
 /// First tries Java bundled with Android Studio, then sniffs JAVA_HOME, then falls back to PATH.
 String? findJavaHome({
   required AndroidStudio? androidStudio,
@@ -37,6 +38,7 @@ String? findJavaHome({
 
 /// Attempts to find the java binary of the local Java installation used by
 /// the flutter tool.
+///
 /// See [findJavaHome].
 String? findJavaBinary({
   required AndroidStudio? androidStudio,

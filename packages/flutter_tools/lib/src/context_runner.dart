@@ -14,6 +14,7 @@ import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
 import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
+import 'android/java.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
@@ -87,6 +88,12 @@ Future<T> runInContext<T>(
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidBuilder: () => AndroidGradleBuilder(
+        javaSdkHome: findJavaHome(
+          androidStudio: globals.androidStudio,
+          fileSystem: globals.fs,
+          operatingSystemUtils: globals.os,
+          platform: globals.platform
+        ),
         logger: globals.logger,
         processManager: globals.processManager,
         fileSystem: globals.fs,

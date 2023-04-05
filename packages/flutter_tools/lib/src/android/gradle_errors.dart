@@ -12,6 +12,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'gradle_utils.dart';
+import 'java.dart';
 import 'multidex.dart';
 
 typedef GradleErrorTest = bool Function(String);
@@ -366,6 +367,13 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
+    final String? javaHome = findJavaHome(
+      androidStudio: globals.androidStudio,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
+      platform: globals.platform,
+    );
+
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
         globals.gradleUtils!.getExecutable(project),
@@ -376,8 +384,8 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
       environment: <String, String>{
-        if (globals.javaHome != null)
-          'JAVA_HOME': globals.javaHome!,
+        if (javaHome != null)
+          'JAVA_HOME': javaHome,
       },
     );
     // Extract build types and product flavors.

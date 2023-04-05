@@ -1017,7 +1017,7 @@ void main() {
     });
 
     testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform(), javaHome: null);
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
@@ -1025,7 +1025,7 @@ void main() {
       final String? oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
       try {
-        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform(), javaHome: null);
         expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
 
         final Directory gradleWrapperDir = cache!.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
@@ -1057,7 +1057,7 @@ void main() {
     });
 
     testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform(), javaHome: null);
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
 
       await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem!, FakeOperatingSystemUtils());

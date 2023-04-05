@@ -46,6 +46,7 @@ void main() {
 
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        javaSdkHome: null,
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,

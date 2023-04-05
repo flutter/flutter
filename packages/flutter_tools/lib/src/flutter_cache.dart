@@ -352,12 +352,17 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 /// A cached artifact containing the Maven dependencies used to build Android projects.
 ///
 /// This is a no-op if the android SDK is not available.
+///
+/// todo document javaHome
 class AndroidMavenArtifacts extends ArtifactSet {
   AndroidMavenArtifacts(this.cache, {
     required Platform platform,
+    required String? javaHome,
   }) : _platform = platform,
+       _javaHome = javaHome,
        super(DevelopmentArtifact.androidMaven);
 
+  final String? _javaHome;
   final Platform _platform;
   final Cache cache;
 
@@ -390,8 +395,8 @@ class AndroidMavenArtifacts extends ArtifactSet {
           'resolveDependencies',
         ],
         environment: <String, String>{
-          if (globals.javaHome != null)
-            'JAVA_HOME': globals.javaHome!,
+          if (_javaHome != null)
+            'JAVA_HOME': _javaHome!,
         },
       );
       if (processResult.exitCode != 0) {

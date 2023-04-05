@@ -26,7 +26,6 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
@@ -124,11 +123,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Usage usage,
     required GradleUtils gradleUtils,
     required Platform platform,
+    required String? javaSdkHome,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _usage = usage,
        _gradleUtils = gradleUtils,
+       _javaSdkHome = javaSdkHome,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -139,6 +140,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final Usage _usage;
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
+  final String? _javaSdkHome;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -402,8 +404,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (globals.javaHome != null)
-            'JAVA_HOME': globals.javaHome!,
+          if (_javaSdkHome != null)
+            'JAVA_HOME': _javaSdkHome!,
         },
         mapFunction: consumeLog,
       );
@@ -671,8 +673,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (globals.javaHome != null)
-            'JAVA_HOME': globals.javaHome!,
+          if (_javaSdkHome != null)
+            'JAVA_HOME': _javaSdkHome!,
         },
       );
     } finally {
