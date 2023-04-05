@@ -88,6 +88,7 @@ class JsCompilerConfig extends WebCompilerConfig {
   /// An override for the dart2js build mode.
   ///
   /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
+  // TODO(kevmoo): consider storing this as an [int] and validating it!
   final String optimizationLevel;
 
   /// Whether the dart2js build should output source maps.
@@ -106,11 +107,15 @@ class JsCompilerConfig extends WebCompilerConfig {
         kSourceMapsEnabled: sourceMaps.toString(),
       };
 
+  /// dart2js arguments to use in both phases: full compile and CFE-only.
   List<String> toSharedCommandOptions() => <String>[
         if (nativeNullAssertions) '--native-null-assertions',
         if (!sourceMaps) '--no-source-maps',
       ];
 
+  /// dart2js arguments to use in the full compile, but not CFE-only.
+  ///
+  /// Includes the contents of [toSharedCommandOptions].
   List<String> toCommandOptions() => <String>[
         ...toSharedCommandOptions(),
         '-$optimizationLevel',
