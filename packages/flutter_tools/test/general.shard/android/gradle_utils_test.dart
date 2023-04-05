@@ -602,3 +602,17 @@ class JavaGradleTestData {
   final String? javaVersion;
   final bool validPair;
 }
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
+    'FLUTTER_ROOT': r'C:\flutter',
+    'USERPROFILE': '/',
+  }
+);
+final Platform notWindowsPlatform = FakePlatform(
+  environment: <String, String>{
+    'FLUTTER_ROOT': r'/users/someuser/flutter',
+  }
+);
