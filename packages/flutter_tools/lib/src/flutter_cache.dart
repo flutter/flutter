@@ -13,11 +13,9 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'dart/pub.dart';
-import 'globals.dart' as globals;
 import 'project.dart';
 
 /// An implementation of the [Cache] which provides all of Flutter's default artifacts.
@@ -347,78 +345,6 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 
   @override
   List<String> getLicenseDirs() { return <String>[]; }
-}
-
-/// A cached artifact containing the Maven dependencies used to build Android projects.
-///
-/// This is a no-op if the android SDK is not available.
-///
-/// todo document javaHome
-class AndroidMavenArtifacts extends ArtifactSet {
-  AndroidMavenArtifacts(this.cache, {
-    required Platform platform,
-    required String? javaHome,
-  }) : _platform = platform,
-       _javaHome = javaHome,
-       super(DevelopmentArtifact.androidMaven);
-
-  final String? _javaHome;
-  final Platform _platform;
-  final Cache cache;
-
-  @override
-  Future<void> update(
-    ArtifactUpdater artifactUpdater,
-    Logger logger,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
-    {bool offline = false}
-  ) async {
-    if (globals.androidSdk == null) {
-      return;
-    }
-    final Directory tempDir = cache.getRoot().createTempSync('flutter_gradle_wrapper.');
-    globals.gradleUtils?.injectGradleWrapperIfNeeded(tempDir);
-
-    final Status status = logger.startProgress('Downloading Android Maven dependencies...');
-    final File gradle = tempDir.childFile(
-      _platform.isWindows ? 'gradlew.bat' : 'gradlew',
-    );
-    try {
-      final String gradleExecutable = gradle.absolute.path;
-      final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot!);
-      final RunResult processResult = await globals.processUtils.run(
-        <String>[
-          gradleExecutable,
-          '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
-          '--project-cache-dir', tempDir.path,
-          'resolveDependencies',
-        ],
-        environment: <String, String>{
-          if (_javaHome != null)
-            'JAVA_HOME': _javaHome!,
-        },
-      );
-      if (processResult.exitCode != 0) {
-        logger.printError('Failed to download the Android dependencies');
-      }
-    } finally {
-      status.stop();
-      tempDir.deleteSync(recursive: true);
-      globals.androidSdk?.reinitialize();
-    }
-  }
-
-  @override
-  Future<bool> isUpToDate(FileSystem fileSystem) async {
-    // The dependencies are downloaded and cached by Gradle.
-    // The tool doesn't know if the dependencies are already cached at this point.
-    // Therefore, call Gradle to figure this out.
-    return false;
-  }
-
-  @override
-  String get name => 'android-maven-artifacts';
 }
 
 /// Artifacts used for internal builds. The flutter tool builds Android projects
