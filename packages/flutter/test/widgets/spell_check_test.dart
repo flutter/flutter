@@ -327,7 +327,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
   testWidgets(
-    'buildTextSpanWithSpellCheckSuggestions corrects results when additions are made to misspelled word example',
+    'buildTextSpanWithSpellCheckSuggestions discards result when additions are made to misspelled word example',
       (WidgetTester tester) async {
     const String text = 'Hello, wroldd!';
     const String resultsText = 'Hello, wrold!';
