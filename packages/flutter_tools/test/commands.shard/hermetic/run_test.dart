@@ -793,7 +793,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('with only iOS network device', () async {
+      testUsingContext('with only iOS wireless device', () async {
         final List<Device> devices = <Device>[
           FakeIOSDevice(
             connectionInterface: DeviceConnectionInterface.wireless,
@@ -836,7 +836,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('with both iOS usb and network devices', () async {
+      testUsingContext('with both iOS usb and wireless devices', () async {
         final List<Device> devices = <Device>[
           FakeIOSDevice(
             connectionInterface: DeviceConnectionInterface.wireless,
