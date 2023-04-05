@@ -576,7 +576,7 @@ if (!is_fuchsia) {
              ":flutter_platform_dills",
              "//flutter/third_party/canvaskit:canvaskit_group",
              "//flutter/third_party/canvaskit:canvaskit_chromium_group",
-             "//flutter/lib/web_ui/skwasm",
+             "//flutter/third_party/canvaskit:skwasm_group",
            ] + web_engine_libraries
 
     # flutter_ddc_modules
@@ -595,6 +595,15 @@ if (!is_fuchsia) {
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
     sources += get_target_outputs(":flutter_dart2js_kernel_sdk_full_unsound")
     sources += get_target_outputs(":flutter_dart2js_kernel_sdk_full_sound")
+    sources += [
+      "$root_out_dir/flutter_web_sdk/canvaskit/canvaskit.js",
+      "$root_out_dir/flutter_web_sdk/canvaskit/canvaskit.wasm",
+      "$root_out_dir/flutter_web_sdk/canvaskit/chromium/canvaskit.js",
+      "$root_out_dir/flutter_web_sdk/canvaskit/chromium/canvaskit.wasm",
+      "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.js",
+      "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.wasm",
+      "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.worker.js",
+    ]
 
     # TODO(jacksongardner): remove these once they are no longer used by the flutter tool
     # https://github.com/flutter/flutter/issues/113303
@@ -618,36 +627,6 @@ if (!is_fuchsia) {
         },
       ]
     }
-    tmp_files += [
-      {
-        source = rebase_path("$root_out_dir/canvaskit/canvaskit.js")
-        destination = "canvaskit/canvaskit.js"
-      },
-      {
-        source = rebase_path("$root_out_dir/canvaskit/canvaskit.wasm")
-        destination = "canvaskit/canvaskit.wasm"
-      },
-      {
-        source = rebase_path("$root_out_dir/canvaskit/chromium/canvaskit.js")
-        destination = "canvaskit/chromium/canvaskit.js"
-      },
-      {
-        source = rebase_path("$root_out_dir/canvaskit/chromium/canvaskit.wasm")
-        destination = "canvaskit/chromium/canvaskit.wasm"
-      },
-      {
-        source = rebase_path("$root_out_dir/skwasm.js")
-        destination = "canvaskit/skwasm.js"
-      },
-      {
-        source = rebase_path("$root_out_dir/skwasm.worker.js")
-        destination = "canvaskit/skwasm.worker.js"
-      },
-      {
-        source = rebase_path("$root_out_dir/skwasm.wasm")
-        destination = "canvaskit/skwasm.wasm"
-      },
-    ]
     files = tmp_files
   }
 }
