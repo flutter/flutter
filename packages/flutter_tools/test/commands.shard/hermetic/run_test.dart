@@ -228,7 +228,7 @@ void main() {
 
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+          containsIgnoringWhitespace('No supported devices connected.'),
         );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -404,11 +404,11 @@ void main() {
 
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+          containsIgnoringWhitespace('No supported devices connected.'),
         );
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
+          containsIgnoringWhitespace('The following devices were found, but are not supported by this project:'),
         );
         expect(
           testLogger.statusText,
