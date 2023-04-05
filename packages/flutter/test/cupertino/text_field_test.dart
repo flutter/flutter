@@ -5436,8 +5436,8 @@ void main() {
 
     // Tap on text field to gain focus, and set selection to '|a'. On iOS
     // the selection is set to the word edge closest to the tap position.
-    // We await for 300ms after the up event, so our next down event does not
-    // register as a double tap.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
     final TestGesture gesture = await tester.startGesture(aPos);
     await tester.pump();
     await gesture.up();
@@ -5487,8 +5487,8 @@ void main() {
 
     // Tap on text field to gain focus, and set selection to '|a'. On iOS
     // the selection is set to the word edge closest to the tap position.
-    // We await for 300ms after the up event, so our next down event does not
-    // register as a double tap.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
     final TestGesture gesture = await tester.startGesture(aPos);
     await tester.pump();
     await gesture.up();
