@@ -1,0 +1,118 @@
+{
+    "builds": [
+        {
+            "archives": [
+                {
+                    "base_path": "out/host_debug_unopt/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                    ],
+                    "name": "host_debug_unopt"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+               "--runtime-mode",
+               "debug",
+               "--unoptimized",
+               "--no-lto",
+               "--prebuilt-dart-sdk"
+            ],
+            "name": "host_debug_unopt",
+            "ninja": {
+                "config": "host_debug_unopt",
+                "targets": [
+                ]
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Host Tests for host_debug_unopt",
+                    "parameters": [
+                        "--variant",
+                        "host_debug_unopt",
+                        "--type",
+                        "dart,engine",
+                        "--engine-capture-core-dump"
+                    ],
+                    "script": "flutter/testing/run_tests.py",
+                    "type": "local"
+                }
+            ]
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ios_debug_sim/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                    ],
+                    "name": "ios_debug_sim"
+                }
+            ],
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "runtime_versions": [ "ios-16-0_14a5294e" ],
+                    "sdk_version": "14a5294e"
+                }
+            },
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "debug",
+                "--simulator",
+                "--no-lto"
+            ],
+            "name": "ios_debug_sim",
+            "ninja": {
+                "config": "ios_debug_sim",
+                "targets": [
+                    "flutter/testing/scenario_app",
+                    "flutter/shell/platform/darwin/ios:ios_test_flutter"
+                ]
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Tests for ios_debug_sim",
+                    "parameters": [
+                        "--variant",
+                        "ios_debug_sim",
+                        "--type",
+                        "objc",
+                        "--engine-capture-core-dump",
+                        "--ios-variant",
+                        "ios_debug_sim"
+                    ],
+                    "script": "flutter/testing/run_tests.py",
+                    "type": "local"
+                },
+                {
+                    "name": "Scenario App Integration Tests",
+                    "parameters": [
+                        "ios_debug_sim"
+                    ],
+                    "script": "flutter/testing/scenario_app/run_ios_tests.sh",
+                    "type": "local"
+                }
+
+            ]
+        }
+    ],
+    "tests": []
+}
