@@ -22,6 +22,12 @@ gradlePlugin {
             id = "dev.flutter.flutter-gradle-plugin"
             implementationClass = "FlutterPlugin"
         }
+
+        // The "flutterSettingsPlugin" name isn't used anywhere
+        create("flutterSettingsPlugin") {
+            id = "dev.flutter.flutter-app-plugin-loader-gradle-plugin"
+            implementationClass = "FlutterSettingsPlugin"
+        }
     }
 }
 
