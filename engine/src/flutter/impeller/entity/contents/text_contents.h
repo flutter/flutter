@@ -38,7 +38,7 @@ class TextContents final : public Contents {
 
   void SetInheritedOpacity(Scalar opacity) override;
 
-  void SetInverseMatrix(Matrix matrix);
+  void SetOffset(Vector2 offset);
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
@@ -58,7 +58,7 @@ class TextContents final : public Contents {
   Color color_;
   Scalar inherited_opacity_ = 1.0;
   mutable std::shared_ptr<LazyGlyphAtlas> lazy_atlas_;
-  Matrix inverse_matrix_;
+  Vector2 offset_;
 
   std::shared_ptr<GlyphAtlas> ResolveAtlas(
       GlyphAtlas::Type type,

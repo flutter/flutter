@@ -445,8 +445,7 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
     auto cvg = text_contents->GetCoverage(test).value();
     color_text_contents->SetTextPosition(cvg.origin + position);
 
-    text_contents->SetInverseMatrix(
-        Matrix::MakeTranslation(Vector3(-cvg.origin.x, -cvg.origin.y, 0)));
+    text_contents->SetOffset(-cvg.origin);
     color_text_contents->SetTextContents(std::move(text_contents));
     color_text_contents->SetColorSourceContents(source());
 

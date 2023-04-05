@@ -70,7 +70,7 @@ void GlyphAtlas::AddTypefaceGlyphPosition(const FontGlyphPair& pair,
   positions_[pair] = rect;
 }
 
-std::optional<Rect> GlyphAtlas::FindFontGlyphPosition(
+std::optional<Rect> GlyphAtlas::FindFontGlyphBounds(
     const FontGlyphPair& pair) const {
   auto found = positions_.find(pair);
   if (found == positions_.end()) {
