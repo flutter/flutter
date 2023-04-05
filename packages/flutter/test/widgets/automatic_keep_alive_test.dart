@@ -667,14 +667,6 @@ class KeepAliveListenableLeakChecker extends StatefulWidget {
 }
 
 class _KeepAliveListenableLeakCheckerState extends State<KeepAliveListenableLeakChecker> {
-  final LeakCheckerHandle _handle = LeakCheckerHandle();
-
-  @override
-  void deactivate() {
-    _handle.dispose();
-    super.deactivate();
-  }
-
   void dispatch(Listenable handle) {
     KeepAliveNotification(handle).dispatch(context);
   }
