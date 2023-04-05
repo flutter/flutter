@@ -48,6 +48,7 @@ void main() {
           outdatedGradleHandler,
           sslExceptionHandler,
           zipExceptionHandler,
+          incompatibleJavaAndGradleVersionsHandler,
         ])
       );
     });
@@ -1301,6 +1302,40 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       ProcessManager: () => processManager,
       AnsiTerminal: () => _TestPromptTerminal('n'),
       BotDetector: () => const FakeBotDetector(false),
+    });
+  });
+
+  group('incompatible java and gradle versions error', () {
+    const String errorMessage = '''
+Could not compile build file '…/example/android/build.gradle'.
+> startup failed:
+  General error during conversion: Unsupported class file major version 61
+  java.lang.IllegalArgumentException: Unsupported class file major version 61
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        incompatibleJavaAndGradleVersionsHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await incompatibleJavaAndGradleVersionsHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
+      );
+
+      // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
+      expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
+      expect(testLogger.statusText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 }
