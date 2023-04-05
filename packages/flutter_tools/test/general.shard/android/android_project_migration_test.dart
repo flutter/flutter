@@ -31,6 +31,14 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ''';
 
+const String unparsableGradleVersionWrapper = r'''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-a.b.c-all.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+''';
+
 void main() {
   group('Android migration', () {
     group('migrate the Gradle "clean" task to lazy declaration', () {
@@ -176,6 +184,19 @@ tasks.register("clean", Delete) {
         expect(gradleWrapperPropertiesFile.readAsStringSync(), recentGradleVersionWrapper);
         expect(bufferLogger.statusText, contains('Conflict detected between versions of Android Studio '
             'and Gradle, upgrading Gradle version from 6.7 to 7.4'));
+      });
+
+      testWithoutContext('nothing is changed if we cant parse gradle version', () {
+        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
+          project,
+          bufferLogger,
+          FakeAndroidStudioFlamingo(),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(unparsableGradleVersionWrapper);
+        migration.migrate();
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), unparsableGradleVersionWrapper);
+        expect(bufferLogger.traceText, contains('Failed to parse Gradle version from distribution url, '
+            'skipping Gradle-Java version compatibility check.'));
       });
     });
   });

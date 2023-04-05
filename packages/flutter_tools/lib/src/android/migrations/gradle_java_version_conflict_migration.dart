@@ -11,6 +11,7 @@ import '../android_studio.dart';
 // Android Studio 2022.2 "Flamingo" is the first to bundle a Java 17 JDK.
 // Previous versions bundled a Java 11 JDK.
 final Version _androidStudioFlamingo = Version(2022, 2, 0);
+final RegExp _distributionUrlMatch = RegExp(r'^\s*distributionUrl');
 final RegExp _gradleVersionMatch = RegExp(
   r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(?:all|bin)\.zip');
 final Version _lowestSupportedGradleVersion = Version(7, 3, 0); // minimum for JDK 17
@@ -54,12 +55,13 @@ class GradleJavaVersionConflictMigration extends ProjectMigrator {
 
   @override
   String migrateLine(String line) {
-    final RegExpMatch? match = _gradleVersionMatch.firstMatch(line);
-    if (match == null) {
+    if (!_distributionUrlMatch.hasMatch(line)) {
       return line;
     }
-    if (match.groupCount < 1) {
-      logger.printTrace('Failed to parse Gradle version, skipping Gradle-Java version compatibility check.');
+    final RegExpMatch? match = _gradleVersionMatch.firstMatch(line);
+    if (match == null || match.groupCount < 1) {
+      logger.printTrace('Failed to parse Gradle version from distribution url, '
+          'skipping Gradle-Java version compatibility check.');
       return line;
     }
     final String existingVersionString = match[1]!;
