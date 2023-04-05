@@ -38,19 +38,13 @@ void main() {
     final TestBuildSystem buildSystem =
         TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
-      expect(webServiceWorker.isWasm, isTrue);
+      expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
       expect(webServiceWorker.webRenderer, WebRendererMode.autoDetect);
 
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
-        'cspMode': 'true',
-        'SourceMaps': 'true',
-        'NativeNullAssertions': 'true',
         'ServiceWorkerStrategy': 'serviceWorkerStrategy',
-        'Dart2jsOptimization': 'O4',
-        'Dart2jsDumpInfo': 'false',
-        'Dart2jsNoFrequencyBasedMinification': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -73,7 +67,7 @@ void main() {
       'target',
       BuildInfo.debug,
       'serviceWorkerStrategy',
-      compilerConfig: const JsCompilerConfig.run(nativeNullAssertions: true),
+      compilerConfig: const WasmCompilerConfig(),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));

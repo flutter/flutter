@@ -24,6 +24,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     required this.sourceMaps,
   });
 
+  /// Instantiates [JsCompilerConfig] suitable for the `flutter run` command.
   const JsCompilerConfig.run({required bool nativeNullAssertions})
       : this(
           csp: false,
