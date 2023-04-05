@@ -613,6 +613,7 @@ class AppDomain extends Domain {
       'directory': projectDirectory,
       'supportsRestart': isRestartSupported(enableHotReload, device),
       'launchMode': launchMode.toString(),
+      'mode': runner.debuggingOptions.buildInfo.modeName,
     });
 
     Completer<DebugConnectionInfo>? connectionInfoCompleter;
