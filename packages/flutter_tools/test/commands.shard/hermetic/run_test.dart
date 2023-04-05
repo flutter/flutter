@@ -475,8 +475,44 @@ void main() {
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
             'cd57': 'usb',
+            'cd58': 'false',
           })
         )));
+      }, overrides: <Type, Generator>{
+        AnsiTerminal: () => fakeTerminal,
+        Artifacts: () => artifacts,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        DeviceManager: () => testDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Stdio: () => FakeStdio(),
+        Usage: () => usage,
+      });
+
+      testUsingContext('correctly reports tests to usage', () async {
+        fs.currentDirectory.childDirectory('test').childFile('widget_test.dart').createSync(recursive: true);
+        fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
+        final RunCommand command = RunCommand();
+        final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
+          ..startAppSuccess = false;
+
+        testDeviceManager.devices = <Device>[mockDevice];
+
+        await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          'test/widget_test.dart',
+        ]), isNull);
+
+        expect(usage.commands, contains(
+          TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
+            'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
+            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
+            'cd57': 'usb',
+            'cd58': 'true',
+          })),
+        ));
       }, overrides: <Type, Generator>{
         AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
@@ -745,6 +781,7 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
+          commandRunIsTest: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -785,6 +822,7 @@ void main() {
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
           commandRunIOSInterfaceType: 'usb',
+          commandRunIsTest: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -828,6 +866,7 @@ void main() {
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
           commandRunIOSInterfaceType: 'wireless',
+          commandRunIsTest: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -871,6 +910,7 @@ void main() {
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
           commandRunIOSInterfaceType: 'wireless',
+          commandRunIsTest: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
