@@ -325,4 +325,32 @@ void main() {
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+  testWidgets(
+    'buildTextSpanWithSpellCheckSuggestions corrects results when additions are made to misspelled word example',
+      (WidgetTester tester) async {
+    const String text = 'Hello, wroldd!';
+    const String resultsText = 'Hello, wrold!';
+    const TextEditingValue value = TextEditingValue(text: text);
+    const bool composingRegionOutOfRange = false;
+    const SpellCheckResults spellCheckResults =
+      SpellCheckResults(resultsText, <SuggestionSpan>[
+        SuggestionSpan(
+            TextRange(start: 7, end: 12), <String>['world', 'word', 'old']),
+    ]);
+
+    const TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
+      TextSpan(text: 'Hello, wroldd!'),
+    ]);
+    final TextSpan textSpanTree =
+      buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
+    );
+
+    expect(textSpanTree, equals(expectedTextSpanTree));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 }

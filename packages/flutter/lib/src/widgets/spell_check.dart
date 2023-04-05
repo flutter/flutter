@@ -137,9 +137,11 @@ List<SuggestionSpan> _correctSpellCheckResults(
       // the offset value, so apply it to new text by adding it to the list of
       // corrected results.
       final SuggestionSpan adjustedSpan = SuggestionSpan(
-          TextRange(
-              start: currentSpan.range.start + offset, end: currentSpan.range.end + offset),
-          currentSpan.suggestions,
+        TextRange(
+          start: currentSpan.range.start + offset,
+          end: currentSpan.range.end + offset,
+        ),
+        currentSpan.suggestions,
       );
 
       // Start search for the next misspelled word at the end of currentSpan.
@@ -150,8 +152,8 @@ List<SuggestionSpan> _correctSpellCheckResults(
       final int adjustedSpanStart = searchStart + foundIndex;
       final int adjustedSpanEnd = adjustedSpanStart + spanLength;
       final SuggestionSpan adjustedSpan = SuggestionSpan(
-          TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
-          currentSpan.suggestions,
+        TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
+        currentSpan.suggestions,
       );
 
       // Start search for the next misspelled word at the end of the
