@@ -35,7 +35,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.linearMinHeight,
     this.circularTrackColor,
     this.refreshBackgroundColor,
-    this.preferRoundIndicator,
   });
 
   /// The color of the [ProgressIndicator]'s indicator.
@@ -63,9 +62,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// {@macro flutter.material.RefreshProgressIndicator.backgroundColor}
   final Color? refreshBackgroundColor;
 
-  /// {@macro flutter.material.ProgressIndicator.preferRoundIndicator}
-  final bool? preferRoundIndicator;
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ProgressIndicatorThemeData copyWith({
@@ -74,7 +70,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
     double? linearMinHeight,
     Color? circularTrackColor,
     Color? refreshBackgroundColor,
-    bool? preferRoundIndicator,
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
@@ -82,7 +77,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
       linearMinHeight : linearMinHeight ?? this.linearMinHeight,
       circularTrackColor : circularTrackColor ?? this.circularTrackColor,
       refreshBackgroundColor : refreshBackgroundColor ?? this.refreshBackgroundColor,
-      preferRoundIndicator: preferRoundIndicator ?? this.preferRoundIndicator,
     );
   }
 
@@ -99,7 +93,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
       linearMinHeight : lerpDouble(a?.linearMinHeight, b?.linearMinHeight, t),
       circularTrackColor : Color.lerp(a?.circularTrackColor, b?.circularTrackColor, t),
       refreshBackgroundColor : Color.lerp(a?.refreshBackgroundColor, b?.refreshBackgroundColor, t),
-      preferRoundIndicator: t < 0.5 ? a?.preferRoundIndicator : b?.preferRoundIndicator,
     );
   }
 
@@ -110,7 +103,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
     linearMinHeight,
     circularTrackColor,
     refreshBackgroundColor,
-    preferRoundIndicator,
   );
 
   @override
@@ -126,8 +118,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       && other.linearTrackColor == linearTrackColor
       && other.linearMinHeight == linearMinHeight
       && other.circularTrackColor == circularTrackColor
-      && other.refreshBackgroundColor == refreshBackgroundColor
-      && other.preferRoundIndicator == preferRoundIndicator;
+      && other.refreshBackgroundColor == refreshBackgroundColor;
   }
 
   @override
@@ -138,7 +129,6 @@ class ProgressIndicatorThemeData with Diagnosticable {
     properties.add(DoubleProperty('linearMinHeight', linearMinHeight, defaultValue: null));
     properties.add(ColorProperty('circularTrackColor', circularTrackColor, defaultValue: null));
     properties.add(ColorProperty('refreshBackgroundColor', refreshBackgroundColor, defaultValue: null));
-    properties.add(FlagProperty('preferRoundIndicator', value: preferRoundIndicator, ifTrue: 'has round stroke', defaultValue: false));
   }
 }
 

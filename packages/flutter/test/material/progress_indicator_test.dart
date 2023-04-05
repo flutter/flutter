@@ -443,36 +443,44 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
-  testWidgets('CircularProgressIndicator stroke cap', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator with a round indicator', (WidgetTester tester) async {
     await tester.pumpWidget(const CircularProgressIndicator());
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
 
-    await tester.pumpWidget(const CircularProgressIndicator(preferRoundIndicator: false));
-    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
-
     await tester.pumpWidget(const CircularProgressIndicator(preferRoundIndicator: true));
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
+  });
 
-    // With ProgressIndicatorTheme
-    await tester.pumpWidget(Theme(
-      data: theme.copyWith(progressIndicatorTheme: const ProgressIndicatorThemeData(
-        preferRoundIndicator: true,
-      )),
-      child: const CircularProgressIndicator(),
-    ));
-    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
-
-    // With ProgressIndicatorTheme, CircularProgressIndicator takes precedence.
-    await tester.pumpWidget(Theme(
-      data: theme.copyWith(progressIndicatorTheme: const ProgressIndicatorThemeData(
-        preferRoundIndicator: false,
-      )),
-      child: const CircularProgressIndicator(preferRoundIndicator: true),
-    ));
-    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
-
-    await tester.pumpWidget(const CircularProgressIndicator(preferRoundIndicator: true));
-    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
+  testWidgets('LinearProgressIndicator with indicatorBorderRadius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 4.0,
+              child: LinearProgressIndicator(
+                value: 0.25,
+                indicatorBorderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(
+        find.byType(LinearProgressIndicator),
+        paints
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(0.0, 0.0, 25.0, 4.0,
+            topRight: const Radius.circular(10.0),
+            bottomRight: const Radius.circular(10.0),
+          ),
+        ),
+    );
+    expect(tester.binding.transientCallbackCount, 0);
   });
 
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
@@ -601,30 +609,9 @@ void main() {
     expect(themeBackgroundMaterial.color, blue);
   });
 
-  testWidgets('RefreshProgressIndicator stroke cap', (WidgetTester tester) async {
+  testWidgets('RefreshProgressIndicator with a round indicator', (WidgetTester tester) async {
     await tester.pumpWidget(const RefreshProgressIndicator());
     expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
-
-    await tester.pumpWidget(const RefreshProgressIndicator(preferRoundIndicator: false));
-    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
-
-    // With ProgressIndicatorTheme
-    await tester.pumpWidget(Theme(
-      data: theme.copyWith(progressIndicatorTheme: const ProgressIndicatorThemeData(
-        preferRoundIndicator: true,
-      )),
-      child: const RefreshProgressIndicator(),
-    ));
-    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
-
-    // With ProgressIndicatorTheme, RefreshProgressIndicator takes precedence.
-    await tester.pumpWidget(Theme(
-      data: theme.copyWith(progressIndicatorTheme: const ProgressIndicatorThemeData(
-        preferRoundIndicator: false,
-      )),
-      child: const RefreshProgressIndicator(preferRoundIndicator: true),
-    ));
-    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
 
     await tester.pumpWidget(const RefreshProgressIndicator(preferRoundIndicator: true));
     expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
