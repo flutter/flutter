@@ -280,7 +280,7 @@ platform :osx, '10.14'
     });
   });
 
-  group('update NSPrincipalClass to FlutterApplication', () {
+  group('update NSPrincipalClass from FlutterApplication to NSApplication', () {
     late MemoryFileSystem memoryFileSystem;
     late BufferLogger testLogger;
     late FakeMacOSProject project;
@@ -318,7 +318,7 @@ platform :osx, '10.14'
       macOSProjectMigration.migrate();
       expect(infoPlistFile.existsSync(), isFalse);
 
-      expect(testLogger.traceText, contains('${infoPlistFile.basename} not found, skipping FlutterApplication migration.'));
+      expect(testLogger.traceText, isEmpty);
       expect(testLogger.statusText, isEmpty);
     });
 
@@ -333,19 +333,7 @@ platform :osx, '10.14'
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithMocks('skipped if already upgraded', () async {
-      fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'FlutterApplication');
-      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
-        project,
-        testLogger,
-      );
-      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
-      macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'FlutterApplication');
-      expect(testLogger.statusText, isEmpty);
-    });
-
-    testWithMocks('Info.plist migrated to use FlutterApplication', () async {
+    testWithMocks('skipped if already de-upgraded (or never migrated)', () async {
       fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'NSApplication');
       final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
         project,
@@ -353,9 +341,21 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'FlutterApplication');
+      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithMocks('Info.plist migrated to use NSApplication', () async {
+      fakePlistParser.setProperty(PlistParser.kNSPrincipalClassKey, 'FlutterApplication');
+      final FlutterApplicationMigration macOSProjectMigration = FlutterApplicationMigration(
+        project,
+        testLogger,
+      );
+      infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
+      macOSProjectMigration.migrate();
+      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
       // Only print once.
-      expect('Updating ${infoPlistFile.basename} to use FlutterApplication instead of NSApplication.'.allMatches(testLogger.statusText).length, 1);
+      expect('Updating ${infoPlistFile.basename} to use NSApplication instead of FlutterApplication.'.allMatches(testLogger.statusText).length, 1);
     });
 
     testWithMocks('Skip if NSPrincipalClass is not NSApplication', () async {
@@ -368,7 +368,7 @@ platform :osx, '10.14'
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
       expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), differentApp);
-      expect(testLogger.traceText, contains('${infoPlistFile.basename} has an ${PlistParser.kNSPrincipalClassKey} of $differentApp, not NSApplication, skipping FlutterApplication migration'));
+      expect(testLogger.traceText, isEmpty);
     });
   });
 }

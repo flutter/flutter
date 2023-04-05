@@ -27,6 +27,6 @@
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
-	<string>FlutterApplication</string>
+	<string>NSApplication</string>
 </dict>
 </plist>
