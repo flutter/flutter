@@ -318,11 +318,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            false,
             kNoneWorker,
-            true,
-            debuggingOptions.nativeNullAssertions,
-            false,
+            compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions)
           );
         }
         await device!.device!.startApp(
@@ -391,11 +388,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           flutterProject,
           target,
           debuggingOptions.buildInfo,
-          false,
           kNoneWorker,
-          true,
-          debuggingOptions.nativeNullAssertions,
-          false,
+          compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions),
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

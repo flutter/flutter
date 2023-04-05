@@ -80,7 +80,7 @@ class BuildWebCommand extends BuildSubCommand {
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O0 to O4.',
-          defaultsTo: kDart2jsDefaultOptimizationLevel
+          defaultsTo: JsCompilerConfig.kDart2jsDefaultOptimizationLevel
     );
     argParser.addFlag('dump-info', negatable: false,
       help: 'Passes "--dump-info" to the Javascript compiler which generates '
@@ -133,9 +133,21 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final bool wasmRequested = boolArg('wasm');
-    if (wasmRequested && !featureFlags.isFlutterWebWasmEnabled) {
-      throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
+    WebCompilerConfig compilerConfig;
+    if (boolArg('wasm')) {
+      if (!featureFlags.isFlutterWebWasmEnabled) {
+        throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
+      }
+      compilerConfig = const WasmCompilerConfig();
+    } else {
+      compilerConfig = JsCompilerConfig(
+        csp: boolArg('csp'),
+        optimizationLevel: stringArg('dart2js-optimization') ?? JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
+        dumpInfo: boolArg('dump-info'),
+        nativeNullAssertions: boolArg('native-null-assertions'),
+        noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+        sourceMaps: boolArg('source-maps'),
+      );
     }
 
     final FlutterProject flutterProject = FlutterProject.current();
@@ -172,16 +184,10 @@ class BuildWebCommand extends BuildSubCommand {
       flutterProject,
       target,
       buildInfo,
-      boolArg('csp'),
       stringArg('pwa-strategy')!,
-      boolArg('source-maps'),
-      boolArg('native-null-assertions'),
-      wasmRequested,
+      compilerConfig: compilerConfig,
       baseHref: baseHref,
-      dart2jsOptimization: stringArg('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
       outputDirectoryPath: outputDirectoryPath,
-      dumpInfo: boolArg('dump-info'),
-      noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
     );
     return FlutterCommandResult.success();
   }

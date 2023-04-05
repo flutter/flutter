@@ -16,29 +16,24 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
+import 'compiler_config.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
-export '../build_system/targets/web.dart' show kDart2jsDefaultOptimizationLevel;
+export 'compiler_config.dart';
 
 Future<void> buildWeb(
   FlutterProject flutterProject,
   String target,
   BuildInfo buildInfo,
-  bool csp,
-  String serviceWorkerStrategy,
-  bool sourceMaps,
-  bool nativeNullAssertions,
-  bool isWasm, {
-  String dart2jsOptimization = kDart2jsDefaultOptimizationLevel,
+  String serviceWorkerStrategy, {
+  required WebCompilerConfig compilerConfig,
   String? baseHref,
-  bool dumpInfo = false,
-  bool noFrequencyBasedMinification = false,
   String? outputDirectoryPath,
 }) async {
   final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Directory outputDirectory = outputDirectoryPath == null
-      ? globals.fs.directory(getWebBuildDirectory(isWasm))
+      ? globals.fs.directory(getWebBuildDirectory(compilerConfig.isWasm))
       : globals.fs.directory(outputDirectoryPath);
   outputDirectory.createSync(recursive: true);
 
@@ -54,7 +49,7 @@ Future<void> buildWeb(
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await globals.buildSystem.build(
-      WebServiceWorker(globals.fs, buildInfo.webRenderer, isWasm: isWasm),
+      WebServiceWorker(globals.fs, buildInfo.webRenderer, isWasm: compilerConfig.isWasm),
       Environment(
         projectDir: globals.fs.currentDirectory,
         outputDir: outputDirectory,
@@ -64,15 +59,10 @@ Future<void> buildWeb(
         defines: <String, String>{
           kTargetFile: target,
           kHasWebPlugins: hasWebPlugins.toString(),
-          kCspMode: csp.toString(),
           if (baseHref != null)
             kBaseHref : baseHref,
-          kSourceMapsEnabled: sourceMaps.toString(),
-          kNativeNullAssertions: nativeNullAssertions.toString(),
           kServiceWorkerStrategy: serviceWorkerStrategy,
-          kDart2jsOptimization: dart2jsOptimization,
-          kDart2jsDumpInfo: dumpInfo.toString(),
-          kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
+          ...compilerConfig.toBuildSystemEnvironment(),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,
