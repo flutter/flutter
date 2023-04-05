@@ -5,20 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'l10n/generated_widgets_localizations.dart';
-
 /// Localized values for widgets.
 ///
-/// ## Supported languages
-///
-/// This class supports locales with the following [Locale.languageCode]s:
-///
-/// {@macro flutter.localizations.widgets.languages}
-///
-/// This list is available programmatically via [kWidgetsSupportedLanguages].
-///
-/// Besides localized strings, this class also maps [locale] to [textDirection].
-/// All locales are [TextDirection.ltr] except for locales with the following
+/// Currently this class just maps [locale] to [textDirection]. All locales
+/// are [TextDirection.ltr] except for locales with the following
 /// [Locale.languageCode] values, which are [TextDirection.rtl]:
 ///
 ///   * ar - Arabic
@@ -27,20 +17,47 @@ import 'l10n/generated_widgets_localizations.dart';
 ///   * ps - Pashto
 ///   * sd - Sindhi
 ///   * ur - Urdu
-///
-abstract class GlobalWidgetsLocalizations implements WidgetsLocalizations {
+class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
-  /// library for the given [textDirection].
-  const GlobalWidgetsLocalizations(this.textDirection);
+  /// library for the given `locale`.
+  ///
+  /// [LocalizationsDelegate] implementations typically call the static [load]
+  /// function, rather than constructing this class directly.
+  GlobalWidgetsLocalizations(this.locale) {
+    final String language = locale.languageCode.toLowerCase();
+    _textDirection = _rtlLanguages.contains(language) ? TextDirection.rtl : TextDirection.ltr;
+  }
+
+  // See http://en.wikipedia.org/wiki/Right-to-left
+  static const List<String> _rtlLanguages = <String>[
+    'ar', // Arabic
+    'fa', // Farsi
+    'he', // Hebrew
+    'ps', // Pashto
+    'ur', // Urdu
+  ];
+
+  /// The locale for which the values of this class's localized resources
+  /// have been translated.
+  final Locale locale;
 
   @override
-  final TextDirection textDirection;
+  TextDirection get textDirection => _textDirection;
+  late TextDirection _textDirection;
 
-  /// A [LocalizationsDelegate] for [WidgetsLocalizations].
+  /// Creates an object that provides localized resource values for the
+  /// lowest levels of the Flutter framework.
   ///
-  /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
-  /// as the value of [MaterialApp.localizationsDelegates] to include
-  /// the localizations for both the material and widget libraries.
+  /// This method is typically used to create a [LocalizationsDelegate].
+  /// The [WidgetsApp] does so by default.
+  static Future<WidgetsLocalizations> load(Locale locale) {
+    return SynchronousFuture<WidgetsLocalizations>(GlobalWidgetsLocalizations(locale));
+  }
+
+  /// A [LocalizationsDelegate] that uses [GlobalWidgetsLocalizations.load]
+  /// to create an instance of this class.
+  ///
+  /// [WidgetsApp] automatically adds this value to [WidgetsApp.localizationsDelegates].
   static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
 }
 
@@ -48,23 +65,14 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
   const _WidgetsLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => kWidgetsSupportedLanguages.contains(locale.languageCode);
-
-  static final Map<Locale, Future<WidgetsLocalizations>> _loadedTranslations = <Locale, Future<WidgetsLocalizations>>{};
+  bool isSupported(Locale locale) => true;
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) {
-    assert(isSupported(locale));
-    return _loadedTranslations.putIfAbsent(locale, () {
-      return SynchronousFuture<WidgetsLocalizations>(getWidgetsTranslation(
-        locale,
-      )!);
-    });
-  }
+  Future<WidgetsLocalizations> load(Locale locale) => GlobalWidgetsLocalizations.load(locale);
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'GlobalWidgetsLocalizations.delegate(${kWidgetsSupportedLanguages.length} locales)';
+  String toString() => 'GlobalWidgetsLocalizations.delegate(all locales)';
 }
