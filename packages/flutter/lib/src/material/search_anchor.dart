@@ -486,8 +486,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     final BoxConstraints effectiveConstraints = viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
     _rectTween.begin = anchorRect;
 
-    double viewWidth = anchorRect.width;
-    viewWidth = clampDouble(viewWidth, effectiveConstraints.minWidth, effectiveConstraints.maxWidth);
+    final double viewWidth = clampDouble(anchorRect.width, effectiveConstraints.minWidth, effectiveConstraints.maxWidth);
     final double viewHeight = clampDouble(screenSize.height * 2 / 3, effectiveConstraints.minHeight, effectiveConstraints.maxHeight);
 
     switch (textDirection ?? TextDirection.ltr) {
@@ -678,8 +677,7 @@ class _ViewContentState extends State<_ViewContent> {
       setState(() {
         final Rect anchorRect = widget.getRect() ?? _viewRect;
         final BoxConstraints constraints = widget.viewConstraints ?? widget.viewTheme.constraints ?? widget.viewDefaults.constraints!;
-        double viewWidth = anchorRect.width;
-        viewWidth = clampDouble(viewWidth, constraints.minWidth, constraints.maxWidth);
+        final double viewWidth = clampDouble(anchorRect.width, constraints.minWidth, constraints.maxWidth);
         final double viewHeight = clampDouble(_screenSize!.height * 2 / 3, constraints.minHeight, constraints.maxHeight);
         final Size updatedViewSize = Size(viewWidth, viewHeight);
 
