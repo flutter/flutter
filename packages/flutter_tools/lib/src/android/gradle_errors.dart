@@ -674,7 +674,7 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
 /// If an incompatible Java and Gradle versions error is caught, we expect an
 /// error specifying that the Java major class file version, one of
 /// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
-final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+([0-9]+)');
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'(?:Unsupported class file major version\s+([0-9]+))');
 
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
@@ -695,19 +695,17 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
+    // TODO(reidbaker): Replace URL with constant defined in
+    // https://github.com/flutter/flutter/pull/123916.
     globals.printBox(
-      "${globals.logger.terminal.warningMark} Your project's Gradle and AGP version "
-      'is incompatible with the Java version that Flutter is using.\n\n'
+      "${globals.logger.terminal.warningMark} Your project's Gradle version "
+      'is incompatible with the Java version that Gradle is using.\n\n'
       'To fix this issue, first, check the Java version used by Flutter by '
       'running `flutter doctor --verbose`.\n\n'
       'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
       'to be compatible with that Java version. '
       'See the link below for more information on compatible Java/Gradle versions:\n'
-      'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n'
-      'Then, ensure the AGP version specified in ${gradleFile.path} is '
-      'compatible with the new Gradle version. See the link below for more '
-      'information on compatible Gradle/AGP versions:\n'
-      'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle',
+      'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
