@@ -456,6 +456,30 @@ void main() {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
+      // Launch the app and wait for it to send a 'flutter.appStart' event.
+      final Future<Event> appStartFuture = dap.client.event('flutter.appStart');
+      await Future.wait(<Future<void>>[
+        appStartFuture,
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            toolArgs: <String>['-d', 'flutter-tester'],
+          ),
+        ),
+      ], eagerError: true);
+
+      await dap.client.terminate();
+
+      final Event appStart = await appStartFuture;
+      final Map<String, Object?> params = appStart.body! as Map<String, Object?>;
+      expect(params['deviceId'], 'flutter-tester');
+      expect(params['mode'], 'debug');
+    });
+
+    testWithoutContext('provides appStarted events to the client', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
       // Launch the app and wait for it to send a 'flutter.appStarted' event.
       await Future.wait(<Future<void>>[
         dap.client.event('flutter.appStarted'),

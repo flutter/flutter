@@ -393,6 +393,16 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     // session (which is much slower, but required for profile/release mode).
     final bool supportsRestart = (params['supportsRestart'] as bool?) ?? false;
     sendEvent(CapabilitiesEventBody(capabilities: Capabilities(supportsRestartRequest: supportsRestart)));
+
+    // Send a custom event so the editor has info about the app starting.
+    //
+    // This message contains things like the `deviceId` and `mode` that the
+    // client might not know about if they were inferred or set by users custom
+    // args.
+    sendEvent(
+      RawEventBody(params),
+      eventType: 'flutter.appStart',
+    );
   }
 
   /// Handles the app.started event from Flutter.
