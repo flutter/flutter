@@ -1473,7 +1473,7 @@ void main() {
       // Because we add the onEditingComplete and we didn't unfocus there, so focus still exists.
       expect(focusNode.hasFocus, isTrue);
     } else {
-      // For mobile and other platform, call connectionClosed will only unfocus.
+      // For mobile and other platforms, calling connectionClosed will only unfocus.
       expect(focusNode.hasFocus, isFalse);
       expect(onEditingCompleteInvoked, isFalse);
       expect(onSubmittedInvoked, isFalse);
