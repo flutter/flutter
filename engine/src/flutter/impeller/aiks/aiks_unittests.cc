@@ -1210,11 +1210,18 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
 
 TEST_P(AiksTest, TextRotated) {
   Canvas canvas;
-  canvas.Transform(Matrix(0.5, -0.3, 0, -0.002,  //
-                          0, 1, 0, 0,            //
-                          0, 0, 0.3, 0,          //
-                          100, 100, 0, 1.3));
+  canvas.Scale(GetContentScale());
 
+  Paint paint;
+  paint.color = Color(0.1, 0.1, 0.1, 1.0);
+  canvas.DrawRect(
+      Rect::MakeLTRB(0, 0, GetWindowSize().width, GetWindowSize().height),
+      paint);
+
+  canvas.Transform(Matrix(0.25, -0.3, 0, -0.002,  //
+                          0, 0.5, 0, 0,           //
+                          0, 0, 0.3, 0,           //
+                          100, 100, 0, 1.3));
   ASSERT_TRUE(RenderTextInCanvas(
       GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
       "Roboto-Regular.ttf"));
