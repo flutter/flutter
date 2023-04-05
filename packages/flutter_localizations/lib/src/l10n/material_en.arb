@@ -414,36 +414,6 @@
     "description": "Label indicating that the focused date is the current date."
   },
 
-  "reorderItemToStart": "Move to the start",
-  "@reorderItemToStart": {
-    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
-  },
-
-  "reorderItemToEnd": "Move to the end",
-  "@reorderItemToEnd": {
-    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
-  },
-
-  "reorderItemUp": "Move up",
-  "@reorderItemUp": {
-    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
-  },
-
-  "reorderItemDown": "Move down",
-  "@reorderItemDown": {
-    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
-  },
-
-  "reorderItemLeft": "Move left",
-  "@reorderItemLeft": {
-    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
-  },
-
-  "reorderItemRight": "Move right",
-  "@reorderItemRight": {
-    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
-  },
-
   "expandedIconTapHint": "Collapse",
   "@expandedIconTapHint": {
     "description": "The verb which describes what happens when an expanded ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
