@@ -90,33 +90,37 @@ void main() {
     );
   }
 
+  // Should we remove this test, because if this PR is approved it won't be possible
+  // to have an invalid selection for the controller if it is attached to a focused
+  // TextField.
   testWidgets(
     'Movement/Deletion shortcuts do nothing when the selection is invalid',
     (WidgetTester tester) async {
-      await tester.pumpWidget(buildEditableText());
-      controller.text = testText;
-      controller.selection = const TextSelection.collapsed(offset: -1);
-      await tester.pump();
 
-      const List<LogicalKeyboardKey> triggers = <LogicalKeyboardKey>[
-        LogicalKeyboardKey.backspace,
-        LogicalKeyboardKey.delete,
-        LogicalKeyboardKey.arrowLeft,
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowUp,
-        LogicalKeyboardKey.arrowDown,
-        LogicalKeyboardKey.pageUp,
-        LogicalKeyboardKey.pageDown,
-        LogicalKeyboardKey.home,
-        LogicalKeyboardKey.end,
-      ];
+      // await tester.pumpWidget(buildEditableText());
+      // controller.text = testText;
+      // controller.selection = const TextSelection.collapsed(offset: -1);
+      // await tester.pump();
 
-      for (final SingleActivator activator in triggers.expand(allModifierVariants)) {
-        await sendKeyCombination(tester, activator);
-        await tester.pump();
-        expect(controller.text, testText, reason: activator.toString());
-        expect(controller.selection, const TextSelection.collapsed(offset: -1), reason: activator.toString());
-      }
+      // const List<LogicalKeyboardKey> triggers = <LogicalKeyboardKey>[
+      //   LogicalKeyboardKey.backspace,
+      //   LogicalKeyboardKey.delete,
+      //   LogicalKeyboardKey.arrowLeft,
+      //   LogicalKeyboardKey.arrowRight,
+      //   LogicalKeyboardKey.arrowUp,
+      //   LogicalKeyboardKey.arrowDown,
+      //   LogicalKeyboardKey.pageUp,
+      //   LogicalKeyboardKey.pageDown,
+      //   LogicalKeyboardKey.home,
+      //   LogicalKeyboardKey.end,
+      // ];
+
+      // for (final SingleActivator activator in triggers.expand(allModifierVariants)) {
+      //   await sendKeyCombination(tester, activator);
+      //   await tester.pump();
+      //   expect(controller.text, testText, reason: activator.toString());
+      //   expect(controller.selection, const TextSelection.collapsed(offset: -1), reason: activator.toString());
+      // }
     },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
     variant: TargetPlatformVariant.all(),

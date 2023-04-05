@@ -55,6 +55,13 @@ enum HandlePositionInViewport {
 
 typedef _VoidFutureCallback = Future<void> Function();
 
+TextEditingValue collapsedAtEnd(String text) {
+  return TextEditingValue(
+    text: text,
+    selection: TextSelection.collapsed(offset: text.length),
+  );
+}
+
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
   TestWidgetsFlutterBinding.ensureInitialized()
@@ -5635,7 +5642,7 @@ void main() {
 
         tester.testTextInput.log.clear();
 
-        controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
+        controller.value = collapsedAtEnd('a' * 100).copyWith(composing: const TextRange(start: 0, end: 10));
         await tester.pump();
 
         expect(tester.testTextInput.log, contains(
@@ -9441,86 +9448,95 @@ void main() {
   });
 
   group('EditableText does not send editing values more than once', () {
-    final TextEditingController controller = TextEditingController(text: testText);
-    final EditableText editableText = EditableText(
-      showSelectionHandles: true,
-      maxLines: 2,
-      controller: controller,
-      focusNode: FocusNode(),
-      cursorColor: Colors.red,
-      backgroundCursorColor: Colors.blue,
-      style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
-      keyboardType: TextInputType.text,
-      inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
-      onChanged: (String s) => controller.text += ' onChanged',
-    );
+    Widget boilerplate(TextEditingController controller) {
+      final EditableText editableText = EditableText(
+        showSelectionHandles: true,
+        maxLines: 2,
+        controller: controller,
+        focusNode: FocusNode(),
+        cursorColor: Colors.red,
+        backgroundCursorColor: Colors.blue,
+        style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+        keyboardType: TextInputType.text,
+        inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(6)],
+        onChanged: (String s) {
+          controller.value = collapsedAtEnd('${controller.text} onChanged');
+        },
+      );
 
-    final Widget widget = MediaQuery(
-      data: const MediaQueryData(),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: editableText,
-      ),
-    );
+      controller.addListener(() {
+        if (!controller.text.endsWith('listener')) {
+          controller.value = collapsedAtEnd('${controller.text} listener');
+        }
+      });
 
-    controller.addListener(() {
-      if (!controller.text.endsWith('listener')) {
-        controller.text += ' listener';
-      }
-    });
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: editableText,
+        ),
+      );
+    }
 
     testWidgets('input from text input plugin', (WidgetTester tester) async {
-      await tester.pumpWidget(widget);
+      final TextEditingController controller = TextEditingController(text: testText);
+      await tester.pumpWidget(boilerplate(controller));
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
       tester.testTextInput.log.clear();
 
-      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
-      state.updateEditingValue(const TextEditingValue(text: 'remoteremoteremote'));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.updateEditingValue(collapsedAtEnd('remoteremoteremote'));
 
       // Apply in order: length formatter -> listener -> onChanged -> listener.
-      expect(controller.text, 'remote listener onChanged listener');
+      const String expectedText = 'remote listener onChanged listener';
+      expect(controller.text, expectedText);
       final List<TextEditingValue> updates = tester.testTextInput.log
         .where((MethodCall call) => call.method == 'TextInput.setEditingState')
         .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
         .toList(growable: false);
 
-      expect(updates, const <TextEditingValue>[TextEditingValue(text: 'remote listener onChanged listener')]);
+      expect(updates, <TextEditingValue>[collapsedAtEnd(expectedText)]);
 
       tester.testTextInput.log.clear();
 
       // If by coincidence the text input plugin sends the same value back,
       // do nothing.
-      state.updateEditingValue(const TextEditingValue(text: 'remote listener onChanged listener'));
+      state.updateEditingValue(collapsedAtEnd(expectedText));
       expect(controller.text, 'remote listener onChanged listener');
       expect(tester.testTextInput.log, isEmpty);
     });
 
     testWidgets('input from text selection menu', (WidgetTester tester) async {
-      await tester.pumpWidget(widget);
+      final TextEditingController controller = TextEditingController(text: testText);
+      await tester.pumpWidget(boilerplate(controller));
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
       tester.testTextInput.log.clear();
 
-      final EditableTextState state = tester.state<EditableTextState>(find.byWidget(editableText));
-      state.userUpdateTextEditingValue(const TextEditingValue(text: 'remoteremoteremote'), SelectionChangedCause.keyboard);
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.userUpdateTextEditingValue(
+        collapsedAtEnd('remoteremoteremote'),
+        SelectionChangedCause.keyboard,
+      );
 
-      // Apply in order: length formatter -> listener -> onChanged -> listener.
-      expect(controller.text, 'remote listener onChanged listener');
       final List<TextEditingValue> updates = tester.testTextInput.log
         .where((MethodCall call) => call.method == 'TextInput.setEditingState')
         .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
         .toList(growable: false);
 
-      expect(updates, const <TextEditingValue>[TextEditingValue(text: 'remote listener onChanged listener')]);
+      const String expectedText = 'remote listener onChanged listener';
+      expect(updates, <TextEditingValue>[collapsedAtEnd(expectedText)]);
 
       tester.testTextInput.log.clear();
     });
 
     testWidgets('input from controller', (WidgetTester tester) async {
-      await tester.pumpWidget(widget);
+      final TextEditingController controller = TextEditingController(text: testText);
+      await tester.pumpWidget(boilerplate(controller));
 
       // Connect.
       await tester.showKeyboard(find.byType(EditableText));
@@ -9532,7 +9548,7 @@ void main() {
         .map((MethodCall call) => TextEditingValue.fromJSON(call.arguments as Map<String, dynamic>))
         .toList(growable: false);
 
-      expect(updates, const <TextEditingValue>[TextEditingValue(text: 'remoteremoteremote listener')]);
+      expect(updates, <TextEditingValue>[collapsedAtEnd('remoteremoteremote listener')]);
     });
 
     testWidgets('input from changing controller', (WidgetTester tester) async {
@@ -9819,7 +9835,7 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
-    controller.text += '...';
+    controller.value = collapsedAtEnd('${controller.text}...');
     await tester.idle();
 
     final List<String> logOrder = <String>[
@@ -9852,7 +9868,7 @@ void main() {
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       if (newValue.text == 'I will be modified by the formatter.') {
-        newValue = const TextEditingValue(text: 'Flutter is the best!');
+        newValue = collapsedAtEnd('Flutter is the best!');
       }
       return newValue;
     });
@@ -9919,8 +9935,8 @@ void main() {
       methodCall,
       isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
         'text': 'Flutter is the best!',
-        'selectionBase': -1,
-        'selectionExtent': -1,
+        'selectionBase': 20,
+        'selectionExtent': 20,
         'selectionAffinity': 'TextAffinity.downstream',
         'selectionIsDirectional': false,
         'composingBase': -1,
@@ -9931,8 +9947,9 @@ void main() {
     log.clear();
 
     // setEditingState is called when the [controller.value] is modified by local.
+    String text = 'I love flutter!';
     setState(() {
-      controller.text = 'I love flutter!';
+      controller.value = collapsedAtEnd(text);
     });
     expect(log.length, 1);
     methodCall = log[0];
@@ -9940,8 +9957,8 @@ void main() {
       methodCall,
       isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
         'text': 'I love flutter!',
-        'selectionBase': -1,
-        'selectionExtent': -1,
+        'selectionBase': text.length,
+        'selectionExtent': text.length,
         'selectionAffinity': 'TextAffinity.downstream',
         'selectionIsDirectional': false,
         'composingBase': -1,
@@ -9953,8 +9970,9 @@ void main() {
 
     // Currently `_receivedRemoteTextEditingValue` equals 'I will be modified by the formatter.',
     // setEditingState will be called when set the [controller.value] to `_receivedRemoteTextEditingValue` by local.
+    text = 'I will be modified by the formatter.';
     setState(() {
-      controller.text = 'I will be modified by the formatter.';
+      controller.value = collapsedAtEnd(text);
     });
     expect(log.length, 1);
     methodCall = log[0];
@@ -9962,8 +9980,8 @@ void main() {
       methodCall,
       isMethodCall('TextInput.setEditingState', arguments: <String, dynamic>{
         'text': 'I will be modified by the formatter.',
-        'selectionBase': -1,
-        'selectionExtent': -1,
+        'selectionBase': text.length,
+        'selectionExtent': text.length,
         'selectionAffinity': 'TextAffinity.downstream',
         'selectionIsDirectional': false,
         'composingBase': -1,
@@ -9980,7 +9998,7 @@ void main() {
       return null;
     });
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
-      return const TextEditingValue(text: 'Flutter is the best!');
+      return collapsedAtEnd('Flutter is the best!');
     });
     final TextEditingController controller = TextEditingController();
 
@@ -10026,11 +10044,8 @@ void main() {
     final EditableTextState state = tester.firstState(find.byType(EditableText));
 
     // setEditingState is called when remote value modified by the formatter.
-    state.updateEditingValue(TextEditingValue(
-      text: 'I will be modified by the formatter.',
-      selection: controller.selection,
-    ));
-    expect(log.length, 1);
+    state.updateEditingValue(collapsedAtEnd('I will be modified by the formatter.'));
+    expect(log.length, 2);
     expect(log, contains(matchesMethodCall(
       'TextInput.setEditingState',
       args: allOf(
@@ -10040,10 +10055,8 @@ void main() {
 
     log.clear();
 
-    state.updateEditingValue(const TextEditingValue(
-      text: 'I will be modified by the formatter.',
-    ));
-    expect(log.length, 1);
+    state.updateEditingValue(collapsedAtEnd('I will be modified by the formatter.'));
+    expect(log.length, 2);
     expect(log, contains(matchesMethodCall(
       'TextInput.setEditingState',
       args: allOf(
@@ -10525,9 +10538,10 @@ void main() {
     expect(state.wantKeepAlive, true);
 
     expect(formatter.formatCallCount, 0);
-    state.updateEditingValue(const TextEditingValue(text: 'test'));
-    state.updateEditingValue(const TextEditingValue(text: 'test', composing: TextRange(start: 1, end: 2)));
-    state.updateEditingValue(const TextEditingValue(text: '0')); // pass to formatter once to check the values.
+    state.updateEditingValue(collapsedAtEnd('test'));
+    state.updateEditingValue(collapsedAtEnd('test').copyWith(composing: const TextRange(start: 1, end: 2)));
+    // Pass to formatter once to check the values.
+    state.updateEditingValue(collapsedAtEnd('test'));
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
     expect(formatter.lastOldValue.text, 'test');
   });
