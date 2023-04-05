@@ -2165,8 +2165,8 @@ void main() {
 
     // Tap on text field to gain focus, and set selection to '|g'. On iOS
     // the selection is set to the word edge closest to the tap position.
-    // We await for 300ms after the up event, so our next down event does not
-    // register as a double tap.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
     final TestGesture gesture = await tester.startGesture(ePos);
     await tester.pump();
     await gesture.up();
@@ -2179,6 +2179,131 @@ void main() {
     // we can move the cursor with a drag.
     // Here we tap on '|g', where our selection was previously, and move to '|i'.
     await gesture.down(textOffsetToPosition(tester, 7));
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            maxLines: null,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc\ndef\nghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and move to '|i'.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/122519
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              TextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                maxLines: null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc\ndef\nghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and attempt move
+    // to '|g'. The cursor will not move because the `VerticalDragGestureRecognizer`
+    // in the scrollable will beat the `TapAndHorizontalDragGestureRecognizer`
+    // in the TextField. This is because moving from `|a` to `|g` is a completely
+    // vertical movement.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // Release the pointer.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and move to '|i'.
+    // Unlike our previous attempt to drag to `|g`, this works because moving
+    // to `|i` includes a horizontal movement so the `TapAndHorizontalDragGestureRecognizer`
+    // in TextField can beat the `VerticalDragGestureRecognizer` in the scrollable.
+    await gesture.down(aPos);
     await tester.pump();
     await gesture.moveTo(iPos);
     await tester.pumpAndSettle();
@@ -2211,8 +2336,8 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     // Tap on text field to gain focus, and set selection to '|e'.
-    // We await for 300ms after the up event, so our next down event does not
-    // register as a double tap.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
     final TestGesture gesture = await tester.startGesture(ePos);
     await tester.pump();
     await gesture.up();
@@ -2223,6 +2348,122 @@ void main() {
 
     // Here we tap on '|d', and move to '|g'.
     await gesture.down(textOffsetToPosition(tester, testValue.indexOf('d')));
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('g'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
+  );
+
+  testWidgets('Can move cursor when dragging (Android) - multiline', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            maxLines: null,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc\ndef\nghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    // Tap on text field to gain focus, and set selection to '|a'.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('a'));
+
+    // Here we tap on '|c', and move down to '|g'.
+    await gesture.down(textOffsetToPosition(tester, testValue.indexOf('c')));
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('g'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
+  );
+
+  testWidgets('Can move cursor when dragging (Android) - ListView', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/122519
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              TextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                maxLines: null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc\ndef\nghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset cPos = textOffsetToPosition(tester, testValue.indexOf('c'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    // Tap on text field to gain focus, and set selection to '|c'.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(cPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('c'));
+
+    // Here we tap on '|a', and attempt move to '|g'. The cursor will not move
+    // because the `VerticalDragGestureRecognizer` in the scrollable will beat
+    // the `TapAndHorizontalDragGestureRecognizer` in the TextField. This is
+    // because moving from `|a` to `|g` is a completely vertical movement.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('c'));
+
+    // Release the pointer.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Here we tap on '|c', and move to '|g'. Unlike our previous attempt to
+    // drag to `|g`, this works because moving from `|c` to `|g` includes a
+    // horizontal movement so the `TapAndHorizontalDragGestureRecognizer`
+    // in TextField can beat the `VerticalDragGestureRecognizer` in the scrollable.
+    await gesture.down(cPos);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();

@@ -8,16 +8,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard, LogicalKeyboardKey;
 
+import 'framework.dart';
+import 'gesture_detector.dart';
+
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+// late String _last;
+
 double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
   assert(originPosition != null);
   final Offset offset = event.position - originPosition!.global;
   return offset.distance;
 }
 
-// The possible states of a [TapAndDragGestureRecognizer].
+// The possible states of a [BaseTapAndDragGestureRecognizer].
 //
 // The recognizer advances from [ready] to [possible] when it starts tracking
-// a pointer in [TapAndDragGestureRecognizer.addAllowedPointer]. Where it advances
+// a pointer in [BaseTapAndDragGestureRecognizer.addAllowedPointer]. Where it advances
 // from there depends on the sequence of pointer events that is tracked by the
 // recognizer, following the initial [PointerDownEvent]:
 //
@@ -25,7 +32,7 @@ double _getGlobalDistance(PointerEvent event, OffsetPair? originPosition) {
 //   state as long as it continues to track a pointer.
 // * If a [PointerMoveEvent] is tracked that has moved a sufficient global distance
 //   from the initial [PointerDownEvent] and it came before a [PointerUpEvent], then
-//   when this recognizer wins the arena, it will move from the [possible] state to [accepted].
+//   this recognizer moves from the [possible] state to [accepted].
 // * If a [PointerUpEvent] is tracked before the pointer has moved a sufficient global
 //   distance to be considered a drag, then this recognizer moves from the [possible]
 //   state to [ready].
@@ -51,7 +58,7 @@ enum _DragState {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragDownDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onTapDown].
+/// Used by [BaseTapAndDragGestureRecognizer.onTapDown].
 typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 
 /// Details for [GestureTapDragDownCallback], such as the number of
@@ -59,8 +66,8 @@ typedef GestureTapDragDownCallback  = void Function(TapDragDownDetails details);
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onTapDown] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onTapDown] callback.
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
@@ -110,7 +117,7 @@ class TapDragDownDetails with Diagnosticable {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragUpDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onTapUp].
+/// Used by [BaseTapAndDragGestureRecognizer.onTapUp].
 typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 
 /// Details for [GestureTapDragUpCallback], such as the number of
@@ -118,8 +125,8 @@ typedef GestureTapDragUpCallback  = void Function(TapDragUpDetails details);
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onTapUp] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onTapUp] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
@@ -169,7 +176,7 @@ class TapDragUpDetails with Diagnosticable {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragStartDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onDragStart].
+/// Used by [BaseTapAndDragGestureRecognizer.onDragStart].
 typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details);
 
 /// Details for [GestureTapDragStartCallback], such as the number of
@@ -177,8 +184,8 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onDragStart] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onDragStart] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
@@ -242,7 +249,7 @@ class TapDragStartDetails with Diagnosticable {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragUpdateDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onDragUpdate].
+/// Used by [BaseTapAndDragGestureRecognizer.onDragUpdate].
 typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails details);
 
 /// Details for [GestureTapDragUpdateCallback], such as the number of
@@ -250,8 +257,8 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onDragUpdate] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onDragUpdate] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
@@ -374,7 +381,7 @@ class TapDragUpdateDetails with Diagnosticable {
 /// The consecutive tap count at the time the pointer contacted the
 /// screen is given by [TapDragEndDetails.consecutiveTapCount].
 ///
-/// Used by [TapAndDragGestureRecognizer.onDragEnd].
+/// Used by [BaseTapAndDragGestureRecognizer.onDragEnd].
 typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 
 /// Details for [GestureTapDragEndCallback], such as the number of
@@ -382,8 +389,8 @@ typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 ///
 /// See also:
 ///
-///  * [TapAndDragGestureRecognizer], which passes this information to its
-///    [TapAndDragGestureRecognizer.onDragEnd] callback.
+///  * [BaseTapAndDragGestureRecognizer], which passes this information to its
+///    [BaseTapAndDragGestureRecognizer.onDragEnd] callback.
 ///  * [TapDragDownDetails], the details for [GestureTapDragDownCallback].
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
@@ -443,7 +450,7 @@ class TapDragEndDetails with Diagnosticable {
 /// Signature for when the pointer that previously triggered a
 /// [GestureTapDragDownCallback] did not complete.
 ///
-/// Used by [TapAndDragGestureRecognizer.onCancel].
+/// Used by [BaseTapAndDragGestureRecognizer.onCancel].
 typedef GestureCancelCallback = void Function();
 
 // A mixin for [OneSequenceGestureRecognizer] that tracks the number of taps
@@ -514,13 +521,6 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   // If this value is null, [consecutiveTapCount] can grow infinitely large.
   int? get maxConsecutiveTap;
 
-  // The maximum distance in logical pixels the gesture is allowed to drift
-  // from the initial touch down position before the [consecutiveTapCount]
-  // and [keysPressedOnDown] are frozen and the remaining tracker state is
-  // reset. These values remain frozen until the next [PointerDownEvent] is
-  // tracked in [addAllowedPointer].
-  double? get slopTolerance;
-
   // Private tap state tracked.
   PointerDownEvent? _down;
   PointerUpEvent? _up;
@@ -560,7 +560,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
-      final bool isSlopPastTolerance = slopTolerance != null && _getGlobalDistance(event, _originPosition) > slopTolerance!;
+      final double computedSlop = computeHitSlop(event.kind, gestureSettings);
+      final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > computedSlop;
 
       if (isSlopPastTolerance) {
         _consecutiveTapTimerStop();
@@ -648,14 +649,14 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 }
 
-/// Recognizes taps and movements.
+/// A base class for gesture recognizers that recognize taps and movements.
 ///
 /// Takes on the responsibilities of [TapGestureRecognizer] and
 /// [DragGestureRecognizer] in one [GestureRecognizer].
 ///
 /// ### Gesture arena behavior
 ///
-/// [TapAndDragGestureRecognizer] competes on the pointer events of
+/// [BaseTapAndDragGestureRecognizer] competes on the pointer events of
 /// [kPrimaryButton] only when it has at least one non-null `onTap*`
 /// or `onDrag*` callback.
 ///
@@ -664,12 +665,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// screen) or a drag (e.g. if the pointer was not dragged far enough to
 /// be considered a drag.
 ///
-/// This recognizer will not immediately declare victory for every tap or drag that it
-/// recognizes.
+/// This recognizer will not immediately declare victory for every tap that it
+/// recognizes, but it declares victory for every drag.
 ///
 /// The recognizer will declare victory when all other recognizer's in
 /// the arena have lost, if the timer of [kPressTimeout] elapses and a tap
-/// series greater than 1 is being tracked.
+/// series greater than 1 is being tracked, or until the pointer has moved
+/// a sufficient global distance from the origin to be considered a drag.
 ///
 /// If this recognizer loses the arena (either by declaring defeat or by
 /// another recognizer declaring victory) while the pointer is contacting the
@@ -678,7 +680,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// ### When competing with `TapGestureRecognizer` and `DragGestureRecognizer`
 ///
 /// Similar to [TapGestureRecognizer] and [DragGestureRecognizer],
-/// [TapAndDragGestureRecognizer] will not aggressively declare victory when it detects
+/// [BaseTapAndDragGestureRecognizer] will not aggressively declare victory when it detects
 /// a tap, so when it is competing with those gesture recognizers and others it has a chance
 /// of losing.
 ///
@@ -689,19 +691,86 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 ///
 /// When competing against [DragGestureRecognizer], if the pointer does not move a sufficient
 /// global distance to be considered a drag, the recognizers will tie in the arena. If the
-/// pointer does travel enough distance then the [TapAndDragGestureRecognizer] will lose because
-/// the [DragGestureRecognizer] will declare self-victory when the drag threshold is met.
-class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
+/// pointer does travel enough distance then the recognizer that entered the arena
+/// first will win. The gesture detected in this case is a drag.
+///
+/// {@tool snippet}
+///
+/// This example shows how to hook up [TapAndPanGestureRecognizer]s' to nested
+/// [RawGestureDetector]s'. It assumes that the code is being used inside a [State]
+/// object with a `_last` field that is then displayed as the child of the gesture detector.
+///
+/// In this example, if the pointer has moved past the drag threshold, then the
+/// the first [TapAndPanGestureRecognizer] instance to receive the [PointerEvent]
+/// will win the arena because the recognizer will immediately declare victory.
+///
+/// The first one to receive the event in the example will depend on where on both
+/// containers the pointer lands first. If your pointer begins in the overlapping
+/// area of both containers, then the inner-most widget will receive the event first.
+/// If your pointer begins in the yellow container then it will be the first to
+/// receive the event.
+///
+/// If the pointer has not moved past the drag threshold, then the first recognizer
+/// to enter the arena will win (i.e. they both tie and the gesture arena will call
+/// [GestureArenaManager.sweep] so the first member of the arena will win).
+///
+/// ```dart
+/// RawGestureDetector(
+///   gestures: <Type, GestureRecognizerFactory>{
+///     TapAndPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+///       () => TapAndPanGestureRecognizer(),
+///       (TapAndPanGestureRecognizer instance) {
+///         instance
+///           ..onTapDown = (TapDragDownDetails details) { setState(() { _last = 'down_a'; }); }
+///           ..onDragStart = (TapDragStartDetails details) { setState(() { _last = 'drag_start_a'; }); }
+///           ..onDragUpdate = (TapDragUpdateDetails details) { setState(() { _last = 'drag_update_a'; }); }
+///           ..onDragEnd = (TapDragEndDetails details) { setState(() { _last = 'drag_end_a'; }); }
+///           ..onTapUp = (TapDragUpDetails details) { setState(() { _last = 'up_a'; }); }
+///           ..onCancel = () { setState(() { _last = 'cancel_a'; }); };
+///       },
+///     ),
+///   },
+///   child: Container(
+///     width: 300.0,
+///     height: 300.0,
+///     color: Colors.yellow,
+///     alignment: Alignment.center,
+///     child: RawGestureDetector(
+///       gestures: <Type, GestureRecognizerFactory>{
+///         TapAndPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+///           () => TapAndPanGestureRecognizer(),
+///           (TapAndPanGestureRecognizer instance) {
+///             instance
+///               ..onTapDown = (TapDragDownDetails details) { setState(() { _last = 'down_b'; }); }
+///               ..onDragStart = (TapDragStartDetails details) { setState(() { _last = 'drag_start_b'; }); }
+///               ..onDragUpdate = (TapDragUpdateDetails details) { setState(() { _last = 'drag_update_b'; }); }
+///               ..onDragEnd = (TapDragEndDetails details) { setState(() { _last = 'drag_end_b'; }); }
+///               ..onTapUp = (TapDragUpDetails details) { setState(() { _last = 'up_b'; }); }
+///               ..onCancel = () { setState(() { _last = 'cancel_b'; }); };
+///           },
+///         ),
+///       },
+///       child: Container(
+///         width: 150.0,
+///         height: 150.0,
+///         color: Colors.blue,
+///         child: Text(_last),
+///       ),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  TapAndDragGestureRecognizer({
+  BaseTapAndDragGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
   }) : _deadline = kPressTimeout,
-      dragStartBehavior = DragStartBehavior.start,
-      slopTolerance = kTouchSlop;
+      dragStartBehavior = DragStartBehavior.start;
 
   /// Configure the behavior of offsets passed to [onDragStart].
   ///
@@ -738,23 +807,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   @override
   int? maxConsecutiveTap;
 
-  // The maximum distance in logical pixels the gesture is allowed to drift
-  // to still be considered a tap.
-  //
-  // Drifting past the allowed slop amount causes the recognizer to reset
-  // the tap series it is currently tracking, stopping the consecutive tap
-  // count from increasing. The consecutive tap count and the set of hardware
-  // keys that were pressed on tap down will retain their pre-past slop
-  // tolerance values until the next [PointerDownEvent] is tracked.
-  //
-  // If the gesture exceeds this value, then it can only be accepted as a drag
-  // gesture.
-  //
-  // Can be null to indicate that the gesture can drift for any distance.
-  // Defaults to 18 logical pixels.
-  @override
-  final double? slopTolerance;
-
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
   /// This triggers after the down event, once a short timeout ([kPressTimeout]) has
@@ -763,7 +815,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [TapDragDownDetails] object.
   ///
-  /// {@template flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@template flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   /// The number of consecutive taps, and the keys that were pressed on tap down
   /// are also provided in the callback's `details` argument.
   /// {@endtemplate}
@@ -782,7 +834,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// The position of the pointer is provided in the callback's `details`
   /// argument, which is a [TapDragUpDetails] object.
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -796,7 +848,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// argument, which is a [TapDragStartDetails] object. The [dragStartBehavior]
   /// determines this position.
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -809,7 +861,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// The distance traveled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [TapDragUpdateDetails] object.
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -822,7 +874,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   /// The velocity is provided in the callback's `details` argument, which is a
   /// [TapDragEndDetails] object.
   ///
-  /// {@macro flutter.gestures.selectionrecognizers.TapAndDragGestureRecognizer.tapStatusTrackerData}
+  /// {@macro flutter.gestures.selectionrecognizers.BaseTapAndDragGestureRecognizer.tapStatusTrackerData}
   ///
   /// See also:
   ///
@@ -864,6 +916,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   PointerEvent? _start;
   late OffsetPair _initialPosition;
   late double _globalDistanceMoved;
+  late double _globalDistanceMovedAllAxes;
   OffsetPair? _correctedPosition;
 
   // For drag update throttle.
@@ -872,9 +925,9 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   final Set<int> _acceptedActivePointers = <int>{};
 
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
-    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
-  }
+  Offset _getDeltaForDetails(Offset delta);
+  double? _getPrimaryValueFromOffset(Offset value);
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
 
   // Drag updates may require throttling to avoid excessive updating, such as for text layouts in text
   // fields. The frequency of invocations is controlled by the [dragUpdateThrottleFrequency].
@@ -921,6 +974,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       super.addAllowedPointer(event);
       _primaryPointer = event.pointer;
       _globalDistanceMoved = 0.0;
+      _globalDistanceMovedAllAxes = 0.0;
       _dragState = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
       _deadlineTimer = Timer(_deadline, () => _didExceedDeadlineWithEvent(event));
@@ -955,7 +1009,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
     _wonArenaForPrimaryPointer = true;
 
+    // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent] has
+    // moved a sufficient global distance.
     if (_start != null) {
+      assert(_dragState == _DragState.accepted);
+      assert(currentUp == null);
       _acceptDrag(_start!);
     }
 
@@ -979,6 +1037,10 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
             // but the pointer has exceeded the tap tolerance, then the pointer is accepted as a
             // drag gesture.
             if (currentDown != null) {
+              if (!_acceptedActivePointers.remove(pointer)) {
+                resolvePointer(pointer, GestureDisposition.rejected);
+              }
+              _dragState = _DragState.accepted;
               _acceptDrag(currentDown!);
               _checkDragEnd();
             }
@@ -1026,8 +1088,8 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       // has been accepted and it has moved past the [slopTolerance] but has not moved
       // a sufficient global distance from the initial position to be considered a drag.
       // In this case since the gesture cannot be a tap, it defaults to a drag.
-
-      _pastSlopTolerance = _pastSlopTolerance || slopTolerance != null && _getGlobalDistance(event, _initialPosition) > slopTolerance!;
+      final double computedSlop = computeHitSlop(event.kind, gestureSettings);
+      _pastSlopTolerance = _pastSlopTolerance || _getGlobalDistance(event, _initialPosition) > computedSlop;
 
       if (_dragState == _DragState.accepted) {
         _checkDragUpdate(event);
@@ -1084,7 +1146,6 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     if (!_wonArenaForPrimaryPointer) {
       return;
     }
-    _dragState = _DragState.accepted;
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
     }
@@ -1106,13 +1167,24 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
 
   void _checkDrag(PointerMoveEvent event) {
     final Matrix4? localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+    final Offset movedLocally = _getDeltaForDetails(event.localDelta);
     _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
+      transform: localToGlobalTransform,
+      untransformedDelta: movedLocally,
+      untransformedEndPosition: event.localPosition
+    ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
+    _globalDistanceMovedAllAxes += PointerEvent.transformDeltaViaPositions(
       transform: localToGlobalTransform,
       untransformedDelta: event.localDelta,
       untransformedEndPosition: event.localPosition
     ).distance * 1.sign;
-    if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
+    if (_hasSufficientGlobalDistanceToAccept(event.kind)
+        || (_wonArenaForPrimaryPointer && _globalDistanceMovedAllAxes.abs() > computePanSlop(event.kind, gestureSettings))) {
       _start = event;
+      _dragState = _DragState.accepted;
+      if (!_wonArenaForPrimaryPointer) {
+        resolve(GestureDisposition.accepted);
+      }
     }
   }
 
@@ -1287,4 +1359,114 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       _deadlineTimer = null;
     }
   }
+}
+
+/// Recognizes taps along with movement in the horizontal direction.
+///
+/// Before this recognizer has won the arena for the primary pointer being tracked,
+/// it will only accept a drag on the horizontal axis. If a drag is detected after
+/// this recognizer has won the arena then it will accept a drag on any axis.
+///
+/// See also:
+///
+///  * [BaseTapAndDragGestureRecognizer], for the class that provides the main
+///  implementation details of this recognizer.
+///  * [TapAndPanGestureRecognizer], for a similar recognizer that accepts a drag
+///  on any axis regardless if the recognizer has won the arena for the primary
+///  pointer being tracked.
+///  * [HorizontalDragGestureRecognizer], for a similar recognizer that only recognizes
+///  horizontal movement.
+class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
+  /// Create a gesture recognizer for interactions in the horizontal axis.
+  ///
+  /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
+  TapAndHorizontalDragGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+  });
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
+
+  @override
+  double _getPrimaryValueFromOffset(Offset value) => value.dx;
+
+  @override
+  String get debugDescription => 'tap and horizontal drag';
+}
+
+/// {@template flutter.gestures.selectionrecognizers.TapAndPanGestureRecognizer}
+/// Recognizes taps along with both horizontal and vertical movement.
+///
+/// This recognizer will accept a drag on any axis, regardless if it has won the
+/// arena for the primary pointer being tracked.
+///
+/// See also:
+///
+///  * [BaseTapAndDragGestureRecognizer], for the class that provides the main
+///  implementation details of this recognizer.
+///  * [TapAndHorizontalDragGestureRecognizer], for a similar recognizer that
+///  only accepts horizontal drags before it has won the arena for the primary
+///  pointer being tracked.
+///  * [PanGestureRecognizer], for a similar recognizer that only recognizes
+///  movement.
+/// {@endtemplate}
+class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
+  /// Create a gesture recognizer for interactions on a plane.
+  TapAndPanGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+  });
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double? _getPrimaryValueFromOffset(Offset value) => null;
+
+  @override
+  String get debugDescription => 'tap and pan';
+}
+
+@Deprecated(
+  'Use TapAndPanGestureRecognizer instead. '
+  'TapAndPanGestureRecognizer works exactly the same but has a more disambiguated name from BaseTapAndDragGestureRecognizer. '
+  'This feature was deprecated after v3.9.0-19.0.pre.'
+)
+/// {@macro flutter.gestures.selectionrecognizers.TapAndPanGestureRecognizer}
+class TapAndDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
+  /// Create a gesture recognizer for interactions on a plane.
+  @Deprecated(
+    'Use TapAndPanGestureRecognizer instead. '
+    'TapAndPanGestureRecognizer works exactly the same but has a more disambiguated name from BaseTapAndDragGestureRecognizer. '
+    'This feature was deprecated after v3.9.0-19.0.pre.'
+  )
+  TapAndDragGestureRecognizer({
+    super.debugOwner,
+    super.supportedDevices,
+  });
+
+  @override
+  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double? _getPrimaryValueFromOffset(Offset value) => null;
+
+  @override
+  String get debugDescription => 'tap and pan';
 }
