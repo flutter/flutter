@@ -336,7 +336,7 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
   bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
 
   for (const auto& pair : new_pairs) {
-    auto pos = atlas.FindFontGlyphPosition(pair);
+    auto pos = atlas.FindFontGlyphBounds(pair);
     if (!pos.has_value()) {
       continue;
     }
