@@ -3260,7 +3260,7 @@ enum ClipboardStatus {
 /// to leave that to [EditableText.contextMenuBuilder].
 @Deprecated(
   'Use `TextSelectionControls`. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
+  'This feature was deprecated after v3.9.0-21.0.pre.',
 )
 mixin TextSelectionHandleControls on TextSelectionControls {
   @override
