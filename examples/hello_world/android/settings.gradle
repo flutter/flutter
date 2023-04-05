@@ -27,12 +27,8 @@ pluginManagement {
     }
 }
 
-plugins {
-    id "dev.flutter.flutter-app-plugin-loader-gradle-plugin"
-}
-
 include ':app'
 
 enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
 
-// apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
