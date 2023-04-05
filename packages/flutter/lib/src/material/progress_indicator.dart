@@ -552,24 +552,23 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The width of the line used to draw the circle.
   final double strokeWidth;
 
-  /// The progress indicator's line ending.
+  /// The shape of the progress indicator's stroke ends.
   ///
-  /// This determines the shape of the stroke ends of the progress indicator.
-  /// By default, [strokeCap] is null.
-  /// When [value] is null (indeterminate), the stroke ends are set to
-  /// [StrokeCap.square]. When [value] is not null, the stroke
-  /// ends are set to [StrokeCap.butt].
+  /// Determines the appearance of the stroke ends in the progress indicator.
+  /// By default, [strokeCap] is null, causing the stroke ends to be set to
+  /// [StrokeCap.square] when [value] is null (indeterminate), and to
+  /// [StrokeCap.butt] when [value] is not null (determinate).
   ///
-  /// Setting [strokeCap] to [StrokeCap.round] will result in a rounded end.
-  /// Setting [strokeCap] to [StrokeCap.butt] with [value] == null will result
-  /// in a slightly different indeterminate animation; the indicator completely
-  /// disappears and reappears on its minimum value.
-  /// Setting [strokeCap] to [StrokeCap.square] with [value] != null will
-  /// result in a different display of [value]. The indicator will start
-  /// drawing from slightly less than the start, and end slightly after
-  /// the end. This is not reccomended, as the expected behavior is, for
-  /// example, that a [value] of 0.5 starts at 90 degrees and ends at 270
-  /// degrees. With [strokeCap.square], it could start at 85 degrees and
+  /// Setting [strokeCap] to [StrokeCap.round] results in rounded stroke ends.
+  /// With [strokeCap] set to [StrokeCap.butt] and [value] == null, the
+  /// indicator exhibits a different indeterminate animation, disappearing
+  /// completely before reappearing at its minimum value.
+  ///
+  /// Using [strokeCap] as [StrokeCap.square] when [value] is not null leads to
+  /// an unconventional display of [value], starting and ending slightly
+  /// off the expected angles. While not recommended, this behavior can be
+  /// observed with a [value] of 0.5, where the expected start and end angles
+  /// are 90 and 270 degrees, but the indicator may start at 85 degrees and
   /// end at 275 degrees.
   final StrokeCap? strokeCap;
 
