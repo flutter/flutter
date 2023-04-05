@@ -161,48 +161,6 @@ List<SuggestionSpan> _correctSpellCheckResults(
       // was positioned in resultsText versus in newText.
       offset = adjustedSpanStart - currentSpan.range.start;
       correctedSpellCheckResults.add(adjustedSpan);
-    } else {
-      // Check if word was modified by extension by searching for word
-      // anywhere in the remaing substring of newText left to search.
-      final RegExp modifiedRegex = RegExp(currentSpanText);
-      final int modifiedFoundIndex = newText.substring(searchStart).indexOf(modifiedRegex);
-
-      if (modifiedFoundIndex >= 0) {
-        // Word was modified by extension, so check for next space following the
-        // modified word to find its end index.
-        final RegExp regex = RegExp(' ');
-        final int adjustedSearchStartForSpace = modifiedFoundIndex + searchStart + spanLength;
-        final int foundEndIndex = newText.substring(adjustedSearchStartForSpace).indexOf(regex);
-
-        if (foundEndIndex >= 0) {
-          // Word was found within newText.
-          final int adjustedSpanStart = modifiedFoundIndex + searchStart;
-          final int adjustedSpanEnd = adjustedSearchStartForSpace + foundEndIndex;
-          final SuggestionSpan adjustedSpan = SuggestionSpan(
-            TextRange(start: adjustedSpanStart, end: adjustedSpanEnd),
-            currentSpan.suggestions,
-          );
-
-          // Start search for the next misspelled word at the end of the
-          // adjusted currentSpan.
-          searchStart = adjustedSpanEnd + 1;
-          correctedSpellCheckResults.add(adjustedSpan);
-          // Adjust offset to reflect the difference between where currentSpan
-          // was positioned in resultsText versus where the modified version
-          // is positioned in newText.
-          offset = (adjustedSpanEnd - adjustedSpanStart) - (currentSpan.range.end - currentSpan.range.start) + (adjustedSpanStart - currentSpan.range.start);
-        } else {
-          // Word was found at the end of newText.
-          final int adjustedSpanStart = modifiedFoundIndex + searchStart;
-          final SuggestionSpan adjustedSpan = SuggestionSpan(
-            TextRange(start: adjustedSpanStart, end: newText.length),
-            currentSpan.suggestions,
-          );
-
-          correctedSpellCheckResults.add(adjustedSpan);
-          break;
-        }
-      }
     }
     spanPointer++;
   }
