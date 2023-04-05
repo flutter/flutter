@@ -38,7 +38,6 @@ _framework_binary_subpath = "Versions/A/$_flutter_framework_name"
 # the Flutter engine source root.
 _flutter_framework_headers = [
   "framework/Headers/FlutterAppDelegate.h",
-  "framework/Headers/FlutterApplication.h",
   "framework/Headers/FlutterDartProject.h",
   "framework/Headers/FlutterEngine.h",
   "framework/Headers/FlutterMacOS.h",
@@ -58,7 +57,6 @@ source_set("flutter_framework_source") {
     "framework/Source/AccessibilityBridgeMac.h",
     "framework/Source/AccessibilityBridgeMac.mm",
     "framework/Source/FlutterAppDelegate.mm",
-    "framework/Source/FlutterApplication.mm",
     "framework/Source/FlutterBackingStore.h",
     "framework/Source/FlutterBackingStore.mm",
     "framework/Source/FlutterChannelKeyResponder.h",
