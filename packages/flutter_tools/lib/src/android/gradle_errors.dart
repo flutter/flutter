@@ -12,7 +12,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'gradle_utils.dart';
-import 'java.dart';
+import 'java.dart' as java;
 import 'multidex.dart';
 
 typedef GradleErrorTest = bool Function(String);
@@ -367,7 +367,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     required bool usesAndroidX,
     required bool multidexEnabled,
   }) async {
-    final String? javaHome = findJavaHome(
+    final String? javaHome = java.findJavaHome(
       androidStudio: globals.androidStudio,
       fileSystem: globals.fs,
       operatingSystemUtils: globals.os,

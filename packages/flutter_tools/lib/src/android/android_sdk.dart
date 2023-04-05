@@ -8,7 +8,7 @@ import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
-import 'java.dart';
+import 'java.dart' as java;
 
 // ANDROID_HOME is deprecated.
 // See https://developer.android.com/studio/command-line/variables.html#envar
@@ -411,7 +411,7 @@ class AndroidSdk {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
-      final String? javaBinary = findJavaBinary(
+      final String? javaBinary = java.findJavaBinary(
         androidStudio: globals.androidStudio,
         fileSystem: globals.fs,
         operatingSystemUtils: globals.os,
