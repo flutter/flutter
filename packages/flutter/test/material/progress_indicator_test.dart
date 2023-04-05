@@ -447,7 +447,7 @@ void main() {
     await tester.pumpWidget(const CircularProgressIndicator());
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
 
-    await tester.pumpWidget(const CircularProgressIndicator(preferRoundIndicator: true));
+    await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.round));
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
@@ -613,7 +613,7 @@ void main() {
     await tester.pumpWidget(const RefreshProgressIndicator());
     expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.square));
 
-    await tester.pumpWidget(const RefreshProgressIndicator(preferRoundIndicator: true));
+    await tester.pumpWidget(const RefreshProgressIndicator(strokeCap: StrokeCap.round));
     expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 

@@ -145,8 +145,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     this.value,
     required this.animationValue,
     required this.textDirection,
-    required this.indicatorBorderRadius,
-    required this.shape,
   });
 
   final Color backgroundColor;
@@ -154,8 +152,6 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   final double? value;
   final double animationValue;
   final TextDirection textDirection;
-  final BorderRadius indicatorBorderRadius;
-  final ShapeBorder shape;
 
   // The indeterminate progress animation displays two lines whose leading (head)
   // and trailing (tail) endpoints are defined by the following four curves.
@@ -185,6 +181,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     final Paint paint = Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.fill;
+    canvas.drawRect(Offset.zero & size, paint);
 
     paint.color = valueColor;
 
@@ -200,28 +197,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         case TextDirection.ltr:
           left = x;
       }
-
-      final Rect rect = Offset(left, 0.0) & Size(width, size.height);
-      if (indicatorBorderRadius != BorderRadius.zero) {
-        // When the indicator has a value, we override the start border radius
-        // to be zero, so that the radius is only applied to the trailing edge
-        //of the indicator.
-        final BorderRadius borderRadius;
-        if (value == null || indicatorBorderRadius == BorderRadius.zero) {
-          borderRadius = indicatorBorderRadius;
-        } else {
-          switch (textDirection) {
-            case TextDirection.rtl:
-              borderRadius = indicatorBorderRadius.copyWith(topRight: Radius.zero, bottomRight: Radius.zero);
-            case TextDirection.ltr:
-              borderRadius = indicatorBorderRadius.copyWith(topLeft: Radius.zero, bottomLeft: Radius.zero);
-          }
-        }
-
-        canvas.drawRRect(borderRadius.toRRect(rect), paint);
-      } else {
-        canvas.drawRect(rect, paint);
-      }
+      canvas.drawRect(Offset(left, 0.0) & Size(width, size.height), paint);
     }
 
     if (value != null) {
@@ -244,9 +220,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         || oldPainter.valueColor != valueColor
         || oldPainter.value != value
         || oldPainter.animationValue != animationValue
-        || oldPainter.textDirection != textDirection
-        || oldPainter.indicatorBorderRadius != indicatorBorderRadius
-        || oldPainter.shape != shape;
+        || oldPainter.textDirection != textDirection;
   }
 }
 
@@ -305,8 +279,6 @@ class LinearProgressIndicator extends ProgressIndicator {
     this.minHeight,
     super.semanticsLabel,
     super.semanticsValue,
-    this.indicatorBorderRadius = BorderRadius.zero,
-    this.shape = const RoundedRectangleBorder(),
   }) : assert(minHeight == null || minHeight > 0);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
@@ -328,16 +300,6 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// it will use 4dp.
   /// {@endtemplate}
   final double? minHeight;
-
-  /// The border radius of the indicator.
-  ///
-  /// By default it is [BorderRadius.zero], which produces a rectangular indicator.
-  final BorderRadius indicatorBorderRadius;
-
-  /// The border radius of the background indicator.
-  ///
-  /// By default it is [BorderRadius.zero], which produces a rectangular track.
-  final ShapeBorder shape;
 
   @override
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
@@ -390,11 +352,6 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: ShapeDecoration(
-          color: trackColor,
-          shape: widget.shape,
-        ),
         constraints: BoxConstraints(
           minWidth: double.infinity,
           minHeight: minHeight,
@@ -406,8 +363,6 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
             value: widget.value, // may be null
             animationValue: animationValue, // ignored if widget.value is not null
             textDirection: textDirection,
-            indicatorBorderRadius: widget.indicatorBorderRadius,
-            shape: widget.shape,
           ),
         ),
       ),
@@ -441,7 +396,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     required this.offsetValue,
     required this.rotationValue,
     required this.strokeWidth,
-    required this.preferRoundIndicator,
+    required this.strokeCap,
   }) : arcStart = value != null
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
@@ -459,7 +414,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   final double strokeWidth;
   final double arcStart;
   final double arcSweep;
-  final bool preferRoundIndicator;
+  final StrokeCap? strokeCap;
 
   static const double _twoPi = math.pi * 2.0;
   static const double _epsilon = .001;
@@ -469,26 +424,25 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final StrokeCap strokeCap;
-    if (preferRoundIndicator) {
-      strokeCap = StrokeCap.round;
-    } else if (value == null) { // Indeterminate
-      strokeCap = StrokeCap.square;
-    } else {
-      strokeCap = StrokeCap.butt;
-    }
-
     final Paint paint = Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
-      ..strokeCap = strokeCap
       ..style = PaintingStyle.stroke;
+
     if (backgroundColor != null) {
       final Paint backgroundPaint = Paint()
         ..color = backgroundColor!
         ..strokeWidth = strokeWidth
         ..style = PaintingStyle.stroke;
       canvas.drawArc(Offset.zero & size, 0, _sweep, false, backgroundPaint);
+    }
+
+    if (value == null && strokeCap == null) {
+      // Indeterminate
+      paint.strokeCap = StrokeCap.square;
+    } else {
+      // Butt when determinate (value != null) && strokeCap == null;
+      paint.strokeCap = strokeCap ?? StrokeCap.butt;
     }
 
     canvas.drawArc(Offset.zero & size, arcStart, arcSweep, false, paint);
@@ -504,7 +458,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
         || oldPainter.offsetValue != offsetValue
         || oldPainter.rotationValue != rotationValue
         || oldPainter.strokeWidth != strokeWidth
-        || oldPainter.preferRoundIndicator != preferRoundIndicator;
+        || oldPainter.strokeCap != strokeCap;
   }
 }
 
@@ -561,7 +515,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     super.semanticsLabel,
     super.semanticsValue,
-    this.preferRoundIndicator = false,
+    this.strokeCap,
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
@@ -580,7 +534,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeWidth = 4.0,
     super.semanticsLabel,
     super.semanticsValue,
-    this.preferRoundIndicator = false,
+    this.strokeCap,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
@@ -598,13 +552,26 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The width of the line used to draw the circle.
   final double strokeWidth;
 
-  /// The progress indicator's line ending: square or round.
+  /// The progress indicator's line ending.
   ///
   /// This determines the shape of the stroke ends of the progress indicator.
-  /// False is the default value, and it results in square ends for the
-  /// progress indicator. The true value results in rounded ends for the
-  /// stroke.
-  final bool preferRoundIndicator;
+  /// By default, [strokeCap] is null.
+  /// When [value] is null (indeterminate), the stroke ends are set to
+  /// [StrokeCap.square]. When [value] is not null, the stroke
+  /// ends are set to [StrokeCap.butt].
+  ///
+  /// Setting [strokeCap] to [StrokeCap.round] will result in a rounded end.
+  /// Setting [strokeCap] to [StrokeCap.butt] with [value] == null will result
+  /// in a slightly different indeterminate animation; the indicator completely
+  /// disappears and reappears on its minimum value.
+  /// Setting [strokeCap] to [StrokeCap.square] with [value] != null will
+  /// result in a different display of [value]. The indicator will start
+  /// drawing from slightly less than the start, and end slightly after
+  /// the end. This is not reccomended, as the expected behavior is, for
+  /// example, that a [value] of 0.5 starts at 90 degrees and ends at 270
+  /// degrees. With [strokeCap.square], it could start at 85 degrees and
+  /// end at 275 degrees.
+  final StrokeCap? strokeCap;
 
   @override
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
@@ -685,7 +652,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
             offsetValue: offsetValue,
             rotationValue: rotationValue,
             strokeWidth: widget.strokeWidth,
-            preferRoundIndicator: widget.preferRoundIndicator,
+            strokeCap: widget.strokeCap,
           ),
         ),
       ),
@@ -744,7 +711,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     required super.rotationValue,
     required super.strokeWidth,
     required this.arrowheadScale,
-    required super.preferRoundIndicator,
+    required super.strokeCap,
   });
 
   final double arrowheadScale;
@@ -769,10 +736,18 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
       ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
       ..lineTo(arrowheadPointX, arrowheadPointY)
       ..close();
+
+    final StrokeCap internalStrokeCap;
+    if (strokeCap == null) {
+      internalStrokeCap = StrokeCap.butt;
+    } else {
+      internalStrokeCap = strokeCap!;
+    }
+    
     final Paint paint = Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
-      ..strokeCap = preferRoundIndicator ? StrokeCap.round : StrokeCap.butt
+      ..strokeCap = internalStrokeCap
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, paint);
   }
@@ -815,7 +790,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     super.strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
     super.semanticsLabel,
     super.semanticsValue,
-    super.preferRoundIndicator,
+    super.strokeCap,
   });
 
   /// Default stroke width.
@@ -945,7 +920,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
                     rotationValue: rotationValue,
                     strokeWidth: widget.strokeWidth,
                     arrowheadScale: arrowheadScale,
-                    preferRoundIndicator: widget.preferRoundIndicator,
+                    strokeCap: widget.strokeCap,
                   ),
                 ),
               ),
