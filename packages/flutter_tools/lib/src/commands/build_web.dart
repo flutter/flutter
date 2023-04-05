@@ -7,6 +7,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/targets/web.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
@@ -168,7 +169,14 @@ class BuildWebCommand extends BuildSubCommand {
     final String? outputDirectoryPath = stringArg('output');
 
     displayNullSafetyMode(buildInfo);
-    await buildWeb(
+    final WebBuilder webBuilder = WebBuilder(
+      logger: globals.logger,
+      buildSystem: globals.buildSystem,
+      fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
+      usage: globals.flutterUsage,
+    );
+    await webBuilder.buildWeb(
       flutterProject,
       target,
       buildInfo,
