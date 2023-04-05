@@ -692,9 +692,6 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
         .childDirectory('gradle')
         .childDirectory('wrapper')
         .childFile('gradle-wrapper.properties');
-    final File gradleFile = project.directory
-        .childDirectory('android')
-        .childFile('build.gradle');
     // TODO(reidbaker): Replace URL with constant defined in
     // https://github.com/flutter/flutter/pull/123916.
     globals.printBox(
