@@ -722,6 +722,11 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   ///  * [DragGestureRecognizer.dragStartBehavior], which includes more details and an example.
   DragStartBehavior dragStartBehavior;
 
+  /// The frequency at which the [onDragUpdate] callback is called.
+  ///
+  /// The value defaults to null, meaning there is no delay for [onDragUpdate] callback.
+  Duration? dragUpdateThrottleFrequency;
+
   /// An upper bound for the amount of taps that can belong to one tap series.
   ///
   /// When this limit is reached the series of taps being tracked by this
@@ -857,10 +862,28 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
   late double _globalDistanceMoved;
   OffsetPair? _correctedPosition;
 
+  // For drag update throttle.
+  TapDragUpdateDetails? _lastDragUpdateDetails;
+  Timer? _dragUpdateThrottleTimer;
+
   final Set<int> _acceptedActivePointers = <int>{};
 
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop) {
     return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  }
+
+  // Drag updates may require throttling to avoid excessive updating, such as for text layouts in text
+  // fields. The frequency of invocations is controlled by the [dragUpdateThrottleFrequency].
+  //
+  // Once the drag gesture ends, any pending drag update will be fired
+  // immediately. See [_checkDragEnd].
+  void _handleDragUpdateThrottled() {
+    assert(_lastDragUpdateDetails != null);
+    if (onDragUpdate != null) {
+      invokeCallback<void>('onDragUpdate', () => onDragUpdate!(_lastDragUpdateDetails!));
+    }
+    _dragUpdateThrottleTimer = null;
+    _lastDragUpdateDetails = null;
   }
 
   @override
@@ -1040,11 +1063,13 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _stopDeadlineTimer();
     _giveUpPointer(pointer);
     _resetTaps();
+    _resetDragUpdateThrottle();
   }
 
   @override
   void dispose() {
     _stopDeadlineTimer();
+    _resetDragUpdateThrottle();
     super.dispose();
   }
 
@@ -1163,12 +1188,25 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
       keysPressedOnDown: keysPressedOnDown,
     );
 
-    if (onDragUpdate != null) {
-      invokeCallback<void>('onDragUpdate', () => onDragUpdate!(details));
+    if (dragUpdateThrottleFrequency != null) {
+      _lastDragUpdateDetails = details;
+      // Only schedule a new timer if there's not one pending.
+      _dragUpdateThrottleTimer ??= Timer(dragUpdateThrottleFrequency!, _handleDragUpdateThrottled);
+    } else {
+      if (onDragUpdate != null) {
+        invokeCallback<void>('onDragUpdate', () => onDragUpdate!(details));
+      }
     }
   }
 
   void _checkDragEnd() {
+    if (_dragUpdateThrottleTimer != null) {
+      // If there's already an update scheduled, trigger it immediately and
+      // cancel the timer.
+      _dragUpdateThrottleTimer!.cancel();
+      _handleDragUpdateThrottled();
+    }
+
     final TapDragEndDetails endDetails =
       TapDragEndDetails(
         primaryVelocity: 0.0,
@@ -1181,6 +1219,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     }
 
     _resetTaps();
+    _resetDragUpdateThrottle();
   }
 
   void _checkCancel() {
@@ -1191,6 +1230,7 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     if (onCancel != null) {
       invokeCallback('onCancel', onCancel!);
     }
+    _resetDragUpdateThrottle();
     _resetTaps();
   }
 
@@ -1224,6 +1264,17 @@ class TapAndDragGestureRecognizer extends OneSequenceGestureRecognizer with _Tap
     _sentTapDown = false;
     _wonArenaForPrimaryPointer = false;
     _primaryPointer = null;
+  }
+
+  void _resetDragUpdateThrottle() {
+    if (dragUpdateThrottleFrequency == null) {
+      return;
+    }
+    _lastDragUpdateDetails = null;
+    if (_dragUpdateThrottleTimer != null) {
+      _dragUpdateThrottleTimer!.cancel();
+      _dragUpdateThrottleTimer = null;
+    }
   }
 
   void _stopDeadlineTimer() {
