@@ -242,8 +242,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
       );
     });
 
-    testWithoutContext('returns gradlew version, whitespace, location',
-        () async {
+    testWithoutContext('returns gradlew version, whitespace, location', () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')
         ..createSync();
@@ -279,8 +278,9 @@ zipStorePath=wrapper/dists
         ..createSync(recursive: true);
       // Distribution url is not the last line.
       // Whitespace around distribution url.
-      wrapperDirectory.childFile('gradle-wrapper.properties').writeAsStringSync(
-          r'distributionUrl=https\://services.gradle.org/distributions/gradle_7.4.2_all.zip');
+      wrapperDirectory
+          .childFile('gradle-wrapper.properties')
+          .writeAsStringSync(r'distributionUrl=https\://services.gradle.org/distributions/gradle_7.4.2_all.zip');
 
       // FakeProcessManager.any is used here and not in other getGradleVersion
       // tests because this test does not care about process fallback logic.
@@ -325,8 +325,7 @@ OS:           Mac OS X 13.2.1 aarch64
       );
     });
 
-    testWithoutContext(
-        'returns the installed gradle with whitespace formatting', () async {
+    testWithoutContext('returns the installed gradle with whitespace formatting', () async {
       const String expectedVersion = '7.4.2';
       const String gradleOutput = 'Gradle   $expectedVersion';
       final Directory androidDirectory = fileSystem.directory('/android')
