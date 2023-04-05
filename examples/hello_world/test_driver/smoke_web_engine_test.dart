@@ -43,6 +43,6 @@ void main() {
         <dynamic>[],
       ) as WebElement?;
       expect(fltSemantics, isNotNull);
-    }, skip: true); // TODO(htoor3): Remove once https://github.com/flutter/engine/pull/40904 merged.
+    }, skip: true); // https://github.com/flutter/flutter/issues/124174
   });
 }
