@@ -125,7 +125,7 @@ tasks.register("clean", Delete) {
         );
         migration.migrate();
         expect(gradleWrapperPropertiesFile.existsSync(), isFalse);
-        expect(bufferLogger.traceText, contains('gradle-wrapper.properties not found, skipping gradle version compatibility check.'));
+        expect(bufferLogger.traceText, contains('gradle-wrapper.properties not found, skipping Gradle-Java version compatibility check.'));
       });
 
 
@@ -138,7 +138,7 @@ tasks.register("clean", Delete) {
         gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
         migration.migrate();
         expect(bufferLogger.traceText, contains('Android Studio version could not be detected, '
-            'skipping gradle version compatibility check.'));
+            'skipping Gradle-Java version compatibility check.'));
       });
 
       testWithoutContext('skipped if android studio version is less than flamingo', () {
@@ -175,7 +175,7 @@ tasks.register("clean", Delete) {
         migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), recentGradleVersionWrapper);
         expect(bufferLogger.statusText, contains('Conflict detected between versions of Android Studio '
-            'and gradle, upgrading gradle version from 6.7 to 7.4'));
+            'and Gradle, upgrading Gradle version from 6.7 to 7.4'));
       });
     });
   });
