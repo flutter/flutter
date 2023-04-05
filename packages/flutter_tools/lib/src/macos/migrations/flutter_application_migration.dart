@@ -8,7 +8,13 @@ import '../../globals.dart' as globals;
 import '../../ios/plist_parser.dart';
 import '../../xcode_project.dart';
 
-/// Update the minimum macOS deployment version to the minimum allowed by Xcode without causing a warning.
+/// Migrate principle class from FlutterApplication to NSApplication.
+///
+/// For several weeks, we required macOS apps to use FlutterApplication as the
+/// app's NSPrincipalClass rather than NSApplication. During that time an
+/// automated migration migrated the NSPrincipalClass in the Info.plist from
+/// NSApplication to FlutterApplication. Now that this is no longer necessary,
+/// we apply the reverse migration for anyone who was previously migrated.
 class FlutterApplicationMigration extends ProjectMigrator {
   FlutterApplicationMigration(
     MacOSProject project,
