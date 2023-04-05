@@ -397,7 +397,20 @@ class AlertDialog extends StatelessWidget {
     this.scrollable = false,
   }) : _dialogType = _DialogType.material;
 
-  /// Adaptive alert dialog
+  /// Creates an adaptive [AlertDialog] based on whether the target platform is
+  /// iOS or macOS, following Material design's
+  /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
+  ///
+  /// On iOS and macOS, this constructor creates a [CupertinoAlertDialog]. On
+  /// other platforms, this creates a Material design [AlertDialog].
+  ///
+  /// Typically passed as a child of [showAdaptiveDialog], which will display
+  /// the alert differently based on platform.
+  ///
+  /// If a [CupertinoAlertDialog] is created, all but the following parameters
+  /// are ignored: [title], [content], and [actions].
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const AlertDialog.adaptive({
     super.key,
     this.icon,
@@ -1363,7 +1376,14 @@ Future<T?> showDialog<T>({
   ));
 }
 
-/// Displays an adaptive dialog.
+/// Displays either a Material or Cupertino dialog depending on platform.
+///
+/// On most platforms this function will act the same as [showDialog], except
+/// for iOS and macOS, in which case it will act the same as
+/// [showCupertinoDialog].
+///
+/// On Cupertino platforms, [barrierColor], [useSafeArea], and
+/// [traversalEdgeBehavior] are ignored.
 Future<T?> showAdaptiveDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
