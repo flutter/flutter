@@ -56,7 +56,7 @@ void FlatlandConnection::Present() {
   if (present_credits_ > 0) {
     DoPresent();
   } else {
-    present_pending_ = true;
+    present_waiting_for_credit_ = true;
   }
 }
 
@@ -87,25 +87,25 @@ void FlatlandConnection::DoPresent() {
 // This method is called from the UI thread.
 void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
   std::scoped_lock<std::mutex> lock(threadsafe_state_.mutex_);
+  const fml::TimePoint now = fml::TimePoint::Now();
 
   // Immediately fire callbacks until the first Present. We might receive
   // multiple requests for AwaitVsync() until the first Present, which relies on
   // receiving size on FlatlandPlatformView::OnGetLayout() at an uncertain time.
   if (!threadsafe_state_.first_present_called_) {
-    fml::TimePoint now = fml::TimePoint::Now();
     callback(now, now + kDefaultFlatlandPresentationInterval);
     return;
   }
 
   threadsafe_state_.fire_callback_ = callback;
 
-  if (threadsafe_state_.fire_callback_pending_) {
-    const fml::TimePoint now = fml::TimePoint::Now();
+  // Immediately fire callback if OnNextFrameBegin() is already called.
+  if (threadsafe_state_.on_next_frame_pending_) {
     threadsafe_state_.fire_callback_(
         now, GetNextPresentationTime(
                  now, threadsafe_state_.next_presentation_time_));
     threadsafe_state_.fire_callback_ = nullptr;
-    threadsafe_state_.fire_callback_pending_ = false;
+    threadsafe_state_.on_next_frame_pending_ = false;
   }
 }
 
@@ -129,9 +129,9 @@ void FlatlandConnection::OnNextFrameBegin(
     fuchsia::ui::composition::OnNextFrameBeginValues values) {
   present_credits_ += values.additional_present_credits();
 
-  if (present_pending_ && present_credits_ > 0) {
+  if (present_waiting_for_credit_ && present_credits_ > 0) {
     DoPresent();
-    present_pending_ = false;
+    present_waiting_for_credit_ = false;
   }
 
   if (present_credits_ > 0) {
@@ -148,9 +148,9 @@ void FlatlandConnection::OnNextFrameBegin(
           /*frame_target=*/next_presentation_time);
       threadsafe_state_.fire_callback_ = nullptr;
     } else {
-      threadsafe_state_.fire_callback_pending_ = true;
-      threadsafe_state_.next_presentation_time_ = next_presentation_time;
+      threadsafe_state_.on_next_frame_pending_ = true;
     }
+    threadsafe_state_.next_presentation_time_ = next_presentation_time;
   }
 }
 

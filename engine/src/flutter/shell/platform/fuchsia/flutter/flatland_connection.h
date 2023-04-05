@@ -79,7 +79,7 @@ class FlatlandConnection final {
 
   on_frame_presented_event on_frame_presented_callback_;
   uint32_t present_credits_ = 1;
-  bool present_pending_ = false;
+  bool present_waiting_for_credit_ = false;
 
   // A flow event trace id for following |Flatland::Present| calls into Scenic.
   uint64_t next_present_trace_id_ = 0;
@@ -90,8 +90,8 @@ class FlatlandConnection final {
   struct {
     std::mutex mutex_;
     FireCallbackCallback fire_callback_;
-    bool fire_callback_pending_ = false;
     bool first_present_called_ = false;
+    bool on_next_frame_pending_ = false;
     fml::TimePoint next_presentation_time_;
   } threadsafe_state_;
 
