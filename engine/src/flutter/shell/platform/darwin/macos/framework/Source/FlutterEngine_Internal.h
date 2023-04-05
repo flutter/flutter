@@ -8,7 +8,6 @@
 
 #include <memory>
 
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterApplication.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/AccessibilityBridgeMac.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
@@ -52,11 +51,14 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  * messages through the platform channel managed by the engine.
  */
 @interface FlutterEngineTerminationHandler : NSObject
+
+@property(nonatomic, readonly) BOOL shouldTerminate;
+
 - (instancetype)initWithEngine:(FlutterEngine*)engine
                     terminator:(nullable FlutterTerminationCallback)terminator;
 - (void)handleRequestAppExitMethodCall:(NSDictionary<NSString*, id>*)data
                                 result:(FlutterResult)result;
-- (void)requestApplicationTermination:(FlutterApplication*)sender
+- (void)requestApplicationTermination:(NSApplication*)sender
                              exitType:(FlutterAppExitType)type
                                result:(nullable FlutterResult)result;
 @end
