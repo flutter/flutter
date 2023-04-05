@@ -462,7 +462,17 @@ class AndroidSdk {
     return versionString.split('_').first;
   }
 
+  /// Finds the java binary that is used for all operations across the tool.
+  ///
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
+  ///
+  // TODO(andrewkolos): To prevent confusion when debugging Android-related
+  // issues (see https://github.com/flutter/flutter/issues/122609 for an example),
+  // this logic should be consistently followed by any Java-dependent operation
+  // across the  the tool (building Android apps, interacting with the Android SDK, etc.).
+  // Currently, this consistency is fragile since the logic used for building
+  // Android apps exists independently of this method.
+  // See https://github.com/flutter/flutter/issues/124252.
   static String? findJavaBinary({
     required AndroidStudio? androidStudio,
     required FileSystem fileSystem,
@@ -480,30 +490,6 @@ class AndroidSdk {
       // Trust JAVA_HOME.
       globals.printTrace('Using JAVA_HOME.');
       return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
-    }
-
-    // MacOS specific logic to avoid popping up a dialog window.
-    // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
-    if (platform.isMacOS) {
-      try {
-        // -v Filter versions (as if JAVA_VERSION had been set in the environment).
-        // It is unlikley that filtering to java version 1.8 is the right
-        // decision here. That said, trying this on a mac shows the same jdk
-        // path no matter what input is passed.
-        final String javaHomeOutput = globals.processUtils
-            .runSync(
-              <String>['/usr/libexec/java_home', '-v', '1.8'],
-              throwOnError: true,
-              hideStdout: true,
-            )
-            .stdout
-            .trim();
-        if (javaHomeOutput.isNotEmpty) {
-          final String javaHome = javaHomeOutput.split('\n').last.trim();
-          globals.printTrace('Using mac JAVA_HOME.');
-          return fileSystem.path.join(javaHome, 'bin', 'java');
-        }
-      } on Exception {/* ignore */}
     }
 
     // Fallback to PATH based lookup.

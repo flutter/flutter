@@ -8,9 +8,11 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:test/fake.dart';
 
 import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
@@ -346,6 +348,87 @@ void main() {
       Platform: () => FakePlatform(operatingSystem: 'windows'),
       Config: () => config,
     });
+
+    group('findJavaBinary', () {
+      testUsingContext('returns the path of the JDK bundled with Android Studio, if it exists', () {
+        final String androidStudioBundledJdkHome = globals.androidStudio!.javaPath!;
+        final String expectedJavaBinaryPath = globals.fs.path.join(androidStudioBundledJdkHome, 'bin', 'java');
+
+        final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
+          androidStudio: globals.androidStudio,
+          fileSystem: globals.fs,
+          operatingSystemUtils: globals.os,
+          platform: globals.platform,
+        );
+
+        expect(foundJavaBinaryPath, expectedJavaBinaryPath);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        OperatingSystemUtils: () => FakeOperatingSystemUtilsWithJava(),
+        Platform: () => FakePlatform(),
+        Config: () => Config,
+        AndroidStudio: () => FakeAndroidStudioWithJdk(),
+      });
+
+      testUsingContext('returns the current value of JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found', () {
+        final String expectedJavaBinaryPath = globals.fs.path.join('java-home-path', 'bin', 'java');
+
+        final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
+          androidStudio: globals.androidStudio,
+          fileSystem: globals.fs,
+          operatingSystemUtils: globals.os,
+          platform: globals.platform,
+        );
+
+        expect(foundJavaBinaryPath, expectedJavaBinaryPath);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        OperatingSystemUtils: () => FakeOperatingSystemUtilsWithJava(),
+        Platform: () => FakePlatform(environment: <String, String>{
+          'JAVA_HOME': 'java-home-path',
+        }),
+        Config: () => Config,
+        AndroidStudio: () => FakeAndroidStudioWithoutJdk(),
+      });
+
+      testUsingContext('returns the java binary found on PATH if no other can be found', () {
+        final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
+          androidStudio: globals.androidStudio,
+          fileSystem: globals.fs,
+          operatingSystemUtils: globals.os,
+          platform: globals.platform,
+        );
+
+        expect(foundJavaBinaryPath, globals.os.which('java')!.path);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        OperatingSystemUtils: () => FakeOperatingSystemUtilsWithJava(),
+        Platform: () => FakePlatform(),
+        Config: () => Config,
+        AndroidStudio: () => FakeAndroidStudioWithoutJdk(),
+      });
+
+      testUsingContext('returns null if no java binary could be found', () {
+        final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
+          androidStudio: globals.androidStudio,
+          fileSystem: globals.fs,
+          operatingSystemUtils: globals.os,
+          platform: globals.platform,
+        );
+
+        expect(foundJavaBinaryPath, null);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        OperatingSystemUtils: () => FakeOperatingSystemUtilsWithoutJava(),
+        Platform: () => FakePlatform(),
+        Config: () => Config,
+        AndroidStudio: () => FakeAndroidStudioWithoutJdk(),
+      });
+    });
   });
 
   group('java version', () {
@@ -553,3 +636,30 @@ ro.build.version.incremental=1624448
 ro.build.version.sdk=24
 ro.build.version.codename=REL
 ''';
+
+class FakeAndroidStudioWithJdk extends Fake implements AndroidStudio {
+  @override
+  String? get javaPath => '/fake/android_studio/java/path/';
+}
+
+class FakeAndroidStudioWithoutJdk extends Fake implements AndroidStudio {
+  @override
+  String? get javaPath => null;
+}
+
+class FakeOperatingSystemUtilsWithJava extends Fake implements OperatingSystemUtils {
+  @override
+  File? which(String execName) {
+    if (execName == 'java') {
+      return globals.fs.file('/fake/which/java/path');
+    }
+    return null;
+  }
+}
+
+class FakeOperatingSystemUtilsWithoutJava extends Fake implements OperatingSystemUtils {
+  @override
+  File? which(String execName) {
+    return null;
+  }
+}
