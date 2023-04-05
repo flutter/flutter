@@ -20,15 +20,15 @@ class FlutterApplicationMigration extends ProjectMigrator {
   @override
   void migrate() {
     if (_infoPlistFile.existsSync()) {
-      final String? principleClass =
+      final String? principalClass =
           globals.plistParser.getStringValueFromFile(_infoPlistFile.path, PlistParser.kNSPrincipalClassKey);
-      if (principleClass == null || principleClass == 'NSApplication') {
+      if (principalClass == null || principalClass == 'NSApplication') {
         // No NSPrincipalClass defined, or already converted. No migration
         // needed.
         return;
       }
-      if (principleClass != 'FlutterApplication') {
-        // If the principle class wasn't already migrated to
+      if (principalClass != 'FlutterApplication') {
+        // If the principal class wasn't already migrated to
         // FlutterApplication, there's no need to revert the migration.
         return;
       }
