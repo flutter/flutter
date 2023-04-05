@@ -549,7 +549,7 @@ class RtlOverrideWidgetsDelegate extends LocalizationsDelegate<WidgetsLocalizati
   bool shouldReload(LocalizationsDelegate<WidgetsLocalizations> oldDelegate) => false;
 }
 
-class RtlOverrideWidgetsLocalization implements WidgetsLocalizations {
+class RtlOverrideWidgetsLocalization extends DefaultWidgetsLocalizations {
   const RtlOverrideWidgetsLocalization();
   @override
   TextDirection get textDirection => TextDirection.rtl;

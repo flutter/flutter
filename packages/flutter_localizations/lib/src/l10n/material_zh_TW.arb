@@ -1,4 +1,9 @@
 {
+  "scrimLabel": "紗罩",
+  "bottomSheetLabel": "底部功能表",
+  "scrimOnTapHint": "關閉「$modalRouteContentName」",
+  "currentDateLabel": "今天",
+  "keyboardKeyShift": "Shift 鍵",
   "menuBarMenuLabel": "選單列選單",
   "keyboardKeyNumpad8": "數字鍵盤 8",
   "keyboardKeyChannelDown": "下一個頻道",
@@ -58,7 +63,7 @@
   "dateSeparator": "/",
   "dateInputLabel": "輸入日期",
   "calendarModeButtonLabel": "切換到日曆模式",
-  "dateRangePickerHelpText": "選取範圍",
+  "dateRangePickerHelpText": "選取日期範圍",
   "datePickerHelpText": "選取日期",
   "saveButtonLabel": "儲存",
   "dateOutOfRangeLabel": "超出範圍。",
