@@ -57,8 +57,8 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     }
     if (spanAtCursorIndex.suggestions.isEmpty) {
       return <ContextMenuButtonItem>[
-        ContextMenuButtonItem(
-          onPressed: () {},
+        const ContextMenuButtonItem(
+          onPressed: null,
           label: 'No Replacements Found',
         )
       ];
