@@ -22,27 +22,21 @@ class FlutterApplicationMigration extends ProjectMigrator {
     if (_infoPlistFile.existsSync()) {
       final String? principleClass =
           globals.plistParser.getStringValueFromFile(_infoPlistFile.path, PlistParser.kNSPrincipalClassKey);
-      if (principleClass == null || principleClass == 'FlutterApplication') {
-        // No NSPrincipalClass defined, or already converted, so no migration
+      if (principleClass == null || principleClass == 'NSApplication') {
+        // No NSPrincipalClass defined, or already converted. No migration
         // needed.
         return;
       }
-      if (principleClass != 'NSApplication') {
-        // Only replace NSApplication values, since we don't know why they might
-        // have substituted something else.
-        logger.printTrace('${_infoPlistFile.basename} has an '
-          '${PlistParser.kNSPrincipalClassKey} of $principleClass, not '
-          'NSApplication, skipping FlutterApplication migration.\nYou will need '
-          'to modify your application class to derive from FlutterApplication.');
+      if (principleClass != 'FlutterApplication') {
+        // If the principle class wasn't already migrated to
+        // FlutterApplication, there's no need to revert the migration.
         return;
       }
-      logger.printStatus('Updating ${_infoPlistFile.basename} to use FlutterApplication instead of NSApplication.');
-      final bool success = globals.plistParser.replaceKey(_infoPlistFile.path, key: PlistParser.kNSPrincipalClassKey, value: 'FlutterApplication');
+      logger.printStatus('Updating ${_infoPlistFile.basename} to use NSApplication instead of FlutterApplication.');
+      final bool success = globals.plistParser.replaceKey(_infoPlistFile.path, key: PlistParser.kNSPrincipalClassKey, value: 'NSApplication');
       if (!success) {
         logger.printError('Updating ${_infoPlistFile.basename} failed.');
       }
-    } else {
-      logger.printTrace('${_infoPlistFile.basename} not found, skipping FlutterApplication migration.');
     }
   }
 }
