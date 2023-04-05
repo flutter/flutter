@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -1432,7 +1433,6 @@ void _canvasTests() {
     builder.addText('Hello');
     final CkParagraph paragraph = builder.build();
 
-    paragraph.delete();
     paragraph.dispose();
     expect(paragraph.debugDisposed, true);
   });
@@ -1893,6 +1893,15 @@ void _paragraphTests() {
       canvasKitWasmModuleUrl('canvaskit.wasm', 'http://localhost:1234/foo/'),
       'http://localhost:1234/foo/canvaskit.wasm',
     );
+  });
+
+  test('SkObjectFinalizationRegistry', () {
+    // There's no reliable way to test the actual functionality of
+    // FinalizationRegistry because it depends on GC, which cannot be controlled,
+    // So the test simply tests that a FinalizationRegistry can be constructed
+    // and its `register` method can be called.
+    final SkObjectFinalizationRegistry registry = createSkObjectFinalizationRegistry((String arg) {}.toJS);
+    registry.register(Object(), Object());
   });
 }
 
