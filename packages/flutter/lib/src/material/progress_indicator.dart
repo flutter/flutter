@@ -735,18 +735,10 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
       ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
       ..lineTo(arrowheadPointX, arrowheadPointY)
       ..close();
-
-    final StrokeCap internalStrokeCap;
-    if (strokeCap == null) {
-      internalStrokeCap = StrokeCap.butt;
-    } else {
-      internalStrokeCap = strokeCap!;
-    }
     
     final Paint paint = Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
-      ..strokeCap = internalStrokeCap
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, paint);
   }
