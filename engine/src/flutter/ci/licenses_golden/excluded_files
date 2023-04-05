@@ -2835,12 +2835,15 @@
 ../../../third_party/skia/third_party/piet-gpu/Makefile
 ../../../third_party/skia/third_party/vulkanmemoryallocator/BUILD.bazel
 ../../../third_party/skia/toolchain/BUILD.bazel
+../../../third_party/skia/toolchain/android_trampolines/gen_trampolines/BUILD.bazel
 ../../../third_party/skia/toolchain/clang_layering_check.bzl
 ../../../third_party/skia/toolchain/download_linux_amd64_toolchain.bzl
 ../../../third_party/skia/toolchain/download_mac_toolchain.bzl
+../../../third_party/skia/toolchain/download_ndk_linux_amd64_toolchain.bzl
 ../../../third_party/skia/toolchain/download_toolchains.bzl
 ../../../third_party/skia/toolchain/linux_amd64_toolchain_config.bzl
 ../../../third_party/skia/toolchain/mac_toolchain_config.bzl
+../../../third_party/skia/toolchain/ndk_linux_arm64_toolchain_config.bzl
 ../../../third_party/skia/toolchain/utils.bzl
 ../../../third_party/skia/tools
 ../../../third_party/sqlite/.git
