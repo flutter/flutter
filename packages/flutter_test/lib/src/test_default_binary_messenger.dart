@@ -322,11 +322,10 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   /// Events are decoded using the codec of the channel.
   ///
-  /// The handler's stream messages are used as a response, after re-encoding
+  /// The handler's stream messages are used as a response, after encoding
   /// them using the channel's codec.
   ///
-  /// To send an error, send a [PlatformException] in the handler.
-  /// Other exceptions are not caught.
+  /// To send an error, pass the error information to the handler's event sink.
   ///
   /// {@macro flutter.flutter_test.TestDefaultBinaryMessenger.handlePlatformMessage.asyncHandlers}
   ///
