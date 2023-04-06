@@ -3270,12 +3270,11 @@ enum ClipboardStatus {
   notPasteable,
 }
 
+// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
+// deleted, when users should migrate back to TextSelectionControls.buildHandle.
+// See https://github.com/flutter/flutter/pull/124262
 /// [TextSelectionControls] that specifically do not manage the toolbar in order
 /// to leave that to [EditableText.contextMenuBuilder].
-@Deprecated(
-  'Use `TextSelectionControls`. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
-)
 mixin TextSelectionHandleControls on TextSelectionControls {
   @override
   Widget buildToolbar(
