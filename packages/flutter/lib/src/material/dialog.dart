@@ -411,6 +411,17 @@ class AlertDialog extends StatelessWidget {
   /// are ignored: [title], [content], and [actions].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  ///
+  /// {@tool dartpad}
+  /// This demo shows a [TextButton] which when pressed, calls [showAdaptiveDialog].
+  /// When called, this method displays an adaptive dialog above the current
+  /// contents of the app, with different behaviors depending on target platform.
+  ///
+  /// [CupertinoDialogAction] is conditionally used as the child to show more
+  /// platform specific design.
+  ///
+  /// ** See code in examples/api/lib/material/dialog/adaptive_alert_dialog.0.dart **
+  /// {@end-tool}
   const AlertDialog.adaptive({
     super.key,
     this.icon,
