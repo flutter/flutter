@@ -141,9 +141,9 @@ std::unique_ptr<Config> Display::ChooseConfig(ConfigDescriptor config) const {
     if (sample_count > 1) {
       attributes.push_back(EGL_SAMPLE_BUFFERS);
       attributes.push_back(1);
+      attributes.push_back(EGL_SAMPLES);
+      attributes.push_back(sample_count);
     }
-    attributes.push_back(EGL_SAMPLES);
-    attributes.push_back(sample_count);
   }
 
   // termination sentinel must be present.
