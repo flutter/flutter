@@ -494,7 +494,7 @@ void main() {
 
     Object? error;
     try {
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
             (ByteData? _) {},
@@ -542,7 +542,7 @@ void main() {
 
     Object? error;
     try {
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData? _) {},
