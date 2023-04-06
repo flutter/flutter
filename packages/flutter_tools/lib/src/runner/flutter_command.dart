@@ -97,7 +97,7 @@ class FlutterCommandResult {
 }
 
 /// Common flutter command line options.
-class FlutterOptions {
+abstract final class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
   static const String kEnableExperiment = 'enable-experiment';
@@ -126,6 +126,7 @@ class FlutterOptions {
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
+  static const String kWebWasmFlag = 'wasm';
 }
 
 /// flutter command categories for usage.
