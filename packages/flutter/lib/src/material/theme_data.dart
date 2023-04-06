@@ -448,7 +448,7 @@ class ThemeData with Diagnosticable {
     }
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
-    visualDensity ??= VisualDensity.getDensityForPlatform(platform);
+    visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
     useMaterial3 ??= false;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??= useMaterial3
@@ -2654,9 +2654,9 @@ class VisualDensity with Diagnosticable {
   ///
   /// See also:
   ///
-  /// * [getDensityForPlatform] which returns a [VisualDensity] that is adaptive
+  /// * [defaultDensityForPlatform] which returns a [VisualDensity] that is adaptive
   ///   based on the given [platform].
-  static VisualDensity get adaptivePlatformDensity => getDensityForPlatform(defaultTargetPlatform);
+  static VisualDensity get adaptivePlatformDensity => defaultDensityForPlatform(defaultTargetPlatform);
 
   /// Returns a [VisualDensity] that is adaptive based on the given [platform].
   ///
@@ -2667,7 +2667,7 @@ class VisualDensity with Diagnosticable {
   ///
   /// * [adaptivePlatformDensity] which returns a [VisualDensity] that is
   ///   adaptive based on [defaultTargetPlatform].
-  static VisualDensity getDensityForPlatform(TargetPlatform platform) {
+  static VisualDensity defaultDensityForPlatform(TargetPlatform platform) {
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
