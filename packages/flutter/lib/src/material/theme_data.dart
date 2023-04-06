@@ -2649,13 +2649,14 @@ class VisualDensity with Diagnosticable {
   /// Returns a [VisualDensity] that is adaptive based on the
   /// [defaultTargetPlatform].
   ///
-  /// For desktop platforms, this returns [compact], and for other platforms, it
-  /// returns a default-constructed [VisualDensity].
+  /// When [defaultTargetPlatform] is a desktop platform, this returns
+  /// [compact], and for other platforms, it returns a default-constructed
+  /// [VisualDensity].
   ///
   /// See also:
   ///
   /// * [defaultDensityForPlatform] which returns a [VisualDensity] that is adaptive
-  ///   based on the given [platform].
+  ///   based on the platform given to it.
   static VisualDensity get adaptivePlatformDensity => defaultDensityForPlatform(defaultTargetPlatform);
 
   /// Returns a [VisualDensity] that is adaptive based on the given [platform].
