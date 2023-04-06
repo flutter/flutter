@@ -1459,9 +1459,9 @@ class TextInputConnection {
     if (!attached) {
       return;
     }
+    _client.connectionClosed();
     TextInput._instance._currentConnection = null;
     assert(!attached);
-    _client.connectionClosed();
   }
 }
 
