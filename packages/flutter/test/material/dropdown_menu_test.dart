@@ -1110,6 +1110,123 @@ void main() {
     expect(textInput1.width, 200);
     expect(menu1.width, 200);
   });
+
+  testWidgets('Semantics does not include hint when input is not empty', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String hintText = 'I am hintText';
+    TestMenu? selectedValue;
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: Center(
+              child: DropdownMenu<TestMenu>(
+                requestFocusOnTap: true,
+                dropdownMenuEntries: menuChildren,
+                hintText: hintText,
+                onSelected: (TestMenu? value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                },
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.text(hintText));
+
+    expect(selectedValue?.label, null);
+    expect(node.label, hintText);
+    expect(node.value, '');
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 3').last);
+    await tester.pumpAndSettle();
+    expect(selectedValue?.label, 'Item 3');
+    expect(node.label, '');
+    expect(node.value, 'Item 3');
+  });
+
+  testWidgets('helperText is not visible when errorText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String helperText = 'I am helperText';
+    const String errorText = 'I am errorText';
+
+    Widget buildFrame(bool hasError) {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              helperText: helperText,
+              errorText: hasError ? errorText : null,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(false));
+    expect(find.text(helperText), findsOneWidget);
+    expect(find.text(errorText), findsNothing);
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(find.text(helperText), findsNothing);
+    expect(find.text(errorText), findsOneWidget);
+  });
+
+  testWidgets('DropdownMenu can respect helperText when helperText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String helperText = 'I am helperText';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              helperText: helperText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text(helperText), findsOneWidget);
+  });
+
+  testWidgets('DropdownMenu can respect errorText when errorText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String errorText = 'I am errorText';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              errorText: errorText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text(errorText), findsOneWidget);
+  });
 }
 
 enum TestMenu {
