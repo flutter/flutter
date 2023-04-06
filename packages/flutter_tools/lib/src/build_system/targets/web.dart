@@ -34,36 +34,11 @@ import 'shader_compiler.dart';
 /// Whether the application has web plugins.
 const String kHasWebPlugins = 'HasWebPlugins';
 
-/// An override for the dart2js build mode.
-///
-/// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
-const String kDart2jsOptimization = 'Dart2jsOptimization';
-
-/// The default optimization level for dart2js.
-///
-/// Maps to [kDart2jsOptimization].
-const String kDart2jsDefaultOptimizationLevel = 'O4';
-
-/// If `--dump-info` should be passed to dart2js.
-const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
-
-// If `--no-frequency-based-minification` should be based to dart2js
-const String kDart2jsNoFrequencyBasedMinification = 'Dart2jsNoFrequencyBasedMinification';
-
-/// Whether to disable dynamic generation code to satisfy csp policies.
-const String kCspMode = 'cspMode';
-
 /// Base href to set in index.html in flutter build command
 const String kBaseHref = 'baseHref';
 
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
-
-/// Whether the dart2js build should output source maps.
-const String kSourceMapsEnabled = 'SourceMaps';
-
-/// Whether the dart2js native null assertions are enabled.
-const String kNativeNullAssertions = 'NativeNullAssertions';
 
 const String kOfflineFirst = 'offline-first';
 const String kNoneWorker = 'none';
@@ -201,8 +176,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       throw MissingDefineException(kBuildMode, name);
     }
     final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
-    final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
-    final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
+    final JsCompilerConfig compilerConfig = JsCompilerConfig.fromBuildSystemEnvironment(environment.defines);
     final Artifacts artifacts = globals.artifacts!;
     final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
     final List<String> sharedCommandOptions = <String>[
@@ -212,20 +186,17 @@ class Dart2JSTarget extends Dart2WebTarget {
       '--platform-binaries=$platformBinariesPath',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       '--invoker=flutter_tool',
-      if (nativeNullAssertions)
-        '--native-null-assertions',
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
       for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
         '-D$dartDefine',
-      if (!sourceMapsEnabled)
-        '--no-source-maps',
     ];
 
     final List<String> compilationArgs = <String>[
       ...sharedCommandOptions,
+      ...compilerConfig.toSharedCommandOptions(),
       '-o',
       environment.buildDir.childFile('app.dill').path,
       '--packages=.dart_tool/package_config.json',
@@ -241,19 +212,12 @@ class Dart2JSTarget extends Dart2WebTarget {
       throw Exception(_collectOutput(kernelResult));
     }
 
-    final String dart2jsOptimization = environment.defines[kDart2jsOptimization] ?? kDart2jsDefaultOptimizationLevel;
-    final bool dumpInfo = environment.defines[kDart2jsDumpInfo] == 'true';
-    final bool noFrequencyBasedMinification = environment.defines[kDart2jsNoFrequencyBasedMinification] == 'true';
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
-    final bool csp = environment.defines[kCspMode] == 'true';
 
     final ProcessResult javaScriptResult = await environment.processManager.run(<String>[
       ...sharedCommandOptions,
-      '-$dart2jsOptimization',
       if (buildMode == BuildMode.profile) '--no-minify',
-      if (dumpInfo) '--dump-info',
-      if (noFrequencyBasedMinification) '--no-frequency-based-minification',
-      if (csp) '--csp',
+      ...compilerConfig.toCommandOptions(),
       '-o',
       outputJSFile.path,
       environment.buildDir.childFile('app.dill').path, // dartfile

@@ -324,13 +324,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           );
           await webBuilder.buildWeb(
             flutterProject,
-            target: target,
-            buildInfo: debuggingOptions.buildInfo,
-            csp: false,
-            serviceWorkerStrategy: kNoneWorker,
-            sourceMaps: true,
-            nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-            isWasm: false,
+            target,
+            debuggingOptions.buildInfo,
+            kNoneWorker,
+            compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions)
           );
         }
         await device!.device!.startApp(
@@ -405,13 +402,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         );
         await webBuilder.buildWeb(
           flutterProject,
-          target: target,
-          buildInfo: debuggingOptions.buildInfo,
-          csp: false,
-          serviceWorkerStrategy: kNoneWorker,
-          sourceMaps: true,
-          nativeNullAssertions:debuggingOptions.nativeNullAssertions,
-          isWasm: false,
+          target,
+          debuggingOptions.buildInfo,
+          kNoneWorker,
+          compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions),
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

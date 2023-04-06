@@ -20,9 +20,10 @@ import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../version.dart';
+import 'compiler_config.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
-export '../build_system/targets/web.dart' show kDart2jsDefaultOptimizationLevel;
+export 'compiler_config.dart';
 
 class WebBuilder {
   WebBuilder({
@@ -47,24 +48,27 @@ class WebBuilder {
   final FileSystem _fileSystem;
 
   Future<void> buildWeb(
-    FlutterProject flutterProject, {
-    required String target,
-    required BuildInfo buildInfo,
-    required bool csp,
-    required String serviceWorkerStrategy,
-    required bool sourceMaps,
-    required bool nativeNullAssertions,
-    required bool isWasm,
-    String dart2jsOptimization = kDart2jsDefaultOptimizationLevel,
+    FlutterProject flutterProject,
+    String target,
+    BuildInfo buildInfo,
+    String serviceWorkerStrategy, {
+    required WebCompilerConfig compilerConfig,
     String? baseHref,
-    bool dumpInfo = false,
-    bool noFrequencyBasedMinification = false,
     String? outputDirectoryPath,
   }) async {
+    if (compilerConfig.isWasm) {
+      globals.logger.printBox(
+        title: 'Experimental feature',
+        '''
+  WebAssembly compilation is experimental.
+  See $kWasmPreviewUri for more information.''',
+      );
+    }
+
     final bool hasWebPlugins =
         (await findPlugins(flutterProject)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
-        ? _fileSystem.directory(getWebBuildDirectory(isWasm))
+        ? _fileSystem.directory(getWebBuildDirectory(compilerConfig.isWasm))
         : _fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
 
@@ -80,7 +84,7 @@ class WebBuilder {
     final Stopwatch sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-          WebServiceWorker(_fileSystem, buildInfo.webRenderer, isWasm: isWasm),
+          WebServiceWorker(_fileSystem, buildInfo.webRenderer, isWasm: compilerConfig.isWasm),
           Environment(
             projectDir: _fileSystem.currentDirectory,
             outputDir: outputDirectory,
@@ -88,14 +92,9 @@ class WebBuilder {
             defines: <String, String>{
               kTargetFile: target,
               kHasWebPlugins: hasWebPlugins.toString(),
-              kCspMode: csp.toString(),
               if (baseHref != null) kBaseHref: baseHref,
-              kSourceMapsEnabled: sourceMaps.toString(),
-              kNativeNullAssertions: nativeNullAssertions.toString(),
               kServiceWorkerStrategy: serviceWorkerStrategy,
-              kDart2jsOptimization: dart2jsOptimization,
-              kDart2jsDumpInfo: dumpInfo.toString(),
-              kDart2jsNoFrequencyBasedMinification: noFrequencyBasedMinification.toString(),
+              ...compilerConfig.toBuildSystemEnvironment(),
               ...buildInfo.toBuildSystemEnvironment(),
             },
             artifacts: globals.artifacts!,
@@ -172,3 +171,5 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
     NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
   },
 };
+
+const String kWasmPreviewUri = 'https://flutter.dev/wasm';

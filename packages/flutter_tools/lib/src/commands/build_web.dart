@@ -11,7 +11,7 @@ import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult;
+    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -81,7 +81,7 @@ class BuildWebCommand extends BuildSubCommand {
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O0 to O4.',
-          defaultsTo: kDart2jsDefaultOptimizationLevel
+          defaultsTo: JsCompilerConfig.kDart2jsDefaultOptimizationLevel
     );
     argParser.addFlag('dump-info', negatable: false,
       help: 'Passes "--dump-info" to the Javascript compiler which generates '
@@ -98,14 +98,14 @@ class BuildWebCommand extends BuildSubCommand {
     if (featureFlags.isFlutterWebWasmEnabled) {
       argParser.addSeparator('Experimental options');
       argParser.addFlag(
-        'wasm',
-        help: 'Compile to WebAssembly rather than JavaScript.',
+        FlutterOptions.kWebWasmFlag,
+        help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
         negatable: false,
       );
     } else {
       // Add the flag as hidden. Will give a helpful error message in [runCommand] below.
       argParser.addFlag(
-        'wasm',
+        FlutterOptions.kWebWasmFlag,
         hide: true,
       );
     }
@@ -134,9 +134,21 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final bool wasmRequested = boolArg('wasm');
-    if (wasmRequested && !featureFlags.isFlutterWebWasmEnabled) {
-      throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
+    final WebCompilerConfig compilerConfig;
+    if (boolArg('wasm')) {
+      if (!featureFlags.isFlutterWebWasmEnabled) {
+        throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
+      }
+      compilerConfig = const WasmCompilerConfig();
+    } else {
+      compilerConfig = JsCompilerConfig(
+        csp: boolArg('csp'),
+        optimizationLevel: stringArg('dart2js-optimization') ?? JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
+        dumpInfo: boolArg('dump-info'),
+        nativeNullAssertions: boolArg('native-null-assertions'),
+        noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+        sourceMaps: boolArg('source-maps'),
+      );
     }
 
     final FlutterProject flutterProject = FlutterProject.current();
@@ -179,18 +191,12 @@ class BuildWebCommand extends BuildSubCommand {
     );
     await webBuilder.buildWeb(
       flutterProject,
-      target: target,
-      buildInfo: buildInfo,
-      csp: boolArg('csp'),
-      serviceWorkerStrategy: stringArg('pwa-strategy')!,
-      sourceMaps: boolArg('source-maps'),
-      nativeNullAssertions: boolArg('native-null-assertions'),
-      isWasm: wasmRequested,
+      target,
+      buildInfo,
+      stringArg('pwa-strategy')!,
+      compilerConfig: compilerConfig,
       baseHref: baseHref,
-      dart2jsOptimization: stringArg('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
       outputDirectoryPath: outputDirectoryPath,
-      dumpInfo: boolArg('dump-info'),
-      noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
     );
     return FlutterCommandResult.success();
   }

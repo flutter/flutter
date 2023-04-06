@@ -148,6 +148,7 @@ class SearchAnchor extends StatefulWidget {
     TextStyle? viewHeaderHintStyle,
     Color? dividerColor,
     BoxConstraints? constraints,
+    BoxConstraints? viewConstraints,
     bool? isFullScreen,
     SearchController searchController,
     required SuggestionsBuilder suggestionsBuilder
@@ -253,6 +254,11 @@ class SearchAnchor extends StatefulWidget {
   final Color? dividerColor;
 
   /// Optional size constraints for the search view.
+  ///
+  /// By default, the search view has the same width as the anchor and is 2/3
+  /// the height of the screen. If the width and height of the view are within
+  /// the [viewConstraints], the view will show its default size. Otherwise,
+  /// the size of the view will be constrained by this property.
   ///
   /// If null, the value of [SearchViewThemeData.constraints] will be used. If
   /// this is also null, then the constraints defaults to:
@@ -477,24 +483,43 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     final Size screenSize = MediaQuery.of(context).size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
-    // Check if the search view goes off the screen.
     final BoxConstraints effectiveConstraints = viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
-    final double verticalDistanceToEdge = screenSize.height - anchorRect.top;
-    final double endHeight = math.max(effectiveConstraints.minHeight, math.min(screenSize.height * 2 / 3, verticalDistanceToEdge));
     _rectTween.begin = anchorRect;
+
+    final double viewWidth = clampDouble(anchorRect.width, effectiveConstraints.minWidth, effectiveConstraints.maxWidth);
+    final double viewHeight = clampDouble(screenSize.height * 2 / 3, effectiveConstraints.minHeight, effectiveConstraints.maxHeight);
 
     switch (textDirection ?? TextDirection.ltr) {
       case TextDirection.ltr:
-        final double viewEdgeToScreenEdge = screenSize.width - anchorRect.left;
-        final double endWidth = math.max(effectiveConstraints.minWidth, math.min(anchorRect.width, viewEdgeToScreenEdge));
-        final Size endSize = Size(endWidth, endHeight);
-        _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (anchorRect.topLeft & endSize);
+        final double viewLeftToScreenRight = screenSize.width - anchorRect.left;
+        final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
+
+        // Make sure the search view doesn't go off the screen. If the search view
+        // doesn't fit, move the top-left corner of the view to fit the window.
+        // If the window is smaller than the view, then we resize the view to fit the window.
+        Offset topLeft = anchorRect.topLeft;
+        if (viewLeftToScreenRight < viewWidth) {
+          topLeft = Offset(screenSize.width - math.min(viewWidth, screenSize.width), topLeft.dy);
+        }
+        if (viewTopToScreenBottom < viewHeight) {
+          topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
+        }
+        final Size endSize = Size(viewWidth, viewHeight);
+        _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
         return;
       case TextDirection.rtl:
-        final double viewEdgeToScreenEdge = anchorRect.right;
-        final double endWidth = math.max(effectiveConstraints.minWidth, math.min(anchorRect.width, viewEdgeToScreenEdge));
-        final Offset topLeft = Offset(math.max(anchorRect.right - endWidth, 0.0), anchorRect.top);
-        final Size endSize = Size(endWidth, endHeight);
+        final double viewRightToScreenLeft = anchorRect.right;
+        final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
+
+        // Make sure the search view doesn't go off the screen.
+        Offset topLeft = Offset(math.max(anchorRect.right - viewWidth, 0.0), anchorRect.top);
+        if (viewRightToScreenLeft < viewWidth) {
+          topLeft = Offset(0.0, topLeft.dy);
+        }
+        if (viewTopToScreenBottom < viewHeight) {
+          topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
+        }
+        final Size endSize = Size(viewWidth, viewHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
     }
   }
@@ -626,7 +651,6 @@ class _ViewContentState extends State<_ViewContent> {
     super.initState();
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
-    result = widget.suggestionsBuilder(context, _controller);
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
     }
@@ -645,20 +669,45 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    result = widget.suggestionsBuilder(context, _controller);
     final Size updatedScreenSize = MediaQuery.of(context).size;
+
     if (_screenSize != updatedScreenSize) {
       _screenSize = updatedScreenSize;
       setState(() {
         final Rect anchorRect = widget.getRect() ?? _viewRect;
         final BoxConstraints constraints = widget.viewConstraints ?? widget.viewTheme.constraints ?? widget.viewDefaults.constraints!;
-        final Size updatedViewSize = Size(math.max(constraints.minWidth, anchorRect.width), _viewRect.height);
+        final double viewWidth = clampDouble(anchorRect.width, constraints.minWidth, constraints.maxWidth);
+        final double viewHeight = clampDouble(_screenSize!.height * 2 / 3, constraints.minHeight, constraints.maxHeight);
+        final Size updatedViewSize = Size(viewWidth, viewHeight);
+
         switch (Directionality.of(context)) {
           case TextDirection.ltr:
-            final Offset updatedPosition = anchorRect.topLeft;
-            _viewRect = updatedPosition & updatedViewSize;
+            final double viewLeftToScreenRight = _screenSize!.width - anchorRect.left;
+            final double viewTopToScreenBottom = _screenSize!.height - anchorRect.top;
+
+            // Make sure the search view doesn't go off the screen when the screen
+            // size is changed. If the search view doesn't fit, move the top-left
+            // corner of the view to fit the window. If the window is smaller than
+            // the view, then we resize the view to fit the window.
+            Offset topLeft = anchorRect.topLeft;
+            if (viewLeftToScreenRight < viewWidth) {
+              topLeft = Offset(_screenSize!.width - math.min(viewWidth, _screenSize!.width), anchorRect.top);
+            }
+            if (viewTopToScreenBottom < viewHeight) {
+              topLeft = Offset(topLeft.dx, _screenSize!.height - math.min(viewHeight, _screenSize!.height));
+            }
+            _viewRect = topLeft & updatedViewSize;
             return;
           case TextDirection.rtl:
-            final Offset topLeft = Offset(math.max(anchorRect.right - updatedViewSize.width, 0.0), anchorRect.top);
+            final double viewTopToScreenBottom = _screenSize!.height - anchorRect.top;
+            Offset topLeft = Offset(
+              math.max(anchorRect.right - viewWidth, 0.0),
+              anchorRect.top,
+            );
+            if (viewTopToScreenBottom < viewHeight) {
+              topLeft = Offset(topLeft.dx, _screenSize!.height - math.min(viewHeight, _screenSize!.height));
+            }
             _viewRect = topLeft & updatedViewSize;
         }
       });
@@ -834,6 +883,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     TextStyle? viewHeaderHintStyle,
     super.dividerColor,
     BoxConstraints? constraints,
+    super.viewConstraints,
     super.isFullScreen,
     super.searchController,
     required super.suggestionsBuilder

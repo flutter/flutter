@@ -12997,7 +12997,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       await sendUndo(tester);
       expect(controller.value, composingStep2);
 
-      // Waiting for the throttling beetween undos should have no effect.
+      // Waiting for the throttling between undos should have no effect.
       await tester.pump(const Duration(milliseconds: 500));
 
       // Undo second insertion.

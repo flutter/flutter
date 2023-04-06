@@ -12,7 +12,7 @@ String generateWasmBootstrapFile(bool isSkwasm) {
   let dart2wasm_runtime;
   let moduleInstance;
   try {
-    const dartModulePromise = WebAssembly.compileStreaming(fetch("main.dart.wasm"));
+    const dartModulePromise = WebAssembly.compileStreaming(fetch('main.dart.wasm'));
     ${generateImports(isSkwasm)}
     dart2wasm_runtime = await import('./main.dart.mjs');
     moduleInstance = await dart2wasm_runtime.instantiate(dartModulePromise, imports);
@@ -43,9 +43,9 @@ String generateImports(bool isSkwasm) {
         const skwasmInstance = await skwasm();
         window._flutter_skwasmInstance = skwasmInstance;
         resolve({
-          "skwasm": skwasmInstance.asm,
-          "ffi": {
-            "memory": skwasmInstance.wasmMemory,
+          'skwasm': skwasmInstance.asm,
+          'ffi': {
+            'memory': skwasmInstance.wasmMemory,
           }
         });
       });
