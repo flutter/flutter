@@ -56,6 +56,7 @@ void main() {
       renderSelectionSpy.events.clear();
 
       await gesture.moveTo(const Offset(200.0, 100.0));
+      debugPrint('${renderSelectionSpy.events}');
       expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.startEdgeUpdate);
       final SelectionEdgeUpdateEvent startEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
