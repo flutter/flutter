@@ -51,6 +51,15 @@ class WebBuilder {
     String? baseHref,
     String? outputDirectoryPath,
   }) async {
+    if (compilerConfig.isWasm) {
+      globals.logger.printBox(
+        title: 'Experimental feature',
+        '''
+  WebAssembly compilation is experimental.
+  See $kWasmPreviewUri for more information.''',
+      );
+    }
+
     final bool hasWebPlugins =
         (await findPlugins(flutterProject)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
@@ -155,3 +164,5 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
     NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
   },
 };
+
+const String kWasmPreviewUri = 'https://flutter.dev/wasm';
