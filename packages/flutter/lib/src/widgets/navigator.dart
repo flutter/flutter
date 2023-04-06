@@ -4628,6 +4628,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _afterNavigation(Route<dynamic>? route) {
+    print('justin Navigator._afterNavigation');
     if (!kReleaseMode) {
       // Among other uses, performance tools use this event to ensure that perf
       // stats reflect the time interval since the last navigation event
@@ -4671,6 +4672,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     if (context.findAncestorStateOfType<NavigatorState>() == null) {
       // If canPop is true then CanPopScopes aren't going to have any effect.
       if (canPop()) {
+        print('justin Navigator._afterNavigation updateNavigationStackStatus to true');
         SystemNavigator.updateNavigationStackStatus(true);
         return;
       }
@@ -4678,6 +4680,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           _history.value.firstWhere(_RouteEntry.isPresentPredicate);
       final bool canPopScopeIsDisablingPop =
           currentRouteEntry.route.popEnabled() == RoutePopDisposition.doNotPop;
+        print('justin Navigator._afterNavigation updateNavigationStackStatus to $canPopScopeIsDisablingPop');
       SystemNavigator.updateNavigationStackStatus(canPopScopeIsDisablingPop);
     }
   }
@@ -5343,6 +5346,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   @override
   Widget build(BuildContext context) {
+    print('justin Navigator.build');
     assert(!_debugLocked);
     assert(_history.value.isNotEmpty);
 

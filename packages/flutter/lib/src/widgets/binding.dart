@@ -623,7 +623,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Future<void> handlePopRoute() async {
     print('justin Received back from system. Iterating through all of the didPopRoutes, there are ${_observers.length}');
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      // TODO(justinmc): Maybe I need to be considering these didPopRoute observers too, or I need to deprecate them.
       if (await observer.didPopRoute()) {
         return;
       }
