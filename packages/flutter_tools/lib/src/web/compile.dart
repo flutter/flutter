@@ -119,7 +119,11 @@ class WebBuilder {
     } finally {
       status.stop();
     }
-    _flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
+    _flutterUsage.sendTiming(
+      'build',
+      isWasm ? 'dart2wasm' : 'dart2js',
+      Duration(milliseconds: sw.elapsedMilliseconds),
+    );
   }
 }
 
