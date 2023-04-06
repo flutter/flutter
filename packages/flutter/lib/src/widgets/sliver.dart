@@ -1360,3 +1360,39 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
   }
 }
+
+/// A sliver that constrains the cross axis extent of its sliver child.
+///
+/// The [SliverConstrainedCrossAxis] takes an [extent] parameter and uses it as
+/// the cross axis extent of the [SliverConstraints] passed to the sliver child.
+/// The widget ensures that the [extent] is a value between 0 and the parent's
+/// cross axis extent.
+///
+/// This is useful when you want to apply a custom cross-axis extent constraint
+/// to a sliver child.
+class SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that constrains the cross axis extent of its sliver child.
+  ///
+  /// The [extent] parameters must not be null.
+  const SliverConstrainedCrossAxis({
+    super.key,
+    required this.extent,
+    Widget? sliver,
+  }) : super(child: sliver);
+
+  /// The cross axis extent to apply to the sliver child.
+  ///
+  /// This value must be between 0 and the parent's cross axis extent.
+  final double extent;
+
+  @override
+  RenderSliverConstrainedCrossAxis createRenderObject(BuildContext context) {
+    return RenderSliverConstrainedCrossAxis(extent: extent);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
+    renderObject.extent = extent;
+  }
+}
