@@ -21,7 +21,6 @@ import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/generate_synthetic_packages.dart';
-import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -113,6 +112,7 @@ class FlutterOptions {
   static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
+  static const String kDeviceConnection = 'device-connection';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kCodeSizeDirectory = 'code-size-directory';
   static const String kNullAssertions = 'null-assertions';
@@ -126,6 +126,7 @@ class FlutterOptions {
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
+  static const String kWebWasmFlag = 'wasm';
 }
 
 /// flutter command categories for usage.
@@ -603,8 +604,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(ipv6Flag,
       negatable: false,
       help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
-            'forwards the host port to a device port. Not used when the '
-            '"--debug-port" flag is not set.',
+            'forwards the host port to a device port.',
       hide: !verboseHelp,
     );
     _usesIpv6Flag = true;
@@ -695,6 +695,19 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesDeviceConnectionOption() {
+    argParser.addOption(FlutterOptions.kDeviceConnection,
+      defaultsTo: 'both',
+      help: 'Discover devices based on connection type.',
+      allowed: <String>['attached', 'wireless', 'both'],
+      allowedHelp: <String, String>{
+        'both': 'Searches for both attached and wireless devices.',
+        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
+        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.'
+      },
+    );
+  }
+
   void usesApplicationBinaryOption() {
     argParser.addOption(
       FlutterOptions.kUseApplicationBinary,
@@ -723,10 +736,24 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }();
 
+  DeviceConnectionInterface? get deviceConnectionInterface  {
+    if ((argResults?.options.contains(FlutterOptions.kDeviceConnection) ?? false)
+        && (argResults?.wasParsed(FlutterOptions.kDeviceConnection) ?? false)) {
+      final String? connectionType = stringArg(FlutterOptions.kDeviceConnection);
+      if (connectionType == 'attached') {
+        return DeviceConnectionInterface.attached;
+      } else if (connectionType == 'wireless') {
+        return DeviceConnectionInterface.wireless;
+      }
+    }
+    return null;
+  }
+
   late final TargetDevices _targetDevices = TargetDevices(
     platform: globals.platform,
     deviceManager: globals.deviceManager!,
     logger: globals.logger,
+    deviceConnectionInterface: deviceConnectionInterface,
   );
 
   void addBuildModeFlags({
@@ -822,20 +849,13 @@ abstract class FlutterCommand extends Command<void> {
 
   void addNullSafetyModeOptions({ required bool hide }) {
     argParser.addFlag(FlutterOptions.kNullSafety,
-      help:
-        'Whether to override the inferred null safety mode. This allows null-safe '
-        'libraries to depend on un-migrated (non-null safe) libraries. By default, '
-        'Flutter mobile & desktop applications will attempt to run at the null safety '
-        'level of their entrypoint library (usually lib/main.dart). Flutter web '
-        'applications will default to sound null-safety, unless specifically configured.',
+      help: 'This flag is deprecated as only null-safe code is supported.',
       defaultsTo: true,
-      hide: hide,
+      hide: true,
     );
     argParser.addFlag(FlutterOptions.kNullAssertions,
-      help:
-        'Perform additional null assertions on the boundaries of migrated and '
-        'un-migrated code. This setting is not currently supported on desktop '
-        'devices.'
+      help: 'This flag is deprecated as only null-safe code is supported.',
+      hide: true,
     );
   }
 
@@ -1148,39 +1168,17 @@ abstract class FlutterCommand extends Command<void> {
 
     NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
     if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
-      // Explicitly check for `true` and `false` so that `null` results in not
-      // passing a flag. Examine the entrypoint file to determine if it
-      // is opted in or out.
       final bool wasNullSafetyFlagParsed = argResults?.wasParsed(FlutterOptions.kNullSafety) ?? false;
-      if (!wasNullSafetyFlagParsed && (argParser.options.containsKey('target') || forcedTargetFile != null)) {
-        final File entrypointFile = forcedTargetFile ?? globals.fs.file(targetFile);
-        final LanguageVersion languageVersion = determineLanguageVersion(
-          entrypointFile,
-          packageConfig.packageOf(entrypointFile.absolute.uri),
-          Cache.flutterRoot!,
-        );
-        // Extra frontend options are only provided if explicitly
-        // requested.
-        if ((languageVersion.major > nullSafeVersion.major) ||
-            (languageVersion.major == nullSafeVersion.major && languageVersion.minor >= nullSafeVersion.minor)) {
+      // Extra frontend options are only provided if explicitly
+      // requested.
+      if (wasNullSafetyFlagParsed) {
+        if (boolArg(FlutterOptions.kNullSafety)) {
           nullSafetyMode = NullSafetyMode.sound;
+          extraFrontEndOptions.add('--sound-null-safety');
         } else {
-          throwToolExit(
-            'This application does not support sound null-safety (its language version is $languageVersion).\n'
-            'To build this application, you must provide the CLI flag --no-sound-null-safety. Dart 3 will only '
-            'support sound null safety, see https://dart.dev/null-safety.',
-          );
+          nullSafetyMode = NullSafetyMode.unsound;
+          extraFrontEndOptions.add('--no-sound-null-safety');
         }
-      } else if (!wasNullSafetyFlagParsed) {
-        // This mode is only used for commands which do not build a single target like
-        // 'flutter test'.
-        nullSafetyMode = NullSafetyMode.autodetect;
-      } else if (boolArg(FlutterOptions.kNullSafety)) {
-        nullSafetyMode = NullSafetyMode.sound;
-        extraFrontEndOptions.add('--sound-null-safety');
-      } else {
-        nullSafetyMode = NullSafetyMode.unsound;
-        extraFrontEndOptions.add('--no-sound-null-safety');
       }
     }
 
@@ -1487,6 +1485,16 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+    if (argParser.options.containsKey(FlutterOptions.kNullSafety) &&
+        argResults![FlutterOptions.kNullSafety] == false &&
+        globals.nonNullSafeBuilds == NonNullSafeBuilds.notAllowed) {
+      throwToolExit('''
+Could not find an option named "no-${FlutterOptions.kNullSafety}".
+
+Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.
+''');
+    }
+
     globals.preRunValidator.validate();
 
     if (refreshWirelessDevices) {
@@ -1754,3 +1762,12 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
+
+/// Whether the tool should allow non-null safe builds.
+///
+/// The Dart SDK no longer supports non-null safe builds, so this value in the
+/// tool's context should always be [NonNullSafeBuilds.notAllowed].
+enum NonNullSafeBuilds {
+  allowed,
+  notAllowed,
+}
