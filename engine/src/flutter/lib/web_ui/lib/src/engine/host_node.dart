@@ -110,8 +110,10 @@ class ShadowDomHostNode implements HostNode {
   /// This also calls [applyGlobalCssRulesToSheet], with the [defaultFont]
   /// to be used as the default font definition.
   ShadowDomHostNode(DomElement root, String defaultFont)
-      : assert(root.isConnected ?? true,
-            'The `root` of a ShadowDomHostNode must be connected to the Document object or a ShadowRoot.') {
+      : assert(
+          root.isConnected ?? true,
+          'The `root` of a ShadowDomHostNode must be connected to the Document object or a ShadowRoot.'
+        ) {
     _shadow = root.attachShadow(<String, dynamic>{
       'mode': 'open',
       // This needs to stay false to prevent issues like this:
@@ -179,7 +181,7 @@ class ElementHostNode implements HostNode {
     applyGlobalCssRulesToSheet(
       styleElement.sheet! as DomCSSStyleSheet,
       hasAutofillOverlay: browserHasAutofillOverlay(),
-      cssSelectorPrefix: FlutterViewEmbedder.flutterViewTagName,
+      cssSelectorPrefix: FlutterViewEmbedder.glassPaneTagName,
       defaultCssFont: defaultFont,
     );
 
