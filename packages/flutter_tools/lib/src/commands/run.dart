@@ -498,6 +498,7 @@ class RunCommand extends RunCommandBase {
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
       commandRunEnableImpeller: enableImpeller.asBool,
       commandRunIOSInterfaceType: iOSInterfaceType,
+      commandRunIsTest: targetFile.endsWith('_test.dart'),
     );
   }
 
