@@ -301,10 +301,9 @@ bool debugCheckHasMediaQuery(BuildContext context) {
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
           'No MediaQuery ancestor could be found starting from the context '
-          'that was passed to MediaQuery.of(). This can happen because you '
-          'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
-          '(those widgets introduce a MediaQuery), or it can happen if the '
-          'context you use comes from a widget above those widgets.',
+          'that was passed to MediaQuery.of(). This can happen because the '
+          'context used is not a descendant of a View widget, which introduces '
+          'a MediaQuery.'
         ),
       ]);
     }
