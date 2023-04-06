@@ -53,10 +53,10 @@ void main() {
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
+      await tester.pumpAndSettle();
       renderSelectionSpy.events.clear();
 
       await gesture.moveTo(const Offset(200.0, 100.0));
-      debugPrint('${renderSelectionSpy.events}');
       expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.startEdgeUpdate);
       final SelectionEdgeUpdateEvent startEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
@@ -250,6 +250,7 @@ void main() {
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
+      await tester.pumpAndSettle();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
@@ -507,6 +508,7 @@ void main() {
       // Start a new drag.
       await gesture.up();
       await gesture.down(textOffsetToPosition(paragraph, 5));
+      await tester.pumpAndSettle();
       expect(paragraph.selections.isEmpty, isTrue);
 
       // Selecting across line should select to the end.
@@ -2417,6 +2419,7 @@ void main() {
 
     // Backwards selection.
     await gesture.down(textOffsetToPosition(paragraph, 3));
+    await tester.pumpAndSettle();
     expect(content, isNull);
     await gesture.moveTo(textOffsetToPosition(paragraph, 0));
     await gesture.up();
