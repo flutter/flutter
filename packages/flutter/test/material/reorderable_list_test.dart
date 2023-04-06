@@ -673,23 +673,8 @@ void main() {
           // Get the switch tile's semantics:
           final SemanticsNode semanticsNode = tester.getSemantics(find.byKey(const Key('Switch tile')));
 
-          // Check for ReorderableListView custom semantics actions.
+          // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
           expect(semanticsNode, matchesSemantics(
-            customActions: const <CustomSemanticsAction>[
-              CustomSemanticsAction(label: 'Move up'),
-              CustomSemanticsAction(label: 'Move down'),
-              CustomSemanticsAction(label: 'Move to the end'),
-              CustomSemanticsAction(label: 'Move to the start'),
-            ],
-          ));
-
-          // Check for properties of SwitchTile semantics.
-          late SemanticsNode child;
-          semanticsNode.visitChildren((SemanticsNode node) {
-            child = node;
-            return false;
-          });
-          expect(child, matchesSemantics(
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,
@@ -697,6 +682,12 @@ void main() {
             hasEnabledState: true,
             label: 'Switch tile',
             hasTapAction: true,
+            customActions: const <CustomSemanticsAction>[
+              CustomSemanticsAction(label: 'Move up'),
+              CustomSemanticsAction(label: 'Move down'),
+              CustomSemanticsAction(label: 'Move to the end'),
+              CustomSemanticsAction(label: 'Move to the start'),
+            ],
           ));
           handle.dispose();
         });
@@ -1653,7 +1644,7 @@ void main() {
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child: SizedBox(
+      child:SizedBox(
         width: 100.0,
         height: 100.0,
         child: Directionality(
