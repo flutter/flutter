@@ -4763,7 +4763,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// cheaper. (Additionally, if _any_ subclass of [Widget] used in an
   /// application implements `operator ==`, then the compiler cannot inline the
   /// comparison anywhere, because it has to treat the call as virtual just in
-  /// case the instance happens to be one that has an overriden operator.)
+  /// case the instance happens to be one that has an overridden operator.)
   ///
   /// Instead, the best way to avoid unnecessary rebuilds is to cache the
   /// widgets that are returned from [State.build], so that each frame the same
