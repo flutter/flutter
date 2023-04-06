@@ -123,6 +123,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
   context.io_manager = std::move(io_manager);
   context.advisory_script_uri = "main.dart";
   context.advisory_script_entrypoint = entrypoint.c_str();
+  context.enable_impeller = p_settings.enable_impeller;
 
   auto isolate =
       DartIsolate::CreateRunningRootIsolate(

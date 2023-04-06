@@ -8,6 +8,7 @@
 #include "flutter/impeller/core/allocator.h"
 #include "flutter/impeller/core/device_buffer.h"
 #include "flutter/impeller/geometry/size.h"
+#include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
@@ -28,7 +29,27 @@
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSize.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace impeller {
+
+class TestImpellerTexture : public Texture {
+ public:
+  explicit TestImpellerTexture(TextureDescriptor desc) : Texture(desc) {}
+
+  void SetLabel(std::string_view label) override {}
+  bool IsValid() const override { return true; }
+  ISize GetSize() const { return GetTextureDescriptor().size; }
+
+  bool OnSetContents(const uint8_t* contents, size_t length, size_t slice) {
+    return true;
+  }
+  bool OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
+                     size_t slice) {
+    return true;
+  }
+};
 
 class TestImpellerDeviceBuffer : public DeviceBuffer {
  public:
@@ -84,8 +105,42 @@ class TestImpellerAllocator : public impeller::Allocator {
 
   std::shared_ptr<Texture> OnCreateTexture(
       const TextureDescriptor& desc) override {
+    return std::make_shared<TestImpellerTexture>(desc);
+  }
+};
+
+class TestImpellerContext : public impeller::Context {
+ public:
+  TestImpellerContext() = default;
+
+  bool IsValid() const override { return true; }
+
+  const std::shared_ptr<const Capabilities>& GetCapabilities() const override {
+    return capabilities_;
+  }
+
+  std::shared_ptr<Allocator> GetResourceAllocator() const override {
+    return std::make_shared<TestImpellerAllocator>();
+  }
+
+  std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override {
     return nullptr;
   }
+
+  std::shared_ptr<SamplerLibrary> GetSamplerLibrary() const override {
+    return nullptr;
+  }
+
+  std::shared_ptr<PipelineLibrary> GetPipelineLibrary() const override {
+    return nullptr;
+  }
+
+  std::shared_ptr<CommandBuffer> CreateCommandBuffer() const override {
+    return nullptr;
+  }
+
+ private:
+  std::shared_ptr<const Capabilities> capabilities_;
 };
 
 }  // namespace impeller
@@ -98,6 +153,7 @@ class TestIOManager final : public IOManager {
   explicit TestIOManager(const fml::RefPtr<fml::TaskRunner>& task_runner,
                          bool has_gpu_context = true)
       : gl_surface_(SkISize::Make(1, 1)),
+        impeller_context_(std::make_shared<impeller::TestImpellerContext>()),
         gl_context_(has_gpu_context ? gl_surface_.CreateGrContext() : nullptr),
         weak_gl_context_factory_(
             has_gpu_context
@@ -149,10 +205,20 @@ class TestIOManager final : public IOManager {
     return is_gpu_disabled_sync_switch_;
   }
 
+  // |IOManager|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override {
+    return impeller_context_;
+  }
+
+  void SetGpuDisabled(bool disabled) {
+    is_gpu_disabled_sync_switch_->SetSwitch(disabled);
+  }
+
   bool did_access_is_gpu_disabled_sync_switch_ = false;
 
  private:
   TestGLSurface gl_surface_;
+  std::shared_ptr<impeller::Context> impeller_context_;
   sk_sp<GrDirectContext> gl_context_;
   std::unique_ptr<fml::WeakPtrFactory<GrDirectContext>>
       weak_gl_context_factory_;
@@ -939,7 +1005,15 @@ TEST_F(ImageDecoderFixtureTest, MultiFrameCodecDidAccessGpuDisabledSyncSwitch) {
 
   std::unique_ptr<TestIOManager> io_manager;
   fml::RefPtr<MultiFrameCodec> codec;
+  fml::AutoResetWaitableEvent latch;
 
+  auto validate_frame_callback = [&latch](Dart_NativeArguments args) {
+    EXPECT_FALSE(Dart_IsNull(Dart_GetNativeArgument(args, 0)));
+    latch.Signal();
+  };
+
+  AddNativeCallback("ValidateFrameCallback",
+                    CREATE_NATIVE_ENTRY(validate_frame_callback));
   // Setup the IO manager.
   PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
@@ -978,6 +1052,95 @@ TEST_F(ImageDecoderFixtureTest, MultiFrameCodecDidAccessGpuDisabledSyncSwitch) {
     EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
   });
 
+  latch.Wait();
+
+  // Destroy the Isolate
+  isolate = nullptr;
+
+  // Destroy the MultiFrameCodec
+  PostTaskSync(runners.GetUITaskRunner(), [&]() { codec = nullptr; });
+
+  // Destroy the IO manager
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
+}
+
+TEST_F(ImageDecoderFixtureTest,
+       MultiFrameCodecProducesATextureEvenIfGPUIsDisabledOnImpeller) {
+  auto settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  auto vm_ref = DartVMRef::Create(settings);
+  auto vm_data = vm_ref.GetVMData();
+
+  auto gif_mapping = OpenFixtureAsSkData("hello_loop_2.gif");
+
+  ASSERT_TRUE(gif_mapping);
+
+  ImageGeneratorRegistry registry;
+  std::shared_ptr<ImageGenerator> gif_generator =
+      registry.CreateCompatibleGenerator(gif_mapping);
+  ASSERT_TRUE(gif_generator);
+
+  TaskRunners runners(GetCurrentTestName(),         // label
+                      CreateNewThread("platform"),  // platform
+                      CreateNewThread("raster"),    // raster
+                      CreateNewThread("ui"),        // ui
+                      CreateNewThread("io")         // io
+  );
+
+  std::unique_ptr<TestIOManager> io_manager;
+  fml::RefPtr<MultiFrameCodec> codec;
+  fml::AutoResetWaitableEvent latch;
+
+  auto validate_frame_callback = [&latch](Dart_NativeArguments args) {
+    EXPECT_FALSE(Dart_IsNull(Dart_GetNativeArgument(args, 0)));
+    latch.Signal();
+  };
+
+  AddNativeCallback("ValidateFrameCallback",
+                    CREATE_NATIVE_ENTRY(validate_frame_callback));
+
+  // Setup the IO manager.
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
+    io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
+    // Mark GPU disabled.
+    io_manager->SetGpuDisabled(true);
+  });
+
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "main", {},
+                                      GetDefaultKernelFilePath(),
+                                      io_manager->GetWeakIOManager());
+
+  PostTaskSync(runners.GetUITaskRunner(), [&]() {
+    fml::AutoResetWaitableEvent isolate_latch;
+
+    EXPECT_TRUE(isolate->RunInIsolateScope([&]() -> bool {
+      Dart_Handle library = Dart_RootLibrary();
+      if (Dart_IsError(library)) {
+        isolate_latch.Signal();
+        return false;
+      }
+      Dart_Handle closure =
+          Dart_GetField(library, Dart_NewStringFromCString("frameCallback"));
+      if (Dart_IsError(closure) || !Dart_IsClosure(closure)) {
+        isolate_latch.Signal();
+        return false;
+      }
+
+      EXPECT_FALSE(io_manager->did_access_is_gpu_disabled_sync_switch_);
+      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator));
+      codec->getNextFrame(closure);
+      isolate_latch.Signal();
+      return true;
+    }));
+    isolate_latch.Wait();
+  });
+
+  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
+    EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
+  });
+
+  latch.Wait();
+
   // Destroy the Isolate
   isolate = nullptr;
 
@@ -990,3 +1153,5 @@ TEST_F(ImageDecoderFixtureTest, MultiFrameCodecDidAccessGpuDisabledSyncSwitch) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

@@ -110,6 +110,8 @@ static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
   switch (type) {
     case kRGBA_8888_SkColorType:
       return impeller::PixelFormat::kR8G8B8A8UNormInt;
+    case kBGRA_8888_SkColorType:
+      return impeller::PixelFormat::kB8G8R8A8UNormInt;
     case kRGBA_F16_SkColorType:
       return impeller::PixelFormat::kR16G16B16A16Float;
     case kBGR_101010x_XR_SkColorType:
