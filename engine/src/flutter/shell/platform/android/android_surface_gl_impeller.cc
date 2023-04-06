@@ -98,10 +98,19 @@ AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
   desc.samples = impeller::egl::Samples::kFour;
 
   desc.surface_type = impeller::egl::SurfaceType::kWindow;
-  auto onscreen_config = display->ChooseConfig(desc);
+  std::unique_ptr<impeller::egl::Config> onscreen_config =
+      display->ChooseConfig(desc);
   if (!onscreen_config) {
-    FML_DLOG(ERROR) << "Could not choose onscreen config.";
-    return;
+    // Fallback for Android emulator.
+    desc.samples = impeller::egl::Samples::kOne;
+    onscreen_config = display->ChooseConfig(desc);
+    if (onscreen_config) {
+      FML_LOG(INFO) << "Warning: This device doesn't support MSAA for onscreen "
+                       "framebuffers. Falling back to a single sample.";
+    } else {
+      FML_DLOG(ERROR) << "Could not choose onscreen config.";
+      return;
+    }
   }
 
   desc.surface_type = impeller::egl::SurfaceType::kPBuffer;
