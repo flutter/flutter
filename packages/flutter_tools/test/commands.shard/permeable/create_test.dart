@@ -1663,7 +1663,7 @@ void main() {
     expect(LineSplitter.split(metadata), contains('project_type: app'));
   });
 
-  testUsingContext('can re-gen default template over existing app project with no metadta and detect the type', () async {
+  testUsingContext('can re-gen default template over existing app project with no metadata and detect the type', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -1957,7 +1957,7 @@ void main() {
       loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline')
+        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline'),
       )));
     },
     overrides: <Type, Generator>{
@@ -2429,7 +2429,7 @@ void main() {
     androidIdentifier: 'com.example.flutter_project');
   });
 
-  testUsingContext('plugin includes native unit tests', () async {
+  testUsingContext('plugin includes native Swift unit tests', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2452,7 +2452,64 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('plugin includes native Ojb-C unit tests', () async {
+  testUsingContext('plugin includes native Kotlin unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--org=com.example',
+      '--platforms=android',
+      projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('test')
+        .childDirectory('kotlin')
+        .childDirectory('com')
+        .childDirectory('example')
+        .childDirectory('flutter_project')
+        .childFile('FlutterProjectPluginTest.kt'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext('plugin includes native Java unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--org=com.example',
+      '--platforms=android',
+      '-a', 'java',
+      projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('test')
+        .childDirectory('java')
+        .childDirectory('com')
+        .childDirectory('example')
+        .childDirectory('flutter_project')
+        .childFile('FlutterProjectPluginTest.java'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext('plugin includes native Objective-C unit tests', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2473,6 +2530,50 @@ void main() {
         .childFile('RunnerTests.m'), exists);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext('plugin includes native Windows unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platforms=windows',
+      projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('windows')
+        .childDirectory('test')
+        .childFile('flutter_project_plugin_test.cpp'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Logger: () => logger,
+  });
+
+  testUsingContext('plugin includes native Linux unit tests', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platforms=linux',
+      projectDir.path]);
+
+    expect(projectDir
+        .childDirectory('linux')
+        .childDirectory('test')
+        .childFile('flutter_project_plugin_test.cc'), exists);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Logger: () => logger,
   });
 
@@ -2661,7 +2762,7 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('newly created plugin has min flutter sdk version as 2.5.0', () async {
+  testUsingContext('newly created plugin has min flutter sdk version as 3.3.0', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -2670,8 +2771,54 @@ void main() {
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
     final Map<String, VersionConstraint?> env = pubspec.environment!;
-    expect(env['flutter']!.allows(Version(2, 5, 0)), true);
-    expect(env['flutter']!.allows(Version(2, 4, 9)), false);
+    expect(env['flutter']!.allows(Version(3, 3, 0)), true);
+    expect(env['flutter']!.allows(Version(3, 2, 9)), false);
+  });
+
+  testUsingContext('newly created iOS plugins has min iOS version of 11.0', () async {
+    Cache.flutterRoot = '../..';
+    final String flutterToolsAbsolutePath = globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+    );
+    final List<String> iosPluginTemplates = <String>[
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin',
+        'ios-objc.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin',
+        'ios-swift.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+      globals.fs.path.join(
+        flutterToolsAbsolutePath,
+        'templates',
+        'plugin_ffi',
+        'ios.tmpl',
+        'projectName.podspec.tmpl',
+      ),
+    ];
+
+    for (final String templatePath in iosPluginTemplates) {
+      final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
+      expect(rawTemplate, contains("s.platform = :ios, '11.0'"));
+    }
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--platform=ios', projectDir.path]);
+
+    expect(projectDir.childDirectory('ios').childFile('flutter_project.podspec'),
+        exists);
+    final String rawPodSpec = await projectDir.childDirectory('ios').childFile('flutter_project.podspec').readAsString();
+    expect(rawPodSpec, contains("s.platform = :ios, '11.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {

@@ -9,6 +9,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
@@ -62,6 +63,9 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
+
+  /// The location of file generators.
+  flutterToolsFileGenerators,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -202,6 +206,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
+    case Artifact.flutterToolsFileGenerators:
+      return '';
   }
 }
 
@@ -524,6 +530,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
+      case Artifact.flutterToolsFileGenerators:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -561,6 +568,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
+      case Artifact.flutterToolsFileGenerators:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -610,6 +618,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
+      case Artifact.flutterToolsFileGenerators:
         return _getHostArtifactPath(artifact, platform, mode);
     }
   }
@@ -625,7 +634,6 @@ class CachedArtifacts implements Artifacts {
   }
 
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode? mode) {
-    assert(platform != null);
     switch (artifact) {
       case Artifact.genSnapshot:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
@@ -686,6 +694,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
         throw StateError('Artifact $artifact not available for platform $platform.');
+      case Artifact.flutterToolsFileGenerators:
+        return _getFileGeneratorsPath();
     }
   }
 
@@ -953,6 +963,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.dart2wasmSnapshot:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
+      case Artifact.flutterToolsFileGenerators:
+        return _getFileGeneratorsPath();
     }
   }
 
@@ -1100,6 +1112,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fuchsiaFlutterRunner:
         case Artifact.fontSubset:
         case Artifact.constFinder:
+        case Artifact.flutterToolsFileGenerators:
           break;
       }
     }
@@ -1227,7 +1240,7 @@ class OverrideArtifacts implements Artifacts {
     this.engineDartBinary,
     this.platformKernelDill,
     this.flutterPatchedSdk,
-  }) : assert(parent != null);
+  });
 
   final Artifacts parent;
   final File? frontendServer;
@@ -1299,6 +1312,11 @@ class _TestArtifacts implements Artifacts {
     BuildMode? mode,
     EnvironmentType? environmentType,
   }) {
+    // The path to file generators is the same even in the test environment.
+    if (artifact == Artifact.flutterToolsFileGenerators) {
+      return _getFileGeneratorsPath();
+    }
+
     final StringBuffer buffer = StringBuffer();
     buffer.write(artifact);
     if (platform != null) {
@@ -1340,4 +1358,21 @@ class _TestLocalEngine extends _TestArtifacts {
 
   @override
   final LocalEngineInfo localEngineInfo;
+}
+
+String _getFileGeneratorsPath() {
+  final String flutterRoot = Cache.defaultFlutterRoot(
+    fileSystem: globals.localFileSystem,
+    platform: const LocalPlatform(),
+    userMessages: UserMessages(),
+  );
+  return globals.localFileSystem.path.join(
+    flutterRoot,
+    'packages',
+    'flutter_tools',
+    'lib',
+    'src',
+    'web',
+    'file_generators',
+  );
 }

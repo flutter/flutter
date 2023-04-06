@@ -1193,9 +1193,9 @@ class FakeVmService extends Fake implements vms.VmService {
     commandLog.add('$method $args');
     await artificialExtensionDelay;
 
-    final vms.Response response = responses[args!['command']]!;
+    final vms.Response? response = responses[args!['command']];
     assert(response != null, 'Failed to create a response for ${args['command']}');
-    return response;
+    return response!;
   }
 
   @override
@@ -1243,9 +1243,9 @@ class FakeVmService extends Fake implements vms.VmService {
   @override
   Future<vms.Timeline> getVMTimeline({int? timeOriginMicros, int? timeExtentMicros}) async {
     connectionLog.add('getVMTimeline $timeOriginMicros $timeExtentMicros');
-    final vms.Timeline timeline = timelineResponses[timeOriginMicros ?? 1]!;
+    final vms.Timeline? timeline = timelineResponses[timeOriginMicros ?? 1];
     assert(timeline != null, 'Missing entry in timelineResponses[$timeOriginMicros]');
-    return timeline;
+    return timeline!;
   }
 
   @override

@@ -222,6 +222,34 @@ class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMove
 }
 
 /// Extends, or moves the current selection from the current
+/// [TextSelection.extent] position to the previous or the next paragraph
+/// boundary.
+class ExtendSelectionToNextParagraphBoundaryIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExtendSelectionToNextParagraphBoundaryIntent].
+  const ExtendSelectionToNextParagraphBoundaryIntent({
+    required bool forward,
+    required bool collapseSelection,
+  }) : super(forward, collapseSelection);
+}
+
+/// Extends, or moves the current selection from the current
+/// [TextSelection.extent] position to the previous or the next paragraph
+/// boundary depending on the [forward] parameter.
+///
+/// This [Intent] typically has the same effect as an
+/// [ExtendSelectionToNextParagraphBoundaryIntent], except it collapses the selection
+/// when the order of [TextSelection.base] and [TextSelection.extent] would
+/// reverse.
+///
+/// This is typically only used on MacOS.
+class ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent extends DirectionalCaretMovementIntent {
+  /// Creates an [ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent].
+  const ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent({
+    required bool forward,
+  }) : super(forward, false, true);
+}
+
+/// Extends, or moves the current selection from the current
 /// [TextSelection.extent] position to the start or the end of the document.
 ///
 /// See also:

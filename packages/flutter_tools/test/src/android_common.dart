@@ -24,6 +24,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    bool configOnly = false,
   }) async {}
 
   @override
@@ -33,6 +34,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required String target,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
+    bool configOnly = false,
   }) async {}
 }
 
@@ -40,7 +42,6 @@ class FakeAndroidBuilder implements AndroidBuilder {
 /// within [directoryOverride].
 class FakeFlutterProjectFactory extends FlutterProjectFactory {
   FakeFlutterProjectFactory(this.directoryOverride) :
-    assert(directoryOverride != null),
     super(
       fileSystem: globals.fs,
       logger: globals.logger,

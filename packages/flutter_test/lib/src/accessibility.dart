@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -42,11 +43,11 @@ class Evaluation {
     }
 
     final StringBuffer buffer = StringBuffer();
-    if (reason != null) {
+    if (reason != null && reason!.isNotEmpty) {
       buffer.write(reason);
-      buffer.write(' ');
+      buffer.writeln();
     }
-    if (other.reason != null) {
+    if (other.reason != null && other.reason!.isNotEmpty) {
       buffer.write(other.reason);
     }
     return Evaluation._(
@@ -122,16 +123,22 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    return _traverse(
-      tester,
-      tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!,
-    );
+    Evaluation result = const Evaluation.pass();
+    for (final FlutterView view in tester.platformDispatcher.views) {
+      result += _traverse(
+        view,
+        // TODO(pdblasi-google): Get the specific semantics root for this view when available
+        tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!,
+      );
+    }
+
+    return result;
   }
 
-  Evaluation _traverse(WidgetTester tester, SemanticsNode node) {
+  Evaluation _traverse(FlutterView view, SemanticsNode node) {
     Evaluation result = const Evaluation.pass();
     node.visitChildren((SemanticsNode child) {
-      result += _traverse(tester, child);
+      result += _traverse(view, child);
       return true;
     });
     if (node.isMergedIntoParent) {
@@ -152,7 +159,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     // skip node if it is touching the edge of the screen, since it might
     // be partially scrolled offscreen.
     const double delta = 0.001;
-    final Size physicalSize = tester.binding.window.physicalSize;
+    final Size physicalSize = view.physicalSize;
     if (paintBounds.left <= delta ||
         paintBounds.top <= delta ||
         (paintBounds.bottom - physicalSize.height).abs() <= delta ||
@@ -160,7 +167,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       return result;
     }
     // shrink by device pixel ratio.
-    final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
+    final Size candidateSize = paintBounds.size / view.devicePixelRatio;
     if (candidateSize.width < size.width - delta ||
         candidateSize.height < size.height - delta) {
       result += Evaluation.fail(
@@ -210,35 +217,42 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
-    Evaluation traverse(SemanticsNode node) {
-      Evaluation result = const Evaluation.pass();
-      node.visitChildren((SemanticsNode child) {
-        result += traverse(child);
-        return true;
-      });
-      if (node.isMergedIntoParent ||
-          node.isInvisible ||
-          node.hasFlag(ui.SemanticsFlag.isHidden) ||
-          node.hasFlag(ui.SemanticsFlag.isTextField)) {
-        return result;
-      }
-      final SemanticsData data = node.getSemanticsData();
-      // Skip node if it has no actions, or is marked as hidden.
-      if (!data.hasAction(ui.SemanticsAction.longPress) &&
-          !data.hasAction(ui.SemanticsAction.tap)) {
-        return result;
-      }
-      if ((data.label == null || data.label.isEmpty) && (data.tooltip == null || data.tooltip.isEmpty)) {
-        result += Evaluation.fail(
-          '$node: expected tappable node to have semantic label, '
-          'but none was found.\n',
-        );
-      }
-      return result;
+    Evaluation result = const Evaluation.pass();
+
+    // TODO(pdblasi-google): Use view to retrieve the appropriate root semantics node when available.
+    // ignore: unused_local_variable
+    for (final FlutterView view in tester.platformDispatcher.views) {
+      result += _traverse(tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!);
     }
 
-    return traverse(root);
+    return result;
+  }
+
+  Evaluation _traverse(SemanticsNode node) {
+    Evaluation result = const Evaluation.pass();
+    node.visitChildren((SemanticsNode child) {
+      result += _traverse(child);
+      return true;
+    });
+    if (node.isMergedIntoParent ||
+        node.isInvisible ||
+        node.hasFlag(ui.SemanticsFlag.isHidden) ||
+        node.hasFlag(ui.SemanticsFlag.isTextField)) {
+      return result;
+    }
+    final SemanticsData data = node.getSemanticsData();
+    // Skip node if it has no actions, or is marked as hidden.
+    if (!data.hasAction(ui.SemanticsAction.longPress) &&
+        !data.hasAction(ui.SemanticsAction.tap)) {
+      return result;
+    }
+    if ((data.label.isEmpty) && (data.tooltip.isEmpty)) {
+      result += Evaluation.fail(
+        '$node: expected tappable node to have semantic label, '
+        'but none was found.',
+      );
+    }
+    return result;
   }
 }
 
@@ -283,22 +297,28 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
-    final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
+    Evaluation result = const Evaluation.pass();
+    for (final FlutterView view in tester.platformDispatcher.views) {
+      // TODO(pdblasi): This renderView will need to be retrieved from view when available.
+      final RenderView renderView = tester.binding.renderView;
+      final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
+      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
 
-    late ui.Image image;
-    final ByteData? byteData = await tester.binding.runAsync<ByteData?>(
-      () async {
-        // Needs to be the same pixel ratio otherwise our dimensions won't match
-        // the last transform layer.
-        final double ratio = 1 / tester.binding.window.devicePixelRatio;
-        image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
-        return image.toByteData();
-      },
-    );
+      late ui.Image image;
+      final ByteData? byteData = await tester.binding.runAsync<ByteData?>(
+        () async {
+          // Needs to be the same pixel ratio otherwise our dimensions won't match
+          // the last transform layer.
+          final double ratio = 1 / view.devicePixelRatio;
+          image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
+          return image.toByteData();
+        },
+      );
 
-    return _evaluateNode(root, tester, image, byteData!);
+      result += await _evaluateNode(root, tester, image, byteData!, view);
+    }
+
+    return result;
   }
 
   Future<Evaluation> _evaluateNode(
@@ -306,6 +326,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     WidgetTester tester,
     ui.Image image,
     ByteData byteData,
+    FlutterView view,
   ) async {
     Evaluation result = const Evaluation.pass();
 
@@ -327,7 +348,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       return true;
     });
     for (final SemanticsNode child in children) {
-      result += await _evaluateNode(child, tester, image, byteData);
+      result += await _evaluateNode(child, tester, image, byteData, view);
     }
     if (shouldSkipNode(data)) {
       return result;
@@ -335,7 +356,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final String text = data.label.isEmpty ? data.value : data.label;
     final Iterable<Element> elements = find.text(text).hitTestable().evaluate();
     for (final Element element in elements) {
-      result += await _evaluateElement(node, element, tester, image, byteData);
+      result += await _evaluateElement(node, element, tester, image, byteData, view);
     }
     return result;
   }
@@ -346,6 +367,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     WidgetTester tester,
     ui.Image image,
     ByteData byteData,
+    FlutterView view,
   ) async {
     // Look up inherited text properties to determine text size and weight.
     late bool isBold;
@@ -401,7 +423,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       throw StateError('Unexpected widget type: ${widget.runtimeType}');
     }
 
-    if (isNodeOffScreen(paintBoundsWithOffset, tester.binding.window)) {
+    if (isNodeOffScreen(paintBoundsWithOffset, view)) {
       return const Evaluation.pass();
     }
 
@@ -512,69 +534,72 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
     // Compute elements to be evaluated.
-
     final List<Element> elements = finder.evaluate().toList();
-
-    // Obtain rendered image.
-
-    final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
-    late ui.Image image;
-    final ByteData? byteData = await tester.binding.runAsync<ByteData?>(
-      () async {
-        // Needs to be the same pixel ratio otherwise our dimensions won't match
-        // the last transform layer.
-        final double ratio = 1 / tester.binding.window.devicePixelRatio;
-        image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
-        return image.toByteData();
-      },
-    );
-
-    // How to evaluate a single element.
-
-    Evaluation evaluateElement(Element element) {
-      final RenderBox renderObject = element.renderObject! as RenderBox;
-
-      final Rect originalPaintBounds = renderObject.paintBounds;
-
-      final Rect inflatedPaintBounds = originalPaintBounds.inflate(4.0);
-
-      final Rect paintBounds = Rect.fromPoints(
-        renderObject.localToGlobal(inflatedPaintBounds.topLeft),
-        renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
-      );
-
-      final Map<Color, int> colorHistogram = _colorsWithinRect(byteData!, paintBounds, image.width, image.height);
-
-      if (colorHistogram.isEmpty) {
-        return const Evaluation.pass();
-      }
-
-      final _ContrastReport report = _ContrastReport(colorHistogram);
-      final double contrastRatio = report.contrastRatio();
-
-      if (contrastRatio >= minimumRatio - tolerance) {
-        return const Evaluation.pass();
-      } else {
-        return Evaluation.fail(
-          '$element:\nExpected contrast ratio of at least '
-          '$minimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
-          'The computed light color was: ${report.lightColor}, '
-          'The computed dark color was: ${report.darkColor}\n'
-          '$description',
-        );
-      }
-    }
+    final Map<FlutterView, ui.Image> images = <FlutterView, ui.Image>{};
+    final Map<FlutterView, ByteData> byteDatas = <FlutterView, ByteData>{};
 
     // Collate all evaluations into a final evaluation, then return.
-
     Evaluation result = const Evaluation.pass();
-
     for (final Element element in elements) {
-      result = result + evaluateElement(element);
+      final FlutterView view = tester.viewOf(find.byElementPredicate((Element e) => e == element));
+
+      // TODO(pdblasi): Obtain this renderView from view when possible.
+      final RenderView renderView = tester.binding.renderView;
+      final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
+
+      late final ui.Image image;
+      late final ByteData byteData;
+
+      // Obtain a previously rendered image or render one for a new view.
+      await tester.binding.runAsync(() async {
+        image = images[view] ??= await layer.toImage(
+          renderView.paintBounds,
+          // Needs to be the same pixel ratio otherwise our dimensions
+          // won't match the last transform layer.
+          pixelRatio: 1 / view.devicePixelRatio,
+        );
+        byteData = byteDatas[view] ??= (await image.toByteData())!;
+      });
+
+      result = result + _evaluateElement(element, byteData, image);
     }
 
     return result;
+  }
+
+  // How to evaluate a single element.
+  Evaluation _evaluateElement(Element element, ByteData byteData, ui.Image image) {
+    final RenderBox renderObject = element.renderObject! as RenderBox;
+
+    final Rect originalPaintBounds = renderObject.paintBounds;
+
+    final Rect inflatedPaintBounds = originalPaintBounds.inflate(4.0);
+
+    final Rect paintBounds = Rect.fromPoints(
+      renderObject.localToGlobal(inflatedPaintBounds.topLeft),
+      renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
+    );
+
+    final Map<Color, int> colorHistogram = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
+
+    if (colorHistogram.isEmpty) {
+      return const Evaluation.pass();
+    }
+
+    final _ContrastReport report = _ContrastReport(colorHistogram);
+    final double contrastRatio = report.contrastRatio();
+
+    if (contrastRatio >= minimumRatio - tolerance) {
+      return const Evaluation.pass();
+    } else {
+      return Evaluation.fail(
+        '$element:\nExpected contrast ratio of at least '
+        '$minimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
+        'The computed light color was: ${report.lightColor}, '
+        'The computed dark color was: ${report.darkColor}\n'
+        '$description',
+      );
+    }
   }
 }
 

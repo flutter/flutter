@@ -365,9 +365,7 @@ class _OptionsState extends State<Options> {
 }
 
 class _ControlTile extends StatelessWidget {
-  const _ControlTile({required this.label, required this.child})
-      : assert(label != null),
-        assert(child != null);
+  const _ControlTile({required this.label, required this.child});
 
   final String label;
   final Widget child;

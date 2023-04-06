@@ -190,20 +190,13 @@ class NestedScrollView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scrollBehavior,
-  }) : assert(scrollDirection != null),
-       assert(reverse != null),
-       assert(headerSliverBuilder != null),
-       assert(body != null),
-       assert(floatHeaderSlivers != null),
-       assert(clipBehavior != null);
+  });
 
   /// An object that can be used to control the position to which the outer
   /// scroll view is scrolled.
   final ScrollController? controller;
 
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Defaults to [Axis.vertical].
+  /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
 
   /// Whether the scroll view scrolls in the reading direction.
@@ -510,8 +503,7 @@ class _InheritedNestedScrollView extends InheritedWidget {
   const _InheritedNestedScrollView({
     required this.state,
     required super.child,
-  }) : assert(state != null),
-       assert(child != null);
+  });
 
   final NestedScrollViewState state;
 
@@ -633,7 +625,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   ScrollDirection _userScrollDirection = ScrollDirection.idle;
 
   void updateUserScrollDirection(ScrollDirection value) {
-    assert(value != null);
     if (userScrollDirection == value) {
       return;
     }
@@ -752,7 +743,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   _NestedScrollMetrics _getMetrics(_NestedScrollPosition innerPosition, double velocity) {
-    assert(innerPosition != null);
     double pixels, minRange, maxRange, correctionOffset;
     double extra = 0.0;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
@@ -1187,7 +1177,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     super.debugLabel,
     required this.coordinator,
   }) {
-    if (!hasPixels && initialPixels != null) {
+    if (!hasPixels) {
       correctPixels(initialPixels);
     }
     if (activity == null) {
@@ -1376,7 +1366,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     if (simulation == null) {
       return IdleScrollActivity(this);
     }
-    assert(mode != null);
     switch (mode) {
       case _NestedBallisticScrollActivityMode.outer:
         assert(metrics != null);
@@ -1644,7 +1633,6 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
     switch (_writers) {
       case 0:
         extra = ', orphan';
-        break;
       case 1:
         // normal case
         break;
@@ -1677,8 +1665,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
     super.key,
     required this.handle,
     Widget? sliver,
-  }) : assert(handle != null),
-      super(child: sliver);
+  }) : super(child: sliver);
 
   /// The object in which the absorbed overlap is recorded.
   ///
@@ -1722,8 +1709,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   RenderSliverOverlapAbsorber({
     required SliverOverlapAbsorberHandle handle,
     RenderSliver? sliver,
-  }) : assert(handle != null),
-       _handle = handle {
+  }) : _handle = handle {
     child = sliver;
   }
 
@@ -1734,7 +1720,6 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   SliverOverlapAbsorberHandle get handle => _handle;
   SliverOverlapAbsorberHandle _handle;
   set handle(SliverOverlapAbsorberHandle value) {
-    assert(value != null);
     if (handle == value) {
       return;
     }
@@ -1839,8 +1824,7 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
     super.key,
     required this.handle,
     Widget? sliver,
-  }) : assert(handle != null),
-       super(child: sliver);
+  }) : super(child: sliver);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   ///
@@ -1880,8 +1864,7 @@ class RenderSliverOverlapInjector extends RenderSliver {
   /// The [handle] must not be null.
   RenderSliverOverlapInjector({
     required SliverOverlapAbsorberHandle handle,
-  }) : assert(handle != null),
-       _handle = handle;
+  }) : _handle = handle;
 
   double? _currentLayoutExtent;
   double? _currentMaxExtent;
@@ -1894,7 +1877,6 @@ class RenderSliverOverlapInjector extends RenderSliver {
   SliverOverlapAbsorberHandle get handle => _handle;
   SliverOverlapAbsorberHandle _handle;
   set handle(SliverOverlapAbsorberHandle value) {
-    assert(value != null);
     if (handle == value) {
       return;
     }
@@ -1957,13 +1939,11 @@ class RenderSliverOverlapInjector extends RenderSliver {
             start = Offset(x, offset.dy);
             end = Offset(x, offset.dy + geometry!.paintExtent);
             delta = Offset(constraints.crossAxisExtent / 5.0, 0.0);
-            break;
           case Axis.horizontal:
             final double y = offset.dy + constraints.crossAxisExtent / 2.0;
             start = Offset(offset.dx, y);
             end = Offset(offset.dy + geometry!.paintExtent, y);
             delta = Offset(0.0, constraints.crossAxisExtent / 5.0);
-            break;
         }
         for (int index = -2; index <= 2; index += 1) {
           paintZigZag(
@@ -2005,7 +1985,7 @@ class NestedScrollViewViewport extends Viewport {
     super.slivers,
     required this.handle,
     super.clipBehavior,
-  }) : assert(handle != null);
+  });
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   final SliverOverlapAbsorberHandle handle;
@@ -2064,15 +2044,13 @@ class RenderNestedScrollViewViewport extends RenderViewport {
     super.center,
     required SliverOverlapAbsorberHandle handle,
     super.clipBehavior,
-  }) : assert(handle != null),
-       _handle = handle;
+  }) : _handle = handle;
 
   /// The object to notify when [markNeedsLayout] is called.
   SliverOverlapAbsorberHandle get handle => _handle;
   SliverOverlapAbsorberHandle _handle;
   /// Setting this will trigger notifications on the new object.
   set handle(SliverOverlapAbsorberHandle value) {
-    assert(value != null);
     if (handle == value) {
       return;
     }

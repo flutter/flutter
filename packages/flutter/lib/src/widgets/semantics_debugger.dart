@@ -32,8 +32,7 @@ class SemanticsDebugger extends StatefulWidget {
       fontSize: 10.0,
       height: 0.8,
     ),
-  }) : assert(child != null),
-       assert(labelStyle != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -287,7 +286,6 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       annotations.add('adjustable');
     }
 
-    assert(data.attributedLabel != null);
     final String message;
     // Android will avoid pronouncing duplicating tooltip and label.
     // Therefore, having two identical strings is the same as having a single
@@ -310,10 +308,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         switch (data.textDirection!) {
           case TextDirection.rtl:
             effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}';
-            break;
           case TextDirection.ltr:
             effectivelabel = tooltipAndLabel;
-            break;
         }
       }
       if (annotations.isEmpty) {

@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -137,13 +138,13 @@ class CupertinoContextMenu extends StatefulWidget {
     super.key,
     required this.actions,
     required Widget this.child,
+    this.enableHapticFeedback = false,
     @Deprecated(
       'Use CupertinoContextMenu.builder instead. '
       'This feature was deprecated after v3.4.0-34.1.pre.',
     )
     this.previewBuilder = _defaultPreviewBuilder,
-  }) : assert(actions != null && actions.isNotEmpty),
-       assert(child != null),
+  }) : assert(actions.isNotEmpty),
        builder = ((BuildContext context, Animation<double> animation) => child);
 
   /// Creates a context menu with a custom [builder] controlling the widget.
@@ -158,7 +159,8 @@ class CupertinoContextMenu extends StatefulWidget {
     super.key,
     required this.actions,
     required this.builder,
-  }) : assert(actions != null && actions.isNotEmpty),
+    this.enableHapticFeedback = false,
+  }) : assert(actions.isNotEmpty),
        child = null,
        previewBuilder = null;
 
@@ -275,7 +277,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// opened in the default way to match a native iOS 16.0 app. The behavior
   /// will match what will happen if the simple child image was passed as just
   /// the [child] parameter, instead of [builder]. This can be manipulated to
-  /// add more custamizability to the widget's animation.
+  /// add more customizability to the widget's animation.
   ///
   /// ```dart
   /// CupertinoContextMenu.builder(
@@ -389,6 +391,13 @@ class CupertinoContextMenu extends StatefulWidget {
   /// This parameter cannot be null or empty.
   final List<Widget> actions;
 
+  /// If true, clicking on the [CupertinoContextMenuAction]s will
+  /// produce haptic feedback.
+  ///
+  /// Uses [HapticFeedback.heavyImpact] when activated.
+  /// Defaults to false.
+  final bool enableHapticFeedback;
+
   /// A function that returns an alternative widget to show when the
   /// [CupertinoContextMenu] is open.
   ///
@@ -482,6 +491,15 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     _openController.addStatusListener(_onDecoyAnimationStatusChange);
   }
 
+  void _listenerCallback() {
+    if (_openController.status != AnimationStatus.reverse &&
+        _openController.value >= _midpoint &&
+        widget.enableHapticFeedback) {
+      HapticFeedback.heavyImpact();
+      _openController.removeListener(_listenerCallback);
+    }
+  }
+
   // Determine the _ContextMenuLocation based on the location of the original
   // child in the screen.
   //
@@ -546,7 +564,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         }
         _lastOverlayEntry?.remove();
         _lastOverlayEntry = null;
-        break;
 
       case AnimationStatus.completed:
         setState(() {
@@ -562,7 +579,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           _lastOverlayEntry = null;
           _openController.reset();
         });
-        break;
 
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
@@ -584,24 +600,28 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   }
 
   void _onTap() {
+    _openController.removeListener(_listenerCallback);
     if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
   void _onTapCancel() {
+    _openController.removeListener(_listenerCallback);
     if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
   void _onTapUp(TapUpDetails details) {
+    _openController.removeListener(_listenerCallback);
     if (_openController.isAnimating && _openController.value < _midpoint) {
       _openController.reverse();
     }
   }
 
   void _onTapDown(TapDownDetails details) {
+    _openController.addListener(_listenerCallback);
     setState(() {
       _childHidden = true;
     });
@@ -794,8 +814,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     super.filter,
     required Rect previousChildRect,
     super.settings,
-  }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuLocation != null),
+  }) : assert(actions.isNotEmpty),
        _actions = actions,
        _builder = builder,
        _contextMenuLocation = contextMenuLocation,
@@ -1081,8 +1100,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     this.onDismiss,
     required this.orientation,
     this.sheetGlobalKey,
-  }) : assert(contextMenuLocation != null),
-       assert(orientation != null);
+  });
 
   final List<Widget>? actions;
   final Widget child;
@@ -1373,27 +1391,24 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     );
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(_kPadding),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: GestureDetector(
-            onPanEnd: _onPanEnd,
-            onPanStart: _onPanStart,
-            onPanUpdate: _onPanUpdate,
-            child: AnimatedBuilder(
-              animation: _moveController,
-              builder: _buildAnimation,
-              child: widget.orientation == Orientation.portrait
-                ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                )
-                : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                ),
-            ),
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: GestureDetector(
+          onPanEnd: _onPanEnd,
+          onPanStart: _onPanStart,
+          onPanUpdate: _onPanUpdate,
+          child: AnimatedBuilder(
+            animation: _moveController,
+            builder: _buildAnimation,
+            child: widget.orientation == Orientation.portrait
+              ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children,
+              )
+              : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children,
+              ),
           ),
         ),
       ),
@@ -1409,9 +1424,7 @@ class _ContextMenuSheet extends StatelessWidget {
     required this.actions,
     required _ContextMenuLocation contextMenuLocation,
     required Orientation orientation,
-  }) : assert(actions != null && actions.isNotEmpty),
-       assert(contextMenuLocation != null),
-       assert(orientation != null),
+  }) : assert(actions.isNotEmpty),
        _contextMenuLocation = contextMenuLocation,
        _orientation = orientation;
 
@@ -1419,12 +1432,13 @@ class _ContextMenuSheet extends StatelessWidget {
   final _ContextMenuLocation _contextMenuLocation;
   final Orientation _orientation;
 
+  static const double _kMenuWidth = 250.0;
+
   // Get the children, whose order depends on orientation and
   // contextMenuLocation.
   List<Widget> getChildren(BuildContext context) {
-    final Widget menu = Flexible(
-      fit: FlexFit.tight,
-      flex: 2,
+    final Widget menu = SizedBox(
+      width: _kMenuWidth,
       child: IntrinsicHeight(
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
@@ -1437,9 +1451,12 @@ class _ContextMenuSheet extends StatelessWidget {
                   decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(
-                        color: CupertinoDynamicColor.resolve(_borderColor, context),
-                        width: 0.5,
-                      )
+                        color: CupertinoDynamicColor.resolve(
+                          _borderColor,
+                          context,
+                        ),
+                        width: 0.4,
+                      ),
                     ),
                   ),
                   position: DecorationPosition.foreground,

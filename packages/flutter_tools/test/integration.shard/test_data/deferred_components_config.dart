@@ -25,56 +25,26 @@ abstract class DeferredComponentsConfig {
   List<DeferredComponentModule> get deferredComponents;
 
   void setUpIn(Directory dir) {
-    if (deferredLibrary != null) {
-      writeFile(fileSystem.path.join(dir.path, 'lib', 'deferred_library.dart'), deferredLibrary);
-    }
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'deferred_library.dart'), deferredLibrary);
     final String? golden = deferredComponentsGolden;
     if (golden != null) {
       writeFile(fileSystem.path.join(dir.path, 'deferred_components_loading_units.yaml'), golden);
     }
-    if (androidSettings != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);
-    }
-    if (androidBuild != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'build.gradle'), androidBuild);
-    }
-    if (androidLocalProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
-    }
-    if (androidGradleProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'gradle.properties'), androidGradleProperties);
-    }
-    if (androidKeyProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'key.properties'), androidKeyProperties);
-    }
-    if (androidKey != null) {
-      writeBytesFile(fileSystem.path.join(dir.path, 'android', 'app', 'key.jks'), androidKey);
-    }
-    if (appBuild != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'build.gradle'), appBuild);
-    }
-    if (appManifest != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), appManifest);
-    }
-    if (appStrings != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
-    }
-    if (appStyles != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
-    }
-    if (appLaunchBackground != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
-    }
-    if (asset1 != null) {
-      writeFile(fileSystem.path.join(dir.path, 'test_assets/asset1.txt'), asset1);
-    }
-    if (asset2 != null) {
-      writeFile(fileSystem.path.join(dir.path, 'test_assets/asset2.txt'), asset2);
-    }
-    if (deferredComponents != null) {
-      for (final DeferredComponentModule component in deferredComponents) {
-        component.setUpIn(dir);
-      }
+    writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'build.gradle'), androidBuild);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'gradle.properties'), androidGradleProperties);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'key.properties'), androidKeyProperties);
+    writeBytesFile(fileSystem.path.join(dir.path, 'android', 'app', 'key.jks'), androidKey);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'build.gradle'), appBuild);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), appManifest);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
+    writeFile(fileSystem.path.join(dir.path, 'test_assets/asset1.txt'), asset1);
+    writeFile(fileSystem.path.join(dir.path, 'test_assets/asset2.txt'), asset2);
+    for (final DeferredComponentModule component in deferredComponents) {
+      component.setUpIn(dir);
     }
   }
 }
@@ -85,70 +55,68 @@ class DeferredComponentModule {
   String name;
 
   void setUpIn(Directory dir) {
-    if (name != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', name, 'build.gradle'), r'''
-      def localProperties = new Properties()
-      def localPropertiesFile = rootProject.file('local.properties')
-      if (localPropertiesFile.exists()) {
-          localPropertiesFile.withReader('UTF-8') { reader ->
-              localProperties.load(reader)
-          }
-      }
-
-      def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-      if (flutterVersionCode == null) {
-          flutterVersionCode = '1'
-      }
-
-      def flutterVersionName = localProperties.getProperty('flutter.versionName')
-      if (flutterVersionName == null) {
-          flutterVersionName = '1.0'
-      }
-
-      apply plugin: "com.android.dynamic-feature"
-
-      android {
-          compileSdkVersion 31
-
-          sourceSets {
-              applicationVariants.all { variant ->
-                  main.assets.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_assets"
-                  main.jniLibs.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_libs"
-              }
-          }
-
-          defaultConfig {
-              minSdkVersion 16
-              targetSdkVersion 31
-              versionCode flutterVersionCode.toInteger()
-              versionName flutterVersionName
-          }
-          compileOptions {
-              sourceCompatibility 1.8
-              targetCompatibility 1.8
-          }
-      }
-
-      dependencies {
-          implementation project(":app")
-      }
-      ''');
-
-      writeFile(fileSystem.path.join(dir.path, 'android', name, 'src', 'main', 'AndroidManifest.xml'), '''
-      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:dist="http://schemas.android.com/apk/distribution"
-          package="com.example.$name">
-
-          <dist:module
-              dist:instant="false"
-              dist:title="@string/component1Name">
-              <dist:delivery>
-                  <dist:on-demand />
-              </dist:delivery>
-              <dist:fusing dist:include="true" />
-          </dist:module>
-      </manifest>
-      ''');
+    writeFile(fileSystem.path.join(dir.path, 'android', name, 'build.gradle'), r'''
+    def localProperties = new Properties()
+    def localPropertiesFile = rootProject.file('local.properties')
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.withReader('UTF-8') { reader ->
+            localProperties.load(reader)
+        }
     }
+
+    def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+    if (flutterVersionCode == null) {
+        flutterVersionCode = '1'
+    }
+
+    def flutterVersionName = localProperties.getProperty('flutter.versionName')
+    if (flutterVersionName == null) {
+        flutterVersionName = '1.0'
+    }
+
+    apply plugin: "com.android.dynamic-feature"
+
+    android {
+        compileSdkVersion 31
+
+        sourceSets {
+            applicationVariants.all { variant ->
+                main.assets.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_assets"
+                main.jniLibs.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_libs"
+            }
+        }
+
+        defaultConfig {
+            minSdkVersion 16
+            targetSdkVersion 31
+            versionCode flutterVersionCode.toInteger()
+            versionName flutterVersionName
+        }
+        compileOptions {
+            sourceCompatibility 1.8
+            targetCompatibility 1.8
+        }
+    }
+
+    dependencies {
+        implementation project(":app")
+    }
+    ''');
+
+    writeFile(fileSystem.path.join(dir.path, 'android', name, 'src', 'main', 'AndroidManifest.xml'), '''
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:dist="http://schemas.android.com/apk/distribution"
+        package="com.example.$name">
+
+        <dist:module
+            dist:instant="false"
+            dist:title="@string/component1Name">
+            <dist:delivery>
+                <dist:on-demand />
+            </dist:delivery>
+            <dist:fusing dist:include="true" />
+        </dist:module>
+    </manifest>
+    ''');
   }
 }

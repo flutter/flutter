@@ -204,7 +204,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
     final Duration reverseDuration = reverseTransitionDuration;
-    assert(duration != null && duration >= Duration.zero);
+    assert(duration >= Duration.zero);
     return AnimationController(
       duration: duration,
       reverseDuration: reverseDuration,
@@ -232,7 +232,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         }
         _performanceModeRequestHandle?.dispose();
         _performanceModeRequestHandle = null;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         if (overlayEntries.isNotEmpty) {
@@ -241,7 +240,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         _performanceModeRequestHandle ??=
           SchedulerBinding.instance
             .requestPerformanceMode(ui.DartPerformanceMode.latency);
-        break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
         // transition and hits the dismissed status. For example, the iOS
@@ -253,7 +251,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           _performanceModeRequestHandle?.dispose();
           _performanceModeRequestHandle = null;
         }
-        break;
     }
   }
 
@@ -371,7 +368,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
                   _trainHoppingListenerRemover!();
                   _trainHoppingListenerRemover = null;
                 }
-                break;
               case AnimationStatus.forward:
               case AnimationStatus.reverse:
                 break;
@@ -692,7 +688,6 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// The entry's [LocalHistoryEntry.onRemove] callback, if any, will be called
   /// synchronously.
   void removeLocalHistoryEntry(LocalHistoryEntry entry) {
-    assert(entry != null);
     assert(entry._owner == this);
     assert(_localHistory!.contains(entry));
     bool internalStateChanged = false;
@@ -775,10 +770,7 @@ class _ModalScopeStatus extends InheritedWidget {
     required this.impliesAppBarDismissal,
     required this.route,
     required super.child,
-  }) : assert(isCurrent != null),
-       assert(canPop != null),
-       assert(route != null),
-       assert(child != null);
+  });
 
   final bool isCurrent;
   final bool canPop;
@@ -1901,8 +1893,6 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// to [route], e.g. when [route] is covered by another route or when [route]
   /// is popped off the [Navigator] stack.
   void subscribe(RouteAware routeAware, R route) {
-    assert(routeAware != null);
-    assert(route != null);
     final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => <RouteAware>{});
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
@@ -1914,7 +1904,6 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// [routeAware] is no longer informed about changes to its route. If the given argument was
   /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(RouteAware routeAware) {
-    assert(routeAware != null);
     final List<R> routes = _listeners.keys.toList();
     for (final R route in routes) {
       final Set<RouteAware>? subscribers = _listeners[route];
@@ -1966,7 +1955,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
 ///
 /// This is used with [RouteObserver] to make a widget aware of changes to the
 /// [Navigator]'s session history.
-abstract class RouteAware {
+abstract mixin class RouteAware {
   /// Called when the top route has been popped off, and the current route
   /// shows up.
   void didPopNext() { }
@@ -2038,8 +2027,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     super.settings,
     this.anchorPoint,
     super.traversalEdgeBehavior,
-  }) : assert(barrierDismissible != null),
-       _pageBuilder = pageBuilder,
+  }) : _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
        _barrierColor = barrierColor,
@@ -2186,8 +2174,6 @@ Future<T?> showGeneralDialog<T extends Object?>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
 }) {
-  assert(pageBuilder != null);
-  assert(useRootNavigator != null);
   assert(!barrierDismissible || barrierLabel != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(RawDialogRoute<T>(
     pageBuilder: pageBuilder,

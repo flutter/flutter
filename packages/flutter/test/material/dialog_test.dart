@@ -1513,7 +1513,7 @@ void main() {
         ElevatedButton(
           key: key1,
           onPressed: () {},
-          child: const Text('Loooooooooog button 1'),
+          child: const Text('Loooooooooong button 1'),
         ),
         ElevatedButton(
           key: key2,
@@ -2505,6 +2505,7 @@ void main() {
       label: 'Custom label',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
+    semantics.dispose();
   });
 
   testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
@@ -2710,6 +2711,7 @@ void main() {
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<Object?> _materialDialogBuilder(BuildContext context, Object? arguments) {
     return DialogRoute<void>(
       context: context,

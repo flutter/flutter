@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import 'binding.dart';
 
-// TODO(ianh): Once https://github.com/dart-lang/dartdoc/issues/2033 is fixed, update the hyperlinks marked HYPERLINK below.
 // TODO(ianh): Once cocoon and other customer_tests are migrated, deprecate these transitional APIs
 
 /// Shim to support the obsolete [setMockMessageHandler] and
@@ -19,26 +18,24 @@ import 'binding.dart';
 /// `tester.binding.defaultBinaryMessenger.setMockMessageHandler` directly. This
 /// more accurately represents the actual method invocation.
 extension TestBinaryMessengerExtension on BinaryMessenger {
-  /// Shim for `TestDefaultBinaryMessenger.setMockMessageHandler`.
-  // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  /// Shim for [TestDefaultBinaryMessenger.setMockMessageHandler].
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.setMockMessageHandler or '
   //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler instead. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   void setMockMessageHandler(String channel, MessageHandler? handler) {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(channel, handler);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(channel, handler);
   }
 
-  /// Shim for `TestDefaultBinaryMessenger.checkMockMessageHandler`.
-  // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  /// Shim for [TestDefaultBinaryMessenger.checkMockMessageHandler].
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.checkMockMessageHandler or '
   //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler instead.'
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   bool checkMockMessageHandler(String channel, Object? handler) {
-    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(channel, handler);
+    return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(channel, handler);
   }
 }
 
@@ -51,19 +48,17 @@ extension TestBinaryMessengerExtension on BinaryMessenger {
 /// `tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler`
 /// directly. This more accurately represents the actual method invocation.
 extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
-  /// Shim for `TestDefaultBinaryMessenger.setMockDecodedMessageHandler`.
-  // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  /// Shim for [TestDefaultBinaryMessenger.setMockDecodedMessageHandler].
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler or '
   //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockDecodedMessageHandler instead. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   void setMockMessageHandler(Future<T> Function(T? message)? handler) {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockDecodedMessageHandler<T>(this, handler);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockDecodedMessageHandler<T>(this, handler);
   }
 
-  /// Shim for `TestDefaultBinaryMessenger.checkMockMessageHandler`.
-  // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  /// Shim for [TestDefaultBinaryMessenger.checkMockMessageHandler].
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.checkMockMessageHandler or '
   //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler instead. '
@@ -71,7 +66,7 @@ extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   bool checkMockMessageHandler(Object? handler) {
-    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(name, handler);
+    return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(name, handler);
   }
 }
 
@@ -84,19 +79,17 @@ extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
 /// `tester.binding.defaultBinaryMessenger.setMockMethodCallHandler` directly.
 /// This more accurately represents the actual method invocation.
 extension TestMethodChannelExtension on MethodChannel {
-  /// Shim for `TestDefaultBinaryMessenger.setMockMethodCallHandler`.
-  // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  /// Shim for [TestDefaultBinaryMessenger.setMockMethodCallHandler].
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.setMockMethodCallHandler or '
   //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler instead. '
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   void setMockMethodCallHandler(Future<dynamic>? Function(MethodCall call)? handler) {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(this, handler);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(this, handler);
   }
 
-  /// Shim for `TestDefaultBinaryMessenger.checkMockMessageHandler`.
-  // HYPERLINK ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  /// Shim for [TestDefaultBinaryMessenger.checkMockMessageHandler].
   // TODO(ianh): deprecate this method: @NotYetDeprecated(
   //   'Use tester.binding.defaultBinaryMessenger.checkMockMessageHandler or '
   //   'TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler instead. '
@@ -104,6 +97,6 @@ extension TestMethodChannelExtension on MethodChannel {
   //   'This feature was deprecated after v2.1.0-10.0.pre.'
   // )
   bool checkMockMethodCallHandler(Object? handler) {
-    return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.checkMockMessageHandler(name, handler);
+    return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(name, handler);
   }
 }

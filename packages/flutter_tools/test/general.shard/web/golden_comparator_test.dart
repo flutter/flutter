@@ -40,7 +40,7 @@ void main() {
       processManager.addCommand(FakeCommand(
         command: const <String>[
           'shell',
-          '--disable-observatory',
+          '--disable-vm-service',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
@@ -74,7 +74,7 @@ void main() {
       processManager.addCommand(FakeCommand(
         command: const <String>[
           'shell',
-          '--disable-observatory',
+          '--disable-vm-service',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
@@ -107,7 +107,7 @@ void main() {
       processManager.addCommand(FakeCommand(
         command: const <String>[
           'shell',
-          '--disable-observatory',
+          '--disable-vm-service',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
@@ -143,7 +143,7 @@ void main() {
       processManager.addCommand(FakeCommand(
         command: const <String>[
           'shell',
-          '--disable-observatory',
+          '--disable-vm-service',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
@@ -152,7 +152,7 @@ void main() {
       processManager.addCommand(FakeCommand(
         command: const <String>[
           'shell',
-          '--disable-observatory',
+          '--disable-vm-service',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
@@ -186,7 +186,7 @@ void main() {
       processManager.addCommand(FakeCommand(
         command: const <String>[
           'shell',
-          '--disable-observatory',
+          '--disable-vm-service',
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',

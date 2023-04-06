@@ -88,9 +88,9 @@ class StackSizePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return const Material(
       child: Column(
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox(
             width: 200,
             height: 100,

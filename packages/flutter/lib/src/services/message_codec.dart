@@ -29,13 +29,12 @@ abstract class MessageCodec<T> {
   T? decodeMessage(ByteData? message);
 }
 
-/// An command object representing the invocation of a named method.
+/// A command object representing the invocation of a named method.
 @immutable
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].
-  const MethodCall(this.method, [this.arguments])
-    : assert(method != null);
+  const MethodCall(this.method, [this.arguments]);
 
   /// The name of the method to be called.
   final String method;
@@ -114,7 +113,7 @@ class PlatformException implements Exception {
     this.message,
     this.details,
     this.stacktrace,
-  }) : assert(code != null);
+  });
 
   /// An error code.
   final String code;

@@ -82,6 +82,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   outdatedGradleHandler,
   sslExceptionHandler,
   zipExceptionHandler,
+  incompatibleJavaAndGradleVersionsHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -337,7 +338,6 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
     final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
-    assert(licenseFailure != null);
     final Match? licenseMatch = licenseFailure.firstMatch(line);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
@@ -462,8 +462,8 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
     globals.printBox(
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
       '$textInBold\n'
-      "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n"
-      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
+      'Following this change, your app will not be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n'
+      'Consider searching for a version of this plugin that supports these lower versions of the Android SDK instead.\n'
       'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration',
       title: _boxTitle,
     );
@@ -669,4 +669,43 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'ssl-exception-tag-mismatch',
+);
+
+/// If an incompatible Java and Gradle versions error is caught, we expect an
+/// error specifying that the Java major class file version, one of
+/// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+\d+');
+
+@visibleForTesting
+final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
+  test: (String line) {
+    return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    final File gradlePropertiesFile = project.directory
+        .childDirectory('android')
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties');
+    // TODO(reidbaker): Replace URL with constant defined in
+    // https://github.com/flutter/flutter/pull/123916.
+    globals.printBox(
+      "${globals.logger.terminal.warningMark} Your project's Gradle version "
+      'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
+      'To fix this issue, first, check the Java version used by Flutter by '
+      'running `flutter doctor --verbose`.\n\n'
+      'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
+      'to be compatible with that Java version. '
+      'See the link below for more information on compatible Java/Gradle versions:\n'
+      'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-java-gradle-version',
 );

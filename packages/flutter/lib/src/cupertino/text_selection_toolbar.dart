@@ -19,9 +19,6 @@ const double _kToolbarHeight = 43.0;
 // Vertical distance between the tip of the arrow and the line of text the arrow
 // is pointing to. The value used here is eyeballed.
 const double _kToolbarContentDistance = 8.0;
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// screen.
-const double _kToolbarScreenPadding = 8.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
@@ -123,6 +120,16 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// default Cupertino toolbar.
   final CupertinoToolbarBuilder toolbarBuilder;
 
+  /// Minimal padding from all edges of the selection toolbar to all edges of the
+  /// viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which uses this same value for its
+  ///    padding from the edges of the viewport.
+  ///  * [TextSelectionToolbar], which uses this same value as well.
+  static const double kToolbarScreenPadding = 8.0;
+
   // Add the visual vertical line spacer between children buttons.
   static List<Widget> _addChildrenSpacers(List<Widget> children) {
     final List<Widget> nextChildren = <Widget>[];
@@ -163,7 +170,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     assert(debugCheckHasMediaQuery(context));
     final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
-    final double paddingAbove = mediaQueryPadding.top + _kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryPadding.top + kToolbarScreenPadding;
     final double toolbarHeightNeeded = paddingAbove
         + _kToolbarContentDistance
         + _kToolbarHeight;
@@ -180,15 +187,15 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     );
     final Offset anchorBelowAdjusted = Offset(
       clampDouble(anchorBelow.dx, leftMargin, rightMargin),
-      anchorBelow.dy - _kToolbarContentDistance + paddingAbove,
+      anchorBelow.dy + _kToolbarContentDistance - paddingAbove,
     );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
         paddingAbove,
-        _kToolbarScreenPadding,
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
+        kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
         delegate: TextSelectionToolbarLayoutDelegate(
@@ -426,8 +433,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     required this.isAbove,
     required this.toolbarBuilder,
     required this.children,
-  }) : assert(children != null),
-       assert(children.length > 0);
+  }) : assert(children.length > 0);
 
   final Offset anchor;
   final List<Widget> children;
@@ -533,13 +539,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
     required this.dividerWidth,
     required this.nextButton,
     required this.nextButtonDisabled,
-  }) : assert(children != null),
-       assert(children.isNotEmpty),
-       assert(backButton != null),
-       assert(dividerWidth != null),
-       assert(nextButton != null),
-       assert(nextButtonDisabled != null),
-       assert(page != null);
+  }) : assert(children.isNotEmpty);
 
   final Widget backButton;
   final List<Widget> children;
@@ -587,13 +587,10 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     switch (slot) {
       case _CupertinoTextSelectionToolbarItemsSlot.backButton:
         renderObject.backButton = child;
-        break;
       case _CupertinoTextSelectionToolbarItemsSlot.nextButton:
         renderObject.nextButton = child;
-        break;
       case _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled:
         renderObject.nextButtonDisabled = child;
-        break;
     }
   }
 
@@ -732,9 +729,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   _RenderCupertinoTextSelectionToolbarItems({
     required double dividerWidth,
     required int page,
-  }) : assert(dividerWidth != null),
-       assert(page != null),
-       _dividerWidth = dividerWidth,
+  }) : _dividerWidth = dividerWidth,
        _page = page,
        super();
 

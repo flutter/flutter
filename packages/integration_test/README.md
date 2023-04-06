@@ -86,7 +86,7 @@ flutter drive \
 ### Web
 
 Make sure you have [enabled web support](https://flutter.dev/docs/get-started/web#set-up)
-then [download and run](https://flutter.dev/docs/cookbook/testing/integration/introduction#6b-web)
+then [download and run](https://docs.flutter.dev/cookbook/testing/integration/introduction#5b-web)
 the web driver in another process.
 
 Use following command to execute the tests:
@@ -221,6 +221,13 @@ physical):
 ./gradlew app:connectedAndroidTest -Ptarget=`pwd`/../integration_test/foo_test.dart
 ```
 
+Note:
+To use `--dart-define` with `gradlew` you must `base64` encode all parameters,
+and pass them to gradle in a comma separated list:
+```bash
+./gradlew project:task -Pdart-defines="{base64(key=value)},[...]"
+```
+
 ## Firebase Test Lab
 
 If this is your first time testing with Firebase Test Lab, you'll need to follow
@@ -310,7 +317,13 @@ dev_target="14.3"
 flutter build ios integration_test/foo_test.dart --release
 
 pushd ios
-xcodebuild -workspace Runner.xcworkspace -scheme Runner -config Flutter/Release.xcconfig -derivedDataPath $output -sdk iphoneos build-for-testing
+xcodebuild build-for-testing \
+  -workspace Runner.xcworkspace \
+  -scheme Runner \
+  -xcconfig Flutter/Release.xcconfig \
+  -configuration Release \
+  -derivedDataPath \
+  $output -sdk iphoneos
 popd
 
 pushd $product
@@ -321,11 +334,15 @@ popd
 You can verify locally that your tests are successful by running the following command:
 
 ```sh
-xcodebuild test-without-building -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" -destination id=<YOUR_DEVICE_ID>
+xcodebuild test-without-building \
+  -xctestrun "build/ios_integ/Build/Products/Runner_iphoneos14.3-arm64.xctestrun" \
+  -destination id=<YOUR_DEVICE_ID>
 ```
 
 Once everything is ok, you can upload the resulting zip to Firebase Test Lab (change the model with your values):
 
 ```sh
-gcloud firebase test ios run --test "build/ios_integ/Build/Products/ios_tests.zip" --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
+gcloud firebase test ios run \
+  --test "build/ios_integ/Build/Products/ios_tests.zip" \
+  --device model=iphone11pro,version=14.1,locale=fr_FR,orientation=portrait
 ```

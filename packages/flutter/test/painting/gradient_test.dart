@@ -66,6 +66,17 @@ void main() {
     ));
   });
 
+  test('LinearGradient.lerp identical a,b', () {
+    expect(LinearGradient.lerp(null, null, 0), null);
+    const LinearGradient gradient = LinearGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+    expect(identical(LinearGradient.lerp(gradient, gradient, 0.5), gradient), true);
+  });
+
   test('LinearGradient lerp test with stops', () {
     const LinearGradient testGradient1 = LinearGradient(
       begin: Alignment.topLeft,
@@ -342,6 +353,17 @@ void main() {
     ));
   });
 
+  test('RadialGradient.lerp identical a,b', () {
+    expect(RadialGradient.lerp(null, null, 0), null);
+    const RadialGradient gradient = RadialGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+    expect(identical(RadialGradient.lerp(gradient, gradient, 0.5), gradient), true);
+  });
+
   test('RadialGradient lerp test with stops', () {
     const RadialGradient testGradient1 = RadialGradient(
       center: Alignment.topLeft,
@@ -555,6 +577,17 @@ void main() {
         1.0,
       ],
     ));
+  });
+
+  test('SweepGradient.lerp identical a,b', () {
+    expect(SweepGradient.lerp(null, null, 0), null);
+    const SweepGradient gradient = SweepGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+    );
+    expect(identical(SweepGradient.lerp(gradient, gradient, 0.5), gradient), true);
   });
 
   test('SweepGradient lerp test with stops', () {

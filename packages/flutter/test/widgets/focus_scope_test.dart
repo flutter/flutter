@@ -420,7 +420,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Adding a new FocusScope attaches the child it to its parent.', (WidgetTester tester) async {
+    testWidgets('Adding a new FocusScope attaches the child to its parent.', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope Node');
       final FocusScopeNode childFocusScope = FocusScopeNode(debugLabel: 'Child Scope Node');
@@ -540,24 +540,24 @@ void main() {
 
       await tester.pumpWidget(
         FocusScope.withExternalFocusNode(
-            focusScopeNode: topNode,
-            child: Column(
-              children: <Widget>[
-                FocusScope.withExternalFocusNode(
-                  focusScopeNode: parentNode,
-                  child: const SizedBox(),
+          focusScopeNode: topNode,
+          child: Column(
+            children: <Widget>[
+              FocusScope.withExternalFocusNode(
+                focusScopeNode: parentNode,
+                child: const SizedBox(),
+              ),
+              FocusScope.withExternalFocusNode(
+                focusScopeNode: childNode,
+                parentNode: parentNode,
+                child: const Focus(
+                  autofocus: true,
+                  child: SizedBox(),
                 ),
-                FocusScope.withExternalFocusNode(
-                  focusScopeNode: childNode,
-                  parentNode: parentNode,
-                  child: const Focus(
-                    autofocus: true,
-                    child: SizedBox(),
-                  ),
-                )
-              ],
-            ),
+              )
+            ],
           ),
+        ),
       );
       await tester.pump();
 
@@ -568,27 +568,27 @@ void main() {
       // Check that inserting a Focus in between doesn't reparent the child.
       await tester.pumpWidget(
         FocusScope.withExternalFocusNode(
-            focusScopeNode: topNode,
-            child: Column(
-              children: <Widget>[
-                FocusScope.withExternalFocusNode(
-                  focusScopeNode: parentNode,
-                  child: const SizedBox(),
-                ),
-                FocusScope.withExternalFocusNode(
-                  focusScopeNode: insertedNode,
-                  child: FocusScope.withExternalFocusNode(
-                    focusScopeNode: childNode,
-                    parentNode: parentNode,
-                    child: const Focus(
+          focusScopeNode: topNode,
+          child: Column(
+            children: <Widget>[
+              FocusScope.withExternalFocusNode(
+                focusScopeNode: parentNode,
+                child: const SizedBox(),
+              ),
+              FocusScope.withExternalFocusNode(
+                focusScopeNode: insertedNode,
+                child: FocusScope.withExternalFocusNode(
+                  focusScopeNode: childNode,
+                  parentNode: parentNode,
+                  child: const Focus(
                     autofocus: true,
                     child: SizedBox(),
                   ),
-                  ),
-                )
-              ],
-            ),
+                ),
+              )
+            ],
           ),
+        ),
       );
       await tester.pump();
 
@@ -1673,6 +1673,7 @@ void main() {
       await pumpTest(traverseScope1: true);
       expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1, scope2]));
     });
+
     testWidgets('descendantsAreFocusable works as expected.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -1750,19 +1751,18 @@ void main() {
       await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
 
     testWidgets('Focus updates the onKey handler when the widget updates', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback handleCallback = (FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleCallback(FocusNode node, RawKeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback ignoreCallback = (FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
+      }
+      KeyEventResult ignoreCallback(FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
       Focus focusWidget = Focus(
         onKey: ignoreCallback, // This one does nothing.
         focusNode: focusNode,
@@ -1807,13 +1807,11 @@ void main() {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback handleEventCallback = (FocusNode node, KeyEvent event) {
+      KeyEventResult handleEventCallback(FocusNode node, KeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback ignoreEventCallback = (FocusNode node, KeyEvent event) => KeyEventResult.ignored;
+      }
+      KeyEventResult ignoreEventCallback(FocusNode node, KeyEvent event) => KeyEventResult.ignored;
       Focus focusWidget = Focus(
         onKeyEvent: ignoreEventCallback, // This one does nothing.
         focusNode: focusNode,
@@ -1858,20 +1856,16 @@ void main() {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback handleCallback = (FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleCallback(FocusNode node, RawKeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback handleEventCallback = (FocusNode node, KeyEvent event) {
+      }
+      KeyEventResult handleEventCallback(FocusNode node, KeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
-      };
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyCallback ignoreCallback = (FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
-      // ignore: prefer_function_declarations_over_variables
-      final FocusOnKeyEventCallback ignoreEventCallback = (FocusNode node, KeyEvent event) => KeyEventResult.ignored;
+      }
+      KeyEventResult ignoreCallback(FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreEventCallback(FocusNode node, KeyEvent event) => KeyEventResult.ignored;
       focusNode.onKey = ignoreCallback;
       focusNode.onKeyEvent = ignoreEventCallback;
       focusNode.descendantsAreFocusable = false;
@@ -1974,6 +1968,7 @@ void main() {
       expect(containerNode.hasFocus, isFalse);
       expect(unfocusableNode.hasFocus, isFalse);
     });
+
     // Regression test for https://github.com/flutter/flutter/issues/61700
     testWidgets("ExcludeFocus doesn't transfer focus to another descendant.", (WidgetTester tester) async {
       final FocusNode parentFocusNode = FocusNode(debugLabel: 'group');
@@ -2049,6 +2044,7 @@ void main() {
       await tester.pumpWidget(ExcludeFocus(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
       expect(semantics, hasSemantics(expectedSemantics));
+      semantics.dispose();
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/92693

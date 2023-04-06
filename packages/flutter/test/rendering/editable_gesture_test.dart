@@ -21,9 +21,7 @@ void main() {
       textSelectionDelegate: delegate,
       text: const TextSpan(
         text: 'test',
-        style: TextStyle(
-          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
-        ),
+        style: TextStyle(height: 1.0, fontSize: 10.0),
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),

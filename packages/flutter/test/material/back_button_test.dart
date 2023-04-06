@@ -108,9 +108,9 @@ void main() {
     final Icon linuxIcon = tester.widget(find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)));
     final Icon macOSIcon = tester.widget(find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
     final Icon windowsIcon = tester.widget(find.descendant(of: find.byKey(windowsKey), matching: find.byType(Icon)));
-    expect(iOSIcon.icon == androidIcon.icon, isFalse);
+    expect(iOSIcon.icon == androidIcon.icon, kIsWeb ? isTrue : isFalse);
     expect(linuxIcon.icon == androidIcon.icon, isTrue);
-    expect(macOSIcon.icon == androidIcon.icon, isFalse);
+    expect(macOSIcon.icon == androidIcon.icon, kIsWeb ? isTrue : isFalse);
     expect(macOSIcon.icon == iOSIcon.icon, isTrue);
     expect(windowsIcon.icon == androidIcon.icon, isTrue);
   });
@@ -120,7 +120,7 @@ void main() {
       const MaterialApp(
         home: Material(
           child: BackButton(
-            color: Colors.blue,
+            color: Colors.red,
           ),
         ),
       ),
@@ -130,7 +130,51 @@ void main() {
       of: find.byType(BackButton),
       matching: find.byType(RichText),
     ));
-    expect(iconText.text.style!.color, Colors.blue);
+    expect(iconText.text.style!.color, Colors.red);
+  });
+
+  testWidgets('BackButton color with ButtonStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: BackButton(
+            style: ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(BackButton),
+      matching: find.byType(RichText),
+    ));
+    expect(iconText.text.style!.color, Colors.red);
+  });
+
+  testWidgets('BackButton.style.iconColor parameter overrides BackButton.color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: BackButton(
+            color: Colors.green,
+            style: ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(BackButton),
+      matching: find.byType(RichText),
+    ));
+
+    expect(iconText.text.style!.color, Colors.red);
   });
 
   testWidgets('BackButton semantics', (WidgetTester tester) async {
@@ -157,7 +201,6 @@ void main() {
     switch(defaultTargetPlatform) {
       case TargetPlatform.android:
         expectedLabel = 'Back';
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -201,7 +244,6 @@ void main() {
     switch(defaultTargetPlatform) {
       case TargetPlatform.android:
         expectedLabel = 'Close';
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -236,6 +278,50 @@ void main() {
       of: find.byType(CloseButton),
       matching: find.byType(RichText),
     ));
+    expect(iconText.text.style!.color, Colors.red);
+  });
+
+  testWidgets('CloseButton color with ButtonStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: CloseButton(
+            style: ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(CloseButton),
+      matching: find.byType(RichText),
+    ));
+    expect(iconText.text.style!.color, Colors.red);
+  });
+
+  testWidgets('CloseButton.style.iconColor parameter overrides CloseButton.color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Material(
+          child: CloseButton(
+            color: Colors.green,
+            style: ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(CloseButton),
+      matching: find.byType(RichText),
+    ));
+
     expect(iconText.text.style!.color, Colors.red);
   });
 

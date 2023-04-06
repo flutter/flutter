@@ -32,7 +32,7 @@ class FlutterManifest {
     required FileSystem fileSystem,
     required Logger logger,
   }) {
-    if (path == null || !fileSystem.isFileSync(path)) {
+    if (!fileSystem.isFileSync(path)) {
       return _createFromYaml(null, logger);
     }
     final String manifest = fileSystem.file(path).readAsStringSync();
@@ -42,7 +42,7 @@ class FlutterManifest {
   /// Returns null on missing or invalid manifest.
   @visibleForTesting
   static FlutterManifest? createFromString(String manifest, { required Logger logger }) {
-    return _createFromYaml(manifest != null ? loadYaml(manifest) : null, logger);
+    return _createFromYaml(loadYaml(manifest), logger);
   }
 
   static FlutterManifest? _createFromYaml(Object? yamlDocument, Logger logger) {
@@ -237,7 +237,7 @@ class FlutterManifest {
         assetsUri = const <Uri>[];
       } else {
         for (final Object? asset in assets) {
-          if (asset is! String || asset == null || asset == '') {
+          if (asset is! String || asset == '') {
             _logger.printError('Deferred component asset manifest contains a null or empty uri.');
             continue;
           }
@@ -319,7 +319,7 @@ class FlutterManifest {
     }
     final List<Uri> results = <Uri>[];
     for (final Object? asset in assets) {
-      if (asset is! String || asset == null || asset == '') {
+      if (asset is! String || asset == '') {
         _logger.printError('Asset manifest contains a null or empty uri.');
         continue;
       }
@@ -387,7 +387,7 @@ class FlutterManifest {
     }
     final List<Uri> results = <Uri>[];
     for (final Object? item in items) {
-      if (item is! String || item == null || item == '') {
+      if (item is! String || item == '') {
         _logger.printError('$singularName manifest contains a null or empty uri.');
         continue;
       }
@@ -422,9 +422,7 @@ class FlutterManifest {
 
 class Font {
   Font(this.familyName, this.fontAssets)
-    : assert(familyName != null),
-      assert(fontAssets != null),
-      assert(fontAssets.isNotEmpty);
+    : assert(fontAssets.isNotEmpty);
 
   final String familyName;
   final List<FontAsset> fontAssets;
@@ -441,8 +439,7 @@ class Font {
 }
 
 class FontAsset {
-  FontAsset(this.assetUri, {this.weight, this.style})
-    : assert(assetUri != null);
+  FontAsset(this.assetUri, {this.weight, this.style});
 
   final Uri assetUri;
   final int? weight;
@@ -482,7 +479,6 @@ bool _validate(Object? manifest, Logger logger) {
           if (kvp.value is! String) {
             errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
           }
-          break;
         case 'flutter':
           if (kvp.value == null) {
             continue;
@@ -492,7 +488,6 @@ bool _validate(Object? manifest, Logger logger) {
           } else {
             _validateFlutter(kvp.value as YamlMap?, errors);
           }
-          break;
         default:
         // additionalProperties are allowed.
           break;
@@ -510,7 +505,7 @@ bool _validate(Object? manifest, Logger logger) {
 }
 
 void _validateFlutter(YamlMap? yaml, List<String> errors) {
-  if (yaml == null || yaml.entries == null) {
+  if (yaml == null) {
     return;
   }
   for (final MapEntry<Object?, Object?> kvp in yaml.entries) {
@@ -525,7 +520,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         if (yamlValue is! bool) {
           errors.add('Expected "$yamlKey" to be a bool, but got $yamlValue (${yamlValue.runtimeType}).');
         }
-        break;
       case 'assets':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -536,7 +530,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
             'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
           );
         }
-        break;
       case 'shaders':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -547,7 +540,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
             'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
           );
         }
-        break;
       case 'models':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -558,7 +550,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
             'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
           );
         }
-        break;
       case 'fonts':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -571,7 +562,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         } else {
           _validateFonts(yamlValue, errors);
         }
-        break;
       case 'licenses':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list of files, but got $yamlValue (${yamlValue.runtimeType})');
@@ -584,7 +574,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         } else {
           _validateListType<String>(yamlValue, errors, '"$yamlKey"', 'files');
         }
-        break;
       case 'module':
         if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -600,20 +589,17 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         if (yamlValue['iosBundleIdentifier'] != null && yamlValue['iosBundleIdentifier'] is! String) {
           errors.add('The "iosBundleIdentifier" section must be a string if set.');
         }
-        break;
       case 'plugin':
-        if (yamlValue is! YamlMap || yamlValue == null) {
+        if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
           break;
         }
         final List<String> pluginErrors = Plugin.validatePluginYaml(yamlValue);
         errors.addAll(pluginErrors);
-        break;
       case 'generate':
         break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
-        break;
       default:
         errors.add('Unexpected child "$yamlKey" found under "flutter".');
         break;
@@ -666,9 +652,6 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
 }
 
 void _validateFonts(YamlList fonts, List<String> errors) {
-  if (fonts == null) {
-    return;
-  }
   const Set<int> fontWeights = <int>{
     100, 200, 300, 400, 500, 600, 700, 800, 900,
   };
@@ -704,17 +687,14 @@ void _validateFonts(YamlList fonts, List<String> errors) {
             if (kvp.value is! String) {
               errors.add('Expected font asset ${kvp.value} ((${kvp.value.runtimeType})) to be a string.');
             }
-            break;
           case 'weight':
             if (!fontWeights.contains(kvp.value)) {
               errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> weight.');
             }
-            break;
           case 'style':
             if (kvp.value != 'normal' && kvp.value != 'italic') {
               errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> style.');
             }
-            break;
           default:
             errors.add('Unexpected key $fontKey ((${kvp.value.runtimeType})) under font.');
             break;

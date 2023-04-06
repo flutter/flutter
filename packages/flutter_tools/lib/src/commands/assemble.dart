@@ -138,9 +138,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = FlutterProject.current();
-    if (flutterProject == null) {
-      return const CustomDimensions();
-    }
     try {
       return CustomDimensions(
         commandBuildBundleTargetPlatform: environment.defines[kTargetPlatform],
@@ -212,7 +209,7 @@ class AssembleCommand extends FlutterCommand {
   /// The environmental configuration for a build invocation.
   Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
-    String? output = stringArgDeprecated('output');
+    String? output = stringArg('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
@@ -261,24 +258,8 @@ class AssembleCommand extends FlutterCommand {
       results[kExtraGenSnapshotOptions] = (argumentResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
     }
 
-    List<String> dartDefines = <String>[];
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefinesOption)) {
-      dartDefines = argumentResults[FlutterOptions.kDartDefinesOption] as List<String>;
-    }
-    if (argumentResults.wasParsed(FlutterOptions.kDartDefineFromFileOption)) {
-      final String? configJsonPath = stringArg(FlutterOptions.kDartDefineFromFileOption);
-      if (configJsonPath != null && globals.fs.isFileSync(configJsonPath)) {
-        final String configJsonRaw = globals.fs.file(configJsonPath).readAsStringSync();
-        try {
-          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, dynamic value) {
-            dartDefines.add('$key=$value');
-          });
-        } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions.kDartDefineFromFileOption}=$configJsonPath" format err, '
-              'please fix first! format err:\n$err');
-        }
-      }
-    }
+    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
     if(dartDefines.isNotEmpty){
       results[kDartDefines] = dartDefines.join(',');
     }
@@ -336,7 +317,7 @@ class AssembleCommand extends FlutterCommand {
       environment,
       buildSystemConfig: BuildSystemConfig(
         resourcePoolSize: argumentResults.wasParsed('resource-pool-size')
-          ? int.tryParse(stringArgDeprecated('resource-pool-size')!)
+          ? int.tryParse(stringArg('resource-pool-size')!)
           : null,
         ),
       );
@@ -353,17 +334,17 @@ class AssembleCommand extends FlutterCommand {
     globals.printTrace('build succeeded.');
 
     if (argumentResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, stringArgDeprecated('build-inputs')!);
+      writeListIfChanged(result.inputFiles, stringArg('build-inputs')!);
     }
     if (argumentResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, stringArgDeprecated('build-outputs')!);
+      writeListIfChanged(result.outputFiles, stringArg('build-outputs')!);
     }
     if (argumentResults.wasParsed('performance-measurement-file')) {
       final File outFile = globals.fs.file(argumentResults['performance-measurement-file']);
       writePerformanceData(result.performance.values, outFile);
     }
     if (argumentResults.wasParsed('depfile')) {
-      final File depfileFile = globals.fs.file(stringArgDeprecated('depfile'));
+      final File depfileFile = globals.fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
