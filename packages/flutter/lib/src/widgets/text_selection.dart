@@ -2624,7 +2624,7 @@ class TextSelectionGestureDetectorBuilder {
   ///    this callback./lib/src/material/text_field.dart
   @protected
   void onDragSelectionUpdate(TapDragUpdateDetails details) {
-    if (!delegate.selectionEnabled) {
+    if (!delegate.selectionEnabled || !renderEditable.hasFocus) {
       return;
     }
 
