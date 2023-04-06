@@ -126,6 +126,7 @@ class FlutterOptions {
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
+  static const String kWebWasmFlag = 'wasm';
 }
 
 /// flutter command categories for usage.
