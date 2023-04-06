@@ -794,10 +794,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   /// The frequency at which the [onDragUpdate] callback is called.
   ///
   /// The value defaults to null, meaning there is no delay for [onDragUpdate] callback.
-  ///
-  /// See also:
-  ///   * [TextSelectionGestureDetector], which uses this parameter to avoid excessive updates
-  ///     text layouts in text fields.
   Duration? dragUpdateThrottleFrequency;
 
   /// An upper bound for the amount of taps that can belong to one tap series.
