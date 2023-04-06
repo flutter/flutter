@@ -321,7 +321,7 @@ class CheckboxListTile extends StatelessWidget {
   /// If null, then the value of [activeColor] with alpha [kRadialReactionAlpha]
   /// and [hoverColor] is used in the pressed and hovered state. If that is also null,
   /// the value of [CheckboxThemeData.overlayColor] is used. If that is also null,
-  /// then the the default value is used in the pressed and hovered state.
+  /// then the default value is used in the pressed and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.checkbox.splashRadius}
