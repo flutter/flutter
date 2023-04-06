@@ -692,7 +692,7 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
     globals.printBox(
       "${globals.logger.terminal.warningMark} Your project's Gradle version "
       'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
-      'To fix this issue, consult the migration guide at docs.flutter.dev/go/android-android-gradle-error.',
+      'To fix this issue, consult the migration guide at docs.flutter.dev/go/android-java-gradle-error.',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
