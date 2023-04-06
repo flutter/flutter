@@ -87,7 +87,7 @@ static bool CopyToBitmap(SkBitmap* dst,
 sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
     fml::WeakPtr<GrDirectContext> resourceContext,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
-    std::shared_ptr<impeller::Context> impeller_context_,
+    const std::shared_ptr<impeller::Context>& impeller_context,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue) {
   SkBitmap bitmap = SkBitmap();
   SkImageInfo info = generator_->GetInfo().makeColorType(kN32_SkColorType);
@@ -145,16 +145,11 @@ sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
 
 #if IMPELLER_SUPPORTS_RENDERING
   if (is_impeller_enabled_) {
-    sk_sp<DlImage> result;
-    // impeller, transfer to DlImageImpeller
-    gpu_disable_sync_switch->Execute(fml::SyncSwitch::Handlers().SetIfFalse(
-        [&result, &bitmap, &impeller_context_] {
-          result = ImageDecoderImpeller::UploadTextureToShared(
-              impeller_context_, std::make_shared<SkBitmap>(bitmap),
-              /*create_mips=*/false);
-        }));
-
-    return result;
+    // This is safe regardless of whether the GPU is available or not because
+    // without mipmap creation there is no command buffer encoding done.
+    return ImageDecoderImpeller::UploadTextureToShared(
+        impeller_context, std::make_shared<SkBitmap>(bitmap),
+        /*create_mips=*/false);
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
@@ -191,12 +186,12 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
     size_t trace_id,
-    std::shared_ptr<impeller::Context> impeller_context) {
+    const std::shared_ptr<impeller::Context>& impeller_context) {
   fml::RefPtr<CanvasImage> image = nullptr;
   int duration = 0;
   sk_sp<DlImage> dlImage =
       GetNextFrameImage(std::move(resourceContext), gpu_disable_sync_switch,
-                        std::move(impeller_context), std::move(unref_queue));
+                        impeller_context, std::move(unref_queue));
   if (dlImage) {
     image = CanvasImage::Create();
     image->set_image(dlImage);

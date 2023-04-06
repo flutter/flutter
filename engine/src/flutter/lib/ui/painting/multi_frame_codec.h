@@ -59,7 +59,7 @@ class MultiFrameCodec : public Codec {
     sk_sp<DlImage> GetNextFrameImage(
         fml::WeakPtr<GrDirectContext> resourceContext,
         const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
-        std::shared_ptr<impeller::Context> impeller_context_,
+        const std::shared_ptr<impeller::Context>& impeller_context,
         fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue);
 
     void GetNextFrameAndInvokeCallback(
@@ -69,7 +69,7 @@ class MultiFrameCodec : public Codec {
         fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
         const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
         size_t trace_id,
-        std::shared_ptr<impeller::Context> impeller_context_);
+        const std::shared_ptr<impeller::Context>& impeller_context);
   };
 
   // Shared across the UI and IO task runners.
