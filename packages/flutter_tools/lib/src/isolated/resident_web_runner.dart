@@ -316,6 +316,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         } else {
           final WebBuilder webBuilder = WebBuilder(
             logger: _logger,
+            processManager: globals.processManager,
             buildSystem: globals.buildSystem,
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
@@ -323,13 +324,13 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           );
           await webBuilder.buildWeb(
             flutterProject,
-            target,
-            debuggingOptions.buildInfo,
-            false,
-            kNoneWorker,
-            true,
-            debuggingOptions.nativeNullAssertions,
-            false,
+            target: target,
+            buildInfo: debuggingOptions.buildInfo,
+            csp: false,
+            serviceWorkerStrategy: kNoneWorker,
+            sourceMaps: true,
+            nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+            isWasm: false,
           );
         }
         await device!.device!.startApp(
@@ -396,6 +397,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       try {
         final WebBuilder webBuilder = WebBuilder(
           logger: _logger,
+          processManager: globals.processManager,
           buildSystem: globals.buildSystem,
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
@@ -403,13 +405,13 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         );
         await webBuilder.buildWeb(
           flutterProject,
-          target,
-          debuggingOptions.buildInfo,
-          false,
-          kNoneWorker,
-          true,
-          debuggingOptions.nativeNullAssertions,
-          false,
+          target: target,
+          buildInfo: debuggingOptions.buildInfo,
+          csp: false,
+          serviceWorkerStrategy: kNoneWorker,
+          sourceMaps: true,
+          nativeNullAssertions:debuggingOptions.nativeNullAssertions,
+          isWasm: false,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

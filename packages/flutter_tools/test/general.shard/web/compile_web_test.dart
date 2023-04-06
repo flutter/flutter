@@ -63,6 +63,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,
@@ -70,13 +71,13 @@ void main() {
     );
     await webBuilder.buildWeb(
       flutterProject,
-      'target',
-      BuildInfo.debug,
-      true,
-      'serviceWorkerStrategy',
-      true,
-      true,
-      true,
+      target: 'target',
+      buildInfo: BuildInfo.debug,
+      csp: true,
+      serviceWorkerStrategy: 'serviceWorkerStrategy',
+      sourceMaps: true,
+      nativeNullAssertions: true,
+      isWasm: true,
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -104,6 +105,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,
@@ -112,13 +114,13 @@ void main() {
     await expectLater(
         () async => webBuilder.buildWeb(
               flutterProject,
-              'target',
-              BuildInfo.debug,
-              true,
-              'serviceWorkerStrategy',
-              true,
-              true,
-              true,
+              target: 'target',
+              buildInfo: BuildInfo.debug,
+              csp: true,
+              serviceWorkerStrategy: 'serviceWorkerStrategy',
+              sourceMaps: true,
+              nativeNullAssertions: true,
+              isWasm: true,
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
 

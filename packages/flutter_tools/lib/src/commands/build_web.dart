@@ -171,6 +171,7 @@ class BuildWebCommand extends BuildSubCommand {
     displayNullSafetyMode(buildInfo);
     final WebBuilder webBuilder = WebBuilder(
       logger: globals.logger,
+      processManager: globals.processManager,
       buildSystem: globals.buildSystem,
       fileSystem: globals.fs,
       flutterVersion: globals.flutterVersion,
@@ -178,13 +179,13 @@ class BuildWebCommand extends BuildSubCommand {
     );
     await webBuilder.buildWeb(
       flutterProject,
-      target,
-      buildInfo,
-      boolArg('csp'),
-      stringArg('pwa-strategy')!,
-      boolArg('source-maps'),
-      boolArg('native-null-assertions'),
-      wasmRequested,
+      target: target,
+      buildInfo: buildInfo,
+      csp: boolArg('csp'),
+      serviceWorkerStrategy: stringArg('pwa-strategy')!,
+      sourceMaps: boolArg('source-maps'),
+      nativeNullAssertions: boolArg('native-null-assertions'),
+      isWasm: wasmRequested,
       baseHref: baseHref,
       dart2jsOptimization: stringArg('dart2js-optimization') ?? kDart2jsDefaultOptimizationLevel,
       outputDirectoryPath: outputDirectoryPath,
