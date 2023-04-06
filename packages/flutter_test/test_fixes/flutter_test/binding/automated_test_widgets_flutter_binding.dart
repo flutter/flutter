@@ -7,12 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final binding = AutomatedTestWidgetsFlutterBinding.ensureInitialized();
   binding.runTest(
-    () async {
-      expect(true, isTrue);
-    },
+    () async { },
     () { },
-    // This timeout will be removed and not replaced since there is no
-    // equivalent API at this layer.
+    // Changes made in https://github.com/flutter/flutter/pull/89952
     timeout: Duration(minutes: 30),
   );
 }

@@ -16,14 +16,14 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are for AnimationSheetBuilder from the flutter_test/animation_sheet library. *
+# * Fixes in this file are for AnimationSheetBuilder from the flutter_test/animation_sheet.dart file. *
 
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/83337
   # The related deprecation for `sheetSize` doesn't have a fix because there
   # isn't an alternative API, it's being removed completely.
-  - title: 'Use collate instead'
+  - title: 'Migrate to collate'
     date: 2023-03-29
     element:
       uris: [ 'flutter_test.dart' ]

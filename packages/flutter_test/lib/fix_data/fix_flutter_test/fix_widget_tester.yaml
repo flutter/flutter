@@ -16,12 +16,12 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are for the flutter_test/widget_tester library. *
+# * Fixes in this file are for the flutter_test/widget_tester.dart file. *
 
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/89952
-  - title: "Don't use initialTimeout"
+  - title: "Migrate to timeout"
     date: 2023-03-30
     element:
       uris: [ 'flutter_test.dart' ]

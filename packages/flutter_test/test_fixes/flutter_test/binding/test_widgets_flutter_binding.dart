@@ -8,7 +8,7 @@ import 'package:clock/src/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
-  TestWidgetsFlutterBinding binding = FakeTestWidgetsFlutterBinding();
+  TestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding.ensureInitialized();
   binding.runTest(
     () async {
       // This will be unchanged as there is no equivalent API.
@@ -16,7 +16,7 @@ void main() async {
 
       await binding.runAsync(
         () async {},
-        // The `additionalTime` parameter will be removed
+        // Changes made in https://github.com/flutter/flutter/pull/89952
         additionalTime: Duration(seconds: 25),
       );
     },
@@ -25,38 +25,4 @@ void main() async {
     // equivalent API at this layer.
     timeout: Duration(minutes: 30),
   );
-}
-
-class FakeTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
-  @override
-  Clock get clock => throw UnimplementedError();
-
-  @override
-  Timeout get defaultTestTimeout => throw UnimplementedError();
-
-  @override
-  Future<void> delayed(Duration duration) {
-    throw UnimplementedError();
-  }
-
-  @override
-  bool get inTest => throw UnimplementedError();
-
-  @override
-  int get microtaskCount => throw UnimplementedError();
-
-  @override
-  Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<T?> runAsync<T>(Future<T> Function() callback, {Duration additionalTime = const Duration(milliseconds: 1000)}) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> runTest(Future<void> Function() testBody, VoidCallback invariantTester, {String description = '', Duration? timeout}) {
-    throw UnimplementedError();
-  }
 }
