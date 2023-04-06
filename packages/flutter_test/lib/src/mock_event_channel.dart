@@ -20,12 +20,12 @@ abstract class MockStreamHandler {
   /// Create a new [MockStreamHandler].
   MockStreamHandler();
 
-  /// Create a new [InlineMockStreamHandler] with the given [onListen] and
+  /// Create a new inline [MockStreamHandler] with the given [onListen] and
   /// [onCancel] handlers.
   factory MockStreamHandler.inline({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
-  }) => InlineMockStreamHandler._(onListen: onListen, onCancel: onCancel);
+  }) => _InlineMockStreamHandler(onListen: onListen, onCancel: onCancel);
 
   /// Handler for the listen event.
   void onListen(Object? arguments, MockStreamHandlerEventSink events);
@@ -34,17 +34,14 @@ abstract class MockStreamHandler {
   void onCancel(Object? arguments);
 }
 
-/// Typedef for the [InlineMockStreamHandler.onListen] callback.
+/// Typedef for the inline onListen callback.
 typedef MockStreamHandlerOnListenCallback = void Function(Object? arguments, MockStreamHandlerEventSink events);
 
-/// Typedef for the [InlineMockStreamHandler.onCancel] callback.
+/// Typedef for the inline onCancel callback.
 typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
 
-/// Convenience class for creating a [MockStreamHandler] inline.
-///
-/// {@macro flutter.flutter_test.MockStreamHandler}
-class InlineMockStreamHandler extends MockStreamHandler {
-  InlineMockStreamHandler._({
+class _InlineMockStreamHandler extends MockStreamHandler {
+  _InlineMockStreamHandler({
     required MockStreamHandlerOnListenCallback onListen,
     MockStreamHandlerOnCancelCallback? onCancel,
   })  : _onListenInline = onListen,
