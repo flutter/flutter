@@ -38,19 +38,13 @@ void main() {
     final TestBuildSystem buildSystem =
         TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
-      expect(webServiceWorker.isWasm, isTrue);
+      expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
       expect(webServiceWorker.webRenderer, WebRendererMode.autoDetect);
 
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
-        'cspMode': 'true',
-        'SourceMaps': 'true',
-        'NativeNullAssertions': 'true',
         'ServiceWorkerStrategy': 'serviceWorkerStrategy',
-        'Dart2jsOptimization': 'O4',
-        'Dart2jsDumpInfo': 'false',
-        'Dart2jsNoFrequencyBasedMinification': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -72,11 +66,8 @@ void main() {
       flutterProject,
       'target',
       BuildInfo.debug,
-      true,
       'serviceWorkerStrategy',
-      true,
-      true,
-      true,
+      compilerConfig: const WasmCompilerConfig(),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -114,11 +105,8 @@ void main() {
               flutterProject,
               'target',
               BuildInfo.debug,
-              true,
               'serviceWorkerStrategy',
-              true,
-              true,
-              true,
+              compilerConfig: const JsCompilerConfig.run(nativeNullAssertions: true),
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
 
