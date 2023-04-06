@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 class TestDragData {
   const TestDragData(
@@ -552,6 +553,34 @@ void main() {
       expect(logs[0], isNotNull);
       expect(logs[1], isNotNull);
       expect(logs[1] != logs[0], isTrue);
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.tap appears in stack trace on error',
+    (WidgetTester tester) async {
+      // Regression test from https://github.com/flutter/flutter/pull/123946
+      await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: Text('target'))));
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text('target')), pointer: 1);
+      addTearDown(() => gesture.up());
+
+      Trace? stackTrace;
+      try {
+        await tester.tap(find.text('target'), pointer: 1);
+      } on Error catch (e) {
+        stackTrace = Trace.from(e.stackTrace!);
+      }
+      expect(stackTrace, isNotNull);
+
+      final int tapFrame = stackTrace!.frames.indexWhere(
+              (Frame frame) => frame.member == 'WidgetController.tap');
+      expect(tapFrame, greaterThanOrEqualTo(0));
+      expect(stackTrace.frames[tapFrame].package, 'flutter_test');
+      expect(stackTrace.frames[tapFrame+1].member, 'main.<fn>');
+      expect(stackTrace.frames[tapFrame+1].package, null);
     },
   );
 
