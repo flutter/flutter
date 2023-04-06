@@ -3177,7 +3177,12 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       } else if (offBottom(y)) {
         final double newY = anchorRect.top - childSize.height;
         if (!offTop(newY)) {
-          y = newY;
+          // Only move the menu up if its parent is horizontal (MenuAchor/MenuBar).
+          if (parentOrientation == Axis.horizontal) {
+            y = newY - alignmentOffset.dy;
+          } else {
+            y = newY;
+          }
         } else {
           y = allowedRect.bottom - childSize.height;
         }
