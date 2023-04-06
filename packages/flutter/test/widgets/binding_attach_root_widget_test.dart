@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('attachRootWidget will schedule a frame', () async {
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding();
+    final WidgetsFlutterBindingWithTestBinaryMessenger binding = WidgetsFlutterBindingWithTestBinaryMessenger();
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     // Framework starts with detached statue. Sends resumed signal to enable frame.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
@@ -20,4 +20,4 @@ void main() {
   });
 }
 
-class TestWidgetsFlutterBinding extends WidgetsFlutterBinding with TestDefaultBinaryMessengerBinding { }
+class WidgetsFlutterBindingWithTestBinaryMessenger extends WidgetsFlutterBinding with TestDefaultBinaryMessengerBinding { }
