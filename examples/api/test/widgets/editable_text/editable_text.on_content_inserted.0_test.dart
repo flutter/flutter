@@ -44,7 +44,7 @@ void main() {
     });
 
     try {
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
             (ByteData? _) {},
