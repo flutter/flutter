@@ -11,7 +11,7 @@ import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult;
+    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -98,14 +98,14 @@ class BuildWebCommand extends BuildSubCommand {
     if (featureFlags.isFlutterWebWasmEnabled) {
       argParser.addSeparator('Experimental options');
       argParser.addFlag(
-        'wasm',
-        help: 'Compile to WebAssembly rather than JavaScript.',
+        FlutterOptions.kWebWasmFlag,
+        help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
         negatable: false,
       );
     } else {
       // Add the flag as hidden. Will give a helpful error message in [runCommand] below.
       argParser.addFlag(
-        'wasm',
+        FlutterOptions.kWebWasmFlag,
         hide: true,
       );
     }
@@ -134,7 +134,7 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final bool wasmRequested = boolArg('wasm');
+    final bool wasmRequested = boolArg(FlutterOptions.kWebWasmFlag);
     if (wasmRequested && !featureFlags.isFlutterWebWasmEnabled) {
       throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
     }
