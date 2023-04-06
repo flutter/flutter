@@ -505,6 +505,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// then flushes microtasks.
   ///
   /// Set to null to use the default surface size.
+  ///
+  /// To avoid affecting other tests by leaking state, a test that
+  /// uses this method should always reset the surface size to the default.
+  /// For example, using `addTearDown`:
+  /// ```dart
+  ///   await binding.setSurfaceSize(someSize);
+  ///   addTearDown(() => binding.setSurfaceSize(null));
+  /// ```
+  ///
+  /// See also [TestFlutterView.physicalSize], which has a similar effect.
+  // TODO(pdblasi-google): Deprecate this. https://github.com/flutter/flutter/issues/123881
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
