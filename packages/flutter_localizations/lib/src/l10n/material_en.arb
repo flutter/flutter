@@ -456,12 +456,12 @@
 
   "expansionTileExpandedHint": "double tap to collapse'",
   "@expansionTileExpandedHint": {
-    "description": "The verb which describes the tap action on an expanded ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on an expanded ExpansionTile. In the case of US english, this would be 'Expanded double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+    "description": "The verb which describes the tap action on an expanded ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the collapsedHint string which describes the action to be performed on an expanded ExpansionTile. In the case of US english, this would be 'Expanded\n double tap to collapse.' The exact phrasing of the hint will vary based on locale"
   },
 
   "expansionTileCollapsedHint": "double tap to expand",
   "@expansionTileCollapsedHint": {
-    "description": "The verb which describes the tap action on a collapsed ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on a collapsed ExpansionTile. In the case of US english, this would be 'Collapsed double tap to expand.' The exact phrasing of the hint will vary based on locale"
+    "description": "The verb which describes the tap action on a collapsed ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on a collapsed ExpansionTile. In the case of US english, this would be 'Collapsed\n double tap to expand.' The exact phrasing of the hint will vary based on locale"
   },
 
   "expansionTileExpandedTapHint": "Collapse",

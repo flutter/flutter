@@ -69,8 +69,6 @@ void main() {
     expect(localizations.signedInLabel, isNotNull);
     expect(localizations.hideAccountsLabel, isNotNull);
     expect(localizations.showAccountsLabel, isNotNull);
-<<<<<<< Updated upstream
-=======
     expect(localizations.reorderItemToStart, isNotNull);
     expect(localizations.reorderItemToEnd, isNotNull);
     expect(localizations.reorderItemUp, isNotNull);
@@ -83,7 +81,6 @@ void main() {
     expect(localizations.expansionTileCollapsedHint, isNotNull);
     expect(localizations.expandedHint, isNotNull);
     expect(localizations.collapsedHint, isNotNull);
->>>>>>> Stashed changes
     expect(localizations.keyboardKeyAlt, isNotNull);
     expect(localizations.keyboardKeyAltGraph, isNotNull);
     expect(localizations.keyboardKeyBackspace, isNotNull);

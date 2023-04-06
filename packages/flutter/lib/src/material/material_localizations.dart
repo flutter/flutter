@@ -1198,7 +1198,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
-  String get expansionTileCollapsedHint => 'double tap to collapse';
+  String get expansionTileCollapsedHint => 'double tap to expand';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';

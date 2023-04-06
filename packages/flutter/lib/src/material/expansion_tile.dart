@@ -544,14 +544,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     super.dispose();
   }
 
-<<<<<<< Updated upstream
   void _toggleExpansion() {
-=======
-  void _handleTap() {
-    final TextDirection textDirection = Directionality.of(context);
+    final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String stateHint = _isExpanded ? localizations.expandedHint : localizations.collapsedHint;
->>>>>>> Stashed changes
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
@@ -625,9 +621,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         semanticsHint = _isExpanded
-          ? '${localizations.collapsedHint} ${localizations.expansionTileExpandedHint}'
-          : '${localizations.expandedHint} ${localizations.expansionTileCollapsedHint}';
-        break;
+          ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+          : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
