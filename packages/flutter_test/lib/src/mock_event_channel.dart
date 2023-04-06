@@ -9,13 +9,11 @@ import 'package:flutter/services.dart';
 /// A mock stream handler for an [EventChannel] that mimics the native
 /// StreamHandler API.
 ///
-/// {@template flutter.flutter_test.MockStreamHandler}
 /// The [onListen] callback is provided a [MockStreamHandlerEventSink] with
 /// the following API:
 /// - [MockStreamHandlerEventSink.success] sends a success event.
 /// - [MockStreamHandlerEventSink.error] sends an error event.
 /// - [MockStreamHandlerEventSink.endOfStream] sends an end of stream event.
-/// {@endtemplate}
 abstract class MockStreamHandler {
   /// Create a new [MockStreamHandler].
   MockStreamHandler();
