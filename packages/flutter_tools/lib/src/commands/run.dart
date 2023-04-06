@@ -38,6 +38,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDartDefineOption();
     usesFlavorOption();
     usesWebRendererOption();
+    usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     usesApplicationBinaryOption();
@@ -173,14 +174,18 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
     addServeObservatoryOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
+    addImpellerForceGLFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
 
@@ -194,8 +199,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get runningWithPrebuiltApplication => argResults![FlutterOptions.kUseApplicationBinary] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller => ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
+  bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
+  bool get impellerForceGL => boolArg('impeller-force-gl');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+
+  @override
+  bool get refreshWirelessDevices => true;
+
+  @override
+  bool get reportNullSafety => true;
 
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
@@ -229,6 +242,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
         enableImpeller: enableImpeller,
+        enableVulkanValidation: enableVulkanValidation,
+        impellerForceGL: impellerForceGL,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
@@ -274,8 +289,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
           && !runningWithPrebuiltApplication,
+        nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
+        enableVulkanValidation: enableVulkanValidation,
+        impellerForceGL: impellerForceGL,
         uninstallFirst: uninstallFirst,
         serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
@@ -480,6 +498,7 @@ class RunCommand extends RunCommandBase {
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
       commandRunEnableImpeller: enableImpeller.asBool,
       commandRunIOSInterfaceType: iOSInterfaceType,
+      commandRunIsTest: targetFile.endsWith('_test.dart'),
     );
   }
 

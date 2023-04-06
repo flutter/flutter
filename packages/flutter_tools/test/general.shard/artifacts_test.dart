@@ -145,13 +145,25 @@ void main() {
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         fileSystem.path.join('root', 'bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'frontend_server.dart.snapshot')
       );
-      expect(
-        artifacts.getArtifactPath(Artifact.canvasKitPath),
-        fileSystem.path.join('root', 'bin', 'cache', 'flutter_web_sdk', 'canvaskit'),
-      );
     });
 
     testWithoutContext('precompiled web artifact paths are correct', () {
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSdk).path,
+        'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js',
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledSdkSourcemaps).path,
+        'root/bin/cache/flutter_web_sdk/kernel/amd/dart_sdk.js.map',
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdk).path,
+        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledCanvaskitSdkSourcemaps).path,
+        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
+      );
       expect(
         artifacts.getHostArtifact(HostArtifact.webPrecompiledSoundSdk).path,
         'root/bin/cache/flutter_web_sdk/kernel/amd-sound/dart_sdk.js',
@@ -329,10 +341,6 @@ void main() {
       expect(
         artifacts.getHostArtifact(HostArtifact.libtessellator).path,
         fileSystem.path.join('/out', 'host_debug_unopt', 'libtessellator.so'),
-      );
-      expect(
-        artifacts.getArtifactPath(Artifact.canvasKitPath, platform: TargetPlatform.web_javascript),
-        fileSystem.path.join('/out', 'wasm_release', 'canvaskit'),
       );
     });
 

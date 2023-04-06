@@ -762,15 +762,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     switch (_state) {
       case _ScaleState.possible:
         resolve(GestureDisposition.rejected);
-        break;
       case _ScaleState.ready:
         assert(false); // We should have not seen a pointer yet
-        break;
       case _ScaleState.accepted:
         break;
       case _ScaleState.started:
         assert(false); // We should be in the accepted state when user is done
-        break;
     }
     _state = _ScaleState.ready;
   }

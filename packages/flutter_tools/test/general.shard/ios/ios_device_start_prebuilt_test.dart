@@ -337,7 +337,7 @@ void main() {
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
-            '--dart-flags="--foo"',
+            '--dart-flags="--foo,--null_assertions"',
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -405,6 +405,7 @@ void main() {
         purgePersistentCache: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.disabled,
+        nullAssertions: true,
         enableEmbedderApi: true,
       ),
       platformArgs: <String, dynamic>{},
@@ -598,6 +599,7 @@ IOSDevice setUpIOSDevice({
     ),
     cpuArchitecture: DarwinArch.arm64,
     connectionInterface: interfaceType,
+    isConnected: true,
   );
 }
 

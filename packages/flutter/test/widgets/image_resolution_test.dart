@@ -43,25 +43,18 @@ class TestAssetBundle extends CachingAssetBundle {
     switch (key) {
       case 'AssetManifest.bin':
         data = manifest;
-        break;
       case 'assets/image.png':
         data = testByteData(1.0);
-        break;
       case 'assets/1.0x/image.png':
         data = testByteData(10.0); // see "...with a main asset and a 1.0x asset"
-        break;
       case 'assets/1.5x/image.png':
         data = testByteData(1.5);
-        break;
       case 'assets/2.0x/image.png':
         data = testByteData(2.0);
-        break;
       case 'assets/3.0x/image.png':
         data = testByteData(3.0);
-        break;
       case 'assets/4.0x/image.png':
         data = testByteData(4.0);
-        break;
     }
     return SynchronousFuture<ByteData>(data);
   }

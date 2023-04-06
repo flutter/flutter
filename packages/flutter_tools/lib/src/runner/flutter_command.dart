@@ -109,10 +109,13 @@ class FlutterOptions {
   static const String kDartDefineFromFileOption = 'dart-define-from-file';
   static const String kBundleSkSLPathOption = 'bundle-sksl-path';
   static const String kPerformanceMeasurementFile = 'performance-measurement-file';
+  static const String kNullSafety = 'sound-null-safety';
   static const String kDeviceUser = 'device-user';
   static const String kDeviceTimeout = 'device-timeout';
+  static const String kDeviceConnection = 'device-connection';
   static const String kAnalyzeSize = 'analyze-size';
   static const String kCodeSizeDirectory = 'code-size-directory';
+  static const String kNullAssertions = 'null-assertions';
   static const String kAndroidGradleDaemon = 'android-gradle-daemon';
   static const String kDeferredComponents = 'deferred-components';
   static const String kAndroidProjectArgs = 'android-project-arg';
@@ -122,6 +125,8 @@ class FlutterOptions {
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebRendererFlag = 'web-renderer';
+  static const String kWebResourcesCdnFlag = 'web-resources-cdn';
+  static const String kWebWasmFlag = 'wasm';
 }
 
 /// flutter command categories for usage.
@@ -205,6 +210,11 @@ abstract class FlutterCommand extends Command<void> {
   bool get shouldUpdateCache => true;
 
   bool get deprecated => false;
+
+  /// When the command runs and this is true, trigger an async process to
+  /// discover devices from discoverers that support wireless devices for an
+  /// extended amount of time and refresh the device cache with the results.
+  bool get refreshWirelessDevices => false;
 
   @override
   bool get hidden => deprecated;
@@ -470,7 +480,6 @@ abstract class FlutterCommand extends Command<void> {
   void addServeObservatoryOptions({required bool verboseHelp}) {
     argParser.addFlag('serve-observatory',
       hide: !verboseHelp,
-      defaultsTo: true,
       help: 'Serve the legacy Observatory developer tooling through the VM service.',
     );
   }
@@ -595,8 +604,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(ipv6Flag,
       negatable: false,
       help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
-            'forwards the host port to a device port. Not used when the '
-            '"--debug-port" flag is not set.',
+            'forwards the host port to a device port.',
       hide: !verboseHelp,
     );
     _usesIpv6Flag = true;
@@ -665,6 +673,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesWebResourcesCdnFlag() {
+    argParser.addFlag(
+      FlutterOptions.kWebResourcesCdnFlag,
+      defaultsTo: true,
+      help: 'Use Web static resources hosted on a CDN.',
+    );
+  }
+
   void usesDeviceUserOption() {
     argParser.addOption(FlutterOptions.kDeviceUser,
       help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
@@ -676,6 +692,19 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kDeviceTimeout,
       help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
       valueHelp: '10'
+    );
+  }
+
+  void usesDeviceConnectionOption() {
+    argParser.addOption(FlutterOptions.kDeviceConnection,
+      defaultsTo: 'both',
+      help: 'Discover devices based on connection type.',
+      allowed: <String>['attached', 'wireless', 'both'],
+      allowedHelp: <String, String>{
+        'both': 'Searches for both attached and wireless devices.',
+        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
+        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.'
+      },
     );
   }
 
@@ -692,6 +721,9 @@ abstract class FlutterCommand extends Command<void> {
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
+  /// Whether this command should report null safety analytics.
+  bool get reportNullSafety => false;
+
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false)
         && (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
@@ -704,9 +736,24 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }();
 
+  DeviceConnectionInterface? get deviceConnectionInterface  {
+    if ((argResults?.options.contains(FlutterOptions.kDeviceConnection) ?? false)
+        && (argResults?.wasParsed(FlutterOptions.kDeviceConnection) ?? false)) {
+      final String? connectionType = stringArg(FlutterOptions.kDeviceConnection);
+      if (connectionType == 'attached') {
+        return DeviceConnectionInterface.attached;
+      } else if (connectionType == 'wireless') {
+        return DeviceConnectionInterface.wireless;
+      }
+    }
+    return null;
+  }
+
   late final TargetDevices _targetDevices = TargetDevices(
+    platform: globals.platform,
     deviceManager: globals.deviceManager!,
     logger: globals.logger,
+    deviceConnectionInterface: deviceConnectionInterface,
   );
 
   void addBuildModeFlags({
@@ -797,6 +844,18 @@ abstract class FlutterCommand extends Command<void> {
       hide: !verboseHelp,
       help: 'This flag has no effect. Code shrinking is always enabled in release builds. '
             'To learn more, see: https://developer.android.com/studio/build/shrink-code'
+    );
+  }
+
+  void addNullSafetyModeOptions({ required bool hide }) {
+    argParser.addFlag(FlutterOptions.kNullSafety,
+      help: 'This flag is deprecated as only null-safe code is supported.',
+      defaultsTo: true,
+      hide: true,
+    );
+    argParser.addFlag(FlutterOptions.kNullAssertions,
+      help: 'This flag is deprecated as only null-safe code is supported.',
+      hide: true,
     );
   }
 
@@ -928,6 +987,7 @@ abstract class FlutterCommand extends Command<void> {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addDartObfuscationOption();
     addEnableExperimentation(hide: !verboseHelp);
+    addNullSafetyModeOptions(hide: !verboseHelp);
     addSplitDebugInfoOption();
     addTreeShakeIconsFlag();
     usesAnalyzeSizeFlag();
@@ -1027,6 +1087,25 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableVulkanValidationFlag({required bool verboseHelp}) {
+    argParser.addFlag('enable-vulkan-validation',
+        hide: !verboseHelp,
+        help: 'Enable vulkan validation on the Impeller rendering backend if '
+              'Vulkan is in use and the validation layers are available to the '
+              'application.',
+    );
+  }
+
+  void addImpellerForceGLFlag({required bool verboseHelp}) {
+    argParser.addFlag('impeller-force-gl',
+        hide: !verboseHelp,
+        help: 'On platforms that support OpenGL Rendering using Impeller, force '
+              'rendering using OpenGL over other APIs. If Impeller is not '
+              'enabled or the platform does not support OpenGL ES, this flag '
+              'does nothing.',
+    );
+  }
+
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
     argParser.addFlag('enable-embedder-api',
         hide: !verboseHelp,
@@ -1087,6 +1166,22 @@ abstract class FlutterCommand extends Command<void> {
       codeSizeDirectory = directory.path;
     }
 
+    NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
+    if (argParser.options.containsKey(FlutterOptions.kNullSafety)) {
+      final bool wasNullSafetyFlagParsed = argResults?.wasParsed(FlutterOptions.kNullSafety) ?? false;
+      // Extra frontend options are only provided if explicitly
+      // requested.
+      if (wasNullSafetyFlagParsed) {
+        if (boolArg(FlutterOptions.kNullSafety)) {
+          nullSafetyMode = NullSafetyMode.sound;
+          extraFrontEndOptions.add('--sound-null-safety');
+        } else {
+          nullSafetyMode = NullSafetyMode.unsound;
+          extraFrontEndOptions.add('--no-sound-null-safety');
+        }
+      }
+    }
+
     final bool dartObfuscation = argParser.options.containsKey(FlutterOptions.kDartObfuscationOption)
       && boolArg(FlutterOptions.kDartObfuscationOption);
 
@@ -1143,6 +1238,15 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines = updateDartDefines(dartDefines, webRenderer);
     }
 
+    if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
+      final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
+      if (boolArg(FlutterOptions.kWebResourcesCdnFlag) && !hasLocalWebSdk) {
+        if (!dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
+          dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
+        }
+      }
+    }
+
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
@@ -1170,6 +1274,7 @@ abstract class FlutterCommand extends Command<void> {
       performanceMeasurementFile: performanceMeasurementFile,
       dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
+      nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
       androidGradleDaemon: androidGradleDaemon,
       packageConfig: packageConfig,
@@ -1380,7 +1485,25 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+    if (argParser.options.containsKey(FlutterOptions.kNullSafety) &&
+        argResults![FlutterOptions.kNullSafety] == false &&
+        globals.nonNullSafeBuilds == NonNullSafeBuilds.notAllowed) {
+      throwToolExit('''
+Could not find an option named "no-${FlutterOptions.kNullSafety}".
+
+Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.
+''');
+    }
+
     globals.preRunValidator.validate();
+
+    if (refreshWirelessDevices) {
+      // Loading wireless devices takes longer so start it early.
+      _targetDevices.startExtendedWirelessDeviceDiscovery(
+        deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+      );
+    }
+
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
@@ -1429,6 +1552,9 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
       await project.regeneratePlatformSpecificTooling();
+      if (reportNullSafety) {
+        await _sendNullSafetyAnalyticsEvents(project);
+      }
     }
 
     setupApplicationPackages();
@@ -1440,6 +1566,16 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return runCommand();
+  }
+
+  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
+    final BuildInfo buildInfo = await getBuildInfo();
+    NullSafetyAnalysisEvent(
+      buildInfo.packageConfig,
+      buildInfo.nullSafetyMode,
+      project.manifest.appName,
+      globals.flutterUsage,
+    ).send();
   }
 
   /// The set of development artifacts required for this command.
@@ -1558,14 +1694,17 @@ abstract class FlutterCommand extends Command<void> {
 }
 
 /// A mixin which applies an implementation of [requiredArtifacts] that only
-/// downloads artifacts corresponding to an attached device.
+/// downloads artifacts corresponding to potentially connected devices.
 mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    // If there are no attached devices, use the default configuration.
-    // Otherwise, only add development artifacts which correspond to a
-    // connected device.
-    final List<Device> devices = await globals.deviceManager!.getDevices();
+    // If there are no devices, use the default configuration.
+    // Otherwise, only add development artifacts corresponding to
+    // potentially connected devices. We might not be able to determine if a
+    // device is connected yet, so include it in case it becomes connected.
+    final List<Device> devices = await globals.deviceManager!.getDevices(
+      filter: DeviceDiscoveryFilter(excludeDisconnected: false),
+    );
     if (devices.isEmpty) {
       return super.requiredArtifacts;
     }
@@ -1623,3 +1762,12 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
+
+/// Whether the tool should allow non-null safe builds.
+///
+/// The Dart SDK no longer supports non-null safe builds, so this value in the
+/// tool's context should always be [NonNullSafeBuilds.notAllowed].
+enum NonNullSafeBuilds {
+  allowed,
+  notAllowed,
+}

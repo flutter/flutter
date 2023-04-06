@@ -1059,7 +1059,6 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.bottom:
               final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: widths[x]));
               rowHeight = math.max(rowHeight, childSize.height);
-              break;
             case TableCellVerticalAlignment.fill:
               break;
           }
@@ -1093,7 +1092,6 @@ class RenderTable extends RenderBox {
         }
         _columnLefts = positions.reversed;
         _tableWidth = positions.first + widths.first;
-        break;
       case TextDirection.ltr:
         positions[0] = 0.0;
         for (int x = 1; x < columns; x += 1) {
@@ -1101,7 +1099,6 @@ class RenderTable extends RenderBox {
         }
         _columnLefts = positions;
         _tableWidth = positions.last + widths.last;
-        break;
     }
     _rowTops.clear();
     _baselineDistance = null;
@@ -1135,13 +1132,11 @@ class RenderTable extends RenderBox {
                 rowHeight = math.max(rowHeight, child.size.height);
                 childParentData.offset = Offset(positions[x], rowTop);
               }
-              break;
             case TableCellVerticalAlignment.top:
             case TableCellVerticalAlignment.middle:
             case TableCellVerticalAlignment.bottom:
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
               rowHeight = math.max(rowHeight, child.size.height);
-              break;
             case TableCellVerticalAlignment.fill:
               break;
           }
@@ -1161,20 +1156,15 @@ class RenderTable extends RenderBox {
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               childParentData.offset = Offset(positions[x], rowTop + beforeBaselineDistance - baselines[x]);
-              break;
             case TableCellVerticalAlignment.top:
               childParentData.offset = Offset(positions[x], rowTop);
-              break;
             case TableCellVerticalAlignment.middle:
               childParentData.offset = Offset(positions[x], rowTop + (rowHeight - child.size.height) / 2.0);
-              break;
             case TableCellVerticalAlignment.bottom:
               childParentData.offset = Offset(positions[x], rowTop + rowHeight - child.size.height);
-              break;
             case TableCellVerticalAlignment.fill:
               child.layout(BoxConstraints.tightFor(width: widths[x], height: rowHeight));
               childParentData.offset = Offset(positions[x], rowTop);
-              break;
           }
         }
       }

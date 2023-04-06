@@ -954,7 +954,6 @@ class PubspecYaml {
               endOfDirectDependencies = output.length;
             }
             endOfDevDependencies = output.length;
-            break;
           case Section.builders:
           case Section.dependencyOverrides:
           case Section.header:
@@ -964,7 +963,6 @@ class PubspecYaml {
             if (data.lockLine != null) {
               output.add(data.lockLine!);
             }
-            break;
         }
       } else {
         // Not a header, not a dependency, just pass that through unmodified.
@@ -1377,12 +1375,10 @@ class PubspecDependency extends PubspecLine {
       case DependencyKind.unknown:
       case DependencyKind.overridden:
         assert(kind != DependencyKind.unknown);
-        break;
       case DependencyKind.normal:
         if (!kManuallyPinnedDependencies.containsKey(name)) {
           dependencies.writeln('  $name: $versionToUse');
         }
-        break;
       case DependencyKind.path:
         if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
@@ -1392,7 +1388,6 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln('    path: $_lockTarget');
         }
-        break;
       case DependencyKind.sdk:
         if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
@@ -1402,7 +1397,6 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln('    sdk: $_lockTarget');
         }
-        break;
       case DependencyKind.git:
         if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
@@ -1412,7 +1406,6 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln(lockLine);
         }
-        break;
     }
   }
 

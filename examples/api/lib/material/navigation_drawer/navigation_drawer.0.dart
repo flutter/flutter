@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [NavigationDrawer] .
-
 // Builds an adaptive navigation widget layout. When the screen width is less than
 // 450, A [NavigationBar] will be displayed. Otherwise, a [NavigationRail] will be
 // displayed on the left side, and also a button to open the [NavigationDrawer].
 // All of these navigation widgets are built from an identical list of data.
 
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [NavigationDrawer].
 
 class ExampleDestination {
   const ExampleDestination(this.label, this.icon, this.selectedIcon);
@@ -29,7 +29,6 @@ const List<ExampleDestination> destinations = <ExampleDestination>[
 void main() {
   runApp(
     MaterialApp(
-      title: 'NavigationDrawer Example',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
       home: const NavigationDrawerExample(),
@@ -60,7 +59,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
     scaffoldKey.currentState!.openEndDrawer();
   }
 
-  Widget buildBottomBarScaffold(){
+  Widget buildBottomBarScaffold() {
     return Scaffold(
       body: Center(
         child: Column(
@@ -77,21 +76,21 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
             screenIndex = index;
           });
         },
-        destinations: destinations
-          .map((ExampleDestination destination) {
+        destinations: destinations.map(
+          (ExampleDestination destination) {
             return NavigationDestination(
               label: destination.label,
               icon: destination.icon,
               selectedIcon: destination.selectedIcon,
               tooltip: destination.label,
             );
-          })
-          .toList(),
+          },
+        ).toList(),
       ),
     );
   }
 
-  Widget buildDrawerScaffold(BuildContext context){
+  Widget buildDrawerScaffold(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
       body: SafeArea(
@@ -103,15 +102,15 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
               padding: const EdgeInsets.symmetric(horizontal: 5),
               child: NavigationRail(
                 minWidth: 50,
-                destinations: destinations
-                  .map((ExampleDestination destination) {
+                destinations: destinations.map(
+                  (ExampleDestination destination) {
                     return NavigationRailDestination(
                       label: Text(destination.label),
                       icon: destination.icon,
                       selectedIcon: destination.selectedIcon,
                     );
-                  })
-                  .toList(),
+                  },
+                ).toList(),
                 selectedIndex: screenIndex,
                 useIndicator: true,
                 onDestinationSelected: (int index) {
@@ -148,14 +147,15 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
               style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
-          ...destinations
-            .map((ExampleDestination destination) {
+          ...destinations.map(
+            (ExampleDestination destination) {
               return NavigationDrawerDestination(
                 label: Text(destination.label),
                 icon: destination.icon,
                 selectedIcon: destination.selectedIcon,
               );
-            }),
+            },
+          ),
           const Padding(
             padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
             child: Divider(),
@@ -168,7 +168,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    showNavigationDrawer =  MediaQuery.of(context).size.width >= 450;
+    showNavigationDrawer = MediaQuery.of(context).size.width >= 450;
   }
 
   @override

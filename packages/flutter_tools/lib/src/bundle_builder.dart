@@ -194,13 +194,11 @@ Future<void> writeBundle(
                 target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
-              break;
             case AssetKind.model:
               doCopy = !await sceneImporter.importScene(
                 input: input,
                 outputPath: file.path,
               );
-              break;
           }
           if (doCopy) {
             input.copySync(file.path);

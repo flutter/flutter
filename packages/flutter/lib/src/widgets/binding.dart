@@ -386,6 +386,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.debugDumpFocusTree.name,
+        callback: (Map<String, String> parameters) async {
+          final String data = focusManager.toStringDeep();
+          return <String, Object>{
+            'data': data,
+          };
+        },
+      );
+
       if (!kIsWeb) {
         registerBoolServiceExtension(
           name: WidgetsServiceExtensions.showPerformanceOverlay.name,
@@ -479,8 +489,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<void> _forceRebuild() {
-    if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!, null);
+    if (rootElement != null) {
+      buildOwner!.reassemble(rootElement!, null);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -889,8 +899,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
 
     try {
-      if (renderViewElement != null) {
-        buildOwner!.buildScope(renderViewElement!);
+      if (rootElement != null) {
+        buildOwner!.buildScope(rootElement!);
       }
       super.drawFrame();
       buildOwner!.finalizeTree();
@@ -914,12 +924,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
   }
 
-  /// The [Element] that is at the root of the hierarchy (and which wraps the
-  /// [RenderView] object at the root of the rendering hierarchy).
+  /// The [Element] that is at the root of the element tree hierarchy.
   ///
   /// This is initialized the first time [runApp] is called.
-  Element? get renderViewElement => _renderViewElement;
-  Element? _renderViewElement;
+  Element? get rootElement => _rootElement;
+  Element? _rootElement;
+
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// Use [rootElement] instead.
+  @Deprecated(
+    'Use rootElement instead. '
+    'This feature was deprecated after v3.9.0-16.0.pre.'
+  )
+  Element? get renderViewElement => rootElement;
 
   bool _readyToProduceFrames = false;
 
@@ -951,7 +969,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     });
   }
 
-  /// Takes a widget and attaches it to the [renderViewElement], creating it if
+  /// Takes a widget and attaches it to the [rootElement], creating it if
   /// necessary.
   ///
   /// This is called by [runApp] to configure the widget tree.
@@ -961,23 +979,23 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
   ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
-    final bool isBootstrapFrame = renderViewElement == null;
+    final bool isBootstrapFrame = rootElement == null;
     _readyToProduceFrames = true;
-    _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
+    _rootElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget,
-    ).attachToRenderTree(buildOwner!, renderViewElement as RenderObjectToWidgetElement<RenderBox>?);
+    ).attachToRenderTree(buildOwner!, rootElement as RenderObjectToWidgetElement<RenderBox>?);
     if (isBootstrapFrame) {
       SchedulerBinding.instance.ensureVisualUpdate();
     }
   }
 
-  /// Whether the [renderViewElement] has been initialized.
+  /// Whether the [rootElement] has been initialized.
   ///
   /// This will be false until [runApp] is called (or [WidgetTester.pumpWidget]
   /// is called in the context of a [TestWidgetsFlutterBinding]).
-  bool get isRootWidgetAttached => _renderViewElement != null;
+  bool get isRootWidgetAttached => _rootElement != null;
 
   @override
   Future<void> performReassemble() {
@@ -986,8 +1004,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       return true;
     }());
 
-    if (renderViewElement != null) {
-      buildOwner!.reassemble(renderViewElement!, BindingBase.debugReassembleConfig);
+    if (rootElement != null) {
+      buildOwner!.reassemble(rootElement!, BindingBase.debugReassembleConfig);
     }
     return super.performReassemble();
   }
@@ -1069,8 +1087,8 @@ String _debugDumpAppString() {
   const String mode = kDebugMode ? 'DEBUG MODE' : kReleaseMode ? 'RELEASE MODE' : 'PROFILE MODE';
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
-  if (WidgetsBinding.instance.renderViewElement != null) {
-    buffer.writeln(WidgetsBinding.instance.renderViewElement!.toStringDeep());
+  if (WidgetsBinding.instance.rootElement != null) {
+    buffer.writeln(WidgetsBinding.instance.rootElement!.toStringDeep());
   } else {
     buffer.writeln('<no tree currently mounted>');
   }
@@ -1148,7 +1166,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
-/// A [RootRenderObjectElement] that is hosted by a [RenderObject].
+/// The root of the element tree that is hosted by a [RenderObject].
 ///
 /// This element class is the instantiation of a [RenderObjectToWidgetAdapter]
 /// widget. It can be used only as the root of an [Element] tree (it cannot be
@@ -1158,7 +1176,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 /// whose container is the [RenderView] that connects to the Flutter engine. In
 /// this usage, it is normally instantiated by the bootstrapping logic in the
 /// [WidgetsFlutterBinding] singleton created by [runApp].
-class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObjectElement {
+class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectElement with RootElementMixin {
   /// Creates an element that is hosted by a [RenderObject].
   ///
   /// The [RenderObject] created by this element is not automatically set as a

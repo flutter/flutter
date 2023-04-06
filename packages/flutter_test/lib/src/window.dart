@@ -147,8 +147,6 @@ class FakeViewPadding implements ViewPadding {
 ///
 ///   * [TestFlutterView], which wraps a [FlutterView] for testing and
 ///     mocking purposes.
-///   * [TestWindow], which wraps a [SingletonFlutterWindow] for
-///     testing and mocking purposes.
 class TestPlatformDispatcher implements PlatformDispatcher {
   /// Constructs a [TestPlatformDispatcher] that defers all behavior to the given
   /// [PlatformDispatcher] unless explicitly overridden for test purposes.

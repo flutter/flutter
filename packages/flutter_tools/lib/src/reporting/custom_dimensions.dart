@@ -59,6 +59,8 @@ class CustomDimensions {
     this.commandPackagesAndroidEmbeddingVersion,
     this.nullSafety,
     this.fastReassemble,
+    this.nullSafeMigratedLibraries,
+    this.nullSafeTotalLibraries,
     this.hotEventCompileTimeInMs,
     this.hotEventFindInvalidatedTimeInMs,
     this.hotEventScannedSourcesCount,
@@ -66,6 +68,7 @@ class CustomDimensions {
     this.hotEventReloadVMTimeInMs,
     this.commandRunEnableImpeller,
     this.commandRunIOSInterfaceType,
+    this.commandRunIsTest,
   });
 
   final String? sessionHostOsDetails;  // cd1
@@ -116,8 +119,8 @@ class CustomDimensions {
   final String? commandPackagesAndroidEmbeddingVersion;  // cd46
   final bool? nullSafety;  // cd47
   final bool? fastReassemble;  // cd48
-  // final int? nullSafeMigratedLibraries;  // cd49 - deprecated
-  // final int? nullSafeTotalLibraries;  // cd50 - deprecated
+  final int? nullSafeMigratedLibraries;  // cd49
+  final int? nullSafeTotalLibraries;  // cd50
   final int? hotEventCompileTimeInMs;  // cd 51
   final int? hotEventFindInvalidatedTimeInMs;  // cd 52
   final int? hotEventScannedSourcesCount;  // cd 53
@@ -125,6 +128,7 @@ class CustomDimensions {
   final int? hotEventReloadVMTimeInMs;  // cd 55
   final bool? commandRunEnableImpeller;  // cd 56
   final String? commandRunIOSInterfaceType; // cd 57
+  final bool? commandRunIsTest; // cd 58
 
   /// Convert to a map that will be used to upload to the analytics backend.
   Map<String, String> toMap() => <String, String>{
@@ -176,6 +180,8 @@ class CustomDimensions {
       if (commandPackagesAndroidEmbeddingVersion != null) cdKey(CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion): commandPackagesAndroidEmbeddingVersion.toString(),
       if (nullSafety != null) cdKey(CustomDimensionsEnum.nullSafety): nullSafety.toString(),
       if (fastReassemble != null) cdKey(CustomDimensionsEnum.fastReassemble): fastReassemble.toString(),
+      if (nullSafeMigratedLibraries != null) cdKey(CustomDimensionsEnum.nullSafeMigratedLibraries): nullSafeMigratedLibraries.toString(),
+      if (nullSafeTotalLibraries != null) cdKey(CustomDimensionsEnum.nullSafeTotalLibraries): nullSafeTotalLibraries.toString(),
       if (hotEventCompileTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventCompileTimeInMs): hotEventCompileTimeInMs.toString(),
       if (hotEventFindInvalidatedTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventFindInvalidatedTimeInMs): hotEventFindInvalidatedTimeInMs.toString(),
       if (hotEventScannedSourcesCount != null) cdKey(CustomDimensionsEnum.hotEventScannedSourcesCount): hotEventScannedSourcesCount.toString(),
@@ -183,6 +189,7 @@ class CustomDimensions {
       if (hotEventReloadVMTimeInMs != null) cdKey(CustomDimensionsEnum.hotEventReloadVMTimeInMs): hotEventReloadVMTimeInMs.toString(),
       if (commandRunEnableImpeller != null) cdKey(CustomDimensionsEnum.commandRunEnableImpeller): commandRunEnableImpeller.toString(),
       if (commandRunIOSInterfaceType != null) cdKey(CustomDimensionsEnum.commandRunIOSInterfaceType): commandRunIOSInterfaceType.toString(),
+      if (commandRunIsTest != null) cdKey(CustomDimensionsEnum.commandRunIsTest): commandRunIsTest.toString(),
     };
 
   /// Merge the values of two [CustomDimensions] into one. If a value is defined
@@ -241,6 +248,8 @@ class CustomDimensions {
       commandPackagesAndroidEmbeddingVersion: other.commandPackagesAndroidEmbeddingVersion ?? commandPackagesAndroidEmbeddingVersion,
       nullSafety: other.nullSafety ?? nullSafety,
       fastReassemble: other.fastReassemble ?? fastReassemble,
+      nullSafeMigratedLibraries: other.nullSafeMigratedLibraries ?? nullSafeMigratedLibraries,
+      nullSafeTotalLibraries: other.nullSafeTotalLibraries ?? nullSafeTotalLibraries,
       hotEventCompileTimeInMs: other.hotEventCompileTimeInMs ?? hotEventCompileTimeInMs,
       hotEventFindInvalidatedTimeInMs: other.hotEventFindInvalidatedTimeInMs ?? hotEventFindInvalidatedTimeInMs,
       hotEventScannedSourcesCount: other.hotEventScannedSourcesCount ?? hotEventScannedSourcesCount,
@@ -248,6 +257,7 @@ class CustomDimensions {
       hotEventReloadVMTimeInMs: other.hotEventReloadVMTimeInMs ?? hotEventReloadVMTimeInMs,
       commandRunEnableImpeller: other.commandRunEnableImpeller ?? commandRunEnableImpeller,
       commandRunIOSInterfaceType: other.commandRunIOSInterfaceType ?? commandRunIOSInterfaceType,
+      commandRunIsTest: other.commandRunIsTest ?? commandRunIsTest,
     );
   }
 
@@ -300,6 +310,8 @@ class CustomDimensions {
       commandPackagesAndroidEmbeddingVersion: _extractString(map, CustomDimensionsEnum.commandPackagesAndroidEmbeddingVersion),
       nullSafety: _extractBool(map, CustomDimensionsEnum.nullSafety),
       fastReassemble: _extractBool(map, CustomDimensionsEnum.fastReassemble),
+      nullSafeMigratedLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeMigratedLibraries),
+      nullSafeTotalLibraries: _extractInt(map, CustomDimensionsEnum.nullSafeTotalLibraries),
       hotEventCompileTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventCompileTimeInMs),
       hotEventFindInvalidatedTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventFindInvalidatedTimeInMs),
       hotEventScannedSourcesCount: _extractInt(map, CustomDimensionsEnum.hotEventScannedSourcesCount),
@@ -307,6 +319,7 @@ class CustomDimensions {
       hotEventReloadVMTimeInMs: _extractInt(map, CustomDimensionsEnum.hotEventReloadVMTimeInMs),
       commandRunEnableImpeller: _extractBool(map, CustomDimensionsEnum.commandRunEnableImpeller),
       commandRunIOSInterfaceType: _extractString(map, CustomDimensionsEnum.commandRunIOSInterfaceType),
+      commandRunIsTest: _extractBool(map, CustomDimensionsEnum.commandRunIsTest),
     );
 
   static bool? _extractBool(Map<String, String> map, CustomDimensionsEnum field) =>
@@ -385,8 +398,8 @@ enum CustomDimensionsEnum {
   commandPackagesAndroidEmbeddingVersion,  // cd46
   nullSafety,  // cd47
   fastReassemble,  // cd48
-  nullSafeMigratedLibraries,  // cd49 - deprecated
-  nullSafeTotalLibraries,  // cd50 - deprecated
+  nullSafeMigratedLibraries,  // cd49
+  nullSafeTotalLibraries,  // cd50
   hotEventCompileTimeInMs,  // cd51
   hotEventFindInvalidatedTimeInMs,  // cd52
   hotEventScannedSourcesCount,  // cd53
@@ -394,6 +407,7 @@ enum CustomDimensionsEnum {
   hotEventReloadVMTimeInMs,  // cd55
   commandRunEnableImpeller,  // cd56
   commandRunIOSInterfaceType,  // cd57
+  commandRunIsTest, // cd58
 }
 
 String cdKey(CustomDimensionsEnum cd) => 'cd${cd.index + 1}';

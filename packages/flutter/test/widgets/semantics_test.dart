@@ -520,7 +520,8 @@ void main() {
       ),
     );
 
-    final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+    // ignore: deprecated_member_use
+    final Set<SemanticsAction> allActions = SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList.toSet()
       ..remove(SemanticsAction.moveCursorForwardByWord)
       ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
@@ -546,16 +547,13 @@ void main() {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
           semanticsOwner.performAction(expectedId, action, true);
-          break;
         case SemanticsAction.setSelection:
           semanticsOwner.performAction(expectedId, action, <dynamic, dynamic>{
             'base': 4,
             'extent': 5,
           });
-          break;
         case SemanticsAction.setText:
           semanticsOwner.performAction(expectedId, action, 'text');
-          break;
         case SemanticsAction.copy:
         case SemanticsAction.customAction:
         case SemanticsAction.cut:
@@ -575,7 +573,6 @@ void main() {
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
-          break;
       }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);
@@ -616,7 +613,8 @@ void main() {
           liveRegion: true,
         ),
     );
-    final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    // ignore: deprecated_member_use
+    final List<SemanticsFlag> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)

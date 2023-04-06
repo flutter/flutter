@@ -414,8 +414,8 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// The [build] method of a stateless widget is typically only called in three
 /// situations: the first time the widget is inserted in the tree, when the
-/// widget's parent changes its configuration, and when an [InheritedWidget] it
-/// depends on changes.
+/// widget's parent changes its configuration (see [Element.rebuild]), and when
+/// an [InheritedWidget] it depends on changes.
 ///
 /// If a widget's parent will regularly change the widget's configuration, or if
 /// it depends on inherited widgets that frequently change, then it is important
@@ -687,6 +687,9 @@ abstract class StatelessWidget extends Widget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=IOyq-eTRhvo}
 ///
+/// For more details on the mechanics of rebuilding a widget, see
+/// the discussion at [Element.rebuild].
+///
 /// {@tool snippet}
 ///
 /// This is a skeleton of a stateful widget subclass called `YellowBird`.
@@ -869,7 +872,8 @@ const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 ///    objects should override [didUpdateWidget] to respond to changes in their
 ///    associated widget (e.g., to start implicit animations). The framework
 ///    always calls [build] after calling [didUpdateWidget], which means any
-///    calls to [setState] in [didUpdateWidget] are redundant.
+///    calls to [setState] in [didUpdateWidget] are redundant. (See alse the
+///    discussion at [Element.rebuild].)
 ///  * During development, if a hot reload occurs (whether initiated from the
 ///    command line `flutter` tool by pressing `r`, or from an IDE), the
 ///    [reassemble] method is called. This provides an opportunity to
@@ -1028,6 +1032,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   /// Implementations of this method should start with a call to the inherited
   /// method, as in `super.didUpdateWidget(oldWidget)`.
+  ///
+  /// _See the discussion at [Element.rebuild] for more information on when this
+  /// method is called._
   @mustCallSuper
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
@@ -2492,7 +2499,7 @@ abstract class BuildContext {
 /// Additional build owners can be built to manage off-screen widget trees.
 ///
 /// To assign a build owner to a tree, use the
-/// [RootRenderObjectElement.assignOwner] method on the root element of the
+/// [RootElementMixin.assignOwner] method on the root element of the
 /// widget tree.
 ///
 /// {@tool dartpad}
@@ -4671,6 +4678,103 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// The method will only rebuild if [dirty] is true. To rebuild regardless
   /// of the [dirty] flag, set `force` to true. Forcing a rebuild is convenient
   /// from [update], during which [dirty] is false.
+  ///
+  /// ## When rebuilds happen
+  ///
+  /// ### Terminology
+  ///
+  /// [Widget]s represent the configuration of [Element]s. Each [Element] has a
+  /// widget, specified in [Element.widget]. The term "widget" is often used
+  /// when strictly speaking "element" would be more correct.
+  ///
+  /// While an [Element] has a current [Widget], over time, that widget may be
+  /// replaced by others. For example, the element backing a [ColoredBox] may
+  /// first have as its widget a [ColoredBox] whose [ColoredBox.color] is blue,
+  /// then later be given a new [ColoredBox] whose color is green.
+  ///
+  /// At any particular time, multiple [Element]s in the same tree may have the
+  /// same [Widget]. For example, the same [ColoredBox] with the green color may
+  /// be used in multiple places in the widget tree at the same time, each being
+  /// backed by a different [Element].
+  ///
+  /// ### Marking an element dirty
+  ///
+  /// An [Element] can be marked dirty between frames. This can happen for various
+  /// reasons, including the following:
+  ///
+  /// * The [State] of a [StatefulWidget] can cause its [Element] to be marked
+  ///   dirty by calling the [State.setState] method.
+  ///
+  /// * When an [InheritedWidget] changes, descendants that have previously
+  ///   subscribed to it will be marked dirty.
+  ///
+  /// * During a hot reload, every element is marked dirty (using [Element.reassemble]).
+  ///
+  /// ### Rebuilding
+  ///
+  /// Dirty elements are rebuilt during the next frame. Precisely how this is
+  /// done depends on the kind of element. A [StatelessElement] rebuilds by
+  /// using its widget's [StatelessWidget.build] method. A [StatefulElement]
+  /// rebuilds by using its widget's state's [State.build] method. A
+  /// [RenderObjectElement] rebuilds by updating its [RenderObject].
+  ///
+  /// In many cases, the end result of rebuilding is a single child widget
+  /// or (for [MultiChildRenderObjectElement]s) a list of children widgets.
+  ///
+  /// These child widgets are used to update the [widget] property of the
+  /// element's child (or children) elements. The new [Widget] is considered to
+  /// correspond to an existing [Element] if it has the same [Type] and [Key].
+  /// (In the case of [MultiChildRenderObjectElement]s, some effort is put into
+  /// tracking widgets even when they change order; see
+  /// [RenderObjectElement.updateChildren].)
+  ///
+  /// If there was no corresponding previous child, this results in a new
+  /// [Element] being created (using [Widget.createElement]); that element is
+  /// then itself built, recursively.
+  ///
+  /// If there was a child previously but the build did not provide a
+  /// corresponding child to update it, then the old child is discarded (or, in
+  /// cases involving [GlobalKey] reparenting, reused elsewhere in the element
+  /// tree).
+  ///
+  /// The most common case, however, is that there was a corresponding previous
+  /// child. This is handled by asking the child [Element] to update itself
+  /// using the new child [Widget]. In the case of [StatefulElement]s, this
+  /// is what triggers [State.didUpdateWidget].
+  ///
+  /// ### Not rebuilding
+  ///
+  /// Before an [Element] is told to update itself with a new [Widget], the old
+  /// and new objects are compared using `operator ==`.
+  ///
+  /// In general, this is equivalent to doing a comparison using [identical] to
+  /// see if the two objects are in fact the exact same instance. If they are,
+  /// and if the element is not already marked dirty for other reasons, then the
+  /// element skips updating itself as it can determine with certainty that
+  /// there would be no value in updating itself or its descendants.
+  ///
+  /// It is strongly advised to avoid overriding `operator ==` on [Widget]
+  /// objects. While doing so seems like it could improve performance, in
+  /// practice, for non-leaf widgets, it results in O(N²) behavior. This is
+  /// because by necessity the comparison would have to include comparing child
+  /// widgets, and if those child widgets also implement `operator ==`, it
+  /// ultimately results in a complete walk of the widget tree... which is then
+  /// repeated at each level of the tree. In practice, just rebuilding is
+  /// cheaper. (Additionally, if _any_ subclass of [Widget] used in an
+  /// application implements `operator ==`, then the compiler cannot inline the
+  /// comparison anywhere, because it has to treat the call as virtual just in
+  /// case the instance happens to be one that has an overriden operator.)
+  ///
+  /// Instead, the best way to avoid unnecessary rebuilds is to cache the
+  /// widgets that are returned from [State.build], so that each frame the same
+  /// widgets are used until such time as they change. Several mechanisms exist
+  /// to encourage this: `const` widgets, for example, are a form of automatic
+  /// caching (if a widget is constructed using the `const` keyword, the same
+  /// instance is returned each time it is constructed with the same arguments).
+  ///
+  /// Another example is the [AnimatedBuilder.child] property, which allows the
+  /// non-animating parts of a subtree to remain static even as the
+  /// [AnimatedBuilder.builder] callback recreates the other components.
   @pragma('vm:prefer-inline')
   void rebuild({bool force = false}) {
     assert(_lifecycleState != _ElementLifecycle.initial);
@@ -6186,30 +6290,7 @@ abstract class RenderObjectElement extends Element {
   /// [IndexedSlot] is a convenient value for the slot.
   /// {@endtemplate}
   @protected
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
-    assert(() {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('RenderObjectElement.insertChildRenderObject() is deprecated.'),
-        toDiagnosticsNode(
-          name: 'insertChildRenderObject() was called on this Element',
-          style: DiagnosticsTreeStyle.shallow,
-        ),
-        ErrorDescription(
-          'insertChildRenderObject() has been deprecated in favor of '
-          'insertRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-          'for details.',
-        ),
-        ErrorHint(
-          'Rather than overriding insertChildRenderObject() in your '
-          'RenderObjectElement subclass, override insertRenderObjectChild() instead, '
-          "and DON'T call super.insertRenderObjectChild(). If you're implementing a "
-          'new RenderObjectElement, you should override/implement '
-          'insertRenderObjectChild(), moveRenderObjectChild(), and '
-          'removeRenderObjectChild().',
-        ),
-      ]);
-    }());
-  }
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot);
 
   /// Move the given child from the given old slot to the given new slot.
   ///
@@ -6226,60 +6307,14 @@ abstract class RenderObjectElement extends Element {
   /// compared against each other for the purposes of updating one slot with the
   /// element from another slot) would never call this.
   @protected
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {
-    assert(() {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('RenderObjectElement.moveChildRenderObject() is deprecated.'),
-        toDiagnosticsNode(
-          name: 'super.moveChildRenderObject() was called on this Element',
-          style: DiagnosticsTreeStyle.shallow,
-        ),
-        ErrorDescription(
-          'moveChildRenderObject() has been deprecated in favor of '
-          'moveRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-          'for details.',
-        ),
-        ErrorHint(
-          'Rather than overriding moveChildRenderObject() in your '
-          'RenderObjectElement subclass, override moveRenderObjectChild() instead, '
-          "and DON'T call super.moveRenderObjectChild(). If you're implementing a "
-          'new RenderObjectElement, you should override/implement '
-          'insertRenderObjectChild(), moveRenderObjectChild(), and '
-          'removeRenderObjectChild().',
-        ),
-      ]);
-    }());
-  }
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot);
 
   /// Remove the given child from [renderObject].
   ///
   /// The given child is guaranteed to have been inserted at the given `slot`
   /// and have [renderObject] as its parent.
   @protected
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) {
-    assert(() {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('RenderObjectElement.removeChildRenderObject() is deprecated.'),
-        toDiagnosticsNode(
-          name: 'super.removeChildRenderObject() was called on this Element',
-          style: DiagnosticsTreeStyle.shallow,
-        ),
-        ErrorDescription(
-          'removeChildRenderObject() has been deprecated in favor of '
-          'removeRenderObjectChild(). See https://github.com/flutter/flutter/issues/63269 '
-          'for details.',
-        ),
-        ErrorHint(
-          'Rather than overriding removeChildRenderObject() in your '
-          'RenderObjectElement subclass, override removeRenderObjectChild() instead, '
-          "and DON'T call super.removeRenderObjectChild(). If you're implementing a "
-          'new RenderObjectElement, you should override/implement '
-          'insertRenderObjectChild(), moveRenderObjectChild(), and '
-          'removeRenderObjectChild().',
-        ),
-      ]);
-    }());
-  }
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -6288,14 +6323,29 @@ abstract class RenderObjectElement extends Element {
   }
 }
 
-/// The element at the root of the tree.
+/// Deprecated. Unused in the framework and will be removed in a future version
+/// of Flutter.
+///
+/// Classes that extend this class can extend [RenderObjectElement] and mixin
+/// [RootElementMixin] instead.
+@Deprecated(
+  'Use RootElementMixin instead. '
+  'This feature was deprecated after v3.9.0-16.0.pre.'
+)
+abstract class RootRenderObjectElement extends RenderObjectElement with RootElementMixin {
+  /// Initializes fields for subclasses.
+  @Deprecated(
+    'Use RootElementMixin instead. '
+    'This feature was deprecated after v3.9.0-16.0.pre.'
+  )
+  RootRenderObjectElement(super.widget);
+}
+
+/// Mixin for the element at the root of the tree.
 ///
 /// Only root elements may have their owner set explicitly. All other
 /// elements inherit their owner from their parent.
-abstract class RootRenderObjectElement extends RenderObjectElement {
-  /// Initializes fields for subclasses.
-  RootRenderObjectElement(super.widget);
-
+mixin RootElementMixin on Element {
   /// Set the owner of the element. The owner will be propagated to all the
   /// descendants of this element.
   ///

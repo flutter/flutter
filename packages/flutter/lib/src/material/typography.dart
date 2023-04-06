@@ -215,24 +215,19 @@ class Typography with Diagnosticable {
       case TargetPlatform.iOS:
         black ??= blackCupertino;
         white ??= whiteCupertino;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         black ??= blackMountainView;
         white ??= whiteMountainView;
-        break;
       case TargetPlatform.windows:
         black ??= blackRedmond;
         white ??= whiteRedmond;
-        break;
       case TargetPlatform.macOS:
         black ??= blackRedwoodCity;
         white ??= whiteRedwoodCity;
-        break;
       case TargetPlatform.linux:
         black ??= blackHelsinki;
         white ??= whiteHelsinki;
-        break;
       case null:
         break;
     }

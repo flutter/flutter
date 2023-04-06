@@ -355,11 +355,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       case AxisDirection.down:
       case AxisDirection.up:
         indicatorAtTopNow = true;
-        break;
       case AxisDirection.left:
       case AxisDirection.right:
         indicatorAtTopNow = null;
-        break;
     }
     if (indicatorAtTopNow != _isIndicatorAtTop) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
@@ -398,10 +396,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       switch (_mode) {
         case _RefreshIndicatorMode.armed:
           _show();
-          break;
         case _RefreshIndicatorMode.drag:
           _dismiss(_RefreshIndicatorMode.canceled);
-          break;
         case _RefreshIndicatorMode.canceled:
         case _RefreshIndicatorMode.done:
         case _RefreshIndicatorMode.refresh:
@@ -433,7 +429,6 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       case AxisDirection.down:
       case AxisDirection.up:
         _isIndicatorAtTop = true;
-        break;
       case AxisDirection.left:
       case AxisDirection.right:
         _isIndicatorAtTop = null;
@@ -471,10 +466,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     switch (_mode!) {
       case _RefreshIndicatorMode.done:
         await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
-        break;
       case _RefreshIndicatorMode.canceled:
         await _positionController.animateTo(0.0, duration: _kIndicatorScaleDuration);
-        break;
       case _RefreshIndicatorMode.armed:
       case _RefreshIndicatorMode.drag:
       case _RefreshIndicatorMode.refresh:

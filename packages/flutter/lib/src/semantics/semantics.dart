@@ -669,7 +669,8 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     final List<String> actionSummary = <String>[
-      for (final SemanticsAction action in SemanticsAction.values.values)
+      // ignore: deprecated_member_use
+      for (final SemanticsAction action in SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList)
         if ((actions & action.index) != 0)
           describeEnum(action),
     ];
@@ -680,7 +681,8 @@ class SemanticsData with Diagnosticable {
     properties.add(IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[
-      for (final SemanticsFlag flag in SemanticsFlag.values.values)
+      // ignore: deprecated_member_use
+      for (final SemanticsFlag flag in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList)
         if ((flags & flag.index) != 0)
           describeEnum(flag),
     ];
@@ -2755,7 +2757,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null));
-    final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
+    // ignore: deprecated_member_use
+    final List<String> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
@@ -2875,7 +2878,7 @@ class _BoxEdge implements Comparable<_BoxEdge> {
 /// nodes that share the same [SemanticsNode] parent.
 ///
 /// The [nodes] are sorted among each other separately from other nodes.
-class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
+class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
   _SemanticsSortGroup({
     required this.startOffset,
     required this.textDirection,
@@ -4741,10 +4744,8 @@ AttributedString _concatAttributedString({
     switch (otherTextDirection) {
       case TextDirection.rtl:
         otherAttributedString = AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF);
-        break;
       case TextDirection.ltr:
         otherAttributedString = AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF);
-        break;
     }
   }
   if (thisAttributedString.string.isEmpty) {
