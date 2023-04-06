@@ -29,6 +29,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    namespace "io.flutter.examples.hello_world"
     compileSdkVersion flutter.compileSdkVersion
 
     compileOptions {

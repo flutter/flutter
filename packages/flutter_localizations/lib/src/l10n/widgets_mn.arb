@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "Эхлэл рүү зөөх",
+  "reorderItemToEnd": "Төгсгөл рүү зөөх",
+  "reorderItemUp": "Дээш зөөх",
+  "reorderItemDown": "Доош зөөх",
+  "reorderItemLeft": "Зүүн тийш зөөх",
+  "reorderItemRight": "Баруун тийш зөөх"
+}

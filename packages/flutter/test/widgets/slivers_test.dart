@@ -1294,6 +1294,55 @@ void main() {
     expect(firstTapped, 0);
     expect(secondTapped, 1);
   });
+
+  testWidgets('SliverGridRegularTileLayout.computeMaxScrollOffset handles 0 children', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/59663
+    final ScrollController controller = ScrollController();
+
+    // SliverGridDelegateWithFixedCrossAxisCount
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverGrid.builder(
+              itemCount: 0,
+              itemBuilder: (_, __) => Container(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                mainAxisSpacing: 10,
+                childAspectRatio: 2.1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct scroll extent
+    expect(controller.position.maxScrollExtent, 0.0);
+
+    // SliverGridDelegateWithMaxCrossAxisExtent
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverGrid.builder(
+              itemCount: 0,
+              itemBuilder: (_, __) => Container(),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 30,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct scroll extent
+    expect(controller.position.maxScrollExtent, 0.0);
+  });
 }
 
 bool isRight(Offset a, Offset b) => b.dx > a.dx;

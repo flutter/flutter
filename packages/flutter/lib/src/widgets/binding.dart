@@ -386,6 +386,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.debugDumpFocusTree.name,
+        callback: (Map<String, String> parameters) async {
+          final String data = focusManager.toStringDeep();
+          return <String, Object>{
+            'data': data,
+          };
+        },
+      );
+
       if (!kIsWeb) {
         registerBoolServiceExtension(
           name: WidgetsServiceExtensions.showPerformanceOverlay.name,

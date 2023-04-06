@@ -257,7 +257,6 @@ void main() {
           "          '`path_provider_linux` threw an error: \$err. '\n"
           "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
-          '        rethrow;\n'
           '      }\n'
           '\n'
           '    } else if (Platform.isMacOS) {\n'
@@ -385,7 +384,6 @@ void main() {
           "          '`path_provider_linux` threw an error: \$err. '\n"
           "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
-          '        rethrow;\n'
           '      }\n'
           '\n'
           '    } else if (Platform.isMacOS) {\n'

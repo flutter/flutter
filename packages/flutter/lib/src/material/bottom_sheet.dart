@@ -1322,19 +1322,19 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  Color get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color get shadowColor => Colors.transparent;
+  Color? get shadowColor => Colors.transparent;
 
   @override
-  Color get dragHandleColor => Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4);
+  Color? get dragHandleColor => _colors.onSurfaceVariant.withOpacity(0.4);
 
   @override
-  Size get dragHandleSize => const Size(32, 4);
+  Size? get dragHandleSize => const Size(32, 4);
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet

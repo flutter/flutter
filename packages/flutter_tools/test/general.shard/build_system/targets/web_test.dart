@@ -330,7 +330,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args with csp', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kCspMode] = 'true';
+    environment.defines[JsCompilerConfig.kCspMode] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -479,14 +479,14 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args in release mode with native null assertions', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kNativeNullAssertions] = 'true';
+    environment.defines[JsCompilerConfig.kNativeNullAssertions] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '--invoker=flutter_tool',
-        '--native-null-assertions',
         '-Ddart.vm.product=true',
+        '--native-null-assertions',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -500,8 +500,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '--platform-binaries=bin/cache/flutter_web_sdk/kernel',
         '--invoker=flutter_tool',
-        '--native-null-assertions',
         '-Ddart.vm.product=true',
+        '--native-null-assertions',
         '--no-source-maps',
         '-O4',
         '-o',
@@ -517,7 +517,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kDart2jsOptimization] = 'O3';
+    environment.defines[JsCompilerConfig.kDart2jsOptimization] = 'O3';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -624,7 +624,7 @@ void main() {
 
   test('Dart2JSTarget can enable source maps', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kSourceMapsEnabled] = 'true';
+    environment.defines[JsCompilerConfig.kSourceMapsEnabled] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -700,7 +700,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args with dump-info', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDart2jsDumpInfo] = 'true';
+    environment.defines[JsCompilerConfig.kDart2jsDumpInfo] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -738,7 +738,7 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with expected args with no-frequency-based-minification', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDart2jsNoFrequencyBasedMinification] = 'true';
+    environment.defines[JsCompilerConfig.kDart2jsNoFrequencyBasedMinification] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
@@ -945,5 +945,27 @@ void main() {
     expect(environment.outputDir.childDirectory('canvaskit')
       .childFile('canvaskit.wasm')
       .existsSync(), true);
+  }));
+
+  test('wasm copies over canvaskit again if the web sdk changes', () => testbed.run(() async {
+    final File canvasKitInput = globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
+      ..createSync(recursive: true);
+    canvasKitInput.writeAsStringSync('foo', flush: true);
+
+    await WebBuiltInAssets(globals.fs, isWasm: true).build(environment);
+
+    final File canvasKitOutputBefore = environment.outputDir.childDirectory('canvaskit')
+      .childFile('canvaskit.wasm');
+    expect(canvasKitOutputBefore.existsSync(), true);
+    expect(canvasKitOutputBefore.readAsStringSync(), 'foo');
+
+    canvasKitInput.writeAsStringSync('bar', flush: true);
+
+    await WebBuiltInAssets(globals.fs, isWasm: true).build(environment);
+
+    final File canvasKitOutputAfter = environment.outputDir.childDirectory('canvaskit')
+      .childFile('canvaskit.wasm');
+    expect(canvasKitOutputAfter.existsSync(), true);
+    expect(canvasKitOutputAfter.readAsStringSync(), 'bar');
   }));
 }

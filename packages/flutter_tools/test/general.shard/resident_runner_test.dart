@@ -1455,6 +1455,7 @@ flutter:
           commandHelp.w,
           commandHelp.t,
           commandHelp.L,
+          commandHelp.f,
           commandHelp.S,
           commandHelp.U,
           commandHelp.i,

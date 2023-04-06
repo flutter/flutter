@@ -100,3 +100,8 @@ void test17() { }
   'This feature was deprecated after v2.1.0-11.0.pre.'
 )
 void test18() { }
+
+@Deprecated( // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/000000
+  'Missing the version line. '
+)
+void test19() { }

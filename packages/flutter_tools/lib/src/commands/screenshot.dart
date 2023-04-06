@@ -52,6 +52,7 @@ class ScreenshotCommand extends FlutterCommand {
       defaultsTo: _kDeviceType,
     );
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   final FileSystem fs;
@@ -64,6 +65,9 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   final String category = FlutterCommandCategory.tools;
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   @override
   final List<String> aliases = <String>['pic'];
