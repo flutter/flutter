@@ -93,6 +93,15 @@ public class FlutterViewTest {
   }
 
   @Test
+  public void flutterView_importantForAutofillDoesNotExcludeDescendants() {
+    FlutterView flutterView = new FlutterView(Robolectric.setupActivity(Activity.class));
+
+    // Value should not exclude descendants because platform views are added as child views and
+    // can be eligible for autofill (e.g. a WebView).
+    assertEquals(View.IMPORTANT_FOR_AUTOFILL_YES, flutterView.getImportantForAutofill());
+  }
+
+  @Test
   public void detachFromFlutterEngine_alertsPlatformViews() {
     FlutterView flutterView = new FlutterView(Robolectric.setupActivity(Activity.class));
     FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
