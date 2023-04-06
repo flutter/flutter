@@ -19,25 +19,23 @@ import '../semantics.dart' show EngineSemanticsOwner;
 /// It also takes into account semantics being enabled to fix the case where
 /// offsetX, offsetY == 0 (TalkBack events).
 ui.Offset computeEventOffsetToTarget(DomMouseEvent event, DomElement actualTarget) {
+  // On top of a platform view
+  if (event.target != actualTarget) {
+    return _computeOffsetOnPlatformView(event, actualTarget);
+  }
   // On a TalkBack event
   if (EngineSemanticsOwner.instance.semanticsEnabled && event.offsetX == 0 && event.offsetY == 0) {
     return _computeOffsetForTalkbackEvent(event, actualTarget);
-  }
-
-  final bool isTargetOutsideOfShadowDOM = event.target != actualTarget;
-  if (isTargetOutsideOfShadowDOM) {
-    return _computeOffsetRelativeToActualTarget(event, actualTarget);
   }
   // Return the offsetX/Y in the normal case.
   // (This works with 3D translations of the parent element.)
   return ui.Offset(event.offsetX, event.offsetY);
 }
 
-/// Computes the event offset when hovering over any nodes that don't exist in
-/// the shadowDOM such as platform views or text editing nodes.
+/// Computes the event offset when hovering over a platformView.
 ///
 /// This still uses offsetX/Y, but adds the offset from the top/left corner of the
-/// platform view to the Flutter View (`actualTarget`).
+/// platform view to the glass pane (`actualTarget`).
 ///
 ///  ×--FlutterView(actualTarget)--------------+
 ///  |\                                        |
@@ -59,7 +57,7 @@ ui.Offset computeEventOffsetToTarget(DomMouseEvent event, DomElement actualTarge
 ///
 /// Event offset relative to FlutterView = (offsetX + xP, offsetY + yP)
 // TODO(dit): Make this understand 3D transforms, https://github.com/flutter/flutter/issues/117091
-ui.Offset _computeOffsetRelativeToActualTarget(DomMouseEvent event, DomElement actualTarget) {
+ui.Offset _computeOffsetOnPlatformView(DomMouseEvent event, DomElement actualTarget) {
   final DomElement target = event.target! as DomElement;
   final DomRect targetRect = target.getBoundingClientRect();
   final DomRect actualTargetRect = actualTarget.getBoundingClientRect();
