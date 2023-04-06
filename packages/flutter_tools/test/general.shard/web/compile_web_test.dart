@@ -45,6 +45,7 @@ void main() {
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': 'serviceWorkerStrategy',
+        'WasmOmitTypeChecks': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
