@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
-import '../../commands.shard/hermetic/build_windows_test.dart' as windows;
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
@@ -211,10 +210,10 @@ void main() {
       );
     });
     testWithoutContext('getGradleFileName for notWindows', () {
-      expect(getGradlewFileName(windows.notWindowsPlatform), 'gradlew');
+      expect(getGradlewFileName(notWindowsPlatform), 'gradlew');
     });
     testWithoutContext('getGradleFileName for windows', () {
-      expect(getGradlewFileName(windows.windowsPlatform), 'gradlew.bat');
+      expect(getGradlewFileName(windowsPlatform), 'gradlew.bat');
     });
 
     testWithoutContext('returns the gradle wrapper version', () async {
