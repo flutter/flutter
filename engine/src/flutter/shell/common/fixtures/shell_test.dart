@@ -326,10 +326,10 @@ void onBeginFrameWithNotifyNativeMain() {
 }
 
 @pragma('vm:entry-point')
-void frameCallback(_Image, int) {
-  // It is used as the frame callback of 'MultiFrameCodec' in the test
-  // 'ItDoesNotCrashThatSkiaUnrefQueueDrainAfterIOManagerReset'.
-  // The test is a regression test and doesn't care about images, so it is empty.
+void frameCallback(Object? image, int durationMilliseconds) {
+  if (image == null) {
+    throw Exception('Expeccted image in frame callback to be non-null');
+  }
 }
 
 Picture CreateRedBox(Size size) {
