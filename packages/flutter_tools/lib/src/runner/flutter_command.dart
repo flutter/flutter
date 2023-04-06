@@ -97,7 +97,7 @@ class FlutterCommandResult {
 }
 
 /// Common flutter command line options.
-class FlutterOptions {
+abstract final class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
   static const String kEnableExperiment = 'enable-experiment';
