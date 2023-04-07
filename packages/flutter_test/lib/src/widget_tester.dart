@@ -9,6 +9,7 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
 // The test_api package is not for general use... it's literally for our use.
@@ -110,7 +111,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// the `test` package.
 ///
 /// If [trackMemoryLeaks] is set to `true`, the test will be run with memory leak detection.
-/// This feature is experimental and more documentation will be added in the future.
+/// This feature is experimental and more documentation will be added.
 ///
 /// See also:
 ///
@@ -171,7 +172,11 @@ void testWidgets(
             Object? memento;
             try {
               memento = await variant.setUp(value);
-              await callback(tester);
+              if (trackMemoryLeaks) {
+                _runWithLeakTracking(callback, tester);
+              } else {
+                await callback(tester);
+              }
             } finally {
               await variant.tearDown(value, memento);
             }
@@ -187,6 +192,11 @@ void testWidgets(
       tags: tags,
     );
   }
+}
+
+void _runWithLeakTracking(WidgetTesterCallback callback, WidgetTester tester){
+  asyncCodeRunner(DartAsyncCallback action) async => tester.runAsync(action);
+
 }
 
 /// An abstract base class for describing test environment variants.

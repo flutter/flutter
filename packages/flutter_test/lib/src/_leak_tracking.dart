@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+
+import 'test_async_utils.dart';
+import 'widget_tester.dart';
 
 typedef LeaksObtainer = void Function(Leaks foundLeaks);
 
@@ -17,16 +19,13 @@ typedef LeaksObtainer = void Function(Leaks foundLeaks);
 ///
 /// The Flutter related enhancements are:
 /// 1. Listens to [MemoryAllocations] events.
-/// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
-///
-/// If you use [testWidgets], pass [tester] to avoid async issues in leak processing.
-/// Pass null otherwise.
+/// 2. Uses `asyncCodeRunner` for async call for leak detection.
 ///
 /// Pass [leaksObtainer] if you want to get leak information before
 /// the method failure.
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
-  required WidgetTester? tester,
+  required AsyncCodeRunner asyncCodeRunner,
   StackTraceCollectionConfig stackTraceCollectionConfig =
       const StackTraceCollectionConfig(),
   Duration? timeoutForFinalGarbageCollection,
@@ -50,9 +49,6 @@ Future<void> withFlutterLeakTracking(
 
   return TestAsyncUtils.guard<void>(() async {
     MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
-    final AsyncCodeRunner asyncCodeRunner = tester == null
-        ? (DartAsyncCallback action) async => action()
-        : (DartAsyncCallback action) async => tester.runAsync(action);
     try {
       final Leaks leaks = await withLeakTracking(
         callback,
