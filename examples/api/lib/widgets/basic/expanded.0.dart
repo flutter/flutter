@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Expanded].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Expanded].
 
 void main() => runApp(const ExpandedApp());
 
@@ -19,7 +19,7 @@ class ExpandedApp extends StatelessWidget {
           title: const Text('Expanded Column Sample'),
         ),
         body: const ExpandedExample(),
-      )
+      ),
     );
   }
 }

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SearchAnchor.bar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [SearchAnchor.bar].
 
 void main() => runApp(const SearchBarApp());
 
@@ -20,32 +20,40 @@ class _SearchBarAppState extends State<SearchBarApp> {
   List<ColorLabel> searchHistory = <ColorLabel>[];
 
   Iterable<Widget> getHistoryList(SearchController controller) {
-    return searchHistory.map((ColorLabel color) => ListTile(
-      leading: const Icon(Icons.history),
-      title: Text(color.label),
-      trailing: IconButton(icon: const Icon(Icons.call_missed), onPressed: () {
-        controller.text = color.label;
-        controller.selection = TextSelection.collapsed(offset: controller.text.length);
-      }),
-    ));
+    return searchHistory.map(
+      (ColorLabel color) => ListTile(
+        leading: const Icon(Icons.history),
+        title: Text(color.label),
+        trailing: IconButton(
+          icon: const Icon(Icons.call_missed),
+          onPressed: () {
+            controller.text = color.label;
+            controller.selection = TextSelection.collapsed(offset: controller.text.length);
+          },
+        ),
+      ),
+    );
   }
 
   Iterable<Widget> getSuggestions(SearchController controller) {
     final String input = controller.value.text;
-    return ColorLabel.values.where((ColorLabel color) => color.label.contains(input))
-      .map((ColorLabel filteredColor) =>
-        ListTile(
-          leading: CircleAvatar(backgroundColor: filteredColor.color),
-          title: Text(filteredColor.label),
-          trailing: IconButton(icon: const Icon(Icons.call_missed), onPressed: () {
-            controller.text = filteredColor.label;
-            controller.selection = TextSelection.collapsed(offset: controller.text.length);
-          }),
-          onTap: () {
-            controller.closeView(filteredColor.label);
-            handleSelection(filteredColor);
-          },
-        ));
+    return ColorLabel.values.where((ColorLabel color) => color.label.contains(input)).map(
+          (ColorLabel filteredColor) => ListTile(
+            leading: CircleAvatar(backgroundColor: filteredColor.color),
+            title: Text(filteredColor.label),
+            trailing: IconButton(
+              icon: const Icon(Icons.call_missed),
+              onPressed: () {
+                controller.text = filteredColor.label;
+                controller.selection = TextSelection.collapsed(offset: controller.text.length);
+              },
+            ),
+            onTap: () {
+              controller.closeView(filteredColor.label);
+              handleSelection(filteredColor);
+            },
+          ),
+        );
   }
 
   void handleSelection(ColorLabel selectedColor) {
@@ -78,7 +86,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
                     if (searchHistory.isNotEmpty) {
                       return getHistoryList(controller);
                     }
-                    return <Widget>[ Center(child: Text('No search history.', style: TextStyle(color: colors.outline))) ];
+                    return <Widget>[Center(child: Text('No search history.', style: TextStyle(color: colors.outline)))];
                   }
                   return getSuggestions(controller);
                 },
@@ -98,7 +106,10 @@ class _SearchBarAppState extends State<SearchBarApp> {
   }
 }
 
-SizedBox cardSize = const SizedBox(width: 80, height: 30,);
+SizedBox cardSize = const SizedBox(
+  width: 80,
+  height: 30,
+);
 
 enum ColorLabel {
   red('red', Colors.red),
