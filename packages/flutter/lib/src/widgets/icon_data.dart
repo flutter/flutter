@@ -111,8 +111,10 @@ class _StaticIconProvider {
 /// of [IconData] appearing in the declaration of this class when tree-shaking
 /// unused code points from the bundled font.
 ///
-/// Classes with this annotation should only have static const declarations of
-/// the [IconData] class, such as:
+/// Classes with this annotation must have only "static const" members. The
+/// presence of any non-const [IconData] instances will preclude apps
+/// importing the declaration into their application from being able to use
+/// icon tree-shaking during release builds, resulting in larger font assets.
 ///
 /// ```dart
 /// @staticIconProvider
