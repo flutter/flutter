@@ -150,6 +150,8 @@ class GalleryTransitionTest {
         'test_driver/$testDriver.dart',
         '-d',
         deviceId,
+        '-v',
+        '--verbose-system-logs'
       ]);
     });
 
