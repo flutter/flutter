@@ -384,17 +384,25 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// The [globalPosition] contains the location of the selection start edge.
   const SelectionEdgeUpdateEvent.forStart({
     required this.globalPosition
-  }) : super._(SelectionEventType.startEdgeUpdate);
+  }) : mode = null, super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
   /// The [globalPosition] contains the new location of the selection end edge.
   const SelectionEdgeUpdateEvent.forEnd({
-    required this.globalPosition
+    required this.globalPosition,
+    this.mode = SelectionMode.character
   }) : super._(SelectionEventType.endEdgeUpdate);
+
+  final SelectionMode? mode;
 
   /// The new location of the selection edge.
   final Offset globalPosition;
+}
+
+enum SelectionMode {
+  character,
+  word
 }
 
 /// Extends the start or end of the selection by a given [TextGranularity].
