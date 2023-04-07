@@ -90,8 +90,8 @@ indeterminate.className = "indeterminate";
 loader.appendChild(indeterminate);
 
 document.addEventListener('dart-app-ready', function (e) {
-   loader.parentNode.removeChild(loader);
-   styleSheet.parentNode.removeChild(styleSheet);
+   loader.parentNode && loader.parentNode.removeChild(loader);
+   styleSheet.parentNode && styleSheet.parentNode.removeChild(styleSheet);
 });
 
 // A map containing the URLs for the bootstrap scripts in debug.
