@@ -97,24 +97,6 @@ void exitTestExit() async {
     closed.complete(data);
   });
   await closed.future;
-
-  // From here down, nothing should be called, because the application will have already been closed.
-  final Completer<ByteData?> exited = Completer<ByteData?>();
-  final String jsonString = json.encode(<String, dynamic>{
-    'method': 'System.exitApplication',
-    'args': <String, dynamic>{
-      'type': 'required', 'exitCode': 0
-      }
-    });
-  ui.PlatformDispatcher.instance.sendPlatformMessage(
-    'flutter/platform',
-    ByteData.sublistView(
-      Uint8List.fromList(utf8.encode(jsonString))
-    ),
-    (ByteData? reply) {
-      exited.complete(reply);
-    });
-  await exited.future;
 }
 
 @pragma('vm:entry-point')
