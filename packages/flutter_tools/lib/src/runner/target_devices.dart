@@ -19,7 +19,6 @@ const String _connectedDevicesMessage = 'Connected devices:';
 const String _foundButUnsupportedDevicesMessage = 'The following devices were found, but are not supported by this project:';
 const String _noAttachedCheckForWirelessMessage = 'No devices found yet. Checking for wireless devices...';
 const String _noDevicesFoundMessage = 'No devices found.';
-const String _noSupportedDevicesMessage = 'No supported devices connected.';
 const String _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
 const String _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
 
@@ -214,7 +213,7 @@ class TargetDevices {
 
     _logger.printStatus(_deviceManager.hasSpecifiedAllDevices
         ? _noDevicesFoundMessage
-        : _noSupportedDevicesMessage);
+        : userMessages.flutterNoSupportedDevices);
     await _printUnsupportedDevice(unsupportedDevices);
     return null;
   }
