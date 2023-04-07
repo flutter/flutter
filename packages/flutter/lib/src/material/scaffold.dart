@@ -2271,7 +2271,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       return true;
     }());
 
-    final Completer<T> completer = Completer<T>();
     final GlobalKey<_StandardBottomSheetState> bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
     late _StandardBottomSheet bottomSheet;
 
@@ -2307,7 +2306,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       if (animationController.status != AnimationStatus.dismissed) {
         _dismissedBottomSheets.add(bottomSheet);
       }
-      completer.complete(null as T);
     }
 
     final LocalHistoryEntry? entry = isPersistent
@@ -2366,7 +2364,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     return PersistentBottomSheetController<T>._(
       bottomSheet,
-      completer,
+      Completer<T>(),
       entry != null
         ? entry.remove
         : removeCurrentBottomSheet,
