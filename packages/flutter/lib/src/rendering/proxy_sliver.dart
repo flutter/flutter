@@ -403,22 +403,21 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
 
 /// Applies a cross-axis constraint to its sliver child.
 ///
-/// This render object takes an [maxExtent] parameter and uses the smaller of
+/// This render object takes a [maxExtent] parameter and uses the smaller of
 /// [maxExtent] and the parent's [SliverConstraints.crossAxisExtent] as the
 /// cross axis extent of the [SliverConstraints] passed to the sliver child.
 class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
   /// Creates a render object that constrains the cross axis extent of its sliver child.
   ///
-  /// The [maxExtent] parameter must not be null and must be between 0 and the
-  /// parent's cross axis extent.
+  /// The [maxExtent] parameter must not be null and must be nonnegative.
   RenderSliverConstrainedCrossAxis({
     required double maxExtent
   }) : _maxExtent = maxExtent,
-       assert(maxExtent >= 0.0 && maxExtent < double.infinity);
+       assert(maxExtent >= 0.0);
 
   /// The cross axis extent to apply to the sliver child.
   ///
-  /// This value must be between 0 and the parent's crossAxisExtent.
+  /// This value must be nonnegative.
   double get maxExtent => _maxExtent;
   double _maxExtent;
   set maxExtent(double value) {

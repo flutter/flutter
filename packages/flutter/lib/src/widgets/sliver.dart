@@ -1381,17 +1381,17 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
 class SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
   /// Creates a sliver that constrains the cross axis extent of its sliver child.
   ///
-  /// The [maxExtent] parameters must not be null.
+  /// The [maxExtent] parameter is required and must be nonnegative.
   const SliverConstrainedCrossAxis({
     super.key,
     required this.maxExtent,
-    Widget? sliver,
-  }) : assert(maxExtent >= 0.0 && maxExtent < double.infinity),
+    required Widget sliver,
+  }) : assert(maxExtent >= 0.0),
        super(child: sliver);
 
   /// The cross axis extent to apply to the sliver child.
   ///
-  /// This value must be between 0 and the parent's cross axis extent.
+  /// This value must be nonnegative.
   final double maxExtent;
 
   @override
