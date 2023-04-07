@@ -42,12 +42,16 @@ class _Material3ComponentsState extends State<Material3Components> {
         key: scaffoldKey,
         body: Row(
           children: <Widget>[
-            FirstComponentList(
-              showNavBottomBar: true,
-              scaffoldKey: scaffoldKey,
-              showSecondList: true,
+            Expanded(
+              child: FirstComponentList(
+                showNavBottomBar: true,
+                scaffoldKey: scaffoldKey,
+                showSecondList: true,
+              ),
             ),
-            SecondComponentList(scaffoldKey: scaffoldKey),
+            Expanded(
+              child: SecondComponentList(scaffoldKey: scaffoldKey),
+            ),
           ],
         ),
       ),
