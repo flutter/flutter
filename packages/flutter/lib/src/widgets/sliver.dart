@@ -1370,6 +1370,14 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
 ///
 /// This is useful when you want to apply a custom cross-axis extent constraint
 /// to a sliver child, as slivers typically consume the full cross axis extent.
+///
+/// {@tool dartpad}
+/// In this sample the [SliverConstrainedCrossAxis] sizes its [child] so that the
+/// cross axis extent takes up less space than the actual viewport.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_constrained_cross_axis.0.dart **
+/// {@end-tool}
+
 class SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
   /// Creates a sliver that constrains the cross axis extent of its sliver child.
   ///

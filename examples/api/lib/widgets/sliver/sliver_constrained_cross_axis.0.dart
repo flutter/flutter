@@ -29,22 +29,20 @@ class SliverConstrainedCrossAxisExample extends StatelessWidget {
       slivers: <Widget>[
         SliverConstrainedCrossAxis(
           maxExtent: 200,
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Container(
-                  color: index.isEven ? Colors.amber[300] : Colors.blue[300],
-                  height: 100.0,
-                  child: Center(
-                    child: Text(
-                      'Item $index',
-                      style: const TextStyle(fontSize: 24),
-                    ),
+          sliver: SliverList.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                color: index.isEven ? Colors.amber[300] : Colors.blue[300],
+                height: 100.0,
+                child: Center(
+                  child: Text(
+                    'Item $index',
+                    style: const TextStyle(fontSize: 24),
                   ),
-                );
-              },
-              childCount: 10,
-            ),
+                ),
+              );
+            },
+            itemCount: 10,
           ),
         ),
       ],
