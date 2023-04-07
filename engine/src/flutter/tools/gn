@@ -393,6 +393,15 @@ def to_gn_args(args):
   # flags allow preventing those targets from being part of the build tree.
   gn_args['enable_desktop_embeddings'] = not args.disable_desktop_embeddings
 
+  # Determine whether backtace support should be compiled in.
+  if args.backtrace:
+    gn_args['enable_backtrace'] = (
+        args.target_os in ['linux', 'mac', 'win'] or
+        args.target_os == 'ios' and runtime_mode == 'debug'
+    )
+  else:
+    gn_args['enable_backtrace'] = False
+
   # Overrides whether Boring SSL is compiled with system as. Only meaningful
   # on Android.
   gn_args['bssl_use_clang_integrated_as'] = True
@@ -772,6 +781,17 @@ def parse_args(args):
   parser.add_argument(
       '--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp']
   )
+
+  # Whether to compile in backtrace support.
+  # Available for Windows and POSIX platforms whose libc includes execinfo.h.
+  # MUSL doesn't include execinfo.h should be build with --no-backtrace.
+  parser.add_argument(
+      '--backtrace',
+      default=True,
+      action='store_true',
+      help='Whether OS support exists for collecting backtraces.'
+  )
+  parser.add_argument('--no-backtrace', dest='backtrace', action='store_false')
 
   parser.add_argument(
       '--build-engine-artifacts',
