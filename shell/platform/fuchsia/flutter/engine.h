@@ -48,7 +48,9 @@ class Engine final : public fuchsia::memorypressure::Watcher {
     virtual void OnEngineTerminate(const Engine* holder) = 0;
   };
 
-  static flutter::ThreadHost CreateThreadHost(const std::string& name_prefix);
+  static flutter::ThreadHost CreateThreadHost(
+      const std::string& name_prefix,
+      const std::shared_ptr<sys::ServiceDirectory>& runner_services = nullptr);
 
   // Gfx connection ctor.
   Engine(Delegate& delegate,
