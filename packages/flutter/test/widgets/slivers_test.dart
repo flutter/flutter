@@ -869,6 +869,22 @@ void main() {
       semantics.dispose();
     });
 
+    testWidgets('ignoring only block semantics actions', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(boilerPlate(
+        SliverIgnorePointer(
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () { },
+            ),
+          ),
+        ),
+      ));
+      expect(semantics, includesNodeWith(label: 'a', actions: <SemanticsAction>[]));
+      semantics.dispose();
+    });
+
     testWidgets('ignores pointer events & semantics', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final List<String> events = <String>[];

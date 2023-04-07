@@ -884,7 +884,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
             child: IgnorePointer(
               key: _ignorePointerKey,
               ignoring: _shouldIgnorePointer,
-              ignoringSemantics: false,
               child: widget.viewportBuilder(context, position),
             ),
           ),

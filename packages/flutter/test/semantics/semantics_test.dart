@@ -631,6 +631,30 @@ void main() {
     );
   });
 
+  test('blocked actions debug properties', () {
+    final SemanticsConfiguration config = SemanticsConfiguration()
+      ..isBlockingUserActions = true
+      ..onScrollUp = () { }
+      ..onLongPress = () { }
+      ..onShowOnScreen = () { }
+      ..onDidGainAccessibilityFocus = () { };
+    final SemanticsNode blocked = SemanticsNode()
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
+      ..updateWith(config: config);
+    expect(
+      blocked.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'SemanticsNode#1\n'
+        '   STALE\n'
+        '   owner: null\n'
+        '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
+        '   actions: didGainAccessibilityFocus, longPress🚫️, scrollUp🚫️,\n'
+        '     showOnScreen🚫️\n',
+      ),
+    );
+  });
+
   test('Custom actions debug properties', () {
     final SemanticsConfiguration configuration = SemanticsConfiguration();
     const CustomSemanticsAction action1 = CustomSemanticsAction(label: 'action1');

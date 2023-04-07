@@ -1403,7 +1403,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       items.add(DefaultTextStyle(
         style: _textStyle!.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
-          ignoringSemantics: false,
           child: _DropdownMenuItemContainer(
             alignment: widget.alignment,
             child: displayedHint,

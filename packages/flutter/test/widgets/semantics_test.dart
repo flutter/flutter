@@ -6,7 +6,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -1692,6 +1691,118 @@ void main() {
 
     expect(node.transform, null); // Make sure the zero transform didn't end up on the root somehow.
     expect(node.childrenCount, 0);
+  });
+
+  testWidgets('blocking user interaction works on explicit child node.', (WidgetTester tester) async {
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Semantics(
+          blockUserActions: true,
+          explicitChildNodes: true,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                key: key1,
+                label: 'label1',
+                onTap: () {},
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                key: key2,
+                label: 'label2',
+                onTap: () {},
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key1)),
+      // Tap action is blocked.
+      matchesSemantics(
+        label: 'label1',
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key2)),
+      // Tap action is blocked.
+      matchesSemantics(
+        label: 'label2',
+      ),
+    );
+  });
+
+  testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Semantics(
+          key: key,
+          container: true,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                blockUserActions: true,
+                label: 'label1',
+                onTap: () { },
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                label: 'label2',
+                onLongPress: () { },
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.byKey(key)),
+      // Tap action in label1 is blocked,
+      matchesSemantics(
+        label: 'label1\nlabel2',
+        hasLongPressAction: true,
+      ),
+    );
+  });
+
+  testWidgets('does not merge conflicting actions even if one of them is blocked', (WidgetTester tester) async {
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Semantics(
+          key: key,
+          container: true,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                blockUserActions: true,
+                label: 'label1',
+                onTap: () { },
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                label: 'label2',
+                onTap: () { },
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    expect(
+      node,
+      matchesSemantics(
+        children: <Matcher>[containsSemantics(label: 'label1'), containsSemantics(label: 'label2')],
+      ),
+    );
   });
 }
 
