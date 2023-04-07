@@ -448,7 +448,7 @@ class ThemeData with Diagnosticable {
     }
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
-    visualDensity ??= VisualDensity.adaptivePlatformDensity;
+    visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
     useMaterial3 ??= false;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??= useMaterial3
@@ -2646,12 +2646,32 @@ class VisualDensity with Diagnosticable {
   /// It corresponds to a density value of -2 in both axes.
   static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
 
-  /// Returns a visual density that is adaptive based on the [defaultTargetPlatform].
+  /// Returns a [VisualDensity] that is adaptive based on the current platform
+  /// on which the framework is executing, from [defaultTargetPlatform].
   ///
-  /// For desktop platforms, this returns [compact], and for other platforms,
-  /// it returns a default-constructed [VisualDensity].
-  static VisualDensity get adaptivePlatformDensity {
-    switch (defaultTargetPlatform) {
+  /// When [defaultTargetPlatform] is a desktop platform, this returns
+  /// [compact], and for other platforms, it returns a default-constructed
+  /// [VisualDensity].
+  ///
+  /// See also:
+  ///
+  /// * [defaultDensityForPlatform] which returns a [VisualDensity] that is
+  ///   adaptive based on the platform given to it.
+  /// * [defaultTargetPlatform] which returns the platform on which the
+  ///   framework is currently executing.
+  static VisualDensity get adaptivePlatformDensity => defaultDensityForPlatform(defaultTargetPlatform);
+
+  /// Returns a [VisualDensity] that is adaptive based on the given [platform].
+  ///
+  /// For desktop platforms, this returns [compact], and for other platforms, it
+  /// returns a default-constructed [VisualDensity].
+  ///
+  /// See also:
+  ///
+  /// * [adaptivePlatformDensity] which returns a [VisualDensity] that is
+  ///   adaptive based on [defaultTargetPlatform].
+  static VisualDensity defaultDensityForPlatform(TargetPlatform platform) {
+    switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
