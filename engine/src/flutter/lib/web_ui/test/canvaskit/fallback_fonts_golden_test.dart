@@ -35,7 +35,7 @@ void testMain() {
           .singleWhere((NotoFont font) => font.name == 'Noto Sans Arabic')
           .url;
       final String notoEmojiUrl = fallbackFonts
-          .singleWhere((NotoFont font) => font.name == 'Noto Color Emoji')
+          .singleWhere((NotoFont font) => font.name == 'Noto Emoji')
           .url;
       TestDownloader.mockDownloads[notoSansArabicUrl] =
           '/assets/fonts/NotoNaskhArabic-Regular.ttf';
@@ -123,7 +123,7 @@ void testMain() {
 
       expect(FontFallbackData.instance.globalFontFallbacks, <String>[
         'Roboto',
-        'Noto Color Emoji',
+        'Noto Emoji',
         'Noto Sans Arabic',
       ]);
     });
@@ -144,7 +144,7 @@ void testMain() {
       await notoDownloadQueue.debugWhenIdle();
 
       expect(FontFallbackData.instance.globalFontFallbacks,
-          contains('Noto Color Emoji'));
+          contains('Noto Emoji'));
 
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
@@ -250,7 +250,7 @@ void testMain() {
           testedFonts,
           unorderedEquals(<String>{
             'Noto Sans',
-            'Noto Color Emoji',
+            'Noto Emoji',
             'Noto Sans Symbols',
             'Noto Sans Symbols 2',
             'Noto Sans Adlam',

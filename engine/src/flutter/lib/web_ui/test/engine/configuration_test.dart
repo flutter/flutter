@@ -103,4 +103,22 @@ void testMain() {
       expect(config.canvasKitVariant, CanvasKitVariant.chromium);
     });
   });
+
+  group('useColorEmoji', () {
+    test('defaults to false', () {
+      final FlutterConfiguration config = FlutterConfiguration();
+      config.setUserConfiguration(
+        js_util.jsify(<String, Object?>{}) as JsFlutterConfiguration,
+      );
+      expect(config.useColorEmoji, isFalse);
+    });
+
+    test('can be set to true', () {
+      final FlutterConfiguration config = FlutterConfiguration();
+      config.setUserConfiguration(
+        js_util.jsify(<String, Object?>{'useColorEmoji': true}) as JsFlutterConfiguration,
+      );
+      expect(config.useColorEmoji, isTrue);
+    });
+  });
 }
