@@ -189,7 +189,6 @@ targets:
   - name: Linux analyzer_benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # Newly switched to a vm bot: https://github.com/flutter/flutter/issues/124065
     timeout: 60
     properties:
       dependencies: >-
