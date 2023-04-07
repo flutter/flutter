@@ -1232,8 +1232,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get enabled => isWidgetEnabled(widget);
-  bool get primaryButtonEnabled => _primaryButtonEnabled(widget);
-  bool get secondaryButtonEnabled => _secondaryButtonEnabled(widget);
+  bool get _primaryEnabled => _primaryButtonEnabled(widget);
+  bool get _secondaryEnabled => _secondaryButtonEnabled(widget);
 
   void handleMouseEnter(PointerEnterEvent event) {
     _hovering = true;
@@ -1314,16 +1314,16 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               onTap: widget.excludeFromSemantics || widget.onTap == null ? null : simulateTap,
               onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : simulateLongPress,
               child: GestureDetector(
-                onTapDown: primaryButtonEnabled ? handleTapDown : null,
-                onTapUp: primaryButtonEnabled ? handleTapUp : null,
-                onTap: primaryButtonEnabled ? handleTap : null,
-                onTapCancel: primaryButtonEnabled ? handleTapCancel : null,
+                onTapDown: _primaryEnabled ? handleTapDown : null,
+                onTapUp: _primaryEnabled ? handleTapUp : null,
+                onTap: _primaryEnabled ? handleTap : null,
+                onTapCancel: _primaryEnabled ? handleTapCancel : null,
                 onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
                 onLongPress: widget.onLongPress != null ? handleLongPress : null,
-                onSecondaryTapDown: secondaryButtonEnabled ? handleSecondaryTapDown : null,
-                onSecondaryTapUp: secondaryButtonEnabled ? handleSecondaryTapUp: null,
-                onSecondaryTap: secondaryButtonEnabled ? handleSecondaryTap : null,
-                onSecondaryTapCancel: secondaryButtonEnabled ? handleSecondaryTapCancel : null,
+                onSecondaryTapDown: _secondaryEnabled ? handleSecondaryTapDown : null,
+                onSecondaryTapUp: _secondaryEnabled ? handleSecondaryTapUp: null,
+                onSecondaryTap: _secondaryEnabled ? handleSecondaryTap : null,
+                onSecondaryTapCancel: _secondaryEnabled ? handleSecondaryTapCancel : null,
                 behavior: HitTestBehavior.opaque,
                 excludeFromSemantics: true,
                 child: widget.child,
