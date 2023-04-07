@@ -21,8 +21,7 @@ typedef LeaksObtainer = void Function(Leaks foundLeaks);
 /// 1. Listens to [MemoryAllocations] events.
 /// 2. Uses `asyncCodeRunner` for async call for leak detection.
 ///
-/// Pass [leaksObtainer] if you want to get leak information before
-/// the method failure.
+
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
   required AsyncCodeRunner asyncCodeRunner,
