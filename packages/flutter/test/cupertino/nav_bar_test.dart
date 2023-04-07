@@ -53,7 +53,7 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     // Expect the middle of the title to be exactly in the middle of the screen.
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
@@ -673,7 +673,7 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
@@ -688,7 +688,7 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.widgetWithText(CupertinoButton, 'Close'), findsOneWidget);
 
@@ -696,14 +696,14 @@ void main() {
     await tester.tap(find.text('Close'));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Page 2'), findsOneWidget);
 
     await tester.tap(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Home page'), findsOneWidget);
   });
@@ -1157,7 +1157,7 @@ void main() {
       );
 
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 600));
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
         CupertinoPageRoute<void>(
@@ -1176,11 +1176,11 @@ void main() {
       );
 
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 600));
 
       await tester.tap(find.byType(CupertinoNavigationBarBackButton));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 600));
 
       // The second page is still on top and didn't pop.
       expect(find.text('A Phone'), findsOneWidget);
@@ -1406,13 +1406,13 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsOneWidget);
 
     await tester.tap(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
   });

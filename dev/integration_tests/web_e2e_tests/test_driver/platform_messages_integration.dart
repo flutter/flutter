@@ -21,7 +21,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, null);
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
@@ -39,7 +39,7 @@ void main() {
     platformViewsRegistry.getNextPlatformViewId();
     // ignore: undefined_prefixed_name, avoid_dynamic_calls
     ui.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
-      ++viewInstanceCount;
+      viewInstanceCount += 1;
       return html.DivElement();
     });
 

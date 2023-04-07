@@ -8,11 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'basic_types.dart';
 
 /// Utility functions for working with matrices.
-class MatrixUtils {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  MatrixUtils._();
-
+abstract final class MatrixUtils {
   /// Returns the given [transform] matrix as an [Offset], if the matrix is
   /// nothing but a 2D translation.
   ///

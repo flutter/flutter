@@ -922,8 +922,15 @@ class _FakeDeviceManager extends DeviceManager {
   @override
   Future<List<Device>> getAllDevices({
     DeviceDiscoveryFilter? filter,
-  }) async => _connectedDevices;
+  }) async => filteredDevices(filter);
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+      return <Device>[];
+    }
+    return _connectedDevices;
+  }
 }

@@ -394,16 +394,12 @@ class StartContext extends Context {
           z: 0,
           type: VersionType.stable,
         );
-        break;
       case ReleaseType.STABLE_HOTFIX:
         nextVersion = Version.increment(lastVersion, 'z');
-        break;
       case ReleaseType.BETA_INITIAL:
         nextVersion = Version.fromCandidateBranch(candidateBranch);
-        break;
       case ReleaseType.BETA_HOTFIX:
         nextVersion = Version.increment(lastVersion, 'n');
-        break;
     }
     return nextVersion;
   }

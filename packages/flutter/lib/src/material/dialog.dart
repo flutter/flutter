@@ -272,15 +272,6 @@ class Dialog extends StatelessWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
-/// If the content is too large to fit on the screen vertically, the dialog will
-/// display the title and the actions and let the content overflow, which is
-/// rarely desired. Consider using a scrolling widget for [content], such as
-/// [SingleChildScrollView], to avoid overflow. (However, be aware that since
-/// [AlertDialog] tries to size itself using the intrinsic dimensions of its
-/// children, widgets such as [ListView], [GridView], and [CustomScrollView],
-/// which use lazy viewports, will not work. If this is a problem, consider
-/// using [Dialog] directly.)
-///
 /// For dialogs that offer the user a choice between several options, consider
 /// using a [SimpleDialog].
 ///
@@ -339,6 +330,24 @@ class Dialog extends StatelessWidget {
 ///
 /// ** See code in examples/api/lib/material/dialog/alert_dialog.1.dart **
 /// {@end-tool}
+///
+/// ## Alert dialogs and scrolling
+///
+/// By default, alert dialogs size themselves to contain their children.
+///
+/// If the content is too large to fit on the screen vertically, the dialog will
+/// display the title and actions, and let the _[content]_ overflow. This is
+/// rarely desired. Consider using a scrolling widget for [content], such as
+/// [SingleChildScrollView], to avoid overflow.
+///
+/// Because the dialog attempts to size itself to the contents, the [content]
+/// must support reporting its intrinsic dimensions. In particular, this means
+/// that lazily-rendered widgets such as [ListView], [GridView], and
+/// [CustomScrollView], will not work in an [AlertDialog] unless they are
+/// wrapped in a widget that forces a particular size (e.g. a [SizedBox]).
+///
+/// For finer-grained control over the sizing of a dialog, consider using
+/// [Dialog] directly.
 ///
 /// See also:
 ///
@@ -441,7 +450,12 @@ class AlertDialog extends StatelessWidget {
   /// Typically this is a [SingleChildScrollView] that contains the dialog's
   /// message. As noted in the [AlertDialog] documentation, it's important
   /// to use a [SingleChildScrollView] if there's any risk that the content
-  /// will not fit.
+  /// will not fit, as the contents will otherwise overflow the dialog.
+  ///
+  /// The [content] must support reporting its intrinsic dimensions. In
+  /// particular, [ListView], [GridView], and [CustomScrollView] cannot be used
+  /// here unless they are first wrapped in a widget that itself can report
+  /// intrinsic dimensions, such as a [SizedBox].
   final Widget? content;
 
   /// Padding around the content.
@@ -1433,7 +1447,7 @@ class _DialogDefaultsM2 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _DialogDefaultsM3 extends DialogTheme {
   _DialogDefaultsM3(this.context)
@@ -1478,7 +1492,7 @@ class _DialogDefaultsM3 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _DialogFullscreenDefaultsM3 extends DialogTheme {
   const _DialogFullscreenDefaultsM3(this.context);

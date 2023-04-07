@@ -564,7 +564,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         }
         _lastOverlayEntry?.remove();
         _lastOverlayEntry = null;
-        break;
 
       case AnimationStatus.completed:
         setState(() {
@@ -580,7 +579,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           _lastOverlayEntry = null;
           _openController.reset();
         });
-        break;
 
       case AnimationStatus.forward:
       case AnimationStatus.reverse:

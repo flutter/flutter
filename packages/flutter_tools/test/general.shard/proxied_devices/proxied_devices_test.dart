@@ -8,10 +8,12 @@ import 'dart:typed_data';
 
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/daemon.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_devices.dart';
 
 void main() {
   late BufferLogger bufferLogger;
@@ -225,26 +227,45 @@ void main() {
     });
   });
 
+  final Map<String, Object> fakeDevice = <String, Object>{
+    'name': 'device-name',
+    'id': 'device-id',
+    'category': 'mobile',
+    'platformType': 'android',
+    'platform': 'android-arm',
+    'emulator': true,
+    'ephemeral': false,
+    'sdk': 'Test SDK (1.2.3)',
+    'capabilities': <String, Object>{
+      'hotReload': true,
+      'hotRestart': true,
+      'screenshot': false,
+      'fastStart': false,
+      'flutterExit': true,
+      'hardwareRendering': true,
+      'startPaused': true,
+    },
+  };
+  final Map<String, Object> fakeDevice2 = <String, Object>{
+    'name': 'device-name2',
+    'id': 'device-id2',
+    'category': 'mobile',
+    'platformType': 'android',
+    'platform': 'android-arm',
+    'emulator': true,
+    'ephemeral': false,
+    'sdk': 'Test SDK (1.2.3)',
+    'capabilities': <String, Object>{
+      'hotReload': true,
+      'hotRestart': true,
+      'screenshot': false,
+      'fastStart': false,
+      'flutterExit': true,
+      'hardwareRendering': true,
+      'startPaused': true,
+    },
+  };
   group('ProxiedDevice', () {
-    final Map<String, Object> fakeDevice = <String, Object>{
-      'name': 'device-name',
-      'id': 'device-id',
-      'category': 'mobile',
-      'platformType': 'android',
-      'platform': 'android-arm',
-      'emulator': true,
-      'ephemeral': false,
-      'sdk': 'Test SDK (1.2.3)',
-      'capabilities': <String, Object>{
-        'hotReload': true,
-        'hotRestart': true,
-        'screenshot': false,
-        'fastStart': false,
-        'flutterExit': true,
-        'hardwareRendering': true,
-        'startPaused': true,
-      },
-    };
     testWithoutContext('calls stopApp without application package if not passed', () async {
       bufferLogger = BufferLogger.test();
       final ProxiedDevices proxiedDevices = ProxiedDevices(
@@ -257,6 +278,42 @@ void main() {
       expect(message.data['id'], isNotNull);
       expect(message.data['method'], 'device.stopApp');
       expect(message.data['params'], <String, Object?>{'deviceId': 'device-id', 'userIdentifier': 'user-id'});
+    });
+  });
+
+  group('ProxiedDevices', () {
+    testWithoutContext('devices respects the filter passed in', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      final FakeDeviceDiscoveryFilter fakeFilter = FakeDeviceDiscoveryFilter();
+
+      final FakeDevice supportedDevice = FakeDevice('Device', 'supported');
+      fakeFilter.filteredDevices = <Device>[
+        supportedDevice,
+      ];
+
+      final Future<List<Device>> resultFuture = proxiedDevices.devices(filter: fakeFilter);
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.discoverDevices');
+
+      serverDaemonConnection.sendResponse(message.data['id']!, <Map<String, Object?>>[
+        fakeDevice,
+        fakeDevice2,
+      ]);
+
+      final List<Device> result = await resultFuture;
+      expect(result.length, 1);
+      expect(result.first.id, supportedDevice.id);
+
+      expect(fakeFilter.devices!.length, 2);
+      expect(fakeFilter.devices![0].id, fakeDevice['id']);
+      expect(fakeFilter.devices![1].id, fakeDevice2['id']);
     });
   });
 }
@@ -371,5 +428,16 @@ class FakeDaemonConnection extends Fake implements DaemonConnection {
       return response;
     }
     throw Exception('"$method" request failed');
+  }
+}
+
+class FakeDeviceDiscoveryFilter extends Fake implements DeviceDiscoveryFilter {
+  List<Device>? filteredDevices;
+  List<Device>? devices;
+
+  @override
+  Future<List<Device>> filterDevices(List<Device> devices) async {
+    this.devices = devices;
+    return filteredDevices!;
   }
 }

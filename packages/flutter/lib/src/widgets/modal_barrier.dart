@@ -212,12 +212,10 @@ class ModalBarrier extends StatelessWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         platformSupportsDismissingBarrier = false;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         platformSupportsDismissingBarrier = true;
-        break;
     }
     final bool semanticsDismissible = dismissible && platformSupportsDismissingBarrier;
     final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;

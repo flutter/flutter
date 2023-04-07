@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for BottomAppBar with Material 3
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+/// Flutter code sample for [BottomAppBar] with Material 3.
 
 void main() {
   runApp(const BottomAppBarDemo());
@@ -37,9 +37,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   bool _isElevated = true;
   bool _isVisible = true;
 
-  FloatingActionButtonLocation get _fabLocation => _isVisible
-      ? FloatingActionButtonLocation.endContained
-      : FloatingActionButtonLocation.endFloat;
+  FloatingActionButtonLocation get _fabLocation =>
+      _isVisible ? FloatingActionButtonLocation.endContained : FloatingActionButtonLocation.endFloat;
 
   void _listen() {
     final ScrollDirection direction = _controller.position.userScrollDirection;

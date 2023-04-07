@@ -7,11 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
-class SystemNavigator {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemNavigator._();
-
+abstract final class SystemNavigator {
   static bool _frameworkHandlesPop = false;
 
   /// Inform the platform of whether or not the navigation stack is empty.
@@ -55,7 +51,6 @@ class SystemNavigator {
           _frameworkHandlesPop = !frameworkHandlesPop;
           rethrow;
         }
-        break;
     }
   }
 

@@ -34,36 +34,11 @@ import 'shader_compiler.dart';
 /// Whether the application has web plugins.
 const String kHasWebPlugins = 'HasWebPlugins';
 
-/// An override for the dart2js build mode.
-///
-/// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
-const String kDart2jsOptimization = 'Dart2jsOptimization';
-
-/// The default optimization level for dart2js.
-///
-/// Maps to [kDart2jsOptimization].
-const String kDart2jsDefaultOptimizationLevel = 'O4';
-
-/// If `--dump-info` should be passed to dart2js.
-const String kDart2jsDumpInfo = 'Dart2jsDumpInfo';
-
-// If `--no-frequency-based-minification` should be based to dart2js
-const String kDart2jsNoFrequencyBasedMinification = 'Dart2jsNoFrequencyBasedMinification';
-
-/// Whether to disable dynamic generation code to satisfy csp policies.
-const String kCspMode = 'cspMode';
-
 /// Base href to set in index.html in flutter build command
 const String kBaseHref = 'baseHref';
 
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
-
-/// Whether the dart2js build should output source maps.
-const String kSourceMapsEnabled = 'SourceMaps';
-
-/// Whether the dart2js native null assertions are enabled.
-const String kNativeNullAssertions = 'NativeNullAssertions';
 
 const String kOfflineFirst = 'offline-first';
 const String kNoneWorker = 'none';
@@ -201,8 +176,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       throw MissingDefineException(kBuildMode, name);
     }
     final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
-    final bool sourceMapsEnabled = environment.defines[kSourceMapsEnabled] == 'true';
-    final bool nativeNullAssertions = environment.defines[kNativeNullAssertions] == 'true';
+    final JsCompilerConfig compilerConfig = JsCompilerConfig.fromBuildSystemEnvironment(environment.defines);
     final Artifacts artifacts = globals.artifacts!;
     final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
     final List<String> sharedCommandOptions = <String>[
@@ -211,20 +185,18 @@ class Dart2JSTarget extends Dart2WebTarget {
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot, platform: TargetPlatform.web_javascript),
       '--platform-binaries=$platformBinariesPath',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
-      if (nativeNullAssertions)
-        '--native-null-assertions',
+      '--invoker=flutter_tool',
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
       for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
         '-D$dartDefine',
-      if (!sourceMapsEnabled)
-        '--no-source-maps',
     ];
 
     final List<String> compilationArgs = <String>[
       ...sharedCommandOptions,
+      ...compilerConfig.toSharedCommandOptions(),
       '-o',
       environment.buildDir.childFile('app.dill').path,
       '--packages=.dart_tool/package_config.json',
@@ -240,19 +212,12 @@ class Dart2JSTarget extends Dart2WebTarget {
       throw Exception(_collectOutput(kernelResult));
     }
 
-    final String dart2jsOptimization = environment.defines[kDart2jsOptimization] ?? kDart2jsDefaultOptimizationLevel;
-    final bool dumpInfo = environment.defines[kDart2jsDumpInfo] == 'true';
-    final bool noFrequencyBasedMinification = environment.defines[kDart2jsNoFrequencyBasedMinification] == 'true';
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
-    final bool csp = environment.defines[kCspMode] == 'true';
 
     final ProcessResult javaScriptResult = await environment.processManager.run(<String>[
       ...sharedCommandOptions,
-      '-$dart2jsOptimization',
       if (buildMode == BuildMode.profile) '--no-minify',
-      if (dumpInfo) '--dump-info',
-      if (noFrequencyBasedMinification) '--no-frequency-based-minification',
-      if (csp) '--csp',
+      ...compilerConfig.toCommandOptions(),
       '-o',
       outputJSFile.path,
       environment.buildDir.childFile('app.dill').path, // dartfile
@@ -294,6 +259,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
     final Artifacts artifacts = globals.artifacts!;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
+    final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.path;
 
@@ -318,10 +284,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
       dartSdkRoot,
       '--libraries-spec',
       artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path,
+      '--depfile=${depFile.path}',
 
       environment.buildDir.childFile('main.dart').path, // dartfile
       outputWasmFile.path,
     ];
+    globals.printTrace('compiling dart code to wasm with command "${compilationArgs.join(' ')}"');
     final ProcessResult compileResult = await globals.processManager.run(compilationArgs);
     if (compileResult.exitCode != 0) {
       throw Exception(_collectOutput(compileResult));
@@ -333,6 +301,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
 
   @override
   String get name => 'dart2wasm';
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2wasm.d',
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
@@ -347,7 +320,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
-  const WebReleaseBundle(this.webRenderer, this.isWasm);
+  const WebReleaseBundle(this.webRenderer, {required this.isWasm});
 
   final WebRendererMode webRenderer;
   final bool isWasm;
@@ -485,13 +458,12 @@ class WebReleaseBundle extends Target {
 /// Static assets provided by the Flutter SDK that do not change, such as
 /// CanvasKit.
 ///
-/// These assets can be cached forever and are only invalidated when the
-/// Flutter SDK is upgraded to a new version.
+/// These assets can be cached until a new version of the flutter web sdk is
+/// downloaded.
 class WebBuiltInAssets extends Target {
-  const WebBuiltInAssets(this.fileSystem, this.cache, this.isWasm);
+  const WebBuiltInAssets(this.fileSystem, {required this.isWasm});
 
   final FileSystem fileSystem;
-  final Cache cache;
   final bool isWasm;
 
   @override
@@ -504,25 +476,35 @@ class WebBuiltInAssets extends Target {
   List<String> get depfiles => const <String>[];
 
   @override
-  List<Source> get inputs => const <Source>[];
+  List<Source> get inputs => const <Source>[
+    Source.hostArtifact(HostArtifact.flutterWebSdk),
+  ];
+
+  Directory get _canvasKitDirectory =>
+    globals.fs.directory(
+      fileSystem.path.join(
+        globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+        'canvaskit',
+      )
+    );
+
+  List<File> get _canvasKitFiles => _canvasKitDirectory.listSync(recursive: true).whereType<File>().toList();
+
+  String _filePathRelativeToCanvasKitDirectory(File file) =>
+    fileSystem.path.relative(file.path, from: _canvasKitDirectory.path);
 
   @override
-  List<Source> get outputs => const <Source>[];
+  List<Source> get outputs => <Source>[
+    if (isWasm) const Source.pattern('{BUILD_DIR}/main.dart.js'),
+    const Source.pattern('{BUILD_DIR}/flutter.js'),
+    for (final File file in _canvasKitFiles)
+      Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
+  ];
 
   @override
   Future<void> build(Environment environment) async {
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/52588
-    //
-    // Update this when we start building CanvasKit from sources. In the
-    // meantime, get the Web SDK directory from cache rather than through
-    // Artifacts. The latter is sensitive to `--local-engine`, which changes
-    // the directory to point to ENGINE/src/out. However, CanvasKit is not yet
-    // built as part of the engine, but fetched from CIPD, and so it won't be
-    // found in ENGINE/src/out.
-    final Directory flutterWebSdk = cache.getWebSdkDirectory();
-    final Directory canvasKitDirectory = flutterWebSdk.childDirectory('canvaskit');
-    for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
-      final String relativePath = fileSystem.path.relative(file.path, from: canvasKitDirectory.path);
+    for (final File file in _canvasKitFiles) {
+      final String relativePath = _filePathRelativeToCanvasKitDirectory(file);
       final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
       file.copySync(targetPath);
     }
@@ -543,10 +525,9 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.cache, this.webRenderer, this.isWasm);
+  const WebServiceWorker(this.fileSystem, this.webRenderer, {required this.isWasm});
 
   final FileSystem fileSystem;
-  final Cache cache;
   final WebRendererMode webRenderer;
   final bool isWasm;
 
@@ -556,8 +537,8 @@ class WebServiceWorker extends Target {
   @override
   List<Target> get dependencies => <Target>[
     if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
-    WebReleaseBundle(webRenderer, isWasm),
-    WebBuiltInAssets(fileSystem, cache, isWasm),
+    WebReleaseBundle(webRenderer, isWasm: isWasm),
+    WebBuiltInAssets(fileSystem, isWasm: isWasm),
   ];
 
   @override

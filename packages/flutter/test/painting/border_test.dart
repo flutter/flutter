@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show FlutterError;
-import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestCanvas implements Canvas {
@@ -264,8 +263,8 @@ void main() {
       // Border.all supports all StrokeAlign values.
       // Border() supports [BorderSide.strokeAlignInside] only.
       const Border(
-        left: BorderSide(strokeAlign: BorderSide.strokeAlignCenter),
-        right: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
+        left: BorderSide(strokeAlign: BorderSide.strokeAlignCenter, color: Color(0xff000001)),
+        right: BorderSide(strokeAlign: BorderSide.strokeAlignOutside, color: Color(0xff000002)),
       ).paint(canvas, const Rect.fromLTWH(10.0, 20.0, 30.0, 40.0));
     } on FlutterError catch (e) {
       error = e;
@@ -274,7 +273,7 @@ void main() {
     expect(error.diagnostics.length, 1);
     expect(
       error.diagnostics[0].toStringDeep(),
-      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on uniform borders.\n',
+      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on borders with uniform colors and\nstyles.\n',
     );
   });
 
@@ -299,5 +298,108 @@ void main() {
     const BorderSide outsideSide = BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside);
     const BorderDirectional outsideBorderDirectional = BorderDirectional(top: outsideSide, bottom: outsideSide, start: outsideSide, end: outsideSide);
     expect(outsideBorderDirectional.dimensions, EdgeInsetsDirectional.zero);
+
+    const Border nonUniformBorder = Border(
+      left: BorderSide(width: 5),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      right: BorderSide(width: 15, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 20),
+    );
+    expect(nonUniformBorder.dimensions, const EdgeInsets.fromLTRB(5, 5, 0, 20));
+
+    const BorderDirectional nonUniformBorderDirectional = BorderDirectional(
+      start: BorderSide(width: 5),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      end: BorderSide(width: 15, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 20),
+    );
+    expect(nonUniformBorderDirectional.dimensions, const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20));
+  });
+
+  testWidgets('Non-Uniform Border variations', (WidgetTester tester) async {
+
+    Widget buildWidget({ required BoxBorder border, BorderRadius? borderRadius, BoxShape boxShape = BoxShape.rectangle}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: boxShape,
+            border: border,
+            borderRadius: borderRadius,
+          ),
+        ),
+      );
+    }
+
+    // This is used to test every allowed non-uniform border combination.
+    const Border allowedBorderVariations = Border(
+      left: BorderSide(width: 5),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      right: BorderSide(width: 15, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 20),
+    );
+
+    // This falls into non-uniform border because of strokeAlign.
+    await tester.pumpWidget(buildWidget(border: allowedBorderVariations));
+    expect(tester.takeException(), isNull,
+        reason: 'Border with non-uniform strokeAlign should not fail.');
+
+    await tester.pumpWidget(buildWidget(
+      border: allowedBorderVariations,
+      borderRadius: BorderRadius.circular(25),
+    ));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildWidget(border: allowedBorderVariations, boxShape: BoxShape.circle));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      buildWidget(
+        border: const Border(
+          left: BorderSide(width: 5, style: BorderStyle.none),
+          top: BorderSide(width: 10),
+          right: BorderSide(width: 15),
+          bottom: BorderSide(width: 20),
+        ),
+        borderRadius: BorderRadius.circular(25),
+      ),
+    );
+    expect(tester.takeException(), isAssertionError,
+        reason: 'Border with non-uniform styles should fail with borderRadius.');
+
+    await tester.pumpWidget(
+      buildWidget(
+        border: const Border(
+          left: BorderSide(width: 5, color: Color(0xff123456)),
+          top: BorderSide(width: 10),
+          right: BorderSide(width: 15),
+          bottom: BorderSide(width: 20),
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+    expect(tester.takeException(), isAssertionError,
+        reason: 'Border with non-uniform colors should fail with borderRadius.');
+
+    // Tests for BorderDirectional.
+    const BorderDirectional allowedBorderDirectionalVariations = BorderDirectional(
+      start: BorderSide(width: 5),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      end: BorderSide(width: 15, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 20),
+    );
+
+    await tester.pumpWidget(buildWidget(border: allowedBorderDirectionalVariations));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildWidget(
+      border: allowedBorderDirectionalVariations,
+      borderRadius: BorderRadius.circular(25),
+    ));
+    expect(tester.takeException(), isNull,
+        reason:'BorderDirectional should not fail with uniform styles and colors.');
+
+    await tester.pumpWidget(buildWidget(border: allowedBorderDirectionalVariations, boxShape: BoxShape.circle));
+    expect(tester.takeException(), isNull);
   });
 }

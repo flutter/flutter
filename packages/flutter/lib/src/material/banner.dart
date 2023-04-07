@@ -5,9 +5,11 @@
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
+import 'color_scheme.dart';
 import 'divider.dart';
 import 'material.dart';
 import 'scaffold.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -243,6 +245,9 @@ class MaterialBanner extends StatefulWidget {
       elevation: elevation,
       leading: leading,
       backgroundColor: backgroundColor,
+      surfaceTintColor: surfaceTintColor,
+      shadowColor: shadowColor,
+      dividerColor: dividerColor,
       padding: padding,
       margin: margin,
       leadingPadding: leadingPadding,
@@ -459,25 +464,27 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _BannerDefaultsM3 extends MaterialBannerThemeData {
-  const _BannerDefaultsM3(this.context)
+  _BannerDefaultsM3(this.context)
     : super(elevation: 1.0);
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get dividerColor => Theme.of(context).colorScheme.outlineVariant;
+  Color? get dividerColor => _colors.outlineVariant;
 
   @override
-  TextStyle? get contentTextStyle => Theme.of(context).textTheme.bodyMedium;
+  TextStyle? get contentTextStyle => _textTheme.bodyMedium;
 }
 
 // END GENERATED TOKEN PROPERTIES - Banner
