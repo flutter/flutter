@@ -8,6 +8,9 @@ import 'dart:ui' as ui;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 
+import 'mock_event_channel.dart';
+import 'widget_tester.dart';
+
 /// A function which takes the name of the method channel, it's handler,
 /// platform message and asynchronously returns an encoded response.
 typedef AllMessagesHandler = Future<ByteData?>? Function(
@@ -197,6 +200,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   ///  * [setMockMethodCallHandler], which wraps this method but decodes
   ///    the messages using a [MethodCodec].
+  ///
+  ///  * [setMockStreamHandler], which wraps [setMockMethodCallHandler] to
+  ///    handle [EventChannel] messages.
   void setMockMessageHandler(String channel, MessageHandler? handler, [ Object? identity ]) {
     if (handler == null) {
       _outboundHandlers.remove(channel);
@@ -237,6 +243,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   ///
   ///  * [setMockMethodCallHandler], which is similar but decodes
   ///    the messages using a [MethodCodec].
+  ///
+  ///  * [setMockStreamHandler], which wraps [setMockMethodCallHandler] to
+  ///    handle [EventChannel] messages.
   void setMockDecodedMessageHandler<T>(BasicMessageChannel<T> channel, Future<T> Function(T? message)? handler) {
     if (handler == null) {
       setMockMessageHandler(channel.name, null);
@@ -300,6 +309,81 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
         return channel.codec.encodeErrorEnvelope(code: 'error', message: '$error');
       }
     }, handler);
+  }
+
+  /// Set a handler for intercepting stream events sent to the
+  /// platform on the given channel.
+  ///
+  /// Intercepted method calls are not forwarded to the platform.
+  ///
+  /// The given handler will replace the currently registered
+  /// handler for that channel, if any. To stop intercepting messages
+  /// at all, pass null as the handler.
+  ///
+  /// Events are decoded using the codec of the channel.
+  ///
+  /// The handler's stream messages are used as a response, after encoding
+  /// them using the channel's codec.
+  ///
+  /// To send an error, pass the error information to the handler's event sink.
+  ///
+  /// {@macro flutter.flutter_test.TestDefaultBinaryMessenger.handlePlatformMessage.asyncHandlers}
+  ///
+  /// Registered handlers are cleared after each test.
+  ///
+  /// See also:
+  ///
+  ///  * [setMockMethodCallHandler], which is the similar method for
+  ///    [MethodChannel].
+  ///
+  ///  * [setMockMessageHandler], which is similar but provides raw
+  ///    access to the underlying bytes.
+  ///
+  ///  * [setMockDecodedMessageHandler], which is similar but decodes
+  ///    the messages using a [MessageCodec].
+  void setMockStreamHandler(EventChannel channel, MockStreamHandler? handler) {
+    if (handler == null) {
+      setMockMessageHandler(channel.name, null);
+      return;
+    }
+
+    final StreamController<Object?> controller = StreamController<Object?>();
+    addTearDown(controller.close);
+
+    setMockMethodCallHandler(MethodChannel(channel.name, channel.codec), (MethodCall call) async {
+      switch (call.method) {
+        case 'listen':
+          return handler.onListen(call.arguments, MockStreamHandlerEventSink(controller.sink));
+        case 'cancel':
+          return handler.onCancel(call.arguments);
+        default:
+          throw UnimplementedError('Method ${call.method} not implemented');
+      }
+    });
+
+    final StreamSubscription<Object?> sub = controller.stream.listen(
+      (Object? e) => channel.binaryMessenger.handlePlatformMessage(
+        channel.name,
+        channel.codec.encodeSuccessEnvelope(e),
+        null,
+      ),
+    );
+    addTearDown(sub.cancel);
+    sub.onError((Object? e) {
+      if (e is! PlatformException) {
+        throw ArgumentError('Stream error must be a PlatformException');
+      }
+      channel.binaryMessenger.handlePlatformMessage(
+        channel.name,
+        channel.codec.encodeErrorEnvelope(
+          code: e.code,
+          message: e.message,
+          details: e.details,
+        ),
+        null,
+      );
+    });
+    sub.onDone(() => channel.binaryMessenger.handlePlatformMessage(channel.name, null, null));
   }
 
   /// Returns true if the `handler` argument matches the `handler`
