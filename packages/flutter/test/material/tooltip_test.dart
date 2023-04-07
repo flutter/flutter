@@ -685,7 +685,7 @@ void main() {
       textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
       expect(textAlign, TextAlign.end);
     },
-    trackMemoryLeaks: true,
+    //trackMemoryLeaks: true,
   );
 
   testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {

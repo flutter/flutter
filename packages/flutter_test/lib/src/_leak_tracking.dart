@@ -8,7 +8,7 @@ import 'package:leak_tracker/leak_tracker.dart';
 import 'test_async_utils.dart';
 import 'widget_tester.dart';
 
-typedef LeaksObtainer = void Function(Leaks foundLeaks);
+
 
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
