@@ -19,6 +19,9 @@ declare_args() {
 
   # Whether to build host-side development artifacts.
   flutter_build_engine_artifacts = true
+
+  # Whether to include backtrace support.
+  enable_backtrace = true
 }
 
 # feature_defines_list ---------------------------------------------------------
