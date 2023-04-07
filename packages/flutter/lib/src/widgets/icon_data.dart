@@ -22,8 +22,10 @@ class IconData {
   /// The [fontPackage] argument must be non-null when using a font family that
   /// is included in a package. This is used when selecting the font.
   ///
-  /// Instantiating non-const instances of this class can cause icon
-  /// tree-shaking to fail.
+  /// Instantiating non-const instances of this class will in your app will
+  /// mean the app cannot be built in release mode with icon tree-shaking (it
+  /// need to be explicitly opted out at build time). See [staticIconProvider]
+  /// for more context.
   const IconData(
     this.codePoint, {
     this.fontFamily,
