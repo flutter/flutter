@@ -189,8 +189,9 @@ Future<String?> getGradleVersion(
     // Expected content format (with lines above and below).
     // Version can have 2 or 3 numbers.
     // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
+    // '^\s*' protects against commented out lines.
     final RegExp distributionUrlRegex =
-        RegExp(r'distributionUrl\s?=\s?.*\.zip');
+        RegExp(r'^\s*distributionUrl\s?=\s?.*\.zip', multiLine: true);
 
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);
