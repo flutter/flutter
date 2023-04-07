@@ -3196,4 +3196,52 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       ..writeOutputFiles();
     expect(logger.hadWarningOutput, isFalse);
   });
+
+  testWithoutContext('can use decimalPatternDigits with decimalDigits optional parameter', () {
+    const String arbFile = '''
+{
+  "treeHeight": "Tree height is {height}m.",
+  "@treeHeight": {
+    "placeholders": {
+      "height": {
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 3
+        }
+      }
+    }
+  }
+}''';
+
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(arbFile);
+
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+      logger: logger,
+    )
+      ..loadResources()
+      ..writeOutputFiles();
+
+    final String localizationsFile = fs.file(
+      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+    ).readAsStringSync();
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+String treeHeight(double height) {
+'''));
+    expect(localizationsFile, containsIgnoringWhitespace(r'''
+NumberFormat.decimalPatternDigits(
+  locale: localeName,
+  decimalDigits: 3
+);
+'''));
+  });
 }

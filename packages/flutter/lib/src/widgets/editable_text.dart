@@ -3706,6 +3706,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _didChangeTextEditingValue() {
+    if (_hasFocus && !_value.selection.isValid) {
+      // If this field is focused and the selection is invalid, place the cursor at
+      // the end. Does not rely on _handleFocusChanged because it makes selection
+      // handles visible on Android.
+      // Unregister as a listener to the text controller while making the change.
+      widget.controller.removeListener(_didChangeTextEditingValue);
+      widget.controller.selection = _adjustedSelectionWhenFocused()!;
+      widget.controller.addListener(_didChangeTextEditingValue);
+    }
     _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
@@ -3726,27 +3735,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
-      final bool shouldSelectAll = widget.selectionEnabled && kIsWeb
-          && !_isMultiline && !_nextFocusChangeIsInternal;
-      if (shouldSelectAll) {
-        // On native web, single line <input> tags select all when receiving
-        // focus.
-        _handleSelectionChanged(
-          TextSelection(
-            baseOffset: 0,
-            extentOffset: _value.text.length,
-          ),
-          null,
-        );
-      } else if (!_value.selection.isValid) {
-        // Place cursor at the end if the selection is invalid when we receive focus.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
+      final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
+      if (updatedSelection != null) {
+        _handleSelectionChanged(updatedSelection, null);
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
       setState(() { _currentPromptRectRange = null; });
     }
     updateKeepAlive();
+  }
+
+  TextSelection? _adjustedSelectionWhenFocused() {
+    TextSelection? selection;
+    final bool shouldSelectAll = widget.selectionEnabled && kIsWeb
+        && !_isMultiline && !_nextFocusChangeIsInternal;
+    if (shouldSelectAll) {
+      // On native web, single line <input> tags select all when receiving
+      // focus.
+      selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _value.text.length,
+      );
+    } else if (!_value.selection.isValid) {
+      // Place cursor at the end if the selection is invalid when we receive focus.
+      selection = TextSelection.collapsed(offset: _value.text.length);
+    }
+    return selection;
   }
 
   void _compositeCallback(Layer layer) {
