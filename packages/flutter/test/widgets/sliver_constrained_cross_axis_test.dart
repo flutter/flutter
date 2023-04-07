@@ -42,9 +42,22 @@ void main() {
     expect(box.size.height, 100);
     expect(box.size.width, VIEWPORT_WIDTH);
   });
+
+  testWidgets('SliverConstrainedCrossAxis constrains the height when direction is horizontal', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildSliverConstrainedCrossAxis(
+      maxExtent: 50,
+      scrollDirection: Axis.horizontal,
+    ));
+
+    final RenderBox box = tester.renderObject(find.byType(Container));
+    expect(box.size.height, 50);
+  });
 }
 
-Widget _buildSliverConstrainedCrossAxis({required double maxExtent, GlobalKey? key}) {
+Widget _buildSliverConstrainedCrossAxis({
+  required double maxExtent,
+  Axis scrollDirection = Axis.vertical,
+}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
@@ -52,12 +65,14 @@ Widget _buildSliverConstrainedCrossAxis({required double maxExtent, GlobalKey? k
         width: VIEWPORT_WIDTH,
         height: VIEWPORT_HEIGHT,
         child: CustomScrollView(
+          scrollDirection: scrollDirection,
           slivers: <Widget>[
             SliverConstrainedCrossAxis(
               maxExtent: maxExtent,
               sliver: SliverToBoxAdapter(
-                key: key,
-                child: Container(height: 100),
+                child: scrollDirection == Axis.vertical
+                  ? Container(height: 100)
+                  : Container(width: 100),
               ),
             ),
           ],

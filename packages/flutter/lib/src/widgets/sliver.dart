@@ -1363,10 +1363,9 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
 
 /// A sliver that constrains the cross axis extent of its sliver child.
 ///
-/// The [SliverConstrainedCrossAxis] takes an [maxExtent] parameter and uses it as
+/// The [SliverConstrainedCrossAxis] takes a [maxExtent] parameter and uses it as
 /// the cross axis extent of the [SliverConstraints] passed to the sliver child.
-/// The widget ensures that the [maxExtent] is a value between 0 and the parent's
-/// cross axis extent.
+/// The widget ensures that the [maxExtent] is a nonnegative value.
 ///
 /// This is useful when you want to apply a custom cross-axis extent constraint
 /// to a sliver child, as slivers typically consume the full cross axis extent.
