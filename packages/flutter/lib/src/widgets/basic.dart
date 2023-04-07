@@ -6740,10 +6740,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// as usual. It just cannot be the target of located events, because it returns
 /// false from [RenderBox.hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools). If
-/// [ignoringSemantics] is null, it uses the value of [ignoring].
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
 ///
 /// {@tool dartpad}
@@ -6756,6 +6752,24 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
+/// ## Semantics
+///
+/// Using this widget may also affect how the semantics subtree underneath this
+/// widget is collected.
+///
+/// {@template flutter.widgets.IgnorePointer.Semantics}
+/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
+/// the subtree will be invisible to assistive technologies.
+///
+/// If [ignoringSemantics] is false, the semantics subtree is collected as
+/// usual.
+///
+/// If [ignoringSemantics] is not set, then [ignoring] decides how the
+/// semantics subtree is collected. If [ignoring] is true, pointer-related
+/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
+/// subtree remains untouched.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
@@ -6764,11 +6778,14 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
-  /// this render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null.
   const IgnorePointer({
     super.key,
     this.ignoring = true,
+    @Deprecated(
+      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     this.ignoringSemantics,
     super.child,
   });
@@ -6777,13 +6794,22 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   ///
   /// Regardless of whether this widget is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
+  ///
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  ///
+  /// Defaults to true.
   final bool ignoring;
 
-  /// Whether the semantics of this widget is ignored when compiling the semantics tree.
+  /// Whether the semantics of this widget is ignored when compiling the
+  /// semantics subtree.
   ///
-  /// If null, defaults to value of [ignoring].
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
+  @Deprecated(
+    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   final bool? ignoringSemantics;
 
   @override
@@ -6817,6 +6843,9 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
 ///
+/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// the semantics layer (and thus e.g. accessibility tools).
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// {@tool dartpad}
@@ -6826,6 +6855,23 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
+///
+/// ## Semantics
+///
+/// Using this widget may also affect how the semantics subtree underneath this
+/// widget is collected.
+///
+/// {@template flutter.widgets.AbsorbPointer.Semantics}
+/// If [ignoringSemantics] is true, the semantics subtree is dropped.
+///
+/// If [ignoringSemantics] is false, the semantics subtree is collected as
+/// usual.
+///
+/// If [ignoringSemantics] is not set, then [absorbing] decides how the
+/// semantics subtree is collected. If [absorbing] is true, pointer-related
+/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
+/// subtree remains untouched.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -6838,8 +6884,12 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   const AbsorbPointer({
     super.key,
     this.absorbing = true,
-    super.child,
+    @Deprecated(
+      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     this.ignoringSemantics,
+    super.child,
   });
 
   /// Whether this widget absorbs pointers during hit testing.
@@ -6847,14 +6897,22 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Regardless of whether this render object absorbs pointers during hit
   /// testing, it will still consume space during layout and be visible during
   /// painting.
+  ///
+  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  ///
+  /// Defaults to true.
   final bool absorbing;
 
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// If null, defaults to the value of [absorbing].
+  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
+  @Deprecated(
+    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   final bool? ignoringSemantics;
 
   @override
@@ -6968,6 +7026,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool container = false,
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
+    bool blockUserActions = false,
     bool? enabled,
     bool? checked,
     bool? mixed,
@@ -7033,6 +7092,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     container: container,
     explicitChildNodes: explicitChildNodes,
     excludeSemantics: excludeSemantics,
+    blockUserActions: blockUserActions,
     properties: SemanticsProperties(
       enabled: enabled,
       checked: checked,
@@ -7108,6 +7168,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.container = false,
     this.explicitChildNodes = false,
     this.excludeSemantics = false,
+    this.blockUserActions = false,
     required this.properties,
   });
 
@@ -7151,12 +7212,48 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// an [ExcludeSemantics] widget and then another [Semantics] widget.
   final bool excludeSemantics;
 
+  /// Whether to block user interactions for the rendering subtree.
+  ///
+  /// Setting this to true will prevent users from interacting with The
+  /// rendering object configured by this widget and its subtree through
+  /// pointer-related [SemanticsAction]s in assistive technologies.
+  ///
+  /// The [SemanticsNode] created from this widget is still focusable by
+  /// assistive technologies. Only pointer-related [SemanticsAction]s, such as
+  /// [SemanticsAction.tap] or its friends, are blocked.
+  ///
+  /// If this widget is merged into a parent semantics node, only the
+  /// [SemanticsAction]s of this widget and the widgets in the subtree are
+  /// blocked.
+  ///
+  /// For example:
+  /// ```dart
+  /// void _myTap() { }
+  /// void _myLongPress() { }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Semantics(
+  ///     onTap: _myTap,
+  ///     child: Semantics(
+  ///       blockUserActions: true,
+  ///       onLongPress: _myLongPress,
+  ///       child: const Text('label'),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// The result semantics node will still have `_myTap`, but the `_myLongPress`
+  /// will be blocked.
+  final bool blockUserActions;
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
       excludeSemantics: excludeSemantics,
+      blockUserActions: blockUserActions,
       properties: properties,
       textDirection: _getTextDirection(context),
     );
@@ -7186,6 +7283,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..explicitChildNodes = explicitChildNodes
       ..excludeSemantics = excludeSemantics
+      ..blockUserActions = blockUserActions
       ..properties = properties
       ..textDirection = _getTextDirection(context);
   }

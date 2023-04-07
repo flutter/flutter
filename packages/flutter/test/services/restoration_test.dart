@@ -304,7 +304,7 @@ void main() {
 }
 
 Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
-  await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+  await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
     'flutter/restoration',
     const StandardMethodCodec().encodeMethodCall(MethodCall('push', data)),
     (_) { },
