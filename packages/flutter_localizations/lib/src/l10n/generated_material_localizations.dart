@@ -375,6 +375,24 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Skuif af';
+
+  @override
+  String get reorderItemLeft => 'Skuif na links';
+
+  @override
+  String get reorderItemRight => 'Skuif na regs';
+
+  @override
+  String get reorderItemToEnd => 'Skuif na die einde';
+
+  @override
+  String get reorderItemToStart => 'Skuif na die begin';
+
+  @override
+  String get reorderItemUp => 'Skuif op';
+
+  @override
   String get rowsPerPageTitle => 'Rye per bladsy:';
 
   @override
@@ -812,6 +830,24 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'ወደ ታች ውሰድ';
+
+  @override
+  String get reorderItemLeft => 'ወደ ግራ ውሰድ';
+
+  @override
+  String get reorderItemRight => 'ወደ ቀኝ ውሰድ';
+
+  @override
+  String get reorderItemToEnd => 'ወደ መጨረሻ ውሰድ';
+
+  @override
+  String get reorderItemToStart => 'ወደ መጀመሪያ ውሰድ';
+
+  @override
+  String get reorderItemUp => 'ወደ ላይ ውሰድ';
 
   @override
   String get rowsPerPageTitle => 'ረድፎች በገጽ፦';
@@ -1253,6 +1289,24 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'لا أحرف متبقية';
 
   @override
+  String get reorderItemDown => 'نقل لأسفل';
+
+  @override
+  String get reorderItemLeft => 'نقل لليمين';
+
+  @override
+  String get reorderItemRight => 'نقل لليسار';
+
+  @override
+  String get reorderItemToEnd => 'نقل إلى نهاية القائمة';
+
+  @override
+  String get reorderItemToStart => 'نقل إلى بداية القائمة';
+
+  @override
+  String get reorderItemUp => 'نقل لأعلى';
+
+  @override
   String get rowsPerPageTitle => 'عدد الصفوف في الصفحة:';
 
   @override
@@ -1690,6 +1744,24 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'তললৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemLeft => 'বাওঁফাললৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemRight => 'সোঁফাললৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemToEnd => 'শেষলৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemToStart => 'আৰম্ভণিলৈ স্থানান্তৰ কৰক';
+
+  @override
+  String get reorderItemUp => 'ওপৰলৈ নিয়ক';
 
   @override
   String get rowsPerPageTitle => 'প্ৰতিটো পৃষ্ঠাত থকা শাৰী:';
@@ -2131,6 +2203,24 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Aşağı köçürün';
+
+  @override
+  String get reorderItemLeft => 'Sola köçürün';
+
+  @override
+  String get reorderItemRight => 'Sağa köçürün';
+
+  @override
+  String get reorderItemToEnd => 'Sona köçürün';
+
+  @override
+  String get reorderItemToStart => 'Əvvələ köçürün';
+
+  @override
+  String get reorderItemUp => 'Yuxarı köçürün';
+
+  @override
   String get rowsPerPageTitle => 'Hər səhifə üzrə sıra:';
 
   @override
@@ -2568,6 +2658,24 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'Перамясціць уніз';
+
+  @override
+  String get reorderItemLeft => 'Перамясціць улева';
+
+  @override
+  String get reorderItemRight => 'Перамясціць управа';
+
+  @override
+  String get reorderItemToEnd => 'Перамясціць у канец';
+
+  @override
+  String get reorderItemToStart => 'Перамясціць у пачатак';
+
+  @override
+  String get reorderItemUp => 'Перамясціць уверх';
 
   @override
   String get rowsPerPageTitle => 'Радкоў на старонку:';
@@ -3009,6 +3117,24 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Преместване надолу';
+
+  @override
+  String get reorderItemLeft => 'Преместване наляво';
+
+  @override
+  String get reorderItemRight => 'Преместване надясно';
+
+  @override
+  String get reorderItemToEnd => 'Преместване в края';
+
+  @override
+  String get reorderItemToStart => 'Преместване в началото';
+
+  @override
+  String get reorderItemUp => 'Преместване нагоре';
+
+  @override
   String get rowsPerPageTitle => 'Редове на страница:';
 
   @override
@@ -3446,6 +3572,24 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'নিচের দিকে সরান';
+
+  @override
+  String get reorderItemLeft => 'বাঁদিকে সরান';
+
+  @override
+  String get reorderItemRight => 'ডানদিকে সরান';
+
+  @override
+  String get reorderItemToEnd => 'একদম শেষের দিকে যান';
+
+  @override
+  String get reorderItemToStart => 'চালু করতে সরান';
+
+  @override
+  String get reorderItemUp => 'উপরের দিকে সরান';
 
   @override
   String get rowsPerPageTitle => 'প্রতি পৃষ্ঠায় সারির সংখ্যা:';
@@ -3887,6 +4031,24 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Pomjeri nadolje';
+
+  @override
+  String get reorderItemLeft => 'Pomjeri lijevo';
+
+  @override
+  String get reorderItemRight => 'Pomjeri desno';
+
+  @override
+  String get reorderItemToEnd => 'Pomjerite na kraj';
+
+  @override
+  String get reorderItemToStart => 'Pomjerite na početak';
+
+  @override
+  String get reorderItemUp => 'Pomjeri nagore';
+
+  @override
   String get rowsPerPageTitle => 'Broj redova po stranici:';
 
   @override
@@ -4324,6 +4486,24 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Mou avall';
+
+  @override
+  String get reorderItemLeft => "Mou cap a l'esquerra";
+
+  @override
+  String get reorderItemRight => 'Mou cap a la dreta';
+
+  @override
+  String get reorderItemToEnd => 'Mou al final';
+
+  @override
+  String get reorderItemToStart => 'Mou al principi';
+
+  @override
+  String get reorderItemUp => 'Mou amunt';
 
   @override
   String get rowsPerPageTitle => 'Files per pàgina:';
@@ -4765,6 +4945,24 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Přesunout dolů';
+
+  @override
+  String get reorderItemLeft => 'Přesunout doleva';
+
+  @override
+  String get reorderItemRight => 'Přesunout doprava';
+
+  @override
+  String get reorderItemToEnd => 'Přesunout na konec';
+
+  @override
+  String get reorderItemToStart => 'Přesunout na začátek';
+
+  @override
+  String get reorderItemUp => 'Přesunout nahoru';
+
+  @override
   String get rowsPerPageTitle => 'Počet řádků na stránku:';
 
   @override
@@ -5202,6 +5400,24 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'Dim nodau ar ôl';
+
+  @override
+  String get reorderItemDown => 'Symud i lawr';
+
+  @override
+  String get reorderItemLeft => "Symud i'r chwith";
+
+  @override
+  String get reorderItemRight => "Symud i'r dde";
+
+  @override
+  String get reorderItemToEnd => "Symud i'r diwedd";
+
+  @override
+  String get reorderItemToStart => "Symud i'r dechrau";
+
+  @override
+  String get reorderItemUp => 'Symud i fyny';
 
   @override
   String get rowsPerPageTitle => 'Rhesi fesul tudalen:';
@@ -5643,6 +5859,24 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Flyt ned';
+
+  @override
+  String get reorderItemLeft => 'Flyt til venstre';
+
+  @override
+  String get reorderItemRight => 'Flyt til højre';
+
+  @override
+  String get reorderItemToEnd => 'Flyt til sidst på listen';
+
+  @override
+  String get reorderItemToStart => 'Flyt til først på listen';
+
+  @override
+  String get reorderItemUp => 'Flyt op';
+
+  @override
   String get rowsPerPageTitle => 'Rækker pr. side:';
 
   @override
@@ -6080,6 +6314,24 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Nach unten verschieben';
+
+  @override
+  String get reorderItemLeft => 'Nach links verschieben';
+
+  @override
+  String get reorderItemRight => 'Nach rechts verschieben';
+
+  @override
+  String get reorderItemToEnd => 'An das Ende verschieben';
+
+  @override
+  String get reorderItemToStart => 'An den Anfang verschieben';
+
+  @override
+  String get reorderItemUp => 'Nach oben verschieben';
 
   @override
   String get rowsPerPageTitle => 'Zeilen pro Seite:';
@@ -6585,6 +6837,24 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Μετακίνηση προς τα κάτω';
+
+  @override
+  String get reorderItemLeft => 'Μετακίνηση αριστερά';
+
+  @override
+  String get reorderItemRight => 'Μετακίνηση δεξιά';
+
+  @override
+  String get reorderItemToEnd => 'Μετακίνηση στο τέλος';
+
+  @override
+  String get reorderItemToStart => 'Μετακίνηση στην αρχή';
+
+  @override
+  String get reorderItemUp => 'Μετακίνηση προς τα πάνω';
+
+  @override
   String get rowsPerPageTitle => 'Σειρές ανά σελίδα:';
 
   @override
@@ -7024,6 +7294,24 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'No characters remaining';
 
   @override
+  String get reorderItemDown => 'Move down';
+
+  @override
+  String get reorderItemLeft => 'Move left';
+
+  @override
+  String get reorderItemRight => 'Move right';
+
+  @override
+  String get reorderItemToEnd => 'Move to the end';
+
+  @override
+  String get reorderItemToStart => 'Move to the start';
+
+  @override
+  String get reorderItemUp => 'Move up';
+
+  @override
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
@@ -7188,6 +7476,12 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => 'Dialogue';
+
+  @override
+  String get reorderItemLeft => 'Move to the left';
+
+  @override
+  String get reorderItemRight => 'Move to the right';
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
@@ -7291,6 +7585,12 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => 'Dialogue';
+
+  @override
+  String get reorderItemLeft => 'Move to the left';
+
+  @override
+  String get reorderItemRight => 'Move to the right';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
@@ -7376,6 +7676,12 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => 'Dialogue';
+
+  @override
+  String get reorderItemLeft => 'Move to the left';
+
+  @override
+  String get reorderItemRight => 'Move to the right';
 }
 
 /// The translations for English, as used in Ireland (`en_IE`).
@@ -7461,6 +7767,12 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => 'Dialogue';
+
+  @override
+  String get reorderItemLeft => 'Move to the left';
+
+  @override
+  String get reorderItemRight => 'Move to the right';
 }
 
 /// The translations for English, as used in India (`en_IN`).
@@ -7543,6 +7855,12 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => 'Dialogue';
+
+  @override
+  String get reorderItemLeft => 'Move to the left';
+
+  @override
+  String get reorderItemRight => 'Move to the right';
 }
 
 /// The translations for English, as used in New Zealand (`en_NZ`).
@@ -7625,6 +7943,12 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => 'Dialogue';
+
+  @override
+  String get reorderItemLeft => 'Move to the left';
+
+  @override
+  String get reorderItemRight => 'Move to the right';
 }
 
 /// The translations for English, as used in Singapore (`en_SG`).
@@ -7707,6 +8031,12 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => 'Dialogue';
+
+  @override
+  String get reorderItemLeft => 'Move to the left';
+
+  @override
+  String get reorderItemRight => 'Move to the right';
 }
 
 /// The translations for English, as used in South Africa (`en_ZA`).
@@ -7792,6 +8122,12 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
 
   @override
   String get dialogLabel => 'Dialogue';
+
+  @override
+  String get reorderItemLeft => 'Move to the left';
+
+  @override
+  String get reorderItemRight => 'Move to the right';
 }
 
 /// The translations for Spanish Castilian (`es`).
@@ -8149,6 +8485,24 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Mover hacia abajo';
+
+  @override
+  String get reorderItemLeft => 'Mover hacia la izquierda';
+
+  @override
+  String get reorderItemRight => 'Mover hacia la derecha';
+
+  @override
+  String get reorderItemToEnd => 'Mover al final';
+
+  @override
+  String get reorderItemToStart => 'Mover al principio';
+
+  @override
+  String get reorderItemUp => 'Mover hacia arriba';
+
+  @override
   String get rowsPerPageTitle => 'Filas por página:';
 
   @override
@@ -8393,6 +8747,9 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get dialogLabel => 'Diálogo';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get expandedIconTapHint => 'Contraer';
 
   @override
@@ -8559,6 +8916,9 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   String get dialogLabel => 'Diálogo';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get expandedIconTapHint => 'Contraer';
 
   @override
@@ -8681,6 +9041,9 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -8849,6 +9212,9 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -9013,6 +9379,9 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -9181,6 +9550,9 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -9345,6 +9717,9 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -9513,6 +9888,9 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -9677,6 +10055,9 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -9845,6 +10226,9 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -10009,6 +10393,9 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -10177,6 +10564,9 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -10341,6 +10731,9 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -10509,6 +10902,9 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -10673,6 +11069,9 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -10841,6 +11240,9 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -11007,6 +11409,9 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -11171,6 +11576,9 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -11342,6 +11750,9 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String get unspecifiedDateRange => 'Período';
 
   @override
+  String get reorderItemToStart => 'Mover al inicio';
+
+  @override
   String get modalBarrierDismissLabel => 'Descartar';
 
   @override
@@ -11506,6 +11917,9 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
 
   @override
   String get unspecifiedDateRange => 'Período';
+
+  @override
+  String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get modalBarrierDismissLabel => 'Descartar';
@@ -11909,6 +12323,24 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Teisalda alla';
+
+  @override
+  String get reorderItemLeft => 'Teisalda vasakule';
+
+  @override
+  String get reorderItemRight => 'Teisalda paremale';
+
+  @override
+  String get reorderItemToEnd => 'Teisalda lõppu';
+
+  @override
+  String get reorderItemToStart => 'Teisalda algusesse';
+
+  @override
+  String get reorderItemUp => 'Teisalda üles';
 
   @override
   String get rowsPerPageTitle => 'Ridu lehe kohta:';
@@ -12350,6 +12782,24 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Eraman behera';
+
+  @override
+  String get reorderItemLeft => 'Eraman ezkerrera';
+
+  @override
+  String get reorderItemRight => 'Eraman eskuinera';
+
+  @override
+  String get reorderItemToEnd => 'Eraman amaierara';
+
+  @override
+  String get reorderItemToStart => 'Eraman hasierara';
+
+  @override
+  String get reorderItemUp => 'Eraman gora';
+
+  @override
   String get rowsPerPageTitle => 'Errenkadak orriko:';
 
   @override
@@ -12787,6 +13237,24 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'انتقال به پایین';
+
+  @override
+  String get reorderItemLeft => 'انتقال به راست';
+
+  @override
+  String get reorderItemRight => 'انتقال به چپ';
+
+  @override
+  String get reorderItemToEnd => 'انتقال به انتها';
+
+  @override
+  String get reorderItemToStart => 'انتقال به ابتدا';
+
+  @override
+  String get reorderItemUp => 'انتقال به بالا';
 
   @override
   String get rowsPerPageTitle => 'ردیف در هر صفحه:';
@@ -13228,6 +13696,24 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Siirrä alas';
+
+  @override
+  String get reorderItemLeft => 'Siirrä vasemmalle';
+
+  @override
+  String get reorderItemRight => 'Siirrä oikealle';
+
+  @override
+  String get reorderItemToEnd => 'Siirrä loppuun';
+
+  @override
+  String get reorderItemToStart => 'Siirrä alkuun';
+
+  @override
+  String get reorderItemUp => 'Siirrä ylös';
+
+  @override
   String get rowsPerPageTitle => 'Riviä/sivu:';
 
   @override
@@ -13665,6 +14151,24 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Ilipat pababa';
+
+  @override
+  String get reorderItemLeft => 'Ilipat pakaliwa';
+
+  @override
+  String get reorderItemRight => 'Ilipat pakanan';
+
+  @override
+  String get reorderItemToEnd => 'Ilipat sa dulo';
+
+  @override
+  String get reorderItemToStart => 'Ilipat sa simula';
+
+  @override
+  String get reorderItemUp => 'Ilipat pataas';
 
   @override
   String get rowsPerPageTitle => 'Mga row bawat page:';
@@ -14106,6 +14610,24 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Déplacer vers le bas';
+
+  @override
+  String get reorderItemLeft => 'Déplacer vers la gauche';
+
+  @override
+  String get reorderItemRight => 'Déplacer vers la droite';
+
+  @override
+  String get reorderItemToEnd => 'Déplacer vers la fin';
+
+  @override
+  String get reorderItemToStart => 'Déplacer vers le début';
+
+  @override
+  String get reorderItemUp => 'Déplacer vers le haut';
+
+  @override
   String get rowsPerPageTitle => 'Lignes par page :';
 
   @override
@@ -14321,6 +14843,12 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Sélectionnez les minutes';
+
+  @override
+  String get reorderItemToStart => 'Déplacer au début';
+
+  @override
+  String get reorderItemToEnd => 'Déplacer à la fin';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.frenchCanadian;
@@ -14679,6 +15207,24 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Mover cara abaixo';
+
+  @override
+  String get reorderItemLeft => 'Mover cara á esquerda';
+
+  @override
+  String get reorderItemRight => 'Mover cara á dereita';
+
+  @override
+  String get reorderItemToEnd => 'Mover ao final';
+
+  @override
+  String get reorderItemToStart => 'Mover ao inicio';
+
+  @override
+  String get reorderItemUp => 'Mover cara arriba';
 
   @override
   String get rowsPerPageTitle => 'Filas por páxina:';
@@ -15120,6 +15666,24 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Nach unten verschieben';
+
+  @override
+  String get reorderItemLeft => 'Nach links verschieben';
+
+  @override
+  String get reorderItemRight => 'Nach rechts verschieben';
+
+  @override
+  String get reorderItemToEnd => 'An das Ende verschieben';
+
+  @override
+  String get reorderItemToStart => 'An den Anfang verschieben';
+
+  @override
+  String get reorderItemUp => 'Nach oben verschieben';
+
+  @override
   String get rowsPerPageTitle => 'Zeilen pro Seite:';
 
   @override
@@ -15557,6 +16121,24 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'નીચે ખસેડો';
+
+  @override
+  String get reorderItemLeft => 'ડાબે ખસેડો';
+
+  @override
+  String get reorderItemRight => 'જમણે ખસેડો';
+
+  @override
+  String get reorderItemToEnd => 'અંતમાં ખસેડો';
+
+  @override
+  String get reorderItemToStart => 'પ્રારંભમાં ખસેડો';
+
+  @override
+  String get reorderItemUp => 'ઉપર ખસેડો';
 
   @override
   String get rowsPerPageTitle => 'પેજ દીઠ પંક્તિઓ:';
@@ -15998,6 +16580,24 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'העברה למטה';
+
+  @override
+  String get reorderItemLeft => 'העברה שמאלה';
+
+  @override
+  String get reorderItemRight => 'העברה ימינה';
+
+  @override
+  String get reorderItemToEnd => 'העברה לסוף';
+
+  @override
+  String get reorderItemToStart => 'העברה להתחלה';
+
+  @override
+  String get reorderItemUp => 'העברה למעלה';
+
+  @override
   String get rowsPerPageTitle => 'שורות בכל דף:';
 
   @override
@@ -16435,6 +17035,24 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'नीचे ले जाएं';
+
+  @override
+  String get reorderItemLeft => 'बाएं ले जाएं';
+
+  @override
+  String get reorderItemRight => 'दाएं ले जाएं';
+
+  @override
+  String get reorderItemToEnd => 'आखिर में ले जाएं';
+
+  @override
+  String get reorderItemToStart => 'शुरुआत पर ले जाएं';
+
+  @override
+  String get reorderItemUp => 'ऊपर ले जाएं';
 
   @override
   String get rowsPerPageTitle => 'हर पेज में पंक्तियों की संख्या:';
@@ -16876,6 +17494,24 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Pomakni prema dolje';
+
+  @override
+  String get reorderItemLeft => 'Pomakni ulijevo';
+
+  @override
+  String get reorderItemRight => 'Pomakni udesno';
+
+  @override
+  String get reorderItemToEnd => 'Premjesti na kraj';
+
+  @override
+  String get reorderItemToStart => 'Premjesti na početak';
+
+  @override
+  String get reorderItemUp => 'Pomakni prema gore';
+
+  @override
   String get rowsPerPageTitle => 'Redaka po stranici:';
 
   @override
@@ -17313,6 +17949,24 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Áthelyezés lefelé';
+
+  @override
+  String get reorderItemLeft => 'Áthelyezés balra';
+
+  @override
+  String get reorderItemRight => 'Áthelyezés jobbra';
+
+  @override
+  String get reorderItemToEnd => 'Áthelyezés a végére';
+
+  @override
+  String get reorderItemToStart => 'Áthelyezés az elejére';
+
+  @override
+  String get reorderItemUp => 'Áthelyezés felfelé';
 
   @override
   String get rowsPerPageTitle => 'Oldalankénti sorszám:';
@@ -17754,6 +18408,24 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'Նիշի հնարավորություն չկա';
 
   @override
+  String get reorderItemDown => 'Տեղափոխել ներքև';
+
+  @override
+  String get reorderItemLeft => 'Տեղափոխել ձախ';
+
+  @override
+  String get reorderItemRight => 'Տեղափոխել աջ';
+
+  @override
+  String get reorderItemToEnd => 'Տեղափոխել վերջ';
+
+  @override
+  String get reorderItemToStart => 'Տեղափոխել սկիզբ';
+
+  @override
+  String get reorderItemUp => 'Տեղափոխել վերև';
+
+  @override
   String get rowsPerPageTitle => 'Մեկ էջի տողերը՝';
 
   @override
@@ -18191,6 +18863,24 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Turunkan';
+
+  @override
+  String get reorderItemLeft => 'Pindahkan ke kiri';
+
+  @override
+  String get reorderItemRight => 'Pindahkan ke kanan';
+
+  @override
+  String get reorderItemToEnd => 'Pindahkan ke akhir';
+
+  @override
+  String get reorderItemToStart => 'Pindahkan ke awal';
+
+  @override
+  String get reorderItemUp => 'Naikkan';
 
   @override
   String get rowsPerPageTitle => 'Baris per halaman:';
@@ -18632,6 +19322,24 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Færa niður';
+
+  @override
+  String get reorderItemLeft => 'Færa til vinstri';
+
+  @override
+  String get reorderItemRight => 'Færa til hægri';
+
+  @override
+  String get reorderItemToEnd => 'Færa aftast';
+
+  @override
+  String get reorderItemToStart => 'Færa fremst';
+
+  @override
+  String get reorderItemUp => 'Færa upp';
+
+  @override
   String get rowsPerPageTitle => 'Línur á síðu:';
 
   @override
@@ -19069,6 +19777,24 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Sposta giù';
+
+  @override
+  String get reorderItemLeft => 'Sposta a sinistra';
+
+  @override
+  String get reorderItemRight => 'Sposta a destra';
+
+  @override
+  String get reorderItemToEnd => 'Sposta alla fine';
+
+  @override
+  String get reorderItemToStart => "Sposta all'inizio";
+
+  @override
+  String get reorderItemUp => 'Sposta su';
 
   @override
   String get rowsPerPageTitle => 'Righe per pagina:';
@@ -19510,6 +20236,24 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => '下に移動';
+
+  @override
+  String get reorderItemLeft => '左に移動';
+
+  @override
+  String get reorderItemRight => '右に移動';
+
+  @override
+  String get reorderItemToEnd => '最後に移動';
+
+  @override
+  String get reorderItemToStart => '先頭に移動';
+
+  @override
+  String get reorderItemUp => '上に移動';
+
+  @override
   String get rowsPerPageTitle => 'ページあたりの行数:';
 
   @override
@@ -19947,6 +20691,24 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'ქვემოთ გადატანა';
+
+  @override
+  String get reorderItemLeft => 'მარცხნივ გადატანა';
+
+  @override
+  String get reorderItemRight => 'მარჯვნივ გადატანა';
+
+  @override
+  String get reorderItemToEnd => 'ბოლოში გადატანა';
+
+  @override
+  String get reorderItemToStart => 'დასაწყისში გადატანა';
+
+  @override
+  String get reorderItemUp => 'ზემოთ გადატანა';
 
   @override
   String get rowsPerPageTitle => 'მწკრივი გვერდზე:';
@@ -20388,6 +21150,24 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'Таңбалар қалмады';
 
   @override
+  String get reorderItemDown => 'Төменге жылжыту';
+
+  @override
+  String get reorderItemLeft => 'Солға жылжыту';
+
+  @override
+  String get reorderItemRight => 'Оңға жылжыту';
+
+  @override
+  String get reorderItemToEnd => 'Соңына өту';
+
+  @override
+  String get reorderItemToStart => 'Басына өту';
+
+  @override
+  String get reorderItemUp => 'Жоғарыға жылжыту';
+
+  @override
   String get rowsPerPageTitle => 'Әр беттегі жолдар саны:';
 
   @override
@@ -20825,6 +21605,24 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'ផ្លាស់ទី​ចុះ​ក្រោម';
+
+  @override
+  String get reorderItemLeft => 'ផ្លាស់ទី​ទៅ​ឆ្វេង';
+
+  @override
+  String get reorderItemRight => 'ផ្លាស់ទីទៅ​ស្តាំ';
+
+  @override
+  String get reorderItemToEnd => 'ផ្លាស់ទីទៅ​ចំណុចបញ្ចប់';
+
+  @override
+  String get reorderItemToStart => 'ផ្លាស់ទីទៅ​ចំណុច​ចាប់ផ្ដើម';
+
+  @override
+  String get reorderItemUp => 'ផ្លាស់ទី​ឡើង​លើ';
 
   @override
   String get rowsPerPageTitle => 'ជួរ​ដេក​ក្នុង​មួយ​ទំព័រ៖';
@@ -21266,6 +22064,24 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => '\u{c95}\u{cc6}\u{cb3}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemLeft => '\u{c8e}\u{ca1}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemRight => '\u{cac}\u{cb2}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemToEnd => '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemToStart => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get reorderItemUp => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
   String get rowsPerPageTitle => '\u{caa}\u{ccd}\u{cb0}\u{ca4}\u{cbf}\u{20}\u{caa}\u{cc1}\u{c9f}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cbe}\u{cb2}\u{cc1}\u{c97}\u{cb3}\u{cc1}\u{3a}';
 
   @override
@@ -21703,6 +22519,24 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => '아래로 이동';
+
+  @override
+  String get reorderItemLeft => '왼쪽으로 이동';
+
+  @override
+  String get reorderItemRight => '오른쪽으로 이동';
+
+  @override
+  String get reorderItemToEnd => '끝으로 이동';
+
+  @override
+  String get reorderItemToStart => '시작으로 이동';
+
+  @override
+  String get reorderItemUp => '위로 이동';
 
   @override
   String get rowsPerPageTitle => '페이지당 행 수:';
@@ -22144,6 +22978,24 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Төмөн жылдыруу';
+
+  @override
+  String get reorderItemLeft => 'Солго жылдыруу';
+
+  @override
+  String get reorderItemRight => 'Оңго жылдыруу';
+
+  @override
+  String get reorderItemToEnd => 'Аягына жылдыруу';
+
+  @override
+  String get reorderItemToStart => 'Башына жылдыруу';
+
+  @override
+  String get reorderItemUp => 'Жогору жылдыруу';
+
+  @override
   String get rowsPerPageTitle => 'Бир беттеги саптардын саны:';
 
   @override
@@ -22581,6 +23433,24 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'ຍ້າຍລົງ';
+
+  @override
+  String get reorderItemLeft => 'ຍ້າຍໄປຊ້າຍ';
+
+  @override
+  String get reorderItemRight => 'ຍ້າຍໄປຂວາ';
+
+  @override
+  String get reorderItemToEnd => 'ຍ້າຍໄປສິ້ນສຸດ';
+
+  @override
+  String get reorderItemToStart => 'ຍ້າຍໄປເລີ່ມຕົ້ນ';
+
+  @override
+  String get reorderItemUp => 'ຍ້າຍຂຶ້ນ';
 
   @override
   String get rowsPerPageTitle => 'ແຖວຕໍ່ໜ້າ:';
@@ -23022,6 +23892,24 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Perkelti žemyn';
+
+  @override
+  String get reorderItemLeft => 'Perkelti kairėn';
+
+  @override
+  String get reorderItemRight => 'Perkelti dešinėn';
+
+  @override
+  String get reorderItemToEnd => 'Perkelti į pabaigą';
+
+  @override
+  String get reorderItemToStart => 'Perkelti į pradžią';
+
+  @override
+  String get reorderItemUp => 'Perkelti aukštyn';
+
+  @override
   String get rowsPerPageTitle => 'Eilučių puslapyje:';
 
   @override
@@ -23459,6 +24347,24 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'Nav atlikusi neviena rakstzīme.';
+
+  @override
+  String get reorderItemDown => 'Pārvietot uz leju';
+
+  @override
+  String get reorderItemLeft => 'Pārvietot pa kreisi';
+
+  @override
+  String get reorderItemRight => 'Pārvietot pa labi';
+
+  @override
+  String get reorderItemToEnd => 'Pārvietot uz beigām';
+
+  @override
+  String get reorderItemToStart => 'Pārvietot uz sākumu';
+
+  @override
+  String get reorderItemUp => 'Pārvietot uz augšu';
 
   @override
   String get rowsPerPageTitle => 'Rindas lapā:';
@@ -23900,6 +24806,24 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Преместете надолу';
+
+  @override
+  String get reorderItemLeft => 'Преместете налево';
+
+  @override
+  String get reorderItemRight => 'Преместете надесно';
+
+  @override
+  String get reorderItemToEnd => 'Преместете на крајот';
+
+  @override
+  String get reorderItemToStart => 'Преместете на почеток';
+
+  @override
+  String get reorderItemUp => 'Преместете нагоре';
+
+  @override
   String get rowsPerPageTitle => 'Редови на страница:';
 
   @override
@@ -24337,6 +25261,24 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'താഴോട്ട് നീക്കുക';
+
+  @override
+  String get reorderItemLeft => 'ഇടത്തോട്ട് നീക്കുക';
+
+  @override
+  String get reorderItemRight => 'വലത്തോട്ട് നീക്കുക';
+
+  @override
+  String get reorderItemToEnd => 'അവസാന ഭാഗത്തേക്ക് പോവുക';
+
+  @override
+  String get reorderItemToStart => 'തുടക്കത്തിലേക്ക് പോവുക';
+
+  @override
+  String get reorderItemUp => 'മുകളിലോട്ട് നീക്കുക';
 
   @override
   String get rowsPerPageTitle => 'ഓരോ പേജിലുമുള്ള വരികൾ:';
@@ -24778,6 +25720,24 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'No characters remaining';
 
   @override
+  String get reorderItemDown => 'Доош зөөх';
+
+  @override
+  String get reorderItemLeft => 'Зүүн тийш зөөх';
+
+  @override
+  String get reorderItemRight => 'Баруун тийш зөөх';
+
+  @override
+  String get reorderItemToEnd => 'Төгсгөл рүү зөөх';
+
+  @override
+  String get reorderItemToStart => 'Эхлэл рүү зөөх';
+
+  @override
+  String get reorderItemUp => 'Дээш зөөх';
+
+  @override
   String get rowsPerPageTitle => 'Хуудсан дахь мөрийн тоо:';
 
   @override
@@ -25215,6 +26175,24 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'कोणतेही वर्ण शिल्लक नाहीत';
+
+  @override
+  String get reorderItemDown => 'खाली हलवा';
+
+  @override
+  String get reorderItemLeft => 'डावीकडे हलवा';
+
+  @override
+  String get reorderItemRight => 'उजवीकडे हलवा';
+
+  @override
+  String get reorderItemToEnd => 'शेवटाकडे हलवा';
+
+  @override
+  String get reorderItemToStart => 'सुरुवातीला हलवा';
+
+  @override
+  String get reorderItemUp => 'वर हलवा';
 
   @override
   String get rowsPerPageTitle => 'प्रति पेज पंक्ती:';
@@ -25656,6 +26634,24 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Alih ke bawah';
+
+  @override
+  String get reorderItemLeft => 'Alih ke kiri';
+
+  @override
+  String get reorderItemRight => 'Alih ke kanan';
+
+  @override
+  String get reorderItemToEnd => 'Alih ke penghujung';
+
+  @override
+  String get reorderItemToStart => 'Alih ke permulaan';
+
+  @override
+  String get reorderItemUp => 'Alih ke atas';
+
+  @override
   String get rowsPerPageTitle => 'Baris setiap halaman:';
 
   @override
@@ -26093,6 +27089,24 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'အောက်သို့ရွှေ့ရန်';
+
+  @override
+  String get reorderItemLeft => 'ဘယ်ဘက်သို့ရွှေ့ရန်';
+
+  @override
+  String get reorderItemRight => 'ညာဘက်သို့ရွှေ့ရန်';
+
+  @override
+  String get reorderItemToEnd => 'အဆုံးသို့ ‌ရွှေ့ရန်';
+
+  @override
+  String get reorderItemToStart => 'အစသို့ ရွှေ့ရန်';
+
+  @override
+  String get reorderItemUp => 'အပေါ်သို့ ရွှေ့ရန်';
 
   @override
   String get rowsPerPageTitle => 'စာတစ်မျက်နှာပါ လိုင်းအရေအတွက်−';
@@ -26534,6 +27548,24 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Flytt ned';
+
+  @override
+  String get reorderItemLeft => 'Flytt til venstre';
+
+  @override
+  String get reorderItemRight => 'Flytt til høyre';
+
+  @override
+  String get reorderItemToEnd => 'Flytt til slutten';
+
+  @override
+  String get reorderItemToStart => 'Flytt til starten';
+
+  @override
+  String get reorderItemUp => 'Flytt opp';
+
+  @override
   String get rowsPerPageTitle => 'Rader per side:';
 
   @override
@@ -26971,6 +28003,24 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'तल सार्नुहोस्';
+
+  @override
+  String get reorderItemLeft => 'बायाँ सार्नुहोस्';
+
+  @override
+  String get reorderItemRight => 'दायाँ सार्नुहोस्';
+
+  @override
+  String get reorderItemToEnd => 'अन्त्यमा जानुहोस्';
+
+  @override
+  String get reorderItemToStart => 'सुरुमा सार्नुहोस्';
+
+  @override
+  String get reorderItemUp => 'माथि सार्नुहोस्';
 
   @override
   String get rowsPerPageTitle => 'प्रत्येक पृष्ठमा रहेका पङ्क्तिहरूको सङ्ख्या:';
@@ -27412,6 +28462,24 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Omlaag verplaatsen';
+
+  @override
+  String get reorderItemLeft => 'Naar links verplaatsen';
+
+  @override
+  String get reorderItemRight => 'Naar rechts verplaatsen';
+
+  @override
+  String get reorderItemToEnd => 'Naar het einde verplaatsen';
+
+  @override
+  String get reorderItemToStart => 'Naar het begin verplaatsen';
+
+  @override
+  String get reorderItemUp => 'Omhoog verplaatsen';
+
+  @override
   String get rowsPerPageTitle => 'Rijen per pagina:';
 
   @override
@@ -27849,6 +28917,24 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'Flytt ned';
+
+  @override
+  String get reorderItemLeft => 'Flytt til venstre';
+
+  @override
+  String get reorderItemRight => 'Flytt til høyre';
+
+  @override
+  String get reorderItemToEnd => 'Flytt til slutten';
+
+  @override
+  String get reorderItemToStart => 'Flytt til starten';
+
+  @override
+  String get reorderItemUp => 'Flytt opp';
 
   @override
   String get rowsPerPageTitle => 'Rader per side:';
@@ -28290,6 +29376,24 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'ତଳକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemLeft => 'ବାମକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemRight => 'ଡାହାଣକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemToEnd => 'ଶେଷକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemToStart => 'ଆରମ୍ଭକୁ ଯାଆନ୍ତୁ';
+
+  @override
+  String get reorderItemUp => 'ଉପରକୁ ନିଅନ୍ତୁ';
+
+  @override
   String get rowsPerPageTitle => 'ପୃଷ୍ଠା ପିଛା ଧାଡ଼ି:';
 
   @override
@@ -28727,6 +29831,24 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'ਹੇਠਾਂ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemLeft => 'ਖੱਬੇ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemRight => 'ਸੱਜੇ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemToEnd => 'ਅੰਤ ਵਿੱਚ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemToStart => 'ਸ਼ੁਰੂ ਵਿੱਚ ਲਿਜਾਓ';
+
+  @override
+  String get reorderItemUp => 'ਉੱਪਰ ਲਿਜਾਓ';
 
   @override
   String get rowsPerPageTitle => "ਹਰ ਪੰਨੇ 'ਤੇ ਕਤਾਰਾਂ:";
@@ -29168,6 +30290,24 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Przenieś w dół';
+
+  @override
+  String get reorderItemLeft => 'Przenieś w lewo';
+
+  @override
+  String get reorderItemRight => 'Przenieś w prawo';
+
+  @override
+  String get reorderItemToEnd => 'Przenieś na koniec';
+
+  @override
+  String get reorderItemToStart => 'Przenieś na początek';
+
+  @override
+  String get reorderItemUp => 'Przenieś w górę';
+
+  @override
   String get rowsPerPageTitle => 'Wiersze na stronie:';
 
   @override
@@ -29605,6 +30745,24 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'No characters remaining';
+
+  @override
+  String get reorderItemDown => 'Move down';
+
+  @override
+  String get reorderItemLeft => 'Move left';
+
+  @override
+  String get reorderItemRight => 'Move right';
+
+  @override
+  String get reorderItemToEnd => 'Move to the end';
+
+  @override
+  String get reorderItemToStart => 'Move to the start';
+
+  @override
+  String get reorderItemUp => 'Move up';
 
   @override
   String get rowsPerPageTitle => 'د هرې پاڼې پاڼې:';
@@ -30046,6 +31204,24 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Mover para baixo';
+
+  @override
+  String get reorderItemLeft => 'Mover para a esquerda';
+
+  @override
+  String get reorderItemRight => 'Mover para a direita';
+
+  @override
+  String get reorderItemToEnd => 'Mover para o final';
+
+  @override
+  String get reorderItemToStart => 'Mover para o início';
+
+  @override
+  String get reorderItemUp => 'Mover para cima';
+
+  @override
   String get rowsPerPageTitle => 'Linhas por página:';
 
   @override
@@ -30264,6 +31440,9 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
 
   @override
   String get searchFieldLabel => 'Pesquisar';
+
+  @override
+  String get reorderItemToEnd => 'Mover para o fim';
 
   @override
   String get expandedIconTapHint => 'Reduzir';
@@ -30631,6 +31810,24 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Mutați în jos';
+
+  @override
+  String get reorderItemLeft => 'Mutați la stânga';
+
+  @override
+  String get reorderItemRight => 'Mutați la dreapta';
+
+  @override
+  String get reorderItemToEnd => 'Mutați la sfârșit';
+
+  @override
+  String get reorderItemToStart => 'Mutați la început';
+
+  @override
+  String get reorderItemUp => 'Mutați în sus';
 
   @override
   String get rowsPerPageTitle => 'Rânduri pe pagină:';
@@ -31072,6 +32269,24 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Переместить вниз';
+
+  @override
+  String get reorderItemLeft => 'Переместить влево';
+
+  @override
+  String get reorderItemRight => 'Переместить вправо';
+
+  @override
+  String get reorderItemToEnd => 'Переместить в конец';
+
+  @override
+  String get reorderItemToStart => 'Переместить в начало';
+
+  @override
+  String get reorderItemUp => 'Переместить вверх';
+
+  @override
   String get rowsPerPageTitle => 'Строк на странице:';
 
   @override
@@ -31509,6 +32724,24 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'පහළට ගෙන යන්න';
+
+  @override
+  String get reorderItemLeft => 'වමට ගෙන යන්න';
+
+  @override
+  String get reorderItemRight => 'දකුණට ගෙන යන්න';
+
+  @override
+  String get reorderItemToEnd => 'අවසානයට යන්න';
+
+  @override
+  String get reorderItemToStart => 'ආරම්භය වෙත යන්න';
+
+  @override
+  String get reorderItemUp => 'ඉහළට ගෙන යන්න';
 
   @override
   String get rowsPerPageTitle => 'පිටුවකට පේළි:';
@@ -31950,6 +33183,24 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Presunúť nadol';
+
+  @override
+  String get reorderItemLeft => 'Presunúť doľava';
+
+  @override
+  String get reorderItemRight => 'Presunúť doprava';
+
+  @override
+  String get reorderItemToEnd => 'Presunúť na koniec';
+
+  @override
+  String get reorderItemToStart => 'Presunúť na začiatok';
+
+  @override
+  String get reorderItemUp => 'Presunúť nahor';
+
+  @override
   String get rowsPerPageTitle => 'Počet riadkov na stránku:';
 
   @override
@@ -32387,6 +33638,24 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Premakni navzdol';
+
+  @override
+  String get reorderItemLeft => 'Premakni levo';
+
+  @override
+  String get reorderItemRight => 'Premakni desno';
+
+  @override
+  String get reorderItemToEnd => 'Premakni na konec';
+
+  @override
+  String get reorderItemToStart => 'Premakni na začetek';
+
+  @override
+  String get reorderItemUp => 'Premakni navzgor';
 
   @override
   String get rowsPerPageTitle => 'Vrstice na stran:';
@@ -32828,6 +34097,24 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Lëvize poshtë';
+
+  @override
+  String get reorderItemLeft => 'Lëvize majtas';
+
+  @override
+  String get reorderItemRight => 'Lëvize djathtas';
+
+  @override
+  String get reorderItemToEnd => 'Lëvize në fund';
+
+  @override
+  String get reorderItemToStart => 'Lëvize në fillim';
+
+  @override
+  String get reorderItemUp => 'Lëvize lart';
+
+  @override
   String get rowsPerPageTitle => 'Rreshtat për faqe:';
 
   @override
@@ -33267,6 +34554,24 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Померите надоле';
+
+  @override
+  String get reorderItemLeft => 'Померите улево';
+
+  @override
+  String get reorderItemRight => 'Померите удесно';
+
+  @override
+  String get reorderItemToEnd => 'Померите на крај';
+
+  @override
+  String get reorderItemToStart => 'Померите на почетак';
+
+  @override
+  String get reorderItemUp => 'Померите нагоре';
+
+  @override
   String get rowsPerPageTitle => 'Редова на страници:';
 
   @override
@@ -33576,6 +34881,24 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
 
   @override
   String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
+
+  @override
+  String get reorderItemDown => 'Pomerite nadole';
+
+  @override
+  String get reorderItemLeft => 'Pomerite ulevo';
+
+  @override
+  String get reorderItemRight => 'Pomerite udesno';
+
+  @override
+  String get reorderItemToEnd => 'Pomerite na kraj';
+
+  @override
+  String get reorderItemToStart => 'Pomerite na početak';
+
+  @override
+  String get reorderItemUp => 'Pomerite nagore';
 
   @override
   String get rowsPerPageTitle => 'Redova na stranici:';
@@ -34000,6 +35323,24 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Flytta nedåt';
+
+  @override
+  String get reorderItemLeft => 'Flytta åt vänster';
+
+  @override
+  String get reorderItemRight => 'Flytta åt höger';
+
+  @override
+  String get reorderItemToEnd => 'Flytta till slutet';
+
+  @override
+  String get reorderItemToStart => 'Flytta till början';
+
+  @override
+  String get reorderItemUp => 'Flytta uppåt';
 
   @override
   String get rowsPerPageTitle => 'Rader per sida:';
@@ -34441,6 +35782,24 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'Hapana herufi zilizo baki';
 
   @override
+  String get reorderItemDown => 'Sogeza chini';
+
+  @override
+  String get reorderItemLeft => 'Sogeza kushoto';
+
+  @override
+  String get reorderItemRight => 'Sogeza kulia';
+
+  @override
+  String get reorderItemToEnd => 'Sogeza hadi mwisho';
+
+  @override
+  String get reorderItemToStart => 'Sogeza hadi mwanzo';
+
+  @override
+  String get reorderItemUp => 'Sogeza juu';
+
+  @override
   String get rowsPerPageTitle => 'Safu mlalo kwa kila ukurasa:';
 
   @override
@@ -34878,6 +36237,24 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'எழுத்துக்கள் எதுவும் இல்லை';
+
+  @override
+  String get reorderItemDown => 'கீழே நகர்த்தவும்';
+
+  @override
+  String get reorderItemLeft => 'இடப்புறம் நகர்த்தவும்';
+
+  @override
+  String get reorderItemRight => 'வலப்புறம் நகர்த்தவும்';
+
+  @override
+  String get reorderItemToEnd => 'இறுதிக்கு நகர்த்தவும்';
+
+  @override
+  String get reorderItemToStart => 'தொடக்கத்திற்கு நகர்த்தவும்';
+
+  @override
+  String get reorderItemUp => 'மேலே நகர்த்தவும்';
 
   @override
   String get rowsPerPageTitle => 'ஒரு பக்கத்திற்கான வரிசைகள்:';
@@ -35319,6 +36696,24 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'కిందికు జరుపు';
+
+  @override
+  String get reorderItemLeft => 'ఎడమవైపుగా జరపండి';
+
+  @override
+  String get reorderItemRight => 'కుడివైపుగా జరపండి';
+
+  @override
+  String get reorderItemToEnd => 'చివరకు తరలించండి';
+
+  @override
+  String get reorderItemToStart => 'ప్రారంభానికి తరలించండి';
+
+  @override
+  String get reorderItemUp => 'పైకి జరపండి';
+
+  @override
   String get rowsPerPageTitle => 'పేజీకి ఉండే అడ్డు వరుసలు:';
 
   @override
@@ -35756,6 +37151,24 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'ย้ายลง';
+
+  @override
+  String get reorderItemLeft => 'ย้ายไปทางซ้าย';
+
+  @override
+  String get reorderItemRight => 'ย้ายไปทางขวา';
+
+  @override
+  String get reorderItemToEnd => 'ย้ายไปท้ายรายการ';
+
+  @override
+  String get reorderItemToStart => 'ย้ายไปต้นรายการ';
+
+  @override
+  String get reorderItemUp => 'ย้ายขึ้น';
 
   @override
   String get rowsPerPageTitle => 'แถวต่อหน้า:';
@@ -36197,6 +37610,24 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Ilipat pababa';
+
+  @override
+  String get reorderItemLeft => 'Ilipat pakaliwa';
+
+  @override
+  String get reorderItemRight => 'Ilipat pakanan';
+
+  @override
+  String get reorderItemToEnd => 'Ilipat sa dulo';
+
+  @override
+  String get reorderItemToStart => 'Ilipat sa simula';
+
+  @override
+  String get reorderItemUp => 'Ilipat pataas';
+
+  @override
   String get rowsPerPageTitle => 'Mga row bawat page:';
 
   @override
@@ -36634,6 +38065,24 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Aşağı taşı';
+
+  @override
+  String get reorderItemLeft => 'Sola taşı';
+
+  @override
+  String get reorderItemRight => 'Sağa taşı';
+
+  @override
+  String get reorderItemToEnd => 'Sona taşı';
+
+  @override
+  String get reorderItemToStart => 'Başa taşı';
+
+  @override
+  String get reorderItemUp => 'Yukarı taşı';
 
   @override
   String get rowsPerPageTitle => 'Sayfa başına satır sayısı:';
@@ -37075,6 +38524,24 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => 'Перемістити вниз';
+
+  @override
+  String get reorderItemLeft => 'Перемістити ліворуч';
+
+  @override
+  String get reorderItemRight => 'Перемістити праворуч';
+
+  @override
+  String get reorderItemToEnd => 'Перемістити в кінець';
+
+  @override
+  String get reorderItemToStart => 'Перемістити на початок';
+
+  @override
+  String get reorderItemUp => 'Перемістити вгору';
+
+  @override
   String get rowsPerPageTitle => 'Рядків на сторінці:';
 
   @override
@@ -37512,6 +38979,24 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'نیچے منتقل کریں';
+
+  @override
+  String get reorderItemLeft => 'بائیں منتقل کریں';
+
+  @override
+  String get reorderItemRight => 'دائیں منتقل کریں';
+
+  @override
+  String get reorderItemToEnd => 'آخر میں منتقل کریں';
+
+  @override
+  String get reorderItemToStart => 'شروع میں منتقل کریں';
+
+  @override
+  String get reorderItemUp => 'اوپر منتقل کریں';
 
   @override
   String get rowsPerPageTitle => 'قطاریں فی صفحہ:';
@@ -37953,6 +39438,24 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
+  String get reorderItemDown => 'Pastga siljitish';
+
+  @override
+  String get reorderItemLeft => 'Chapga siljitish';
+
+  @override
+  String get reorderItemRight => 'Oʻngga siljitish';
+
+  @override
+  String get reorderItemToEnd => 'Oxiriga siljitish';
+
+  @override
+  String get reorderItemToStart => 'Boshiga siljitish';
+
+  @override
+  String get reorderItemUp => 'Tepaga siljitish';
+
+  @override
   String get rowsPerPageTitle => 'Har bir sahifadagi qatorlar soni:';
 
   @override
@@ -38390,6 +39893,24 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Di chuyển xuống';
+
+  @override
+  String get reorderItemLeft => 'Di chuyển sang trái';
+
+  @override
+  String get reorderItemRight => 'Di chuyển sang phải';
+
+  @override
+  String get reorderItemToEnd => 'Di chuyển xuống cuối danh sách';
+
+  @override
+  String get reorderItemToStart => 'Di chuyển lên đầu danh sách';
+
+  @override
+  String get reorderItemUp => 'Di chuyển lên';
 
   @override
   String get rowsPerPageTitle => 'Số hàng mỗi trang:';
@@ -38831,6 +40352,24 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
+  String get reorderItemDown => '下移';
+
+  @override
+  String get reorderItemLeft => '左移';
+
+  @override
+  String get reorderItemRight => '右移';
+
+  @override
+  String get reorderItemToEnd => '移到末尾';
+
+  @override
+  String get reorderItemToStart => '移到开头';
+
+  @override
+  String get reorderItemUp => '上移';
+
+  @override
   String get rowsPerPageTitle => '每页行数：';
 
   @override
@@ -39193,6 +40732,24 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
 
   @override
+  String get reorderItemDown => '向下移';
+
+  @override
+  String get reorderItemLeft => '向左移';
+
+  @override
+  String get reorderItemRight => '向右移';
+
+  @override
+  String get reorderItemToEnd => '移到最後';
+
+  @override
+  String get reorderItemToStart => '移到開頭';
+
+  @override
+  String get reorderItemUp => '向上移';
+
+  @override
   String get rowsPerPageTitle => '每頁列數：';
 
   @override
@@ -39376,6 +40933,12 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
 
   @override
   String get alertDialogLabel => '快訊';
+
+  @override
+  String get reorderItemToStart => '移至開頭';
+
+  @override
+  String get reorderItemToEnd => '移至結尾';
 
   @override
   String? get remainingTextFieldCharacterCountOne => '還可輸入 1 個字元';
@@ -39737,6 +41300,24 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'Iya phansi';
+
+  @override
+  String get reorderItemLeft => 'Hambisa kwesokunxele';
+
+  @override
+  String get reorderItemRight => 'Yisa kwesokudla';
+
+  @override
+  String get reorderItemToEnd => 'Yisa ekugcineni';
+
+  @override
+  String get reorderItemToStart => 'Yisa ekuqaleni';
+
+  @override
+  String get reorderItemUp => 'Iya phezulu';
 
   @override
   String get rowsPerPageTitle => 'Imigqa ekhasini ngalinye:';

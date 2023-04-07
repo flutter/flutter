@@ -10,7 +10,6 @@ import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
-import 'localizations.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'scroll_controller.dart';
@@ -929,63 +928,6 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       key: _ReorderableItemGlobalKey(child.key!, index, this),
       index: index,
       capturedThemes: InheritedTheme.capture(from: context, to: overlay.context),
-      child: _wrapWithSemantics(child, index),
-    );
-  }
-
-  Widget _wrapWithSemantics(Widget child, int index) {
-    void reorder(int startIndex, int endIndex) {
-      if (startIndex != endIndex) {
-        widget.onReorder(startIndex, endIndex);
-      }
-    }
-
-    // First, determine which semantics actions apply.
-    final Map<CustomSemanticsAction, VoidCallback> semanticsActions = <CustomSemanticsAction, VoidCallback>{};
-
-    // Create the appropriate semantics actions.
-    void moveToStart() => reorder(index, 0);
-    void moveToEnd() => reorder(index, widget.itemCount);
-    void moveBefore() => reorder(index, index - 1);
-    // To move after, go to index+2 because it is moved to the space
-    // before index+2, which is after the space at index+1.
-    void moveAfter() => reorder(index, index + 2);
-
-    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final bool isHorizontal = _scrollDirection == Axis.horizontal;
-    // If the item can move to before its current position in the list.
-    if (index > 0) {
-      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToStart)] = moveToStart;
-      String reorderItemBefore = localizations.reorderItemUp;
-      if (isHorizontal) {
-        reorderItemBefore = Directionality.of(context) == TextDirection.ltr
-            ? localizations.reorderItemLeft
-            : localizations.reorderItemRight;
-      }
-      semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] = moveBefore;
-    }
-
-    // If the item can move to after its current position in the list.
-    if (index < widget.itemCount - 1) {
-      String reorderItemAfter = localizations.reorderItemDown;
-      if (isHorizontal) {
-        reorderItemAfter = Directionality.of(context) == TextDirection.ltr
-            ? localizations.reorderItemRight
-            : localizations.reorderItemLeft;
-      }
-      semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
-      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
-    }
-
-    // Pass toWrap with a GlobalKey into the item so that when it
-    // gets dragged, the accessibility framework can preserve the selected
-    // state of the dragging item.
-    //
-    // Also apply the relevant custom accessibility actions for moving the item
-    // up, down, to the start, and to the end of the list.
-    return Semantics(
-      container: true,
-      customSemanticsActions: semanticsActions,
       child: child,
     );
   }
