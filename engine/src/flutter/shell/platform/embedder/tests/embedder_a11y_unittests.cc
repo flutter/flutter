@@ -15,6 +15,10 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/testing/testing.h"
+#include "third_party/tonic/converter/dart_converter.h"
+
+#include "gmock/gmock.h"  // For EXPECT_THAT and matchers
+#include "gtest/gtest.h"
 
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -23,6 +27,7 @@ namespace flutter {
 namespace testing {
 
 using EmbedderA11yTest = testing::EmbedderTest;
+using ::testing::ElementsAre;
 
 constexpr static char kTooltip[] = "tooltip";
 
@@ -175,9 +180,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   // Wait for initial NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_semantics_enabled_latch.Signal();
   };
@@ -186,9 +191,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   // Prepare to NotifyAccessibilityFeatures call
   fml::AutoResetWaitableEvent notify_features_latch;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_features_latch.Signal();
   };
@@ -196,9 +201,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   // Enable semantics. Wait for NotifySemanticsEnabled(true).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_2;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = false;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_TRUE(enabled);
     notify_semantics_enabled_latch_2.Signal();
   };
@@ -212,9 +217,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   // Set accessibility features: (reduce_motion == true)
   fml::AutoResetWaitableEvent notify_features_latch_2;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
-    bool enabled = false;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_TRUE(enabled);
     notify_features_latch_2.Signal();
   };
@@ -231,24 +236,19 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   // Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
   fml::AutoResetWaitableEvent notify_semantics_action_latch;
   notify_semantics_action_callback = [&](Dart_NativeArguments args) {
-    int64_t node_id = 0;
-    Dart_GetNativeIntegerArgument(args, 0, &node_id);
+    Dart_Handle exception = nullptr;
+    int64_t node_id =
+        ::tonic::DartConverter<int64_t>::FromArguments(args, 0, exception);
     ASSERT_EQ(42, node_id);
 
-    int64_t action_id;
-    auto handle = Dart_GetNativeIntegerArgument(args, 1, &action_id);
-    ASSERT_FALSE(Dart_IsError(handle));
+    int64_t action_id =
+        ::tonic::DartConverter<int64_t>::FromArguments(args, 1, exception);
     ASSERT_EQ(static_cast<int32_t>(flutter::SemanticsAction::kTap), action_id);
 
-    Dart_Handle semantic_args = Dart_GetNativeArgument(args, 2);
-    int64_t data;
-    Dart_Handle dart_int = Dart_ListGetAt(semantic_args, 0);
-    Dart_IntegerToInt64(dart_int, &data);
-    ASSERT_EQ(2, data);
-
-    dart_int = Dart_ListGetAt(semantic_args, 1);
-    Dart_IntegerToInt64(dart_int, &data);
-    ASSERT_EQ(1, data);
+    std::vector<int64_t> semantic_args =
+        ::tonic::DartConverter<std::vector<int64_t>>::FromArguments(args, 2,
+                                                                    exception);
+    ASSERT_THAT(semantic_args, ElementsAre(2, 1));
     notify_semantics_action_latch.Signal();
   };
   std::vector<uint8_t> bytes({2, 1});
@@ -260,8 +260,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   // Disable semantics. Wait for NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_3;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_semantics_enabled_latch_3.Signal();
   };
@@ -355,9 +356,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   // Wait for initial NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_semantics_enabled_latch.Signal();
   };
@@ -366,9 +367,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   // Prepare to NotifyAccessibilityFeatures call
   fml::AutoResetWaitableEvent notify_features_latch;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_features_latch.Signal();
   };
@@ -376,9 +377,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   // Enable semantics. Wait for NotifySemanticsEnabled(true).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_2;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = false;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_TRUE(enabled);
     notify_semantics_enabled_latch_2.Signal();
   };
@@ -392,9 +393,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   // Set accessibility features: (reduce_motion == true)
   fml::AutoResetWaitableEvent notify_features_latch_2;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
-    bool enabled = false;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_TRUE(enabled);
     notify_features_latch_2.Signal();
   };
@@ -411,24 +412,19 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   // Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
   fml::AutoResetWaitableEvent notify_semantics_action_latch;
   notify_semantics_action_callback = [&](Dart_NativeArguments args) {
-    int64_t node_id = 0;
-    Dart_GetNativeIntegerArgument(args, 0, &node_id);
+    Dart_Handle exception = nullptr;
+    int64_t node_id =
+        ::tonic::DartConverter<int64_t>::FromArguments(args, 0, exception);
     ASSERT_EQ(42, node_id);
 
-    int64_t action_id;
-    auto handle = Dart_GetNativeIntegerArgument(args, 1, &action_id);
-    ASSERT_FALSE(Dart_IsError(handle));
+    int64_t action_id =
+        ::tonic::DartConverter<int64_t>::FromArguments(args, 1, exception);
     ASSERT_EQ(static_cast<int32_t>(flutter::SemanticsAction::kTap), action_id);
 
-    Dart_Handle semantic_args = Dart_GetNativeArgument(args, 2);
-    int64_t data;
-    Dart_Handle dart_int = Dart_ListGetAt(semantic_args, 0);
-    Dart_IntegerToInt64(dart_int, &data);
-    ASSERT_EQ(2, data);
-
-    dart_int = Dart_ListGetAt(semantic_args, 1);
-    Dart_IntegerToInt64(dart_int, &data);
-    ASSERT_EQ(1, data);
+    std::vector<int64_t> semantic_args =
+        ::tonic::DartConverter<std::vector<int64_t>>::FromArguments(args, 2,
+                                                                    exception);
+    ASSERT_THAT(semantic_args, ElementsAre(2, 1));
     notify_semantics_action_latch.Signal();
   };
   std::vector<uint8_t> bytes({2, 1});
@@ -440,8 +436,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   // Disable semantics. Wait for NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_3;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_semantics_enabled_latch_3.Signal();
   };
@@ -552,9 +549,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   // Wait for initial NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_semantics_enabled_latch.Signal();
   };
@@ -563,9 +560,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   // Prepare to NotifyAccessibilityFeatures call
   fml::AutoResetWaitableEvent notify_features_latch;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_features_latch.Signal();
   };
@@ -573,9 +570,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   // Enable semantics. Wait for NotifySemanticsEnabled(true).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_2;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = false;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_TRUE(enabled);
     notify_semantics_enabled_latch_2.Signal();
   };
@@ -589,9 +586,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   // Set accessibility features: (reduce_motion == true)
   fml::AutoResetWaitableEvent notify_features_latch_2;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
-    bool enabled = false;
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
-    ASSERT_FALSE(Dart_IsError(handle));
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_TRUE(enabled);
     notify_features_latch_2.Signal();
   };
@@ -613,24 +610,19 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   // Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
   fml::AutoResetWaitableEvent notify_semantics_action_latch;
   notify_semantics_action_callback = [&](Dart_NativeArguments args) {
-    int64_t node_id = 0;
-    Dart_GetNativeIntegerArgument(args, 0, &node_id);
+    Dart_Handle exception = nullptr;
+    int64_t node_id =
+        ::tonic::DartConverter<int64_t>::FromArguments(args, 0, exception);
     ASSERT_EQ(42, node_id);
 
-    int64_t action_id;
-    auto handle = Dart_GetNativeIntegerArgument(args, 1, &action_id);
-    ASSERT_FALSE(Dart_IsError(handle));
+    int64_t action_id =
+        ::tonic::DartConverter<int64_t>::FromArguments(args, 1, exception);
     ASSERT_EQ(static_cast<int32_t>(flutter::SemanticsAction::kTap), action_id);
 
-    Dart_Handle semantic_args = Dart_GetNativeArgument(args, 2);
-    int64_t data;
-    Dart_Handle dart_int = Dart_ListGetAt(semantic_args, 0);
-    Dart_IntegerToInt64(dart_int, &data);
-    ASSERT_EQ(2, data);
-
-    dart_int = Dart_ListGetAt(semantic_args, 1);
-    Dart_IntegerToInt64(dart_int, &data);
-    ASSERT_EQ(1, data);
+    std::vector<int64_t> semantic_args =
+        ::tonic::DartConverter<std::vector<int64_t>>::FromArguments(args, 2,
+                                                                    exception);
+    ASSERT_THAT(semantic_args, ElementsAre(2, 1));
     notify_semantics_action_latch.Signal();
   };
   std::vector<uint8_t> bytes({2, 1});
@@ -642,8 +634,9 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   // Disable semantics. Wait for NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_3;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
-    bool enabled = true;
-    Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
     ASSERT_FALSE(enabled);
     notify_semantics_enabled_latch_3.Signal();
   };
