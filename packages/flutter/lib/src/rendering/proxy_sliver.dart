@@ -432,7 +432,6 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
   @override
   void performLayout() {
     assert(child != null);
-    print(constraints.crossAxisExtent);
     child!.layout(constraints.copyWith(crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent)), parentUsesSize: true);
     geometry = child!.geometry;
   }
