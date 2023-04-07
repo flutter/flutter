@@ -114,11 +114,18 @@ class GenerateFallbackFontDataCommand extends Command<bool>
     sb.writeln();
     sb.writeln('// DO NOT EDIT! This file is generated. See:');
     sb.writeln('// dev/generate_fallback_font_data.dart');
+    sb.writeln("import '../configuration.dart';");
     sb.writeln("import 'noto_font.dart';");
     sb.writeln();
     sb.writeln('final List<NotoFont> fallbackFonts = <NotoFont>[');
 
     for (final String family in fallbackFonts) {
+      if (family == 'Noto Emoji') {
+        sb.write(' if (!configuration.useColorEmoji)');
+      }
+      if (family == 'Noto Color Emoji') {
+        sb.write(' if (configuration.useColorEmoji)');
+      }
       sb.writeln(" NotoFont('$family', '${urlForFamily[family]!}',");
       final List<String> starts = <String>[];
       final List<String> ends = <String>[];
@@ -166,6 +173,7 @@ class GenerateFallbackFontDataCommand extends Command<bool>
 const List<String> fallbackFonts = <String>[
   'Noto Sans',
   'Noto Color Emoji',
+  'Noto Emoji',
   'Noto Sans Symbols',
   'Noto Sans Symbols 2',
   'Noto Sans Adlam',
