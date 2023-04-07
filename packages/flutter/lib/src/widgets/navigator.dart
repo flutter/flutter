@@ -76,7 +76,7 @@ typedef WillPopCallback = Future<bool> Function();
 /// [Navigator.pages] so that it no longer includes the corresponding [Page].
 /// (Otherwise, the page will be interpreted as a new page to show when the
 /// [Navigator.pages] list is next updated.)
-typedef PopPageCallback = bool Function(Route<dynamic> route, dynamic result);
+typedef PopPageCallback = FutureOr<bool> Function(Route<dynamic> route, dynamic result);
 
 /// Indicates whether the current route should be popped.
 ///
@@ -4982,7 +4982,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// ```
   /// {@end-tool}
   @optionalTypeArgs
-  void pop<T extends Object?>([ T? result ]) {
+  Future<void> pop<T extends Object?>([ T? result ]) async {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
@@ -4990,7 +4990,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     if (entry.pageBased) {
-      if (widget.onPopPage!(entry.route, result) && entry.currentState == _RouteLifecycle.idle) {
+      if (await widget.onPopPage!(entry.route, result) && entry.currentState == _RouteLifecycle.idle) {
         // The entry may have been disposed if the pop finishes synchronously.
         assert(entry.route._popCompleter.isCompleted);
         entry.currentState = _RouteLifecycle.pop;
