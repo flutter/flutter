@@ -2646,8 +2646,8 @@ class VisualDensity with Diagnosticable {
   /// It corresponds to a density value of -2 in both axes.
   static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
 
-  /// Returns a [VisualDensity] that is adaptive based on the
-  /// [defaultTargetPlatform].
+  /// Returns a [VisualDensity] that is adaptive based on the current platform
+  /// on which the framework is executing, from [defaultTargetPlatform].
   ///
   /// When [defaultTargetPlatform] is a desktop platform, this returns
   /// [compact], and for other platforms, it returns a default-constructed
@@ -2655,8 +2655,10 @@ class VisualDensity with Diagnosticable {
   ///
   /// See also:
   ///
-  /// * [defaultDensityForPlatform] which returns a [VisualDensity] that is adaptive
-  ///   based on the platform given to it.
+  /// * [defaultDensityForPlatform] which returns a [VisualDensity] that is
+  ///   adaptive based on the platform given to it.
+  /// * [defaultTargetPlatform] which returns the platform on which the
+  ///   framework is currently executing.
   static VisualDensity get adaptivePlatformDensity => defaultDensityForPlatform(defaultTargetPlatform);
 
   /// Returns a [VisualDensity] that is adaptive based on the given [platform].
