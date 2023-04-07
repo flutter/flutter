@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       // Try this: set the platform to platform.android and see the difference
-      theme: ThemeData(platform: TargetPlatform.iOS),
+      theme: ThemeData(platform: TargetPlatform.iOS, useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('AlertDialog Sample')),
         body: const Center(

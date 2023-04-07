@@ -2668,8 +2668,8 @@ void main() {
       ),
       actions: <Widget>[
         TextButton(
-            onPressed: () {},
-            child: const Text('OK'),
+          onPressed: () {},
+          child: const Text('OK'),
         ),
       ],
     );
