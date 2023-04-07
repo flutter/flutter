@@ -314,15 +314,19 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           device!.generator!.accept();
           cacheInitialDillCompilation();
         } else {
-          await buildWeb(
+          final WebBuilder webBuilder = WebBuilder(
+            logger: _logger,
+            buildSystem: globals.buildSystem,
+            fileSystem: _fileSystem,
+            flutterVersion: globals.flutterVersion,
+            usage: globals.flutterUsage,
+          );
+          await webBuilder.buildWeb(
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            false,
             kNoneWorker,
-            true,
-            debuggingOptions.nativeNullAssertions,
-            false,
+            compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions)
           );
         }
         await device!.device!.startApp(
@@ -387,15 +391,19 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       }
     } else {
       try {
-        await buildWeb(
+        final WebBuilder webBuilder = WebBuilder(
+          logger: _logger,
+          buildSystem: globals.buildSystem,
+          fileSystem: _fileSystem,
+          flutterVersion: globals.flutterVersion,
+          usage: globals.flutterUsage,
+        );
+        await webBuilder.buildWeb(
           flutterProject,
           target,
           debuggingOptions.buildInfo,
-          false,
           kNoneWorker,
-          true,
-          debuggingOptions.nativeNullAssertions,
-          false,
+          compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions),
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
