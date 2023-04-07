@@ -1341,47 +1341,53 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockApplication = OCMClassMock([UIApplication class]);
   id mockWindowScene;
   id deviceMock;
-  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:self.mockEngine
-                                                                        nibName:nil
-                                                                         bundle:nil];
-  if (@available(iOS 16.0, *)) {
-    mockWindowScene = OCMClassMock([UIWindowScene class]);
-    if (realVC.supportedInterfaceOrientations == mask) {
-      OCMReject([mockWindowScene requestGeometryUpdateWithPreferences:[OCMArg any]
-                                                         errorHandler:[OCMArg any]]);
+  __block __weak id weakPreferences;
+  @autoreleasepool {
+    FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:self.mockEngine
+                                                                          nibName:nil
+                                                                           bundle:nil];
+    if (@available(iOS 16.0, *)) {
+      mockWindowScene = OCMClassMock([UIWindowScene class]);
+      if (realVC.supportedInterfaceOrientations == mask) {
+        OCMReject([mockWindowScene requestGeometryUpdateWithPreferences:[OCMArg any]
+                                                           errorHandler:[OCMArg any]]);
+      } else {
+        // iOS 16 will decide whether to rotate based on the new preference, so always set it
+        // when it changes.
+        OCMExpect([mockWindowScene
+            requestGeometryUpdateWithPreferences:[OCMArg checkWithBlock:^BOOL(
+                                                             UIWindowSceneGeometryPreferencesIOS*
+                                                                 preferences) {
+              weakPreferences = preferences;
+              return preferences.interfaceOrientations == mask;
+            }]
+                                    errorHandler:[OCMArg any]]);
+      }
+      OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+      OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockWindowScene]);
     } else {
-      // iOS 16 will decide whether to rotate based on the new preference, so always set it
-      // when it changes.
-      OCMExpect([mockWindowScene
-          requestGeometryUpdateWithPreferences:[OCMArg checkWithBlock:^BOOL(
-                                                           UIWindowSceneGeometryPreferencesIOS*
-                                                               preferences) {
-            return preferences.interfaceOrientations == mask;
-          }]
-                                  errorHandler:[OCMArg any]]);
-    }
-    OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-    OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockWindowScene]);
-  } else {
-    deviceMock = OCMPartialMock([UIDevice currentDevice]);
-    if (!didChange) {
-      OCMReject([deviceMock setValue:[OCMArg any] forKey:@"orientation"]);
-    } else {
-      OCMExpect([deviceMock setValue:@(resultingOrientation) forKey:@"orientation"]);
+      deviceMock = OCMPartialMock([UIDevice currentDevice]);
+      if (!didChange) {
+        OCMReject([deviceMock setValue:[OCMArg any] forKey:@"orientation"]);
+      } else {
+        OCMExpect([deviceMock setValue:@(resultingOrientation) forKey:@"orientation"]);
+      }
+
+      OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+      OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
     }
 
-    OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-    OCMStub([mockApplication statusBarOrientation]).andReturn(currentOrientation);
+    [realVC performOrientationUpdate:mask];
+    if (@available(iOS 16.0, *)) {
+      OCMVerifyAll(mockWindowScene);
+    } else {
+      OCMVerifyAll(deviceMock);
+    }
   }
-
-  [realVC performOrientationUpdate:mask];
-  if (@available(iOS 16.0, *)) {
-    OCMVerifyAll(mockWindowScene);
-  } else {
-    OCMVerifyAll(deviceMock);
-  }
+  [mockWindowScene stopMocking];
   [deviceMock stopMocking];
   [mockApplication stopMocking];
+  XCTAssertNil(weakPreferences);
 }
 
 // Creates a mocked UITraitCollection with nil values for everything except accessibilityContrast,
