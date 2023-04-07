@@ -621,10 +621,12 @@ void main() {
         expect(paragraph1.selections.isEmpty, isTrue);
         expect(paragraph2.selections.isEmpty, isTrue);
 
-        // Reset selection and focus selectable region.
-        controller.selection = const TextSelection.collapsed(offset: -1);
+        // Focus selectable region.
         selectableRegionFocus.requestFocus();
         await tester.pump();
+
+        // Reset controller selection once the TextField is unfocused.
+        controller.selection = const TextSelection.collapsed(offset: -1);
 
         // Make sure keyboard select all will be handled by selectable region now.
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, control: true));
@@ -672,10 +674,12 @@ void main() {
         expect(paragraph1.selections.isEmpty, isTrue);
         expect(paragraph2.selections.isEmpty, isTrue);
 
-        // Reset selection and focus selectable region.
-        controller.selection = const TextSelection.collapsed(offset: -1);
+        // Focus selectable region.
         selectableRegionFocus.requestFocus();
         await tester.pump();
+
+        // Reset controller selection once the TextField is unfocused.
+        controller.selection = const TextSelection.collapsed(offset: -1);
 
         // Make sure keyboard select all will be handled by selectable region now.
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, meta: true));
