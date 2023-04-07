@@ -183,7 +183,7 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
@@ -395,7 +395,7 @@ class FakeIosPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 

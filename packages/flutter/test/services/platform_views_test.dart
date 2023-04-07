@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'fake_platform_views.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Android', () {
     late FakeAndroidPlatformViewsController viewsController;
@@ -214,7 +214,7 @@ void main() {
       await viewController.dispose();
       final ByteData message =
           SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
-      await SystemChannels.platform_views.binaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
       expect(didFocus, isFalse);
     });
 

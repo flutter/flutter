@@ -96,7 +96,7 @@ void main() {
     expect(flutterAssetsCallCount, 2);
 
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
 
     await rootBundle.loadString('test_asset');
     expect(flutterAssetsCallCount, 3);
@@ -110,7 +110,7 @@ void main() {
 
   test('initInstances sets a default method call handler for SystemChannels.textInput', () async {
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'method': 'TextInput.requestElementsInRect', 'args': null})!;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (ByteData? data) {
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (ByteData? data) {
       expect(data, isNotNull);
      });
   });

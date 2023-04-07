@@ -805,7 +805,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final ByteData routerMessage = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', routerMessage, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', routerMessage, (_) { });
     await tester.pump();
     expect(find.text('testRouteName'), findsOneWidget);
     expect(find.text('state'), findsOneWidget);
@@ -815,7 +815,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRoute', testRouteName),
     );
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pump();
     expect(find.text('newTestRouteName'), findsOneWidget);
   });
@@ -897,7 +897,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
 
     // Pop route through the message channel.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pump();
     expect(find.text('popped'), findsOneWidget);
   });

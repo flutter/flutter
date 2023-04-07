@@ -9,12 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Can only schedule frames after widget binding attaches the root widget', () async {
-    final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+    final WidgetsFlutterBindingWithTestBinaryMessenger binding = WidgetsFlutterBindingWithTestBinaryMessenger();
     expect(SchedulerBinding.instance.framesEnabled, isFalse);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     // Sends a message to notify that the engine is ready to accept frames.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
 
     // Enables the semantics should not schedule any frames if the root widget
     // has not been attached.
@@ -31,3 +31,5 @@ void main() {
     expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
   });
 }
+
+class WidgetsFlutterBindingWithTestBinaryMessenger extends WidgetsFlutterBinding with TestDefaultBinaryMessengerBinding { }
