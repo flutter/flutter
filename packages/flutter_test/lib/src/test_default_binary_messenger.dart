@@ -362,7 +362,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     });
 
     final StreamSubscription<Object?> sub = controller.stream.listen(
-      (Object? e) => channel.binaryMessenger.handlePlatformMessage(
+      (Object? e) => handlePlatformMessage(
         channel.name,
         channel.codec.encodeSuccessEnvelope(e),
         null,
@@ -373,7 +373,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
       if (e is! PlatformException) {
         throw ArgumentError('Stream error must be a PlatformException');
       }
-      channel.binaryMessenger.handlePlatformMessage(
+      handlePlatformMessage(
         channel.name,
         channel.codec.encodeErrorEnvelope(
           code: e.code,
@@ -383,7 +383,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
         null,
       );
     });
-    sub.onDone(() => channel.binaryMessenger.handlePlatformMessage(channel.name, null, null));
+    sub.onDone(() => handlePlatformMessage(channel.name, null, null));
   }
 
   /// Returns true if the `handler` argument matches the `handler`
