@@ -5,8 +5,11 @@
 #include "engine.h"
 
 #include <fuchsia/accessibility/semantics/cpp/fidl.h>
+#include <fuchsia/media/cpp/fidl.h>
 #include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
+#include <lib/zx/thread.h>
+#include <zircon/rights.h>
 #include <zircon/status.h>
 #include <zircon/types.h>
 #include <memory>
@@ -21,6 +24,7 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/serialization_callbacks.h"
+#include "flutter/shell/common/thread_host.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSerialProcs.h"
 #include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
@@ -54,14 +58,145 @@ std::unique_ptr<flutter::PlatformMessage> MakeLocalizationPlatformMessage(
       nullptr);
 }
 
+//
+// Fuchsia scheduler role naming scheme employed here:
+//
+// Roles based on thread function:
+//   <prefix>.type.{platform,ui,raster,io,profiler}
+//
+// Roles based on fml::Thread::ThreadPriority:
+//   <prefix>.thread.{background,display,raster,normal}
+//
+
+void SetThreadRole(
+    const fuchsia::media::ProfileProviderSyncPtr& profile_provider,
+    const std::string& role) {
+  ZX_ASSERT(profile_provider);
+
+  zx::thread dup;
+  const zx_status_t dup_status =
+      zx::thread::self()->duplicate(ZX_RIGHT_SAME_RIGHTS, &dup);
+  if (dup_status != ZX_OK) {
+    FML_LOG(WARNING)
+        << "Failed to duplicate thread handle when setting thread config: "
+        << zx_status_get_string(dup_status)
+        << ". Thread will run at default priority.";
+    return;
+  }
+
+  int64_t unused_period;
+  int64_t unused_capacity;
+  const zx_status_t status = profile_provider->RegisterHandlerWithCapacity(
+      std::move(dup), role, 0, 0.f, &unused_period, &unused_capacity);
+  if (status != ZX_OK) {
+    FML_LOG(WARNING) << "Failed to set thread role to \"" << role
+                     << "\": " << zx_status_get_string(status)
+                     << ". Thread will run at default priority.";
+    return;
+  }
+}
+
+void SetThreadConfig(
+    const std::string& name_prefix,
+    const fuchsia::media::ProfileProviderSyncPtr& profile_provider,
+    const fml::Thread::ThreadConfig& config) {
+  ZX_ASSERT(profile_provider);
+
+  fml::Thread::SetCurrentThreadName(config);
+
+  // Derive the role name from the prefix and priority. See comment above about
+  // the role naming scheme.
+  std::string role;
+  switch (config.priority) {
+    case fml::Thread::ThreadPriority::BACKGROUND:
+      role = name_prefix + ".thread.background";
+      break;
+    case fml::Thread::ThreadPriority::DISPLAY:
+      role = name_prefix + ".thread.display";
+      break;
+    case fml::Thread::ThreadPriority::RASTER:
+      role = name_prefix + ".thread.raster";
+      break;
+    case fml::Thread::ThreadPriority::NORMAL:
+      role = name_prefix + ".thread.normal";
+      break;
+    default:
+      FML_LOG(WARNING) << "Unknown thread priority "
+                       << static_cast<int>(config.priority)
+                       << ". Thread will run at default priority.";
+      return;
+  }
+  ZX_ASSERT(!role.empty());
+
+  SetThreadRole(profile_provider, role);
+}
+
 }  // namespace
 
-flutter::ThreadHost Engine::CreateThreadHost(const std::string& name_prefix) {
+flutter::ThreadHost Engine::CreateThreadHost(
+    const std::string& name_prefix,
+    const std::shared_ptr<sys::ServiceDirectory>& services) {
   fml::Thread::SetCurrentThreadName(
       fml::Thread::ThreadConfig(name_prefix + ".platform"));
-  return flutter::ThreadHost(name_prefix, flutter::ThreadHost::Type::RASTER |
-                                              flutter::ThreadHost::Type::UI |
-                                              flutter::ThreadHost::Type::IO);
+
+  // Default the config setter to setup the thread name only.
+  flutter::ThreadConfigSetter config_setter = fml::Thread::SetCurrentThreadName;
+
+  // Override the config setter if the media profile provider is available.
+  if (services) {
+    // Connect to the media profile provider to assign thread priorities using
+    // Fuchsia's scheduler role API. Failure to connect will print a warning and
+    // proceed with engine initialization, leaving threads created by the engine
+    // at default priority.
+    //
+    // The use of std::shared_ptr here is to work around the unfortunate
+    // requirement for flutter::ThreadConfigSetter (i.e. std::function<>) that
+    // the target callable be copy-constructible. This awkwardly conflicts with
+    // fuchsia::media::ProfileProviderSyncPtr being move-only. std::shared_ptr
+    // provides copyable object that references the move-only SyncPtr.
+    std::shared_ptr<fuchsia::media::ProfileProviderSyncPtr>
+        media_profile_provider =
+            std::make_shared<fuchsia::media::ProfileProviderSyncPtr>();
+
+    const zx_status_t connect_status =
+        services->Connect(media_profile_provider->NewRequest());
+    if (connect_status != ZX_OK) {
+      FML_LOG(WARNING)
+          << "Failed to connect to " << fuchsia::media::ProfileProvider::Name_
+          << ": " << zx_status_get_string(connect_status)
+          << " This is not a fatal error, but threads created by the engine "
+             "will run at default priority, regardless of the requested "
+             "priority.";
+    } else {
+      // Set the role for (this) platform thread. See comment above about the
+      // role naming scheme.
+      SetThreadRole(*media_profile_provider, name_prefix + ".type.platform");
+
+      // This lambda must be copyable or the assignment fails to compile,
+      // necessitating the use of std::shared_ptr for the profile provider.
+      config_setter = [name_prefix, media_profile_provider](
+                          const fml::Thread::ThreadConfig& config) {
+        SetThreadConfig(name_prefix, *media_profile_provider, config);
+      };
+    }
+  }
+
+  flutter::ThreadHost::ThreadHostConfig thread_host_config{config_setter};
+
+  thread_host_config.SetRasterConfig(
+      {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
+           flutter::ThreadHost::Type::RASTER, name_prefix),
+       fml::Thread::ThreadPriority::RASTER});
+  thread_host_config.SetUIConfig(
+      {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
+           flutter::ThreadHost::Type::UI, name_prefix),
+       fml::Thread::ThreadPriority::DISPLAY});
+  thread_host_config.SetIOConfig(
+      {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
+           flutter::ThreadHost::Type::IO, name_prefix),
+       fml::Thread::ThreadPriority::NORMAL});
+
+  return flutter::ThreadHost(thread_host_config);
 }
 
 Engine::Engine(Delegate& delegate,
@@ -78,7 +213,7 @@ Engine::Engine(Delegate& delegate,
                bool for_v1_component)
     : delegate_(delegate),
       thread_label_(std::move(thread_label)),
-      thread_host_(CreateThreadHost(thread_label_)),
+      thread_host_(CreateThreadHost(thread_label_, runner_services)),
       view_token_(std::move(view_token)),
       memory_pressure_watcher_binding_(this),
       latest_memory_pressure_level_(fuchsia::memorypressure::Level::NORMAL),
@@ -104,7 +239,7 @@ Engine::Engine(Delegate& delegate,
                bool for_v1_component)
     : delegate_(delegate),
       thread_label_(std::move(thread_label)),
-      thread_host_(CreateThreadHost(thread_label_)),
+      thread_host_(CreateThreadHost(thread_label_, runner_services)),
       view_creation_token_(std::move(view_creation_token)),
       memory_pressure_watcher_binding_(this),
       latest_memory_pressure_level_(fuchsia::memorypressure::Level::NORMAL),
