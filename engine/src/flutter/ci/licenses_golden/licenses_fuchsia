@@ -1,4 +1,4 @@
-Signature: d7499aef9286ab70feb8771a2df6bf59
+Signature: 12d9965c2ee07f1a0f549f07cddc74ca
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -2245,7 +2245,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/file2.fidl + ../../../fuchsia
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/io.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/node-protocols.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/node2.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/rights-request.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-counter.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-debug.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-stats.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -2566,7 +2565,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/file2.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/io.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/node-protocols.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/node2.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/rights-request.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-counter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-debug.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/kernel-stats.fidl
