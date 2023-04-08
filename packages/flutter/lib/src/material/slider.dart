@@ -59,13 +59,6 @@ enum SliderInteraction {
   ///
   /// Taping and sliding interactions on the track are ignored.
   slideThumb;
-
-  bool _isSlideOnly() => this == SliderInteraction.slideOnly;
-  bool _isSlideThumb() => this == SliderInteraction.slideThumb;
-  bool _isTapAndSlide() => this == SliderInteraction.tapAndSlide;
-  bool _isTapOnly() => this == SliderInteraction.tapOnly;
-  bool _canSlide() => !_isTapOnly();
-  bool _canTap() => _isTapOnly() || _isTapAndSlide();
 }
 
 /// A Material Design slider.
@@ -1481,14 +1474,19 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _startInteraction(Offset globalPosition) {
     _state.showValueIndicator();
     if (!_active && isInteractive) {
-      if (allowedInteraction._canTap()) {
-        _active = true;
-        _currentDragValue = _getValueFromGlobalPosition(globalPosition);
-        onChanged!(_discretize(_currentDragValue));
-      } else if (allowedInteraction._isSlideOnly()
-          || allowedInteraction._isSlideThumb() && _isPointerOnOverlay(globalPosition)) {
-        _active = true;
-        _currentDragValue = value;
+      switch (allowedInteraction) {
+        case SliderInteraction.tapAndSlide:
+        case SliderInteraction.tapOnly:
+          _active = true;
+          _currentDragValue = _getValueFromGlobalPosition(globalPosition);
+          onChanged!(_discretize(_currentDragValue));
+        case SliderInteraction.slideThumb:
+          if (_isPointerOnOverlay(globalPosition)) {
+            _active = true;
+            _currentDragValue = value;
+          }
+        case SliderInteraction.slideOnly:
+          break;
       }
 
       if (_active) {
@@ -1541,17 +1539,29 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     // for slide only, there is no start interaction trigger, so _active
-    // will be false.
-    if ((_active || allowedInteraction._isSlideOnly()) && isInteractive
-        && allowedInteraction._canSlide()) {
-      final double valueDelta = details.primaryDelta! / _trackRect.width;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          _currentDragValue -= valueDelta;
-        case TextDirection.ltr:
-          _currentDragValue += valueDelta;
-      }
-      onChanged!(_discretize(_currentDragValue));
+    // will be false and needs to be made true.
+    if (!_active && allowedInteraction == SliderInteraction.slideOnly) {
+      _active = true;
+      _currentDragValue = value;
+    }
+
+    switch (allowedInteraction) {
+      case SliderInteraction.tapAndSlide:
+      case SliderInteraction.slideOnly:
+      case SliderInteraction.slideThumb:
+        if (_active && isInteractive) {
+          final double valueDelta = details.primaryDelta! / _trackRect.width;
+          switch (textDirection) {
+            case TextDirection.rtl:
+              _currentDragValue -= valueDelta;
+            case TextDirection.ltr:
+              _currentDragValue += valueDelta;
+          }
+          onChanged!(_discretize(_currentDragValue));
+        }
+      case SliderInteraction.tapOnly:
+        // cannot slide (drag) as its tapOnly.
+        break;
     }
   }
 
