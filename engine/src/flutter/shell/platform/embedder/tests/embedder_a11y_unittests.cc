@@ -177,7 +177,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
-  // Wait for initial NotifySemanticsEnabled(false).
+  // 1: Wait for initial notifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -188,7 +188,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   };
   notify_semantics_enabled_latch.Wait();
 
-  // Prepare to NotifyAccessibilityFeatures call
+  // Prepare notifyAccessibilityFeatures callback.
   fml::AutoResetWaitableEvent notify_features_latch;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -198,7 +198,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
     notify_features_latch.Signal();
   };
 
-  // Enable semantics. Wait for NotifySemanticsEnabled(true).
+  // 2: Enable semantics. Wait for notifySemanticsEnabled(true).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_2;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -211,10 +211,10 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_2.Wait();
 
-  // Wait for initial accessibility features (reduce_motion == false)
+  // 3: Wait for notifyAccessibilityFeatures (reduce_motion == false)
   notify_features_latch.Wait();
 
-  // Set accessibility features: (reduce_motion == true)
+  // 4: Wait for notifyAccessibilityFeatures (reduce_motion == true)
   fml::AutoResetWaitableEvent notify_features_latch_2;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -228,12 +228,12 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_features_latch_2.Wait();
 
-  // Wait for UpdateSemantics callback on platform (current) thread.
+  // 5: Wait for UpdateSemantics callback on platform (current) thread.
   signal_native_latch.Wait();
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   semantics_update_latch.Wait();
 
-  // Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
+  // 6: Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
   fml::AutoResetWaitableEvent notify_semantics_action_latch;
   notify_semantics_action_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -257,7 +257,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_action_latch.Wait();
 
-  // Disable semantics. Wait for NotifySemanticsEnabled(false).
+  // 7: Disable semantics. Wait for NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_3;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -353,7 +353,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
-  // Wait for initial NotifySemanticsEnabled(false).
+  // 1: Wait for initial notifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -364,7 +364,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   };
   notify_semantics_enabled_latch.Wait();
 
-  // Prepare to NotifyAccessibilityFeatures call
+  // Prepare notifyAccessibilityFeatures callback.
   fml::AutoResetWaitableEvent notify_features_latch;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -374,7 +374,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
     notify_features_latch.Signal();
   };
 
-  // Enable semantics. Wait for NotifySemanticsEnabled(true).
+  // 2: Enable semantics. Wait for notifySemanticsEnabled(true).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_2;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -387,10 +387,10 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_2.Wait();
 
-  // Wait for initial accessibility features (reduce_motion == false)
+  // 3: Wait for notifyAccessibilityFeatures (reduce_motion == false)
   notify_features_latch.Wait();
 
-  // Set accessibility features: (reduce_motion == true)
+  // 4: Wait for notifyAccessibilityFeatures (reduce_motion == true)
   fml::AutoResetWaitableEvent notify_features_latch_2;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -404,12 +404,12 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_features_latch_2.Wait();
 
-  // Wait for UpdateSemantics callback on platform (current) thread.
+  // 5: Wait for UpdateSemantics callback on platform (current) thread.
   signal_native_latch.Wait();
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   semantics_update_latch.Wait();
 
-  // Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
+  // 6: Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
   fml::AutoResetWaitableEvent notify_semantics_action_latch;
   notify_semantics_action_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -433,7 +433,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_action_latch.Wait();
 
-  // Disable semantics. Wait for NotifySemanticsEnabled(false).
+  // 7: Disable semantics. Wait for NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_3;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -546,7 +546,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 
-  // Wait for initial NotifySemanticsEnabled(false).
+  // 1: Wait for initial notifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -557,7 +557,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   };
   notify_semantics_enabled_latch.Wait();
 
-  // Prepare to NotifyAccessibilityFeatures call
+  // Prepare notifyAccessibilityFeatures callback.
   fml::AutoResetWaitableEvent notify_features_latch;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -567,7 +567,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
     notify_features_latch.Signal();
   };
 
-  // Enable semantics. Wait for NotifySemanticsEnabled(true).
+  // 2: Enable semantics. Wait for notifySemanticsEnabled(true).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_2;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -580,10 +580,10 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_2.Wait();
 
-  // Wait for initial accessibility features (reduce_motion == false)
+  // 3: Wait for notifyAccessibilityFeatures (reduce_motion == false)
   notify_features_latch.Wait();
 
-  // Set accessibility features: (reduce_motion == true)
+  // 4: Wait for notifyAccessibilityFeatures (reduce_motion == true)
   fml::AutoResetWaitableEvent notify_features_latch_2;
   notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -597,7 +597,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_features_latch_2.Wait();
 
-  // Wait for UpdateSemantics callback on platform (current) thread.
+  // 5: Wait for UpdateSemantics callback on platform (current) thread.
   signal_native_latch.Wait();
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   semantics_node_latch.Wait();
@@ -607,7 +607,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   ASSERT_EQ(1, action_count);
   ASSERT_EQ(1, action_batch_end_count);
 
-  // Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
+  // 6: Dispatch a tap to semantics node 42. Wait for NotifySemanticsAction.
   fml::AutoResetWaitableEvent notify_semantics_action_latch;
   notify_semantics_action_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
@@ -631,7 +631,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_action_latch.Wait();
 
-  // Disable semantics. Wait for NotifySemanticsEnabled(false).
+  // 7: Disable semantics. Wait for NotifySemanticsEnabled(false).
   fml::AutoResetWaitableEvent notify_semantics_enabled_latch_3;
   notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;

@@ -124,23 +124,23 @@ Future<SemanticsActionData> get semanticsAction {
 
 @pragma('vm:entry-point')
 void a11y_main() async {
-  // Return initial state (semantics disabled).
+  // 1: Return initial state (semantics disabled).
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 
-  // Await semantics enabled from embedder.
+  // 2: Await semantics enabled from embedder.
   await semanticsChanged;
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 
-  // Return initial state of accessibility features.
+  // 3: Return initial state of accessibility features.
   notifyAccessibilityFeatures(
       PlatformDispatcher.instance.accessibilityFeatures.reduceMotion);
 
-  // Await accessibility features changed from embedder.
+  // 4: Await accessibility features changed from embedder.
   await accessibilityFeaturesChanged;
   notifyAccessibilityFeatures(
       PlatformDispatcher.instance.accessibilityFeatures.reduceMotion);
 
-  // Fire semantics update.
+  // 5: Fire semantics update.
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder()
     ..updateNode(
       id: 42,
@@ -284,7 +284,7 @@ void a11y_main() async {
 
   signalNativeTest();
 
-  // Await semantics action from embedder.
+  // 6: Await semantics action from embedder.
   final SemanticsActionData data = await semanticsAction;
   final List<int> actionArgs = <int>[
     data.args!.getInt8(0),
@@ -292,7 +292,7 @@ void a11y_main() async {
   ];
   notifySemanticsAction(data.id, data.action.index, actionArgs);
 
-  // Await semantics disabled from embedder.
+  // 7: Await semantics disabled from embedder.
   await semanticsChanged;
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 }
