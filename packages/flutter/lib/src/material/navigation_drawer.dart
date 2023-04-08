@@ -125,7 +125,9 @@ class NavigationDrawer extends StatelessWidget {
   /// Upon updating [selectedIndex], the [NavigationDrawer] will be rebuilt.
   final ValueChanged<int>? onDestinationSelected;
 
-  /// padding of drawer items
+  /// Defines the padding for [NavigationDrawerDestination] widgets (Drawer items).
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 12.0)`.
   final EdgeInsetsGeometry padding;
 
   @override
@@ -520,7 +522,9 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// with [index] passed in.
   final VoidCallback onTap;
 
-  /// padding of drawer items
+  /// Defines the padding for [NavigationDrawerDestination] widgets (Drawer items).
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 12.0)`.
   final EdgeInsetsGeometry padding;
 
   /// Returns a non null [_NavigationDrawerDestinationInfo].
