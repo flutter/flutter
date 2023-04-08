@@ -5349,7 +5349,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   @override
   Widget build(BuildContext context) {
-    print('justin Navigator.build');
     assert(!_debugLocked);
     assert(_history.value.isNotEmpty);
 

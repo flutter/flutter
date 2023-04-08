@@ -543,7 +543,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [removeObserver], to release the resources reserved by this method.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
-  void addObserver(WidgetsBindingObserver observer) => _observers.add(observer);
+  void addObserver(WidgetsBindingObserver observer) {
+    _observers.add(observer);
+  }
 
   /// Unregisters the given observer. This should be used sparingly as
   /// it is relatively expensive (O(N) in the number of registered
@@ -659,7 +661,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
+    // TODO(justinmc): This means that WillPopScope (and CanPopScope) will not
+    // be called inside of a nested Navigator unless the app developer manually
+    // registers a WidgetsBindingObserver. Only WidgetsApp does this automatically
+    // with the root navigator.
     print('justin Received back from system. Iterating through all of the didPopRoutes, there are ${_observers.length}');
+    // TODO(justinmc): You usually see two here. The first from MediaQuery which
+    // always returns false, and the second from WidgetsApp.
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute()) {
         return;

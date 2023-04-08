@@ -1471,6 +1471,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // system back button or performing a back gesture.
   @override
   Future<bool> didPopRoute() async {
+    print('justin WidgetsApp didPopRoute');
     assert(mounted);
     // The back button dispatcher should handle the pop route if we use a
     // router.
