@@ -3245,6 +3245,12 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
         // Nothing to do.
+        break;
+      // ignore: no_default_cases
+      default:
+        // TODO(gspencergoog): Remove this and replace with real cases once
+        // engine change rolls into framework.
+        break;
     }
   }
 
