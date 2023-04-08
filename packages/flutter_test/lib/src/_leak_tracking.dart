@@ -5,10 +5,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
+import 'leak_tracking.dart';
 import 'test_async_utils.dart';
 import 'widget_tester.dart';
-
-
 
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
@@ -20,22 +19,11 @@ import 'widget_tester.dart';
 /// The Flutter related enhancements are:
 /// 1. Listens to [MemoryAllocations] events.
 /// 2. Uses `asyncCodeRunner` for async call for leak detection.
-///
-
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
   required AsyncCodeRunner asyncCodeRunner,
-  StackTraceCollectionConfig stackTraceCollectionConfig =
-      const StackTraceCollectionConfig(),
-  Duration? timeoutForFinalGarbageCollection,
-  LeaksObtainer? leaksObtainer,
+  LeakTrackingTestConfig? config,
 }) async {
-  // The method is copied (with improvements) from
-  // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
-
-  // The method is not combined with [testWidgets], because the combining will
-  // impact VSCode's ability to recognize tests.
-
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
     await callback();
@@ -52,13 +40,13 @@ Future<void> withFlutterLeakTracking(
       final Leaks leaks = await withLeakTracking(
         callback,
         asyncCodeRunner: asyncCodeRunner,
-        stackTraceCollectionConfig: stackTraceCollectionConfig,
+        stackTraceCollectionConfig: config?.stackTraceCollectionConfig ?? const StackTraceCollectionConfig(),
         shouldThrowOnLeaks: false,
-        timeoutForFinalGarbageCollection: timeoutForFinalGarbageCollection,
+        timeoutForFinalGarbageCollection: config?.timeoutForFinalGarbageCollection,
       );
-      if (leaksObtainer != null) {
-        leaksObtainer(leaks);
-      }
+
+      config?.onLeaks?.call(leaks);
+
       expect(leaks, isLeakFree);
     } finally {
       MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
