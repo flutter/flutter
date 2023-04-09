@@ -125,14 +125,14 @@ class _SelectionAreaState extends State<SelectionArea> {
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        controls ??= materialTextSelectionHandleControls;
+        controls ??= materialTextSelectionControls;
       case TargetPlatform.iOS:
-        controls ??= cupertinoTextSelectionHandleControls;
+        controls ??= cupertinoTextSelectionControls;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        controls ??= desktopTextSelectionHandleControls;
+        controls ??= desktopTextSelectionControls;
       case TargetPlatform.macOS:
-        controls ??= cupertinoDesktopTextSelectionHandleControls;
+        controls ??= cupertinoDesktopTextSelectionControls;
     }
 
     return SelectableRegion(
