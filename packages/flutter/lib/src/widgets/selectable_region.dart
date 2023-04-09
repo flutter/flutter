@@ -451,7 +451,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     );
   }
 
+  Offset? _lastTapDownPosition;
   void _startNewMouseSelectionGesture(TapDragDownDetails details) {
+    _lastTapDownPosition = details.globalPosition;
     switch(_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         widget.focusNode.requestFocus();
