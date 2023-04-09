@@ -763,8 +763,9 @@ class RenderListWheelViewport
 
     // Relayout all active children.
     RenderBox? child = firstChild;
+    int index = currentFirstIndex;
     while (child != null) {
-      child.layout(childConstraints, parentUsesSize: true);
+      _layoutChild(child, childConstraints, index++);
       child = childAfter(child);
     }
 

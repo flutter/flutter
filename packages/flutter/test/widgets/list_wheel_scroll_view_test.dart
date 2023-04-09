@@ -604,6 +604,40 @@ void main() {
       // centered.
       expect(viewport.childCount, 13);
     });
+
+    testWidgets('all active children are layout again during performLayout', (WidgetTester tester) async {
+      Future<void> buildWidget(double width) async => tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            itemExtent: 100.0,
+            children: <Widget>[
+              SizedBox(
+                width: width,
+                child: const Center(
+                  child: Text('blah'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      double getSizedBoxWidth() => tester.getSize(find.byType(SizedBox)).width;
+      double getSizedBoxCenterX() => tester.getCenter(find.byType(SizedBox)).dx;
+
+      await buildWidget(200.0);
+      expect(getSizedBoxWidth(), 200.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(100.0);
+      expect(getSizedBoxWidth(), 100.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(300.0);
+      expect(getSizedBoxWidth(), 300.0);
+      expect(getSizedBoxCenterX(), 400.0);
+    });
   });
 
   group('pre-transform viewport', () {
