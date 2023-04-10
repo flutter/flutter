@@ -337,7 +337,7 @@ TEST(DlOpSpy, Images) {
                           SkAlphaType::kPremul_SkAlphaType);
     SkBitmap bitmap;
     bitmap.allocPixels(info, 0);
-    auto sk_image = SkImage::MakeFromBitmap(bitmap);
+    auto sk_image = SkImages::RasterFromBitmap(bitmap);
     builder.DrawImage(DlImage::Make(sk_image), SkPoint::Make(5, 5),
                       DlImageSampling::kLinear);
     sk_sp<DisplayList> dl = builder.Build();
@@ -353,7 +353,7 @@ TEST(DlOpSpy, Images) {
                           SkAlphaType::kPremul_SkAlphaType);
     SkBitmap bitmap;
     bitmap.allocPixels(info, 0);
-    auto sk_image = SkImage::MakeFromBitmap(bitmap);
+    auto sk_image = SkImages::RasterFromBitmap(bitmap);
     builder.DrawImageRect(DlImage::Make(sk_image), SkRect::MakeWH(5, 5),
                           SkRect::MakeWH(5, 5), DlImageSampling::kLinear);
     sk_sp<DisplayList> dl = builder.Build();
@@ -369,7 +369,7 @@ TEST(DlOpSpy, Images) {
                           SkAlphaType::kPremul_SkAlphaType);
     SkBitmap bitmap;
     bitmap.allocPixels(info, 0);
-    auto sk_image = SkImage::MakeFromBitmap(bitmap);
+    auto sk_image = SkImages::RasterFromBitmap(bitmap);
     builder.DrawImageNine(DlImage::Make(sk_image), SkIRect::MakeWH(5, 5),
                           SkRect::MakeWH(5, 5), DlFilterMode::kLinear);
     sk_sp<DisplayList> dl = builder.Build();
@@ -385,7 +385,7 @@ TEST(DlOpSpy, Images) {
                           SkAlphaType::kPremul_SkAlphaType);
     SkBitmap bitmap;
     bitmap.allocPixels(info, 0);
-    auto sk_image = SkImage::MakeFromBitmap(bitmap);
+    auto sk_image = SkImages::RasterFromBitmap(bitmap);
     const SkRSXform xform[] = {};
     const SkRect tex[] = {};
     const DlColor colors[] = {};
