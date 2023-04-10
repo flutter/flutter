@@ -456,6 +456,73 @@ void can_composite_platform_views_with_known_scene() {
 }
 
 @pragma('vm:entry-point')
+void can_composite_platform_views_transparent_overlay() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    Color red = Color.fromARGB(127, 255, 0, 0);
+    Color blue = Color.fromARGB(127, 0, 0, 255);
+    Color transparent = Color(0xFFFFFF);
+
+    Size size = Size(50.0, 150.0);
+
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+
+    // 10 (Index 0)
+    builder.addPicture(
+        Offset(10.0, 10.0), CreateColoredBox(red, size)); // red - flutter
+
+    builder.pushOffset(20.0, 20.0);
+    // 20 (Index 1)
+    builder.addPlatformView(1,
+        width: size.width, height: size.height); // green - platform
+    builder.pop();
+
+    // 30 (Index 2)
+    builder.addPicture(
+        Offset(30.0, 30.0), CreateColoredBox(transparent, size)); // transparent picture, no layer should be created.
+
+    builder.pop();
+
+    PlatformDispatcher.instance.views.first.render(builder.build());
+
+    signalNativeTest(); // Signal 2
+  };
+  signalNativeTest(); // Signal 1
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void can_composite_platform_views_no_overlay() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    Color red = Color.fromARGB(127, 255, 0, 0);
+    Color blue = Color.fromARGB(127, 0, 0, 255);
+
+    Size size = Size(50.0, 150.0);
+
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+
+    // 10 (Index 0)
+    builder.addPicture(
+        Offset(10.0, 10.0), CreateColoredBox(red, size)); // red - flutter
+
+    builder.pushOffset(20.0, 20.0);
+    // 20 (Index 1)
+    builder.addPlatformView(1,
+        width: size.width, height: size.height); // green - platform
+    builder.pop();
+    builder.pop();
+
+    PlatformDispatcher.instance.views.first.render(builder.build());
+
+    signalNativeTest(); // Signal 2
+  };
+  signalNativeTest(); // Signal 1
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+
+@pragma('vm:entry-point')
 void can_composite_platform_views_with_root_layer_only() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     Color red = Color.fromARGB(127, 255, 0, 0);

@@ -30,6 +30,18 @@ void DisplayListEmbedderViewSlice::render_into(DlCanvas* canvas) {
   canvas->DrawDisplayList(display_list_);
 }
 
+void DisplayListEmbedderViewSlice::dispatch(DlOpReceiver& receiver) {
+  display_list_->Dispatch(receiver);
+}
+
+bool DisplayListEmbedderViewSlice::is_empty() {
+  return display_list_->bounds().isEmpty();
+}
+
+bool DisplayListEmbedderViewSlice::recording_ended() {
+  return builder_ == nullptr;
+}
+
 void ExternalViewEmbedder::SubmitFrame(GrDirectContext* context,
                                        std::unique_ptr<SurfaceFrame> frame) {
   frame->Submit();
