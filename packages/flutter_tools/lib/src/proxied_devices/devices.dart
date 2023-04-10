@@ -18,6 +18,7 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
+import 'debounce_data_stream.dart';
 import 'file_transfer.dart';
 
 bool _isNullable<T>() => null is T;
@@ -563,7 +564,7 @@ class ProxiedPortForwarder extends DevicePortForwarder {
           // Do nothing here.
         },
       ));
-      socket.listen((Uint8List data) {
+      debounceDataStream(socket).listen((Uint8List data) {
         unawaited(connection.sendRequest('proxy.write', <String, Object>{
           'id': id,
         }, data).then(
