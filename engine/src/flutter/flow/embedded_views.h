@@ -352,6 +352,9 @@ class DisplayListEmbedderViewSlice : public EmbedderViewSlice {
   std::list<SkRect> searchNonOverlappingDrawnRects(
       const SkRect& query) const override;
   void render_into(DlCanvas* canvas) override;
+  void dispatch(DlOpReceiver& receiver);
+  bool is_empty();
+  bool recording_ended();
 
  private:
   std::unique_ptr<DisplayListBuilder> builder_;
