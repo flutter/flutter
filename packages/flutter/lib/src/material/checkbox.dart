@@ -90,7 +90,6 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
-
     this.semanticLabel,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null);
@@ -112,7 +111,6 @@ class Checkbox extends StatefulWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({
-
     super.key,
     required this.value,
     this.tristate = false,
@@ -132,6 +130,8 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
+  }) : _checkboxType = _CheckboxType.adaptive,
+       assert(tristate || value != null);
 
   /// Whether this checkbox is checked.
   ///
