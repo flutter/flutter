@@ -552,25 +552,25 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The width of the line used to draw the circle.
   final double strokeWidth;
 
-  /// The shape of the progress indicator's stroke ends.
+  /// The progress indicator's line ending.
   ///
-  /// Determines the appearance of the stroke ends in the progress indicator.
-  /// By default, [strokeCap] is null, causing the stroke ends to be set to
-  /// [StrokeCap.square] when [value] is null (indeterminate progress
-  /// indicator), and to [StrokeCap.butt] when [value] is not null
-  /// (determinate progress indicator).
+  /// This determines the shape of the stroke ends of the progress indicator.
+  /// By default, [strokeCap] is null.
+  /// When [value] is null (indeterminate), the stroke ends are set to
+  /// [StrokeCap.square]. When [value] is not null, the stroke
+  /// ends are set to [StrokeCap.butt].
   ///
-  /// Setting [strokeCap] to [StrokeCap.round] results in rounded stroke ends.
-  /// With [strokeCap] set to [StrokeCap.butt] and [value] == null, the
-  /// indicator exhibits a different indeterminate animation, disappearing
-  /// completely before reappearing at its minimum value.
-  ///
-  /// It should be noted that when [StrokeCap.square] is used with a non-null
-  /// [value], the start and end angles might differ slightly from the expected
-  /// values. For example, with a [value] of 0.5, one might anticipate the
-  /// angles to be 90 and 270 degrees. However, the indicator may start at 85
-  /// degrees and end at 275 degrees. This deviation does not adhere to the
-  /// Material Design guidelines, so consider using it thoughtfully.
+  /// Setting [strokeCap] to [StrokeCap.round] will result in a rounded end.
+  /// Setting [strokeCap] to [StrokeCap.butt] with [value] == null will result
+  /// in a slightly different indeterminate animation; the indicator completely
+  /// disappears and reappears on its minimum value.
+  /// Setting [strokeCap] to [StrokeCap.square] with [value] != null will
+  /// result in a different display of [value]. The indicator will start
+  /// drawing from slightly less than the start, and end slightly after
+  /// the end. This might produce unintended results, as the expected behavior
+  /// is, for example, that a [value] of 0.5 starts at 90 degrees and ends at
+  /// 270 degrees. With [strokeCap.square], it could start at 85 degrees and
+  /// end at 275 degrees.
   final StrokeCap? strokeCap;
 
   @override
