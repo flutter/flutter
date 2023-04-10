@@ -25,6 +25,13 @@ List<Node> findElements(String selector) {
     );
   }
 
+  // TODO(htoor3): Remove shadowRoot selectors once DOM structure PR is merged.
+  final Element? flutterView = document.querySelector('flutter-view');
+
+  if(flutterView != null){
+    return flutterView.querySelectorAll(selector);
+  }
+
   final ShadowRoot? shadowRoot = glassPane.shadowRoot;
   return shadowRoot != null
     ? shadowRoot.querySelectorAll(selector)
