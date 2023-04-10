@@ -328,7 +328,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// The border radius of the widget.
   ///
   /// By default it is [BorderRadius.zero], which produces a rectangular shape.
-  final BorderRadius outerBorderRadius;
+  final BorderRadiusGeometry outerBorderRadius;
 
   /// The border radius of the indicator.
   ///
