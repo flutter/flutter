@@ -452,10 +452,16 @@ abstract class MaterialLocalizations {
   /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
   String get collapsedIconTapHint => 'Expand';
 
-  /// The semantics hint to describe the tap action on an expanded [ExpansionTile] on iOS and macOS. This is appended to the [collapsedHint] hint to provide a more detailed description of the action, e.g. "Expanded double tap to collapse".
+  /// The semantics hint to describe the tap action on an expanded
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [collapsedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Expanded
+  /// double tap to collapse".
   String get expansionTileExpandedHint => 'double tap to collapse';
 
-  /// The semantics hint to describe the tap action on a collapsed [ExpansionTile] on iOS and macOS. This is appended to the [expandedHint] hint to provide a more detailed description of the action, e.g. "Collapsed double tap to expand".
+  /// The semantics hint to describe the tap action on a collapsed
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [expandedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Collapsed
+  /// double tap to expand".
   String get expansionTileCollapsedHint => 'double tap to expand';
 
   /// The semantics hint to describe the tap action on an expanded [ExpansionTile].
