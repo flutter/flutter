@@ -4,6 +4,20 @@
 
 import("//flutter/impeller/tools/impeller.gni")
 
+impeller_component("skia_conversions") {
+  sources = [
+    "skia_conversions.cc",
+    "skia_conversions.h",
+  ]
+
+  public_deps = [
+    "../core",
+    "../geometry",
+    "//flutter/fml",
+    "//third_party/skia",
+  ]
+}
+
 impeller_component("display_list") {
   sources = [
     "display_list_dispatcher.cc",
@@ -17,6 +31,7 @@ impeller_component("display_list") {
   ]
 
   public_deps = [
+    ":skia_conversions",
     "../aiks",
     "//flutter/display_list",
     "//flutter/fml",

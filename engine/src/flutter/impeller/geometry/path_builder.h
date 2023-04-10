@@ -19,7 +19,7 @@ class PathBuilder {
   /// the angle. However, accuracy rapidly diminishes if magnified for obtuse
   /// angle arcs, and so multiple cubic curves should be used when approximating
   /// arcs greater than 90 degrees.
-  constexpr static const Scalar kArcApproximationMagic = 0.551915024494;
+  constexpr static const Scalar kArcApproximationMagic = 0.551915024494f;
 
   PathBuilder();
 
