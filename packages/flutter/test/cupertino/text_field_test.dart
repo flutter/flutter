@@ -7444,6 +7444,8 @@ void main() {
       ),
       matchesSemantics(
         hasEnabledState: true,
+        isTextField: true,
+        isReadOnly: true,
       ),
     );
   });
