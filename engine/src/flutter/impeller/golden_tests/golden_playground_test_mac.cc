@@ -10,6 +10,21 @@
 
 namespace impeller {
 
+// If you add a new playground test to the aiks unittests and you do not want it
+// to also be a golden test, then add the test name here.
+static const std::vector<std::string> kSkipTests = {
+    "impeller_Play_AiksTest_CanRenderLinearGradientManyColorsUnevenStops_Metal",
+    "impeller_Play_AiksTest_CanRenderRadialGradient_Metal",
+    "impeller_Play_AiksTest_CanRenderRadialGradientManyColors_Metal",
+    "impeller_Play_AiksTest_TextFrameSubpixelAlignment_Metal",
+    "impeller_Play_AiksTest_ColorWheel_Metal",
+    "impeller_Play_AiksTest_SolidStrokesRenderCorrectly_Metal",
+    "impeller_Play_AiksTest_GradientStrokesRenderCorrectly_Metal",
+    "impeller_Play_AiksTest_CoverageOriginShouldBeAccountedForInSubpasses_"
+    "Metal",
+    "impeller_Play_AiksTest_SceneColorSource_Metal",
+};
+
 namespace {
 std::string GetTestName() {
   std::string suite_name =
@@ -57,21 +72,8 @@ void GoldenPlaygroundTest::SetUp() {
   }
 
   std::string test_name = GetTestName();
-  if (test_name ==
-          "impeller_Play_AiksTest_CanRenderLinearGradientManyColorsUnevenStops_"
-          "Metal" ||
-      test_name == "impeller_Play_AiksTest_CanRenderRadialGradient_Metal" ||
-      test_name ==
-          "impeller_Play_AiksTest_CanRenderRadialGradientManyColors_Metal" ||
-      test_name == "impeller_Play_AiksTest_TextFrameSubpixelAlignment_Metal" ||
-      test_name == "impeller_Play_AiksTest_ColorWheel_Metal" ||
-      test_name == "impeller_Play_AiksTest_SolidStrokesRenderCorrectly_Metal" ||
-      test_name ==
-          "impeller_Play_AiksTest_GradientStrokesRenderCorrectly_Metal" ||
-      test_name ==
-          "impeller_Play_AiksTest_"
-          "CoverageOriginShouldBeAccountedForInSubpasses_Metal" ||
-      test_name == "impeller_Play_AiksTest_SceneColorSource_Metal") {
+  if (std::find(kSkipTests.begin(), kSkipTests.end(), test_name) !=
+      kSkipTests.end()) {
     GTEST_SKIP_(
         "GoldenPlaygroundTest doesn't support interactive playground tests "
         "yet.");
