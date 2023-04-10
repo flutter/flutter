@@ -17,7 +17,10 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
+import '../xcode_project.dart';
+import '../globals.dart' as globals;
 
 final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
@@ -449,12 +452,12 @@ class XcodeProjectInfo {
   final List<String> schemes;
   final Logger _logger;
 
-  bool get definesCustomSchemes => !(schemes.contains('TestName') && schemes.length == 1);
+  bool get definesCustomSchemes => !(schemes.contains('Runner') && schemes.length == 1);
 
   /// The expected scheme for [buildInfo].
   @visibleForTesting
   static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return sentenceCase(buildInfo?.flavor ?? 'TestName');
+    return sentenceCase(buildInfo?.flavor ?? globals.hostProjName);
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].

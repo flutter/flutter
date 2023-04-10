@@ -21,8 +21,26 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform  {
-  static const String _hostAppProjectName = 'TestName';
-  static const String _hostAppWorkspaceName = '';
+  String get hostAppProjectName => _hostAppProjectName;
+
+  String get _hostAppProjectName {
+    List<FileSystemEntity> contents;
+    try {
+      contents = hostAppRoot.listSync();
+    } catch (e) {
+      return 'Runner';
+    }
+    for (final Directory entity in contents.whereType<Directory>()) {
+      // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
+      // Find the first non-hidden xcworkspace and return the directory.
+      if (globals.fs.path.extension(entity.path) == '.xcworkspace' &&
+          !globals.fs.path.basename(entity.path).startsWith('.')) {
+        globals.hostProjName = globals.fs.path.basenameWithoutExtension(entity.path);
+        return globals.fs.path.basenameWithoutExtension(entity.path);
+      }
+    }
+    return 'Runner';
+  }
 
   /// The parent of this project.
   FlutterProject get parent;
@@ -258,9 +276,9 @@ class IosProject extends XcodeBasedProject {
       }
     }
     if (productName == null) {
-      globals.printTrace('FULL_PRODUCT_NAME not present, defaulting to ${XcodeBasedProject._hostAppProjectName}');
+      globals.printTrace('FULL_PRODUCT_NAME not present, defaulting to $_hostAppProjectName');
     }
-    return productName ?? '${XcodeBasedProject._hostAppProjectName}.app';
+    return productName ?? '$_hostAppProjectName.app';
   }
 
   /// The build settings for the host app of this project, as a detached map.
@@ -492,7 +510,7 @@ class IosProject extends XcodeBasedProject {
         ? _flutterLibRoot
             .childDirectory('Flutter')
             .childDirectory('FlutterPluginRegistrant')
-        : hostAppRoot.childDirectory(XcodeBasedProject._hostAppProjectName);
+        : hostAppRoot.childDirectory(_hostAppProjectName);
   }
 
   File get pluginRegistrantHeader {

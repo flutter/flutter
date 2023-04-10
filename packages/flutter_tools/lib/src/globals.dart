@@ -45,6 +45,7 @@ import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
+import 'xcode_project.dart';
 
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>()!;
@@ -70,6 +71,7 @@ XCDevice? get xcdevice => context.get<XCDevice>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
+IosProject? get iosProj => context.get<IosProject>();
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 
@@ -282,6 +284,7 @@ PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const N
 
 // TODO(fujino): Migrate to 'main' https://github.com/flutter/flutter/issues/95041
 const String kDefaultFrameworkChannel = 'master';
+String hostProjName = '';
 
 // Used to build RegExp instances which can detect the VM service message.
 final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
