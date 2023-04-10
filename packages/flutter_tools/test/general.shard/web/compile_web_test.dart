@@ -58,6 +58,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,
@@ -96,6 +97,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,

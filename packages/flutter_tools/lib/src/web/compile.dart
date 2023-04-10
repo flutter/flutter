@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -26,17 +28,20 @@ export 'compiler_config.dart';
 class WebBuilder {
   WebBuilder({
     required Logger logger,
+    required ProcessManager processManager,
     required BuildSystem buildSystem,
     required Usage usage,
     required FlutterVersion flutterVersion,
     required FileSystem fileSystem,
   })  : _logger = logger,
+        _processManager = processManager,
         _buildSystem = buildSystem,
         _flutterUsage = usage,
         _flutterVersion = flutterVersion,
         _fileSystem = fileSystem;
 
   final Logger _logger;
+  final ProcessManager _processManager;
   final BuildSystem _buildSystem;
   final Usage _flutterUsage;
   final FlutterVersion _flutterVersion;
@@ -95,7 +100,7 @@ class WebBuilder {
             artifacts: globals.artifacts!,
             fileSystem: _fileSystem,
             logger: _logger,
-            processManager: globals.processManager,
+            processManager: _processManager,
             platform: globals.platform,
             usage: _flutterUsage,
             cacheDir: globals.cache.getRoot(),
@@ -135,6 +140,8 @@ enum WebRendererMode {
   canvaskit,
   /// Always uses html.
   html,
+  /// Always use skwasm.
+  skwasm,
 }
 
 /// The correct precompiled artifact to use for each build and render mode.
