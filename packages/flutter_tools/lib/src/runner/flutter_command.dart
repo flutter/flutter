@@ -97,7 +97,7 @@ class FlutterCommandResult {
 }
 
 /// Common flutter command line options.
-class FlutterOptions {
+abstract final class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
   static const String kEnableExperiment = 'enable-experiment';
@@ -126,6 +126,7 @@ class FlutterOptions {
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
+  static const String kWebWasmFlag = 'wasm';
 }
 
 /// flutter command categories for usage.
@@ -162,6 +163,7 @@ abstract class FlutterCommand extends Command<void> {
     'auto': WebRendererMode.autoDetect,
     'canvaskit': WebRendererMode.canvaskit,
     'html': WebRendererMode.html,
+    'skwasm': WebRendererMode.skwasm,
   };
 
   /// The map used to convert web renderer mode to a List of dart-defines.
@@ -178,6 +180,11 @@ abstract class FlutterCommand extends Command<void> {
       'FLUTTER_WEB_AUTO_DETECT=false',
       'FLUTTER_WEB_USE_SKIA=false',
     ],
+    WebRendererMode.skwasm: <String>[
+      'FLUTTER_WEB_AUTO_DETECT=false',
+      'FLUTTER_WEB_USE_SKIA=false',
+      'FLUTTER_WEB_USE_SKWASM=true',
+    ]
   };
 
   @override
@@ -662,12 +669,13 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       FlutterOptions.kWebRendererFlag,
       defaultsTo: 'auto',
-      allowed: <String>['auto', 'canvaskit', 'html'],
+      allowed: <String>['auto', 'canvaskit', 'html', 'skwasm'],
       help: 'The renderer implementation to use when building for the web.',
       allowedHelp: <String, String>{
         'html': 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.',
         'canvaskit': 'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.',
         'auto': 'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
+        'skwasm': 'Always use the experimental skwasm renderer.',
       }
     );
   }
