@@ -25,6 +25,7 @@ import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../proxied_devices/debounce_data_stream.dart';
 import '../proxied_devices/file_transfer.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -1463,7 +1464,7 @@ class ProxyDomain extends Domain {
     }
 
     _forwardedConnections[id] = socket;
-    socket.listen((List<int> data) {
+    debounceDataStream(socket).listen((List<int> data) {
       sendEvent('proxy.data.$id', null, data);
     }, onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
