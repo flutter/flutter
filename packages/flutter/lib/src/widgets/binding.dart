@@ -994,11 +994,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   void attachRootWidget(Widget rootWidget) {
     final bool isBootstrapFrame = rootElement == null;
     _readyToProduceFrames = true;
-    _rootElement = RenderObjectToWidgetAdapter<RenderBox>(
-      container: renderView,
+    _rootElement = RootWidget(
       debugShortDescription: '[root]',
-      child: rootWidget,
-    ).attachToRenderTree(buildOwner!, rootElement as RenderObjectToWidgetElement<RenderBox>?);
+      child: ViewHooksScope(
+        hooks: ViewHooks(
+          renderViewRepository: this,
+          pipelineOwner: rootPipelineOwner,
+        ),
+        child: rootWidget,
+      ),
+    ).attach(buildOwner!, rootElement as RootElement?);
     if (isBootstrapFrame) {
       SchedulerBinding.instance.ensureVisualUpdate();
     }
@@ -1113,52 +1118,28 @@ void debugDumpApp() {
   debugPrint(_debugDumpAppString());
 }
 
-/// A bridge from a [RenderObject] to an [Element] tree.
 ///
-/// The given container is the [RenderObject] that the [Element] tree should be
-/// inserted into. It must be a [RenderObject] that implements the
-/// [RenderObjectWithChildMixin] protocol. The type argument `T` is the kind of
-/// [RenderObject] that the container expects as its child.
-///
-/// Used by [runApp] to bootstrap applications.
-class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
-  /// Creates a bridge from a [RenderObject] to an [Element] tree.
+class RootWidget extends Widget {
   ///
-  /// Used by [WidgetsBinding] to attach the root widget to the [RenderView].
-  RenderObjectToWidgetAdapter({
+  const RootWidget({
+    super.key,
     this.child,
-    required this.container,
     this.debugShortDescription,
-  }) : super(key: GlobalObjectKey(container));
+  });
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
-  /// The [RenderObject] that is the parent of the [Element] created by this widget.
-  final RenderObjectWithChildMixin<T> container;
-
   /// A short description of this widget used by debugging aids.
   final String? debugShortDescription;
 
   @override
-  RenderObjectToWidgetElement<T> createElement() => RenderObjectToWidgetElement<T>(this);
+  RootElement createElement() => RootElement(this);
 
-  @override
-  RenderObjectWithChildMixin<T> createRenderObject(BuildContext context) => container;
-
-  @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) { }
-
-  /// Inflate this widget and actually set the resulting [RenderObject] as the
-  /// child of [container].
   ///
-  /// If `element` is null, this function will create a new element. Otherwise,
-  /// the given element will have an update scheduled to switch to this widget.
-  ///
-  /// Used by [runApp] to bootstrap applications.
-  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [ RenderObjectToWidgetElement<T>? element ]) {
+  RootElement attach(BuildOwner owner, [ RootElement? element ]) {
     if (element == null) {
       owner.lockState(() {
         element = createElement();
@@ -1166,7 +1147,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
         element!.assignOwner(owner);
       });
       owner.buildScope(element!, () {
-        element!.mount(null, null);
+        element!.mount(/* parent */ null, null); // TODO(goderbauer): slot
       });
     } else {
       element._newWidget = this;
@@ -1179,27 +1160,12 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
-/// The root of the element tree that is hosted by a [RenderObject].
 ///
-/// This element class is the instantiation of a [RenderObjectToWidgetAdapter]
-/// widget. It can be used only as the root of an [Element] tree (it cannot be
-/// mounted into another [Element]; it's parent must be null).
-///
-/// In typical usage, it will be instantiated for a [RenderObjectToWidgetAdapter]
-/// whose container is the [RenderView] that connects to the Flutter engine. In
-/// this usage, it is normally instantiated by the bootstrapping logic in the
-/// [WidgetsFlutterBinding] singleton created by [runApp].
-class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectElement with RootElementMixin {
-  /// Creates an element that is hosted by a [RenderObject].
+class RootElement extends Element with RootElementMixin {
   ///
-  /// The [RenderObject] created by this element is not automatically set as a
-  /// child of the hosting [RenderObject]. To actually attach this element to
-  /// the render tree, call [RenderObjectToWidgetAdapter.attachToRenderTree].
-  RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> super.widget);
+  RootElement(RootWidget super.widget);
 
   Element? _child;
-
-  static const Object _rootChildSlot = Object();
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -1217,14 +1183,14 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectEl
 
   @override
   void mount(Element? parent, Object? newSlot) {
-    assert(parent == null);
+    assert(parent == null); // We are the root!
     super.mount(parent, newSlot);
     _rebuild();
     assert(_child != null);
   }
 
   @override
-  void update(RenderObjectToWidgetAdapter<T> newWidget) {
+  void update(RootWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _rebuild();
@@ -1232,16 +1198,16 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectEl
 
   // When we are assigned a new widget, we store it here
   // until we are ready to update to it.
-  Widget? _newWidget;
+  RootWidget? _newWidget;
 
   @override
   void performRebuild() {
     if (_newWidget != null) {
       // _newWidget can be null if, for instance, we were rebuilt
       // due to a reassemble.
-      final Widget newWidget = _newWidget!;
+      final RootWidget newWidget = _newWidget!;
       _newWidget = null;
-      update(newWidget as RenderObjectToWidgetAdapter<T>);
+      update(newWidget);
     }
     super.performRebuild();
     assert(_newWidget == null);
@@ -1250,40 +1216,30 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectEl
   @pragma('vm:notify-debugger-on-exception')
   void _rebuild() {
     try {
-      _child = updateChild(_child, (widget as RenderObjectToWidgetAdapter<T>).child, _rootChildSlot);
+      _child = updateChild(_child, (widget as RootWidget).child, null); // TODO(goderbauer): slot
     } catch (exception, stack) {
       final FlutterErrorDetails details = FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'widgets library',
-        context: ErrorDescription('attaching to the render tree'),
+        context: ErrorDescription('attaching to the root widget'),
       );
+      // TODO(goderbauer): There is nothing to render the error widget into.
       FlutterError.reportError(details);
       final Widget error = ErrorWidget.builder(details);
-      _child = updateChild(null, error, _rootChildSlot);
+      _child = updateChild(null, error, null); // TODO(goderbauer): slot
     }
   }
 
   @override
-  RenderObjectWithChildMixin<T> get renderObject => super.renderObject as RenderObjectWithChildMixin<T>;
-
-  @override
-  void insertRenderObjectChild(RenderObject child, Object? slot) {
-    assert(slot == _rootChildSlot);
-    assert(renderObject.debugValidateChild(child));
-    renderObject.child = child as T;
-  }
-
-  @override
-  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
+  RenderObject? get renderObject {
+    // TODO(goderbauer): ??
     assert(false);
+    return null;
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, Object? slot) {
-    assert(renderObject.child == child);
-    renderObject.child = null;
-  }
+  bool get debugDoingBuild => false; // This element doesn't have a build phase.
 }
 
 /// A concrete binding for applications based on the Widgets framework.

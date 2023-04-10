@@ -67,10 +67,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Typically created by the binding (e.g., [RendererBinding]).
   ///
-  /// The [configuration] must not be null.
+  /// Providing a [configuration] is optional, but a configuration must be set
+  /// before doing layout.
   RenderView({
     RenderBox? child,
-    required ViewConfiguration configuration,
+    ViewConfiguration? configuration,
     required ui.FlutterView view,
   }) : _configuration = configuration,
        _view = view {
@@ -82,20 +83,20 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   Size _size = Size.zero;
 
   /// The constraints used for the root layout.
-  ViewConfiguration get configuration => _configuration;
-  ViewConfiguration _configuration;
+  ViewConfiguration get configuration => _configuration!;
+  ViewConfiguration? _configuration;
 
   /// The configuration is initially set by the [configuration] argument
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
-    if (configuration == value) {
+    if (_configuration == value) {
       return;
     }
-    final ViewConfiguration oldConfiguration = _configuration;
+    final ViewConfiguration? oldConfiguration = _configuration;
     _configuration = value;
-    if (oldConfiguration.toMatrix() != _configuration.toMatrix()) {
+    if (oldConfiguration?.toMatrix() != configuration.toMatrix()) {
       replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
     }
     assert(_rootTransform != null);
@@ -422,8 +423,17 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 }
 
+
 /// A callback for painting a debug overlay on top of the provided [RenderView].
 ///
 /// Used by [RenderView.debugAddPaintCallback] and
 /// [RenderView.debugRemovePaintCallback].
 typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset, RenderView renderView);
+
+///
+abstract class RenderViewRepository {
+  ///
+  void addRenderView(RenderView view);
+  ///
+  void removeRenderView(RenderView view);
+}

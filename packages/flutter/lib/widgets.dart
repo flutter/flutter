@@ -18,6 +18,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 export 'foundation.dart' show UniqueKey;
 export 'rendering.dart' show TextSelectionHandleType;
 export 'src/widgets/actions.dart';
+export 'src/widgets/adapter.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_scroll_view.dart';
 export 'src/widgets/animated_size.dart';

@@ -23,27 +23,22 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 // late BuildContext context;
 
 /// The glue between the render tree and the Flutter engine.
-mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
+mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable implements RenderViewRepository {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _pipelineOwner = PipelineOwner(
-      onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
-      onSemanticsUpdate: _handleSemanticsUpdate,
-      onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
-    );
+    _rootPipelineOwner = createRootPipelineOwner();
     platformDispatcher
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged;
-    initRenderView();
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
       addPostFrameCallback(_handleWebFirstFrame);
     }
-    _pipelineOwner.attach(_manifold);
+    rootPipelineOwner.attach(_manifold);
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -108,9 +103,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerServiceExtension(
         name: RenderingServiceExtensions.debugDumpLayerTree.name,
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
           return <String, Object>{
-            'data': data,
+            'data': _debugCollectLayerTrees(),
           };
         },
       );
@@ -155,9 +149,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerServiceExtension(
         name: RenderingServiceExtensions.debugDumpRenderTree.name,
         callback: (Map<String, String> parameters) async {
-          final String data = RendererBinding.instance.renderView.toStringDeep();
           return <String, Object>{
-            'data': data,
+            'data': _debugCollectRenderTrees(),
           };
         },
       );
@@ -165,7 +158,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name,
         callback: (Map<String, String> parameters) async {
           return <String, Object>{
-            'data': _generateSemanticsTree(DebugSemanticsDumpOrder.traversalOrder),
+            'data': _debugCollectSemanticsTrees(DebugSemanticsDumpOrder.traversalOrder),
           };
         },
       );
@@ -173,7 +166,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         name: RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name,
         callback: (Map<String, String> parameters) async {
           return <String, Object>{
-            'data': _generateSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest),
+            'data': _debugCollectSemanticsTrees(DebugSemanticsDumpOrder.inverseHitTest),
           };
         },
       );
@@ -200,22 +193,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   late final PipelineManifold _manifold = _BindingPipelineManifold(this);
 
-  /// Creates a [RenderView] object to be the root of the
-  /// [RenderObject] rendering tree, and initializes it so that it
-  /// will be rendered when the next frame is requested.
-  ///
-  /// Called automatically when the binding is created.
-  void initRenderView() {
-    assert(!_debugIsRenderViewInitialized);
-    assert(() {
-      _debugIsRenderViewInitialized = true;
-      return true;
-    }());
-    renderView = RenderView(configuration: createViewConfiguration(), view: platformDispatcher.implicitView!);
-    renderView.prepareInitialFrame();
-  }
-  bool _debugIsRenderViewInitialized = false;
-
   /// The object that manages state about currently connected mice, for hover
   /// notification.
   MouseTracker get mouseTracker => _mouseTracker!;
@@ -223,15 +200,102 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics.
-  PipelineOwner get pipelineOwner => _pipelineOwner;
-  late PipelineOwner _pipelineOwner;
+  // TODO(goderbauer): Deprecate this.
+  PipelineOwner get pipelineOwner => throw UnimplementedError();
 
   /// The render tree that's attached to the output surface.
-  RenderView get renderView => _pipelineOwner.rootNode! as RenderView;
-  /// Sets the given [RenderView] object (which must not be null), and its tree, to
-  /// be the new render tree to display. The previous tree, if any, is detached.
-  set renderView(RenderView value) {
-    _pipelineOwner.rootNode = value;
+  // TODO(goderbauer): Deprecate this.
+  RenderView get renderView => throw UnimplementedError();
+
+  ///
+  PipelineOwner createRootPipelineOwner() {
+    return PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate update) {
+      assert(() {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'The global pipeline owner produced an unexpected semantics update.',
+          ),
+          ErrorDescription(
+            'By default, the RendererBinding.rootPipelineOwner is not configured '
+            'to handle semantics because it is not expected to own a root node.',
+          ),
+          ErrorHint(
+            'Override RendererBinding.createRootPipelineOwner to create a '
+            'pipeline owner that is configured for semantics.',
+          ),
+        ]);
+      }());
+    });
+  }
+
+  /// The [PipelineOwner] that is the root of the PipelineOwner tree.
+  ///
+  /// While the root PipelineOwner typically does not manage its own
+  /// [RenderView], its child PipelineOwners typically do manage separate
+  /// [RenderView]s and produce distinct render trees which render their content
+  /// into the [FlutterView] associated with the [RenderView].
+  PipelineOwner get rootPipelineOwner => _rootPipelineOwner;
+  late PipelineOwner _rootPipelineOwner;
+
+  /// The [RenderView]s managed by this binding.
+  ///
+  /// A [RenderView] is added by [addRenderView] and removed by [removeRenderView].
+  Iterable<RenderView> get renderViews => _viewIdToRenderView.values;
+  final Map<Object, RenderView> _viewIdToRenderView = <Object, RenderView>{};
+
+  /// Adds a [RenderView] to be managed by the binding.
+  ///
+  /// The binding will manage the [RenderView] by
+  ///
+  ///  * setting and updating [RenderView.configuration],
+  ///  * calling [RenderView.compositeFrame] when it is time to produce a new
+  ///    frame, and
+  ///  * forwarding relevant pointer events to the [RenderView] for hit testing.
+  ///
+  /// The provided `view` must be attached to the [rootPipelineOwner] or one
+  /// of its descendants.
+  ///
+  /// To remove a [RenderView] from the binding, call [removeRenderView].
+  @override
+  void addRenderView(RenderView view) {
+    final Object viewId = view.flutterView.viewId;
+    assert(!_viewIdToRenderView.containsValue(view));
+    assert(!_viewIdToRenderView.containsKey(viewId));
+    assert(() {
+      bool inTree = rootPipelineOwner == view.owner;
+      if (inTree) {
+        return true;
+      }
+      void visitor(PipelineOwner owner) {
+        inTree = inTree || owner == view.owner;
+        if (!inTree) {
+          owner.visitChildren(visitor);
+        }
+      }
+      rootPipelineOwner.visitChildren(visitor);
+      return inTree;
+    }());
+    _viewIdToRenderView[viewId] = view;
+    view.configuration = createViewConfigurationFor(view);
+  }
+
+  /// Removes a [RenderView] previously added with [addRenderView] from the
+  /// binding.
+  @override
+  void removeRenderView(RenderView view) {
+    final Object viewId = view.flutterView.viewId;
+    assert(_viewIdToRenderView[viewId] == view);
+    _viewIdToRenderView.remove(viewId);
+  }
+
+  ///
+  ViewConfiguration createViewConfigurationFor(RenderView renderView) {
+    final FlutterView view = renderView.flutterView;
+    final double devicePixelRatio = view.devicePixelRatio;
+    return ViewConfiguration(
+      size: view.physicalSize / devicePixelRatio,
+      devicePixelRatio: devicePixelRatio,
+    );
   }
 
   /// Called when the system metrics change.
@@ -240,8 +304,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   @visibleForTesting
   void handleMetricsChanged() {
-    renderView.configuration = createViewConfiguration();
-    if (renderView.child != null) {
+    bool forceFrame = false;
+    for (final RenderView view in renderViews) {
+      forceFrame = forceFrame || view.child != null;
+      view.configuration = createViewConfigurationFor(view);
+    }
+    if (forceFrame) {
       scheduleForcedFrame();
     }
   }
@@ -288,25 +356,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   void handlePlatformBrightnessChanged() { }
 
-  /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
-  /// current environment.
-  ///
-  /// This is called during construction and also in response to changes to the
-  /// system metrics.
-  ///
-  /// Bindings can override this method to change what size or device pixel
-  /// ratio the [RenderView] will use. For example, the testing framework uses
-  /// this to force the display into 800x600 when a test is run on the device
-  /// using `flutter run`.
-  ViewConfiguration createViewConfiguration() {
-    final FlutterView view = platformDispatcher.implicitView!;
-    final double devicePixelRatio = view.devicePixelRatio;
-    return ViewConfiguration(
-      size: view.physicalSize / devicePixelRatio,
-      devicePixelRatio: devicePixelRatio,
-    );
-  }
-
   /// Creates a [MouseTracker] which manages state about currently connected
   /// mice, for hover notification.
   ///
@@ -335,19 +384,19 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override
   void performSemanticsAction(SemanticsActionEvent action) {
-    _pipelineOwner.semanticsOwner?.performAction(action.nodeId, action.type, action.arguments);
-  }
-
-  void _handleSemanticsOwnerCreated() {
-    renderView.scheduleInitialSemantics();
-  }
-
-  void _handleSemanticsUpdate(ui.SemanticsUpdate update) {
-    renderView.updateSemantics(update);
-  }
-
-  void _handleSemanticsOwnerDisposed() {
-    renderView.clearSemantics();
+    SemanticsOwner? target;
+    void visitor(PipelineOwner owner) {
+      if (target != null) {
+        return;
+      }
+      if (owner.semanticsOwner?.ownsNode(action.nodeId) ?? false) {
+        target = owner.semanticsOwner;
+        return;
+      }
+      owner.visitChildren(visitor);
+    }
+    rootPipelineOwner.visitChildren(visitor);
+    target?.performAction(action.nodeId, action.type, action.arguments);
   }
 
   void _handleWebFirstFrame(Duration _) {
@@ -358,7 +407,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
     drawFrame();
-    _scheduleMouseTrackerUpdate();
+    // _scheduleMouseTrackerUpdate();
   }
 
   bool _debugMouseTrackerUpdateScheduled = false;
@@ -491,12 +540,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   // When editing the above, also update widgets/binding.dart's copy.
   @protected
   void drawFrame() {
-    pipelineOwner.flushLayout();
-    pipelineOwner.flushCompositingBits();
-    pipelineOwner.flushPaint();
+    rootPipelineOwner.flushLayout();
+    rootPipelineOwner.flushCompositingBits();
+    rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      renderView.compositeFrame(); // this sends the bits to the GPU
-      pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
+      for (final RenderView renderView in renderViews) {
+        renderView.compositeFrame(); // this sends the bits to the GPU
+      }
+      rootPipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
       _firstFrameSent = true;
     }
   }
@@ -509,7 +560,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         FlutterTimeline.startSync('Preparing Hot Reload (layout)');
       }
       try {
-        renderView.reassemble();
+        for (final RenderView renderView in renderViews) {
+          renderView.reassemble();
+        }
       } finally {
         if (!kReleaseMode) {
           FlutterTimeline.finishSync();
@@ -541,40 +594,78 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       child.markNeedsPaint();
       child.visitChildren(visitor);
     };
-    instance.renderView.visitChildren(visitor);
+    for (final RenderView renderView in renderViews) {
+      renderView.visitChildren(visitor);
+    }
     return endOfFrame;
   }
 }
 
-/// Prints a textual representation of the entire render tree.
-void debugDumpRenderTree() {
-  debugPrint(RendererBinding.instance.renderView.toStringDeep());
+String _debugCollectRenderTrees() {
+  return <String>[
+    for (final RenderView renderView in RendererBinding.instance.renderViews)
+      renderView.toStringDeep(),
+  ].join('\n\n');
 }
 
-/// Prints a textual representation of the entire layer tree.
+/// Prints a textual representation of the render trees.
+///
+/// {@template flutter.rendering.debugDumpRenderTree}
+/// It prints the trees associated with every [RenderView] in
+/// [RendererBinding.renderView], separated by two blank lines.
+/// {@endtemplate}
+void debugDumpRenderTree({RenderView? renderView, FlutterView? flutterView, Object? viewId}) {
+  debugPrint(_debugCollectRenderTrees());
+}
+
+String _debugCollectLayerTrees() {
+  return <String>[
+    for (final RenderView renderView in RendererBinding.instance.renderViews)
+      renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable for $renderView.',
+  ].join('\n\n');
+}
+
+/// Prints a textual representation of the layer trees.
+///
+/// {@macro flutter.rendering.debugDumpRenderTree}
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance.renderView.debugLayer?.toStringDeep());
+  debugPrint(_debugCollectLayerTrees());
 }
 
-/// Prints a textual representation of the entire semantics tree.
-/// This will only work if there is a semantics client attached.
-/// Otherwise, a notice that no semantics are available will be printed.
+String _debugCollectSemanticsTrees(DebugSemanticsDumpOrder childOrder) {
+  final List<String> trees = <String>[];
+  bool printedExplanation = false;
+  for (final RenderView renderView in RendererBinding.instance.renderViews) {
+    final String? tree = renderView.debugSemantics?.toStringDeep(childOrder: childOrder);
+    if (tree != null) {
+      trees.add(tree);
+    } else {
+      String message = 'Semantics not generated for $renderView.';
+      if (!printedExplanation) {
+        printedExplanation = true;
+        message = '$message\n'
+          'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+          'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
+          'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.';
+      }
+      trees.add(message);
+    }
+  }
+  return trees.join('\n\n');
+}
+
+/// Prints a textual representation of the semantics trees.
+///
+/// {@macro flutter.rendering.debugDumpRenderTree}
+///
+/// Semantics trees are only constructed when semantics are enabled (see
+/// [SemanticsBinding.semanticsEnabled]). If a semantics tree is not available,
+/// a notice about the missing semantics tree is printed instead.
 ///
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
 void debugDumpSemanticsTree([DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder]) {
-  debugPrint(_generateSemanticsTree(childOrder));
-}
-
-String _generateSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  final String? tree = RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder);
-  if (tree != null) {
-    return tree;
-  }
-  return 'Semantics not generated.\n'
-    'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-    'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-    'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.';
+  debugPrint(_debugCollectSemanticsTrees(childOrder));
 }
 
 /// A concrete binding for applications that use the Rendering framework
