@@ -411,8 +411,8 @@ class AlertDialog extends StatelessWidget {
   /// Typically passed as a child of [showAdaptiveDialog], which will display
   /// the alert differently based on platform.
   ///
-  /// If a [CupertinoAlertDialog] is created, all parameters are ignored except
-  /// for: [title], [content], [actions], [scrollController],
+  /// If a [CupertinoAlertDialog] is created only these parameters are used:
+  /// [title], [content], [actions], [scrollController],
   /// [actionScrollController], [insetAnimationDuration], and
   /// [insetAnimationCurve]. If a material [AlertDialog] is created,
   /// [scrollController], [actionScrollController], [insetAnimationDuration],
