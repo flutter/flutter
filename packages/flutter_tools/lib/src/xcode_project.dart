@@ -71,11 +71,11 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
       return null;
     }
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
-    for (final Directory entity in contents.whereType<Directory>()) {
+    for (final FileSystemEntity entity in contents) {
       // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
       // Find the first non-hidden xcworkspace and return the directory.
       if (globals.fs.path.extension(entity.path) == '.xcworkspace' && !globals.fs.path.basename(entity.path).startsWith('.')) {
-        return entity;
+        return hostAppRoot.childDirectory(entity.basename);
       }
     }
     return null;
