@@ -211,10 +211,10 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
             rect.top,
             rect.right,
             rect.bottom,
-            bottomRight: rrect.brRadius,
-            topRight: rrect.trRadius,
-            // bottomLeft: Radius.zero, (default value)
-            // topLeft: Radius.zero, (default value)
+            bottomRight: (textDirection == TextDirection.ltr) ? rrect.brRadius : Radius.zero,
+            topRight: (textDirection == TextDirection.ltr) ? rrect.trRadius : Radius.zero,
+            bottomLeft: (textDirection == TextDirection.rtl) ? rrect.blRadius : Radius.zero,
+            topLeft: (textDirection == TextDirection.rtl) ? rrect.tlRadius : Radius.zero,
           );
         }
         canvas.drawRRect(rrect, paint);
