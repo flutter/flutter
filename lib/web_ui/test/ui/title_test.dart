@@ -14,7 +14,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await setUpUiTest();
+  setUpUiTest();
 
   const MethodCodec codec = JSONMethodCodec();
 

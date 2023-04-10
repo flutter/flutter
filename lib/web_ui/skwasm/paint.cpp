@@ -10,7 +10,11 @@
 using namespace Skwasm;
 
 SKWASM_EXPORT SkPaint* paint_create() {
-  return new SkPaint();
+  auto paint = new SkPaint();
+
+  // Antialias defaults to true in flutter.
+  paint->setAntiAlias(true);
+  return paint;
 }
 
 SKWASM_EXPORT void paint_destroy(SkPaint* paint) {

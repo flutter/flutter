@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:ui/ui.dart' as ui;
+
 import 'util.dart';
 
 class Matrix4 {
@@ -1013,6 +1015,10 @@ class Matrix4 {
         (_m4storage[5] * y) +
         _m4storage[13];
   }
+
+  /// Transforms the input rect and calculates the bounding box of the rect
+  /// after the transform.
+  ui.Rect transformRect(ui.Rect rect) => transformRectWithMatrix(this, rect);
 
   /// Copies [this] into [array] starting at [offset].
   void copyIntoArray(List<num> array, [int offset = 0]) {

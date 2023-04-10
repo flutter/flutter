@@ -34,6 +34,9 @@ all web engine targets are built. Common targets are as follows:
 The output of these steps is used in unit tests, and can be used with the flutter
 command via the `--local-web-sdk=wasm_release` command.
 
+The `build` command also accepts either the `--profile` or `--debug` flags, which
+can be used to change the build profile of the artifacts.
+
 ##### Examples
 Builds all web engine targets, then runs a Flutter app using it:
 ```
@@ -54,14 +57,19 @@ information on how test suites are structured, see the test configuration
 
 By default, `felt test` compiles and runs all suites that are compatible with the
 host system. Some useful flags supported by this command:
-  * `--compile` will only perform compilation of these suites without running them. 
-  * `--run` will only run the tests and not compile them, and assume they have been 
-    compiled in a previous run of the tool.
+  * Action flags which say what parts of the test pipeline to perform. More of one
+    of these can be specified to run multiple actions. If none are specified, then
+    *all* of these actions are performed
+    * `--compile` performs compilation of the test bundles.
+    * `--run` runs the unit tests
+    * `--copy-artifacts` will copy build artifacts needed for the tests to run.
+      * The `--profile` or `--debug` flags can be specified to copy over artifacts
+        from the profile or debug build folders instead of release.
   * `--list` will list all the test suites and test bundles and exit without
     compiling or running anything.
   * `--verbose` will output some extra information that may be useful for debugging.
-  * `--debug` will open a browser window and pause the tests before starting so that
-    breakpoints can be set before starting the test suites.
+  * `--start-paused` will open a browser window and pause the tests before starting
+    so that breakpoints can be set before starting the test suites.
 
 Several other flags can be passed that filter which test suites should be run:
   * `--browser` runs only the test suites that test on the browsers passed. Valid

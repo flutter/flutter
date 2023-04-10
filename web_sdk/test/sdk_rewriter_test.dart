@@ -182,7 +182,6 @@ void printSomething() {
       "import 'dart:_web_unicode';",
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
-      "import 'dart:ffi';",
     ]);
 
     // Other libraries (should not have extra imports).

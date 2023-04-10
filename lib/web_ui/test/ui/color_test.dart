@@ -17,7 +17,7 @@ class NotAColor extends Color {
 }
 
 Future<void> testMain() async {
-  await setUpUiTest();
+  setUpUiTest();
 
   test('color accessors should work', () {
     const Color foo = Color(0x12345678);

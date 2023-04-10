@@ -18,7 +18,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await setUpUiTest();
+  setUpUiTest();
   group('PathMetric length', () {
     test('empty path', () {
       final Path path = Path();

@@ -14,10 +14,10 @@ import '../pipeline.dart';
 import '../utils.dart';
 
 class CopyArtifactsStep implements PipelineStep {
-  CopyArtifactsStep(this.artifactDeps, { required this.isProfile });
+  CopyArtifactsStep(this.artifactDeps, { required this.runtimeMode });
 
   final ArtifactDependencies artifactDeps;
-  final bool isProfile;
+  final RuntimeMode runtimeMode;
 
   @override
   String get description => 'copy_artifacts';
@@ -167,9 +167,7 @@ class CopyArtifactsStep implements PipelineStep {
     }
   }
 
-  String get outBuildPath => isProfile
-    ? environment.wasmProfileOutDir.path
-    : environment.wasmReleaseOutDir.path;
+  String get outBuildPath => getBuildDirectoryForRuntimeMode(runtimeMode).path;
 
   Future<void> copySkwasm() async {
     final io.Directory targetDir = io.Directory(pathlib.join(

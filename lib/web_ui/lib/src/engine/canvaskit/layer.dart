@@ -4,7 +4,6 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import '../util.dart';
 import '../vector_math.dart';
 import 'canvas.dart';
 import 'embedded_views.dart';
@@ -362,7 +361,7 @@ class TransformEngineLayer extends ContainerLayer
     prerollContext.mutatorsStack.pushTransform(_transform);
     final ui.Rect childPaintBounds =
         prerollChildren(prerollContext, childMatrix);
-    paintBounds = transformRect(_transform, childPaintBounds);
+    paintBounds = _transform.transformRect(childPaintBounds);
     prerollContext.mutatorsStack.pop();
   }
 

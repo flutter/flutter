@@ -10,6 +10,8 @@
 
 using namespace Skwasm;
 
+SkRTreeFactory bbhFactory;
+
 SKWASM_EXPORT SkPictureRecorder* pictureRecorder_create() {
   return new SkPictureRecorder();
 }
@@ -21,12 +23,16 @@ SKWASM_EXPORT void pictureRecorder_dispose(SkPictureRecorder* recorder) {
 SKWASM_EXPORT CanvasWrapper* pictureRecorder_beginRecording(
     SkPictureRecorder* recorder,
     const SkRect* cullRect) {
-  return new CanvasWrapper{0, recorder->beginRecording(*cullRect)};
+  return new CanvasWrapper{0, recorder->beginRecording(*cullRect, &bbhFactory)};
 }
 
 SKWASM_EXPORT SkPicture* pictureRecorder_endRecording(
     SkPictureRecorder* recorder) {
   return recorder->finishRecordingAsPicture().release();
+}
+
+SKWASM_EXPORT void picture_getCullRect(SkPicture* picture, SkRect* outRect) {
+  *outRect = picture->cullRect();
 }
 
 SKWASM_EXPORT void picture_dispose(SkPicture* picture) {
