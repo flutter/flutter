@@ -56,15 +56,15 @@ Future<void> main(List<String> rawArgs) async {
     );
   }
 
-  final List<dynamic> packages = (
+  final List<Object?> packages = (
     json.decode(packageConfigFile.readAsStringSync()) as Map<String, Object?>
-  )['packages']! as List<dynamic>;
+  )['packages']! as List<Object?>;
 
   String? pathToIntl;
-  for (final dynamic package in packages) {
-    final Map<String, dynamic> packageAsMap = package as Map<String, dynamic>;
+  for (final Object? package in packages) {
+    final Map<String, Object?> packageAsMap = package! as Map<String, Object?>;
     if (packageAsMap['name'] == 'intl') {
-      pathToIntl = (packageAsMap['rootUri'] as String).substring(7);
+      pathToIntl = (packageAsMap['rootUri']! as String).substring(7);
     }
   }
 
