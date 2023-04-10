@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../util.dart';
 import '../validators.dart';
 import '../vector_math.dart';
 import 'canvas.dart';
@@ -145,7 +144,7 @@ class CanvasKitCanvas implements ui.Canvas {
       // non-invertible transforms collapse space to a line or point
       return ui.Rect.zero;
     }
-    return transformRect(transform, _canvas.getDeviceClipBounds());
+    return transform.transformRect(_canvas.getDeviceClipBounds());
   }
 
   @override

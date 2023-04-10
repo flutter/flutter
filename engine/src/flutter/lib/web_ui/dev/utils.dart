@@ -14,6 +14,12 @@ import 'environment.dart';
 import 'exceptions.dart';
 import 'felt_config.dart';
 
+enum RuntimeMode {
+  debug,
+  profile,
+  release,
+}
+
 class FilePath {
   FilePath.fromCwd(String relativePath)
       : _absolutePath = path.absolute(relativePath);
@@ -328,7 +334,29 @@ mixin ArgUtils<T> on Command<T> {
 
   /// Extracts a string argument from [argResults].
   String stringArg(String name) => argResults![name] as String;
+
+  RuntimeMode get runtimeMode {
+    final bool isProfile = boolArg('profile');
+    final bool isDebug = boolArg('debug');
+    if (isProfile && isDebug) {
+      throw ToolExit('Cannot specify both --profile and --debug at the same time.');
+    }
+    if (isProfile) {
+      return RuntimeMode.profile;
+    } else if (isDebug) {
+      return RuntimeMode.debug;
+    } else {
+      return RuntimeMode.release;
+    }
+  }
 }
+
+io.Directory getBuildDirectoryForRuntimeMode(RuntimeMode runtimeMode) =>
+  switch (runtimeMode) {
+    RuntimeMode.debug => environment.wasmDebugOutDir,
+    RuntimeMode.profile => environment.wasmProfileOutDir,
+    RuntimeMode.release => environment.wasmReleaseOutDir,
+  };
 
 /// There might be proccesses started during the tests.
 ///
@@ -386,6 +414,15 @@ io.Directory getBundleBuildDirectory(TestBundle bundle) {
       environment.webUiBuildDir.path,
       'test_bundles',
       bundle.name,
+    )
+  );
+}
+
+io.Directory getSkiaGoldDirectoryForSuite(TestSuite suite) {
+  return io.Directory(
+    path.join(
+      environment.webUiSkiaGoldDirectory.path,
+      suite.name,
     )
   );
 }

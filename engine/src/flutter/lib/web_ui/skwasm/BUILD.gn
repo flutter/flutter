@@ -25,6 +25,7 @@ wasm_lib("skwasm") {
     "-sOFFSCREENCANVAS_SUPPORT",
     "-sPTHREAD_POOL_SIZE=1",
     "-sALLOW_MEMORY_GROWTH",
+    "-sALLOW_TABLE_GROWTH",
     "-sUSE_PTHREADS=1",
     "-lexports.js",
   ]
@@ -33,7 +34,6 @@ wasm_lib("skwasm") {
 
   if (is_debug) {
     ldflags += [
-      "-O0",
       "-sDEMANGLE_SUPPORT=1",
       "-sASSERTIONS=1",
       "-sGL_ASSERTIONS=1",
@@ -43,13 +43,8 @@ wasm_lib("skwasm") {
     ldflags += [
       "-Oz",
       "--closure=1",
-      "-flto",
       "-sEXPORTED_FUNCTIONS=[stackAlloc]",
-    ]
-
-    cflags += [
-      "-flto",
-      "-fvisibility=hidden",
+      "-sEXPORTED_RUNTIME_METHODS=[addFunction,removeFunction]",
     ]
   }
 

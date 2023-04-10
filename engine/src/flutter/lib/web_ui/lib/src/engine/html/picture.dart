@@ -205,10 +205,10 @@ class PersistedPicture extends PersistedLeafSurface {
         final ui.Rect? localClipBounds = parentSurface.localClipBounds;
         if (localClipBounds != null) {
           if (bounds == null) {
-            bounds = transformRect(clipTransform, localClipBounds);
+            bounds = clipTransform.transformRect(localClipBounds);
           } else {
             bounds =
-                bounds.intersect(transformRect(clipTransform, localClipBounds));
+                bounds.intersect(clipTransform.transformRect(localClipBounds));
           }
         }
         final Matrix4? localInverse = parentSurface.localTransformInverse;
@@ -236,7 +236,7 @@ class PersistedPicture extends PersistedLeafSurface {
       _exactGlobalCullRect = ui.Rect.zero;
     } else {
       assert(() {
-        _exactGlobalCullRect = transformRect(transform!, _exactLocalCullRect!);
+        _exactGlobalCullRect = transform!.transformRect(_exactLocalCullRect!);
         return true;
       }());
     }

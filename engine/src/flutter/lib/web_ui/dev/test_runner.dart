@@ -26,7 +26,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   TestCommand() {
     argParser
       ..addFlag(
-        'debug',
+        'start-paused',
         help: 'Pauses the browser before running a test, giving you an '
             'opportunity to add breakpoints or inspect loaded code before '
             'running the code.',
@@ -79,6 +79,11 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         'profile',
         help:
             'Use artifacts from the profile build instead of release.'
+      )
+      ..addFlag(
+        'debug',
+        help:
+            'Use artifacts from the debug build instead of release.'
       )
       ..addFlag(
         'require-skia-gold',
@@ -152,7 +157,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   ///
   /// In this mode the browser pauses before running the test to allow
   /// you set breakpoints or inspect the code.
-  bool get isDebug => boolArg('debug');
+  bool get startPaused => boolArg('start-paused');
 
   bool get isVerbose => boolArg('verbose');
 
@@ -364,7 +369,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final Set<FilePath>? testFiles = targetFiles.isEmpty ? null : Set<FilePath>.from(targetFiles);
     final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
       if (isWatchMode) ClearTerminalScreenStep(),
-      if (shouldCopyArtifacts) CopyArtifactsStep(artifacts, isProfile: boolArg('profile')),
+      if (shouldCopyArtifacts) CopyArtifactsStep(artifacts, runtimeMode: runtimeMode),
       if (shouldCompile)
         for (final TestBundle bundle in bundles)
           CompileBundleStep(
@@ -376,7 +381,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         for (final TestSuite suite in filteredSuites)
           RunSuiteStep(
             suite,
-            isDebug: isDebug,
+            startPaused: startPaused,
             isVerbose: isVerbose,
             doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
             requireSkiaGold: requireSkiaGold,

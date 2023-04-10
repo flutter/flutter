@@ -15,7 +15,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await setUpUiTest();
+  setUpUiTest();
   test('path getBounds', () {
     const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
     final Path p = Path()..addRect(r);

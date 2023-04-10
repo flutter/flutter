@@ -11,10 +11,23 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 final class RawSurface extends Opaque {}
 typedef SurfaceHandle = Pointer<RawSurface>;
 
+final class RawRenderCallback extends Opaque {}
+typedef OnRenderCallbackHandle = Pointer<RawRenderCallback>;
+
 @Native<SurfaceHandle Function(Pointer<Int8>)>(
   symbol: 'surface_createFromCanvas',
   isLeaf: true)
-external SurfaceHandle surfaceCreateFromCanvas(Pointer<Int8> querySelector);
+external SurfaceHandle surfaceCreateFromCanvas(
+  Pointer<Int8> querySelector
+);
+
+@Native<Void Function(SurfaceHandle, OnRenderCallbackHandle)>(
+  symbol: 'surface_setOnRenderCallback',
+  isLeaf: true)
+external void surfaceSetOnRenderCallback(
+  SurfaceHandle surface,
+  OnRenderCallbackHandle callback,
+);
 
 @Native<Void Function(SurfaceHandle)>(
   symbol: 'surface_destroy',
@@ -30,7 +43,7 @@ external void surfaceSetCanvasSize(
   int height
 );
 
-@Native<Void Function(SurfaceHandle, PictureHandle)>(
+@Native<Int32 Function(SurfaceHandle, PictureHandle)>(
   symbol: 'surface_renderPicture',
   isLeaf: true)
-external void surfaceRenderPicture(SurfaceHandle surface, PictureHandle picture);
+external int surfaceRenderPicture(SurfaceHandle surface, PictureHandle picture);

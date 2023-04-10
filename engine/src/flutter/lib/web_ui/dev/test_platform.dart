@@ -429,6 +429,7 @@ class BrowserPlatform extends PlatformPlugin {
       screenshot,
       doUpdateScreenshotGoldens,
       filename,
+      getSkiaGoldDirectoryForSuite(suite),
       skiaClient,
       isCanvaskitTest: isCanvaskitTest,
       verbose: isVerbose,

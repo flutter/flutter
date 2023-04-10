@@ -230,7 +230,7 @@ final Float32List _tempRectData = Float32List(4);
 /// The resulting rect is aligned to the pixel grid, i.e. two of
 /// its sides are vertical and two are horizontal. In the presence of rotations
 /// the rectangle is inflated such that it fits the rotated rectangle.
-ui.Rect transformRect(Matrix4 transform, ui.Rect rect) {
+ui.Rect transformRectWithMatrix(Matrix4 transform, ui.Rect rect) {
   _tempRectData[0] = rect.left;
   _tempRectData[1] = rect.top;
   _tempRectData[2] = rect.right;
