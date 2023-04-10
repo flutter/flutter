@@ -613,10 +613,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     valueIndicatorController.dispose();
     enableController.dispose();
     positionController.dispose();
-    if (overlayEntry != null) {
-      overlayEntry!.remove();
-      overlayEntry = null;
-    }
+    overlayEntry?.remove();
+    overlayEntry = null;
     _focusNode?.dispose();
     super.dispose();
   }
@@ -908,7 +906,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   void showValueIndicator() {
     if (overlayEntry == null) {
-      overlayEntry = OverlayEntry(
+      final localOverlayEntry = OverlayEntry(
         builder: (BuildContext context) {
           return CompositedTransformFollower(
             link: _layerLink,
@@ -918,7 +916,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           );
         },
       );
-      Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
+      Overlay.of(context, debugRequiredFor: widget).insert(localOverlayEntry);
+      overlayEntry = localOverlayEntry;
     }
   }
 }
@@ -1064,7 +1063,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       curve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed && _state.overlayEntry != null) {
-        _state.overlayEntry!.remove();
+        _state.overlayEntry?.remove();
         _state.overlayEntry = null;
       }
     });
