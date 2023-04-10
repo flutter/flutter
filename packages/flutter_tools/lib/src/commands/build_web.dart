@@ -97,27 +97,19 @@ class BuildWebCommand extends BuildSubCommand {
     //
     if (featureFlags.isFlutterWebWasmEnabled) {
       argParser.addSeparator('Experimental options');
-      argParser.addFlag(
-        FlutterOptions.kWebWasmFlag,
-        help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
-        negatable: false,
-      );
-      argParser.addFlag(
-        'omit-type-checks',
-        help: 'Omit type checks in Wasm output.',
-        negatable: false,
-      );
-    } else {
-      // Add the flags as hidden. Will give a helpful error message in [runCommand] below.
-      argParser.addFlag(
-        FlutterOptions.kWebWasmFlag,
-        hide: true,
-      );
-      argParser.addFlag(
-        'omit-type-checks',
-        hide: true,
-      );
     }
+    argParser.addFlag(
+      FlutterOptions.kWebWasmFlag,
+      help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
+      negatable: false,
+      hide: !featureFlags.isFlutterWebWasmEnabled,
+    );
+    argParser.addFlag(
+      'omit-type-checks',
+      help: 'Omit type checks in Wasm output.',
+      negatable: false,
+      hide: !featureFlags.isFlutterWebWasmEnabled,
+    );
   }
 
   final FileSystem _fileSystem;
