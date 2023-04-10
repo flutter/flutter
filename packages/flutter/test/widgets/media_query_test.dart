@@ -44,26 +44,25 @@ class _MediaQueryAspectVariant extends TestVariant<_MediaQueryAspectCase> {
 
 void main() {
   testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
-    bool tested = false;
+    late final FlutterError error;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
         builder: (BuildContext context) {
-          tested = true;
-          MediaQuery.of(context); // should throw
-          return Container();
+          try {
+            MediaQuery.of(context);
+          } on FlutterError catch (e) {
+            error = e;
+          }
+          return View(
+            view: tester.view,
+            child: const SizedBox(),
+          );
         },
       ),
     );
-    expect(tested, isTrue);
-    final dynamic exception = tester.takeException();
-    expect(exception, isNotNull);
-    expect(exception ,isFlutterError);
-    final FlutterError error = exception as FlutterError;
-    expect(error.diagnostics.length, 5);
-    expect(error.diagnostics.last, isA<ErrorHint>());
     expect(
       error.toStringDeep(),
       startsWith(
@@ -119,7 +118,10 @@ void main() {
           final MediaQueryData? data = MediaQuery.maybeOf(context);
           expect(data, isNull);
           tested = true;
-          return Container();
+          return View(
+            view: tester.view,
+            child: const SizedBox(),
+          );
         },
       ),
     );
@@ -295,7 +297,10 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   data = MediaQuery.of(context);
-                  return const Placeholder();
+                  return View(
+                    view: tester.view,
+                    child: const SizedBox(),
+                  );
                 },
               )
           );
@@ -348,7 +353,10 @@ void main() {
                 builder: (BuildContext context) {
                   rebuildCount++;
                   data = MediaQuery.of(context);
-                  return const Placeholder();
+                  return View(
+                    view: tester.view,
+                    child: const SizedBox(),
+                  );
                 },
               ),
           );

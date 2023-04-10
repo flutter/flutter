@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Only check the initial lines of the message, since the message walks the
@@ -82,7 +83,7 @@ No widgets found at Offset(1.0, 1.0).
       ),
     );
 
-    final Size originalSize = tester.binding.createViewConfiguration().size;
+    final Size originalSize = tester.binding.createViewConfigurationFor(tester.binding.renderView).size; // ignore: deprecated_member_use
     await tester.binding.setSurfaceSize(const Size(2000, 1800));
     try {
       await tester.pump();
@@ -126,6 +127,7 @@ class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
     // real devices touches sends event in the global coordinate system.
     // See the documentation of [handlePointerEventForSource] for details.
     if (source == TestBindingEventSource.test) {
+      final RenderView renderView = renderViews.firstWhere((RenderView r) => r.flutterView.viewId == event.viewId);
       final PointerEvent globalEvent = event.copyWith(position: localToGlobal(event.position, renderView));
       return super.handlePointerEventForSource(globalEvent);
     }
