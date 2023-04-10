@@ -352,6 +352,45 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
+  testWidgets('Should not throw exception when dragged after Slider is disposed', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Slider(
+                    key: sliderKey,
+                    value: value,
+                    divisions: 4,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox.shrink()); // This will dispose Slider.
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    await gesture.up();
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('Discrete Slider repaints and animates when dragged', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;

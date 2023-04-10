@@ -906,7 +906,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   void showValueIndicator() {
     if (overlayEntry == null) {
-      final localOverlayEntry = OverlayEntry(
+      final OverlayEntry localOverlayEntry = OverlayEntry(
         builder: (BuildContext context) {
           return CompositedTransformFollower(
             link: _layerLink,
