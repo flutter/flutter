@@ -135,5 +135,11 @@
   "scrimLabel": "स्क्रिम",
   "bottomSheetLabel": "तळाशी असलेली शीट",
   "scrimOnTapHint": "$modalRouteContentName बंद करा",
-  "keyboardKeyShift": "शिफ्ट"
+  "keyboardKeyShift": "शिफ्ट",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

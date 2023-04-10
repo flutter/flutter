@@ -133,5 +133,11 @@
   "scrimLabel": "സ്ക്രിം",
   "bottomSheetLabel": "ബോട്ടം ഷീറ്റ്",
   "scrimOnTapHint": "$modalRouteContentName അടയ്ക്കുക",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

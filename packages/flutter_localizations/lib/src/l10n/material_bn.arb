@@ -133,5 +133,11 @@
   "scrimLabel": "স্ক্রিম",
   "bottomSheetLabel": "স্ক্রিনের নিচে অ্যাটাচ করা শিট",
   "scrimOnTapHint": "$modalRouteContentName বন্ধ করুন",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

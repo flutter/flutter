@@ -134,5 +134,11 @@
   "scrimLabel": "opaklık katmanı",
   "bottomSheetLabel": "alt sayfa",
   "scrimOnTapHint": "$modalRouteContentName içeriğini kapat",
-  "keyboardKeyShift": "üst karakter"
+  "keyboardKeyShift": "üst karakter",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
