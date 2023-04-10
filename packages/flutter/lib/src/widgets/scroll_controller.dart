@@ -10,6 +10,20 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 
+/// Signature for when a [ScrollController] has added or removed a
+/// [ScrollPosition].
+///
+/// Since a [ScrollPosition] is not created and attached to a controller until
+/// the [Scrollable] is built, this can be used to respond to the position being
+/// attached to a controller.
+///
+/// By having access to the position directly, additional listeners can be
+/// applied to aspects of the scroll position, like
+/// [ScrollPosition.isScrollingNotifier].
+///
+/// Used by [ScrollController.onAttach] and [ScrollController.onDetach].
+typedef ScrollControllerCallback = void Function(ScrollPosition position);
+
 /// Controls a scrollable widget.
 ///
 /// Scroll controllers are typically stored as member variables in [State]
@@ -22,12 +36,50 @@ import 'scroll_position_with_single_context.dart';
 /// to an individual [Scrollable] widget. To use a custom [ScrollPosition],
 /// subclass [ScrollController] and override [createScrollPosition].
 ///
-/// A [ScrollController] is a [Listenable]. It notifies its listeners whenever
-/// any of the attached [ScrollPosition]s notify _their_ listeners (i.e.
-/// whenever any of them scroll). It does not notify its listeners when the list
-/// of attached [ScrollPosition]s changes.
-///
 /// Typically used with [ListView], [GridView], [CustomScrollView].
+///
+/// ### Listening to a ScrollPosition
+///
+/// A [ScrollController] is a [Listenable]. It notifies its listeners whenever
+/// any of the attached [ScrollPosition]s notify _their_ listeners, such as when
+/// scrolling occurs.This is very similar to using a [NotificationListener] of
+/// type [ScrollNotification] to listen to changes in the scroll position, with
+/// the difference being that a notification listener will provide information
+/// about the scrolling activity.
+///
+/// //TODO: sample with controller addListener/notificationListener
+///
+/// [ScrollController] does not notify its listeners when the list of
+/// [ScrollPosition]s attached to the scroll controller changes. To listen to
+/// the attaching and detaching of scroll positions to the controller, use the
+/// [ScrollController.onAttach] and [ScrollController.onDetach] methods. This is
+/// also useful for adding a listener to the
+/// [ScrollPosition.isScrollingNotifier] when the position is created during the
+/// build method of the [Scrollable].
+///
+/// //TODO: sample with onAttach/onDetach
+///
+/// When a scroll position is attached, the [ScrollMetrics] such as the
+/// [ScrollMetrics.maxScrollExtent] are not yet available. These are not
+/// determined until the [Scrollable] has finished laying out its contents and
+/// computing things like the full extent of that content.
+///
+/// Lastly, listening to a [ScrollController] will not notify when the
+/// [ScrollMetrics] of a given scroll position changes, such as when the window
+/// is resized, changing the dimensions of the [Viewport] and the previously
+/// mentioned extents of the scrollable. In order to listen to changes in scroll
+/// metrics, use a [NotificationListener] of type [ScrollMetricsNotification].
+/// This type of notification differs from [ScrollNotification], as it is not
+/// associated with the activity of scrolling, but rather the dimensions of
+/// the scrollable area.
+///
+/// {@tool dartpad}
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
+/// the `windowSize` is changed. Press the floating action button to increase
+/// the scrollable window's size.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_metrics_notification.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -39,8 +91,8 @@ import 'scroll_position_with_single_context.dart';
 ///    [PageView].
 ///  * [ScrollPosition], which manages the scroll offset for an individual
 ///    scrolling widget.
-///  * [ScrollNotification] and [NotificationListener], which can be used to watch
-///    the scroll position without using a [ScrollController].
+///  * [ScrollNotification] and [NotificationListener], which can be used to
+///    listen to scrolling occur without using a [ScrollController].
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
   ///
@@ -49,6 +101,8 @@ class ScrollController extends ChangeNotifier {
     double initialScrollOffset = 0.0,
     this.keepScrollOffset = true,
     this.debugLabel,
+    this.onAttach,
+    this.onDetach,
   }) : _initialScrollOffset = initialScrollOffset;
 
   /// The initial value to use for [offset].
@@ -77,6 +131,19 @@ class ScrollController extends ChangeNotifier {
   ///    scrollable appears in the same route, to distinguish the [PageStorage]
   ///    locations used to save scroll offsets.
   final bool keepScrollOffset;
+
+  /// Called when a [ScrollPosition] is attached to the scroll controller.
+  ///
+  /// Since a scroll position is not attached until a [Scrollable] is actually
+  /// built, this can be used to respond to a new position being attached. When
+  /// attached, the scroll position will not yet have determined its
+  /// [ScrollMetrics], which are computed after layout is finished.
+  /// //TODO: sample with onAttach/onDetach
+  final ScrollControllerCallback? onAttach;
+
+  /// Called when a [ScrollPosition] is detached from the scroll controller.
+  /// //TODO: sample with onAttach/onDetach
+  final ScrollControllerCallback? onDetach;
 
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying scroll controller instances in debug output.
@@ -179,6 +246,9 @@ class ScrollController extends ChangeNotifier {
     assert(!_positions.contains(position));
     _positions.add(position);
     position.addListener(notifyListeners);
+    if (onAttach != null) {
+      onAttach!(position);
+    }
   }
 
   /// Unregister the given position with this controller.
@@ -187,6 +257,9 @@ class ScrollController extends ChangeNotifier {
   /// controller will not manipulate the given position.
   void detach(ScrollPosition position) {
     assert(_positions.contains(position));
+    if (onDetach != null) {
+      onDetach!(position);
+    }
     position.removeListener(notifyListeners);
     _positions.remove(position);
   }

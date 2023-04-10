@@ -83,8 +83,26 @@ mixin ViewportElementMixin  on NotifiableElementMixin {
 /// happens after layout). The [GlowingOverscrollIndicator] and [Scrollbar]
 /// widgets are examples of paint effects that use scroll notifications.
 ///
+/// //TODO: sample for scroll notification
+///
 /// To drive layout based on the scroll position, consider listening to the
-/// [ScrollPosition] directly (or indirectly via a [ScrollController]).
+/// [ScrollPosition] directly (or indirectly via a [ScrollController]). This
+/// will not notify when the [ScrollMetrics] of a given scroll position changes,
+/// such as when the window is resized, changing the dimensions of the
+/// [Viewport]. In order to listen to changes in scroll metrics, use a
+/// [NotificationListener] of type [ScrollMetricsNotification].
+/// This type of notification differs from [ScrollNotification], as it is not
+/// associated with the activity of scrolling, but rather the dimensions of
+/// the scrollable area.
+///
+/// {@tool dartpad}
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
+/// the `windowSize` is changed. Press the floating action button to increase
+/// the scrollable window's size.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_metrics_notification.0.dart **
+/// {@end-tool}
+///
 abstract class ScrollNotification extends LayoutChangedNotification with ViewportNotificationMixin {
   /// Initializes fields for subclasses.
   ScrollNotification({
