@@ -287,9 +287,8 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 /// [KeepAliveNotification] is not immediately sent, then the widget risks being
 /// garbage collected while it wants to be kept alive.
 ///
-/// It is an error to use the same [handle] in two [KeepAliveNotification]s
-/// within the same [AutomaticKeepAlive] without triggering that [handle] before
-/// the second notification is sent.
+/// It is acceptable to provide the same [handle] to multiple
+/// [KeepAliveNotification]s without needing to trigger the [handle] inbetween.
 ///
 /// For a more convenient way to interact with [AutomaticKeepAlive] widgets,
 /// consider using [AutomaticKeepAliveClientMixin], which uses
