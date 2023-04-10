@@ -65,6 +65,7 @@ Future<void> main(List<String> rawArgs) async {
     final Map<String, Object?> packageAsMap = package! as Map<String, Object?>;
     if (packageAsMap['name'] == 'intl') {
       pathToIntl = Uri.parse(packageAsMap['rootUri']! as String).toFilePath();
+      break;
     }
   }
 
