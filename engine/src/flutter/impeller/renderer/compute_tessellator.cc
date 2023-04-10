@@ -17,9 +17,10 @@ ComputeTessellator::~ComputeTessellator() = default;
 template <typename T>
 static std::shared_ptr<DeviceBuffer> CreateDeviceBuffer(
     const std::shared_ptr<Context>& context,
-    const std::string& label) {
+    const std::string& label,
+    StorageMode storage_mode = StorageMode::kDevicePrivate) {
   DeviceBufferDescriptor desc;
-  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.storage_mode = storage_mode;
   desc.size = sizeof(T);
   auto buffer = context->GetResourceAllocator()->CreateBuffer(desc);
   buffer->SetLabel(label);
@@ -69,9 +70,9 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
 
   auto cubic_count = path.GetComponentCount(Path::ComponentType::kCubic);
   auto quad_count = path.GetComponentCount(Path::ComponentType::kQuadratic) +
-                    (cubic_count * 10);
+                    (cubic_count * 6);
   auto line_count =
-      path.GetComponentCount(Path::ComponentType::kLinear) + (quad_count * 10);
+      path.GetComponentCount(Path::ComponentType::kLinear) + (quad_count * 6);
   if (cubic_count > kMaxCubicCount || quad_count > kMaxQuadCount ||
       line_count > kMaxLineCount) {
     return Status::kTooManyComponents;
@@ -121,7 +122,7 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
     pass->SetThreadGroupSize(ISize(line_count, 1));
 
     ComputeCommand cmd;
-    cmd.label = "PathToPolyline";
+    cmd.label = "Generate Polyline";
     cmd.pipeline = compute_pipeline;
 
     PS::BindConfig(cmd, pass->GetTransientsBuffer().EmplaceUniform(config));

@@ -13641,11 +13641,11 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.75,
+              0.609375,
               0.0,
-              0.75,
-              0.0,
-              2.0,
+              0.609375,
+              0.3125,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
@@ -13654,17 +13654,17 @@
             "total_cycles": [
               5.9375,
               2.737499952316284,
-              4.824999809265137,
+              4.987500190734863,
               5.9375,
-              35.0,
+              37.20000076293945,
               0.0
             ]
           },
           "shared_storage_used": 12288,
           "stack_spill_bytes": 0,
           "thread_occupancy": 50,
-          "uniform_registers_used": 34,
-          "work_registers_used": 55
+          "uniform_registers_used": 32,
+          "work_registers_used": 51
         }
       }
     }
