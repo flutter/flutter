@@ -2701,7 +2701,7 @@ void main() {
     }
   });
 
-  testWidgets('showAdaptiveDialog should have the right behavior', (WidgetTester tester) async {
+  testWidgets('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2759,7 +2759,6 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog2'), findsOneWidget);
-
   });
 
   testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {

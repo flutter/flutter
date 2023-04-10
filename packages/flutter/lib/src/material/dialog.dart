@@ -395,7 +395,11 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
-  }) : _dialogType = _DialogType.material;
+  }) : _dialogType = _DialogType.material,
+       scrollController = null,
+       actionScrollController = null,
+       insetAnimationDuration = const Duration(milliseconds: 100),
+       insetAnimationCurve = Curves.decelerate;
 
   /// Creates an adaptive [AlertDialog] based on whether the target platform is
   /// iOS or macOS, following Material design's
@@ -408,7 +412,11 @@ class AlertDialog extends StatelessWidget {
   /// the alert differently based on platform.
   ///
   /// If a [CupertinoAlertDialog] is created, all but the following parameters
-  /// are ignored: [title], [content], and [actions].
+  /// are ignored: [title], [content], [actions], [scrollController],
+  /// [actionScrollController], [insetAnimationDuration], and
+  /// [insetAnimationCurve]. If a [AlertDialog] is created, [scrollController],
+  /// [actionScrollController], [insetAnimationDuration], and
+  /// [insetAnimationCurve] are ignored.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   ///
@@ -450,6 +458,10 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
+    this.scrollController,
+    this.actionScrollController,
+    this.insetAnimationDuration = const Duration(milliseconds: 100),
+    this.insetAnimationCurve = Curves.decelerate,
   }) : _dialogType = _DialogType.adaptive;
 
   /// An optional icon to display at the top of the dialog.
@@ -691,6 +703,46 @@ class AlertDialog extends StatelessWidget {
   /// button bar.
   final bool scrollable;
 
+  /// A scroll controller that can be used to control the scrolling of the
+  /// [content] in the dialog.
+  ///
+  /// Defaults to null, and is typically not needed, since most alert messages
+  /// are short.
+  ///
+  /// Only used when [AlertDialog.adaptive] resolves to an iOS platform.
+  ///
+  /// See also:
+  ///
+  ///  * [actionScrollController], which can be used for controlling the actions
+  ///    section when there are many actions.
+  final ScrollController? scrollController;
+
+  /// A scroll controller that can be used to control the scrolling of the
+  /// actions in the dialog.
+  ///
+  /// Defaults to null, and is typically not needed.
+  ///
+  /// Only used when [AlertDialog.adaptive] resolves to an iOS platform.
+  ///
+  /// See also:
+  ///
+  ///  * [scrollController], which can be used for controlling the [content]
+  ///    section when it is long.
+  final ScrollController? actionScrollController;
+
+  ScrollController get _effectiveActionScrollController =>
+    actionScrollController ?? ScrollController();
+
+  /// {@macro flutter.material.dialog.insetAnimationDuration}
+  ///
+  /// Only used when [AlertDialog.adaptive] resolves to an iOS platform.
+  final Duration insetAnimationDuration;
+
+  /// {@macro flutter.material.dialog.insetAnimationCurve}
+  ///
+  /// Only used when [AlertDialog.adaptive] resolves to an iOS platform.
+  final Curve insetAnimationCurve;
+
   final _DialogType _dialogType;
 
   @override
@@ -714,6 +766,10 @@ class AlertDialog extends StatelessWidget {
               title: title,
               content: content,
               actions: actions ?? <Widget>[],
+              scrollController: scrollController,
+              actionScrollController: actionScrollController,
+              insetAnimationDuration: insetAnimationDuration,
+              insetAnimationCurve: insetAnimationCurve,
             );
         }
     }
