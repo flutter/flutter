@@ -118,6 +118,11 @@ QuadDecomposition DecomposeQuad(QuadData quad, float tolerance) {
   vec2 d01 = quad.cp - quad.p1;
   vec2 d12 = quad.p2 - quad.cp;
   vec2 dd = d01 - d12;
+  // This should never happen, but if it does happen be more defensive -
+  // otherwise we'll get NaNs down the line.
+  if (dd == vec2(0.)) {
+    return QuadDecomposition(0., 0., 0., 0., 0, 0.);
+  }
   float c = Cross(quad.p2 - quad.p1, dd);
   float x0 = dot(d01, dd) * 1. / c;
   float x2 = dot(d12, dd) * 1. / c;

@@ -32,6 +32,7 @@ if (impeller_enable_compute) {
     deps = [
       ":compute_shaders",
       ":renderer",
+      "../display_list:skia_conversions",
       "../entity",
       "../fixtures",
       "../playground:playground_test",
