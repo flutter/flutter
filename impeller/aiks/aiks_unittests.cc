@@ -1880,6 +1880,83 @@ TEST_P(AiksTest, DrawPaintAbsorbsClears) {
   ASSERT_EQ(picture.pass->GetClearColor(), Color::CornflowerBlue());
 }
 
+TEST_P(AiksTest, ForegroundBlendSubpassCollapseOptimization) {
+  Canvas canvas;
+
+  canvas.SaveLayer({
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeBlend(
+                BlendMode::kColorDodge, {std::move(input)}, Color::Red());
+          },
+  });
+
+  canvas.Translate({500, 300, 0});
+  canvas.Rotate(Radians(2 * kPi / 3));
+  canvas.DrawRect({100, 100, 200, 200}, {.color = Color::Blue()});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, ColorMatrixFilterSubpassCollapseOptimization) {
+  Canvas canvas;
+
+  canvas.SaveLayer({
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeColorMatrix(
+                std::move(input), {.array = {
+                                       -1.0, 0,    0,    1.0, 0,  //
+                                       0,    -1.0, 0,    1.0, 0,  //
+                                       0,    0,    -1.0, 1.0, 0,  //
+                                       1.0,  1.0,  1.0,  1.0, 0   //
+                                   }});
+          },
+  });
+
+  canvas.Translate({500, 300, 0});
+  canvas.Rotate(Radians(2 * kPi / 3));
+  canvas.DrawRect({100, 100, 200, 200}, {.color = Color::Blue()});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, LinearToSrgbFilterSubpassCollapseOptimization) {
+  Canvas canvas;
+
+  canvas.SaveLayer({
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeLinearToSrgbFilter(
+                std::move(input));
+          },
+  });
+
+  canvas.Translate({500, 300, 0});
+  canvas.Rotate(Radians(2 * kPi / 3));
+  canvas.DrawRect({100, 100, 200, 200}, {.color = Color::Blue()});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
+  Canvas canvas;
+
+  canvas.SaveLayer({
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeSrgbToLinearFilter(
+                std::move(input));
+          },
+  });
+
+  canvas.Translate({500, 300, 0});
+  canvas.Rotate(Radians(2 * kPi / 3));
+  canvas.DrawRect({100, 100, 200, 200}, {.color = Color::Blue()});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 static Picture BlendModeSaveLayerTest(BlendMode blend_mode) {
   Canvas canvas;
   canvas.DrawPaint({.color = Color::CornflowerBlue().WithAlpha(0.75)});
