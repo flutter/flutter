@@ -153,7 +153,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   final double? value;
   final double animationValue;
   final TextDirection textDirection;
-  final BorderRadius indicatorBorderRadius;
+  final BorderRadiusGeometry indicatorBorderRadius;
 
   // The indeterminate progress animation displays two lines whose leading (head)
   // and trailing (tail) endpoints are defined by the following four curves.
@@ -201,21 +201,23 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
       final Rect rect = Offset(left, 0.0) & Size(width, size.height);
       if (indicatorBorderRadius != BorderRadius.zero) {
-        // When the indicator has a determinate value, we override the start
-        // border radius to be zero, so that the radius is only applied to the
-        // trailing edge of the indicator.
-        final BorderRadius borderRadius;
-        if (value == null || indicatorBorderRadius == BorderRadius.zero) {
-          borderRadius = indicatorBorderRadius;
-        } else {
-          switch (textDirection) {
-            case TextDirection.rtl:
-              borderRadius = indicatorBorderRadius.copyWith(topRight: Radius.zero, bottomRight: Radius.zero);
-            case TextDirection.ltr:
-              borderRadius = indicatorBorderRadius.copyWith(topLeft: Radius.zero, bottomLeft: Radius.zero);
-          }
+        RRect rrect = indicatorBorderRadius.resolve(textDirection).toRRect(rect);
+        if (value != null) {
+          // When the indicator has a determinate value, we override the start
+          // border radius to be zero, so that the radius is only applied to the
+          // trailing edge of the indicator.
+          rrect = RRect.fromLTRBAndCorners(
+            rect.left,
+            rect.top,
+            rect.right,
+            rect.bottom,
+            bottomRight: rrect.brRadius,
+            topRight: rrect.trRadius,
+            // bottomLeft: Radius.zero, (default value)
+            // topLeft: Radius.zero, (default value)
+          );
         }
-        canvas.drawRRect(borderRadius.toRRect(rect), paint);
+        canvas.drawRRect(rrect, paint);
       } else {
         canvas.drawRect(rect, paint);
       }
@@ -333,7 +335,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// The border radius of the indicator.
   ///
   /// By default it is [BorderRadius.zero], which produces a rectangular indicator.
-  final BorderRadius indicatorBorderRadius;
+  final BorderRadiusGeometry indicatorBorderRadius;
 
   @override
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
