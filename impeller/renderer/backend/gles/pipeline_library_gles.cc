@@ -114,7 +114,7 @@ static bool LinkProgram(
   GLint frag_status = GL_FALSE;
 
   gl.GetShaderiv(vert_shader, GL_COMPILE_STATUS, &vert_status);
-  gl.GetShaderiv(vert_shader, GL_COMPILE_STATUS, &frag_status);
+  gl.GetShaderiv(frag_shader, GL_COMPILE_STATUS, &frag_status);
 
   if (vert_status != GL_TRUE) {
     LogShaderCompilationFailure(gl, vert_shader, descriptor.GetLabel(),
