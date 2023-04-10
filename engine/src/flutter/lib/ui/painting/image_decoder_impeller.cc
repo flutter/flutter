@@ -16,6 +16,7 @@
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
 #include "impeller/base/strings.h"
+#include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/size.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -106,22 +107,6 @@ static SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
   return type;
 }
 
-static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
-  switch (type) {
-    case kRGBA_8888_SkColorType:
-      return impeller::PixelFormat::kR8G8B8A8UNormInt;
-    case kBGRA_8888_SkColorType:
-      return impeller::PixelFormat::kB8G8R8A8UNormInt;
-    case kRGBA_F16_SkColorType:
-      return impeller::PixelFormat::kR16G16B16A16Float;
-    case kBGR_101010x_XR_SkColorType:
-      return impeller::PixelFormat::kB10G10R10XR;
-    default:
-      return std::nullopt;
-  }
-  return std::nullopt;
-}
-
 std::optional<DecompressResult> ImageDecoderImpeller::DecompressTexture(
     ImageDescriptor* descriptor,
     SkISize target_size,
@@ -174,7 +159,8 @@ std::optional<DecompressResult> ImageDecoderImpeller::DecompressTexture(
             .makeAlphaType(alpha_type);
   }
 
-  const auto pixel_format = ToPixelFormat(image_info.colorType());
+  const auto pixel_format =
+      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
   if (!pixel_format.has_value()) {
     FML_DLOG(ERROR) << "Codec pixel format not supported by Impeller.";
     return std::nullopt;
@@ -260,7 +246,8 @@ sk_sp<DlImage> ImageDecoderImpeller::UploadTextureToPrivate(
   if (!context || !buffer) {
     return nullptr;
   }
-  const auto pixel_format = ToPixelFormat(image_info.colorType());
+  const auto pixel_format =
+      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
     FML_DLOG(ERROR) << "Pixel format unsupported by Impeller.";
     return nullptr;
@@ -319,7 +306,8 @@ sk_sp<DlImage> ImageDecoderImpeller::UploadTextureToShared(
     return nullptr;
   }
   const auto image_info = bitmap->info();
-  const auto pixel_format = ToPixelFormat(image_info.colorType());
+  const auto pixel_format =
+      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
     FML_DLOG(ERROR) << "Pixel format unsupported by Impeller.";
     return nullptr;
