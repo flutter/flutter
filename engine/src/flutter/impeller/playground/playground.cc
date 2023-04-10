@@ -400,6 +400,54 @@ std::shared_ptr<Texture> CreateTextureForDecompressedImage(
     const std::shared_ptr<Context>& context,
     DecompressedImage& decompressed_image,
     bool enable_mipmapping) {
+  // TODO(https://github.com/flutter/flutter/issues/123468): copying buffers to
+  // textures is not implemented for GLES/Vulkan.
+#if FML_OS_MACOSX
+  impeller::TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = impeller::StorageMode::kDevicePrivate;
+  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_descriptor.size = decompressed_image.GetSize();
+  texture_descriptor.mip_count =
+      enable_mipmapping ? decompressed_image.GetSize().MipCount() : 1u;
+
+  auto dest_texture =
+      context->GetResourceAllocator()->CreateTexture(texture_descriptor);
+  if (!dest_texture) {
+    FML_DLOG(ERROR) << "Could not create Impeller texture.";
+    return nullptr;
+  }
+
+  auto buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      *decompressed_image.GetAllocation().get());
+
+  dest_texture->SetLabel(
+      impeller::SPrintF("ui.Image(%p)", dest_texture.get()).c_str());
+
+  auto command_buffer = context->CreateCommandBuffer();
+  if (!command_buffer) {
+    FML_DLOG(ERROR) << "Could not create command buffer for mipmap generation.";
+    return nullptr;
+  }
+  command_buffer->SetLabel("Mipmap Command Buffer");
+
+  auto blit_pass = command_buffer->CreateBlitPass();
+  if (!blit_pass) {
+    FML_DLOG(ERROR) << "Could not create blit pass for mipmap generation.";
+    return nullptr;
+  }
+  blit_pass->SetLabel("Mipmap Blit Pass");
+  blit_pass->AddCopy(buffer->AsBufferView(), dest_texture);
+  if (enable_mipmapping) {
+    blit_pass->GenerateMipmap(dest_texture);
+  }
+
+  blit_pass->EncodeCommands(context->GetResourceAllocator());
+  if (!command_buffer->SubmitCommands()) {
+    FML_DLOG(ERROR) << "Failed to submit blit pass command buffer.";
+    return nullptr;
+  }
+  return dest_texture;
+#else
   auto texture_descriptor = TextureDescriptor{};
   texture_descriptor.storage_mode = StorageMode::kHostVisible;
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
@@ -420,6 +468,7 @@ std::shared_ptr<Texture> CreateTextureForDecompressedImage(
     return nullptr;
   }
   return texture;
+#endif  // FML_OS_MACOS
 }
 }  // namespace
 
