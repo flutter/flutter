@@ -730,9 +730,6 @@ class AlertDialog extends StatelessWidget {
   ///    section when it is long.
   final ScrollController? actionScrollController;
 
-  ScrollController get _effectiveActionScrollController =>
-    actionScrollController ?? ScrollController();
-
   /// {@macro flutter.material.dialog.insetAnimationDuration}
   ///
   /// Only used when [AlertDialog.adaptive] resolves to an iOS platform.
