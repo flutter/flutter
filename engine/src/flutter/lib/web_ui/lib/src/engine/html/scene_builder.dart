@@ -106,8 +106,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
 
-    // TODO(yjbanov): make this final after NNBD ships definite assignment.
-    /*final*/ Float32List? matrix;
+    final Float32List matrix;
     if (_surfaceStack.length == 1) {
       // Top level transform contains view configuration to scale
       // scene to devicepixelratio. Use identity instead since CSS uses

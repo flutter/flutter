@@ -159,7 +159,7 @@ class SurfaceCanvas implements ui.Canvas {
       // non-invertible transforms collapse space to a line or point
       return ui.Rect.zero;
     }
-    return transformRect(transform, _roundOut(destBounds));
+    return transform.transformRect(_roundOut(destBounds));
   }
 
   @override

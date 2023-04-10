@@ -274,7 +274,7 @@ class SemanticsTester {
 
     // Other attributes
     ui.Rect childRect(SemanticsNodeUpdate child) {
-      return transformRect(Matrix4.fromFloat32List(child.transform), child.rect);
+      return Matrix4.fromFloat32List(child.transform).transformRect(child.rect);
     }
 
     // If a rect is not provided, generate one than covers all children.

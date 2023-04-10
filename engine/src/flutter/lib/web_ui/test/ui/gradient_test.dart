@@ -14,7 +14,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await setUpUiTest();
+  setUpUiTest();
 
   test('Gradient.radial with no focal point', () {
     expect(

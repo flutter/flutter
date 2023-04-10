@@ -12,11 +12,6 @@ import 'environment.dart';
 import 'pipeline.dart';
 import 'utils.dart';
 
-enum RuntimeMode {
-  profile,
-  release,
-}
-
 const Map<String, String> targetAliases = <String, String>{
   'sdk': 'flutter/web_sdk',
   'web_sdk': 'flutter/web_sdk',
@@ -45,6 +40,12 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
           'output will be located at "out/wasm_profile".\nThis only applies to '
           'the wasm build. The host build is always built in release mode.',
     );
+    argParser.addFlag(
+      'debug',
+      help: 'Build in debug mode instead of release mode. In this mode, the '
+          'output will be located at "out/wasm_debug".\nThis only applies to '
+          'the wasm build. The host build is always built in release mode.',
+    );
   }
 
   @override
@@ -56,9 +57,6 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
   bool get isWatchMode => boolArg('watch');
 
   bool get host => boolArg('host');
-
-  RuntimeMode get runtimeMode =>
-      boolArg('profile') ? RuntimeMode.profile : RuntimeMode.release;
 
   List<String> get targets => argResults?.rest ?? <String>[];
 
@@ -112,15 +110,6 @@ class GnPipelineStep extends ProcessStep {
   @override
   bool get isSafeToInterrupt => false;
 
-  String get runtimeModeFlag {
-    switch (runtimeMode) {
-      case RuntimeMode.profile:
-        return 'profile';
-      case RuntimeMode.release:
-        return 'release';
-    }
-  }
-
   List<String> get _gnArgs {
     if (host) {
       return <String>[
@@ -130,7 +119,7 @@ class GnPipelineStep extends ProcessStep {
     } else {
       return <String>[
         '--web',
-        '--runtime-mode=$runtimeModeFlag',
+        '--runtime-mode=${runtimeMode.name}',
       ];
     }
   }
@@ -169,12 +158,7 @@ class NinjaPipelineStep extends ProcessStep {
     if (host) {
       return environment.hostDebugUnoptDir.path;
     }
-    switch (runtimeMode) {
-      case RuntimeMode.profile:
-        return environment.wasmProfileOutDir.path;
-      case RuntimeMode.release:
-        return environment.wasmReleaseOutDir.path;
-    }
+    return getBuildDirectoryForRuntimeMode(runtimeMode).path;
   }
 
   @override

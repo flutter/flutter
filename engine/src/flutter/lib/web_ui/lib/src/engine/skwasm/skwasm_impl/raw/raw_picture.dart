@@ -45,3 +45,8 @@ external void pictureDispose(PictureHandle handle);
   symbol: 'picture_approximateBytesUsed',
   isLeaf: true)
 external int pictureApproximateBytesUsed(PictureHandle handle);
+
+@Native<Void Function(PictureHandle, RawRect)>(
+  symbol: 'picture_getCullRect',
+  isLeaf: true)
+external void pictureGetCullRect(PictureHandle handle, RawRect outRect);

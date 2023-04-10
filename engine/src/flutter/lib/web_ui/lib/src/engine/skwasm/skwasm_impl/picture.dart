@@ -34,6 +34,14 @@ class SkwasmPicture implements ui.Picture {
     // TODO(jacksongardner): implement toImageSync
     throw UnimplementedError();
   }
+
+  ui.Rect get cullRect {
+    return withStackScope((StackScope s) {
+      final RawRect rect = s.allocFloatArray(4);
+      pictureGetCullRect(handle, rect);
+      return s.convertRectFromNative(rect);
+    });
+  }
 }
 
 class SkwasmPictureRecorder implements ui.PictureRecorder {

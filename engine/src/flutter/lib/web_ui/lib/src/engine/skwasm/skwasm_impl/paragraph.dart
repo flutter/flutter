@@ -6,7 +6,7 @@
 
 import 'package:ui/ui.dart' as ui;
 
-// TODO(jacksongardner): implement this
+// TODO(jacksongardner): implement everything in this file
 class SkwasmLineMetrics implements ui.LineMetrics {
   factory SkwasmLineMetrics({
     required bool hardBreak,
@@ -71,85 +71,126 @@ class SkwasmLineMetrics implements ui.LineMetrics {
 class SkwasmParagraph implements ui.Paragraph {
   @override
   double get width {
-    throw UnimplementedError();
+    return 0.0;
   }
 
   @override
   double get height {
-    throw UnimplementedError();
+    return 0.0;
   }
 
   @override
   double get longestLine {
-    throw UnimplementedError();
+    return 0.0;
   }
 
   @override
   double get minIntrinsicWidth {
-    throw UnimplementedError();
+    return 0.0;
   }
 
   @override
   double get maxIntrinsicWidth {
-    throw UnimplementedError();
+    return 0.0;
   }
 
   @override
   double get alphabeticBaseline {
-    throw UnimplementedError();
+    return 0.0;
   }
 
   @override
   double get ideographicBaseline {
-    throw UnimplementedError();
+    return 0.0;
   }
 
   @override
   bool get didExceedMaxLines {
-    throw UnimplementedError();
+    return false;
   }
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    throw UnimplementedError();
   }
 
   @override
   List<ui.TextBox> getBoxesForRange(int start, int end,
       {ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
       ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight}) {
-    throw UnimplementedError();
+    return <ui.TextBox>[];
   }
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    throw UnimplementedError();
+    return const ui.TextPosition(offset: 0);
   }
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
-    throw UnimplementedError();
+    return const ui.TextRange(start: 0, end: 0);
   }
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    throw UnimplementedError();
+    return const ui.TextRange(start: 0, end: 0);
   }
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() {
-    throw UnimplementedError();
+    return <ui.TextBox>[];
   }
 
   @override
   List<SkwasmLineMetrics> computeLineMetrics() {
-    throw UnimplementedError();
+    return <SkwasmLineMetrics>[];
   }
 
   @override
-  bool get debugDisposed => throw UnimplementedError();
+  bool get debugDisposed => false;
 
   @override
   void dispose() {
+  }
+}
+
+class SkwasmParagraphStyle implements ui.ParagraphStyle {
+}
+
+class SkwasmTextStyle implements ui.TextStyle {
+}
+
+class SkwasmParagraphBuilder implements ui.ParagraphBuilder {
+  @override
+  void addPlaceholder(
+    double width,
+    double height,
+    ui.PlaceholderAlignment alignment, {
+    double scale = 1.0,
+    double? baselineOffset,
+    ui.TextBaseline? baseline
+  }) {
+  }
+
+  @override
+  void addText(String text) {
+  }
+
+  @override
+  ui.Paragraph build() {
+    return SkwasmParagraph();
+  }
+
+  @override
+  int get placeholderCount => 0;
+
+  @override
+  List<double> get placeholderScales => <double>[];
+
+  @override
+  void pop() {
+  }
+
+  @override
+  void pushStyle(ui.TextStyle style) {
   }
 }

@@ -13,7 +13,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await setUpUiTest();
+  setUpUiTest();
 
   test('Picture construction invokes onCreate once', () async {
     int onCreateInvokedCount = 0;

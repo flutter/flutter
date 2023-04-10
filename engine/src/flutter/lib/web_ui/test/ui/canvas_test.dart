@@ -18,7 +18,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await setUpUiTest();
+  setUpUiTest();
 
   final bool deviceClipRoundsOut = renderer is! HtmlRenderer;
   runCanvasTests(deviceClipRoundsOut: deviceClipRoundsOut);

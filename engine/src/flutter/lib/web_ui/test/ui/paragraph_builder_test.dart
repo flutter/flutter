@@ -13,7 +13,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await setUpUiTest();
+  setUpUiTest();
 
   test('Should be able to build and layout a paragraph', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());

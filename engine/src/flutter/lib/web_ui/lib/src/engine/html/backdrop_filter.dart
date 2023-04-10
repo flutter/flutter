@@ -95,7 +95,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
     // Therefore we need to use parent clip element bounds for
     // backdrop boundary.
     final double dpr = ui.window.devicePixelRatio;
-    final ui.Rect rect = transformRect(_invertedTransform, ui.Rect.fromLTRB(0, 0,
+    final ui.Rect rect = _invertedTransform.transformRect(ui.Rect.fromLTRB(0, 0,
         ui.window.physicalSize.width * dpr,
         ui.window.physicalSize.height * dpr));
     double left = rect.left;

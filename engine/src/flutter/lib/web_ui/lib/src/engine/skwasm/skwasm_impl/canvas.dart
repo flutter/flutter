@@ -206,7 +206,7 @@ class SkwasmCanvas implements ui.Canvas {
 
   @override
   void drawParagraph(ui.Paragraph uiParagraph, ui.Offset offset) {
-    throw UnimplementedError();
+    // TODO(jacksongardner): implement this
   }
 
   @override
@@ -260,7 +260,7 @@ class SkwasmCanvas implements ui.Canvas {
     double elevation,
     bool transparentOccluder,
   ) {
-    throw UnimplementedError();
+    // TODO(jacksongardner): implement this
   }
 
   @override
@@ -280,7 +280,7 @@ class SkwasmCanvas implements ui.Canvas {
       // non-invertible transforms collapse space to a line or point
       return ui.Rect.zero;
     }
-    return transformRect(matrix, getDestinationClipBounds());
+    return matrix.transformRect(getDestinationClipBounds());
   }
 
   @override
