@@ -271,7 +271,7 @@ void testMain() {
       'b: seven',
       '-9',
     ]);
-  }, skip: isWasm); // https://github.com/dart-lang/sdk/issues/50778
+  });
 
   test('ChannelBuffers.clearListener', () async {
     final List<String> log = <String>[];
@@ -365,7 +365,7 @@ void testMain() {
       'callback1: true',
       'callback2: true',
     ]);
-  }, skip: isWasm); // https://github.com/dart-lang/sdk/issues/50778
+  });
 }
 
 class _TestChannelBuffers extends ui.ChannelBuffers {

@@ -14,6 +14,7 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -439,12 +440,24 @@ bool _shouldReadPixelsUnmodified(VideoFrame videoFrame, ui.ImageByteFormat forma
   return format == ui.ImageByteFormat.rawRgba && isRgbFrame;
 }
 
+@JS('Uint8Array')
+@staticInterop
+class _JSUint8Array {
+  external factory _JSUint8Array(JSNumber length);
+}
+
 Future<ByteBuffer> readVideoFramePixelsUnmodified(VideoFrame videoFrame) async {
   final int size = videoFrame.allocationSize().toInt();
-  final Uint8List destination = Uint8List(size);
+
+  // In dart2wasm, Uint8List is not the same as a JS Uint8Array. So we
+  // explicitly construct the JS object here.
+  final JSUint8Array destination = _JSUint8Array(size.toJS) as JSUint8Array;
   final JsPromise copyPromise = videoFrame.copyTo(destination);
   await promiseToFuture<void>(copyPromise);
-  return destination.buffer;
+
+  // In dart2wasm, `toDart` incurs a copy here. On JS backends, this is a
+  // no-op.
+  return destination.toDart.buffer;
 }
 
 Future<Uint8List> encodeVideoFrameAsPng(VideoFrame videoFrame) async {
