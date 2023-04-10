@@ -38,6 +38,20 @@ class BlendFilterContents : public ColorFilterContents {
                                      const Matrix& effect_transform,
                                      const Rect& coverage) const override;
 
+  /// @brief Optimized advanced blend that avoids a second subpass when there is
+  ///        only a single input and a foreground color.
+  ///
+  /// These contents cannot absorb opacity.
+  std::optional<Entity> CreateForegroundBlend(
+      const std::shared_ptr<FilterInput>& input,
+      const ContentContext& renderer,
+      const Entity& entity,
+      const Rect& coverage,
+      Color foreground_color,
+      BlendMode blend_mode,
+      std::optional<Scalar> alpha,
+      bool absorb_opacity) const;
+
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   AdvancedBlendProc advanced_blend_proc_;
   std::optional<Color> foreground_color_;
