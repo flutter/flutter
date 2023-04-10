@@ -164,6 +164,8 @@ class FlatlandExternalViewEmbedder final
 
     std::optional<flutter::EmbeddedViewParams> embedded_view_params;
     std::unique_ptr<SkPictureRecorder> recorder;
+    // TODO(cyanglaz: use DlOpSpy instead.
+    // https://github.com/flutter/flutter/issues/123805
     std::unique_ptr<flutter::CanvasSpy> canvas_spy;
     SkISize surface_size;
     sk_sp<SkPicture> picture;

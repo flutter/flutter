@@ -198,6 +198,7 @@ test_fixtures("fixtures") {
     "fixtures/compositor_software.png",
     "fixtures/compositor_with_platform_layer_on_bottom.png",
     "fixtures/compositor_with_root_layer_only.png",
+    "fixtures/compositor_platform_layer_with_no_overlay.png",
     "fixtures/dpr_noxform.png",
     "fixtures/dpr_xform.png",
     "fixtures/gradient.png",

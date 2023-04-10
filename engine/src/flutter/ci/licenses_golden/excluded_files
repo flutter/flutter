@@ -207,6 +207,7 @@
 ../../../flutter/shell/common/animator_unittests.cc
 ../../../flutter/shell/common/canvas_spy_unittests.cc
 ../../../flutter/shell/common/context_options_unittests.cc
+../../../flutter/shell/common/dl_op_spy_unittests.cc
 ../../../flutter/shell/common/engine_unittests.cc
 ../../../flutter/shell/common/fixtures
 ../../../flutter/shell/common/input_events_unittests.cc

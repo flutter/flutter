@@ -9,8 +9,7 @@ namespace flutter {
 
 /// A enum define the blend mode.
 /// Blends are operators that take in two colors (source, destination) and
-/// return a new color. Blends are operators that take in two colors (source,
-/// destination) and return a new color. Many of these operate the same on all 4
+/// return a new color. Many of these operate the same on all 4
 /// components: red, green, blue, alpha. For these, we just document what
 /// happens to one component, rather than naming each one separately. Different
 /// color types might have different representations for color components:
