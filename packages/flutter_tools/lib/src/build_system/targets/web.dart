@@ -284,6 +284,11 @@ class Dart2WasmTarget extends Dart2WebTarget {
       dartSdkRoot,
       '--libraries-spec',
       artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path,
+      if (webRenderer == WebRendererMode.skwasm)
+        ...<String>[
+          '--import-shared-memory',
+          '--shared-memory-max-pages=32768',
+        ],
       '--depfile=${depFile.path}',
 
       environment.buildDir.childFile('main.dart').path, // dartfile
@@ -312,9 +317,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
     Source.pattern('{OUTPUT_DIR}/main.dart.wasm'),
     Source.pattern('{OUTPUT_DIR}/main.dart.mjs'),
   ];
-
-  // TODO(jacksongardner): override `depfiles` once dart2wasm begins producing
-  // them: https://github.com/dart-lang/sdk/issues/50747
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
@@ -461,9 +463,10 @@ class WebReleaseBundle extends Target {
 /// These assets can be cached until a new version of the flutter web sdk is
 /// downloaded.
 class WebBuiltInAssets extends Target {
-  const WebBuiltInAssets(this.fileSystem, {required this.isWasm});
+  const WebBuiltInAssets(this.fileSystem, this.webRenderer, {required this.isWasm});
 
   final FileSystem fileSystem;
+  final WebRendererMode webRenderer;
   final bool isWasm;
 
   @override
@@ -511,7 +514,9 @@ class WebBuiltInAssets extends Target {
 
     if (isWasm) {
       final File bootstrapFile = environment.outputDir.childFile('main.dart.js');
-      bootstrapFile.writeAsStringSync(wasm_bootstrap.generateWasmBootstrapFile());
+      bootstrapFile.writeAsStringSync(
+        wasm_bootstrap.generateWasmBootstrapFile(webRenderer == WebRendererMode.skwasm)
+      );
     }
 
     // Write the flutter.js file
@@ -538,7 +543,7 @@ class WebServiceWorker extends Target {
   List<Target> get dependencies => <Target>[
     if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
     WebReleaseBundle(webRenderer, isWasm: isWasm),
-    WebBuiltInAssets(fileSystem, isWasm: isWasm),
+    WebBuiltInAssets(fileSystem, webRenderer, isWasm: isWasm),
   ];
 
   @override

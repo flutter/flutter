@@ -810,6 +810,40 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2WasmTarget with skwasm renderer adds extra flags', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    final File depFile = environment.buildDir.childFile('dart2wasm.d');
+
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        'bin/cache/dart-sdk/bin/dartaotruntime',
+        '--disable-dart-dev',
+        'bin/cache/dart-sdk/bin/snapshots/dart2wasm_product.snapshot',
+        '-Ddart.vm.product=true',
+        '--packages=.dart_tool/package_config.json',
+        '--dart-sdk=bin/cache/dart-sdk',
+        '--multi-root-scheme',
+        'org-dartlang-sdk',
+        '--multi-root',
+        'bin/cache/flutter_web_sdk',
+        '--multi-root',
+        'bin/cache',
+        '--libraries-spec',
+        'bin/cache/flutter_web_sdk/libraries.json',
+        '--import-shared-memory',
+        '--shared-memory-max-pages=32768',
+        '--depfile=${depFile.absolute.path}',
+
+        environment.buildDir.childFile('main.dart').absolute.path,
+        environment.buildDir.childFile('main.dart.wasm').absolute.path,
+      ])
+    );
+
+    await Dart2WasmTarget(WebRendererMode.skwasm).build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
   test('Generated service worker is empty with none-strategy', () => testbed.run(() {
     final String fileGeneratorsPath =
         environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
@@ -922,7 +956,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('OL');
 
-    await WebBuiltInAssets(globals.fs, isWasm: false).build(environment);
+    await WebBuiltInAssets(globals.fs, WebRendererMode.autoDetect, isWasm: false).build(environment);
 
     // No caching of source maps.
     final String fileGeneratorsPath = environment.artifacts
@@ -939,7 +973,7 @@ void main() {
     globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm')
       .createSync(recursive: true);
 
-    await WebBuiltInAssets(globals.fs, isWasm: true).build(environment);
+    await WebBuiltInAssets(globals.fs, WebRendererMode.autoDetect, isWasm: true).build(environment);
 
     expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
     expect(environment.outputDir.childDirectory('canvaskit')
@@ -952,7 +986,7 @@ void main() {
       ..createSync(recursive: true);
     canvasKitInput.writeAsStringSync('foo', flush: true);
 
-    await WebBuiltInAssets(globals.fs, isWasm: true).build(environment);
+    await WebBuiltInAssets(globals.fs, WebRendererMode.autoDetect, isWasm: true).build(environment);
 
     final File canvasKitOutputBefore = environment.outputDir.childDirectory('canvaskit')
       .childFile('canvaskit.wasm');
@@ -961,7 +995,7 @@ void main() {
 
     canvasKitInput.writeAsStringSync('bar', flush: true);
 
-    await WebBuiltInAssets(globals.fs, isWasm: true).build(environment);
+    await WebBuiltInAssets(globals.fs, WebRendererMode.autoDetect, isWasm: true).build(environment);
 
     final File canvasKitOutputAfter = environment.outputDir.childDirectory('canvaskit')
       .childFile('canvaskit.wasm');
