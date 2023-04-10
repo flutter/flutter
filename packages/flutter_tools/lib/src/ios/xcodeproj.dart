@@ -457,7 +457,7 @@ class XcodeProjectInfo {
   /// The expected scheme for [buildInfo].
   @visibleForTesting
   static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return sentenceCase(buildInfo?.flavor ?? globals.hostProjName);
+    return sentenceCase(buildInfo?.flavor ?? globals.hostAppProjectName);
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].

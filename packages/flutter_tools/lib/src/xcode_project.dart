@@ -21,25 +21,23 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform  {
-  String get hostAppProjectName => _hostAppProjectName;
-
   String get _hostAppProjectName {
     List<FileSystemEntity> contents;
     try {
       contents = hostAppRoot.listSync();
     } catch (e) {
-      return 'Runner';
+      return globals.hostAppProjectName;
     }
     for (final Directory entity in contents.whereType<Directory>()) {
       // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
       // Find the first non-hidden xcworkspace and return the directory.
       if (globals.fs.path.extension(entity.path) == '.xcworkspace' &&
           !globals.fs.path.basename(entity.path).startsWith('.')) {
-        globals.hostProjName = globals.fs.path.basenameWithoutExtension(entity.path);
-        return globals.fs.path.basenameWithoutExtension(entity.path);
+        globals.hostAppProjectName = globals.fs.path.basenameWithoutExtension(entity.path);
+        return globals.hostAppProjectName;
       }
     }
-    return 'Runner';
+    return globals.hostAppProjectName;
   }
 
   /// The parent of this project.
