@@ -569,7 +569,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// drawing from slightly less than the start, and end slightly after
   /// the end. This might produce unintended results, as the expected behavior
   /// is, for example, that a [value] of 0.5 starts at 90 degrees and ends at
-  /// 270 degrees. With [strokeCap.square], it could start at 85 degrees and
+  /// 270 degrees. With [StrokeCap.square], it could start at 85 degrees and
   /// end at 275 degrees.
   final StrokeCap? strokeCap;
 
