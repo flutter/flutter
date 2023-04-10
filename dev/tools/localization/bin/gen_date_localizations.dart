@@ -74,7 +74,7 @@ Future<void> main(List<String> rawArgs) async {
       'after a successful "flutter update-packages".'
     );
   }
-  
+
   final Directory dateSymbolsDirectory = Directory(path.join(pathToIntl!, 'lib', 'src', 'data', 'dates', 'symbols'));
   final Map<String, File> symbolFiles = _listIntlData(dateSymbolsDirectory);
   final Directory datePatternsDirectory = Directory(path.join(pathToIntl, 'lib', 'src', 'data', 'dates', 'patterns'));
