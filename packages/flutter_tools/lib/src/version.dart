@@ -70,20 +70,37 @@ class FlutterVersion {
   ///
   /// Call [fetchTagsAndUpdate] to update the version based on the latest tags
   /// available upstream.
-  FlutterVersion({
+  factory FlutterVersion({
     SystemClock clock = const SystemClock(),
     String? workingDirectory,
     String? frameworkRevision,
-  }) : _clock = clock,
-       _workingDirectory = workingDirectory {
-    _frameworkRevision = frameworkRevision ?? _runGit(
+  }) {
+    frameworkRevision ??= _runGit(
       gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
       globals.processUtils,
-      _workingDirectory,
+      workingDirectory,
     );
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, gitRef: _frameworkRevision);
-    _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
+    final GitTagVersion gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, gitRef: frameworkRevision, workingDirectory: workingDirectory);
+    final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
+    return FlutterVersion._(
+      clock: clock,
+      workingDirectory: workingDirectory,
+      frameworkRevision: frameworkRevision,
+      frameworkVersion: frameworkVersion,
+      gitTagVersion: gitTagVersion,
+    );
   }
+
+  FlutterVersion._({
+    required SystemClock clock,
+    String? workingDirectory,
+    required this.frameworkRevision,
+    required String frameworkVersion,
+    required GitTagVersion gitTagVersion,
+  }) : _clock = clock,
+       _workingDirectory = workingDirectory,
+       _frameworkVersion = frameworkVersion,
+       _gitTagVersion = gitTagVersion;
 
   final SystemClock _clock;
   final String? _workingDirectory;
@@ -96,7 +113,7 @@ class FlutterVersion {
   /// `flutter doctor`.
   void fetchTagsAndUpdate() {
     _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, fetchTags: true);
-    _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
+    _frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
   }
 
   String? _repositoryUrl;
@@ -142,8 +159,7 @@ class FlutterVersion {
   /// Use getBranchName() to read this.
   String? _branch;
 
-  late String _frameworkRevision;
-  String get frameworkRevision => _frameworkRevision;
+  final String frameworkRevision;
   String get frameworkRevisionShort => _shortGitRevision(frameworkRevision);
 
   String? _frameworkAge;
@@ -155,6 +171,7 @@ class FlutterVersion {
     );
   }
 
+  // TODO this is late since fetching tags can overwrite it.
   late String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
 
@@ -166,7 +183,11 @@ class FlutterVersion {
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
   void ensureVersionFile() {
-    globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version')).writeAsStringSync(_frameworkVersion);
+    globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version'))
+        .writeAsStringSync(_frameworkVersion);
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, '.version.json'))
+        .writeAsStringSync(encoder.convert(toJson()));
   }
 
   @override
