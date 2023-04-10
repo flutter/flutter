@@ -396,7 +396,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     required this.offsetValue,
     required this.rotationValue,
     required this.strokeWidth,
-    required this.strokeCap,
+    this.strokeCap,
   }) : arcStart = value != null
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
@@ -556,8 +556,9 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// Determines the appearance of the stroke ends in the progress indicator.
   /// By default, [strokeCap] is null, causing the stroke ends to be set to
-  /// [StrokeCap.square] when [value] is null (indeterminate), and to
-  /// [StrokeCap.butt] when [value] is not null (determinate).
+  /// [StrokeCap.square] when [value] is null (indeterminate progress
+  /// indicator), and to [StrokeCap.butt] when [value] is not null
+  /// (determinate progress indicator).
   ///
   /// Setting [strokeCap] to [StrokeCap.round] results in rounded stroke ends.
   /// With [strokeCap] set to [StrokeCap.butt] and [value] == null, the
@@ -566,10 +567,11 @@ class CircularProgressIndicator extends ProgressIndicator {
   ///
   /// Using [strokeCap] as [StrokeCap.square] when [value] is not null leads to
   /// an unconventional display of [value], starting and ending slightly
-  /// off the expected angles. While not recommended, this behavior can be
-  /// observed with a [value] of 0.5, where the expected start and end angles
-  /// are 90 and 270 degrees, but the indicator may start at 85 degrees and
-  /// end at 275 degrees.
+  /// off the expected angles. This behavior can be observed with a [value]
+  /// of 0.5, where the expected start and end angles are 90 and 270 degrees,
+  /// but the indicator may start at 85 degrees and end at 275 degrees. This
+  /// doesn't match the Material Design specification and should be used with
+  /// caution.
   final StrokeCap? strokeCap;
 
   @override
