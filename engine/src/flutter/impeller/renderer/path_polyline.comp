@@ -50,15 +50,11 @@ shared uint scratch_count[512];
 shared uint scratch_sum[512];
 
 uint ComputePosition(uint index) {
-  if (index < gl_SubgroupSize) {
-    return scratch_sum[index];
-  }
-  int position = -1;
   uint sum = scratch_sum[index];
-  do {
-    position += int(gl_SubgroupSize);
-    sum += scratch_sum[position];
-  } while (position < index);
+  for (uint position = gl_SubgroupSize - 1; position < index;
+       position += gl_SubgroupSize) {
+    sum += scratch_sum[position] + scratch_count[position];
+  }
   return sum;
 }
 
@@ -73,18 +69,20 @@ void ProcessCubic(uint ident) {
 
   barrier();
 
-  if (quad_count == 0) {
-    return;
+  uint offset = 0;
+  if (quad_count > 0) {
+    scratch_sum[ident] = subgroupExclusiveAdd(scratch_count[ident]);
+
+    offset = ComputePosition(ident) + quads.count;
   }
+  barrier();
+  if (quad_count > 0) {
+    atomicAdd(quads.count, quad_count);
 
-  scratch_sum[ident] = subgroupExclusiveAdd(scratch_count[ident]);
-
-  uint offset = ComputePosition(ident) + quads.count;
-  atomicAdd(quads.count, quad_count);
-
-  cubic_ranges[ident] = uvec2(offset, quad_count);
-  for (uint i = 0; i < quad_count; i++) {
-    quads.data[offset + i] = GenerateQuadraticFromCubic(cubic, i, quad_count);
+    cubic_ranges[ident] = uvec2(offset, quad_count);
+    for (uint i = 0; i < quad_count; i++) {
+      quads.data[offset + i] = GenerateQuadraticFromCubic(cubic, i, quad_count);
+    }
   }
 }
 
@@ -99,30 +97,32 @@ void ProcessQuad(uint ident) {
 
   barrier();
 
-  if (decomposition.line_count == 0) {
-    return;
+  uint offset = 0;
+  if (decomposition.line_count > 0) {
+    scratch_sum[ident] = subgroupExclusiveAdd(scratch_count[ident]);
+    offset = ComputePosition(ident) + lines.count;
   }
+  barrier();
 
-  scratch_sum[ident] = subgroupExclusiveAdd(scratch_count[ident]);
+  if (decomposition.line_count > 0) {
+    atomicAdd(lines.count, decomposition.line_count);
+    quad_ranges[ident] = uvec2(offset, decomposition.line_count);
 
-  uint offset = ComputePosition(ident) + lines.count;
-  atomicAdd(lines.count, decomposition.line_count);
-  quad_ranges[ident] = uvec2(offset, decomposition.line_count);
-
-  vec2 last_point = quad.p1;
-  for (uint i = 1; i < decomposition.line_count; i++) {
-    LineData line =
-        LineData(last_point, GenerateLineFromQuad(quad, i, decomposition));
-    last_point = line.p2;
-    lines.data[offset + i - 1] = line;
+    vec2 last_point = quad.p1;
+    for (uint i = 1; i < decomposition.line_count; i++) {
+      LineData line =
+          LineData(last_point, GenerateLineFromQuad(quad, i, decomposition));
+      last_point = line.p2;
+      lines.data[offset + i - 1] = line;
+    }
+    lines.data[offset + decomposition.line_count - 1] =
+        LineData(last_point, quad.p2);
   }
-  lines.data[offset + decomposition.line_count - 1] =
-      LineData(last_point, quad.p2);
 }
 
 void ProcessLine(uint ident) {
-  if (ident == lines.count) {
-    atomicAdd(polyline.count, lines.count + 1);
+  if (ident == 0) {
+    polyline.count = lines.count + 1;
   }
 
   PathComponent component;
@@ -132,9 +132,9 @@ void ProcessLine(uint ident) {
     if (component.count == 4) {
       // Determine location in quads
       uvec2 quad_range = cubic_ranges[component.index];
+      uvec2 end_range = quad_ranges[quad_range.x + quad_range.y - 1];
       range.x = quad_ranges[quad_range.x].x;
-      range.y = quad_ranges[quad_range.x + quad_range.y - 1].x +
-                quad_ranges[quad_range.x + quad_range.y - 1].y - range.x;
+      range.y = end_range.x + end_range.y - range.x;
     } else if (component.count == 3) {
       range = quad_ranges[component.index];
     } else if (component.count == 2) {
@@ -147,7 +147,6 @@ void ProcessLine(uint ident) {
 
   if (ident < components.count) {
     scratch_sum[ident] = subgroupExclusiveAdd(scratch_count[ident]);
-
     uint offset = ComputePosition(ident);
     polyline.data[offset] = lines.data[range.x].p1;
     for (uint i = 0; i < range.y; i++) {
@@ -168,5 +167,4 @@ void main() {
 
   // Copy lines to the output buffer.
   ProcessLine(ident);
-  barrier();
 }

@@ -22,9 +22,9 @@ class ComputeTessellator {
 
   ~ComputeTessellator();
 
-  static constexpr size_t kMaxCubicCount = 256;
-  static constexpr size_t kMaxQuadCount = 512;
-  static constexpr size_t kMaxLineCount = 1024;
+  static constexpr size_t kMaxCubicCount = 512;
+  static constexpr size_t kMaxQuadCount = 2048;
+  static constexpr size_t kMaxLineCount = 4096;
   static constexpr size_t kMaxComponentCount =
       kMaxCubicCount + kMaxQuadCount + kMaxLineCount;
 
