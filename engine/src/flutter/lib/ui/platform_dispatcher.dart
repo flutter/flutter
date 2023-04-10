@@ -1155,7 +1155,7 @@ class PlatformDispatcher {
       onSemanticsAction,
       _onSemanticsActionZone,
       nodeId,
-      SemanticsAction.values[action]!,
+      SemanticsAction.fromIndex(action)!,
       args,
     );
   }
