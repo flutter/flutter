@@ -1437,6 +1437,57 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
+  // Test case for https://github.com/flutter/flutter/issues/123523.
+  testWidgets(
+      'The focus and callback behavior are correct when TextInputClient.onConnectionClosed message received',
+      (WidgetTester tester) async {
+    bool onSubmittedInvoked = false;
+    bool onEditingCompleteInvoked = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+              onSubmitted: (String text) {
+                onSubmittedInvoked = true;
+              },
+              onEditingComplete: () {
+                onEditingCompleteInvoked = true;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    editableText.connectionClosed();
+    await tester.pump();
+
+    if (kIsWeb) {
+      expect(onSubmittedInvoked, isTrue);
+      expect(onEditingCompleteInvoked, isTrue);
+      // Because we add the onEditingComplete and we didn't unfocus there, so focus still exists.
+      expect(focusNode.hasFocus, isTrue);
+    } else {
+      // For mobile and other platforms, calling connectionClosed will only unfocus.
+      expect(focusNode.hasFocus, isFalse);
+      expect(onEditingCompleteInvoked, isFalse);
+      expect(onSubmittedInvoked, isFalse);
+    }
+  });
+
   testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
