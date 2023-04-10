@@ -135,5 +135,11 @@
   "scrimLabel": "Gitter",
   "bottomSheetLabel": "Ansicht am unteren Rand",
   "scrimOnTapHint": "$modalRouteContentName schließen",
-  "keyboardKeyShift": "Umschalttaste"
+  "keyboardKeyShift": "Umschalttaste",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
