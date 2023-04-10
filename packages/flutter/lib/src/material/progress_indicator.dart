@@ -565,13 +565,12 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// indicator exhibits a different indeterminate animation, disappearing
   /// completely before reappearing at its minimum value.
   ///
-  /// Using [strokeCap] as [StrokeCap.square] when [value] is not null leads to
-  /// an unconventional display of [value], starting and ending slightly
-  /// off the expected angles. This behavior can be observed with a [value]
-  /// of 0.5, where the expected start and end angles are 90 and 270 degrees,
-  /// but the indicator may start at 85 degrees and end at 275 degrees. This
-  /// doesn't match the Material Design specification and should be used with
-  /// caution.
+  /// Keep in mind that when [StrokeCap.square] is used with a non-null
+  /// [value], the start and end angles might differ slightly from the expected
+  /// values. For example, with a [value] of 0.5, you might anticipate the
+  /// angles to be 90 and 270 degrees. However, the indicator may start at 85
+  /// degrees and end at 275 degrees. This deviation does not adhere to the
+  /// Material Design guidelines, so consider using it thoughtfully.
   final StrokeCap? strokeCap;
 
   @override
