@@ -193,7 +193,10 @@ source_set("ui") {
       "painting/image_encoding_impeller.h",
     ]
 
-    deps += [ "//flutter/impeller" ]
+    deps += [
+      "//flutter/impeller",
+      "//flutter/impeller/display_list:skia_conversions",
+    ]
   }
 
   if (!defined(defines)) {
