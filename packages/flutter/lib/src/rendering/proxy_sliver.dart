@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui' as ui show Color;
 
 import 'package:flutter/animation.dart';
@@ -412,5 +413,44 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
     child = sliver;
+  }
+}
+
+/// Applies a cross-axis constraint to its sliver child.
+///
+/// This render object takes a [maxExtent] parameter and uses the smaller of
+/// [maxExtent] and the parent's [SliverConstraints.crossAxisExtent] as the
+/// cross axis extent of the [SliverConstraints] passed to the sliver child.
+class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
+  /// Creates a render object that constrains the cross axis extent of its sliver child.
+  ///
+  /// The [maxExtent] parameter must not be null and must be nonnegative.
+  RenderSliverConstrainedCrossAxis({
+    required double maxExtent
+  }) : _maxExtent = maxExtent,
+       assert(maxExtent >= 0.0);
+
+  /// The cross axis extent to apply to the sliver child.
+  ///
+  /// This value must be nonnegative.
+  double get maxExtent => _maxExtent;
+  double _maxExtent;
+  set maxExtent(double value) {
+    if (_maxExtent == value) {
+      return;
+    }
+    _maxExtent = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    assert(child != null);
+    assert(maxExtent >= 0.0);
+    child!.layout(
+      constraints.copyWith(crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent)),
+      parentUsesSize: true,
+    );
+    geometry = child!.geometry;
   }
 }

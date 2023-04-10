@@ -1365,3 +1365,47 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
   }
 }
+
+/// A sliver that constrains the cross axis extent of its sliver child.
+///
+/// The [SliverConstrainedCrossAxis] takes a [maxExtent] parameter and uses it as
+/// the cross axis extent of the [SliverConstraints] passed to the sliver child.
+/// The widget ensures that the [maxExtent] is a nonnegative value.
+///
+/// This is useful when you want to apply a custom cross-axis extent constraint
+/// to a sliver child, as slivers typically consume the full cross axis extent.
+///
+/// {@tool dartpad}
+/// In this sample the [SliverConstrainedCrossAxis] sizes its [child] so that the
+/// cross axis extent takes up less space than the actual viewport.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_constrained_cross_axis.0.dart **
+/// {@end-tool}
+
+class SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that constrains the cross axis extent of its sliver child.
+  ///
+  /// The [maxExtent] parameter is required and must be nonnegative.
+  const SliverConstrainedCrossAxis({
+    super.key,
+    required this.maxExtent,
+    required Widget sliver,
+  }) : assert(maxExtent >= 0.0),
+       super(child: sliver);
+
+  /// The cross axis extent to apply to the sliver child.
+  ///
+  /// This value must be nonnegative.
+  final double maxExtent;
+
+  @override
+  RenderSliverConstrainedCrossAxis createRenderObject(BuildContext context) {
+    return RenderSliverConstrainedCrossAxis(maxExtent: maxExtent);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
+    renderObject.maxExtent = maxExtent;
+  }
+}
