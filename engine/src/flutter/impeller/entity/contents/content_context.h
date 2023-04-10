@@ -774,7 +774,12 @@ class ContentContext {
     // The prototype must always be initialized in the constructor.
     FML_CHECK(prototype != container.end());
 
-    auto variant_future = prototype->second->WaitAndGet()->CreateVariant(
+    auto pipeline = prototype->second->WaitAndGet();
+    if (!pipeline) {
+      return nullptr;
+    }
+
+    auto variant_future = pipeline->CreateVariant(
         [&opts, variants_count = container.size()](PipelineDescriptor& desc) {
           opts.ApplyToPipelineDescriptor(desc);
           desc.SetLabel(
