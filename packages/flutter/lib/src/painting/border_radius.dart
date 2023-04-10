@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -399,18 +401,23 @@ class BorderRadius extends BorderRadiusGeometry {
     // converting them to an RRect to be rendered, since negative radii on
     // RRects don't make sense.
     //
-    // Using BorderRadius.circular(double.infinity) results in a square rather
-    // than a rounded rectangle due to the renderer's limitations. To avoid
-    // this, we clamp the radii to a maximum finite value of a float32
-    // (3.402823e+38), ensuring that BorderRadius.circular(double.infinity)
-    //will display a rounded rectangle instead of a square.
-    const Radius maxRadius = Radius.circular(3.402823e+38);
+    // We also clamp the radii to be no larger than half the width or height of
+    // the rect, since radii larger than that don't make sense either.
+    // We only do this if the radii are circular, since non-circular radii
+    // can be larger than half the width or height of the rect.
+    final maxRadius = Radius.circular(math.min(rect.width, rect.height) / 2);
+
+    final Radius? maxTopLeft = topLeft.x == topLeft.y ? maxRadius : null;
+    final Radius? maxTopRight = topRight.x == topRight.y ? maxRadius : null;
+    final Radius? maxBottomLeft = bottomLeft.x == bottomLeft.y ? maxRadius : null;
+    final Radius? maxBottomRight = bottomRight.x == bottomRight.y ? maxRadius : null;
+
     return RRect.fromRectAndCorners(
       rect,
-      topLeft: topLeft.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
-      topRight: topRight.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
-      bottomLeft: bottomLeft.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
-      bottomRight: bottomRight.clamp(minimum: Radius.zero, maximum: maxRadius), // ignore_clamp_double_lint
+      topLeft: topLeft.clamp(minimum: Radius.zero, maximum: maxTopLeft), // ignore_clamp_double_lint
+      topRight: topRight.clamp(minimum: Radius.zero, maximum: maxTopRight), // ignore_clamp_double_lint
+      bottomLeft: bottomLeft.clamp(minimum: Radius.zero, maximum: maxBottomLeft), // ignore_clamp_double_lint
+      bottomRight: bottomRight.clamp(minimum: Radius.zero, maximum: maxBottomRight), // ignore_clamp_double_lint
     );
   }
 
