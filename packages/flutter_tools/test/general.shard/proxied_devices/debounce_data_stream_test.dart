@@ -36,7 +36,7 @@ void main() {
       expect(source.hasListener, true);
     });
 
-    testWithoutContext('forwards data normally is all data is longer than duration apart', () {
+    testWithoutContext('forwards data normally is all data if longer than duration apart', () {
       fakeAsync.run((FakeAsync time) {
         final List<Uint8List> outputItems = <Uint8List>[];
         output.listen(outputItems.add);
