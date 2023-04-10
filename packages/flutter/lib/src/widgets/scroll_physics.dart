@@ -685,7 +685,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double frictionFactor(double overscrollFraction) {
     switch (decelerationRate) {
       case ScrollDecelerationRate.fast:
-        return 0.07 * math.pow(1 - overscrollFraction, 2);
+        return 0.26 * math.pow(1 - overscrollFraction, 2);
       case ScrollDecelerationRate.normal:
         return 0.52 * math.pow(1 - overscrollFraction, 2);
     }
