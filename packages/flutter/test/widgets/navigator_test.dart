@@ -3891,6 +3891,35 @@ void main() {
       expect(observations[7].current, 'first');
       expect(observations[7].previous, isNull);
     });
+
+    testWidgets('Navigator accepts an async PopPageCallback', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      final List<TestPage> myPages = <TestPage>[
+        const TestPage(key: ValueKey<String>('1'), name:'initial'),
+        const TestPage(key: ValueKey<String>('2'), name:'second'),
+      ];
+
+      Future<bool> onPopPage(Route<dynamic> route, dynamic result) {
+        myPages.removeWhere((Page<dynamic> page) => route.settings == page);
+        return Future<bool>.delayed(Duration.zero, () => route.didPop(result));
+      }
+
+      await tester.pumpWidget(
+        buildNavigator(
+          view: tester.view,
+          pages: myPages,
+          onPopPage: onPopPage,
+          key: navigator,
+        ),
+      );
+      expect(find.text('second'), findsOneWidget);
+      expect(find.text('initial'), findsNothing);
+
+      navigator.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('second'), findsNothing);
+      expect(find.text('initial'), findsOneWidget);
+    });
   });
 
   testWidgets('Can reuse NavigatorObserver in rebuilt tree', (WidgetTester tester) async {
