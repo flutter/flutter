@@ -12,6 +12,8 @@
 
 @implementation FlutterEngineTest
 
+extern NSNotificationName const FlutterViewControllerWillDealloc;
+
 - (void)testIsolateId {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   XCTAssertNil(engine.isolateId);
@@ -43,6 +45,42 @@
 
   [engine destroyContext];
 
+  XCTAssertNil(engine.navigationChannel);
+  XCTAssertNil(engine.platformChannel);
+  XCTAssertNil(engine.lifecycleChannel);
+}
+
+// https://github.com/flutter/flutter/issues/123776
+- (void)testReleaseViewControllerAfterDestroyContextInHeadlessMode {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                      project:nil
+                                       allowHeadlessExecution:YES];
+  XCTAssertNil(engine.navigationChannel);
+  XCTAssertNil(engine.platformChannel);
+  XCTAssertNil(engine.lifecycleChannel);
+
+  XCTAssertTrue([engine run]);
+
+  XCTAssertNotNil(engine.navigationChannel);
+  XCTAssertNotNil(engine.platformChannel);
+  XCTAssertNotNil(engine.lifecycleChannel);
+  XCTestExpectation* expectation =
+      [[XCTestExpectation alloc] initWithDescription:@"notification called"];
+  @autoreleasepool {
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    [engine setViewController:viewController];
+    [engine destroyContext];
+    [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+                                                      object:nil
+                                                       queue:[NSOperationQueue mainQueue]
+                                                  usingBlock:^(NSNotification* _Nonnull note) {
+                                                    [expectation fulfill];
+                                                  }];
+    viewController = nil;
+  }
+  [self waitForExpectations:@[ expectation ] timeout:30.0];
   XCTAssertNil(engine.navigationChannel);
   XCTAssertNil(engine.platformChannel);
   XCTAssertNil(engine.lifecycleChannel);

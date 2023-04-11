@@ -434,7 +434,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _undoManagerPlugin.get().viewController = nil;
   if (!_allowHeadlessExecution) {
     [self destroyContext];
-  } else {
+  } else if (_shell) {
     flutter::PlatformViewIOS* platform_view = [self iosPlatformView];
     if (platform_view) {
       platform_view->SetOwnerViewController({});
