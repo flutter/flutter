@@ -285,7 +285,7 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
               'the flutter tool is migrating to a new analytics system.\n'
               'Opting out of collection will opt you out of the legacy\n'
               'and new analytics collection systems.\n'
-              'You can opt out by running `flutter --disable-telemetry`\n'
+              'You can disable analytics reporting by running either `flutter --disable-telemetry`\n'
               'or `flutter config --no-analytics\n');
     }
 
