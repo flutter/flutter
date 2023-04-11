@@ -68,7 +68,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Typically created by the binding (e.g., [RendererBinding]).
   ///
   /// Providing a [configuration] is optional, but a configuration must be set
-  /// before doing layout.
+  /// before calling [prepareInitialFrame].
   RenderView({
     RenderBox? child,
     ViewConfiguration? configuration,
@@ -85,17 +85,16 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The constraints used for the root layout.
   ViewConfiguration get configuration => _configuration!;
   ViewConfiguration? _configuration;
-
-  /// The configuration is initially set by the [configuration] argument
-  /// passed to the constructor.
-  ///
-  /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     if (_configuration == value) {
       return;
     }
     final ViewConfiguration? oldConfiguration = _configuration;
     _configuration = value;
+    if (_rootTransform == null) {
+      // [prepareInitialFrame] has not been called yet, nothing to do for now.
+      return;
+    }
     if (oldConfiguration?.toMatrix() != configuration.toMatrix()) {
       replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
     }
