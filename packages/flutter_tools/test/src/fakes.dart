@@ -11,10 +11,12 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
@@ -570,6 +572,26 @@ class FakeFlutterProjectFactory implements FlutterProjectFactory {
 
   @override
   Map<String, FlutterProject> get projects => throw UnimplementedError();
+}
+
+class FakeIosProject implements IosProject {
+  @override
+  String get hostAppProjectName => "TestName";
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class FakeXcodeProjectInfo extends Fake implements XcodeProjectInfo {
+  @override
+  String expectedCustomSchemeFor(BuildInfo? buildInfo) {
+    return 'TestName';
+  }
+
+  @override
+  String? schemeFor(BuildInfo? buildInfo) {
+
+  }
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {

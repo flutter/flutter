@@ -457,7 +457,14 @@ class XcodeProjectInfo {
   /// The expected scheme for [buildInfo].
   @visibleForTesting
   static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return sentenceCase(buildInfo?.flavor ?? globals.hostAppProjectName);
+    return sentenceCase(buildInfo?.flavor ?? 'Runner');
+  }
+
+  @visibleForTesting
+  String expectedCustomSchemeFor(BuildInfo? buildInfo) {
+    final IosProject project = FlutterProject.current().ios;
+
+    return sentenceCase(project.hostAppProjectName);
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].
@@ -483,13 +490,27 @@ class XcodeProjectInfo {
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String? schemeFor(BuildInfo? buildInfo) {
+    String? scheme;
+    // if there is a flavour specified, the one of the schemes MUST match the flavour
+
     final String expectedScheme = expectedSchemeFor(buildInfo);
     if (schemes.contains(expectedScheme)) {
       return expectedScheme;
     }
-    return _uniqueMatch(schemes, (String candidate) {
+    scheme = _uniqueMatch(schemes, (String candidate) {
       return candidate.toLowerCase() == expectedScheme.toLowerCase();
     });
+
+    if (scheme == null && buildInfo?.flavor == null) {
+      // if there isn't a flavour specified, and Runner was not one of schemes, then check for custom.
+      final String expectedCustomScheme = expectedCustomSchemeFor(buildInfo);
+
+      scheme =  _uniqueMatch(schemes, (String candidate) {
+        return candidate.toLowerCase() == expectedCustomScheme.toLowerCase();
+      });
+    } else {
+      return scheme;
+    }
   }
 
   Never reportFlavorNotFoundAndExit() {
