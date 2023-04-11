@@ -135,18 +135,22 @@ class WebBuilder {
 /// Web rendering backend mode.
 enum WebRendererMode {
   /// Auto detects which rendering backend to use.
-  autoDetect,
+  auto(helpText: 'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.'),
   /// Always uses canvaskit.
-  canvaskit,
+  canvaskit(helpText: 'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.'),
   /// Always uses html.
-  html,
+  html(helpText: 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.'),
   /// Always use skwasm.
-  skwasm,
+  skwasm(helpText: 'Always use the experimental skwasm renderer.');
+
+  const WebRendererMode({required this.helpText});
+
+  final String helpText;
 }
 
 /// The correct precompiled artifact to use for each build and render mode.
 const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
+  WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdk,
   },
@@ -162,7 +166,7 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifact
 
 /// The correct source map artifact to use for each build and render mode.
 const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
+  WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
   },
