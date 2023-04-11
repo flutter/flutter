@@ -28,8 +28,8 @@ class SkwasmCanvas implements ui.Canvas {
   }
 
   @override
-  void saveLayer(ui.Rect? bounds, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+  void saveLayer(ui.Rect? bounds, ui.Paint paint) {
+    paint as SkwasmPaint;
     if (bounds != null) {
       withStackScope((StackScope s) {
         canvasSaveLayer(_handle, s.convertRectToNative(bounds), paint.handle);
@@ -87,8 +87,8 @@ class SkwasmCanvas implements ui.Canvas {
   }
 
   @override
-  void clipPath(ui.Path uiPath, {bool doAntiAlias = true}) {
-    final SkwasmPath path = uiPath as SkwasmPath;
+  void clipPath(ui.Path path, {bool doAntiAlias = true}) {
+    path as SkwasmPath;
     canvasClipPath(_handle, path.handle, doAntiAlias);
   }
 
@@ -97,20 +97,20 @@ class SkwasmCanvas implements ui.Canvas {
       canvasDrawColor(_handle, color.value, blendMode.index);
 
   @override
-  void drawLine(ui.Offset p1, ui.Offset p2, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+  void drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
+    paint as SkwasmPaint;
     canvasDrawLine(_handle, p1.dx, p1.dy, p2.dx, p2.dy, paint.handle);
   }
 
   @override
-  void drawPaint(ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+  void drawPaint(ui.Paint paint) {
+    paint as SkwasmPaint;
     canvasDrawPaint(_handle, paint.handle);
   }
 
   @override
-  void drawRect(ui.Rect rect, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+  void drawRect(ui.Rect rect, ui.Paint paint) {
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawRect(
         _handle,
@@ -121,8 +121,8 @@ class SkwasmCanvas implements ui.Canvas {
   }
 
   @override
-  void drawRRect(ui.RRect rrect, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+  void drawRRect(ui.RRect rrect, ui.Paint paint) {
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawRRect(
         _handle,
@@ -133,8 +133,8 @@ class SkwasmCanvas implements ui.Canvas {
   }
 
   @override
-  void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+  void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawDRRect(
         _handle,
@@ -146,23 +146,23 @@ class SkwasmCanvas implements ui.Canvas {
   }
 
   @override
-  void drawOval(ui.Rect rect, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+  void drawOval(ui.Rect rect, ui.Paint paint) {
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawOval(_handle, s.convertRectToNative(rect), paint.handle);
     });
   }
 
   @override
-  void drawCircle(ui.Offset center, double radius, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+  void drawCircle(ui.Offset center, double radius, ui.Paint paint) {
+    paint as SkwasmPaint;
     canvasDrawCircle(_handle, center.dx, center.dy, radius, paint.handle);
   }
 
   @override
   void drawArc(ui.Rect rect, double startAngle, double sweepAngle,
-      bool useCenter, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
+      bool useCenter, ui.Paint paint) {
+    paint as SkwasmPaint;
     withStackScope((StackScope s) {
       canvasDrawArc(
         _handle,
@@ -176,9 +176,9 @@ class SkwasmCanvas implements ui.Canvas {
   }
 
   @override
-  void drawPath(ui.Path uiPath, ui.Paint uiPaint) {
-    final SkwasmPaint paint = uiPaint as SkwasmPaint;
-    final SkwasmPath path = uiPath as SkwasmPath;
+  void drawPath(ui.Path path, ui.Paint paint) {
+    paint as SkwasmPaint;
+    path as SkwasmPath;
     canvasDrawPath(_handle, path.handle, paint.handle);
   }
 
@@ -260,7 +260,14 @@ class SkwasmCanvas implements ui.Canvas {
     double elevation,
     bool transparentOccluder,
   ) {
-    // TODO(jacksongardner): implement this
+    path as SkwasmPath;
+    canvasDrawShadow(
+      _handle,
+      path.handle,
+      elevation,
+      ui.window.devicePixelRatio,
+      color.value,
+      transparentOccluder);
   }
 
   @override
