@@ -2677,6 +2677,7 @@ ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTex
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObjectTest.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextureRegistrar.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextureRegistrar.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterUmbrellaImportTests.m + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController.mm + ../../../flutter/LICENSE
@@ -5276,6 +5277,7 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextu
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextureRegistrar.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterThreadSynchronizer.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterThreadSynchronizer.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterUmbrellaImportTests.m
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterView.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController.mm
