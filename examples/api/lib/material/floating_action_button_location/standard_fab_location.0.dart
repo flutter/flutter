@@ -2,40 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [StandardFabLocation].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [StandardFabLocation].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const StandardFabLocationExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class StandardFabLocationExampleApp extends StatelessWidget {
+  const StandardFabLocationExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: StandardFabLocationExample(),
     );
   }
 }
 
-class AlmostEndFloatFabLocation extends StandardFabLocation
-    with FabEndOffsetX, FabFloatOffsetY {
+class AlmostEndFloatFabLocation extends StandardFabLocation with FabEndOffsetX, FabFloatOffsetY {
   @override
-  double getOffsetX(
-      ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    final double directionalAdjustment =
-        scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
-    return super.getOffsetX(scaffoldGeometry, adjustment) +
-        directionalAdjustment;
+  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    final double directionalAdjustment = scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
+    return super.getOffsetX(scaffoldGeometry, adjustment) + directionalAdjustment;
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class StandardFabLocationExample extends StatelessWidget {
+  const StandardFabLocationExample({super.key});
 
   @override
   Widget build(BuildContext context) {

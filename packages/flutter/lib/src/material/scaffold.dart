@@ -1994,17 +1994,6 @@ class Scaffold extends StatefulWidget {
     }
   }
 
-  /// Whether the given context is descendant of the [Scaffold.body].
-  ///
-  /// This is used by [AppBar] to determine if the [AppBar] should listen to
-  /// [ScrollNotification] from the [Scrollable]s in the [Scaffold.body].
-  ///
-  /// It returns true if the given context is descendant of the [Scaffold.body].
-  static bool isBodyDescendant(BuildContext context) {
-    final _BodyBuilder? body = context.findAncestorWidgetOfExactType<_BodyBuilder>();
-    return body != null;
-  }
-
   @override
   ScaffoldState createState() => ScaffoldState();
 }
