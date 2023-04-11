@@ -927,7 +927,7 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
-  Future<void> runFixTests() async {
+  Future<void> runFixTests(String package) async {
     final List<String> args = <String>[
       'fix',
       '--compare-to-golden',
@@ -935,7 +935,7 @@ Future<void> _runFrameworkTests() async {
     await runCommand(
       dart,
       args,
-      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_fixes'),
+      workingDirectory: path.join(flutterRoot, 'packages', package, 'test_fixes'),
     );
   }
 
@@ -965,7 +965,8 @@ Future<void> _runFrameworkTests() async {
   Future<void> runSlow() async {
     printProgress('${green}Running slow package tests$reset for directories other than packages/flutter');
     await runTracingTests();
-    await runFixTests();
+    await runFixTests('flutter');
+    await runFixTests('flutter_test');
     await runPrivateTests();
   }
 

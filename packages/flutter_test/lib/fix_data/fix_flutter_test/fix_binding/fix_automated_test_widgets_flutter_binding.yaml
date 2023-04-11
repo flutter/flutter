@@ -1,0 +1,32 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/docs/development/tools/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the
+# flutter/packages/flutter_test/test_fixes/README.md file for instructions
+# on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are for AutomatedTestWidgetsFlutterBinding from the flutter_test/binding.dart file. *
+
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/89952
+  - title: "Remove timeout"
+    date: 2023-03-30
+    element:
+      uris: [ 'flutter_test.dart' ]
+      method: 'runTest'
+      inClass: 'AutomatedTestWidgetsFlutterBinding'
+    changes:
+      - kind: 'removeParameter'
+        name: 'timeout'
