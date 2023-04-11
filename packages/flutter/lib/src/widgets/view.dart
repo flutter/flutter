@@ -194,8 +194,8 @@ class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
     // TODO(goderbauer): why do we need this? - Views are only allowed in certain places.
     // assert(newSlot == View.viewSlot);
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    viewWidget.hooks.pipelineOwner.adoptChild(viewWidget.pipelineOwner);
     super.mount(parent, newSlot); // calls attachRenderObject().
+    viewWidget.pipelineOwner.rootNode = renderObject;
     renderObject.prepareInitialFrame();
     if (viewWidget.pipelineOwner.semanticsOwner != null) {
       renderObject.scheduleInitialSemantics();
@@ -205,7 +205,7 @@ class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
   @override
   void unmount() {
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    viewWidget.hooks.pipelineOwner.dropChild(viewWidget.pipelineOwner);
+    viewWidget.pipelineOwner.rootNode = null;
     super.unmount();
   }
 
@@ -213,8 +213,7 @@ class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
   void attachRenderObject(Object? newSlot) {
     // assert(newSlot == View.viewSlot);
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    assert(viewWidget.pipelineOwner.rootNode == null);
-    viewWidget.pipelineOwner.rootNode = renderObject;
+    viewWidget.hooks.pipelineOwner.adoptChild(viewWidget.pipelineOwner);
     viewWidget.hooks.renderViewRepository.addRenderView(renderObject);
   }
 
@@ -223,7 +222,7 @@ class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
     assert(viewWidget.pipelineOwner.rootNode == renderObject);
     viewWidget.hooks.renderViewRepository.removeRenderView(renderObject);
-    viewWidget.pipelineOwner.rootNode = null;
+    viewWidget.hooks.pipelineOwner.dropChild(viewWidget.pipelineOwner);
   }
 
   @override

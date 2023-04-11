@@ -252,29 +252,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///    frame, and
   ///  * forwarding relevant pointer events to the [RenderView] for hit testing.
   ///
-  /// The provided `view` must be attached to the [rootPipelineOwner] or one
-  /// of its descendants.
-  ///
   /// To remove a [RenderView] from the binding, call [removeRenderView].
   @override
   void addRenderView(RenderView view) {
     final Object viewId = view.flutterView.viewId;
     assert(!_viewIdToRenderView.containsValue(view));
     assert(!_viewIdToRenderView.containsKey(viewId));
-    assert(() {
-      bool inTree = rootPipelineOwner == view.owner;
-      if (inTree) {
-        return true;
-      }
-      void visitor(PipelineOwner owner) {
-        inTree = inTree || owner == view.owner;
-        if (!inTree) {
-          owner.visitChildren(visitor);
-        }
-      }
-      rootPipelineOwner.visitChildren(visitor);
-      return inTree;
-    }());
     _viewIdToRenderView[viewId] = view;
     view.configuration = createViewConfigurationFor(view);
   }
