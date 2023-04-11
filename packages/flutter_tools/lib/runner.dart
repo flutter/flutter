@@ -88,6 +88,14 @@ Future<int> run(
           await globals.analytics.setTelemetry(value);
         }
 
+        // If the user has opted out of legacy analytics, we will continue
+        // to opt them out of unified analytics and inform them
+        if (!globals.flutterUsage.enabled && globals.analytics.telemetryEnabled) {
+          await globals.analytics.setTelemetry(false);
+          globals.logger.printStatus(
+              'Please note that analytics reporting was already disabled, and will continue to be disabled.\n');
+        }
+
         await runner.run(args);
 
         // Triggering [runZoned]'s error callback does not necessarily mean that
@@ -263,6 +271,9 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
 }
 
 Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
+  // Need to get the boolean returned from `messenger.shouldDisplayLicenseTerms()`
+  // before invoking the print welcome method because the print welcome method
+  // will set `messenger.shouldDisplayLicenseTerms()` to false
   final FirstRunMessenger messenger =
       FirstRunMessenger(persistentToolState: globals.persistentToolState!);
   final bool legacyAnalyticsMessageShown =
@@ -287,16 +298,6 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
               'and new analytics collection systems. '
               'You can disable analytics reporting by running either `flutter --disable-telemetry` '
               'or `flutter config --no-analytics\n');
-    }
-
-    // If the user has opted out of legacy analytics, we will continue
-    // to opt them out of unified analytics and inform them
-    if (!legacyAnalyticsMessageShown && !globals.flutterUsage.enabled) {
-      await globals.analytics.setTelemetry(false);
-      globals.logger
-          .printStatus(
-          'Please note that analytics reporting was already disabled, and will continue to be disabled.'
-      );
     }
 
     // Invoking this will onboard the flutter tool onto
