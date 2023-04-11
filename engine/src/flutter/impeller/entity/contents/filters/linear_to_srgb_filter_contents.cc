@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/filters/linear_to_srgb_filter_contents.h"
 
+#include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/geometry/point.h"
@@ -35,23 +36,40 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
-                                                 RenderPass& pass) {
+  auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
+  if (!maybe_input_uvs.has_value()) {
+    return std::nullopt;
+  }
+  auto input_uvs = maybe_input_uvs.value();
+
+  //----------------------------------------------------------------------------
+  /// Create AnonymousContents for rendering.
+  ///
+  RenderProc render_proc = [input_snapshot, coverage, input_uvs,
+                            absorb_opacity = GetAbsorbOpacity()](
+                               const ContentContext& renderer,
+                               const Entity& entity, RenderPass& pass) -> bool {
     Command cmd;
     cmd.label = "Linear to sRGB Filter";
+    cmd.stencil_reference = entity.GetStencilDepth();
 
-    auto options = OptionsFromPass(pass);
-    options.blend_mode = BlendMode::kSource;
+    auto options = OptionsFromPassAndEntity(pass, entity);
     cmd.pipeline = renderer.GetLinearToSrgbFilterPipeline(options);
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.AddVertices({
-        {Point(0, 0)},
-        {Point(1, 0)},
-        {Point(1, 1)},
-        {Point(0, 0)},
-        {Point(1, 1)},
-        {Point(0, 1)},
+        {coverage.origin, input_uvs[0]},
+        {{coverage.origin.x + coverage.size.width, coverage.origin.y},
+         input_uvs[1]},
+        {{coverage.origin.x + coverage.size.width,
+          coverage.origin.y + coverage.size.height},
+         input_uvs[3]},
+        {coverage.origin, input_uvs[0]},
+        {{coverage.origin.x + coverage.size.width,
+          coverage.origin.y + coverage.size.height},
+         input_uvs[3]},
+        {{coverage.origin.x, coverage.origin.y + coverage.size.height},
+         input_uvs[2]},
     });
 
     auto& host_buffer = pass.GetTransientsBuffer();
@@ -59,12 +77,12 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
     cmd.BindVertices(vtx_buffer);
 
     VS::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
     frame_info.texture_sampler_y_coord_scale =
         input_snapshot->texture->GetYCoordScale();
 
     FS::FragInfo frag_info;
-    frag_info.input_alpha = GetAbsorbOpacity() ? input_snapshot->opacity : 1.0f;
+    frag_info.input_alpha = absorb_opacity ? input_snapshot->opacity : 1.0f;
 
     auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
     FS::BindInputTexture(cmd, input_snapshot->texture, sampler);
@@ -74,18 +92,19 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
     return pass.AddCommand(std::move(cmd));
   };
 
-  auto out_texture = renderer.MakeSubpass(
-      "Linear to sRGB Filter", input_snapshot->texture->GetSize(), callback);
-  if (!out_texture) {
-    return std::nullopt;
-  }
+  CoverageProc coverage_proc =
+      [coverage](const Entity& entity) -> std::optional<Rect> {
+    return coverage;
+  };
 
-  return Entity::FromSnapshot(
-      Snapshot{.texture = out_texture,
-               .transform = input_snapshot->transform,
-               .sampler_descriptor = input_snapshot->sampler_descriptor,
-               .opacity = GetAbsorbOpacity() ? 1.0f : input_snapshot->opacity},
-      entity.GetBlendMode(), entity.GetStencilDepth());
+  auto contents = AnonymousContents::Make(render_proc, coverage_proc);
+
+  Entity sub_entity;
+  sub_entity.SetContents(std::move(contents));
+  sub_entity.SetStencilDepth(entity.GetStencilDepth());
+  sub_entity.SetTransformation(entity.GetTransformation());
+  sub_entity.SetBlendMode(entity.GetBlendMode());
+  return sub_entity;
 }
 
 }  // namespace impeller

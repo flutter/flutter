@@ -5,6 +5,7 @@
 #include "impeller/entity/contents/filters/border_mask_blur_filter_contents.h"
 #include "impeller/entity/contents/content_context.h"
 
+#include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
@@ -68,6 +69,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
   if (!input_snapshot.has_value()) {
     return std::nullopt;
   }
+
   auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
   if (!maybe_input_uvs.has_value()) {
     return std::nullopt;
@@ -75,43 +77,53 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
   auto input_uvs = maybe_input_uvs.value();
 
   //----------------------------------------------------------------------------
-  /// Render to texture.
+  /// Create AnonymousContents for rendering.
   ///
 
-  ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
-                                                 RenderPass& pass) {
+  auto sigma = effect_transform * Vector2(sigma_x_.sigma, sigma_y_.sigma);
+  RenderProc render_proc = [coverage, input_snapshot, input_uvs = input_uvs,
+                            src_color_factor = src_color_factor_,
+                            inner_blur_factor = inner_blur_factor_,
+                            outer_blur_factor = outer_blur_factor_, sigma](
+                               const ContentContext& renderer,
+                               const Entity& entity, RenderPass& pass) -> bool {
     auto& host_buffer = pass.GetTransientsBuffer();
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.AddVertices({
-        {Point(0, 0), input_uvs[0]},
-        {Point(1, 0), input_uvs[1]},
-        {Point(1, 1), input_uvs[3]},
-        {Point(0, 0), input_uvs[0]},
-        {Point(1, 1), input_uvs[3]},
-        {Point(0, 1), input_uvs[2]},
+        {coverage.origin, input_uvs[0]},
+        {{coverage.origin.x + coverage.size.width, coverage.origin.y},
+         input_uvs[1]},
+        {{coverage.origin.x + coverage.size.width,
+          coverage.origin.y + coverage.size.height},
+         input_uvs[3]},
+        {coverage.origin, input_uvs[0]},
+        {{coverage.origin.x + coverage.size.width,
+          coverage.origin.y + coverage.size.height},
+         input_uvs[3]},
+        {{coverage.origin.x, coverage.origin.y + coverage.size.height},
+         input_uvs[2]},
     });
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     Command cmd;
     cmd.label = "Border Mask Blur Filter";
-    auto options = OptionsFromPass(pass);
-    options.blend_mode = BlendMode::kSource;
+    auto options = OptionsFromPassAndEntity(pass, entity);
+
     cmd.pipeline = renderer.GetBorderMaskBlurPipeline(options);
     cmd.BindVertices(vtx_buffer);
+    cmd.stencil_reference = entity.GetStencilDepth();
 
     VS::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
     frame_info.texture_sampler_y_coord_scale =
         input_snapshot->texture->GetYCoordScale();
 
-    auto sigma = effect_transform * Vector2(sigma_x_.sigma, sigma_y_.sigma);
-
     FS::FragInfo frag_info;
     frag_info.sigma_uv = sigma.Abs() / input_snapshot->texture->GetSize();
-    frag_info.src_factor = src_color_factor_;
-    frag_info.inner_blur_factor = inner_blur_factor_;
-    frag_info.outer_blur_factor = outer_blur_factor_;
+    frag_info.src_factor = src_color_factor;
+    frag_info.inner_blur_factor = inner_blur_factor;
+    frag_info.outer_blur_factor = outer_blur_factor;
 
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
@@ -122,17 +134,19 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     return pass.AddCommand(std::move(cmd));
   };
 
-  auto out_texture = renderer.MakeSubpass("Border Mask Blur Filter",
-                                          ISize(coverage.size), callback);
-  if (!out_texture) {
-    return std::nullopt;
-  }
+  CoverageProc coverage_proc =
+      [coverage](const Entity& entity) -> std::optional<Rect> {
+    return coverage;
+  };
 
-  return Entity::FromSnapshot(
-      Snapshot{.texture = out_texture,
-               .transform = Matrix::MakeTranslation(coverage.origin),
-               .opacity = input_snapshot->opacity},
-      entity.GetBlendMode(), entity.GetStencilDepth());
+  auto contents = AnonymousContents::Make(render_proc, coverage_proc);
+
+  Entity sub_entity;
+  sub_entity.SetContents(std::move(contents));
+  sub_entity.SetStencilDepth(entity.GetStencilDepth());
+  sub_entity.SetTransformation(entity.GetTransformation());
+  sub_entity.SetBlendMode(entity.GetBlendMode());
+  return sub_entity;
 }
 
 std::optional<Rect> BorderMaskBlurFilterContents::GetFilterCoverage(
