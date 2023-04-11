@@ -195,34 +195,38 @@ class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
     // assert(newSlot == View.viewSlot);
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
     super.mount(parent, newSlot); // calls attachRenderObject().
-    viewWidget.pipelineOwner.rootNode = renderObject;
     renderObject.prepareInitialFrame();
     if (viewWidget.pipelineOwner.semanticsOwner != null) {
       renderObject.scheduleInitialSemantics();
     }
   }
 
-  @override
-  void unmount() {
-    final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    viewWidget.pipelineOwner.rootNode = null;
-    super.unmount();
-  }
+  bool _attached = false;
 
   @override
   void attachRenderObject(Object? newSlot) {
     // assert(newSlot == View.viewSlot);
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
     viewWidget.hooks.pipelineOwner.adoptChild(viewWidget.pipelineOwner);
+    assert(viewWidget.pipelineOwner.rootNode == null);
+    viewWidget.pipelineOwner.rootNode = renderObject;
     viewWidget.hooks.renderViewRepository.addRenderView(renderObject);
+    _attached = true;
   }
 
   @override
   void detachRenderObject() {
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    assert(viewWidget.pipelineOwner.rootNode == renderObject);
+    if (!_attached) {
+      // In global key move scenarios `detachRenderObject` is called twice.
+      assert(viewWidget.pipelineOwner.rootNode == null);
+      return;
+    }
     viewWidget.hooks.renderViewRepository.removeRenderView(renderObject);
+    assert(viewWidget.pipelineOwner.rootNode == renderObject);
+    viewWidget.pipelineOwner.rootNode = null;
     viewWidget.hooks.pipelineOwner.dropChild(viewWidget.pipelineOwner);
+    _attached = false;
   }
 
   @override
