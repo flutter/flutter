@@ -75,6 +75,14 @@ class FlutterVersion {
     String? workingDirectory,
     String? frameworkRevision,
   }) {
+    final stopwatch = Stopwatch()..start();
+    final File versionFile = getVersionFile(globals.fs);
+    if (versionFile.existsSync()) {
+      final foo = FlutterVersion.fromJson(versionFile.readAsStringSync());
+      print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
+      exit(42);
+      return foo;
+    }
     frameworkRevision ??= _runGit(
       gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
       globals.processUtils,
@@ -82,7 +90,8 @@ class FlutterVersion {
     );
     final GitTagVersion gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, gitRef: frameworkRevision, workingDirectory: workingDirectory);
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
-    return FlutterVersion._(
+    stopwatch.stop();
+    return _FlutterVersionGit._(
       clock: clock,
       workingDirectory: workingDirectory,
       frameworkRevision: frameworkRevision,
@@ -91,19 +100,8 @@ class FlutterVersion {
     );
   }
 
-  FlutterVersion._({
-    required SystemClock clock,
-    String? workingDirectory,
-    required this.frameworkRevision,
-    required String frameworkVersion,
-    required GitTagVersion gitTagVersion,
-  }) : _clock = clock,
-       _workingDirectory = workingDirectory,
-       _frameworkVersion = frameworkVersion,
-       _gitTagVersion = gitTagVersion;
-
-  final SystemClock _clock;
-  final String? _workingDirectory;
+  // this should be a real constructor
+  factory FlutterVersion.fromJson(String _) => throw UnimplementedError('TODO');
 
   /// Fetches tags from the upstream Flutter repository and re-calculates the
   /// version.
@@ -111,54 +109,20 @@ class FlutterVersion {
   /// This carries a performance penalty, and should only be called when the
   /// user explicitly wants to get the version, e.g. for `flutter --version` or
   /// `flutter doctor`.
-  void fetchTagsAndUpdate() {
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, fetchTags: true);
-    _frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
-  }
+  void fetchTagsAndUpdate() {}
 
-  String? _repositoryUrl;
-  String? get repositoryUrl {
-    final String _ = channel;
-    return _repositoryUrl;
-  }
+  String? repositoryUrl;
 
-  String? _channel;
   /// The channel is the upstream branch.
+  ///
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
-  String get channel {
-    String? channel = _channel;
-    if (channel == null) {
-      final String gitChannel = _runGit(
-        'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
-        globals.processUtils,
-        _workingDirectory,
-      );
-      final int slash = gitChannel.indexOf('/');
-      if (slash != -1) {
-        final String remote = gitChannel.substring(0, slash);
-        _repositoryUrl = _runGit(
-          'git ls-remote --get-url $remote',
-          globals.processUtils,
-          _workingDirectory,
-        );
-        channel = gitChannel.substring(slash + 1);
-      } else if (gitChannel.isEmpty) {
-        channel = 'unknown';
-      } else {
-        channel = gitChannel;
-      }
-      _channel = channel;
-    }
-    return channel;
-  }
-
-  late GitTagVersion _gitTagVersion;
-  GitTagVersion get gitTagVersion => _gitTagVersion;
+  final String channel;
 
   /// The name of the local branch.
   /// Use getBranchName() to read this.
   String? _branch;
 
+  final GitTagVersion gitTagVersion;
   final String frameworkRevision;
   String get frameworkRevisionShort => _shortGitRevision(frameworkRevision);
 
@@ -182,11 +146,15 @@ class FlutterVersion {
   String get engineRevision => globals.cache.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
+  static File getVersionFile(FileSystem fs) {
+    return fs.file(fs.path.join(Cache.flutterRoot!, '.version.json'));
+  }
+
   void ensureVersionFile() {
     globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version'))
         .writeAsStringSync(_frameworkVersion);
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    final File versionFile = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, '.version.json'));
+    final File versionFile = getVersionFile(globals.fs);
     if (!versionFile.existsSync()) {
       versionFile.writeAsStringSync(encoder.convert(toJson()));
     }
@@ -404,6 +372,72 @@ class FlutterVersion {
       return null;
     }
   }
+}
+
+class _FlutterVersionGit implements FlutterVersion {
+  _FlutterVersionGit._({
+    required SystemClock clock,
+    String? workingDirectory,
+    required this.frameworkRevision,
+    required String frameworkVersion,
+    required GitTagVersion gitTagVersion,
+  }) : _clock = clock,
+       _workingDirectory = workingDirectory,
+       _frameworkVersion = frameworkVersion,
+       _gitTagVersion = gitTagVersion;
+
+  final SystemClock _clock;
+  final String? _workingDirectory;
+
+  late GitTagVersion _gitTagVersion;
+  @override
+  GitTagVersion get gitTagVersion => _gitTagVersion;
+
+  @override
+  final String frameworkRevision;
+
+  String? _repositoryUrl;
+  @override
+  String? get repositoryUrl {
+    final String _ = channel;
+    return _repositoryUrl;
+  }
+
+  String? _channel;
+  @override
+  String get channel {
+    String? channel = _channel;
+    if (channel == null) {
+      final String gitChannel = _runGit(
+        'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
+        globals.processUtils,
+        _workingDirectory,
+      );
+      final int slash = gitChannel.indexOf('/');
+      if (slash != -1) {
+        final String remote = gitChannel.substring(0, slash);
+        _repositoryUrl = _runGit(
+          'git ls-remote --get-url $remote',
+          globals.processUtils,
+          _workingDirectory,
+        );
+        channel = gitChannel.substring(slash + 1);
+      } else if (gitChannel.isEmpty) {
+        channel = 'unknown';
+      } else {
+        channel = gitChannel;
+      }
+      _channel = channel;
+    }
+    return channel;
+  }
+
+  @override
+  void fetchTagsAndUpdate() {
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, fetchTags: true);
+    _frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
+  }
+
 }
 
 /// Checks if the provided [version] is tracking a standard remote.
