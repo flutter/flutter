@@ -1,7 +1,6 @@
 {
     "builds": [
         {
-            "archives": [],
             "drone_dimensions": [
                 "device_type=none",
                 "mac_model=Macmini8,1",
@@ -16,13 +15,10 @@
             ],
             "name": "ios_debug_sim",
             "ninja": {
-                "config": "ios_debug_sim",
-                "targets": []
-            },
-            "tests": []
+                "config": "ios_debug_sim"
+            }
         },
         {
-            "archives": [],
             "drone_dimensions": [
                 "device_type=none",
                 "mac_model=Macmini8,1",
@@ -38,19 +34,10 @@
             ],
             "name": "ios_debug_sim_arm64",
             "ninja": {
-                "config": "ios_debug_sim_arm64",
-                "targets": []
-            },
-            "tests": []
+                "config": "ios_debug_sim_arm64"
+            }
         },
         {
-            "archives": [
-                {
-                    "base_path": "out/ios_debug/zip_archives/",
-                    "include_paths": [],
-                    "name": "ios_debug"
-                }
-            ],
             "drone_dimensions": [
                 "device_type=none",
                 "mac_model=Macmini8,1",
@@ -67,11 +54,9 @@
                 "targets": [
                     "flutter/shell/platform/darwin/ios:flutter_framework"
                 ]
-            },
-            "tests": []
+            }
         },
 	{
-            "archives": [],
             "drone_dimensions": [
                 "device_type=none",
                 "mac_model=Macmini8,1",
@@ -89,11 +74,9 @@
                     "flutter/shell/platform/darwin/ios:flutter_framework",
                     "flutter/lib/snapshot:generate_snapshot_bin"
                 ]
-            },
-            "tests": []
+            }
         },
 	{
-            "archives": [],
             "drone_dimensions": [
                 "device_type=none",
                 "mac_model=Macmini8,1",
@@ -111,11 +94,9 @@
                     "flutter/shell/platform/darwin/ios:flutter_framework",
                     "flutter/lib/snapshot:generate_snapshot_bin"
                 ]
-            },
-            "tests": []
+            }
         }
     ],
-    "tests": [],
     "generators": {
         "tasks": [
             {
@@ -188,23 +169,28 @@
     "archives": [
         {
             "source": "out/debug/artifacts.zip",
-            "destination": "ios/artifacts.zip"
+            "destination": "ios/artifacts.zip",
+	    "realm": "production"
         },
 	{
             "source": "out/profile/artifacts.zip",
-            "destination": "ios-profile/artifacts.zip"
+            "destination": "ios-profile/artifacts.zip",
+	    "realm": "production"
         },
         {
             "source": "out/debug/ios-objcdoc.zip",
-            "destination": "ios-objcdoc.zip"
+            "destination": "ios-objcdoc.zip",
+	    "realm": "production"
         },
 	{
             "source": "out/release/artifacts.zip",
-            "destination": "ios-release/artifacts.zip"
+            "destination": "ios-release/artifacts.zip",
+	    "realm": "production"
         },
         {
             "source": "out/release/Flutter.dSYM.zip",
-            "destination": "ios-release/Flutter.dSYM.zip"
+            "destination": "ios-release/Flutter.dSYM.zip",
+	    "realm": "production"
         }
     ]
 }
