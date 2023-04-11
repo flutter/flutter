@@ -274,6 +274,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
         '-D$dartDefine',
+      ...WasmCompilerConfig.fromBuildSystemEnvironment(environment.defines).toCommandOptions(),
       '--packages=.dart_tool/package_config.json',
       '--dart-sdk=$dartSdkPath',
       '--multi-root-scheme',
