@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
@@ -3899,9 +3900,11 @@ void main() {
         const TestPage(key: ValueKey<String>('2'), name:'second'),
       ];
 
-      Future<bool> onPopPage(Route<dynamic> route, dynamic result) {
+      final Completer<void> completer = Completer<void>();
+      Future<bool> onPopPage(Route<dynamic> route, dynamic result) async {
         myPages.removeWhere((Page<dynamic> page) => route.settings == page);
-        return Future<bool>.delayed(Duration.zero, () => route.didPop(result));
+        await completer.future;
+        return route.didPop(result);
       }
 
       await tester.pumpWidget(
@@ -3916,6 +3919,12 @@ void main() {
       expect(find.text('initial'), findsNothing);
 
       navigator.currentState!.pop();
+      // The second page should still be there until the completer completes.
+      await tester.pumpAndSettle();
+      expect(find.text('second'), findsOneWidget);
+      expect(find.text('initial'), findsNothing);
+
+      completer.complete();
       await tester.pumpAndSettle();
       expect(find.text('second'), findsNothing);
       expect(find.text('initial'), findsOneWidget);
