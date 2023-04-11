@@ -15,6 +15,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'divider.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -47,6 +48,39 @@ enum TabBarIndicatorSize {
   /// This value is used to align the tab's label, typically a [Tab]
   /// widget's text or icon, with the selected tab indicator.
   label,
+}
+
+/// Defines how tabs are aligned horizontally in a [TabBar].
+///
+/// See also:
+///
+/// * [TabBar], which displays a row of tabs.
+/// * [TabBarView], which displays a widget for the currently selected tab.
+/// * [TabBar.alignment], which defines the alignment of the tabs.
+enum TabAlignment {
+  /// When [TabBar.isScrollable] is true, tabs are aligned to the
+  /// start of the [TabBar] with a horizontal offset of 56.0 pixels.
+  ///
+  /// If [TabBar.isScrollable] is false, this is ignored.
+  ///
+  /// It is not recommended to set [TabAlignment.start] when
+  /// [ThemeData.useMaterial3] is false.
+  start,
+  /// When [TabBar.isScrollable] is true, tabs are aligned to the
+  /// start of the [TabBar].
+  ///
+  /// If [TabBar.isScrollable] is false, this is ignored.
+  ///
+  /// It is not recommended to set [TabAlignment.startOffset] when
+  /// [ThemeData.useMaterial3] is false.
+  startOffset,
+  /// When [TabBar.isScrollable] is false, tabs are stretched to fill the
+  /// [TabBar].
+  ///
+  /// If [TabBar.isScrollable] is true, this is ignored.
+  fill,
+  /// Tabs are aligned to the center of the [TabBar].
+  center,
 }
 
 /// A Material Design [TabBar] tab.
@@ -306,9 +340,9 @@ class _TabLabelBar extends Flex {
   const _TabLabelBar({
     super.children,
     required this.onPerformLayout,
+    required super.mainAxisSize,
   }) : super(
     direction: Axis.horizontal,
-    mainAxisSize: MainAxisSize.max,
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
     verticalDirection: VerticalDirection.down,
@@ -360,7 +394,6 @@ class _IndicatorPainter extends CustomPainter {
     required _IndicatorPainter? old,
     required this.indicatorPadding,
     required this.labelPaddings,
-    this.dividerColor,
   }) : super(repaint: controller.animation) {
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
@@ -372,7 +405,6 @@ class _IndicatorPainter extends CustomPainter {
   final TabBarIndicatorSize? indicatorSize;
   final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
-  final Color? dividerColor;
   final List<EdgeInsetsGeometry> labelPaddings;
 
   // _currentTabOffsets and _currentTextDirection are set each time TabBar
@@ -465,10 +497,6 @@ class _IndicatorPainter extends CustomPainter {
       size: _currentRect!.size,
       textDirection: _currentTextDirection,
     );
-    if (dividerColor != null) {
-      final Paint dividerPaint = Paint()..color = dividerColor!..strokeWidth = 1;
-      canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), dividerPaint);
-    }
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
@@ -682,6 +710,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.indicator,
     this.indicatorSize,
     this.dividerColor,
+    this.dividerHeight,
     this.labelColor,
     this.labelStyle,
     this.labelPadding,
@@ -695,6 +724,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
+    this.tabAlignment,
   }) : _isPrimary = true,
        assert(indicator != null || (indicatorWeight > 0.0));
 
@@ -731,6 +761,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.indicator,
     this.indicatorSize,
     this.dividerColor,
+    this.dividerHeight,
     this.labelColor,
     this.labelStyle,
     this.labelPadding,
@@ -744,6 +775,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
+    this.tabAlignment,
   }) : _isPrimary = false,
        assert(indicator != null || (indicatorWeight > 0.0));
 
@@ -848,6 +880,13 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// color is used. If that is null and [ThemeData.useMaterial3] is true,
   /// [ColorScheme.surfaceVariant] will be used, otherwise divider will not be drawn.
   final Color? dividerColor;
+
+  /// The height of the divider.
+  ///
+  /// If null and [ThemeData.useMaterial3] is true, [TabBarTheme.dividerHeight]
+  /// is used. If that is null and [ThemeData.useMaterial3] is true, 1.0 will be used.
+  /// Otherwise divider will not be drawn.
+  final double? dividerHeight;
 
   /// The color of selected tab labels.
   ///
@@ -1027,6 +1066,19 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? splashBorderRadius;
 
+  /// Specifies the horizontal alignment of the tabs within a [TabBar].
+  ///
+  /// If this is null, then the value of [TabBarTheme.tabAlignment] is used.
+  ///
+  /// If [TabBarTheme.tabAlignment] is null and [ThemeData.useMaterial3] is true,
+  /// then [TabAlignment.startOffset] is used if [isScrollable] is true,
+  /// otherwise [TabAlignment.fill] is used.
+  ///
+  /// If [TabBarTheme.tabAlignment] is null and [ThemeData.useMaterial3] is false,
+  /// then [TabAlignment.center] is used if [isScrollable] is true,
+  /// otherwise [TabAlignment.fill] is used.
+  final TabAlignment? tabAlignment;
+
   /// A size whose height depends on if the tabs have both icons and text.
   ///
   /// [AppBar] uses this size to compute its own preferred size.
@@ -1089,14 +1141,14 @@ class _TabBarState extends State<TabBar> {
   TabBarTheme get _defaults {
     if (Theme.of(context).useMaterial3) {
       return widget._isPrimary
-          ? _TabsPrimaryDefaultsM3(context)
-          : _TabsSecondaryDefaultsM3(context);
+          ? _TabsPrimaryDefaultsM3(context, widget.isScrollable)
+          : _TabsSecondaryDefaultsM3(context, widget.isScrollable);
     } else {
-      return _TabsDefaultsM2(context);
+      return _TabsDefaultsM2(context, widget.isScrollable);
     }
   }
 
-  Decoration _getIndicator() {
+  Decoration _getIndicator(TabBarIndicatorSize indicatorSize) {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
@@ -1130,17 +1182,24 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
     }
 
-    return UnderlineTabIndicator(
-      borderRadius: theme.useMaterial3 && widget._isPrimary
+    if (theme.useMaterial3 && widget._isPrimary && indicatorSize == TabBarIndicatorSize.label) {
+      return UnderlineTabIndicator(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(3.0),
+          topRight: Radius.circular(3.0),
+        ),
+        borderSide: BorderSide(
         // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
         // when `preferredSize`and `indicatorWeight` are updated to support Material 3
         // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
         // https://github.com/flutter/flutter/issues/116136
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(3.0),
-            topRight: Radius.circular(3.0),
-          )
-        : null,
+          width: widget.indicatorWeight,
+          color: color,
+        ),
+      );
+    }
+
+    return UnderlineTabIndicator(
       borderSide: BorderSide(
         width: widget.indicatorWeight,
         color: color,
@@ -1185,17 +1244,18 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _initIndicatorPainter() {
-    final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarIndicatorSize indicatorSize = widget.indicatorSize
+      ?? tabBarTheme.indicatorSize
+      ?? _defaults.indicatorSize!;
 
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
-      indicator: _getIndicator(),
-      indicatorSize: widget.indicatorSize ?? tabBarTheme.indicatorSize ?? _defaults.indicatorSize!,
+      indicator: _getIndicator(indicatorSize),
+      indicatorSize: indicatorSize,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
-      dividerColor: theme.useMaterial3 ? widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor : null,
       labelPaddings: _labelPaddings,
     );
   }
@@ -1390,7 +1450,10 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
+    final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabAlignment effectiveTabAlignment = widget.tabAlignment ?? tabBarTheme.tabAlignment ?? _defaults.tabAlignment!;
+    final TextDirection textDirection = Directionality.of(context);
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
       const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
@@ -1491,7 +1554,7 @@ class _TabBarState extends State<TabBar> {
           ),
         ),
       );
-      if (!widget.isScrollable) {
+      if (!widget.isScrollable && effectiveTabAlignment == TabAlignment.fill) {
         wrappedTabs[index] = Expanded(child: wrappedTabs[index]);
       }
     }
@@ -1509,6 +1572,7 @@ class _TabBarState extends State<TabBar> {
         defaults: _defaults,
         child: _TabLabelBar(
           onPerformLayout: _saveTabOffsets,
+          mainAxisSize: effectiveTabAlignment == TabAlignment.fill ? MainAxisSize.max : MainAxisSize.min,
           children: wrappedTabs,
         ),
       ),
@@ -1516,6 +1580,9 @@ class _TabBarState extends State<TabBar> {
 
     if (widget.isScrollable) {
       _scrollController ??= _TabBarScrollController(this);
+      final EdgeInsetsGeometry? effectivePadding = effectiveTabAlignment == TabAlignment.startOffset
+        ? const EdgeInsetsDirectional.only(start: 56.0).add(widget.padding ?? EdgeInsets.zero)
+        : widget.padding;
       tabBar = ScrollConfiguration(
         // The scrolling tabs should not show an overscroll indicator.
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
@@ -1523,7 +1590,7 @@ class _TabBarState extends State<TabBar> {
           dragStartBehavior: widget.dragStartBehavior,
           scrollDirection: Axis.horizontal,
           controller: _scrollController,
-          padding: widget.padding,
+          padding: effectivePadding,
           physics: widget.physics,
           child: tabBar,
         ),
@@ -1534,6 +1601,28 @@ class _TabBarState extends State<TabBar> {
         child: tabBar,
       );
     }
+
+    tabBar = Stack(
+      alignment: widget.isScrollable
+        ? (effectiveTabAlignment == TabAlignment.center
+          ? AlignmentDirectional.center
+          : AlignmentDirectional.centerStart)
+        : AlignmentDirectional.center,
+      textDirection: textDirection,
+      children: <Widget>[
+        if (theme.useMaterial3)
+          Container(
+            height: widget.preferredSize.height,
+            alignment: Alignment.bottomCenter,
+            child: Divider(
+              height: 0,
+              thickness: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight,
+              color: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor,
+            ),
+          ),
+        tabBar,
+      ],
+    );
 
     return tabBar;
   }
@@ -2030,10 +2119,11 @@ class TabPageSelector extends StatelessWidget {
 
 // Hand coded defaults based on Material Design 2.
 class _TabsDefaultsM2 extends TabBarTheme {
-  const _TabsDefaultsM2(this.context)
+  const _TabsDefaultsM2(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 
   final BuildContext context;
+  final bool isScrollable;
 
   @override
   Color? get indicatorColor => Theme.of(context).indicatorColor;
@@ -2049,6 +2139,9 @@ class _TabsDefaultsM2 extends TabBarTheme {
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+
+  @override
+  TabAlignment? get tabAlignment => isScrollable ? TabAlignment.center : TabAlignment.fill;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Tabs
@@ -2061,12 +2154,16 @@ class _TabsDefaultsM2 extends TabBarTheme {
 // Token database version: v0_162
 
 class _TabsPrimaryDefaultsM3 extends TabBarTheme {
-  _TabsPrimaryDefaultsM3(this.context)
+  _TabsPrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
+  final bool isScrollable;
+
+  @override
+  double? get dividerHeight => 1.0;
 
   @override
   Color? get dividerColor => _colors.surfaceVariant;
@@ -2116,18 +2213,25 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+
+  @override
+  TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 }
 
 class _TabsSecondaryDefaultsM3 extends TabBarTheme {
-  _TabsSecondaryDefaultsM3(this.context)
+  _TabsSecondaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
+  final bool isScrollable;
 
   @override
   Color? get dividerColor => _colors.surfaceVariant;
+
+  @override
+  double? get dividerHeight => 1.0;
 
   @override
   Color? get indicatorColor => _colors.primary;
@@ -2174,6 +2278,9 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+
+  @override
+  TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 }
 
 // END GENERATED TOKEN PROPERTIES - Tabs
