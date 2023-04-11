@@ -281,11 +281,11 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
     // bug
     if (legacyAnalyticsMessageShown) {
       globals.logger
-          .printStatus('You have received two consent messages because\n'
-              'the flutter tool is migrating to a new analytics system.\n'
-              'Disabling analytics collection will disable both the legacy\n'
-              'and new analytics collection systems.\n'
-              'You can disable analytics reporting by running either `flutter --disable-telemetry`\n'
+          .printStatus('You have received two consent messages because '
+              'the flutter tool is migrating to a new analytics system. '
+              'Disabling analytics collection will disable both the legacy '
+              'and new analytics collection systems. '
+              'You can disable analytics reporting by running either `flutter --disable-telemetry` '
               'or `flutter config --no-analytics\n');
     }
 
