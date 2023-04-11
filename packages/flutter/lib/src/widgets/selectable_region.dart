@@ -1507,7 +1507,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   void _scheduleSelectableUpdate() {
     if (!_scheduledSelectableUpdate) {
       _scheduledSelectableUpdate = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
         if (!_scheduledSelectableUpdate) {
           return;
         }

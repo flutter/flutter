@@ -10,9 +10,12 @@ void main() {
 
   Future<void> pumpContainer(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(
-      DefaultSelectionStyle(
-        selectionColor: Colors.red,
-        child: child,
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultSelectionStyle(
+          selectionColor: Colors.red,
+          child: child,
+        ),
       ),
     );
   }
@@ -59,6 +62,53 @@ void main() {
     );
     expect(registrar.selectables.length, 0);
     expect(delegate.selectables.length, 0);
+  });
+
+  testWidgets('Swapping out container delegate does not crash', (WidgetTester tester) async {
+    final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+    final TestContainerDelegate delegate = TestContainerDelegate();
+    final TestContainerDelegate childDelegate = TestContainerDelegate();
+    await pumpContainer(
+      tester,
+      SelectionContainer(
+        registrar: registrar,
+        delegate: delegate,
+        child: Builder(
+          builder: (BuildContext context) {
+            return SelectionContainer(
+              registrar: SelectionContainer.maybeOf(context),
+              delegate: childDelegate,
+              child: const Text('dummy'),
+            );
+          },
+        )
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(registrar.selectables.length, 1);
+    expect(delegate.value.hasContent, isTrue);
+
+    final TestContainerDelegate newDelegate = TestContainerDelegate();
+    await pumpContainer(
+      tester,
+      SelectionContainer(
+        registrar: registrar,
+        delegate: delegate,
+        child: Builder(
+          builder: (BuildContext context) {
+            return SelectionContainer(
+              registrar: SelectionContainer.maybeOf(context),
+              delegate: newDelegate,
+              child: const Text('dummy'),
+            );
+          },
+        )
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(registrar.selectables.length, 1);
+    expect(delegate.value.hasContent, isTrue);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('selection container registers itself if there is a selectable child', (WidgetTester tester) async {
