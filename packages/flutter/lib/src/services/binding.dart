@@ -66,10 +66,21 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   late final KeyEventManager _keyEventManager;
 
   void _initKeyboard() {
-    _keyboard = HardwareKeyboard();
+    _keyboard = HardwareKeyboard(pressedKeys: _readInitialPressedKeys());
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
     platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
     SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+  }
+
+  Map<PhysicalKeyboardKey, LogicalKeyboardKey> _readInitialPressedKeys() {
+    final Map<PhysicalKeyboardKey, LogicalKeyboardKey> initialPressedKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+    final List<int> keys = instance.platformDispatcher.initialKeyboardState;
+    for (int i = 0; i < keys.length; i = i + 2) {
+      final PhysicalKeyboardKey physical = PhysicalKeyboardKey(keys[i]);
+      final LogicalKeyboardKey logical = LogicalKeyboardKey(keys[i+1]);
+      initialPressedKeys[physical] = logical;
+    }
+    return initialPressedKeys;
   }
 
   /// The default instance of [BinaryMessenger].

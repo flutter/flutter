@@ -378,11 +378,22 @@ typedef KeyEventCallback = bool Function(KeyEvent event);
 ///  * [RawKeyboard], the legacy API that dispatches key events containing raw
 ///    system data.
 class HardwareKeyboard {
+
+  /// Create a [HardwareKeyboard] initialized with the given keys pressed state.
+  ///
+  /// See also:
+  ///
+  ///  * [physicalKeysPressed], which tells if a physical key is being pressed.
+  ///  * [logicalKeysPressed], which tells if a logical key is being pressed.
+  HardwareKeyboard({
+    required Map<PhysicalKeyboardKey, LogicalKeyboardKey> pressedKeys,
+  }) :_pressedKeys = pressedKeys;
+
   /// Provides convenient access to the current [HardwareKeyboard] singleton from
   /// the [ServicesBinding] instance.
   static HardwareKeyboard get instance => ServicesBinding.instance.keyboard;
 
-  final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _pressedKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+  final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _pressedKeys;
 
   /// The set of [PhysicalKeyboardKey]s that are pressed.
   ///
@@ -419,6 +430,8 @@ class HardwareKeyboard {
   /// If called from a key event handler, the result will already include the effect
   /// of the event.
   Set<KeyboardLockMode> get lockModesEnabled => _lockModes;
+
+  bool _hasReceivedFirstKeyEvent = false;
 
   void _assertEventIsRegular(KeyEvent event) {
     assert(() {
@@ -534,7 +547,20 @@ class HardwareKeyboard {
   /// Process a new [KeyEvent] by recording the state changes and dispatching
   /// to handlers.
   bool handleKeyEvent(KeyEvent event) {
-    _assertEventIsRegular(event);
+    bool skipAssert = false;
+
+    if (!_hasReceivedFirstKeyEvent) {
+      _hasReceivedFirstKeyEvent = true;
+      final bool knownDown = event is KeyDownEvent && _pressedKeys.containsKey(event.physicalKey);
+      final bool knownUp = event is KeyUpEvent && !_pressedKeys.containsKey(event.physicalKey);
+      final bool knownRepeat = event is KeyRepeatEvent && !_pressedKeys.containsKey(event.physicalKey);
+      skipAssert =  knownDown || knownUp || knownRepeat;
+    }
+    // Do not assert for the first key event because it is already taken into account
+    // in the initial keyboard state.
+    if (!skipAssert) {
+      _assertEventIsRegular(event);
+    }
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
     if (event is KeyDownEvent) {

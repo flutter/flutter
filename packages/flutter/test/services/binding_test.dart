@@ -41,6 +41,13 @@ $license2
 ''';
 
 class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
+  TestBinding() : platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: PlatformDispatcher.instance,
+  )..initialKeyboardStateTestValue = <int>[1, 2, 3, 4];
+
+  @override
+  final TestPlatformDispatcher platformDispatcher;
+
   @override
   TestDefaultBinaryMessenger get defaultBinaryMessenger => super.defaultBinaryMessenger as TestDefaultBinaryMessenger;
 
@@ -144,5 +151,17 @@ void main() {
     expect(receivedReply, isTrue);
     expect(result, isNotNull);
     expect(result!['response'], equals('exit'));
+  });
+
+  test('initInstances synchronizes keyboard state', () async {
+    final Set<PhysicalKeyboardKey> physicalKeys = HardwareKeyboard.instance.physicalKeysPressed;
+    final Set<LogicalKeyboardKey> logicalKeys = HardwareKeyboard.instance.logicalKeysPressed;
+
+    expect(physicalKeys.length, 2);
+    expect(logicalKeys.length, 2);
+    expect(physicalKeys.first, const PhysicalKeyboardKey(1));
+    expect(logicalKeys.first, const LogicalKeyboardKey(2));
+    expect(physicalKeys.last, const PhysicalKeyboardKey(3));
+    expect(logicalKeys.last, const LogicalKeyboardKey(4));
   });
 }

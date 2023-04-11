@@ -233,6 +233,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
+  List<int> get initialKeyboardState => _initialKeyboardStateTestValue;
+  List<int> _initialKeyboardStateTestValue = <int>[];
+  /// Sets a faked initial keyboard state for testing.
+  set initialKeyboardStateTestValue(List<int> state) { // ignore: avoid_setters_without_getters
+    _initialKeyboardStateTestValue = state;
+  }
+
+  @override
   double get textScaleFactor => _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
   double? _textScaleFactorTestValue;
   /// Hides the real text scale factor and reports the given
