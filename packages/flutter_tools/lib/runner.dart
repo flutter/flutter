@@ -295,8 +295,8 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
       await globals.analytics.setTelemetry(false);
       globals.logger
           .printStatus(
-          'You have already opted out of the legacy analytics system\n'
-          'and will continue to remain opted out of the new analytics system\n');
+          'Please note that analytics reporting was already disabled, and will continue to be disabled.'
+      );
     }
 
     // Invoking this will onboard the flutter tool onto
