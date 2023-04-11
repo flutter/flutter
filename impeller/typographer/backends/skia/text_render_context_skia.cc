@@ -22,6 +22,12 @@
 
 namespace impeller {
 
+std::unique_ptr<TextRenderContext> TextRenderContext::Create(
+    std::shared_ptr<Context> context) {
+  // There is only one backend today.
+  return std::make_unique<TextRenderContextSkia>(std::move(context));
+}
+
 // TODO(bdero): We might be able to remove this per-glyph padding if we fix
 //              the underlying causes of the overlap.
 //              https://github.com/flutter/flutter/issues/114563

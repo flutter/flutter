@@ -6,15 +6,7 @@
 
 #include <utility>
 
-#include "impeller/typographer/backends/skia/text_render_context_skia.h"
-
 namespace impeller {
-
-std::unique_ptr<TextRenderContext> TextRenderContext::Create(
-    std::shared_ptr<Context> context) {
-  // There is only one backend today.
-  return std::make_unique<TextRenderContextSkia>(std::move(context));
-}
 
 TextRenderContext::TextRenderContext(std::shared_ptr<Context> context)
     : context_(std::move(context)) {
