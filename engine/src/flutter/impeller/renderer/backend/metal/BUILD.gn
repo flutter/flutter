@@ -24,8 +24,6 @@ impeller_component("metal") {
     "device_buffer_mtl.mm",
     "formats_mtl.h",
     "formats_mtl.mm",
-    "gpu_tracer_mtl.h",
-    "gpu_tracer_mtl.mm",
     "pipeline_library_mtl.h",
     "pipeline_library_mtl.mm",
     "pipeline_mtl.h",

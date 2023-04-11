@@ -97,8 +97,6 @@ class MockImpellerContext : public Context {
 
   MOCK_CONST_METHOD0(CreateCommandBuffer, std::shared_ptr<CommandBuffer>());
 
-  MOCK_CONST_METHOD0(GetGPUTracer, std::shared_ptr<GPUTracer>());
-
   MOCK_CONST_METHOD0(GetCapabilities,
                      const std::shared_ptr<const Capabilities>&());
 };
