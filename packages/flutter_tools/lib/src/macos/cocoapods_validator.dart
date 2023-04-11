@@ -28,7 +28,7 @@ class CocoaPodsValidator extends DoctorValidator {
     final CocoaPodsStatus cocoaPodsStatus = await _cocoaPods
       .evaluateCocoaPodsInstallation;
 
-    ValidationType status = ValidationType.installed;
+    ValidationType status = ValidationType.success;
     if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
       messages.add(ValidationMessage(_userMessages.cocoaPodsVersion((await _cocoaPods.cocoaPodsVersionText).toString())));
     } else {

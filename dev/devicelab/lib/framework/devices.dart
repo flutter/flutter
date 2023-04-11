@@ -19,7 +19,7 @@ class DeviceException implements Exception {
   final String message;
 
   @override
-  String toString() => message == null ? '$DeviceException' : '$DeviceException: $message';
+  String toString() => '$DeviceException: $message';
 }
 
 /// Gets the artifact path relative to the current directory.
@@ -58,6 +58,7 @@ enum DeviceOperatingSystem {
   fake,
   fuchsia,
   ios,
+  linux,
   macos,
   windows,
 }
@@ -79,6 +80,8 @@ abstract class DeviceDiscovery {
         return IosDeviceDiscovery();
       case DeviceOperatingSystem.fuchsia:
         return FuchsiaDeviceDiscovery();
+      case DeviceOperatingSystem.linux:
+        return LinuxDeviceDiscovery();
       case DeviceOperatingSystem.macos:
         return MacosDeviceDiscovery();
       case DeviceOperatingSystem.windows:
@@ -354,6 +357,40 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     // a better method, but so far that's the best one I've found.
     await exec(adbPath, <String>['kill-server']);
   }
+}
+
+class LinuxDeviceDiscovery implements DeviceDiscovery {
+  factory LinuxDeviceDiscovery() {
+    return _instance ??= LinuxDeviceDiscovery._();
+  }
+
+  LinuxDeviceDiscovery._();
+
+  static LinuxDeviceDiscovery? _instance;
+
+  static const LinuxDevice _device = LinuxDevice();
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    return <String, HealthCheckResult>{};
+  }
+
+  @override
+  Future<void> chooseWorkingDevice() async { }
+
+  @override
+  Future<void> chooseWorkingDeviceById(String deviceId) async { }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    return <String>['linux'];
+  }
+
+  @override
+  Future<void> performPreflightTasks() async { }
+
+  @override
+  Future<Device> get workingDevice  async => _device;
 }
 
 class MacosDeviceDiscovery implements DeviceDiscovery {
@@ -1044,6 +1081,58 @@ class IosDevice extends Device {
   Future<void> reboot() {
     return Process.run('idevicediagnostics', <String>['restart', '-u', deviceId]);
   }
+}
+
+class LinuxDevice extends Device {
+  const LinuxDevice();
+
+  @override
+  String get deviceId => 'linux';
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    return <String, dynamic>{};
+  }
+
+  @override
+  Future<void> home() async { }
+
+  @override
+  Future<bool> isAsleep() async {
+    return false;
+  }
+
+  @override
+  Future<bool> isAwake() async {
+    return true;
+  }
+
+  @override
+  Stream<String> get logcat => const Stream<String>.empty();
+
+  @override
+  Future<void> clearLogs() async {}
+
+  @override
+  Future<void> reboot() async { }
+
+  @override
+  Future<void> sendToSleep() async { }
+
+  @override
+  Future<void> stop(String packageName) async { }
+
+  @override
+  Future<void> tap(int x, int y) async { }
+
+  @override
+  Future<void> togglePower() async { }
+
+  @override
+  Future<void> unlock() async { }
+
+  @override
+  Future<void> wakeUp() async { }
 }
 
 class MacosDevice extends Device {

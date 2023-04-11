@@ -45,13 +45,13 @@ void main() {
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
     final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern. There might be a missing space character at the end of the line.',
         '║ test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
         '║ test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.',
         '║ test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern. It might be missing the line saying "This feature was deprecated after...".',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern. There might not be an explanatory message.',
         '║ test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.',
         '║ test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.',
         '║ test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
@@ -176,7 +176,18 @@ void main() {
       minimumMatches: 1,
     ), shouldHaveErrors: true);
 
-    expect(result, contains('L15'));
-    expect(result, isNot(contains('L12')));
+    expect(result, contains(':15'));
+    expect(result, isNot(contains(':12')));
+  });
+
+  test('analyze.dart - verifyTabooDocumentation', () async {
+    final String result = await capture(() => verifyTabooDocumentation(
+      testRootPath,
+      minimumMatches: 1,
+    ), shouldHaveErrors: true);
+
+    expect(result, isNot(contains(':19')));
+    expect(result, contains(':20'));
+    expect(result, contains(':21'));
   });
 }

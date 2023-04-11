@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [RestorableRouteFuture].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RestorableRouteFuture].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RestorableRouteFutureExampleApp());
+
+class RestorableRouteFutureExampleApp extends StatelessWidget {
+  const RestorableRouteFutureExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +40,7 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
   @override
   void initState() {
     super.initState();
-    _counterRoute = RestorableRouteFuture<int>(
-        onPresent: (NavigatorState navigator, Object? arguments) {
+    _counterRoute = RestorableRouteFuture<int>(onPresent: (NavigatorState navigator, Object? arguments) {
       // Defines what route should be shown (and how it should be added
       // to the navigator) when `RestorableRouteFuture.present` is called.
       return navigator.restorablePush(
@@ -73,8 +72,8 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
 
   // A static `RestorableRouteBuilder` that can re-create the route during
   // state restoration.
-  static Route<int> _counterRouteBuilder(
-      BuildContext context, Object? arguments) {
+  @pragma('vm:entry-point')
+  static Route<int> _counterRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<int>(
       builder: (BuildContext context) => MyCounter(
         title: arguments!.toString(),

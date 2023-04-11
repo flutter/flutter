@@ -9,8 +9,10 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/config.dart';
@@ -28,6 +30,7 @@ import 'package:usage/usage_io.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
+import '../src/test_build_system.dart';
 import '../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -213,7 +216,13 @@ void main() {
     });
 
     testUsingContext('compound command usage path', () async {
-      final BuildCommand buildCommand = BuildCommand();
+      final BuildCommand buildCommand = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+      );
       final FlutterCommand buildApkCommand = buildCommand.subcommands['apk']! as FlutterCommand;
 
       expect(await buildApkCommand.usagePath, 'build/apk');

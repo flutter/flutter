@@ -4,8 +4,7 @@
 
 // @dart = 2.12
 
-// This is a dummy dart:ui package for the sample code analyzer tests to use.
-
+/// This is a dummy dart:ui package for the sample code analyzer tests to use.
 library dart.ui;
 
 /// Bla bla bla bla bla bla bla bla bla.

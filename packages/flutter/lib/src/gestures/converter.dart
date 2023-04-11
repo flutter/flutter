@@ -37,11 +37,7 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
 /// This takes [PointerDataPacket] objects, as received from the engine via
 /// [dart:ui.PlatformDispatcher.onPointerDataPacket], and converts them to
 /// [PointerEvent] objects.
-class PointerEventConverter {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  PointerEventConverter._();
-
+abstract final class PointerEventConverter {
   /// Expand the given packet of pointer data into a sequence of framework
   /// pointer events.
   ///
@@ -52,9 +48,8 @@ class PointerEventConverter {
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) {
     return data
         .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
-        .map((ui.PointerData datum) {
+        .map<PointerEvent?>((ui.PointerData datum) {
           final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
-          assert(position != null);
           final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
           final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
           final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);
@@ -62,7 +57,6 @@ class PointerEventConverter {
           final double radiusMax = _toLogicalPixels(datum.radiusMax, devicePixelRatio);
           final Duration timeStamp = datum.timeStamp;
           final PointerDeviceKind kind = datum.kind;
-          assert(datum.change != null);
           switch (datum.signalKind ?? ui.PointerSignalKind.none) {
             case ui.PointerSignalKind.none:
               switch (datum.change) {
@@ -249,6 +243,9 @@ class PointerEventConverter {
                   );
               }
             case ui.PointerSignalKind.scroll:
+              if (!datum.scrollDeltaX.isFinite || !datum.scrollDeltaY.isFinite || devicePixelRatio <= 0) {
+                return null;
+              }
               final Offset scrollDelta =
                   Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
               return PointerScrollEvent(
@@ -277,12 +274,14 @@ class PointerEventConverter {
                 scale: datum.scale,
               );
             case ui.PointerSignalKind.unknown:
+            default: // ignore: no_default_cases, to allow adding a new [PointerSignalKind] - PointerStylusAuxiliaryAction
+            // TODO(louisehsu): remove after landing engine PR https://github.com/flutter/engine/pull/39637
               // This branch should already have 'unknown' filtered out, but
               // we don't want to return anything or miss if someone adds a new
               // enumeration to PointerSignalKind.
               throw StateError('Unreachable');
           }
-        });
+        }).whereType<PointerEvent>();
   }
 
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;

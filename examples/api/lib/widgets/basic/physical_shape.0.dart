@@ -2,55 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [PhysicalShape].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [PhysicalShape].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const PhysicalShapeApp());
 
-  static const String _title = 'Flutter Code Sample';
+class PhysicalShapeApp extends StatelessWidget {
+  const PhysicalShapeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('PhysicalShape Sample'),
+        ),
+        body: const Center(child: PhysicalShapeExample()),
+      ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class PhysicalShapeExample extends StatelessWidget {
+  const PhysicalShapeExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('PhysicalShape Sample'),
+    return PhysicalShape(
+      elevation: 5.0,
+      clipper: ShapeBorderClipper(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
       ),
-      body: Center(
-        child: PhysicalShape(
-          elevation: 5.0,
-          clipper: ShapeBorderClipper(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-          ),
-          color: Colors.orange,
-          child: const SizedBox(
-            height: 200.0,
-            width: 200.0,
-            child: Center(
-              child: Text(
-                'Hello, World!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                ),
-              ),
+      color: Colors.orange,
+      child: const SizedBox(
+        height: 200.0,
+        width: 200.0,
+        child: Center(
+          child: Text(
+            'Hello, World!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
             ),
           ),
         ),

@@ -31,6 +31,7 @@ const List<String> _kSharedConfig = <String>[
   '-rpath',
   '-Xlinker',
   '@loader_path/Frameworks',
+  '-fapplication-extension',
   '-install_name',
   '@rpath/App.framework/App',
   '-isysroot',
@@ -95,6 +96,7 @@ void main() {
         '-rpath',
         '-Xlinker',
         '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name',
         '@rpath/App.framework/App',
         '-isysroot',
@@ -262,7 +264,8 @@ void main() {
         '--spirv=/App.framework/flutter_assets/shader.glsl.spirv',
         '--input=/shader.glsl',
         '--input-type=frag',
-        '--include=/'
+        '--include=/',
+        '--include=/./shader_lib',
       ]),
       FakeCommand(command: <String>[
         'codesign',
@@ -836,13 +839,17 @@ void main() {
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         FakeCommand(command: <String>[
-          'codesign',
-          '--force',
-          '--sign',
-          'ABC123',
-          '--timestamp=none',
-          binary.path,
-        ], exitCode: 1, stderr: 'codesign error'),
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            binary.path,
+          ],
+          exitCode: 1,
+          stderr: 'codesign error',
+          stdout: 'codesign info',
+        ),
       ]);
 
       await expectLater(
@@ -850,7 +857,7 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to codesign output/Flutter.framework/Flutter with identity ABC123.\ncodesign error'),
+          contains('Failed to codesign output/Flutter.framework/Flutter with identity ABC123.\ncodesign info\ncodesign error'),
         )),
       );
 

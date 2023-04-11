@@ -26,34 +26,33 @@ export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
 /// Only a limited number of modes are supported, which are enumerated as
 /// static members of this class. Manual constructing of this class is
 /// prohibited.
-@immutable
-class KeyboardLockMode {
-  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
-  // members of this class, therefore constructing is prohibited.
-  const KeyboardLockMode._(this.logicalKey);
-
-  /// The logical key that triggers this lock mode.
-  final LogicalKeyboardKey logicalKey;
-
+enum KeyboardLockMode {
   /// Represents the number lock mode on the keyboard.
   ///
   /// On supporting systems, enabling number lock mode usually allows key
   /// presses of the number pad to input numbers, instead of acting as up, down,
   /// left, right, page up, end, etc.
-  static const KeyboardLockMode numLock = KeyboardLockMode._(LogicalKeyboardKey.numLock);
+  numLock._(LogicalKeyboardKey.numLock),
 
   /// Represents the scrolling lock mode on the keyboard.
   ///
   /// On supporting systems and applications (such as a spreadsheet), enabling
   /// scrolling lock mode usually allows key presses of the cursor keys to
   /// scroll the document instead of the cursor.
-  static const KeyboardLockMode scrollLock = KeyboardLockMode._(LogicalKeyboardKey.scrollLock);
+  scrollLock._(LogicalKeyboardKey.scrollLock),
 
   /// Represents the capital letters lock mode on the keyboard.
   ///
   /// On supporting systems, enabling capital lock mode allows key presses of
   /// the letter keys to input uppercase letters instead of lowercase.
-  static const KeyboardLockMode capsLock = KeyboardLockMode._(LogicalKeyboardKey.capsLock);
+  capsLock._(LogicalKeyboardKey.capsLock);
+
+  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
+  // members of this class, therefore constructing is prohibited.
+  const KeyboardLockMode._(this.logicalKey);
+
+  /// The logical key that triggers this lock mode.
+  final LogicalKeyboardKey logicalKey;
 
   static final Map<int, KeyboardLockMode> _knownLockModes = <int, KeyboardLockMode>{
     numLock.logicalKey.keyId: numLock,
@@ -101,7 +100,7 @@ abstract class KeyEvent with Diagnosticable {
   /// is a mnemonic ("keyA" is easier to remember than 0x70004), derived from the
   /// key's effect on a QWERTY keyboard. The name does not represent the key's
   /// effect whatsoever (a physical "keyA" can be the Q key on an AZERTY
-  /// keyboard.)
+  /// keyboard).
   ///
   /// For instance, if you wanted to make a game where the key to the right of
   /// the CAPS LOCK key made the player move left, you would be comparing a
@@ -115,10 +114,10 @@ abstract class KeyEvent with Diagnosticable {
   ///
   /// Also, even though physical keys are defined with USB HID codes, their
   /// values are not necessarily the same HID codes produced by the hardware and
-  /// presented to the driver, because on most platforms Flutter has to map the
-  /// platform representation back to an HID code since the original HID
-  /// code is not provided. USB HID is simply a conveniently well-defined
-  /// standard to list possible keys that a Flutter app can encounter.
+  /// presented to the driver. On most platforms, Flutter has to map the
+  /// platform representation back to a HID code because the original HID
+  /// code is not provided. USB HID was chosen because it is a well-defined
+  /// standard for referring to keys such as those a Flutter app may encounter.
   ///
   /// See also:
   ///
@@ -242,6 +241,9 @@ class KeyUpEvent extends KeyEvent {
 /// An event indicating that the user has been holding a key on the keyboard
 /// and causing repeated events.
 ///
+/// Repeat events are not guaranteed and are provided only if supported by the
+/// underlying platform.
+///
 /// See also:
 ///
 ///  * [KeyDownEvent], a key event representing the user
@@ -259,7 +261,7 @@ class KeyRepeatEvent extends KeyEvent {
   });
 }
 
-/// The signature for [HardwareKeyboard.addHandler], a callback to to decide whether
+/// The signature for [HardwareKeyboard.addHandler], a callback to decide whether
 /// the entire framework handles a key event.
 typedef KeyEventCallback = bool Function(KeyEvent event);
 
@@ -738,7 +740,7 @@ class KeyEventManager {
   /// The global entrance which handles all key events sent to Flutter.
   ///
   /// Typical applications use [WidgetsBinding], where this field is
-  /// set by the focus system (see `FocusManger`) on startup to a function that
+  /// set by the focus system (see `FocusManager`) on startup to a function that
   /// dispatches incoming events to the focus system, including
   /// `FocusNode.onKey`, `FocusNode.onKeyEvent`, and `Shortcuts`. In this case,
   /// the application does not need to read, assign, or invoke this value.
@@ -862,7 +864,7 @@ class KeyEventManager {
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
         // Having 0 as the physical and logical ID indicates an empty key data
-        // (the only occassion either field can be 0,) transmitted to ensure
+        // (the only occasion either field can be 0,) transmitted to ensure
         // that the transit mode is correctly inferred. These events should be
         // ignored.
         if (data.physical == 0 && data.logical == 0) {

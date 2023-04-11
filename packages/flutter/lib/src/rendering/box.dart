@@ -96,10 +96,7 @@ class BoxConstraints extends Constraints {
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
     this.maxHeight = double.infinity,
-  }) : assert(minWidth != null),
-       assert(maxWidth != null),
-       assert(minHeight != null),
-       assert(maxHeight != null);
+  });
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
@@ -190,7 +187,6 @@ class BoxConstraints extends Constraints {
 
   /// Returns new box constraints that are smaller by the given edge dimensions.
   BoxConstraints deflate(EdgeInsets edges) {
-    assert(edges != null);
     assert(debugAssertIsValid());
     final double horizontal = edges.horizontal;
     final double vertical = edges.vertical;
@@ -472,9 +468,8 @@ class BoxConstraints extends Constraints {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxConstraints? lerp(BoxConstraints? a, BoxConstraints? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;
@@ -762,8 +757,6 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    assert(position != null);
-    assert(hitTest != null);
     if (transform != null) {
       transform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
       if (transform == null) {
@@ -801,8 +794,6 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    assert(position != null);
-    assert(hitTest != null);
     final Offset transformedPosition = offset == null ? position : position - offset;
     if (offset != null) {
       pushOffset(-offset);
@@ -838,9 +829,6 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    assert(position != null);
-    assert(hitTest != null);
-    assert(position != null);
     final Offset transformedPosition = transform == null ?
         position : MatrixUtils.transformPoint(transform, position);
     if (transform != null) {
@@ -887,7 +875,6 @@ class BoxHitTestResult extends HitTestResult {
     Matrix4? rawTransform,
     required BoxHitTestWithOutOfBandPosition hitTest,
   }) {
-    assert(hitTest != null);
     assert(
       (paintOffset == null && paintTransform == null && rawTransform != null) ||
       (paintOffset == null && paintTransform != null && rawTransform == null) ||
@@ -915,8 +902,7 @@ class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
-  BoxHitTestEntry(super.target, this.localPosition)
-    : assert(localPosition != null);
+  BoxHitTestEntry(super.target, this.localPosition);
 
   /// The position of the hit test in the local coordinates of [target].
   final Offset localPosition;
@@ -1001,7 +987,6 @@ class _IntrinsicDimensionsCacheEntry {
 /// AxisDirection get axis => _axis;
 /// AxisDirection _axis = AxisDirection.down; // or initialized in constructor
 /// set axis(AxisDirection value) {
-///   assert(value != null); // same checks as in the constructor
 ///   if (value == _axis) {
 ///     return;
 ///   }
@@ -1405,7 +1390,7 @@ abstract class RenderBox extends RenderObject {
         } else {
           debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments!['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments!['intrinsics dimension'] = dimension.name;
         debugTimelineArguments!['intrinsics argument'] = '$argument';
         return true;
       }());
@@ -1452,13 +1437,6 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMinIntrinsicWidth(double height) {
     assert(() {
-      if (height == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The height argument to getMinIntrinsicWidth was null.'),
-          ErrorDescription('The argument to getMinIntrinsicWidth must not be negative or null.'),
-          ErrorHint('If you do not have a specific height in mind, then pass double.infinity instead.'),
-        ]);
-      }
       if (height < 0.0) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMinIntrinsicWidth was negative.'),
@@ -1601,13 +1579,6 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMaxIntrinsicWidth(double height) {
     assert(() {
-      if (height == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The height argument to getMaxIntrinsicWidth was null.'),
-          ErrorDescription('The argument to getMaxIntrinsicWidth must not be negative or null.'),
-          ErrorHint('If you do not have a specific height in mind, then pass double.infinity instead.'),
-        ]);
-      }
       if (height < 0.0) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMaxIntrinsicWidth was negative.'),
@@ -1684,13 +1655,6 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMinIntrinsicHeight(double width) {
     assert(() {
-      if (width == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The width argument to getMinIntrinsicHeight was null.'),
-          ErrorDescription('The argument to getMinIntrinsicHeight must not be negative or null.'),
-          ErrorHint('If you do not have a specific width in mind, then pass double.infinity instead.'),
-        ]);
-      }
       if (width < 0.0) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMinIntrinsicHeight was negative.'),
@@ -1766,13 +1730,6 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getMaxIntrinsicHeight(double width) {
     assert(() {
-      if (width == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The width argument to getMaxIntrinsicHeight was null.'),
-          ErrorDescription('The argument to getMaxIntrinsicHeight must not be negative or null.'),
-          ErrorHint('If you do not have a specific width in mind, then pass double.infinity instead.'),
-        ]);
-      }
       if (width < 0.0) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMaxIntrinsicHeight was negative.'),
@@ -1936,7 +1893,7 @@ abstract class RenderBox extends RenderObject {
   /// may depend on the baseline of a child (which is not available without
   /// doing a full layout), it may be computed by a callback about which the
   /// render object cannot reason, or the layout is so complex that it
-  /// is simply impractical to calculate the size in an efficient way.
+  /// is impractical to calculate the size in an efficient way.
   ///
   /// In such cases, it may be impossible (or at least impractical) to actually
   /// return a valid answer. In such cases, the function should call
@@ -1964,7 +1921,7 @@ abstract class RenderBox extends RenderObject {
   /// When asserts are enabled and [debugCheckingIntrinsics] is not true, this
   /// method will either throw the provided [FlutterError] or it will create and
   /// throw a [FlutterError] with the provided `reason`. Otherwise, it will
-  /// simply return true.
+  /// return true.
   ///
   /// One of the arguments has to be provided.
   ///
@@ -2253,7 +2210,6 @@ abstract class RenderBox extends RenderObject {
 
   @override
   void debugAssertDoesMeetConstraints() {
-    assert(constraints != null);
     assert(() {
       if (!hasSize) {
         final DiagnosticsNode contract;
@@ -2582,7 +2538,6 @@ abstract class RenderBox extends RenderObject {
   /// child's [parentData] in the [BoxParentData.offset] field.
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     assert(child.parent == this);
     assert(() {
       if (child.parentData is! BoxParentData) {

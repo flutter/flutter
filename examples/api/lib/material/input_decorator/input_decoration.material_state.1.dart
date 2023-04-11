@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [InputDecoration].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [InputDecoration].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const MaterialStateExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class MaterialStateExampleApp extends StatelessWidget {
+  const MaterialStateExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('InputDecoration Sample')),
+        body: const MaterialStateExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class MaterialStateExample extends StatelessWidget {
+  const MaterialStateExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,15 +31,18 @@ class MyStatelessWidget extends StatelessWidget {
     return Theme(
       data: themeData.copyWith(
         inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
-          prefixIconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.focused)) {
-              return Colors.green;
-            } if (states.contains(MaterialState.error)) {
-              return Colors.red;
-            }
-            return Colors.grey;
-          }),
-        )
+          prefixIconColor: MaterialStateColor.resolveWith(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.focused)) {
+                return Colors.green;
+              }
+              if (states.contains(MaterialState.error)) {
+                return Colors.red;
+              }
+              return Colors.grey;
+            },
+          ),
+        ),
       ),
       child: TextFormField(
         initialValue: 'abc',

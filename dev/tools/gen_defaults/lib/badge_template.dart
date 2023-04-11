@@ -16,7 +16,7 @@ class _${blockName}DefaultsM3 extends BadgeThemeData {
     smallSize: ${tokens["md.comp.badge.size"]},
     largeSize: ${tokens["md.comp.badge.large.size"]},
     padding: const EdgeInsets.symmetric(horizontal: 4),
-    alignment: const AlignmentDirectional(12, -4),
+    alignment: AlignmentDirectional.topEnd,
   );
 
   final BuildContext context;
@@ -27,7 +27,7 @@ class _${blockName}DefaultsM3 extends BadgeThemeData {
   Color? get backgroundColor => ${color("md.comp.badge.color")};
 
   @override
-  Color? get foregroundColor => ${color("md.comp.badge.large.label-text.color")};
+  Color? get textColor => ${color("md.comp.badge.large.label-text.color")};
 
   @override
   TextStyle? get textStyle => ${textStyle("md.comp.badge.large.label-text")};

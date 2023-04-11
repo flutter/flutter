@@ -35,19 +35,20 @@ class BadgeThemeData with Diagnosticable {
   /// Creates the set of color, style, and size properties used to configure [Badge].
   const BadgeThemeData({
     this.backgroundColor,
-    this.foregroundColor,
+    this.textColor,
     this.smallSize,
     this.largeSize,
     this.textStyle,
     this.padding,
     this.alignment,
+    this.offset,
   });
 
   /// Overrides the default value for [Badge.backgroundColor].
   final Color? backgroundColor;
 
-  /// Overrides the default value for [Badge.foregroundColor].
-  final Color? foregroundColor;
+  /// Overrides the default value for [Badge.textColor].
+  final Color? textColor;
 
   /// Overrides the default value for [Badge.smallSize].
   final double? smallSize;
@@ -62,52 +63,62 @@ class BadgeThemeData with Diagnosticable {
   final EdgeInsetsGeometry? padding;
 
   /// Overrides the default value for [Badge.alignment].
-  final AlignmentDirectional? alignment;
+  final AlignmentGeometry? alignment;
+
+  /// Overrides the default value for [Badge.offset].
+  final Offset? offset;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BadgeThemeData copyWith({
     Color? backgroundColor,
-    Color? foregroundColor,
+    Color? textColor,
     double? smallSize,
     double? largeSize,
     TextStyle? textStyle,
     EdgeInsetsGeometry? padding,
-    AlignmentDirectional? alignment,
+    AlignmentGeometry? alignment,
+    Offset? offset,
   }) {
     return BadgeThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      foregroundColor: foregroundColor ?? this.foregroundColor,
+      textColor: textColor ?? this.textColor,
       smallSize: smallSize ?? this.smallSize,
       largeSize: largeSize ?? this.largeSize,
       textStyle: textStyle ?? this.textStyle,
       padding: padding ?? this.padding,
       alignment: alignment ?? this.alignment,
+      offset: offset ?? this.offset,
     );
   }
 
   /// Linearly interpolate between two [Badge] themes.
   static BadgeThemeData lerp(BadgeThemeData? a, BadgeThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return BadgeThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
-      foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
+      textColor: Color.lerp(a?.textColor, b?.textColor, t),
       smallSize: lerpDouble(a?.smallSize, b?.smallSize, t),
       largeSize: lerpDouble(a?.largeSize, b?.largeSize, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
-      alignment: AlignmentDirectional.lerp(a?.alignment, b?.alignment, t),
+      alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
+      offset: Offset.lerp(a?.offset, b?.offset, t),
     );
   }
 
   @override
   int get hashCode => Object.hash(
     backgroundColor,
-    foregroundColor,
+    textColor,
     smallSize,
     largeSize,
     textStyle,
     padding,
     alignment,
+    offset,
   );
 
   @override
@@ -120,24 +131,26 @@ class BadgeThemeData with Diagnosticable {
     }
     return other is BadgeThemeData
       && other.backgroundColor == backgroundColor
-      && other.foregroundColor == foregroundColor
+      && other.textColor == textColor
       && other.smallSize == smallSize
       && other.largeSize == largeSize
       && other.textStyle == textStyle
       && other.padding == padding
-      && other.alignment == alignment;
+      && other.alignment == alignment
+      && other.offset == offset;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(ColorProperty('textColor', textColor, defaultValue: null));
     properties.add(DoubleProperty('smallSize', smallSize, defaultValue: null));
     properties.add(DoubleProperty('largeSize', largeSize, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<AlignmentDirectional>('alignment', alignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset, defaultValue: null));
   }
 }
 
@@ -153,7 +166,7 @@ class BadgeTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the default color and size overrides for descendant [Badge] widgets.
   final BadgeThemeData data;

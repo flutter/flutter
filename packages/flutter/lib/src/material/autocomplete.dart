@@ -12,6 +12,8 @@ import 'theme.dart';
 
 /// {@macro flutter.widgets.RawAutocomplete.RawAutocomplete}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
+///
 /// {@tool dartpad}
 /// This example shows how to create a very basic Autocomplete widget using the
 /// default UI.
@@ -25,8 +27,6 @@ import 'theme.dart';
 ///
 /// ** See code in examples/api/lib/material/autocomplete/autocomplete.1.dart **
 /// {@end-tool}
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=-Nny8kzW380}
 ///
 /// See also:
 ///
@@ -43,8 +43,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.initialValue,
-  }) : assert(displayStringForOption != null),
-       assert(optionsBuilder != null);
+  });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
   final AutocompleteOptionToString<T> displayStringForOption;

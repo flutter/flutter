@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [NavigationRail].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [NavigationRail].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const NavigationRailExampleApp());
+
+class NavigationRailExampleApp extends StatelessWidget {
+  const NavigationRailExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class _NavRailExampleState extends State<NavRailExample> {
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
   bool showLeading = false;
   bool showTrailing = false;
-  double groupAligment = -1.0;
+  double groupAlignment = -1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -40,26 +40,30 @@ class _NavRailExampleState extends State<NavRailExample> {
         children: <Widget>[
           NavigationRail(
             selectedIndex: _selectedIndex,
-            groupAlignment: groupAligment,
+            groupAlignment: groupAlignment,
             onDestinationSelected: (int index) {
               setState(() {
                 _selectedIndex = index;
               });
             },
             labelType: labelType,
-            leading: showLeading ? FloatingActionButton(
-              elevation: 0,
-              onPressed: () {
-                // Add your onPressed code here!
-              },
-              child: const Icon(Icons.add),
-              ) : const SizedBox(),
-            trailing: showTrailing ? IconButton(
-              onPressed: () {
-                // Add your onPressed code here!
-              },
-              icon: const Icon(Icons.more_horiz_rounded),
-              ) : const SizedBox(),
+            leading: showLeading
+                ? FloatingActionButton(
+                    elevation: 0,
+                    onPressed: () {
+                      // Add your onPressed code here!
+                    },
+                    child: const Icon(Icons.add),
+                  )
+                : const SizedBox(),
+            trailing: showTrailing
+                ? IconButton(
+                    onPressed: () {
+                      // Add your onPressed code here!
+                    },
+                    icon: const Icon(Icons.more_horiz_rounded),
+                  )
+                : const SizedBox(),
             destinations: const <NavigationRailDestination>[
               NavigationRailDestination(
                 icon: Icon(Icons.favorite_border),
@@ -80,100 +84,100 @@ class _NavRailExampleState extends State<NavRailExample> {
           ),
           const VerticalDivider(thickness: 1, width: 1),
           // This is the main content.
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('selectedIndex: $_selectedIndex'),
-                  const SizedBox(height: 20),
-                  Text('Label type: ${labelType.name}'),
-                  const SizedBox(height: 10),
-                  OverflowBar(
-                    spacing: 10.0,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            labelType = NavigationRailLabelType.none;
-                          });
-                        },
-                        child: const Text('None'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            labelType = NavigationRailLabelType.selected;
-                          });
-                        },
-                        child: const Text('Selected'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            labelType = NavigationRailLabelType.all;
-                          });
-                        },
-                        child: const Text('All'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Text('Group alignment: $groupAligment'),
-                  const SizedBox(height: 10),
-                  OverflowBar(
-                    spacing: 10.0,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            groupAligment = -1.0;
-                          });
-                        },
-                        child: const Text('Top'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            groupAligment = 0.0;
-                          });
-                        },
-                        child: const Text('Center'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            groupAligment = 1.0;
-                          });
-                        },
-                        child: const Text('Bottom'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  OverflowBar(
-                    spacing: 10.0,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            showLeading = !showLeading;
-                          });
-                        },
-                        child: Text(showLeading ? 'Hide Leading' : 'Show Leading'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            showTrailing = !showTrailing;
-                          });
-                        },
-                        child: Text(showTrailing ? 'Hide Trailing' : 'Show Trailing'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('selectedIndex: $_selectedIndex'),
+                const SizedBox(height: 20),
+                Text('Label type: ${labelType.name}'),
+                const SizedBox(height: 10),
+                OverflowBar(
+                  spacing: 10.0,
+                  children: <Widget>[
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          labelType = NavigationRailLabelType.none;
+                        });
+                      },
+                      child: const Text('None'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          labelType = NavigationRailLabelType.selected;
+                        });
+                      },
+                      child: const Text('Selected'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          labelType = NavigationRailLabelType.all;
+                        });
+                      },
+                      child: const Text('All'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Text('Group alignment: $groupAlignment'),
+                const SizedBox(height: 10),
+                OverflowBar(
+                  spacing: 10.0,
+                  children: <Widget>[
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          groupAlignment = -1.0;
+                        });
+                      },
+                      child: const Text('Top'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          groupAlignment = 0.0;
+                        });
+                      },
+                      child: const Text('Center'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          groupAlignment = 1.0;
+                        });
+                      },
+                      child: const Text('Bottom'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                OverflowBar(
+                  spacing: 10.0,
+                  children: <Widget>[
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          showLeading = !showLeading;
+                        });
+                      },
+                      child: Text(showLeading ? 'Hide Leading' : 'Show Leading'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          showTrailing = !showTrailing;
+                        });
+                      },
+                      child: Text(showTrailing ? 'Hide Trailing' : 'Show Trailing'),
+                    ),
+                  ],
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );

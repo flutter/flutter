@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// no-shuffle:
-//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
-//   dependencies have been fixed.
-//   https://github.com/flutter/flutter/issues/85160
-//   Fails with "flutter test --test-randomize-ordering-seed=456"
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
-@Tags(<String>['reduced-test-set', 'no-shuffle'])
+@Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui';
 
@@ -589,6 +585,71 @@ void main() {
         tester.getCenter(find.text('10')).dx - tester.getCenter(find.text('AM')).dx,
         distance,
       );
+    });
+
+    testWidgets('wheel does not bend outwards', (WidgetTester tester) async {
+
+      final Widget dateWidget = CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        onDateTimeChanged: (_) { },
+        initialDateTime: DateTime(2018, 1, 1, 10, 30),
+      );
+
+      const String centerMonth = 'January';
+      const List<String> visibleMonthsExceptTheCenter = <String>[
+        'September',
+        'October',
+        'November',
+        'December',
+        'February',
+        'March',
+        'April',
+        'May',
+      ];
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: SizedBox(
+                height: 200.0,
+                width: 300.0,
+                child: dateWidget,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The wheel does not bend outwards.
+      for (final String month in visibleMonthsExceptTheCenter) {
+        expect(
+          tester.getBottomLeft(find.text(centerMonth)).dx,
+          lessThan(tester.getBottomLeft(find.text(month)).dx),
+        );
+      }
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: SizedBox(
+                height: 200.0,
+                width: 3000.0,
+                child: dateWidget,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The wheel does not bend outwards at large widths.
+      for (final String month in visibleMonthsExceptTheCenter) {
+        expect(
+          tester.getBottomLeft(find.text(centerMonth)).dx,
+          lessThan(tester.getBottomLeft(find.text(month)).dx),
+        );
+      }
     });
 
     testWidgets('picker automatically scrolls away from invalid date on month change', (WidgetTester tester) async {
@@ -1662,6 +1723,30 @@ void main() {
       date,
       DateTime(2022, 6, 14, 3, 45),
     );
+  });
+
+  testWidgets('date picker has expected day of week', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (_) { },
+              initialDateTime: DateTime(2018, 9, 15),
+              showDayOfWeek: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('September'), findsOneWidget);
+    expect(find.textContaining('Sat').last, findsOneWidget);
+    expect(find.textContaining('15').last, findsOneWidget);
+    expect(find.text('2018'), findsOneWidget);
   });
 }
 

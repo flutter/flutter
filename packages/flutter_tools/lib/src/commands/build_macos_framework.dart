@@ -29,6 +29,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     super.flutterVersion,
     required super.buildSystem,
     required super.verboseHelp,
+    required super.logger,
     super.cache,
     super.platform,
   });
@@ -79,8 +80,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         modeDirectory.deleteSync(recursive: true);
       }
 
-      if (boolArg('cocoapods') ?? false) {
-        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force') ?? false);
+      if (boolArg('cocoapods')) {
+        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
       }
 
       // Build aot, create App.framework and copy FlutterMacOS.framework. Make XCFrameworks.
@@ -128,7 +129,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
               gitTagVersion.z == null ||
               gitTagVersion.commits != 0)) {
         throwToolExit(
-            '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${flutterVersion.frameworkVersion}');
+            '--cocoapods is only supported on the beta or stable channel. Detected version is ${flutterVersion.frameworkVersion}');
       }
 
       // Podspecs use semantic versioning, which don't support hotfixes.
@@ -239,7 +240,7 @@ end
     final Directory flutterFramework = outputBuildDirectory.childDirectory('FlutterMacOS.framework');
 
     // If FlutterMacOS.podspec was generated, do not generate XCFramework.
-    if (!(boolArg('cocoapods') ?? false)) {
+    if (!boolArg('cocoapods')) {
       await BuildFrameworkCommand.produceXCFramework(
         <Directory>[flutterFramework],
         'FlutterMacOS',
@@ -268,7 +269,7 @@ end
         'SYMROOT=${buildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static') ?? false) 'MACH_O_TYPE=staticlib',
+        if (boolArg('static')) 'MACH_O_TYPE=staticlib',
       ];
 
       final RunResult buildPluginsResult = await globals.processUtils.run(

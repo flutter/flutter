@@ -2,24 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [PointerSignalResolver].
-
 import 'package:flutter/gestures.dart';
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [PointerSignalResolver].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const PointerSignalResolverExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class PointerSignalResolverExampleApp extends StatelessWidget {
+  const PointerSignalResolverExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: PointerSignalResolverExample(),
     );
   }
 }
@@ -65,8 +62,7 @@ class _ColorChangerState extends State<ColorChanger> {
       child: Listener(
         onPointerSignal: (PointerSignalEvent event) {
           if (widget.useResolver) {
-            GestureBinding.instance.pointerSignalResolver.register(event,
-                (PointerSignalEvent event) {
+            GestureBinding.instance.pointerSignalResolver.register(event, (PointerSignalEvent event) {
               rotateColor();
             });
           } else {
@@ -85,14 +81,14 @@ class _ColorChangerState extends State<ColorChanger> {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class PointerSignalResolverExample extends StatefulWidget {
+  const PointerSignalResolverExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<PointerSignalResolverExample> createState() => _PointerSignalResolverExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _PointerSignalResolverExampleState extends State<PointerSignalResolverExample> {
   bool useResolver = false;
 
   @override

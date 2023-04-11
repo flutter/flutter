@@ -2,101 +2,79 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [SwitchListTile].
-
-import 'package:flutter/gestures.dart';
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SwitchListTile].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SwitchListTileApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SwitchListTileApp extends StatelessWidget {
+  const SwitchListTileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
-      ),
+      theme: ThemeData(useMaterial3: true),
+      home: Scaffold(appBar: AppBar(title: const Text('SwitchListTile Sample')), body: const SwitchListTileExample()),
     );
   }
 }
 
-class LinkedLabelSwitch extends StatelessWidget {
-  const LinkedLabelSwitch({
-    super.key,
-    required this.label,
-    required this.padding,
-    required this.value,
-    required this.onChanged,
-  });
+class SwitchListTileExample extends StatefulWidget {
+  const SwitchListTileExample({super.key});
 
-  final String label;
-  final EdgeInsets padding;
-  final bool value;
-  final ValueChanged<bool> onChanged;
+  @override
+  State<SwitchListTileExample> createState() => _SwitchListTileExampleState();
+}
+
+class _SwitchListTileExampleState extends State<SwitchListTileExample> {
+  bool switchValue1 = true;
+  bool switchValue2 = true;
+  bool switchValue3 = true;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: Row(
+    return Scaffold(
+      body: Column(
         children: <Widget>[
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                text: label,
-                style: const TextStyle(
-                  color: Colors.blueAccent,
-                  decoration: TextDecoration.underline,
-                ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    debugPrint('Label has been tapped.');
-                  },
-              ),
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: (bool newValue) {
-              onChanged(newValue);
+          SwitchListTile(
+            value: switchValue1,
+            onChanged: (bool? value) {
+              setState(() {
+                switchValue1 = value!;
+              });
             },
+            title: const Text('Headline'),
+            subtitle: const Text('Supporting text'),
           ),
+          const Divider(height: 0),
+          SwitchListTile(
+            value: switchValue2,
+            onChanged: (bool? value) {
+              setState(() {
+                switchValue2 = value!;
+              });
+            },
+            title: const Text('Headline'),
+            subtitle: const Text(
+                'Longer supporting text to demonstrate how the text wraps and the switch is centered vertically with the text.'),
+          ),
+          const Divider(height: 0),
+          SwitchListTile(
+            value: switchValue3,
+            onChanged: (bool? value) {
+              setState(() {
+                switchValue3 = value!;
+              });
+            },
+            title: const Text('Headline'),
+            subtitle: const Text(
+                "Longer supporting text to demonstrate how the text wraps and how setting 'SwitchListTile.isThreeLine = true' aligns the switch to the top vertically with the text."),
+            isThreeLine: true,
+          ),
+          const Divider(height: 0),
         ],
       ),
-    );
-  }
-}
-
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
-
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  bool _isSelected = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return LinkedLabelSwitch(
-      label: 'Linked, tappable label text',
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      value: _isSelected,
-      onChanged: (bool newValue) {
-        setState(() {
-          _isSelected = newValue;
-        });
-      },
     );
   }
 }

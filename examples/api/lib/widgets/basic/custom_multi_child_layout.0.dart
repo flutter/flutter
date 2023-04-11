@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CustomMultiChildLayout].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [CustomMultiChildLayout].
 
 void main() => runApp(const ExampleApp());
 
@@ -49,7 +49,6 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
     switch (textDirection) {
       case TextDirection.rtl:
         childPosition += Offset(size.width, 0);
-        break;
       case TextDirection.ltr:
         break;
     }
@@ -66,11 +65,9 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
         case TextDirection.rtl:
           positionChild(color, childPosition - Offset(currentSize.width, 0));
           childPosition += Offset(-currentSize.width, currentSize.height - overlap);
-          break;
         case TextDirection.ltr:
           positionChild(color, childPosition);
           childPosition += Offset(currentSize.width, currentSize.height - overlap);
-          break;
       }
     }
   }
@@ -81,8 +78,7 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
   // automatically cause a relayout, like any other widget.
   @override
   bool shouldRelayout(_CascadeLayoutDelegate oldDelegate) {
-    return oldDelegate.textDirection != textDirection
-        || oldDelegate.overlap != overlap;
+    return oldDelegate.textDirection != textDirection || oldDelegate.overlap != overlap;
   }
 }
 

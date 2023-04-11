@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [SelectionArea].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [SelectionArea].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const SelectionAreaExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class SelectionAreaExampleApp extends StatelessWidget {
+  const SelectionAreaExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: SelectionArea(
         child: Scaffold(
-          appBar: AppBar(title: const Text(_title)),
-          body: Center(
+          appBar: AppBar(title: const Text('SelectionArea Sample')),
+          body: const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Row 1'),
                 Text('Row 2'),
                 Text('Row 3'),

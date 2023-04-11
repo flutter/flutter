@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [NavigationBar].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const ExampleApp());
+/// Flutter code sample for [NavigationBar].
 
-class ExampleApp extends StatelessWidget {
-  const ExampleApp({super.key});
+void main() => runApp(const NavigationBarApp());
+
+class NavigationBarApp extends StatelessWidget {
+  const NavigationBarApp({super.key});
 
   @override
   Widget build(BuildContext context) {

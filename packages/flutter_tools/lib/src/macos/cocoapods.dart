@@ -13,10 +13,12 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/project_migrator.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
+import '../migrations/cocoapods_script_symlink.dart';
 import '../reporting/reporting.dart';
 import '../xcode_project.dart';
 
@@ -166,6 +168,13 @@ class CocoaPods {
         throwToolExit('CocoaPods not installed or not in valid state.');
       }
       await _runPodInstall(xcodeProject, buildMode);
+
+      // This migrator works around a CocoaPods bug, and should be run after `pod install` is run.
+      final ProjectMigration postPodMigration = ProjectMigration(<ProjectMigrator>[
+        CocoaPodsScriptReadlink(xcodeProject, _xcodeProjectInterpreter, _logger),
+      ]);
+      postPodMigration.run();
+
       podsProcessed = true;
     }
     return podsProcessed;
@@ -198,7 +207,6 @@ class CocoaPods {
           'To upgrade $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
-        break;
       case CocoaPodsStatus.belowMinimumVersion:
         _logger.printWarning(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
@@ -214,7 +222,6 @@ class CocoaPods {
           'To upgrade $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
-        break;
       case CocoaPodsStatus.recommended:
         break;
     }
@@ -361,7 +368,7 @@ class CocoaPods {
         '  pod repo update\n',
         emphasis: true,
       );
-    } else if ((stderr.contains('ffi_c.bundle') || stderr.contains('/ffi/')) &&
+    } else if ((_isFfiX86Error(stdout) || _isFfiX86Error(stderr)) &&
         _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // https://github.com/flutter/flutter/issues/70796
       UsageEvent(
@@ -375,6 +382,10 @@ class CocoaPods {
         emphasis: true,
       );
     }
+  }
+
+  bool _isFfiX86Error(String error) {
+    return error.contains('ffi_c.bundle') || error.contains('/ffi/');
   }
 
   void _warnIfPodfileOutOfDate(XcodeBasedProject xcodeProject) {

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CupertinoTimerPicker].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoTimerPicker].
 
 void main() => runApp(const TimerPickerApp());
 
@@ -50,7 +50,7 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
           top: false,
           child: child,
         ),
-      )
+      ),
     );
   }
 
@@ -88,7 +88,8 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
                     // In this example, the timer's value is formatted manually.
                     // You can use the intl package to format the value based on
                     // the user's locale settings.
-                    child: Text('$duration',
+                    child: Text(
+                      '$duration',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),

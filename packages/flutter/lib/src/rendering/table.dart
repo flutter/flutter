@@ -134,7 +134,7 @@ class FixedColumnWidth extends TableColumnWidth {
   /// Creates a column width based on a fixed number of logical pixels.
   ///
   /// The [value] argument must not be null.
-  const FixedColumnWidth(this.value) : assert(value != null);
+  const FixedColumnWidth(this.value);
 
   /// The width the column should occupy in logical pixels.
   final double value;
@@ -161,7 +161,7 @@ class FractionColumnWidth extends TableColumnWidth {
   /// maxWidth.
   ///
   /// The [value] argument must not be null.
-  const FractionColumnWidth(this.value) : assert(value != null);
+  const FractionColumnWidth(this.value);
 
   /// The fraction of the table's constraints' maxWidth that this column should
   /// occupy.
@@ -199,7 +199,7 @@ class FlexColumnWidth extends TableColumnWidth {
   /// the other columns have been laid out.
   ///
   /// The [value] argument must not be null.
-  const FlexColumnWidth([this.value = 1.0]) : assert(value != null);
+  const FlexColumnWidth([this.value = 1.0]);
 
   /// The fraction of the remaining space once all the other columns have
   /// been laid out that this column should occupy.
@@ -388,9 +388,6 @@ class RenderTable extends RenderBox {
   }) : assert(columns == null || columns >= 0),
        assert(rows == null || rows >= 0),
        assert(rows == null || children == null),
-       assert(defaultColumnWidth != null),
-       assert(textDirection != null),
-       assert(configuration != null),
        _textDirection = textDirection,
        _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0),
        _rows = rows ?? 0,
@@ -419,7 +416,6 @@ class RenderTable extends RenderBox {
   int get columns => _columns;
   int _columns;
   set columns(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (value == columns) {
       return;
@@ -454,7 +450,6 @@ class RenderTable extends RenderBox {
   int get rows => _rows;
   int _rows;
   set rows(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (value == rows) {
       return;
@@ -513,7 +508,6 @@ class RenderTable extends RenderBox {
   TableColumnWidth get defaultColumnWidth => _defaultColumnWidth;
   TableColumnWidth _defaultColumnWidth;
   set defaultColumnWidth(TableColumnWidth value) {
-    assert(value != null);
     if (defaultColumnWidth == value) {
       return;
     }
@@ -525,7 +519,6 @@ class RenderTable extends RenderBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
@@ -573,7 +566,6 @@ class RenderTable extends RenderBox {
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
-    assert(value != null);
     if (value == _configuration) {
       return;
     }
@@ -585,7 +577,6 @@ class RenderTable extends RenderBox {
   TableCellVerticalAlignment get defaultVerticalAlignment => _defaultVerticalAlignment;
   TableCellVerticalAlignment _defaultVerticalAlignment;
   set defaultVerticalAlignment(TableCellVerticalAlignment value) {
-    assert(value != null);
     if (_defaultVerticalAlignment == value) {
       return;
     }
@@ -617,7 +608,7 @@ class RenderTable extends RenderBox {
   /// replacing the existing children.
   ///
   /// If the new cells contain any existing children of the table, those
-  /// children are simply moved to their new location in the table rather than
+  /// children are moved to their new location in the table rather than
   /// removed from the table and re-added.
   void setFlatChildren(int columns, List<RenderBox?> cells) {
     if (cells == _children && columns == _columns) {
@@ -626,7 +617,7 @@ class RenderTable extends RenderBox {
     assert(columns >= 0);
     // consider the case of a newly empty table
     if (columns == 0 || cells.isEmpty) {
-      assert(cells == null || cells.isEmpty);
+      assert(cells.isEmpty);
       _columns = columns;
       if (_children.isEmpty) {
         assert(_rows == 0);
@@ -642,7 +633,6 @@ class RenderTable extends RenderBox {
       markNeedsLayout();
       return;
     }
-    assert(cells != null);
     assert(cells.length % columns == 0);
     // fill a set with the cells that are moving (it's important not
     // to dropChild a child that's remaining with us, because that
@@ -722,8 +712,6 @@ class RenderTable extends RenderBox {
   /// does not modify the table. Otherwise, the given child must not already
   /// have a parent.
   void setChild(int x, int y, RenderBox? value) {
-    assert(x != null);
-    assert(y != null);
     assert(x >= 0 && x < columns && y >= 0 && y < rows);
     assert(_children.length == rows * columns);
     final int xy = x + y * columns;
@@ -864,7 +852,6 @@ class RenderTable extends RenderBox {
   }
 
   List<double> _computeColumnWidths(BoxConstraints constraints) {
-    assert(constraints != null);
     assert(_children.length == rows * columns);
     // We apply the constraints to the column widths in the order of
     // least important to most important:
@@ -1061,7 +1048,6 @@ class RenderTable extends RenderBox {
         final RenderBox? child = _children[xy];
         if (child != null) {
           final TableCellParentData childParentData = child.parentData! as TableCellParentData;
-          assert(childParentData != null);
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               assert(debugCannotComputeDryLayout(
@@ -1073,7 +1059,6 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.bottom:
               final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: widths[x]));
               rowHeight = math.max(rowHeight, childSize.height);
-              break;
             case TableCellVerticalAlignment.fill:
               break;
           }
@@ -1107,7 +1092,6 @@ class RenderTable extends RenderBox {
         }
         _columnLefts = positions.reversed;
         _tableWidth = positions.first + widths.first;
-        break;
       case TextDirection.ltr:
         positions[0] = 0.0;
         for (int x = 1; x < columns; x += 1) {
@@ -1115,7 +1099,6 @@ class RenderTable extends RenderBox {
         }
         _columnLefts = positions;
         _tableWidth = positions.last + widths.last;
-        break;
     }
     _rowTops.clear();
     _baselineDistance = null;
@@ -1133,7 +1116,6 @@ class RenderTable extends RenderBox {
         final RenderBox? child = _children[xy];
         if (child != null) {
           final TableCellParentData childParentData = child.parentData! as TableCellParentData;
-          assert(childParentData != null);
           childParentData.x = x;
           childParentData.y = y;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
@@ -1150,13 +1132,11 @@ class RenderTable extends RenderBox {
                 rowHeight = math.max(rowHeight, child.size.height);
                 childParentData.offset = Offset(positions[x], rowTop);
               }
-              break;
             case TableCellVerticalAlignment.top:
             case TableCellVerticalAlignment.middle:
             case TableCellVerticalAlignment.bottom:
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
               rowHeight = math.max(rowHeight, child.size.height);
-              break;
             case TableCellVerticalAlignment.fill:
               break;
           }
@@ -1176,20 +1156,15 @@ class RenderTable extends RenderBox {
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               childParentData.offset = Offset(positions[x], rowTop + beforeBaselineDistance - baselines[x]);
-              break;
             case TableCellVerticalAlignment.top:
               childParentData.offset = Offset(positions[x], rowTop);
-              break;
             case TableCellVerticalAlignment.middle:
               childParentData.offset = Offset(positions[x], rowTop + (rowHeight - child.size.height) / 2.0);
-              break;
             case TableCellVerticalAlignment.bottom:
               childParentData.offset = Offset(positions[x], rowTop + rowHeight - child.size.height);
-              break;
             case TableCellVerticalAlignment.fill:
               child.layout(BoxConstraints.tightFor(width: widths[x], height: rowHeight));
               childParentData.offset = Offset(positions[x], rowTop);
-              break;
           }
         }
       }

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [WidgetBindingsObserver].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [WidgetBindingsObserver].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const WidgetBindingObserverExampleApp());
+
+class WidgetBindingObserverExampleApp extends StatelessWidget {
+  const WidgetBindingObserverExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,20 +30,22 @@ class WidgetBindingsObserverSample extends StatefulWidget {
 }
 
 class _WidgetBindingsObserverSampleState extends State<WidgetBindingsObserverSample> with WidgetsBindingObserver {
- final List<AppLifecycleState> _stateHistoryList = <AppLifecycleState>[];
+  final List<AppLifecycleState> _stateHistoryList = <AppLifecycleState>[];
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if(WidgetsBinding.instance.lifecycleState != null) {
+    if (WidgetsBinding.instance.lifecycleState != null) {
       _stateHistoryList.add(WidgetsBinding.instance.lifecycleState!);
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() { _stateHistoryList.add(state); });
+    setState(() {
+      _stateHistoryList.add(state);
+    });
   }
 
   @override
@@ -59,9 +61,9 @@ class _WidgetBindingsObserverSampleState extends State<WidgetBindingsObserverSam
         key: const ValueKey<String>('stateHistoryList'),
         itemCount: _stateHistoryList.length,
         itemBuilder: (BuildContext context, int index) {
-            return Text('state is: ${_stateHistoryList[index]}');
-          },
-        );
+          return Text('state is: ${_stateHistoryList[index]}');
+        },
+      );
     }
 
     return const Center(child: Text('There are no AppLifecycleStates to show.'));

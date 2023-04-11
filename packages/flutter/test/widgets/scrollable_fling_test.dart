@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 const TextStyle testFont = TextStyle(
   color: Color(0xFF00FF00),
-  fontFamily: 'Ahem',
 );
 
 Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
@@ -17,7 +16,7 @@ Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
     theme: ThemeData(
       platform: platform,
     ),
-    home: Container(
+    home: ColoredBox(
       color: const Color(0xFF111111),
       child: ListView.builder(
         dragStartBehavior: DragStartBehavior.down,
@@ -47,8 +46,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/83632
     // Before changing these values, ensure the fling results in a distance that
     // makes sense. See issue for more context.
-    expect(androidResult, greaterThan(394.0));
-    expect(androidResult, lessThan(395.0));
+    expect(androidResult, greaterThan(408.0));
+    expect(androidResult, lessThan(409.0));
 
     await pumpTest(tester, TargetPlatform.linux);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
@@ -153,6 +152,6 @@ void main() {
     expect(log, equals(<String>['tap 21']));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 21', 'tap 48']));
+    expect(log, equals(<String>['tap 21', 'tap 49']));
   });
 }

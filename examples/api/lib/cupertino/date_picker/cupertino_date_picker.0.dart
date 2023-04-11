@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CupertinoDatePicker].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoDatePicker].
 
 void main() => runApp(const DatePickerApp());
 
@@ -52,7 +52,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
           top: false,
           child: child,
         ),
-      )
+      ),
     );
   }
 
@@ -81,6 +81,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                         initialDateTime: date,
                         mode: CupertinoDatePickerMode.date,
                         use24hFormat: true,
+                        // This shows day of week alongside day of month
+                        showDayOfWeek: true,
                         // This is called when the user changes the date.
                         onDateTimeChanged: (DateTime newDate) {
                           setState(() => date = newDate);
@@ -90,7 +92,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // In this example, the date is formatted manually. You can
                     // use the intl package to format the value based on the
                     // user's locale settings.
-                    child: Text('${date.month}-${date.day}-${date.year}',
+                    child: Text(
+                      '${date.month}-${date.day}-${date.year}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),
@@ -117,7 +120,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // In this example, the time value is formatted manually.
                     // You can use the intl package to format the value based on
                     // the user's locale settings.
-                    child: Text('${time.hour}:${time.minute}',
+                    child: Text(
+                      '${time.hour}:${time.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),
@@ -143,7 +147,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // In this example, the time value is formatted manually. You
                     // can use the intl package to format the value based on the
                     // user's locale settings.
-                    child: Text('${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
+                    child: Text(
+                      '${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
                       style: const TextStyle(
                         fontSize: 22.0,
                       ),

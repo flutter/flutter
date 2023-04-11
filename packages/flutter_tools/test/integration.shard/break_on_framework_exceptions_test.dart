@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:file/file.dart';
 
@@ -731,7 +732,7 @@ class TestProject extends Project {
   final String pubspec = '''
     name: test
     environment:
-      sdk: '>=2.12.0-0 <3.0.0'
+      sdk: '>=3.0.0-0 <4.0.0'
 
     dependencies:
       flutter:

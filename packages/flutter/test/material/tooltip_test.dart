@@ -4,12 +4,14 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -45,10 +47,7 @@ void main() {
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -104,10 +103,7 @@ void main() {
                           padding: const EdgeInsets.all(5.0),
                           verticalOffset: 20.0,
                           preferBelow: false,
-                          child: const SizedBox(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                          child: const SizedBox.shrink(),
                         ),
                       ),
                     ],
@@ -164,10 +160,7 @@ void main() {
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -218,10 +211,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -274,10 +264,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -341,10 +328,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 100.0,
                         preferBelow: true,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -396,10 +380,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -453,10 +434,7 @@ void main() {
                         padding: EdgeInsets.zero,
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: const SizedBox(
-                          width: 0.0,
-                          height: 0.0,
-                        ),
+                        child: const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -500,15 +478,13 @@ void main() {
           child: const Icon(Icons.add),
         ),
       );
-      return MediaQuery.fromWindow(
-        child: MediaQuery(
-          data: MediaQueryData(
-            viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
-          ),
-          child: MaterialApp(
-            useInheritedMediaQuery: true,
-            home: scaffold,
-          ),
+      return MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.only(bottom: viewInsetsHeight),
+        ),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          home: scaffold,
         ),
       );
     }
@@ -559,10 +535,7 @@ void main() {
                   message: tooltipText,
                   padding: EdgeInsets.zero,
                   margin: const EdgeInsets.all(customMarginValue),
-                  child: const SizedBox(
-                    width: 0.0,
-                    height: 0.0,
-                  ),
+                  child: const SizedBox.shrink(),
                 );
               },
             ),
@@ -678,38 +651,43 @@ void main() {
   });
 
   testWidgets('Custom tooltip message textAlign', (WidgetTester tester) async {
-    Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
-      final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Tooltip(
-            key: tooltipKey,
-            textAlign: textAlign,
-            message: tooltipText,
-            child: Container(
-              width: 100.0,
-              height: 100.0,
-              color: Colors.green[500],
+    await withFlutterLeakTracking(
+      () async {
+        Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
+          final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Tooltip(
+                key: tooltipKey,
+                textAlign: textAlign,
+                message: tooltipText,
+                child: Container(
+                  width: 100.0,
+                  height: 100.0,
+                  color: Colors.green[500],
+                ),
+              ),
             ),
-          ),
-        ),
-      );
-      tooltipKey.currentState?.ensureTooltipVisible();
-      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
-    }
+          );
+          tooltipKey.currentState?.ensureTooltipVisible();
+          await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+        }
 
-    // Default value should be TextAlign.start
-    await pumpTooltipWithTextAlign();
-    TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.start);
+        // Default value should be TextAlign.start
+        await pumpTooltipWithTextAlign();
+        TextAlign textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.start);
 
-    await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
-    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.center);
+        await pumpTooltipWithTextAlign(textAlign: TextAlign.center);
+        textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.center);
 
-    await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
-    textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
-    expect(textAlign, TextAlign.end);
+        await pumpTooltipWithTextAlign(textAlign: TextAlign.end);
+        textAlign = tester.widget<Text>(find.text(tooltipText)).textAlign!;
+        expect(textAlign, TextAlign.end);
+      },
+      tester: tester,
+    );
   });
 
   testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
@@ -859,10 +837,7 @@ void main() {
                   key: tooltipKey,
                   decoration: customDecoration,
                   message: tooltipText,
-                  child: const SizedBox(
-                    width: 0.0,
-                    height: 0.0,
-                  ),
+                  child: const SizedBox.shrink(),
                 );
               },
             ),
@@ -954,7 +929,7 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
 
     // Tooltip is dismissed after showDuration expired
@@ -1312,10 +1287,10 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Tooltip(
                 message: 'message1',
                 waitDuration: waitDuration,
@@ -1370,9 +1345,7 @@ void main() {
     const Duration waitDuration = Duration(seconds: 1);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1731,7 +1704,7 @@ void main() {
     expect(semanticEvents, unorderedEquals(<dynamic>[
       <String, dynamic>{
         'type': 'longPress',
-        'nodeId': findDebugSemantics(object).id,
+        'nodeId': _findDebugSemantics(object).id,
         'data': <String, dynamic>{},
       },
       <String, dynamic>{
@@ -1824,7 +1797,7 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
   });
 
@@ -1834,10 +1807,10 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureLongPress(tester, tooltip);
+    await _testGestureLongPress(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
   });
 
@@ -1847,7 +1820,7 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1857,10 +1830,10 @@ void main() {
     final Finder tooltip = find.byType(Tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
 
-    await testGestureLongPress(tester, tooltip);
+    await _testGestureLongPress(tester, tooltip);
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1870,13 +1843,13 @@ void main() {
 
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, onTriggered: onTriggered);
     Finder tooltip = find.byType(Tooltip);
-    await testGestureLongPress(tester, tooltip);
+    await _testGestureLongPress(tester, tooltip);
     expect(onTriggeredCalled, true);
 
     onTriggeredCalled = false;
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, onTriggered: onTriggered);
     tooltip = find.byType(Tooltip);
-    await testGestureTap(tester, tooltip);
+    await _testGestureTap(tester, tooltip);
     expect(onTriggeredCalled, true);
   });
 
@@ -1959,7 +1932,7 @@ Future<void> setWidgetForTooltipMode(
   );
 }
 
-Future<void> testGestureLongPress(WidgetTester tester, Finder tooltip) async {
+Future<void> _testGestureLongPress(WidgetTester tester, Finder tooltip) async {
   final TestGesture gestureLongPress = await tester.startGesture(tester.getCenter(tooltip));
   await tester.pump();
   await tester.pump(kLongPressTimeout);
@@ -1967,14 +1940,14 @@ Future<void> testGestureLongPress(WidgetTester tester, Finder tooltip) async {
   await tester.pump();
 }
 
-Future<void> testGestureTap(WidgetTester tester, Finder tooltip) async {
+Future<void> _testGestureTap(WidgetTester tester, Finder tooltip) async {
   await tester.tap(tooltip);
   await tester.pump(const Duration(milliseconds: 10));
 }
 
-SemanticsNode findDebugSemantics(RenderObject object) {
+SemanticsNode _findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null) {
     return object.debugSemantics!;
   }
-  return findDebugSemantics(object.parent! as RenderObject);
+  return _findDebugSemantics(object.parent! as RenderObject);
 }

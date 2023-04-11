@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [FilterChip].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [FilterChip].
 
 enum ExerciseFilter { walking, running, cycling, hiking }
 
@@ -16,8 +16,13 @@ class ChipApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
-      home: const FilterChipExample(),
+      theme: ThemeData(useMaterial3: true),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('FilterChip Sample'),
+        ),
+        body: const FilterChipExample(),
+      ),
     );
   }
 }
@@ -30,49 +35,42 @@ class FilterChipExample extends StatefulWidget {
 }
 
 class _FilterChipExampleState extends State<FilterChipExample> {
-  bool favorite = false;
-  final List<String> _filters = <String>[];
+  Set<ExerciseFilter> filters = <ExerciseFilter>{};
 
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('FilterChip Sample'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Choose an execise', style: textTheme.labelLarge),
-            const SizedBox(height: 5.0),
-            Wrap(
-              spacing: 5.0,
-              children: ExerciseFilter.values.map((ExerciseFilter exercise) {
-                return FilterChip(
-                  label: Text(exercise.name),
-                  selected:_filters.contains(exercise.name),
-                  onSelected: (bool value) {
-                    setState(() {
-                      if (value) {
-                        if (!_filters.contains(exercise.name)) {
-                          _filters.add(exercise.name);
-                        }
-                      } else {
-                        _filters.removeWhere((String name) {
-                          return name == exercise.name;
-                        });
-                      }
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 10.0),
-            Text('Looking for: ${_filters.join(', ')}')
-          ],
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text('Choose an exercise', style: textTheme.labelLarge),
+          const SizedBox(height: 5.0),
+          Wrap(
+            spacing: 5.0,
+            children: ExerciseFilter.values.map((ExerciseFilter exercise) {
+              return FilterChip(
+                label: Text(exercise.name),
+                selected: filters.contains(exercise),
+                onSelected: (bool selected) {
+                  setState(() {
+                    if (selected) {
+                      filters.add(exercise);
+                    } else {
+                      filters.remove(exercise);
+                    }
+                  });
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 10.0),
+          Text(
+            'Looking for: ${filters.map((ExerciseFilter e) => e.name).join(', ')}',
+            style: textTheme.labelLarge,
+          ),
+        ],
       ),
     );
   }

@@ -37,7 +37,7 @@ abstract class InputBorder extends ShapeBorder {
   /// [InputDecorator.isFocused].
   const InputBorder({
     this.borderSide = BorderSide.none,
-  }) : assert(borderSide != null);
+  });
 
   /// No input border.
   ///
@@ -157,7 +157,7 @@ class UnderlineInputBorder extends InputBorder {
       topLeft: Radius.circular(4.0),
       topRight: Radius.circular(4.0),
     ),
-  }) : assert(borderRadius != null);
+  });
 
   /// The radii of the border's rounded rectangle corners.
   ///
@@ -259,12 +259,13 @@ class UnderlineInputBorder extends InputBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is InputBorder
-        && other.borderSide == borderSide;
+    return other is UnderlineInputBorder
+        && other.borderSide == borderSide
+        && other.borderRadius == borderRadius;
   }
 
   @override
-  int get hashCode => borderSide.hashCode;
+  int get hashCode => Object.hash(borderSide, borderRadius);
 }
 
 /// Draws a rounded rectangle around an [InputDecorator]'s container.
@@ -307,8 +308,7 @@ class OutlineInputBorder extends InputBorder {
     super.borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.gapPadding = 4.0,
-  }) : assert(borderRadius != null),
-       assert(gapPadding != null && gapPadding >= 0.0);
+  }) : assert(gapPadding >= 0.0);
 
   // The label text's gap can extend into the corners (even both the top left
   // and the top right corner). To avoid the more complicated problem of finding
@@ -515,7 +515,6 @@ class OutlineInputBorder extends InputBorder {
     double gapPercentage = 0.0,
     TextDirection? textDirection,
   }) {
-    assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
     assert(_cornersAreCircular(borderRadius));
 
@@ -530,12 +529,10 @@ class OutlineInputBorder extends InputBorder {
         case TextDirection.rtl:
           final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
           canvas.drawPath(path, paint);
-          break;
 
         case TextDirection.ltr:
           final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
           canvas.drawPath(path, paint);
-          break;
       }
     }
   }

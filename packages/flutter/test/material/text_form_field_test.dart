@@ -17,7 +17,7 @@ import '../widgets/editable_text_utils.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
 
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
@@ -1104,7 +1104,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1115,7 +1114,6 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsOneWidget);
         expect(find.text('Select all'), findsOneWidget);
-        break;
     }
 
     // Right click the first word.
@@ -1131,7 +1129,6 @@ void main() {
         expect(find.text('Cut'), findsOneWidget);
         expect(find.text('Copy'), findsOneWidget);
         expect(find.text('Paste'), findsOneWidget);
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1142,10 +1139,84 @@ void main() {
         expect(find.text('Copy'), findsNothing);
         expect(find.text('Paste'), findsNothing);
         expect(find.text('Select all'), findsNothing);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
+
+  testWidgets('spellCheckConfiguration passes through to EditableText', (WidgetTester tester) async {
+    final SpellCheckConfiguration mySpellCheckConfiguration = SpellCheckConfiguration(
+        spellCheckService: DefaultSpellCheckService(),
+        misspelledTextStyle: TextField.materialMisspelledTextStyle,
+      );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: TextFormField(
+          spellCheckConfiguration: mySpellCheckConfiguration,
+        ),
+      ),
+    ));
+
+    expect(find.byType(EditableText), findsOneWidget);
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+
+    // Can't do equality comparison on spellCheckConfiguration itself because it
+    // will have been copied.
+    expect(
+      editableText.spellCheckConfiguration?.spellCheckService,
+      equals(mySpellCheckConfiguration.spellCheckService),
+    );
+    expect(
+      editableText.spellCheckConfiguration?.misspelledTextStyle,
+      equals(mySpellCheckConfiguration.misspelledTextStyle),
+    );
+  });
+
+  testWidgets('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
+    final TextMagnifierConfiguration myTextMagnifierConfiguration = TextMagnifierConfiguration(
+      magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo> notifier) {
+        return const Placeholder();
+      },
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: TextFormField(
+          magnifierConfiguration: myTextMagnifierConfiguration,
+        ),
+      ),
+    ));
+
+    expect(find.byType(EditableText), findsOneWidget);
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.magnifierConfiguration, equals(myTextMagnifierConfiguration));
+  });
+
+  testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
+    const Color errorColor = Color(0xff123456);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme.light(error: errorColor),
+      ),
+      home: Material(
+        child: Center(
+          child: TextFormField(
+            enabled: true,
+            autovalidateMode: AutovalidateMode.always,
+            validator: (String? value) {
+              return 'Please enter value';
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.enterText(find.byType(TextField), 'a');
+    final EditableText textField = tester.widget(find.byType(EditableText).first);
+    await tester.pump();
+    expect(textField.cursorColor, errorColor);
+  });
 }

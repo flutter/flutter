@@ -17,7 +17,7 @@ import 'dart/package_map.dart';
 /// They are escaped in Kotlin files.
 ///
 /// https://kotlinlang.org/docs/keyword-reference.html
-const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
+const List<String> kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
@@ -86,7 +86,7 @@ class Template {
           from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
-        // is a candidate for rendering. This catches cases where the folder
+        // a candidate for rendering. This catches cases where the folder
         // itself is a template.
         _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
       }
@@ -101,7 +101,7 @@ class Template {
   }) async {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
-    final Directory imageDir = await _templateImageDirectory(name, fileSystem, logger);
+    final Directory imageDir = await templateImageDirectory(name, fileSystem, logger);
     return Template._(
       <Directory>[templateDir],
       <Directory>[imageDir],
@@ -126,8 +126,8 @@ class Template {
       ],
       <Directory>[
         for (final String name in names)
-          if ((await _templateImageDirectory(name, fileSystem, logger)).existsSync())
-            await _templateImageDirectory(name, fileSystem, logger),
+          if ((await templateImageDirectory(name, fileSystem, logger)).existsSync())
+            await templateImageDirectory(name, fileSystem, logger),
       ],
       fileSystem: fileSystem,
       logger: logger,
@@ -228,7 +228,7 @@ class Template {
         .replaceAll(testTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
-      if (android != null && android && androidIdentifier != null) {
+      if (android && androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
@@ -350,9 +350,10 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
 }
 
-// Returns the directory containing the 'name' template directory in
-// flutter_template_images, to resolve image placeholder against.
-Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Logger logger) async {
+/// Returns the directory containing the 'name' template directory in
+/// flutter_template_images, to resolve image placeholder against.
+/// if 'name' is null, return the parent template directory.
+Future<Directory> templateImageDirectory(String? name, FileSystem fileSystem, Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot!, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
@@ -361,10 +362,10 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Lo
     logger: logger,
   );
   final Uri? imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
-  return fileSystem.directory(imagePackageLibDir)
+  final Directory templateDirectory = fileSystem.directory(imagePackageLibDir)
       .parent
-      .childDirectory('templates')
-      .childDirectory(name);
+      .childDirectory('templates');
+  return name == null ? templateDirectory : templateDirectory.childDirectory(name);
 }
 
 String _escapeKotlinKeywords(String androidIdentifier) {

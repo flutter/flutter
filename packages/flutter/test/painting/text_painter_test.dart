@@ -8,8 +8,112 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const bool isCanvasKit =
-    bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
+  expect(boundaries.first, 0);
+  expect(boundaries.last, text.length);
+
+  final TextPainter painter = TextPainter()
+    ..textDirection = TextDirection.ltr;
+
+  // Lay out the string up to each boundary, and record the width.
+  final List<double> prefixWidths = <double>[];
+  for (final int boundary in boundaries) {
+    painter.text = TextSpan(text: text.substring(0, boundary));
+    painter.layout();
+    prefixWidths.add(painter.width);
+  }
+
+  // The painter has the full text laid out.  Check the caret offsets.
+  double caretOffset(int offset) {
+    final TextPosition position = ui.TextPosition(offset: offset);
+    return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
+  }
+  expect(boundaries.map(caretOffset).toList(), prefixWidths);
+  double lastOffset = caretOffset(0);
+  for (int i = 1; i <= text.length; i++) {
+    final double offset = caretOffset(i);
+    expect(offset, greaterThanOrEqualTo(lastOffset));
+    lastOffset = offset;
+  }
+  painter.dispose();
+}
+
+/// Check the caret offsets are accurate for the given single line of LTR text.
+///
+/// This lays out the given text as a single line with [TextDirection.ltr]
+/// and checks the following invariants, which should always hold if the text
+/// is made up of LTR characters:
+///  * The caret offsets go monotonically from 0.0 to the width of the text.
+///  * At each character (that is, grapheme cluster) boundary, the caret
+///    offset equals the width that the text up to that point would have
+///    if laid out on its own.
+///
+/// If you have a [TextSpan] instead of a plain [String],
+/// see [caretOffsetsForTextSpan].
+void checkCaretOffsetsLtr(String text) {
+  final List<int> characterBoundaries = <int>[];
+  final CharacterRange range = CharacterRange.at(text, 0);
+  while (true) {
+    characterBoundaries.add(range.current.length);
+    if (range.stringAfterLength <= 0) {
+      break;
+    }
+    range.expandNext();
+  }
+  _checkCaretOffsetsLtrAt(text, characterBoundaries);
+}
+
+/// Check the caret offsets are accurate for the given single line of LTR text,
+/// ignoring character boundaries within each given cluster.
+///
+/// This concatenates [clusters] into a string and then performs the same
+/// checks as [checkCaretOffsetsLtr], except that instead of checking the
+/// offset-equals-prefix-width invariant at every character boundary,
+/// it does so only at the boundaries between the elements of [clusters].
+///
+/// The elements of [clusters] should be composed of whole characters: each
+/// element should be a valid character range in the concatenated string.
+///
+/// Consider using [checkCaretOffsetsLtr] instead of this function.  If that
+/// doesn't pass, you may have an instance of <https://github.com/flutter/flutter/issues/122478>.
+void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
+  final StringBuffer buffer = StringBuffer();
+  final List<int> boundaries = <int>[];
+  boundaries.add(buffer.length);
+  for (final String cluster in clusters) {
+    buffer.write(cluster);
+    boundaries.add(buffer.length);
+  }
+  _checkCaretOffsetsLtrAt(buffer.toString(), boundaries);
+}
+
+/// Compute the caret offsets for the given single line of text, a [TextSpan].
+///
+/// This lays out the given text as a single line with the given [textDirection]
+/// and returns a full list of caret offsets, one at each code unit boundary.
+///
+/// This also checks that the offset at the very start or very end, if the text
+/// direction is RTL or LTR respectively, equals the line's width.
+///
+/// If you have a [String] instead of a nontrivial [TextSpan],
+/// consider using [checkCaretOffsetsLtr] instead.
+List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text) {
+  final TextPainter painter = TextPainter()
+    ..textDirection = textDirection
+    ..text = text
+    ..layout();
+  final int length = text.toPlainText().length;
+  final List<double> result = List<double>.generate(length + 1, (int offset) {
+    final TextPosition position = ui.TextPosition(offset: offset);
+    return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
+  });
+  switch (textDirection) {
+    case TextDirection.ltr: expect(result[length], painter.width);
+    case TextDirection.rtl: expect(result[0], painter.width);
+  }
+  painter.dispose();
+  return result;
+}
 
 void main() {
   test('TextPainter caret test', () {
@@ -17,6 +121,8 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     String text = 'A';
+    checkCaretOffsetsLtr(text);
+
     painter.text = TextSpan(text: text);
     painter.layout();
 
@@ -31,6 +137,7 @@ void main() {
     // Check that getOffsetForCaret handles a character that is encoded as a
     // surrogate pair.
     text = 'A\u{1F600}';
+    checkCaretOffsetsLtr(text);
     painter.text = TextSpan(text: text);
     painter.layout();
     caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
@@ -90,6 +197,8 @@ void main() {
     // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧👏<modifier>'
     // One three-person family, one four-person family, one clapping hands (medium skin tone).
     const String text = '👩‍👩‍👦👩‍👩‍👧‍👧👏🏽';
+    checkCaretOffsetsLtr(text);
+
     painter.text = const TextSpan(text: text);
     painter.layout(maxWidth: 10000);
 
@@ -150,6 +259,90 @@ void main() {
     painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
 
+  test('TextPainter caret emoji tests: single, long emoji', () {
+    // Regression test for https://github.com/flutter/flutter/issues/50563
+    checkCaretOffsetsLtr('👩‍🚀');
+    checkCaretOffsetsLtr('👩‍❤️‍💋‍👩');
+    checkCaretOffsetsLtr('👨‍👩‍👦‍👦');
+    checkCaretOffsetsLtr('👨🏾‍🤝‍👨🏻');
+    checkCaretOffsetsLtr('👨‍👦');
+    checkCaretOffsetsLtr('👩‍👦');
+    checkCaretOffsetsLtr('🏌🏿‍♀️');
+    checkCaretOffsetsLtr('🏊‍♀️');
+    checkCaretOffsetsLtr('🏄🏻‍♂️');
+
+    // These actually worked even before #50563 was fixed (because
+    // their lengths in code units are powers of 2, namely 4 and 8).
+    checkCaretOffsetsLtr('🇺🇳');
+    checkCaretOffsetsLtr('👩‍❤️‍👨');
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret emoji test: letters, then 1 emoji of 5 code units', () {
+    // Regression test for https://github.com/flutter/flutter/issues/50563
+    checkCaretOffsetsLtr('a👩‍🚀');
+    checkCaretOffsetsLtr('ab👩‍🚀');
+    checkCaretOffsetsLtr('abc👩‍🚀');
+    checkCaretOffsetsLtr('abcd👩‍🚀');
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret zalgo test', () {
+    // Regression test for https://github.com/flutter/flutter/issues/98516
+    checkCaretOffsetsLtr('Z͉̳̺ͥͬ̾a̴͕̲̒̒͌̋ͪl̨͎̰̘͉̟ͤ̀̈̚͜g͕͔̤͖̟̒͝ͅo̵̡̡̼͚̐ͯ̅ͪ̆ͣ̚');
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret Devanagari test', () {
+    // Regression test for https://github.com/flutter/flutter/issues/118403
+    checkCaretOffsetsLtrFromPieces(
+        <String>['प्रा', 'प्त', ' ', 'व', 'र्ण', 'न', ' ', 'प्र', 'व्रु', 'ति']);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret Devanagari test, full strength', () {
+    // Regression test for https://github.com/flutter/flutter/issues/118403
+    checkCaretOffsetsLtr('प्राप्त वर्णन प्रव्रुति');
+  }, skip: true); // https://github.com/flutter/flutter/issues/122478
+
+  test('TextPainter caret emoji test LTR: letters next to emoji, as separate TextBoxes', () {
+    // Regression test for https://github.com/flutter/flutter/issues/122477
+    // The trigger for this bug was to have SkParagraph report separate
+    // TextBoxes for the emoji and for the characters next to it.
+    // In normal usage on a real device, this can happen by simply typing
+    // letters and then an emoji, presumably because they get different fonts.
+    // In these tests, our single test font covers both letters and emoji,
+    // so we provoke the same effect by adding styles.
+    expect(caretOffsetsForTextSpan(
+        TextDirection.ltr,
+        const TextSpan(children: <TextSpan>[
+          TextSpan(text: '👩‍🚀', style: TextStyle()),
+          TextSpan(text: ' words', style: TextStyle(fontWeight: FontWeight.bold)),
+        ])),
+        <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98, 112]);
+    expect(caretOffsetsForTextSpan(
+        TextDirection.ltr,
+        const TextSpan(children: <TextSpan>[
+          TextSpan(text: 'words ', style: TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: '👩‍🚀', style: TextStyle()),
+        ])),
+        <double>[0, 14, 28, 42, 56, 70, 84, 84, 84, 84, 84, 112]);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
+  test('TextPainter caret emoji test RTL: letters next to emoji, as separate TextBoxes', () {
+    // Regression test for https://github.com/flutter/flutter/issues/122477
+    expect(caretOffsetsForTextSpan(
+        TextDirection.rtl,
+        const TextSpan(children: <TextSpan>[
+          TextSpan(text: '👩‍🚀', style: TextStyle()),
+          TextSpan(text: ' מילים', style: TextStyle(fontWeight: FontWeight.bold)),
+        ])),
+        <double>[112, 84, 84, 84, 84, 84, 70, 56, 42, 28, 14, 0]);
+    expect(caretOffsetsForTextSpan(
+        TextDirection.rtl,
+        const TextSpan(children: <TextSpan>[
+          TextSpan(text: 'מילים ', style: TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(text: '👩‍🚀', style: TextStyle()),
+        ])),
+        <double>[112, 98, 84, 70, 56, 42, 28, 28, 28, 28, 28, 0]);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
+
   test('TextPainter caret center space test', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -199,11 +392,7 @@ void main() {
     final TextPainter painter = TextPainter(
       text: const TextSpan(
         text: 'X',
-        style: TextStyle(
-          inherit: false,
-          fontFamily: 'Ahem',
-          fontSize: 123.0,
-        ),
+        style: TextStyle(inherit: false, fontSize: 123.0),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -216,11 +405,7 @@ void main() {
     final TextPainter painter = TextPainter(
       text: const TextSpan(
         text: 'X',
-        style: TextStyle(
-          inherit: false,
-          fontFamily: 'Ahem',
-          fontSize: 10.0,
-        ),
+        style: TextStyle(inherit: false, fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
       textScaleFactor: 2.0,
@@ -268,7 +453,6 @@ void main() {
   test('TextPainter intrinsic dimensions', () {
     const TextStyle style = TextStyle(
       inherit: false,
-      fontFamily: 'Ahem',
       fontSize: 10.0,
     );
     TextPainter painter;
@@ -827,25 +1011,25 @@ void main() {
     expect(lines[2].hardBreak, true);
     expect(lines[3].hardBreak, true);
 
-    expect(lines[0].ascent, 11.199999809265137);
-    expect(lines[1].ascent, 11.199999809265137);
-    expect(lines[2].ascent, 11.199999809265137);
-    expect(lines[3].ascent, 11.199999809265137);
+    expect(lines[0].ascent, 10.5);
+    expect(lines[1].ascent, 10.5);
+    expect(lines[2].ascent, 10.5);
+    expect(lines[3].ascent, 10.5);
 
-    expect(lines[0].descent, 2.799999952316284);
-    expect(lines[1].descent, 2.799999952316284);
-    expect(lines[2].descent, 2.799999952316284);
-    expect(lines[3].descent, 2.799999952316284);
+    expect(lines[0].descent, 3.5);
+    expect(lines[1].descent, 3.5);
+    expect(lines[2].descent, 3.5);
+    expect(lines[3].descent, 3.5);
 
-    expect(lines[0].unscaledAscent, 11.199999809265137);
-    expect(lines[1].unscaledAscent, 11.199999809265137);
-    expect(lines[2].unscaledAscent, 11.199999809265137);
-    expect(lines[3].unscaledAscent, 11.199999809265137);
+    expect(lines[0].unscaledAscent, 10.5);
+    expect(lines[1].unscaledAscent, 10.5);
+    expect(lines[2].unscaledAscent, 10.5);
+    expect(lines[3].unscaledAscent, 10.5);
 
-    expect(lines[0].baseline, 11.200000047683716);
-    expect(lines[1].baseline, 25.200000047683716);
-    expect(lines[2].baseline, 39.200000047683716);
-    expect(lines[3].baseline, 53.200000047683716);
+    expect(lines[0].baseline, 10.5);
+    expect(lines[1].baseline, 24.5);
+    expect(lines[2].baseline, 38.5);
+    expect(lines[3].baseline, 52.5);
 
     expect(lines[0].height, 14);
     expect(lines[1].height, 14);
@@ -867,7 +1051,7 @@ void main() {
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
     painter.dispose();
-  }, skip: true); // https://github.com/flutter/flutter/issues/62819
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/122066
 
   test('TextPainter caret height and line height', () {
     final TextPainter painter = TextPainter()
@@ -1217,12 +1401,36 @@ void main() {
       textDirection: TextDirection.ltr,
     );
 
-    textPainter.layout();
-    expect(
-      textPainter.getWordBoundary(const TextPosition(offset: 8)),
-      const TextRange(start: 8, end: 16),
+     textPainter.layout();
+     expect(
+       textPainter.getWordBoundary(const TextPosition(offset: 8)),
+       const TextRange(start: 8, end: 16),
+     );
+   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
+
+  test('TextHeightBehavior with strut on empty paragraph', () {
+    // Regression test for https://github.com/flutter/flutter/issues/112123
+    const TextStyle style = TextStyle(height: 11, fontSize: 7);
+    const TextSpan simple = TextSpan(text: 'x', style: style);
+    const TextSpan emptyString = TextSpan(text: '', style: style);
+    const TextSpan emptyParagraph = TextSpan(style: style);
+
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      strutStyle: StrutStyle.fromTextStyle(style, forceStrutHeight: true),
+      textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61017
+
+    painter.text = simple;
+    painter.layout();
+    final double height = painter.height;
+    for (final TextSpan span in <TextSpan>[simple, emptyString, emptyParagraph]) {
+      painter.text = span;
+      painter.layout();
+      expect(painter.height, height, reason: '$span is expected to have a height of $height');
+      expect(painter.preferredLineHeight, height, reason: '$span is expected to have a height of $height');
+    }
+  });
 
   test('TextPainter plainText getter', () {
     final TextPainter painter = TextPainter()

@@ -2,39 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Stepper].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Stepper].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const StepperExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class StepperExampleApp extends StatelessWidget {
+  const StepperExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Stepper Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: StepperExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class StepperExample extends StatefulWidget {
+  const StepperExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<StepperExample> createState() => _StepperExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _StepperExampleState extends State<StepperExample> {
   int _index = 0;
 
   @override
@@ -64,8 +61,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         Step(
           title: const Text('Step 1 title'),
           content: Container(
-              alignment: Alignment.centerLeft,
-              child: const Text('Content for Step 1')),
+            alignment: Alignment.centerLeft,
+            child: const Text('Content for Step 1'),
+          ),
         ),
         const Step(
           title: Text('Step 2 title'),

@@ -778,7 +778,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       builder: (BuildContext context, RouteInformation? information) {
         final List<Widget> children = <Widget>[];
-        if (information!.location! != null) {
+        if (information!.location != null) {
           children.add(Text(information.location!));
         }
         if (information.state != null) {
@@ -805,7 +805,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final ByteData routerMessage = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', routerMessage, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', routerMessage, (_) { });
     await tester.pump();
     expect(find.text('testRouteName'), findsOneWidget);
     expect(find.text('state'), findsOneWidget);
@@ -815,7 +815,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRoute', testRouteName),
     );
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pump();
     expect(find.text('newTestRouteName'), findsOneWidget);
   });
@@ -823,8 +823,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
   testWidgets('PlatformRouteInformationProvider updates route information', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     TestDefaultBinaryMessengerBinding
-      .instance!
-      .defaultBinaryMessenger
+      .instance.defaultBinaryMessenger
       .setMockMethodCallHandler(
         SystemChannels.navigation,
         (MethodCall methodCall) async {
@@ -898,7 +897,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
 
     // Pop route through the message channel.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pump();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -1361,7 +1360,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       routeInformationProvider: provider,
       routeInformationParser: CustomRouteInformationParser((RouteInformation information, BuildContext context) {
         parserCalled = true;
-        final DefaultTextStyle style = context.getElementForInheritedWidgetOfExactType<DefaultTextStyle>()!.widget as DefaultTextStyle;
+        final DefaultTextStyle style = context.getInheritedWidgetOfExactType<DefaultTextStyle>()!;
         return RouteInformation(location: '${style.maxLines}');
       }),
       routerDelegate: SimpleRouterDelegate(

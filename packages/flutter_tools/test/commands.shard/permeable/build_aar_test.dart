@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
@@ -27,7 +28,12 @@ void main() {
   Cache.disableLocking();
 
   Future<BuildAarCommand> runCommandIn(String target, { List<String>? arguments }) async {
-    final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
+    final BuildAarCommand command = BuildAarCommand(
+      androidSdk: FakeAndroidSdk(),
+      fileSystem: globals.fs,
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'aar',
@@ -217,6 +223,7 @@ void main() {
         await expectLater(() async {
           await runBuildAarCommand(
             projectPath,
+            null,
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
@@ -224,7 +231,6 @@ void main() {
         ));
       },
       overrides: <Type, Generator>{
-        AndroidSdk: () => null,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => FakeProcessManager.any(),
       });
@@ -235,6 +241,7 @@ void main() {
         await expectLater(() async {
           await runBuildAarCommand(
             'missing_project',
+            mockAndroidSdk,
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
@@ -278,7 +285,7 @@ void main() {
         exitCode: 1,
       ));
 
-      await expectLater(() => runBuildAarCommand(projectPath, arguments: <String>[
+      await expectLater(() => runBuildAarCommand(projectPath, mockAndroidSdk, arguments: <String>[
         '--no-debug',
         '--no-profile',
         '--extra-front-end-options=foo',
@@ -287,7 +294,6 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
@@ -297,10 +303,15 @@ void main() {
 }
 
 Future<BuildAarCommand> runBuildAarCommand(
-  String target, {
+  String target, AndroidSdk? androidSdk, {
   List<String>? arguments,
 }) async {
-  final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
+  final BuildAarCommand command = BuildAarCommand(
+    androidSdk: androidSdk,
+    fileSystem: globals.fs,
+    logger: BufferLogger.test(),
+    verboseHelp: false,
+  );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'aar',

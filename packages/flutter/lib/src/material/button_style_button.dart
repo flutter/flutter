@@ -43,8 +43,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     required this.child,
-  }) : assert(autofocus != null),
-       assert(clipBehavior != null);
+  });
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -175,10 +174,6 @@ abstract class ButtonStyleButton extends StatefulWidget {
     EdgeInsetsGeometry geometry3x,
     double textScaleFactor,
   ) {
-    assert(geometry1x != null);
-    assert(geometry2x != null);
-    assert(geometry3x != null);
-    assert(textScaleFactor != null);
 
     if (textScaleFactor <= 1) {
       return geometry1x;
@@ -260,7 +255,6 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final ButtonStyle? widgetStyle = widget.style;
     final ButtonStyle? themeStyle = widget.themeStyleOf(context);
     final ButtonStyle defaultStyle = widget.defaultStyleOf(context);
-    assert(defaultStyle != null);
 
     T? effectiveValue<T>(T? Function(ButtonStyle? style) getProperty) {
       final T? widgetValue  = getProperty(widgetStyle);
@@ -425,10 +419,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         );
         assert(minSize.width >= 0.0);
         assert(minSize.height >= 0.0);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
-        break;
     }
 
     return Semantics(

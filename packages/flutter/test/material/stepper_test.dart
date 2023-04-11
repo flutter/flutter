@@ -7,6 +7,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Stepper(
+            onStepTapped: (int i) {},
+            steps: const <Step>[
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Continue'), findsWidgets);
+    expect(find.text('Cancel'), findsWidgets);
+  });
+
   testWidgets('Stepper tap callback test', (WidgetTester tester) async {
     int index = 0;
 
@@ -1228,6 +1259,48 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         tester.widget<Text>(find.text('Label ${index + 2}'));
     expect(bodyMediumStyle, nextLabelTextWidget.style);
   });
+
+  testWidgets('Stepper stepIconBuilder test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            stepIconBuilder: (int index, StepState state) {
+              if (state == StepState.complete) {
+                return const FlutterLogo(size: 18);
+              }
+              return null;
+            },
+            steps: const <Step>[
+              Step(
+                title: Text('A'),
+                state: StepState.complete,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+              Step(
+                title: Text('B'),
+                state: StepState.editing,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+              Step(
+                title: Text('C'),
+                state: StepState.error,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    /// Finds the overridden widget for StepState.complete
+    expect(find.byType(FlutterLogo), findsOneWidget);
+
+    /// StepState.editing and StepState.error should have a default icon
+    expect(find.byIcon(Icons.edit), findsOneWidget);
+    expect(find.text('!'), findsOneWidget);
+  });
+
 }
 
 class _TappableColorWidget extends StatefulWidget {

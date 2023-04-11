@@ -5,6 +5,7 @@
 // ignore_for_file: undefined_class, undefined_getter, undefined_setter
 
 @TestOn('browser') // This file contains web-only library.
+library;
 
 import 'dart:html' as html;
 
@@ -143,15 +144,15 @@ class RenderSelectionSpy extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  SelectionGeometry _value = SelectionGeometry(
+  SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,

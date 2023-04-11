@@ -2,37 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [AnimatedContainer].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AnimatedContainer].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AnimatedContainerExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AnimatedContainerExampleApp extends StatelessWidget {
+  const AnimatedContainerExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('AnimatedContainer Sample')),
+        body: const AnimatedContainerExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AnimatedContainerExample extends StatefulWidget {
+  const AnimatedContainerExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AnimatedContainerExample> createState() => _AnimatedContainerExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _AnimatedContainerExampleState extends State<AnimatedContainerExample> {
   bool selected = false;
 
   @override
@@ -48,8 +45,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           width: selected ? 200.0 : 100.0,
           height: selected ? 100.0 : 200.0,
           color: selected ? Colors.red : Colors.blue,
-          alignment:
-              selected ? Alignment.center : AlignmentDirectional.topCenter,
+          alignment: selected ? Alignment.center : AlignmentDirectional.topCenter,
           duration: const Duration(seconds: 2),
           curve: Curves.fastOutSlowIn,
           child: const FlutterLogo(size: 75),

@@ -29,7 +29,7 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 
 /// An iOS style scrollbar.
 ///
-/// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
+/// To add a scrollbar to a [ScrollView], wrap the scroll view widget in
 /// a [CupertinoScrollbar] widget.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=DbkIQSvwnZc}
@@ -87,12 +87,8 @@ class CupertinoScrollbar extends RawScrollbar {
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
     bool? isAlwaysShown,
-  }) : assert(thickness != null),
-       assert(thickness < double.infinity),
-       assert(thicknessWhileDragging != null),
+  }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
-       assert(radius != null),
-       assert(radiusWhileDragging != null),
        assert(
          isAlwaysShown == null || thumbVisibility == null,
          'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
@@ -171,7 +167,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..mainAxisMargin = _kScrollbarMainAxisMargin
       ..crossAxisMargin = _kScrollbarCrossAxisMargin
       ..radius = _radius
-      ..padding = MediaQuery.of(context).padding
+      ..padding = MediaQuery.paddingOf(context)
       ..minLength = _kScrollbarMinLength
       ..minOverscrollLength = _kScrollbarMinOverscrollLength
       ..scrollbarOrientation = widget.scrollbarOrientation;
@@ -192,10 +188,8 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     switch (direction) {
       case Axis.vertical:
         _pressStartAxisPosition = localPosition.dy;
-        break;
       case Axis.horizontal:
         _pressStartAxisPosition = localPosition.dx;
-        break;
     }
   }
 
@@ -224,13 +218,11 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
           (localPosition.dy - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
-        break;
       case Axis.horizontal:
         if (velocity.pixelsPerSecond.dx.abs() < 10 &&
           (localPosition.dx - _pressStartAxisPosition).abs() > 0) {
           HapticFeedback.mediumImpact();
         }
-        break;
     }
   }
 

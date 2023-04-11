@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [RestorationMixin].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [RestorationMixin].
 
 void main() => runApp(const RestorationExampleApp());
 
@@ -32,8 +32,7 @@ class RestorableCounter extends StatefulWidget {
 
 // The [State] object uses the [RestorationMixin] to make the current value
 // of the counter restorable.
-class _RestorableCounterState extends State<RestorableCounter>
-    with RestorationMixin {
+class _RestorableCounterState extends State<RestorableCounter> with RestorationMixin {
   // The current value of the counter is stored in a [RestorableProperty].
   // During state restoration it is automatically restored to its old value.
   // If no restoration data is available to restore the counter from, it is

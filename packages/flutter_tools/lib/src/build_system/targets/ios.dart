@@ -142,7 +142,7 @@ class AotAssemblyRelease extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(zanderso): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
@@ -177,7 +177,7 @@ class AotAssemblyProfile extends AotAssemblyBase {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
     // TODO(zanderso): cannot reference gen_snapshot with artifacts since
     // it resolves to a file (ios/gen_snapshot) that never exists. This was
@@ -677,6 +677,7 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
         '-miphonesimulator-version-min=11.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-fapplication-extension',
       '-install_name', '@rpath/App.framework/App',
       '-isysroot', sdkRoot,
       '-o', outputFile.path,
@@ -711,6 +712,16 @@ void _signFramework(Environment environment, String binaryPath, BuildMode buildM
     binaryPath,
   ]);
   if (result.exitCode != 0) {
-    throw Exception('Failed to codesign $binaryPath with identity $codesignIdentity.\n${result.stderr}');
+    final String stdout = (result.stdout as String).trim();
+    final String stderr = (result.stderr as String).trim();
+    final StringBuffer output = StringBuffer();
+    output.writeln('Failed to codesign $binaryPath with identity $codesignIdentity.');
+    if (stdout.isNotEmpty) {
+      output.writeln(stdout);
+    }
+    if (stderr.isNotEmpty) {
+      output.writeln(stderr);
+    }
+    throw Exception(output.toString());
   }
 }

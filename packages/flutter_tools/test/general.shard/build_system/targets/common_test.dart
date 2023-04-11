@@ -83,7 +83,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -121,7 +121,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -160,7 +160,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -200,7 +200,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -242,7 +242,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -284,7 +284,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -338,7 +338,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -511,6 +511,7 @@ void main() {
         '-rpath',
         '-Xlinker',
         '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name',
         '@rpath/App.framework/App',
         '-o',

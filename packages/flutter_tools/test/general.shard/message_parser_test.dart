@@ -187,32 +187,60 @@ void main() {
     ]));
   });
 
-  // TODO(thkim1011): Uncomment when implementing escaping.
-  // See https://github.com/flutter/flutter/issues/113455.
-  // testWithoutContext('lexer escaping', () {
-  //   final List<Node> tokens1 = Parser("''").lexIntoTokens();
-  //   expect(tokens1, equals(<Node>[Node.string(0, "'")]));
+  testWithoutContext('lexer escaping', () {
+    final List<Node> tokens1 = Parser('escaping', 'app_en.arb', "''", useEscaping: true).lexIntoTokens();
+    expect(tokens1, equals(<Node>[Node.string(0, "'")]));
 
-  //   final List<Node> tokens2 = Parser("'hello world { name }'").lexIntoTokens();
-  //   expect(tokens2, equals(<Node>[Node.string(0, 'hello world { name }')]));
+    final List<Node> tokens2 = Parser('escaping', 'app_en.arb', "'hello world { name }'", useEscaping: true).lexIntoTokens();
+    expect(tokens2, equals(<Node>[Node.string(0, 'hello world { name }')]));
 
-  //   final List<Node> tokens3 = Parser("'{ escaped string }' { not escaped }").lexIntoTokens();
-  //   expect(tokens3, equals(<Node>[
-  //     Node.string(0, '{ escaped string }'),
-  //     Node.string(20, ' '),
-  //     Node.openBrace(21),
-  //     Node.identifier(23, 'not'),
-  //     Node.identifier(27, 'escaped'),
-  //     Node.closeBrace(35),
-  //   ]));
+    final List<Node> tokens3 = Parser('escaping', 'app_en.arb', "'{ escaped string }' { not escaped }", useEscaping: true).lexIntoTokens();
+    expect(tokens3, equals(<Node>[
+      Node.string(0, '{ escaped string }'),
+      Node.string(20, ' '),
+      Node.openBrace(21),
+      Node.identifier(23, 'not'),
+      Node.identifier(27, 'escaped'),
+      Node.closeBrace(35),
+    ]));
 
-  //   final List<Node> tokens4 = Parser("Flutter''s amazing!").lexIntoTokens();
-  //   expect(tokens4, equals(<Node>[
-  //     Node.string(0, 'Flutter'),
-  //     Node.string(7, "'"),
-  //     Node.string(9, 's amazing!'),
-  //   ]));
-  // });
+    final List<Node> tokens4 = Parser('escaping', 'app_en.arb', "Flutter''s amazing!", useEscaping: true).lexIntoTokens();
+    expect(tokens4, equals(<Node>[
+      Node.string(0, 'Flutter'),
+      Node.string(7, "'"),
+      Node.string(9, 's amazing!'),
+    ]));
+
+    final List<Node> tokens5 = Parser('escaping', 'app_en.arb', "'Flutter''s amazing!'", useEscaping: true).lexIntoTokens();
+    expect(tokens5, equals(<Node>[
+      Node(ST.string, 0, value: 'Flutter'),
+      Node(ST.string, 9, value: "'s amazing!"),
+    ]));
+  });
+
+  testWithoutContext('lexer identifier names can be "select" or "plural"', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ select } { plural, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('select'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('plural'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
+  testWithoutContext('lexer identifier names can contain underscores', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ test_placeholder } { test_select, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('test_placeholder'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('test_select'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
+   testWithoutContext('lexer identifier names can contain the strings select or plural', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ selectTest } { pluralTest, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('selectTest'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('pluralTest'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
 
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
     final List<Node> tokens = Parser(
@@ -235,29 +263,27 @@ void main() {
     ]));
   });
 
-  // TODO(thkim1011): Uncomment when implementing escaping.
-  // See https://github.com/flutter/flutter/issues/113455.
-//   testWithoutContext('lexer unmatched single quote', () {
-//     const String message = "here''s an unmatched single quote: '";
-//     const String expectedError = '''
-// ICU Lexing Error: Unmatched single quotes.
-// here''s an unmatched single quote: '
-//                                    ^''';
-//     expect(
-//       () => Parser(message).lexIntoTokens(),
-//       throwsA(isA<L10nException>().having(
-//         (L10nException e) => e.message,
-//         'message',
-//         contains(expectedError),
-//     )));
-//   });
+  testWithoutContext('lexer unmatched single quote', () {
+    const String message = "here''s an unmatched single quote: '";
+    const String expectedError = '''
+[app_en.arb:escaping] ICU Lexing Error: Unmatched single quotes.
+    here''s an unmatched single quote: '
+                                       ^''';
+    expect(
+      () => Parser('escaping', 'app_en.arb', message, useEscaping: true).lexIntoTokens(),
+      throwsA(isA<L10nException>().having(
+        (L10nException e) => e.message,
+        'message',
+        contains(expectedError),
+    )));
+  });
 
   testWithoutContext('lexer unexpected character', () {
     const String message = '{ * }';
     const String expectedError = '''
-ICU Lexing Error: Unexpected character.
-[app_en.arb:lex] { * }
-                   ^''';
+[app_en.arb:lex] ICU Lexing Error: Unexpected character.
+    { * }
+      ^''';
     expect(
       () => Parser('lex', 'app_en.arb', message).lexIntoTokens(),
       throwsA(isA<L10nException>().having(
@@ -367,17 +393,22 @@ ICU Lexing Error: Unexpected character.
     ));
   });
 
-  // TODO(thkim1011): Uncomment when implementing escaping.
-  // See https://github.com/flutter/flutter/issues/113455.
-  // testWithoutContext('parser basic 2', () {
-  //   expect(Parser("Flutter''s amazing!").parse(), equals(
-  //     Node(ST.message, 0, children: <Node>[
-  //       Node(ST.string, 0, value: 'Flutter'),
-  //       Node(ST.string, 7, value: "'"),
-  //       Node(ST.string, 9, value: 's amazing!'),
-  //     ])
-  //   ));
-  // });
+  testWithoutContext('parser escaping', () {
+    expect(Parser('escaping', 'app_en.arb', "Flutter''s amazing!", useEscaping: true).parse(), equals(
+      Node(ST.message, 0, children: <Node>[
+        Node(ST.string, 0, value: 'Flutter'),
+        Node(ST.string, 7, value: "'"),
+        Node(ST.string, 9, value: 's amazing!'),
+      ])
+    ));
+
+    expect(Parser('escaping', 'app_en.arb', "'Flutter''s amazing!'", useEscaping: true).parse(), equals(
+      Node(ST.message, 0, children: <Node> [
+        Node(ST.string, 0, value: 'Flutter'),
+        Node(ST.string, 9, value: "'s amazing!"),
+      ])
+    ));
+  });
 
   testWithoutContext('parser recursive', () {
     expect(Parser(
@@ -453,11 +484,11 @@ ICU Lexing Error: Unexpected character.
   testWithoutContext('parser unexpected token', () {
     // unexpected token
     const String expectedError1 = '''
-ICU Syntax Error: Expected "}" but found "=".
-[app_en.arb:unexpectedToken] { placeholder =
-                                           ^''';
+[app_en.arb:unexpectedToken] ICU Syntax Error: Expected "}" but found "=".
+    { placeholder =
+                  ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ placeholder =').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ placeholder =').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -465,11 +496,11 @@ ICU Syntax Error: Expected "}" but found "=".
     )));
 
     const String expectedError2 = '''
-ICU Syntax Error: Expected "number" but found "}".
-[app_en.arb:unexpectedToken] { count, plural, = }
-                                                ^''';
+[app_en.arb:unexpectedToken] ICU Syntax Error: Expected "number" but found "}".
+    { count, plural, = }
+                       ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ count, plural, = }').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ count, plural, = }').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
@@ -477,15 +508,26 @@ ICU Syntax Error: Expected "number" but found "}".
     )));
 
     const String expectedError3 = '''
-ICU Syntax Error: Expected "identifier" but found ",".
-[app_en.arb:unexpectedToken] { , plural , = }
-                               ^''';
+[app_en.arb:unexpectedToken] ICU Syntax Error: Expected "identifier" but found ",".
+    { , plural , = }
+      ^''';
     expect(
-      () => Parser('unexpectedToken', 'app_en.arb', '{ , plural , = }').parse(),
+      () => Parser('unexpectedToken', 'app_en.arb', '{ , plural , = }').parseIntoTree(),
       throwsA(isA<L10nException>().having(
         (L10nException e) => e.message,
         'message',
         contains(expectedError3),
     )));
+  });
+
+  testWithoutContext('parser allows select cases with numbers', () {
+    final Node node = Parser('numberSelect', 'app_en.arb', '{ count, select, 0{none} 100{perfect} other{required!} }').parse();
+    final Node selectExpr = node.children[0];
+    final Node selectParts = selectExpr.children[5];
+    final Node selectPart = selectParts.children[0];
+    expect(selectPart.children[0].value, equals('0'));
+    expect(selectPart.children[1].value, equals('{'));
+    expect(selectPart.children[2].type, equals(ST.message));
+    expect(selectPart.children[3].value, equals('}'));
   });
 }

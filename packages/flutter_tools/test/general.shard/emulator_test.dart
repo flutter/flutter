@@ -79,7 +79,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
@@ -101,7 +100,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
 
@@ -116,7 +114,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
         fileSystem: fileSystem,
       );
@@ -144,7 +141,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -186,7 +182,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -223,7 +218,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -262,7 +256,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'existing-avd-1');
@@ -304,7 +297,6 @@ void main() {
         androidWorkflow: AndroidWorkflow(
           androidSdk: sdk,
           featureFlags: TestFeatureFlags(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
         ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();

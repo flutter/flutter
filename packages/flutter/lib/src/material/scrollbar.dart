@@ -312,14 +312,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
         idleColor = _useAndroidScrollbar
           ? Theme.of(context).highlightColor.withOpacity(1.0)
           : onSurface.withOpacity(0.1);
-        break;
       case Brightness.dark:
         dragColor = onSurface.withOpacity(0.75);
         hoverColor = onSurface.withOpacity(0.65);
         idleColor = _useAndroidScrollbar
           ? Theme.of(context).highlightColor.withOpacity(1.0)
           : onSurface.withOpacity(0.3);
-        break;
     }
 
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -403,14 +401,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     switch (theme.platform) {
       case TargetPlatform.android:
         _useAndroidScrollbar = true;
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.fuchsia:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         _useAndroidScrollbar = false;
-        break;
     }
     super.didChangeDependencies();
   }
@@ -427,7 +423,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ?? (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
-      ..padding = MediaQuery.of(context).padding
+      ..padding = MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..ignorePointer = !enableGestures;
   }

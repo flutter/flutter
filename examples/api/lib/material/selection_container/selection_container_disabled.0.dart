@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter example for [SelectionContainer.disabled].
+// Flutter example for [SelectionContainer.disabled].
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const SelectionContainerDisabledExampleApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class SelectionContainerDisabledExampleApp extends StatelessWidget {
+  const SelectionContainerDisabledExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: Center(
+        appBar: AppBar(title: const Text('SelectionContainer.disabled Sample')),
+        body: const Center(
           child: SelectionArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Selectable text'),
                 SelectionContainer.disabled(child: Text('Non-selectable text')),
                 Text('Selectable text'),

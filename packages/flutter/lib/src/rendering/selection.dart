@@ -206,9 +206,7 @@ mixin SelectionRegistrant on Selectable {
 }
 
 /// A utility class that provides useful methods for handling selection events.
-class SelectionUtils {
-  SelectionUtils._();
-
+abstract final class SelectionUtils {
   /// Determines [SelectionResult] purely based on the target rectangle.
   ///
   /// This method returns [SelectionResult.end] if the `point` is inside the
@@ -687,9 +685,7 @@ class SelectionPoint {
     required this.localPosition,
     required this.lineHeight,
     required this.handleType,
-  }) : assert(localPosition != null),
-       assert(lineHeight != null),
-       assert(handleType != null);
+  });
 
   /// The position of the selection point in the local coordinates of the
   /// containing [Selectable].

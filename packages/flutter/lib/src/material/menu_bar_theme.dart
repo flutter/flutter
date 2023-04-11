@@ -41,8 +41,11 @@ class MenuBarThemeData extends MenuThemeData {
   /// Creates a const set of properties used to configure [MenuTheme].
   const MenuBarThemeData({super.style});
 
-  /// Linearly interpolate between two text button themes.
+  /// Linearly interpolate between two [MenuBar] themes.
   static MenuBarThemeData? lerp(MenuBarThemeData? a, MenuBarThemeData? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return MenuBarThemeData(style: MenuStyle.lerp(a?.style, b?.style, t));
   }
 }
@@ -74,7 +77,7 @@ class MenuBarTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties to set for [MenuBar] in this widget's descendants.
   final MenuBarThemeData data;

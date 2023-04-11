@@ -16,17 +16,18 @@ import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../device.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
+import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
-import 'iproxy.dart';
 import 'migrations/host_app_info_plist_migration.dart';
 import 'migrations/ios_deployment_target_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
@@ -86,7 +87,7 @@ class IMobileDevice {
   Future<void> takeScreenshot(
     File outputFile,
     String deviceID,
-    IOSDeviceConnectionInterface interfaceType,
+    DeviceConnectionInterface interfaceType,
   ) {
     return _processUtils.run(
       <String>[
@@ -94,7 +95,7 @@ class IMobileDevice {
         outputFile.path,
         '--udid',
         deviceID,
-        if (interfaceType == IOSDeviceConnectionInterface.network)
+        if (interfaceType == DeviceConnectionInterface.wireless)
           '--network',
       ],
       throwOnError: true,
@@ -130,6 +131,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     HostAppInfoPlistMigration(app.project, globals.logger),
     XcodeScriptBuildPhaseMigration(app.project, globals.logger),
     RemoveBitcodeMigration(app.project, globals.logger),
+    XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -250,17 +252,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
-  final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();
-  for (final FileSystemEntity entity in contents) {
-    if (globals.fs.path.extension(entity.path) == '.xcworkspace') {
-      buildCommands.addAll(<String>[
-        '-workspace', globals.fs.path.basename(entity.path),
-        '-scheme', scheme,
-        if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-          'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
-      ]);
-      break;
-    }
+  final Directory? workspacePath = app.project.xcodeWorkspace;
+  if (workspacePath != null) {
+    buildCommands.addAll(<String>[
+      '-workspace', workspacePath.basename,
+      '-scheme', scheme,
+      if (buildAction != XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
+        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+    ]);
   }
 
   // Check if the project contains a watchOS companion app.
@@ -299,13 +298,11 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   if (activeArch != null) {
     final String activeArchName = getNameForDarwinArch(activeArch);
-    if (activeArchName != null) {
-      buildCommands.add('ONLY_ACTIVE_ARCH=YES');
-      // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
-      // as it cannot be build for the architecture of the Flutter app.
-      if (!hasWatchCompanion) {
-        buildCommands.add('ARCHS=$activeArchName');
-      }
+    buildCommands.add('ONLY_ACTIVE_ARCH=YES');
+    // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
+    // as it cannot be build for the architecture of the Flutter app.
+    if (!hasWatchCompanion) {
+      buildCommands.add('ARCHS=$activeArchName');
     }
   }
 
@@ -551,7 +548,6 @@ Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOS
 
 bool _isXcodeConcurrentBuildFailure(RunResult result) {
 return result.exitCode != 0 &&
-    result.stdout != null &&
     result.stdout.contains('database is locked') &&
     result.stdout.contains('there are two concurrent builds running');
 }
@@ -687,10 +683,8 @@ _XCResultIssueHandlingResult _handleXCResultIssue({required XCResultIssue issue,
   switch (issue.type) {
     case XCResultIssueType.error:
       logger.printError(issueSummary);
-      break;
     case XCResultIssueType.warning:
       logger.printWarning(issueSummary);
-      break;
   }
 
   final String? message = issue.message;
@@ -743,13 +737,6 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   }
 
-  if (!issueDetected && _needUpdateSigningIdentifier(xcodeBuildExecution)) {
-    issueDetected = true;
-    logger.printError('');
-    logger.printError('It appears that your application still contains the default signing identifier.');
-    logger.printError("Try replacing 'com.example' with your signing id in Xcode:");
-    logger.printError('  open ios/Runner.xcworkspace');
-  }
   return issueDetected;
 }
 
@@ -761,13 +748,6 @@ bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
   return xcodeBuildExecution != null && xcodeBuildExecution.environmentType == EnvironmentType.physical &&
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
         xcodeBuildExecution.buildSettings.containsKey);
-}
-
-// Return `true` if the signing identifier needs to be updated.
-bool _needUpdateSigningIdentifier(XcodeBuildExecution? xcodeBuildExecution) {
-  return xcodeBuildExecution != null
-      && xcodeBuildExecution.environmentType == EnvironmentType.physical
-      && (xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') ?? false);
 }
 
 // Detects and handles errors from stdout.

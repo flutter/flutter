@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -176,7 +170,7 @@ void main() {
     // framework, excluding any that are for the widget inspector
     // (see widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions).
-    const int serviceExtensionCount = 37;
+    const int serviceExtensionCount = 38;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
 
@@ -217,6 +211,19 @@ void main() {
     });
   });
 
+  test('Service extensions - debugDumpFocusTree', () async {
+    final Map<String, dynamic> result = await binding.testExtension(WidgetsServiceExtensions.debugDumpFocusTree.name, <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
+        r'^'
+        r'FocusManager#[0-9a-f]{5}\n'
+        r' └─rootScope: FocusScopeNode#[0-9a-f]{5}\(Root Focus Scope\)\n'
+        r'$',
+      ),
+    });
+  });
+
   test('Service extensions - debugDumpRenderTree', () async {
     await binding.doFrame();
     final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpRenderTree.name, <String, String>{});
@@ -226,7 +233,7 @@ void main() {
         r'^'
         r'RenderView#[0-9a-f]{5}\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
-        r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
+        r'   view size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 3\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
         r'$',
@@ -545,7 +552,7 @@ void main() {
     bool completed;
 
     completed = false;
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       expect(utf8.decode(message!.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -572,7 +579,7 @@ void main() {
     });
     expect(data, isFalse);
     expect(completed, isTrue);
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {
@@ -856,6 +863,7 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{});
     expect(binding.reassembled, 1);
+    binding.reassembled = 0;
   });
 
   test('Service extensions - showPerformanceOverlay', () async {

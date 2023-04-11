@@ -107,7 +107,7 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
@@ -152,6 +152,7 @@ List<FlutterCommand> generateCommands({
         platform: globals.platform,
       ),
     ],
+    suppressAnalytics: globals.flutterUsage.suppressAnalytics,
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(
@@ -165,7 +166,14 @@ List<FlutterCommand> generateCommands({
     processInfo: globals.processInfo,
     fileSystem: globals.fs,
   ),
-  BuildCommand(verboseHelp: verboseHelp),
+  BuildCommand(
+    fileSystem: globals.fs,
+    buildSystem: globals.buildSystem,
+    osUtils: globals.os,
+    verboseHelp: verboseHelp,
+    androidSdk: globals.androidSdk,
+    logger: globals.logger,
+  ),
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
   ConfigCommand(verboseHelp: verboseHelp),
@@ -192,7 +200,7 @@ List<FlutterCommand> generateCommands({
     signals: globals.signals,
   ),
   EmulatorsCommand(),
-  FormatCommand(verboseHelp: verboseHelp),
+  FormatCommand(),
   GenerateCommand(),
   GenerateLocalizationsCommand(
     fileSystem: globals.fs,
@@ -200,7 +208,9 @@ List<FlutterCommand> generateCommands({
     artifacts: globals.artifacts!,
     processManager: globals.processManager,
   ),
-  InstallCommand(),
+  InstallCommand(
+    verboseHelp: verboseHelp,
+  ),
   LogsCommand(),
   MakeHostAppEditableCommand(),
   PackagesCommand(),

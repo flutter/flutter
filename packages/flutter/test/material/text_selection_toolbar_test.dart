@@ -8,8 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
-const double _kHandleSize = 22.0;
-const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
 // A custom text selection menu that just displays a single custom button.
@@ -35,7 +33,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     );
     final Offset anchorBelow = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
     );
 
     return TextSelectionToolbar(
@@ -155,7 +153,7 @@ void main() {
     // When the toolbar doesn't fit above aboveAnchor, it positions itself below
     // belowAnchor.
     double toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistanceBelow));
+    expect(toolbarY, equals(anchorBelowY + TextSelectionToolbar.kToolbarContentDistanceBelow));
 
     // Even when it barely doesn't fit.
     setState(() {
@@ -163,7 +161,7 @@ void main() {
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistanceBelow));
+    expect(toolbarY, equals(anchorBelowY + TextSelectionToolbar.kToolbarContentDistanceBelow));
 
     // When it does fit above aboveAnchor, it positions itself there.
     setState(() {

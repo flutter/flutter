@@ -11,15 +11,15 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: example.MyApp(),
+          body: example.DividerExampleApp(),
         ),
       ),
     );
 
     expect(find.byType(Divider), findsOneWidget);
 
-    // Divider is positioned horizintally.
-    final Offset container = tester.getBottomLeft(find.byType(Container).first);
+    // Divider is positioned horizontally.
+    final Offset container = tester.getBottomLeft(find.byType(ColoredBox).first);
     expect(container.dy, tester.getTopLeft(find.byType(Divider)).dy);
 
     final Offset subheader = tester.getTopLeft(find.text('Subheader'));

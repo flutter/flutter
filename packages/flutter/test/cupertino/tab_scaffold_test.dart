@@ -501,7 +501,7 @@ void main() {
                   items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
                 ),
                 tabBuilder: (BuildContext context, int index) {
-                  contentPadding = MediaQuery.of(context).padding;
+                  contentPadding = MediaQuery.paddingOf(context);
                   return const Placeholder();
                 },
               ),

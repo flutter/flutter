@@ -48,6 +48,7 @@ void main() {
           outdatedGradleHandler,
           sslExceptionHandler,
           zipExceptionHandler,
+          incompatibleJavaAndGradleVersionsHandler,
         ])
       );
     });
@@ -808,9 +809,9 @@ assembleProfile
           '│   }                                                                                           │\n'
           '│ }                                                                                             │\n'
           '│                                                                                               │\n'
-          "│ Note that your app won't be available to users running Android SDKs below 19.                 │\n"
-          '│ Alternatively, try to find a version of this plugin that supports these lower versions of the │\n'
-          '│ Android SDK.                                                                                  │\n'
+          '│ Following this change, your app will not be available to users running Android SDKs below 19. │\n'
+          '│ Consider searching for a version of this plugin that supports these lower versions of the     │\n'
+          '│ Android SDK instead.                                                                          │\n'
           '│ For more information, see:                                                                    │\n'
           '│ https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration          │\n'
           '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n'
@@ -931,12 +932,12 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
         testLogger.statusText,
         contains(
           '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                       │\n'
-          '│ Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then │\n'
-          '│ update /android/build.gradle:                                                                │\n'
-          "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
-          '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+          '┌─ Flutter Fix ──────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                     │\n'
+          '│ Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then │\n'
+          '│ update /android/build.gradle:                                                              │\n'
+          "│ ext.kotlin_version = '<latest-version>'                                                    │\n"
+          '└────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{
@@ -979,7 +980,7 @@ A problem occurred evaluating project ':app'.
           '│ To fix this issue, replace the following content:                                │\n'
           '│ /android/build.gradle:                                                           │\n'
           "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-          "│     + classpath 'com.android.tools.build:gradle:7.2.0'                           │\n"
+          "│     + classpath 'com.android.tools.build:gradle:7.3.0'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
           '│     + https://services.gradle.org/distributions/gradle-7.5-all.zip               │\n'
@@ -1301,6 +1302,40 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''
       ProcessManager: () => processManager,
       AnsiTerminal: () => _TestPromptTerminal('n'),
       BotDetector: () => const FakeBotDetector(false),
+    });
+  });
+
+  group('incompatible java and gradle versions error', () {
+    const String errorMessage = '''
+Could not compile build file '…/example/android/build.gradle'.
+> startup failed:
+  General error during conversion: Unsupported class file major version 61
+  java.lang.IllegalArgumentException: Unsupported class file major version 61
+''';
+
+    testWithoutContext('pattern', () {
+      expect(
+        incompatibleJavaAndGradleVersionsHandler.test(errorMessage),
+        isTrue,
+      );
+    });
+
+    testUsingContext('suggestion', () async {
+      await incompatibleJavaAndGradleVersionsHandler.handler(
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        multidexEnabled: true,
+      );
+
+      // Ensure the error notes the incompatible Gradle/AGP/Java versions and links to related resources.
+      expect(testLogger.statusText, contains('Gradle version is incompatible with the Java version'));
+      expect(testLogger.statusText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
   });
 }

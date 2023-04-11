@@ -15,11 +15,10 @@ class SliderTemplate extends TokenTemplate {
   String generate() => '''
 class _${blockName}DefaultsM3 extends SliderThemeData {
   _${blockName}DefaultsM3(this.context)
-    : _colors = Theme.of(context).colorScheme,
-      super(trackHeight: ${tokens['$tokenGroup.active.track.height']});
+    : super(trackHeight: ${tokens['$tokenGroup.active.track.height']});
 
   final BuildContext context;
-  final ColorScheme _colors;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   Color? get activeTrackColor => ${componentColor('$tokenGroup.active.track')};
@@ -71,6 +70,14 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
 
     return Colors.transparent;
   });
+
+  @override
+  TextStyle? get valueIndicatorTextStyle => ${textStyle('$tokenGroup.label.label-text')}!.copyWith(
+    color: ${componentColor('$tokenGroup.label.label-text')},
+  );
+
+  @override
+  SliderComponentShape? get valueIndicatorShape => const DropSliderValueIndicatorShape();
 }
 ''';
 

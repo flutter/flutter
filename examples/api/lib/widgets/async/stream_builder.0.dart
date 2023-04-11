@@ -2,36 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [StreamBuilder].
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [StreamBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const StreamBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class StreamBuilderExampleApp extends StatelessWidget {
+  const StreamBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: StreamBuilderExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class StreamBuilderExample extends StatefulWidget {
+  const StreamBuilderExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<StreamBuilderExample> createState() => _StreamBuilderExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _StreamBuilderExampleState extends State<StreamBuilderExample> {
   final Stream<int> _bids = (() {
     late final StreamController<int> controller;
     controller = StreamController<int>(
@@ -87,7 +84,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       child: Text('Select a lot'),
                     ),
                   ];
-                  break;
                 case ConnectionState.waiting:
                   children = const <Widget>[
                     SizedBox(
@@ -100,7 +96,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       child: Text('Awaiting bids...'),
                     ),
                   ];
-                  break;
                 case ConnectionState.active:
                   children = <Widget>[
                     const Icon(
@@ -113,7 +108,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       child: Text('\$${snapshot.data}'),
                     ),
                   ];
-                  break;
                 case ConnectionState.done:
                   children = <Widget>[
                     const Icon(
@@ -126,7 +120,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       child: Text('\$${snapshot.data} (closed)'),
                     ),
                   ];
-                  break;
               }
             }
 

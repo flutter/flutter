@@ -5,7 +5,8 @@
 import 'package:flutter/material.dart';
 
 import 'common.dart';
-
+import 'src/animated_blur_backdrop_filter.dart';
+import 'src/animated_complex_image_filtered.dart';
 import 'src/animated_complex_opacity.dart';
 import 'src/animated_image.dart';
 import 'src/animated_placeholder.dart';
@@ -82,6 +83,8 @@ class MacrobenchmarksApp extends StatelessWidget {
         ...gradientPerfRoutes,
         kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
         kListTextLayoutRouteName: (BuildContext context) => const ColumnOfText(),
+        kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) => const AnimatedComplexImageFiltered(),
+        kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
       },
     );
   }
@@ -199,7 +202,7 @@ class HomePage extends StatelessWidget {
           ),
           ElevatedButton(
             key: const Key(kColorFilterWithUnstableChildName),
-            child: const Text('Color Filter with Ustable Child'),
+            child: const Text('Color Filter with Unstable Child'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterWithUnstableChildName);
             },
@@ -296,10 +299,24 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
+            key: const Key(kAnimatedComplexImageFilteredPerfRouteName),
+            child: const Text('Animated complex image filtered perf'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedComplexImageFilteredPerfRouteName);
+            },
+          ),
+          ElevatedButton(
             key: const Key(kListTextLayoutRouteName),
             child: const Text('A list with lots of text'),
             onPressed: () {
               Navigator.pushNamed(context, kListTextLayoutRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedBlurBackdropFilter),
+            child: const Text('An animating backdrop filter'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedBlurBackdropFilter);
             },
           ),
         ],

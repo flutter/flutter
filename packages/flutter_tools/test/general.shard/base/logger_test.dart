@@ -87,7 +87,7 @@ void main() {
     final WindowsStdoutLogger logger = WindowsStdoutLogger(
       outputPreferences: OutputPreferences.test(),
       stdio: stdio,
-      terminal: Terminal.test(supportsColor: false, supportsEmoji: false),
+      terminal: Terminal.test(),
     );
 
     logger.printStatus('🔥🖼️✗✓🔨💪✏️');
@@ -480,7 +480,7 @@ void main() {
           expect(done, isTrue);
         });
 
-        testWithoutContext('AnonymousSpinnerStatus logs warning after timeout', () async {
+        testWithoutContext('AnonymousSpinnerStatus logs warning after timeout without color support', () async {
           mockStopwatch = FakeStopwatch();
           const String warningMessage = 'a warning message.';
           final bool done = FakeAsync().run<bool>((FakeAsync time) {
@@ -489,6 +489,7 @@ void main() {
               stopwatch: mockStopwatch,
               terminal: terminal,
               slowWarningCallback: () => warningMessage,
+              warningColor: TerminalColor.red,
               timeout: const Duration(milliseconds: 100),
             )..start();
             // must be greater than the spinner timer duration
@@ -497,10 +498,37 @@ void main() {
             time.elapse(timeLapse);
 
             List<String> lines = outputStdout();
-            expect(
-              lines.join(),
-              contains(warningMessage),
-            );
+            expect(lines.join().contains(RegExp(red)), isFalse);
+            expect(lines.join(), '⣽\ba warning message.⣻');
+
+            spinner.stop();
+            lines = outputStdout();
+            return true;
+          });
+          expect(done, isTrue);
+        });
+
+        testWithoutContext('AnonymousSpinnerStatus logs warning after timeout with color support', () async {
+          mockStopwatch = FakeStopwatch();
+          const String warningMessage = 'a warning message.';
+          final bool done = FakeAsync().run<bool>((FakeAsync time) {
+            final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
+              stdio: mockStdio,
+              stopwatch: mockStopwatch,
+              terminal: coloredTerminal,
+              slowWarningCallback: () => warningMessage,
+              warningColor: TerminalColor.red,
+              timeout: const Duration(milliseconds: 100),
+            )..start();
+            // must be greater than the spinner timer duration
+            const Duration timeLapse = Duration(milliseconds: 101);
+            mockStopwatch.elapsed += timeLapse;
+            time.elapse(timeLapse);
+
+            List<String> lines = outputStdout();
+            expect(lines.join().contains(RegExp(red)), isTrue);
+            expect(lines.join(), '⣽\b${AnsiTerminal.red}a warning message.${AnsiTerminal.resetColor}⣻');
+            expect(lines.join(), matches('$red$warningMessage$resetColor'));
 
             spinner.stop();
             lines = outputStdout();

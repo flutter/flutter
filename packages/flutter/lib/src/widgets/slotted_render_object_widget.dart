@@ -116,7 +116,7 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderBox {
   /// currently occupied by a child to obtain a name for that slot for debug
   /// outputs.
   ///
-  /// The default implementation calls [EnumName.name] on `slot` it it is an
+  /// The default implementation calls [EnumName.name] on `slot` if it is an
   /// [Enum] value and `toString` if it is not.
   @protected
   String debugNameForSlot(S slot) {

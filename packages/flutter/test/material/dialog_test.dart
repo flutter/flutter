@@ -11,7 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textScaleFactor = 1.0 }) {
+MaterialApp _buildAppWithDialog(
+  Widget dialog, {
+  ThemeData? theme,
+  double textScaleFactor = 1.0,
+  TraversalEdgeBehavior? traversalEdgeBehavior,
+}) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -23,6 +28,7 @@ MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData? theme, double textSc
               onPressed: () {
                 showDialog<void>(
                   context: context,
+                  traversalEdgeBehavior: traversalEdgeBehavior,
                   builder: (BuildContext context) {
                     return MediaQuery(
                       data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
@@ -1507,7 +1513,7 @@ void main() {
         ElevatedButton(
           key: key1,
           onPressed: () {},
-          child: const Text('Loooooooooog button 1'),
+          child: const Text('Loooooooooong button 1'),
         ),
         ElevatedButton(
           key: key2,
@@ -2499,6 +2505,7 @@ void main() {
       label: 'Custom label',
       flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
+    semantics.dispose();
   });
 
   testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
@@ -2582,11 +2589,129 @@ void main() {
     expect(tester.getTopLeft(find.byKey(actionKey)).dx, (800 - 20) / 2);
     expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
   });
+
+  testWidgets('Uses closed loop focus traversal', (WidgetTester tester) async {
+    final FocusNode okNode = FocusNode();
+    final FocusNode cancelNode = FocusNode();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    Future<bool> previousFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const PreviousFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    final AlertDialog dialog = AlertDialog(
+      content: const Text('Test dialog'),
+      actions: <Widget>[
+        TextButton(
+          focusNode: okNode,
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+        TextButton(
+          focusNode: cancelNode,
+          onPressed: () {},
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Start at OK
+    okNode.requestFocus();
+    await tester.pump();
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // OK -> Cancel
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // Cancel -> OK
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // Cancel <- OK
+    expect(await previousFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // OK <- Cancel
+    expect(await previousFocus(), true);
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+  });
+
+  testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
+    final FocusNode okNode = FocusNode();
+    final FocusNode cancelNode = FocusNode();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    final AlertDialog dialog = AlertDialog(
+      content: const Text('Test dialog'),
+      actions: <Widget>[
+        TextButton(
+          focusNode: okNode,
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+        TextButton(
+          focusNode: cancelNode,
+          onPressed: () {},
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, traversalEdgeBehavior: TraversalEdgeBehavior.leaveFlutterView));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Start at OK
+    okNode.requestFocus();
+    await tester.pump();
+    expect(okNode.hasFocus, true);
+    expect(cancelNode.hasFocus, false);
+
+    // OK -> Cancel
+    expect(await nextFocus(), true);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, true);
+
+    // Cancel -> nothing
+    expect(await nextFocus(), false);
+    expect(okNode.hasFocus, false);
+    expect(cancelNode.hasFocus, false);
+  });
 }
 
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<Object?> _materialDialogBuilder(BuildContext context, Object? arguments) {
     return DialogRoute<void>(
       context: context,
