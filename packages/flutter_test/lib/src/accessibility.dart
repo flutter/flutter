@@ -121,11 +121,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   /// A link describing the tap target guidelines for a platform.
   final String link;
 
-  /// The gap between semantics node to a scrollable to be consider as a valid
-  /// tap target.
+  /// The gap between targets to their parent scrollables to be consider as valid
+  /// tap targets.
   ///
   /// This avoid cases where a tap target is partially scrolled off-screen that
-  /// result in a smaller tap target.
+  /// result in a smaller tap area.
   static const double _kMinimumGapToBoundary = 0.001;
 
   @override
