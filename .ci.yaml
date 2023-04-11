@@ -423,7 +423,6 @@ targets:
       - "**.mm"
 
   - name: Mac iOS Engine
-    bringup: true
     recipe: engine/engine
     properties:
       add_recipes_cq: "true"
@@ -492,7 +491,6 @@ targets:
     timeout: 75
 
   - name: Mac iOS Engine Profile
-    bringup: true
     recipe: engine/engine
     properties:
       build_ios: "true"
@@ -504,7 +502,6 @@ targets:
       - ci/**
 
   - name: Mac iOS Engine Release
-    bringup: true
     recipe: engine/engine
     properties:
       build_ios: "true"
