@@ -14,10 +14,12 @@ import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/xcode_project.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
@@ -655,7 +657,7 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
   });
 
-  testWithoutContext('scheme for project with custom schemes is matched against flavor', () {
+  testUsingContext('scheme for project with custom schemes is matched against flavor', () {
     final XcodeProjectInfo info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
@@ -727,6 +729,36 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false), 'Free'), null);
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false), 'Paid'), null);
   });
+
+
+
+  group('Renamed xcodeproj and xcworkspace', () {
+    late FakeIosProject project;
+    late FakeXcodeProjectInfo projectInfo;
+    setUp(() {
+      project = FakeIosProject();
+      projectInfo = FakeXcodeProjectInfo();
+    });
+
+    void testWithMocks(String description, Future<void> Function() testMethod) {
+      testUsingContext(description, testMethod, overrides: <Type, Generator>{
+        FakeIosProject: () => project,
+        FakeXcodeProjectInfo: () => projectInfo,
+      });
+    }
+
+    testWithMocks('custom naming', () async {
+      final XcodeProjectInfo info = XcodeProjectInfo(
+        <String>['TestName'],
+        <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
+        <String>['TestName'],
+        logger,
+      );
+
+      expect(projectInfo.schemeFor(BuildInfo.debug), 'TestName');
+    });
+  });
+
  group('environmentVariablesAsXcodeBuildSettings', () {
     late FakePlatform platform;
 
