@@ -149,7 +149,10 @@ shared_library("flutter_framework_dylib") {
   visibility = [ ":*" ]
   output_name = "$_flutter_framework_name"
 
-  ldflags = [ "-Wl,-install_name,@rpath/$_flutter_framework_filename/$_framework_binary_subpath" ]
+  ldflags = [
+    "-Wl,-install_name,@rpath/$_flutter_framework_filename/$_framework_binary_subpath",
+    "-fapplication-extension",
+  ]
 
   deps = [ ":flutter_framework_source" ]
 }
@@ -297,7 +300,7 @@ action("_generate_symlinks") {
 }
 
 group("flutter_framework") {
-  deps = [ ":_generate_symlinks" ]
+  deps = [ ":_generate_symlinks_and_verify_framework_module" ]
 }
 
 if (build_glfw_shell) {
@@ -331,6 +334,24 @@ generated_file("macos_framework_without_entitlement_config") {
   outputs = [ "$target_gen_dir/framework_without_entitlements.txt" ]
 
   data_keys = [ "macos_framework_without_entitlement" ]
+
+  deps = [ ":_generate_symlinks" ]
+}
+
+shared_library("_generate_symlinks_and_verify_framework_module") {
+  framework_search_path = rebase_path("$root_out_dir")
+  visibility = [ ":*" ]
+  cflags_objc = [ "-F$framework_search_path" ]
+
+  ldflags = [
+    "-F$framework_search_path",
+    "-fapplication-extension",
+    "-Xlinker",
+    "-fatal_warnings",
+  ]
+  frameworks = [ "FlutterMacOS.framework" ]
+
+  sources = [ "framework/Source/FlutterUmbrellaImportTests.m" ]
 
   deps = [ ":_generate_symlinks" ]
 }
