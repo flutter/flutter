@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -1115,6 +1116,12 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
   ? TraversalEdgeBehavior.leaveFlutterView
   : TraversalEdgeBehavior.closedLoop;
 
+/// A function that informs when a [Navigator]'s history has changed.
+///
+/// See also:
+///   * [NavigatorState.onHistoryChanged]
+typedef HistoryChangedCallback = void Function(NavigatorState navigatorState);
+
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
 /// Many apps have a navigator near the top of their widget hierarchy in order
@@ -1426,7 +1433,7 @@ class Navigator extends StatefulWidget {
     // TODO(justinmc): Is this something else I need to worry about? It returns a bool.
     this.onPopPage,
     this.initialRoute,
-    this.onHistoryChanged,
+    this.onHistoryChanged = defaultOnHistoryChanged,
     this.onGenerateInitialRoutes = Navigator.defaultGenerateInitialRoutes,
     this.onGenerateRoute,
     this.onUnknownRoute,
@@ -1569,7 +1576,7 @@ class Navigator extends StatefulWidget {
 
   /// Called whenever anything changes in the [Navigator]'s history, including
   /// navigation.
-  final VoidCallback? onHistoryChanged;
+  final HistoryChangedCallback? onHistoryChanged;
 
   /// Called when the widget is created to generate the initial list of [Route]
   /// objects if [initialRoute] is not null.
@@ -2775,6 +2782,30 @@ class Navigator extends StatefulWidget {
     return result.cast<Route<dynamic>>();
   }
 
+  /// Updates [SystemNavigator] with the [Navigator]'s status, if it is the root
+  /// [Navigator].
+  ///
+  /// The default value of [Navigator.onHistoryChanged].
+  static void defaultOnHistoryChanged(NavigatorState navigatorState) {
+    // TODO(justinmc): Also should probably set this on app start, because it
+    // will otherwise carry over during shift+r restart.
+    // If this is the root NavigatorState, then update the SystemNavigator with
+    // its status.
+    if (navigatorState.context.findAncestorStateOfType<NavigatorState>() != null) {
+      return;
+    }
+    // If canPop is true then CanPopScopes aren't going to have any effect.
+    if (navigatorState.canPop()) {
+      SystemNavigator.updateNavigationStackStatus(true);
+      return;
+    }
+    final _RouteEntry currentRouteEntry =
+        navigatorState._history.value.firstWhere(_RouteEntry.isPresentPredicate);
+    final bool canPopScopeIsDisablingPop =
+        currentRouteEntry.route.popEnabled() == RoutePopDisposition.doNotPop;
+    SystemNavigator.updateNavigationStackStatus(canPopScopeIsDisablingPop);
+  }
+
   @override
   NavigatorState createState() => NavigatorState();
 }
@@ -3355,6 +3386,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   late List<NavigatorObserver> _effectiveObservers;
 
+  void _onHistoryChanged() {
+    if (widget.onHistoryChanged == null) {
+      return;
+    }
+    widget.onHistoryChanged!(this);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -3404,9 +3442,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       SystemNavigator.selectSingleEntryHistory();
     }
 
-    if (widget.onHistoryChanged != null) {
-      _history.addListener(widget.onHistoryChanged!);
-    }
+    _history.addListener(_onHistoryChanged);
   }
 
   // Use [_nextPagelessRestorationScopeId] to get the next id.
@@ -3625,14 +3661,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       }());
       _updatePages();
     }
-    if (oldWidget.onHistoryChanged != widget.onHistoryChanged) {
-      if (oldWidget.onHistoryChanged != null) {
-        _history.removeListener(oldWidget.onHistoryChanged!);
-      }
-      if (widget.onHistoryChanged != null) {
-        _history.addListener(widget.onHistoryChanged!);
-      }
-    }
 
     for (final _RouteEntry entry in _history.value) {
       entry.route.changedExternalState();
@@ -3688,9 +3716,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final _RouteEntry entry in _history.value) {
       entry.dispose();
     }
-    if (widget.onHistoryChanged != null) {
-      _history.removeListener(widget.onHistoryChanged!);
-    }
+    _history.removeListener(_onHistoryChanged);
     super.dispose();
     // don't unlock, so that the object becomes unusable
     assert(_debugLocked);
@@ -4668,24 +4694,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       });
     }
     _cancelActivePointers();
-    // TODO(justinmc): Also should probably set this on app start, because it
-    // will otherwise carry over during shift+r restart.
-    // If this is the root NavigatorState, then update the SystemNavigator with
-    // its status.
-    if (context.findAncestorStateOfType<NavigatorState>() == null) {
-      // If canPop is true then CanPopScopes aren't going to have any effect.
-      if (canPop()) {
-        print('justin Navigator._afterNavigation updateNavigationStackStatus to true');
-        SystemNavigator.updateNavigationStackStatus(true);
-        return;
-      }
-      final _RouteEntry currentRouteEntry =
-          _history.value.firstWhere(_RouteEntry.isPresentPredicate);
-      final bool canPopScopeIsDisablingPop =
-          currentRouteEntry.route.popEnabled() == RoutePopDisposition.doNotPop;
-        print('justin Navigator._afterNavigation updateNavigationStackStatus to $canPopScopeIsDisablingPop');
-      SystemNavigator.updateNavigationStackStatus(canPopScopeIsDisablingPop);
-    }
   }
 
   /// Replace the current route of the navigator by pushing the given route and
