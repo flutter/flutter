@@ -4953,7 +4953,7 @@ class Flex extends MultiChildRenderObjectWidget implements _FlexBase {
 ///    that may by sized smaller (leaving some remaining room unused).
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Row extends StatelessWidget implements _FlexBase {
+class Row extends StatefulWidget implements _FlexBase {
   /// Creates a horizontal array of children.
   ///
   /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
@@ -5007,17 +5007,24 @@ class Row extends StatelessWidget implements _FlexBase {
   final List<Widget> children;
 
   @override
+  State<StatefulWidget> createState() => _RowState();
+}
+
+class _RowState extends State<Row> {
+  final StaticMultiSelectableSelectionContainerDelegate _selectionDelegate = StaticMultiSelectableSelectionContainerDelegate(selectedContentSeparator: ' ');
+
+  @override
   Widget build(BuildContext context) {
     Widget result = Flex(
-      direction: direction,
-      mainAxisAlignment: mainAxisAlignment,
-      mainAxisSize: mainAxisSize,
-      crossAxisAlignment: crossAxisAlignment,
-      textDirection: textDirection,
-      verticalDirection: verticalDirection,
-      textBaseline: textBaseline,
-      clipBehavior: clipBehavior,
-      children: children,
+      direction: widget.direction,
+      mainAxisAlignment: widget.mainAxisAlignment,
+      mainAxisSize: widget.mainAxisSize,
+      crossAxisAlignment: widget.crossAxisAlignment,
+      textDirection: widget.textDirection,
+      verticalDirection: widget.verticalDirection,
+      textBaseline: widget.textBaseline,
+      clipBehavior: widget.clipBehavior,
+      children: widget.children,
     );
 
     // Selection is only enabled when there is a parent registrar.
@@ -5025,7 +5032,7 @@ class Row extends StatelessWidget implements _FlexBase {
     if (registrar != null) {
       result = SelectionContainer(
         registrar: registrar,
-        delegate: StaticMultiSelectableSelectionContainerDelegate(selectedContentSeparator: ' '),
+        delegate: _selectionDelegate,
         child: result,
       );
     }
@@ -5201,7 +5208,7 @@ class Row extends StatelessWidget implements _FlexBase {
 ///    use a [Column] inside a scrolling container.
 ///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class Column extends StatelessWidget implements _FlexBase {
+class Column extends StatefulWidget implements _FlexBase {
   /// Creates a vertical array of children.
   ///
   /// The [mainAxisAlignment], [mainAxisSize], [crossAxisAlignment], and
@@ -5253,17 +5260,24 @@ class Column extends StatelessWidget implements _FlexBase {
   final List<Widget> children;
 
   @override
+  State<StatefulWidget> createState() => _ColumnState();
+}
+
+class _ColumnState extends State<Column> {
+  final StaticMultiSelectableSelectionContainerDelegate _selectionDelegate = StaticMultiSelectableSelectionContainerDelegate(selectedContentSeparator: '\n');
+
+  @override
   Widget build(BuildContext context) {
     Widget result = Flex(
-      direction: direction,
-      mainAxisAlignment: mainAxisAlignment,
-      mainAxisSize: mainAxisSize,
-      crossAxisAlignment: crossAxisAlignment,
-      textDirection: textDirection,
-      verticalDirection: verticalDirection,
-      textBaseline: textBaseline,
-      clipBehavior: clipBehavior,
-      children: children,
+      direction: widget.direction,
+      mainAxisAlignment: widget.mainAxisAlignment,
+      mainAxisSize: widget.mainAxisSize,
+      crossAxisAlignment: widget.crossAxisAlignment,
+      textDirection: widget.textDirection,
+      verticalDirection: widget.verticalDirection,
+      textBaseline: widget.textBaseline,
+      clipBehavior: widget.clipBehavior,
+      children: widget.children,
     );
 
     // Selection is only enabled when there is a parent registrar.
@@ -5271,7 +5285,7 @@ class Column extends StatelessWidget implements _FlexBase {
     if (registrar != null) {
       result = SelectionContainer(
         registrar: registrar,
-        delegate: StaticMultiSelectableSelectionContainerDelegate(selectedContentSeparator: '\n'),
+        delegate: _selectionDelegate,
         child: result,
       );
     }
