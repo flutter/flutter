@@ -1471,7 +1471,6 @@ targets:
 
   - name: Linux_android android_semantics_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/114360
     presubmit: false
     timeout: 60
     properties:
@@ -2188,7 +2187,6 @@ targets:
       task_name: new_gallery__transition_perf
 
   - name: Linux_android new_gallery_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112577
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2198,7 +2196,6 @@ targets:
       task_name: new_gallery_impeller__transition_perf
 
   - name: Linux_samsung_s10 new_gallery_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112573
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2437,7 +2434,6 @@ targets:
       task_name: gradient_static_perf__e2e_summary
 
   - name: Linux_android android_choreographer_do_frame_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/119720
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3594,7 +3590,6 @@ targets:
       task_name: imagefiltered_transform_animation_perf_impeller_ios__timeline_summary
 
   - name: Mac_ios external_ui_integration_test_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/106806
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3989,7 +3984,6 @@ targets:
       task_name: simple_animation_perf_impeller_ios
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/120808
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4445,7 +4439,6 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/122200
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4879,7 +4872,6 @@ targets:
 
   - name: Windows_android flavors_test_win
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/107681
     presubmit: false
     timeout: 60
     properties:
