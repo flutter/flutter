@@ -198,7 +198,7 @@ class ScrollPhysics {
 
   /// Whether the scrollable should let the user adjust the scroll offset, for
   /// example by dragging. If [allowUserScrolling] is false, the scrollable
-  /// will never allow the user scrolling.
+  /// will never allow user input to change the scroll position.
   ///
   /// By default, the user can manipulate the scroll offset if, and only if,
   /// there is actually content outside the viewport to reveal.
@@ -492,7 +492,7 @@ class ScrollPhysics {
   /// scroll position to fulfill such a request.
   bool get allowImplicitScrolling => true;
 
-  /// Whether a viewport is allowed the user scrolling.
+  /// Whether a viewport is allowed to change the scroll position as the result of user input.
   bool get allowUserScrolling => true;
 
   @override
