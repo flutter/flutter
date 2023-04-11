@@ -186,8 +186,10 @@ class FlutterVersion {
     globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version'))
         .writeAsStringSync(_frameworkVersion);
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, '.version.json'))
-        .writeAsStringSync(encoder.convert(toJson()));
+    final File versionFile = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, '.version.json'));
+    if (!versionFile.existsSync()) {
+      versionFile.writeAsStringSync(encoder.convert(toJson()));
+    }
   }
 
   @override

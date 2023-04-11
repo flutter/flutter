@@ -128,6 +128,7 @@ GOTO :after_subroutine
 
   :do_snapshot
     IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
+    IF EXIST "%FLUTTER_ROOT%\.version.json" DEL "%FLUTTER_ROOT%\.version.json"
     ECHO: > "%cache_dir%\.dartignore"
     ECHO Building flutter tool... 1>&2
     PUSHD "%flutter_tools_dir%"
