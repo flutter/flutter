@@ -368,6 +368,7 @@ targets:
     properties:
       config_name: mac_unopt
       add_recipes_cq: "true"
+    timeout: 180  # set timeout to 3H while this runs on staging.
 
   - name: Mac Unopt
     recipe: engine/engine_unopt
