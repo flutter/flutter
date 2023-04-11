@@ -289,6 +289,16 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
               'or `flutter config --no-analytics\n');
     }
 
+    // If the user has opted out of legacy analytics, we will continue
+    // to opt them out of unified analytics and inform them
+    if (!legacyAnalyticsMessageShown && !globals.flutterUsage.enabled) {
+      await globals.analytics.setTelemetry(false);
+      globals.logger
+          .printStatus(
+          'You have already opted out of the legacy analytics system\n'
+          'and will continue to remain opted out of the new analytics system\n');
+    }
+
     // Invoking this will onboard the flutter tool onto
     // the package on the developer's machine and will
     // allow for events to be sent to Google Analytics
