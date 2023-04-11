@@ -425,7 +425,6 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 ///     switch (result) {
 ///       case Commands.heroAndScholar:
 ///         setState(() { _heroAndScholar = !_heroAndScholar; });
-///         break;
 ///       case Commands.hurricaneCame:
 ///         // ...handle hurricane option
 ///         break;
@@ -719,10 +718,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       switch (textDirection) {
         case TextDirection.rtl:
           x = size.width - position.right - childSize.width;
-          break;
         case TextDirection.ltr:
           x = position.left;
-          break;
       }
     }
     final Offset wantedPosition = Offset(x, y);
@@ -1245,10 +1242,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     switch (popupMenuPosition) {
       case PopupMenuPosition.over:
         offset = widget.offset;
-        break;
       case PopupMenuPosition.under:
         offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
-        break;
     }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(

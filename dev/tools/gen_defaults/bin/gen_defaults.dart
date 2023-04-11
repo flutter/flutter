@@ -45,6 +45,8 @@ import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/popup_menu_template.dart';
 import 'package:gen_defaults/progress_indicator_template.dart';
 import 'package:gen_defaults/radio_template.dart';
+import 'package:gen_defaults/search_bar_template.dart';
+import 'package:gen_defaults/search_view_template.dart';
 import 'package:gen_defaults/segmented_button_template.dart';
 import 'package:gen_defaults/slider_template.dart';
 import 'package:gen_defaults/snackbar_template.dart';
@@ -107,6 +109,8 @@ Future<void> main(List<String> args) async {
     'progress_indicator_circular.json',
     'progress_indicator_linear.json',
     'radio_button.json',
+    'search_bar.json',
+    'search_view.json',
     'segmented_button_outlined.json',
     'shape.json',
     'sheet_bottom.json',
@@ -173,6 +177,8 @@ Future<void> main(List<String> args) async {
   PopupMenuTemplate('PopupMenu', '$materialLib/popup_menu.dart', tokens).updateFile();
   ProgressIndicatorTemplate('ProgressIndicator', '$materialLib/progress_indicator.dart', tokens).updateFile();
   RadioTemplate('Radio<T>', '$materialLib/radio.dart', tokens).updateFile();
+  SearchBarTemplate('SearchBar', '$materialLib/search_anchor.dart', tokens).updateFile();
+  SearchViewTemplate('SearchView', '$materialLib/search_anchor.dart', tokens).updateFile();
   SegmentedButtonTemplate('md.comp.outlined-segmented-button', 'SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
   SnackbarTemplate('md.comp.snackbar', 'Snackbar', '$materialLib/snack_bar.dart', tokens).updateFile();
   SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();

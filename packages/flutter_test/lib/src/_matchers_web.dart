@@ -57,7 +57,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-    final Element e = binding.renderViewElement!;
+    final Element e = binding.rootElement!;
     final ui.FlutterView view = binding.platformDispatcher.implicitView!;
 
     // Unlike `flutter_tester`, we don't have the ability to render an element

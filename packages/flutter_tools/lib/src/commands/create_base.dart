@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:uuid/uuid.dart';
 
 import '../android/android.dart' as android_common;
@@ -381,12 +380,6 @@ abstract class CreateBase extends FlutterCommand {
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
     final String linuxIdentifier = androidIdentifier;
 
-    // TODO(dacoharkes): Replace with hardcoded version in template when Flutter 2.11 is released.
-    final Version ffiPluginStableRelease = Version(2, 11, 0);
-    final String minFrameworkVersionFfiPlugin = Version.parse(globals.flutterVersion.frameworkVersion) < ffiPluginStableRelease
-        ? globals.flutterVersion.frameworkVersion
-        : ffiPluginStableRelease.toString();
-
     return <String, Object?>{
       'organization': organization,
       'projectName': projectName,
@@ -416,7 +409,6 @@ abstract class CreateBase extends FlutterCommand {
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
-      'minFrameworkVersionFfiPlugin': minFrameworkVersionFfiPlugin,
       'ios': ios,
       'android': android,
       'web': web,

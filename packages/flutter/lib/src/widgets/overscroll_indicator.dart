@@ -255,10 +255,8 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             switch (notification.metrics.axis) {
               case Axis.horizontal:
                 controller!.pull(notification.overscroll.abs(), size.width, clampDouble(position.dy, 0.0, size.height), size.height);
-                break;
               case Axis.vertical:
                 controller!.pull(notification.overscroll.abs(), size.height, clampDouble(position.dx, 0.0, size.width), size.width);
-                break;
             }
           }
         }
@@ -467,11 +465,9 @@ class _GlowController extends ChangeNotifier {
     switch (_state) {
       case _GlowState.absorb:
         _recede(_recedeTime);
-        break;
       case _GlowState.recede:
         _state = _GlowState.idle;
         _pullDistance = 0.0;
-        break;
       case _GlowState.pull:
       case _GlowState.idle:
         break;
@@ -528,7 +524,7 @@ class _GlowController extends ChangeNotifier {
 
   @override
   String toString() {
-    return '_GlowController(color: $color, axis: ${describeEnum(axis)})';
+    return '_GlowController(color: $color, axis: ${axis.name})';
   }
 }
 
@@ -562,28 +558,24 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
         controller.paint(canvas, size);
-        break;
       case AxisDirection.down:
         canvas.save();
         canvas.translate(0.0, size.height);
         canvas.scale(1.0, -1.0);
         controller.paint(canvas, size);
         canvas.restore();
-        break;
       case AxisDirection.left:
         canvas.save();
         canvas.rotate(piOver2);
         canvas.scale(1.0, -1.0);
         controller.paint(canvas, Size(size.height, size.width));
         canvas.restore();
-        break;
       case AxisDirection.right:
         canvas.save();
         canvas.translate(size.width, 0.0);
         canvas.rotate(piOver2);
         controller.paint(canvas, Size(size.height, size.width));
         canvas.restore();
-        break;
     }
   }
 
@@ -800,11 +792,9 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             case Axis.horizontal:
               x += stretch;
               mainAxisSize = size.width;
-              break;
             case Axis.vertical:
               y += stretch;
               mainAxisSize = size.height;
-              break;
           }
 
           final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
@@ -933,11 +923,9 @@ class _StretchController extends ChangeNotifier {
     switch (_state) {
       case _StretchState.absorb:
         _recede(_stretchDuration);
-        break;
       case _StretchState.recede:
         _state = _StretchState.idle;
         _pullDistance = 0.0;
-        break;
       case _StretchState.pull:
       case _StretchState.idle:
         break;
