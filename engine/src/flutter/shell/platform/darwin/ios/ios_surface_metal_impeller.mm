@@ -61,6 +61,10 @@ GPUCAMetalLayerHandle IOSSurfaceMetalImpeller::GetCAMetalLayer(const SkISize& fr
     layer.drawableSize = drawable_size;
   }
 
+  // Flutter needs to read from the color attachment in cases where there are effects such as
+  // backdrop filters. Flutter plugins that create platform views may also read from the layer.
+  layer.framebufferOnly = NO;
+
   // When there are platform views in the scene, the drawable needs to be presented in the same
   // transaction as the one created for platform views. When the drawable are being presented from
   // the raster thread, there is no such transaction.
