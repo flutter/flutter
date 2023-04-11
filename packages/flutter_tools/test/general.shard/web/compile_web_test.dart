@@ -45,6 +45,7 @@ void main() {
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': 'serviceWorkerStrategy',
+        'WasmOmitTypeChecks': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -57,6 +58,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,
@@ -67,7 +69,7 @@ void main() {
       'target',
       BuildInfo.debug,
       'serviceWorkerStrategy',
-      compilerConfig: const WasmCompilerConfig(),
+      compilerConfig: const WasmCompilerConfig(omitTypeChecks: false),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -95,6 +97,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,
