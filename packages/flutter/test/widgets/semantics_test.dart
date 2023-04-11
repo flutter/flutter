@@ -611,7 +611,7 @@ void main() {
           liveRegion: true,
         ),
     );
-    final List<SemanticsFlag> flags = SemanticsFlag.values;
+    final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)

@@ -444,7 +444,7 @@ void _defineTests() {
         ),
       ),
     ));
-    List<SemanticsFlag> flags = SemanticsFlag.values;
+    List<SemanticsFlag> flags = SemanticsFlag.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags
@@ -498,7 +498,7 @@ void _defineTests() {
         ),
       ),
     ));
-    flags = SemanticsFlag.values;
+    flags = SemanticsFlag.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags

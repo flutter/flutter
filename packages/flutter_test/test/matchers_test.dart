@@ -616,7 +616,7 @@ void main() {
       for (final int index in SemanticsAction.values.map((SemanticsAction value) => value.index)) {
         actions |= index;
       }
-      for (final int index in SemanticsAction.values.map((SemanticsAction value) => value.index)) {
+      for (final int index in SemanticsFlag.values.map((SemanticsFlag value) => value.index)) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -898,7 +898,7 @@ void main() {
       for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.index)) {
         actions |= index;
       }
-      for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.index)) {
+      for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.index)) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -1081,7 +1081,7 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
-      for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.index)) {
+      for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.index)) {
         allActions |= index;
       }
       for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.index)) {
