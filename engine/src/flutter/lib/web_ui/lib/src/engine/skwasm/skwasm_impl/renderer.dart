@@ -238,6 +238,9 @@ class SkwasmRenderer implements Renderer {
     }
     final SkwasmPicture picture = (scene as SkwasmScene).picture as SkwasmPicture;
     await surface.renderPicture(picture);
+
+    // TODO(jacksongardner): Remove this hack. See https://github.com/flutter/flutter/issues/124616
+    await Future<void>.delayed(const Duration(milliseconds: 100));
   }
 
   @override
