@@ -534,6 +534,14 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             String possibleReason = '';
             if (lines[lineNumber].trimLeft().startsWith('"')) {
               possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
+            } else if (!lines[lineNumber].contains("'")) {
+              possibleReason = ' It might be missing the line saying "This feature was deprecated after...".';
+            } else if (!lines[lineNumber].trimRight().endsWith(" '")) {
+              if (lines[lineNumber].contains('This feature was deprecated')) {
+                possibleReason = ' There might not be an explanatory message.';
+              } else {
+                possibleReason = ' There might be a missing space character at the end of the line.';
+              }
             }
             throw 'Deprecation notice does not match required pattern.$possibleReason';
           }
@@ -546,6 +554,8 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
             if (firstChar.toUpperCase() != firstChar) {
               throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo';
             }
+          } else {
+            message += messageMatch.namedGroup('message')!;
           }
           lineNumber += 1;
           if (lineNumber >= lines.length) {
@@ -565,7 +575,7 @@ Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 
           }
         }
         if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?')) {
-          throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
+          throw 'Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "$message".';
         }
         if (!lines[lineNumber].startsWith("$indent  '")) {
           throw 'Unexpected deprecation notice indent.';
@@ -1772,7 +1782,14 @@ Future<void> _checkConsumerDependencies() async {
 
       final List<String> currentDependencies = (currentPackage['dependencies']! as List<Object?>).cast<String>();
       for (final String dependency in currentDependencies) {
-        workset.add(dependencyTree[dependency]!);
+        // Don't add dependencies we've already seen or we will get stuck
+        // forever if there are any circular references.
+        // TODO(dantup): Consider failing gracefully with the names of the
+        //  packages once the cycle between test_api and matcher is resolved.
+        //  https://github.com/dart-lang/test/issues/1979
+        if (!dependencies.contains(dependency)) {
+          workset.add(dependencyTree[dependency]!);
+        }
       }
     }
   }

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Scrollbar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Scrollbar].
 
 void main() => runApp(const ScrollbarApp());
 
@@ -17,27 +17,26 @@ class ScrollbarApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('Scrollbar Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: DesktopExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class DesktopExample extends StatefulWidget {
+  const DesktopExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DesktopExample> createState() => _DesktopExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _DesktopExampleState extends State<DesktopExample> {
   final ScrollController controller = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return Row(
         children: <Widget>[
           SizedBox(
@@ -73,8 +72,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 thickness: 20.0,
                 thumbVisibility: true,
                 child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context)
-                      .copyWith(scrollbars: false),
+                  behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                   child: ListView.builder(
                     primary: true,
                     itemCount: 100,

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CustomMultiChildLayout].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [CustomMultiChildLayout].
 
 void main() => runApp(const ExampleApp());
 
@@ -78,8 +78,7 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
   // automatically cause a relayout, like any other widget.
   @override
   bool shouldRelayout(_CascadeLayoutDelegate oldDelegate) {
-    return oldDelegate.textDirection != textDirection
-        || oldDelegate.overlap != overlap;
+    return oldDelegate.textDirection != textDirection || oldDelegate.overlap != overlap;
   }
 }
 

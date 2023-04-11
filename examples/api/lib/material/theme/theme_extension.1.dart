@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ThemeExtension].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+
+/// Flutter code sample for [ThemeExtension].
 
 @immutable
 class MyColors extends ThemeExtension<MyColors> {
@@ -44,19 +44,17 @@ class MyColors extends ThemeExtension<MyColors> {
 void main() {
   // Slow down time to see lerping.
   timeDilation = 5.0;
-  runApp(const MyApp());
+  runApp(const ThemeExtensionExampleApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  static const String _title = 'Flutter Code Sample';
+class ThemeExtensionExampleApp extends StatefulWidget {
+  const ThemeExtensionExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<ThemeExtensionExampleApp> createState() => _ThemeExtensionExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
   bool isLightTheme = true;
 
   void toggleTheme() {
@@ -66,7 +64,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: MyApp._title,
       theme: ThemeData.light().copyWith(
         extensions: <ThemeExtension<dynamic>>[
           const MyColors(
@@ -119,7 +116,7 @@ class Home extends StatelessWidget {
               onPressed: toggleTheme,
             ),
           ],
-        )
+        ),
       ),
     );
   }
