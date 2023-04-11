@@ -613,12 +613,10 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
+      for (final int index in SemanticsAction.values.map((SemanticsAction value) => value.index)) {
         actions |= index;
       }
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
+      for (final int index in SemanticsAction.values.map((SemanticsAction value) => value.index)) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -897,12 +895,10 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
+      for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.value)) {
         actions |= index;
       }
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
+      for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.value)) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -1085,12 +1081,10 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
+      for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.value)) {
         allActions |= index;
       }
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
+      for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.value)) {
         allFlags |= index;
       }
       final SemanticsData emptyData = SemanticsData(
