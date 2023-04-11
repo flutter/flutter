@@ -38,12 +38,12 @@ frag_info;
 
 uniform f16sampler2D input_texture;
 
-in highp vec2 v_position;
+in highp vec2 v_texture_coords;
 out f16vec4 frag_color;
 
 void main() {
   f16vec4 input_color =
-      texture(input_texture, v_position) * frag_info.input_alpha;
+      texture(input_texture, v_texture_coords) * frag_info.input_alpha;
 
   // unpremultiply first, as filter inputs are premultiplied.
   f16vec4 color = IPHalfUnpremultiply(input_color);

@@ -5,6 +5,7 @@
 #include "impeller/entity/contents/filters/yuv_to_rgb_filter_contents.h"
 
 #include "impeller/core/formats.h"
+#include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/renderer/render_pass.h"
@@ -55,6 +56,12 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     return std::nullopt;
   }
 
+  auto maybe_input_uvs = y_input_snapshot->GetCoverageUVs(coverage);
+  if (!maybe_input_uvs.has_value()) {
+    return std::nullopt;
+  }
+  auto input_uvs = maybe_input_uvs.value();
+
   if (y_input_snapshot->texture->GetTextureDescriptor().format !=
           PixelFormat::kR8UNormInt ||
       uv_input_snapshot->texture->GetTextureDescriptor().format !=
@@ -62,23 +69,34 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
-                                                 RenderPass& pass) {
+  //----------------------------------------------------------------------------
+  /// Create AnonymousContents for rendering.
+  ///
+  RenderProc render_proc = [y_input_snapshot, uv_input_snapshot, coverage,
+                            yuv_color_space = yuv_color_space_, input_uvs](
+                               const ContentContext& renderer,
+                               const Entity& entity, RenderPass& pass) -> bool {
     Command cmd;
     cmd.label = "YUV to RGB Filter";
+    cmd.stencil_reference = entity.GetStencilDepth();
 
-    auto options = OptionsFromPass(pass);
-    options.blend_mode = BlendMode::kSource;
+    auto options = OptionsFromPassAndEntity(pass, entity);
     cmd.pipeline = renderer.GetYUVToRGBFilterPipeline(options);
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.AddVertices({
-        {Point(0, 0)},
-        {Point(1, 0)},
-        {Point(1, 1)},
-        {Point(0, 0)},
-        {Point(1, 1)},
-        {Point(0, 1)},
+        {coverage.origin, input_uvs[0]},
+        {{coverage.origin.x + coverage.size.width, coverage.origin.y},
+         input_uvs[1]},
+        {{coverage.origin.x + coverage.size.width,
+          coverage.origin.y + coverage.size.height},
+         input_uvs[3]},
+        {coverage.origin, input_uvs[0]},
+        {{coverage.origin.x + coverage.size.width,
+          coverage.origin.y + coverage.size.height},
+         input_uvs[3]},
+        {{coverage.origin.x, coverage.origin.y + coverage.size.height},
+         input_uvs[2]},
     });
 
     auto& host_buffer = pass.GetTransientsBuffer();
@@ -86,13 +104,13 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     cmd.BindVertices(vtx_buffer);
 
     VS::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
     frame_info.texture_sampler_y_coord_scale =
         y_input_snapshot->texture->GetYCoordScale();
 
     FS::FragInfo frag_info;
-    frag_info.yuv_color_space = static_cast<Scalar>(yuv_color_space_);
-    switch (yuv_color_space_) {
+    frag_info.yuv_color_space = static_cast<Scalar>(yuv_color_space);
+    switch (yuv_color_space) {
       case YUVColorSpace::kBT601LimitedRange:
         frag_info.matrix = kMatrixBT601LimitedRange;
         break;
@@ -111,14 +129,19 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     return pass.AddCommand(std::move(cmd));
   };
 
-  auto out_texture = renderer.MakeSubpass(
-      "YUV to RGB Filter", y_input_snapshot->texture->GetSize(), callback);
-  if (!out_texture) {
-    return std::nullopt;
-  }
+  CoverageProc coverage_proc =
+      [coverage](const Entity& entity) -> std::optional<Rect> {
+    return coverage;
+  };
 
-  return Entity::FromSnapshot(Snapshot{.texture = out_texture},
-                              entity.GetBlendMode(), entity.GetStencilDepth());
+  auto contents = AnonymousContents::Make(render_proc, coverage_proc);
+
+  Entity sub_entity;
+  sub_entity.SetContents(std::move(contents));
+  sub_entity.SetStencilDepth(entity.GetStencilDepth());
+  sub_entity.SetTransformation(entity.GetTransformation());
+  sub_entity.SetBlendMode(entity.GetBlendMode());
+  return sub_entity;
 }
 
 }  // namespace impeller

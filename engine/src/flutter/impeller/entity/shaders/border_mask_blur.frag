@@ -21,12 +21,13 @@ uniform FragInfo {
   float16_t src_factor;
   float16_t inner_blur_factor;
   float16_t outer_blur_factor;
+  float16_t alpha;
 
   f16vec2 sigma_uv;
 }
 frag_info;
 
-in vec2 v_texture_coords;
+in highp vec2 v_texture_coords;
 
 out f16vec4 frag_color;
 
