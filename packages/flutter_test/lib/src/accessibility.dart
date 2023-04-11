@@ -190,11 +190,10 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   }
 
   static bool _isAtBoundary(Rect child, Rect parent) {
-    const double delta = 0.001;
-    if (child.left - parent.left > delta &&
-        parent.right - child.right > delta &&
-        child.top - parent.top > delta &&
-        parent.bottom - child.bottom > delta) {
+    if (child.left - parent.left > _kMinimumGapToBoundary &&
+        parent.right - child.right > _kMinimumGapToBoundary &&
+        child.top - parent.top > _kMinimumGapToBoundary &&
+        parent.bottom - child.bottom > _kMinimumGapToBoundary) {
       return false;
     }
     return true;
