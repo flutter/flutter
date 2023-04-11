@@ -13,9 +13,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/src/leak_tracking.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
+
+import 'utils/leak_tracking_utils.dart';
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -893,6 +897,42 @@ void main() {
       expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
     });
+  });
+
+  group('Leak tracker catches that', () {
+    // These tests cannot run inside other tests because test nesting is forbidden.
+    // So, `expect` happens outside the tests, in `tearDown`.
+    late Leaks leaks;
+
+    testWidgets(
+      '$StatelessLeakingWidget leaks',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(StatelessLeakingWidget());
+      },
+      trackMemoryLeaks: true,
+      leakTrackingFlutterTestConfig: LeakTrackingFlutterTestConfig(
+        onLeaks: (Leaks theLeaks) {
+          leaks = theLeaks;
+        },
+        failTestOnLeaks: false,
+      ),
+    );
+
+    tearDown(() {
+      expect(() => expect(leaks, isLeakFree), throwsException);
+      expect(leaks.total, 2);
+
+      final LeakReport notDisposedLeak = leaks.notDisposed.first;
+      expect(
+        notDisposedLeak.trackedClass,
+        contains(LeakTrackedClass.library),
+      );
+      expect(notDisposedLeak.trackedClass, contains('$LeakTrackedClass'));
+
+      final LeakReport notGcedLeak = leaks.notDisposed.first;
+      expect(notGcedLeak.trackedClass, contains(LeakTrackedClass.library));
+      expect(notGcedLeak.trackedClass, contains('$LeakTrackedClass'));
+     });
   });
 }
 

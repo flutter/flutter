@@ -9,9 +9,9 @@ import 'leak_tracking.dart';
 import 'test_async_utils.dart';
 import 'widget_tester.dart';
 
-/// Wrapper for [withLeakTracking] with Flutter specific functionality.
+/// Init test friendly wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
-/// The method will fail if wrapped code contains memory leaks.
+/// The method will fail with test matcher error if wrapped code contains memory leaks.
 ///
 /// See details in documentation for `withLeakTracking` at
 /// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/orchestration.dart#withLeakTracking
@@ -21,13 +21,20 @@ import 'widget_tester.dart';
 /// 2. Uses `asyncCodeRunner` for async call for leak detection.
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
-  required AsyncCodeRunner asyncCodeRunner,
-  LeakTrackingTestConfig? config,
+  required WidgetTester tester,
+  LeakTrackingFlutterTestConfig? config,
 }) async {
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
     await callback();
     return;
+  }
+
+  final LeakTrackingFlutterTestConfig theConfig =
+    config ?? LeakTrackingFlutterTestConfig();
+
+  Future<void> asyncCodeRunner(DartAsyncCallback action){
+    return tester.runAsync(action);
   }
 
   void flutterEventToLeakTracker(ObjectEvent event) {
@@ -40,14 +47,20 @@ Future<void> withFlutterLeakTracking(
       final Leaks leaks = await withLeakTracking(
         callback,
         asyncCodeRunner: asyncCodeRunner,
-        stackTraceCollectionConfig: config?.stackTraceCollectionConfig ?? const StackTraceCollectionConfig(),
+        stackTraceCollectionConfig: theConfig.stackTraceCollectionConfig,
         shouldThrowOnLeaks: false,
-        timeoutForFinalGarbageCollection: config?.timeoutForFinalGarbageCollection,
+        timeoutForFinalGarbageCollection: theConfig.timeoutForFinalGarbageCollection,
       );
 
-      config?.onLeaks?.call(leaks);
+      if (leaks.total == 0) {
+        return;
+      }
 
-      expect(leaks, isLeakFree);
+      theConfig.onLeaks?.call(leaks);
+
+      if (theConfig.failTestOnLeaks) {
+        expect(leaks, isLeakFree);
+      }
     } finally {
       MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
     }

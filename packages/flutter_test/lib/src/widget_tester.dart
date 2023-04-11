@@ -9,7 +9,6 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
 // The test_api package is not for general use... it's literally for our use.
@@ -113,8 +112,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// the `test` package.
 ///
 /// If [trackMemoryLeaks] is set to `true`, the test will be run with memory leak detection
-/// parameterized by [leakTrackingConfig].
-/// This feature is experimental and more documentation will be added.
+/// parameterized by [leakTrackingFlutterTestConfig].
+/// See details at https://github.com/dart-lang/leak_tracker.
 ///
 /// See also:
 ///
@@ -145,7 +144,7 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   bool trackMemoryLeaks = false,
-  LeakTrackingTestConfig? leakTrackingConfig,
+  LeakTrackingFlutterTestConfig? leakTrackingFlutterTestConfig,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -177,7 +176,11 @@ void testWidgets(
             try {
               memento = await variant.setUp(value);
               if (trackMemoryLeaks) {
-                await _runWithLeakTracking(callback, tester, leakTrackingConfig);
+                await withFlutterLeakTracking(
+                  () => callback(tester),
+                  tester: tester,
+                  config: leakTrackingFlutterTestConfig,
+                );
               } else {
                 await callback(tester);
               }
@@ -196,20 +199,6 @@ void testWidgets(
       tags: tags,
     );
   }
-}
-
-Future<void> _runWithLeakTracking(
-  WidgetTesterCallback callback,
-  WidgetTester tester,
-  LeakTrackingTestConfig? leakTrackingConfig,
-) async {
-  Future<void> asyncCodeRunner(DartAsyncCallback action) => tester.runAsync(action);
-
-  await withFlutterLeakTracking(
-    () => callback(tester),
-    asyncCodeRunner: asyncCodeRunner,
-    config: leakTrackingConfig
-  );
 }
 
 /// An abstract base class for describing test environment variants.
