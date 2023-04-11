@@ -20,7 +20,7 @@ uniform FragInfo {
 }
 frag_info;
 
-in highp vec2 v_position;
+in highp vec2 texture_coords;
 
 out f16vec4 frag_color;
 
@@ -31,7 +31,7 @@ void main() {
     yuv_offset.x = 16.0hf / 255.0hf;
   }
 
-  yuv.x = texture(y_texture, v_position).r;
-  yuv.yz = texture(uv_texture, v_position).rg;
+  yuv.x = texture(y_texture, texture_coords).r;
+  yuv.yz = texture(uv_texture, texture_coords).rg;
   frag_color = f16mat4(frag_info.matrix) * f16vec4(yuv - yuv_offset, 1.0hf);
 }
