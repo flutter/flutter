@@ -21,6 +21,13 @@ void setUpUiTest() {
   });
 }
 
+Picture drawPicture(void Function(Canvas) drawCommands) {
+  final PictureRecorder recorder = PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  drawCommands(canvas);
+  return recorder.endRecording();
+}
+
 /// Draws the [Picture]. This is in preparation for a golden test.
 Future<void> drawPictureUsingCurrentRenderer(Picture picture) async {
   final SceneBuilder sb = SceneBuilder();

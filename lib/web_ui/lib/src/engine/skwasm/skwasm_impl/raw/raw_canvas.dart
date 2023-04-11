@@ -126,6 +126,17 @@ external void canvasDrawPath(
     symbol: 'canvas_drawPicture', isLeaf: true)
 external void canvasDrawPicture(CanvasHandle canvas, PictureHandle picture);
 
+@Native<Void Function(CanvasHandle, PathHandle, Float, Float, Int32, Bool)>(
+    symbol: 'canvas_drawShadow', isLeaf: true)
+external void canvasDrawShadow(
+  CanvasHandle canvas,
+  PathHandle path,
+  double elevation,
+  double devicePixelRatio,
+  int color,
+  bool transparentOccluder,
+);
+
 @Native<Void Function(CanvasHandle, RawMatrix44)>(
     symbol: 'canvas_getTransform', isLeaf: true)
 external void canvasGetTransform(CanvasHandle canvas, RawMatrix44 outMatrix);
