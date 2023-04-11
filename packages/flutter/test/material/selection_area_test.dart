@@ -47,6 +47,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
@@ -80,6 +81,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     expect(find.byKey(key), findsNothing);
@@ -151,6 +153,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
     addTearDown(gesture.removePointer);
