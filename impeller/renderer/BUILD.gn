@@ -63,8 +63,6 @@ impeller_component("renderer") {
     "compute_pipeline_descriptor.h",
     "context.cc",
     "context.h",
-    "gpu_tracer.cc",
-    "gpu_tracer.h",
     "pipeline.cc",
     "pipeline.h",
     "pipeline_builder.cc",
