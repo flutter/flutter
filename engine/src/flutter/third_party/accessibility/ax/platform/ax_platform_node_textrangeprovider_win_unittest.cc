@@ -7,6 +7,7 @@
 #include <UIAutomationClient.h>
 #include <UIAutomationCoreApi.h>
 
+#include <filesystem>
 #include <memory>
 #include <utility>
 
@@ -17,6 +18,8 @@
 #include "base/win/scoped_bstr.h"
 #include "base/win/scoped_safearray.h"
 #include "base/win/scoped_variant.h"
+#include "flutter/fml/icu_util.h"
+#include "third_party/icu/source/common/unicode/putil.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -144,25 +147,25 @@ namespace ui {
     EXPECT_STREQ(expected_content, provider_content.Get()); \
   }
 
-#define EXPECT_UIA_FIND_TEXT(text_range_provider, search_term, ignore_case,  \
-                             owner)                                          \
-  {                                                                          \
-    base::win::ScopedBstr find_string(search_term);                          \
-    ComPtr<ITextRangeProvider> text_range_provider_found;                    \
-    EXPECT_HRESULT_SUCCEEDED(text_range_provider->FindText(                  \
-        find_string.Get(), false, ignore_case, &text_range_provider_found)); \
-    if (text_range_provider_found == nullptr) {                              \
-      EXPECT_TRUE(false);                                                    \
-    } else {                                                                 \
-      SetOwner(owner, text_range_provider_found.Get());                      \
-      base::win::ScopedBstr found_content;                                   \
-      EXPECT_HRESULT_SUCCEEDED(                                              \
-          text_range_provider_found->GetText(-1, found_content.Receive()));  \
-      if (ignore_case)                                                       \
-        EXPECT_EQ(0, _wcsicmp(found_content.Get(), find_string.Get()));      \
-      else                                                                   \
-        EXPECT_EQ(0, wcscmp(found_content.Get(), find_string.Get()));        \
-    }                                                                        \
+#define EXPECT_UIA_FIND_TEXT(text_range_provider, search_term, ignore_case,    \
+                             owner)                                            \
+  {                                                                            \
+    base::win::ScopedBstr find_string(search_term);                            \
+    ComPtr<ITextRangeProvider> text_range_provider_found;                      \
+    EXPECT_HRESULT_SUCCEEDED(text_range_provider->FindText(                    \
+        find_string.Get(), false, ignore_case, &text_range_provider_found));   \
+    if (text_range_provider_found == nullptr) {                                \
+      EXPECT_TRUE(false);                                                      \
+    } else {                                                                   \
+      SetOwner(owner, text_range_provider_found.Get());                        \
+      base::win::ScopedBstr found_content;                                     \
+      EXPECT_HRESULT_SUCCEEDED(                                                \
+          text_range_provider_found->GetText(-1, found_content.Receive()));    \
+      if (ignore_case)                                                         \
+        EXPECT_TRUE(StringCompareICU(found_content.Get(), find_string.Get())); \
+      else                                                                     \
+        EXPECT_EQ(0, wcscmp(found_content.Get(), find_string.Get()));          \
+    }                                                                          \
   }
 
 #define EXPECT_UIA_FIND_TEXT_NO_MATCH(text_range_provider, search_term,      \
@@ -208,6 +211,16 @@ namespace ui {
   }
 
 #define DCHECK_EQ(a, b) BASE_DCHECK((a) == (b))
+
+static bool StringCompareICU(BSTR left, BSTR right) {
+  size_t start, length;
+  if (!StringSearch(reinterpret_cast<char16_t*>(left),
+                    reinterpret_cast<char16_t*>(right), &start, &length, true,
+                    false)) {
+    return false;
+  }
+  return start == 0 && length == wcslen(left);
+}
 
 static AXNodePosition::AXPositionInstance CreateTextPosition(
     const AXNode& anchor,
@@ -5094,9 +5107,20 @@ TEST_F(AXPlatformNodeTextRangeProviderTest,
   selection.Reset();
 }
 
-// TODO(schectman) Find text cannot ignore case yet.
 TEST_F(AXPlatformNodeTextRangeProviderTest, TestITextRangeProviderFindText) {
-  Init(BuildTextDocument({"some text", "more text"},
+  // Initialize the ICU data from the icudtl.dat file, if it exists.
+  wchar_t buffer[MAX_PATH];
+  GetModuleFileName(nullptr, buffer, MAX_PATH);
+  std::filesystem::path exec_path(buffer);
+  exec_path.remove_filename();
+  exec_path.append("icudtl.dat");
+  const std::string icudtl_path = exec_path.string();
+  if (std::filesystem::exists(icudtl_path)) {
+    fml::icu::InitializeICU(icudtl_path);
+  }
+
+  // \xC3\xA9 are the UTF8 bytes for codepoint 0xE9 - accented lowercase e.
+  Init(BuildTextDocument({"some text", "more text", "resum\xC3\xA9"},
                          false /* build_word_boundaries_offsets */,
                          true /* place_text_on_one_line */));
 
@@ -5109,24 +5133,29 @@ TEST_F(AXPlatformNodeTextRangeProviderTest, TestITextRangeProviderFindText) {
   // Test Leaf kStaticText search.
   GetTextRangeProviderFromTextNode(range, root_node->children()[0]);
   EXPECT_UIA_FIND_TEXT(range, L"some text", false, owner);
-  // Some expectations like the one below are currently skipped until we can
-  // implement ignoreCase in FindText.
-  // EXPECT_UIA_FIND_TEXT(range, L"SoMe TeXt", false, owner);
+  EXPECT_UIA_FIND_TEXT(range, L"SoMe TeXt", true, owner);
   GetTextRangeProviderFromTextNode(range, root_node->children()[1]);
   EXPECT_UIA_FIND_TEXT(range, L"more", false, owner);
-  // EXPECT_UIA_FIND_TEXT(range, L"MoRe", true, owner);
+  EXPECT_UIA_FIND_TEXT(range, L"MoRe", true, owner);
 
   // Test searching for leaf content from ancestor.
   GetTextRangeProviderFromTextNode(range, root_node);
   EXPECT_UIA_FIND_TEXT(range, L"some text", false, owner);
-  // EXPECT_UIA_FIND_TEXT(range, L"SoMe TeXt", true, owner);
+  EXPECT_UIA_FIND_TEXT(range, L"SoMe TeXt", true, owner);
   EXPECT_UIA_FIND_TEXT(range, L"more text", false, owner);
-  // EXPECT_UIA_FIND_TEXT(range, L"MoRe TeXt", true, owner);
+  EXPECT_UIA_FIND_TEXT(range, L"MoRe TeXt", true, owner);
   EXPECT_UIA_FIND_TEXT(range, L"more", false, owner);
+  // Accented lowercase e.
+  EXPECT_UIA_FIND_TEXT(range, L"resum\xE9", false, owner);
+  // Accented uppercase +e.
+  EXPECT_UIA_FIND_TEXT(range, L"resum\xC9", true, owner);
+  EXPECT_UIA_FIND_TEXT(range, L"resume", true, owner);
+  EXPECT_UIA_FIND_TEXT(range, L"resumE", true, owner);
   // Test finding text that crosses a node boundary.
   EXPECT_UIA_FIND_TEXT(range, L"textmore", false, owner);
   // Test no match.
   EXPECT_UIA_FIND_TEXT_NO_MATCH(range, L"no match", false, owner);
+  EXPECT_UIA_FIND_TEXT_NO_MATCH(range, L"resume", false, owner);
 
   // Test if range returned is in expected anchor node.
   GetTextRangeProviderFromTextNode(range, root_node->children()[1]);
