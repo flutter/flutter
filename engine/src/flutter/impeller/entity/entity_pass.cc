@@ -404,28 +404,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
                            subpass->GetTotalPassReads(renderer) > 0,  //
                            clear_color_);
 
-    auto subpass_texture =
-        subpass_target.GetRenderTarget().GetRenderTargetTexture();
-
-    if (!subpass_texture) {
-      return EntityPass::EntityResult::Failure();
-    }
-
-    auto offscreen_texture_contents =
-        subpass->delegate_->CreateContentsForSubpassTarget(
-            subpass_texture,
-            Matrix::MakeTranslation(Vector3{-global_pass_position}) *
-                subpass->xformation_);
-
-    if (!offscreen_texture_contents) {
-      // This is an error because the subpass delegate said the pass couldn't
-      // be collapsed into its parent. Yet, when asked how it want's to
-      // postprocess the offscreen texture, it couldn't give us an answer.
-      //
-      // Theoretically, we could collapse the pass now. But that would be
-      // wasteful as we already have the offscreen texture and we don't want
-      // to discard it without ever using it. Just make the delegate do the
-      // right thing.
+    if (!subpass_target.GetRenderTarget().GetRenderTargetTexture()) {
       return EntityPass::EntityResult::Failure();
     }
 
@@ -442,6 +421,28 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
                            subpass->stencil_depth_,   // stencil_depth_floor
                            backdrop_filter_contents  // backdrop_filter_contents
                            )) {
+      return EntityPass::EntityResult::Failure();
+    }
+
+    // The subpass target's texture may have changed during OnRender.
+    auto subpass_texture =
+        subpass_target.GetRenderTarget().GetRenderTargetTexture();
+
+    auto offscreen_texture_contents =
+        subpass->delegate_->CreateContentsForSubpassTarget(
+            subpass_texture,
+            Matrix::MakeTranslation(Vector3{-global_pass_position}) *
+                subpass->xformation_);
+
+    if (!offscreen_texture_contents) {
+      // This is an error because the subpass delegate said the pass couldn't
+      // be collapsed into its parent. Yet, when asked how it want's to
+      // postprocess the offscreen texture, it couldn't give us an answer.
+      //
+      // Theoretically, we could collapse the pass now. But that would be
+      // wasteful as we already have the offscreen texture and we don't want
+      // to discard it without ever using it. Just make the delegate do the
+      // right thing.
       return EntityPass::EntityResult::Failure();
     }
 
