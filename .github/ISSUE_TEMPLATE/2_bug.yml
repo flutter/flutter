@@ -17,7 +17,6 @@ body:
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
-      description: Please search to see if an issue already exists for the bug you encountered.
       options:
       - label: I have searched the [existing issues](https://github.com/flutter/flutter/issues)
         required: true
@@ -63,13 +62,10 @@ body:
         Note: Please do not upload screenshots of text. Instead, use code blocks
         or the above mentioned ways to upload your code sample.
       value: |
-        <details>
-        <summary>Code sample</summary>
+        <details><summary>Code sample</summary>
 
         ```dart
-
-        <!-- Paste your code here -->
-
+        [Paste your code here]
         ```
 
         </details>
@@ -84,7 +80,7 @@ body:
         <details>
         <summary>Screenshots / Video demonstration</summary>
 
-        <!-- Upload media here -->
+        [Upload media here]
 
         </details>
   - type: textarea
@@ -103,13 +99,10 @@ body:
         Note: Please do not upload screenshots of text. Instead, use code blocks
         or the above mentioned ways to upload logs.
       value: |
-        <details>
-        <summary>Logs</summary>
+        <details><summary>Logs</summary>
 
         ```console
-
-        <!-- Paste your logs here -->
-
+        [Paste your logs here]
         ```
 
         </details>
@@ -119,13 +112,10 @@ body:
       description: |
         Please provide the full output of running `flutter doctor -v`
       value: |
-        <details>
-        <summary>Doctor output</summary>
+        <details><summary>Doctor output</summary>
 
         ```console
-
-        <!-- Paste your output here -->
-
+        [Paste your output here]
         ```
 
         </details>
