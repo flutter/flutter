@@ -135,17 +135,45 @@ class WebBuilder {
 /// Web rendering backend mode.
 enum WebRendererMode {
   /// Auto detects which rendering backend to use.
-  auto(helpText: 'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.'),
+  auto,
+
   /// Always uses canvaskit.
-  canvaskit(helpText: 'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.'),
+  canvaskit,
+
   /// Always uses html.
-  html(helpText: 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.'),
+  html,
+
   /// Always use skwasm.
-  skwasm(helpText: 'Always use the experimental skwasm renderer.');
+  skwasm;
 
-  const WebRendererMode({required this.helpText});
+  String get helpText => switch (this) {
+        auto =>
+          'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
+        canvaskit =>
+          'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.',
+        html =>
+          'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.',
+        skwasm => 'Always use the experimental skwasm renderer.'
+      };
 
-  final String helpText;
+  Iterable<String> get dartDefines => switch (this) {
+        WebRendererMode.auto => <String>[
+            'FLUTTER_WEB_AUTO_DETECT=true',
+          ],
+        WebRendererMode.canvaskit => <String>[
+            'FLUTTER_WEB_AUTO_DETECT=false',
+            'FLUTTER_WEB_USE_SKIA=true',
+          ],
+        WebRendererMode.html => <String>[
+            'FLUTTER_WEB_AUTO_DETECT=false',
+            'FLUTTER_WEB_USE_SKIA=false',
+          ],
+        WebRendererMode.skwasm => <String>[
+            'FLUTTER_WEB_AUTO_DETECT=false',
+            'FLUTTER_WEB_USE_SKIA=false',
+            'FLUTTER_WEB_USE_SKWASM=true',
+          ]
+      };
 }
 
 /// The correct precompiled artifact to use for each build and render mode.

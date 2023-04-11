@@ -1737,24 +1737,3 @@ enum NonNullSafeBuilds {
   allowed,
   notAllowed,
 }
-
-extension on WebRendererMode {
-  Iterable<String> get dartDefines => switch (this) {
-        WebRendererMode.auto => <String>[
-            'FLUTTER_WEB_AUTO_DETECT=true',
-          ],
-        WebRendererMode.canvaskit => <String>[
-            'FLUTTER_WEB_AUTO_DETECT=false',
-            'FLUTTER_WEB_USE_SKIA=true',
-          ],
-        WebRendererMode.html => <String>[
-            'FLUTTER_WEB_AUTO_DETECT=false',
-            'FLUTTER_WEB_USE_SKIA=false',
-          ],
-        WebRendererMode.skwasm => <String>[
-            'FLUTTER_WEB_AUTO_DETECT=false',
-            'FLUTTER_WEB_USE_SKIA=false',
-            'FLUTTER_WEB_USE_SKWASM=true',
-          ]
-      };
-}
