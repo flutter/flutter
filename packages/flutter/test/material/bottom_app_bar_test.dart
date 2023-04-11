@@ -11,7 +11,74 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
+  testWidgets('shadow effect is not doubled', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123064
+    debugDisableShadows = false;
+
+    const double elevation = 1;
+    const Color shadowColor = Colors.black;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
+        home: const Scaffold(
+          bottomNavigationBar: BottomAppBar(
+            elevation: elevation,
+            shadowColor: shadowColor,
+          ),
+        ),
+      ),
+    );
+
+    final Finder finder = find.byType(BottomAppBar);
+    expect(finder, paints..shadow(color: shadowColor, elevation: elevation));
+    expect(finder, paintsExactlyCountTimes(#drawShadow, 1));
+
+    debugDisableShadows = true;
+  });
+
+  testWidgets('only one layer with `color` is painted', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/122667
+    const Color bottomAppBarColor = Colors.black45;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true),
+        home: const Scaffold(
+          bottomNavigationBar: BottomAppBar(
+            color: bottomAppBarColor,
+
+            // Avoid getting a surface tint color, to keep the color check below simple
+            elevation: 0,
+          ),
+        ),
+      ),
+    );
+
+    // There should be just one color layer, and with the specified color.
+    final Finder finder = find.descendant(
+      of: find.byType(BottomAppBar),
+      matching: find.byWidgetPredicate((Widget widget) {
+        // A color layer is probably a [PhysicalShape] or [PhysicalModel],
+        // either used directly or backing a [Material] (one without
+        // [MaterialType.transparency]).
+        return widget is PhysicalShape || widget is PhysicalModel;
+      }),
+    );
+    final Widget widget = tester.widgetList(finder).single;
+    if (widget is PhysicalShape) {
+      expect(widget.color, bottomAppBarColor);
+    } else if (widget is PhysicalModel) {
+      expect(widget.color, bottomAppBarColor);
+    } else {
+      // Should be unreachable: compare with the finder.
+      assert(false);
+    }
+  });
+
   testWidgets('no overlap with floating action button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -218,6 +285,7 @@ void main() {
                 ),
                 bottomNavigationBar: BottomAppBar(
                   color: Color(0xff0000ff),
+                  surfaceTintColor: Colors.transparent,
                 ),
             );
           },
@@ -225,12 +293,10 @@ void main() {
       ),
     );
 
-    final PhysicalShape physicalShape =
-      tester.widget(find.byType(PhysicalShape).at(0));
-    final Material material = tester.widget(find.byType(Material).at(1));
+    final PhysicalShape physicalShape = tester.widget(
+        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(PhysicalShape)));
 
     expect(physicalShape.color, const Color(0xff0000ff));
-    expect(material.color, const Color(0xff0000ff));
   });
 
   testWidgets('Shadow color is transparent in Material 3', (WidgetTester tester) async {
@@ -249,9 +315,10 @@ void main() {
       )
     );
 
-    final Material material = tester.widget(find.byType(Material).at(1));
+    final PhysicalShape physicalShape = tester.widget(
+        find.descendant(of: find.byType(BottomAppBar), matching: find.byType(PhysicalShape)));
 
-    expect(material.shadowColor, Colors.transparent);
+    expect(physicalShape.shadowColor, Colors.transparent);
   });
 
   testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {

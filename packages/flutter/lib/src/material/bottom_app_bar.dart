@@ -57,7 +57,7 @@ import 'theme.dart';
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
-  /// The [clipBehavior] argument defaults to [Clip.none] and must not be null.
+  /// The [clipBehavior] argument defaults to [Clip.none].
   /// Additionally, [elevation] must be non-negative.
   ///
   /// If [color], [elevation], or [shape] are null, their [BottomAppBarTheme] values will be used.
@@ -118,7 +118,7 @@ class BottomAppBar extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
@@ -191,7 +191,9 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final double? height = widget.height ?? babTheme.height ?? defaults.height;
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
-    final Color effectiveColor = isMaterial3 ? color : ElevationOverlay.applyOverlay(context, color, elevation);
+    final Color effectiveColor = isMaterial3
+      ? ElevationOverlay.applySurfaceTint(color, surfaceTintColor, elevation)
+      : ElevationOverlay.applyOverlay(context, color, elevation);
     final Color shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
     final Widget child = SizedBox(
@@ -204,11 +206,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
     final Material material = Material(
       key: materialKey,
-      type: isMaterial3 ? MaterialType.canvas : MaterialType.transparency,
-      elevation: elevation,
-      color: isMaterial3 ? effectiveColor : null,
-      surfaceTintColor: surfaceTintColor,
-      shadowColor: shadowColor,
+      type: MaterialType.transparency,
       child: SafeArea(child: child),
     );
 
