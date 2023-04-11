@@ -895,10 +895,10 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.value)) {
+      for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.index)) {
         actions |= index;
       }
-      for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.value)) {
+      for (final int index in SemanticsAction.values.map((SemanticsAction action) => action.index)) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -1081,10 +1081,10 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
-      for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.value)) {
+      for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.index)) {
         allActions |= index;
       }
-      for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.value)) {
+      for (final int index in SemanticsFlag.values.map((SemanticsFlag flag) => flag.index)) {
         allFlags |= index;
       }
       final SemanticsData emptyData = SemanticsData(
