@@ -9,7 +9,7 @@ import 'leak_tracking.dart';
 import 'test_async_utils.dart';
 import 'widget_tester.dart';
 
-/// Init test friendly wrapper for [withLeakTracking] with Flutter specific functionality.
+/// Unit test friendly wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
 /// The method will fail with test matcher error if wrapped code contains memory leaks.
 ///
