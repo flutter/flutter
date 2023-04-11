@@ -49,7 +49,6 @@ Future<void> withFlutterLeakTracking(
         asyncCodeRunner: asyncCodeRunner,
         stackTraceCollectionConfig: theConfig.stackTraceCollectionConfig,
         shouldThrowOnLeaks: false,
-        timeoutForFinalGarbageCollection: theConfig.timeoutForFinalGarbageCollection,
       );
 
       if (leaks.total == 0) {

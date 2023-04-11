@@ -111,7 +111,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
-/// If [trackMemoryLeaks] is set to `true`, the test will be run with memory leak detection
+/// If [trackMemoryLeaks] is `true`, the test will run with memory leak detection
 /// parameterized by [leakTrackingFlutterTestConfig].
 /// See details at https://github.com/dart-lang/leak_tracker.
 ///

@@ -11,24 +11,19 @@ typedef LeaksCallback = void Function(Leaks leaks);
 
 /// Configuration for leak trecking in unit tests.
 ///
-/// The configuration is needed only for test debugging.
+/// The configuration is needed only for test debugging,
+/// not for regular test run.
 class LeakTrackingFlutterTestConfig {
 
   /// Creates a new instance of [LeakTrackingFlutterTestConfig].
   LeakTrackingFlutterTestConfig({
     this.stackTraceCollectionConfig = const StackTraceCollectionConfig(),
-    this.timeoutForFinalGarbageCollection,
     this.onLeaks,
     this.failTestOnLeaks = true,
   });
 
   /// When to collect stack trace information.
   final StackTraceCollectionConfig stackTraceCollectionConfig;
-
-  /// Timout for final garbage collection.
-  ///
-  /// If null, will wait infinitely.
-  final Duration? timeoutForFinalGarbageCollection;
 
   /// Handler to obtain details about collected leaks.
   final LeaksCallback? onLeaks;
