@@ -45,6 +45,7 @@ void main() {
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': 'serviceWorkerStrategy',
+        'WasmOmitTypeChecks': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -68,7 +69,7 @@ void main() {
       'target',
       BuildInfo.debug,
       'serviceWorkerStrategy',
-      compilerConfig: const WasmCompilerConfig(),
+      compilerConfig: const WasmCompilerConfig(omitTypeChecks: false),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
