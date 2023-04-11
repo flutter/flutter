@@ -55,7 +55,7 @@ GPUCAMetalLayerHandle IOSSurfaceMetalSkia::GetCAMetalLayer(const SkISize& frame_
 
   layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
   // Flutter needs to read from the color attachment in cases where there are effects such as
-  // backdrop filters.
+  // backdrop filters. Flutter plugins that create platform views may also read from the layer.
   layer.framebufferOnly = NO;
 
   const auto drawable_size = CGSizeMake(frame_info.width(), frame_info.height());
