@@ -26,6 +26,10 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   using ResourceContext = T;
 
   void Unref(SkRefCnt* object) {
+    if (drain_immediate_) {
+      object->unref();
+      return;
+    }
     std::scoped_lock lock(mutex_);
     objects_.push_back(object);
     if (!drain_pending_) {
@@ -36,6 +40,8 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   }
 
   void DeleteTexture(GrBackendTexture texture) {
+    // drain_immediate_ should only be used on Impeller.
+    FML_DCHECK(!drain_immediate_);
     std::scoped_lock lock(mutex_);
     textures_.push_back(texture);
     if (!drain_pending_) {
@@ -75,17 +81,22 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   std::deque<GrBackendTexture> textures_;
   bool drain_pending_;
   sk_sp<ResourceContext> context_;
+  // Enabled when there is an impeller context, which removes the usage of
+  // the queue altogether.
+  bool drain_immediate_;
 
   // The `GrDirectContext* context` is only used for signaling Skia to
   // performDeferredCleanup. It can be nullptr when such signaling is not needed
   // (e.g., in unit tests).
   UnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
              fml::TimeDelta delay,
-             sk_sp<ResourceContext> context = nullptr)
+             sk_sp<ResourceContext> context = nullptr,
+             bool drain_immediate = false)
       : task_runner_(std::move(task_runner)),
         drain_delay_(delay),
         drain_pending_(false),
-        context_(context) {}
+        context_(context),
+        drain_immediate_(drain_immediate) {}
 
   ~UnrefQueue() {
     // The ResourceContext must be deleted on the task runner thread.
