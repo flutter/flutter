@@ -362,14 +362,14 @@ targets:
         { "sdk_version": "14a5294e" }
 
   - name: Mac mac_unopt
-    bringup: true
     recipe: engine_v2/engine_v2
     properties:
       config_name: mac_unopt
       add_recipes_cq: "true"
-    timeout: 180  # set timeout to 3H while this runs on staging.
+    timeout: 60
 
   - name: Mac Unopt
+    bringup: true
     recipe: engine/engine_unopt
     properties:
       add_recipes_cq: "true"
