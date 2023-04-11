@@ -100,10 +100,7 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
 
   RenderPassResult result;
 
-  if (pass_count_ > 0 && pass_target_.GetRenderTarget()
-                             .GetColorAttachments()
-                             .find(0)
-                             ->second.resolve_texture) {
+  if (pass_count_ > 0) {
     result.backdrop_texture =
         pass_target_.Flip(*context_->GetResourceAllocator());
     if (!result.backdrop_texture) {
@@ -114,12 +111,8 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
   auto color0 =
       pass_target_.GetRenderTarget().GetColorAttachments().find(0)->second;
 
-  if (pass_count_ > 0) {
-    color0.load_action =
-        color0.resolve_texture ? LoadAction::kDontCare : LoadAction::kLoad;
-  } else {
-    color0.load_action = LoadAction::kClear;
-  }
+  color0.load_action =
+      pass_count_ > 0 ? LoadAction::kDontCare : LoadAction::kClear;
 
   color0.store_action = color0.resolve_texture
                             ? StoreAction::kMultisampleResolve
