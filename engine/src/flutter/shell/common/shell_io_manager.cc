@@ -48,7 +48,8 @@ ShellIOManager::ShellIOManager(
       unref_queue_(fml::MakeRefCounted<flutter::SkiaUnrefQueue>(
           std::move(unref_queue_task_runner),
           unref_queue_drain_delay,
-          resource_context_)),
+          resource_context_,
+          /*drain_immediate=*/!!impeller_context)),
       is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)),
       impeller_context_(std::move(impeller_context)),
       weak_factory_(this) {
