@@ -1240,13 +1240,13 @@ void main() {
         Container(),
       ],
     ));
-    final StatelessElement element = key0.currentContext! as StatelessElement;
+    final StatefulElement element = key0.currentContext! as StatefulElement;
 
     expect(element, hasAGoodToStringDeep);
     expect(
       element.toStringDeep(),
       equalsIgnoringHashCodes(
-        'Column-[GlobalKey#00000]\n'
+        'Column-[GlobalKey#00000](state: _ColumnState#00000)\n'
         '└Flex(direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#ca5e0)\n'
         ' ├Container\n'
         ' │└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
