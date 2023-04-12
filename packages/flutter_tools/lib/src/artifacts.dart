@@ -673,7 +673,7 @@ class CachedArtifacts implements Artifacts {
         // https://github.com/flutter/flutter/issues/38935
         String platformDirName = _enginePlatformDirectoryName(platform);
         if (mode == BuildMode.profile || mode == BuildMode.release) {
-          platformDirName = '$platformDirName-${getNameForBuildMode(mode!)}';
+          platformDirName = '$platformDirName-${mode!.name}';
         }
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, _platform, mode));

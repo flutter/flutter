@@ -233,7 +233,7 @@ class BuildInfo {
     // packagesPath and performanceMeasurementFile are not passed into
     // the Environment map.
     return <String, String>{
-      kBuildMode: getNameForBuildMode(mode),
+      kBuildMode: mode.name,
       if (dartDefines.isNotEmpty)
         kDartDefines: encodeDartDefines(dartDefines),
       kDartObfuscation: dartObfuscation.toString(),
@@ -377,41 +377,27 @@ class AndroidBuildInfo {
 }
 
 /// A summary of the compilation strategy used for Dart.
-class BuildMode {
-  const BuildMode._(this.name);
-
-  factory BuildMode.fromName(String value) {
-    switch (value) {
-      case 'debug':
-        return BuildMode.debug;
-      case 'profile':
-        return BuildMode.profile;
-      case 'release':
-        return BuildMode.release;
-      case 'jit_release':
-        return BuildMode.jitRelease;
-    }
-    throw ArgumentError('$value is not a supported build mode');
-  }
-
+enum BuildMode {
   /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
-  static const BuildMode debug = BuildMode._('debug');
+  debug('debug'),
 
   /// Built in AOT mode with some optimizations and a VM service.
-  static const BuildMode profile = BuildMode._('profile');
+  profile('profile'),
 
   /// Built in AOT mode with all optimizations and no VM service.
-  static const BuildMode release = BuildMode._('release');
+  release('release'),
 
   /// Built in JIT mode with all optimizations and no VM service.
-  static const BuildMode jitRelease = BuildMode._('jit_release');
+  jitRelease('jit_release');
 
-  static const List<BuildMode> values = <BuildMode>[
-    debug,
-    profile,
-    release,
-    jitRelease,
-  ];
+  const BuildMode(this.name);
+
+  factory BuildMode.fromName(String value) => values.singleWhere(
+        (BuildMode element) => element.name == value,
+        orElse: () =>
+            throw ArgumentError('$value is not a supported build mode'),
+      );
+
   static const Set<BuildMode> releaseModes = <BuildMode>{
     release,
     jitRelease,
@@ -438,16 +424,6 @@ class BuildMode {
 
   @override
   String toString() => name;
-}
-
-/// Return the name for the build mode, or "any" if null.
-String getNameForBuildMode(BuildMode buildMode) {
-  return buildMode.name;
-}
-
-/// Returns the [BuildMode] for a particular `name`.
-BuildMode getBuildModeForName(String name) {
-  return BuildMode.fromName(name);
 }
 
 /// Environment type of the target device.

@@ -72,8 +72,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     displayNullSafetyMode(buildInfos.first);
 
     for (final BuildInfo buildInfo in buildInfos) {
-      globals.printStatus('Building macOS frameworks in ${getNameForBuildMode(buildInfo.mode)} mode...');
-      final String xcodeBuildConfiguration = sentenceCase(getNameForBuildMode(buildInfo.mode));
+      globals.printStatus('Building macOS frameworks in ${buildInfo.mode.name} mode...');
+      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.name);
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {

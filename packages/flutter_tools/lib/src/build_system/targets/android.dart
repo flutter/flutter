@@ -46,7 +46,7 @@ abstract class AndroidAssetBundle extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets')
       ..createSync(recursive: true);
@@ -167,7 +167,7 @@ class AndroidAot extends AotElfBase {
   }
 
   @override
-  String get name => 'android_aot_${getNameForBuildMode(buildMode)}_'
+  String get name => 'android_aot_${buildMode.name}_'
     '${getNameForTargetPlatform(targetPlatform)}';
 
   /// The specific Android ABI we are building for.
@@ -229,7 +229,7 @@ class AndroidAot extends AotElfBase {
       extraGenSnapshotOptions.add('--loading_unit_manifest=$manifestPath');
       outputs.add(environment.fileSystem.file(manifestPath));
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromName(buildModeEnvironment);
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
@@ -299,7 +299,7 @@ class AndroidAotBundle extends Target {
   }
 
   @override
-  String get name => 'android_aot_bundle_${getNameForBuildMode(dependency.buildMode)}_'
+  String get name => 'android_aot_bundle_${dependency.buildMode.name}_'
     '${getNameForTargetPlatform(dependency.targetPlatform)}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
@@ -390,7 +390,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
   }
 
   @override
-  String get name => 'android_aot_deferred_components_bundle_${getNameForBuildMode(dependency.buildMode)}_'
+  String get name => 'android_aot_deferred_components_bundle_${dependency.buildMode.name}_'
     '${getNameForTargetPlatform(dependency.targetPlatform)}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;

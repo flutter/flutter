@@ -193,8 +193,9 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
         '-Ddart.vm.product=true',
         ...kDartCompilerExperiments,
       ];
+    case _:
+      throw Exception('Unknown BuildMode: $mode');
   }
-  throw Exception('Unknown BuildMode: $mode');
 }
 
 /// A compiler interface for producing single (non-incremental) kernel files.

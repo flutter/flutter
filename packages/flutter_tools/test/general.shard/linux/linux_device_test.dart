@@ -178,7 +178,7 @@ class FakeLinuxApp extends Fake implements LinuxApp {
         return 'profile/executable';
       case BuildMode.release:
         return 'release/executable';
-      default:
+      case _:
         throw StateError('Invalid mode: $buildMode');
     }
   }
