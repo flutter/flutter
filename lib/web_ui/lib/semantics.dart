@@ -85,16 +85,6 @@ class SemanticsAction {
 
   static SemanticsAction? fromIndex(int index) => _kActionById[index];
 
-  /// Temporary API until [values] return a list.
-  /// https://github.com/flutter/flutter/issues/123346
-  @Deprecated('This getter is temporary and will be removed shortly.')
-  static List<SemanticsAction> get doNotUseWillBeDeletedWithoutWarningValuesAsList => values;
-
-  /// Temporary API until [values] return a list.
-  /// https://github.com/flutter/flutter/issues/123346
-  @Deprecated('This getter is temporary and will be removed shortly.')
-  static Iterable<int> get doNotUseWillBeDeletedWithoutWarningKeys => _kActionById.keys;
-
   @override
   String toString() => 'SemanticsAction.$name';
 }
@@ -191,16 +181,6 @@ class SemanticsFlag {
   static List<SemanticsFlag> get values => _kFlagById.values.toList(growable: false);
 
   static SemanticsFlag? fromIndex(int index) => _kFlagById[index];
-
-  /// Temporary API until [values] return a list.
-  /// https://github.com/flutter/flutter/issues/123346
-  @Deprecated('This getter is temporary and will be removed shortly.')
-  static List<SemanticsFlag> get doNotUseWillBeDeletedWithoutWarningValuesAsList => values;
-
-  /// Temporary API until [values] return a list.
-  /// https://github.com/flutter/flutter/issues/123346
-  @Deprecated('This getter is temporary and will be removed shortly.')
-  static Iterable<int> get doNotUseWillBeDeletedWithoutWarningKeys => _kFlagById.keys;
 
   @override
   String toString() => 'SemanticsFlag.$name';
