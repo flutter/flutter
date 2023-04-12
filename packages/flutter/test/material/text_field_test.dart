@@ -6248,7 +6248,6 @@ void main() {
 
   testWidgets('Disabled text field does not have tap action', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -6263,7 +6262,27 @@ void main() {
     );
 
     expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    semantics.dispose();
+  });
 
+  testWidgets('Disabled text field semantics node still contains value', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: TextEditingController(text: 'text'),
+              maxLength: 10,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
     semantics.dispose();
   });
 
@@ -6744,8 +6763,8 @@ void main() {
     variant: KeySimulatorTransitModeVariant.all()
   );
 
-  // Regressing test for https://github.com/flutter/flutter/issues/78219
-  testWidgets('Paste does not crash when the section is inValid', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/78219
+  testWidgets('Paste does not crash after calling TextController.text setter', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController();
     final TextField textField = TextField(
@@ -6778,7 +6797,7 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    // This setter will set `selection` invalid.
+    // Clear the text.
     controller.text = '';
 
     // Paste clipboardContent to the text field.
@@ -6790,10 +6809,12 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
     await tester.pumpAndSettle();
 
-    // Do nothing.
-    expect(find.text(clipboardContent), findsNothing);
-    expect(controller.selection, const TextSelection.collapsed(offset: -1));
-  }, variant: KeySimulatorTransitModeVariant.all());
+    // Clipboard content is correctly pasted.
+    expect(find.text(clipboardContent), findsOneWidget);
+  },
+    skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    variant: KeySimulatorTransitModeVariant.all(),
+  );
 
   testWidgets('Cut test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
