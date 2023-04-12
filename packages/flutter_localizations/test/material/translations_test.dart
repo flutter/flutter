@@ -50,6 +50,10 @@ void main() {
       expect(localizations.alertDialogLabel, isNotNull);
       expect(localizations.collapsedIconTapHint, isNotNull);
       expect(localizations.expandedIconTapHint, isNotNull);
+      expect(localizations.expansionTileExpandedHint, isNotNull);
+      expect(localizations.expansionTileCollapsedHint, isNotNull);
+      expect(localizations.collapsedHint, isNotNull);
+      expect(localizations.expandedHint, isNotNull);
       expect(localizations.refreshIndicatorSemanticLabel, isNotNull);
 
       expect(localizations.remainingTextFieldCharacterCount(0), isNotNull);
@@ -172,7 +176,7 @@ void main() {
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es'));
-    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'jue., 23 jul.');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'jue, 23 jul');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'jueves, 23 de julio de 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('de'));
