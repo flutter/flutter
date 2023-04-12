@@ -80,11 +80,11 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   }
 }
 
+// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
+// deleted, when users should migrate back to
+// cupertinoDesktopTextSelectionControls.
+// See https://github.com/flutter/flutter/pull/124262
 /// Text selection handle controls that follow MacOS design conventions.
-@Deprecated(
-  'Use `cupertinoDesktopTextSelectionControls` instead. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
-)
 final TextSelectionControls cupertinoDesktopTextSelectionHandleControls =
     _CupertinoDesktopTextSelectionHandleControls();
 
