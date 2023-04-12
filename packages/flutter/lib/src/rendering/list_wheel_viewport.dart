@@ -828,22 +828,50 @@ class RenderListWheelViewport
 
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
+    if (overAndUnderCenterOpacity >= 1) {
+      RenderBox? childToPaint = firstChild;
+      while (childToPaint != null) {
+        final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
+        // center value is ignored if overAndUnderCenterOpacity >= 1.
+        _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: true);
+        childToPaint = childAfter(childToPaint);
+      }
+      return;
+    }
+
+    // In order to reduce the number of opacity layers, we first paint all
+    // partially opaque children, then finally paint the fully opaque children.
+    context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
+      RenderBox? childToPaint = firstChild;
+      while (childToPaint != null) {
+        final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
+        _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: false);
+        childToPaint = childAfter(childToPaint);
+      }
+    });
+
     RenderBox? childToPaint = firstChild;
     while (childToPaint != null) {
       final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
-      _paintTransformedChild(childToPaint, context, offset, childParentData.offset);
+      _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: true);
       childToPaint = childAfter(childToPaint);
     }
   }
 
-  /// Takes in a child with a **scrollable layout offset** and paints it in the
-  /// **transformed cylindrical space viewport painting coordinates**.
+  // Takes in a child with a **scrollable layout offset** and paints it in the
+  // **transformed cylindrical space viewport painting coordinates**.
+  //
+  // If [center] is true, only children that overlap with the center section
+  // will be painted. If [center] is false, only children that do not overlap
+  // will be painted. Opacity is only applied to the partially overlapping
+  // children painted when [center] is true.
   void _paintTransformedChild(
     RenderBox child,
     PaintingContext context,
     Offset offset,
-    Offset layoutOffset,
-  ) {
+    Offset layoutOffset, {
+    required bool center,
+  }) {
     final Offset untransformedPaintingCoordinates = offset
         + Offset(
             layoutOffset.dx,
@@ -876,7 +904,7 @@ class RenderListWheelViewport
 
     final bool shouldApplyOffCenterDim = overAndUnderCenterOpacity < 1;
     if (useMagnifier || shouldApplyOffCenterDim) {
-      _paintChildWithMagnifier(context, offset, child, transform, offsetToCenter, untransformedPaintingCoordinates);
+      _paintChildWithMagnifier(context, offset, child, transform, offsetToCenter, untransformedPaintingCoordinates, center: center);
     } else {
       _paintChildCylindrically(context, offset, child, transform, offsetToCenter);
     }
@@ -890,8 +918,9 @@ class RenderListWheelViewport
     RenderBox child,
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
-    Offset untransformedPaintingCoordinates,
-  ) {
+    Offset untransformedPaintingCoordinates, {
+    required bool center,
+  }) {
     final double magnifierTopLinePosition =
         size.height / 2 - _itemExtent * _magnification / 2;
     final double magnifierBottomLinePosition =
@@ -904,6 +933,10 @@ class RenderListWheelViewport
 
     // Some part of the child is in the center magnifier.
     if (isAfterMagnifierTopLine && isBeforeMagnifierBottomLine) {
+      if (!center) {
+        return;
+      }
+
       final Rect centerRect = Rect.fromLTWH(
         0.0,
         magnifierTopLinePosition,
@@ -948,16 +981,21 @@ class RenderListWheelViewport
           ? topHalfRect
           : bottomHalfRect,
         (PaintingContext context, Offset offset) {
-          _paintChildCylindrically(
-            context,
-            offset,
-            child,
-            cylindricalTransform,
-            offsetToCenter,
-          );
+           context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
+            _paintChildCylindrically(
+              context,
+              offset,
+              child,
+              cylindricalTransform,
+              offsetToCenter,
+            );
+          });
         },
       );
     } else {
+      if (center) {
+        return;
+      }
       _paintChildCylindrically(
         context,
         offset,
@@ -987,17 +1025,12 @@ class RenderListWheelViewport
       );
     }
 
-    // Paint child cylindrically, with [overAndUnderCenterOpacity].
-    void opacityPainter(PaintingContext context, Offset offset) {
-      context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), painter);
-    }
-
     context.pushTransform(
       needsCompositing,
       offset,
       _centerOriginTransform(cylindricalTransform),
       // Pre-transform painting function.
-      overAndUnderCenterOpacity == 1 ? painter : opacityPainter,
+      painter,
     );
 
     final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
