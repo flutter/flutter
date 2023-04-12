@@ -891,7 +891,6 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     this.strokeWidth,
     this.hasMaskFilter,
     this.style,
-    this.shader,
     this.strokeCap,
   });
 
@@ -903,7 +902,6 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   final double? strokeWidth;
   final bool? hasMaskFilter;
   final PaintingStyle? style;
-  final Matcher? shader;
   final StrokeCap? strokeCap;
 
   String get methodName => _symbolName(symbol);
@@ -938,9 +936,6 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     }
     if (style != null && paintArgument.style != style) {
       throw 'It called $methodName with a paint whose style, ${paintArgument.style}, was not exactly the expected style ($style).';
-    }
-    if (shader != null && !shader!.matches(paintArgument.shader, <dynamic, dynamic>{})) {
-      throw 'It called $methodName with a paint whose shader, ${paintArgument.shader}, was not exactly the expected shader ($shader).';
     }
     if (strokeCap != null && paintArgument.strokeCap != strokeCap) {
       throw 'It called $methodName with a paint whose strokeCap, ${paintArgument.strokeCap}, was not exactly the expected strokeCap ($strokeCap).';
