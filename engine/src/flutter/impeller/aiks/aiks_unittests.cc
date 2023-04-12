@@ -1230,11 +1230,17 @@ TEST_P(AiksTest, TextRotated) {
 }
 
 TEST_P(AiksTest, CanDrawPaint) {
-  Paint paint;
-  paint.color = Color::MediumTurquoise();
   Canvas canvas;
   canvas.Scale(Vector2(0.2, 0.2));
-  canvas.DrawPaint(paint);
+  canvas.DrawPaint({.color = Color::MediumTurquoise()});
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanDrawPaintMultipleTimes) {
+  Canvas canvas;
+  canvas.Scale(Vector2(0.2, 0.2));
+  canvas.DrawPaint({.color = Color::MediumTurquoise()});
+  canvas.DrawPaint({.color = Color::Color::OrangeRed().WithAlpha(0.5)});
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 

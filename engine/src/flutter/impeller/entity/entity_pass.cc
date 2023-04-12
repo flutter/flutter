@@ -214,8 +214,9 @@ bool EntityPass::Render(ContentContext& renderer,
       .stencil_depth = 0}};
 
   if (GetTotalPassReads(renderer) > 0) {
-    auto offscreen_target = CreateRenderTarget(
-        renderer, render_target.GetRenderTargetSize(), true, clear_color_);
+    auto offscreen_target =
+        CreateRenderTarget(renderer, render_target.GetRenderTargetSize(), true,
+                           clear_color_.Premultiply());
 
     if (!OnRender(renderer,  // renderer
                   offscreen_target.GetRenderTarget()
@@ -277,7 +278,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
   // Set up the clear color of the root pass.
   auto color0 = render_target.GetColorAttachments().find(0)->second;
-  color0.clear_color = clear_color_;
+  color0.clear_color = clear_color_.Premultiply();
 
   auto root_render_target = render_target;
   root_render_target.SetColorAttachment(color0, 0);
@@ -402,7 +403,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
         CreateRenderTarget(renderer,                                  //
                            ISize(subpass_coverage->size),             //
                            subpass->GetTotalPassReads(renderer) > 0,  //
-                           clear_color_);
+                           clear_color_.Premultiply());
 
     if (!subpass_target.GetRenderTarget().GetRenderTargetTexture()) {
       return EntityPass::EntityResult::Failure();
