@@ -1439,7 +1439,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   void updateCanDrag(double totalExtent) {
-    context.setCanDrag(totalExtent > (viewportDimension - maxScrollExtent) || minScrollExtent != maxScrollExtent);
+    context.setCanDrag(physics.allowUserScrolling &&
+        (totalExtent > (viewportDimension - maxScrollExtent) || minScrollExtent != maxScrollExtent));
   }
 
   @override
