@@ -197,7 +197,8 @@ class ScrollPhysics {
   }
 
   /// Whether the scrollable should let the user adjust the scroll offset, for
-  /// example by dragging.
+  /// example by dragging. If [allowUserScrolling] is false, the scrollable
+  /// will never allow user input to change the scroll position.
   ///
   /// By default, the user can manipulate the scroll offset if, and only if,
   /// there is actually content outside the viewport to reveal.
@@ -206,6 +207,10 @@ class ScrollPhysics {
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
   bool shouldAcceptUserOffset(ScrollMetrics position) {
+    if (!allowUserScrolling) {
+      return false;
+    }
+
     if (parent == null) {
       return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
     }
@@ -486,6 +491,9 @@ class ScrollPhysics {
   /// whether the viewport associated with this object is allowed to change the
   /// scroll position to fulfill such a request.
   bool get allowImplicitScrolling => true;
+
+  /// Whether a viewport is allowed to change the scroll position as the result of user input.
+  bool get allowUserScrolling => true;
 
   @override
   String toString() {
@@ -965,7 +973,7 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  bool shouldAcceptUserOffset(ScrollMetrics position) => false;
+  bool get allowUserScrolling => false;
 
   @override
   bool get allowImplicitScrolling => false;

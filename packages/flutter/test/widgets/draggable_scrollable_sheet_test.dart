@@ -1487,6 +1487,51 @@ void main() {
     );
   });
 
+  testWidgets('DraggableScrollableSheet should respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/121021
+    final DraggableScrollableController controller = DraggableScrollableController();
+    Widget buildFrame(ScrollPhysics? physics) {
+      return MaterialApp(
+        home: Scaffold(
+          body: DraggableScrollableSheet(
+            controller: controller,
+            initialChildSize: 0.25,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return ListView(
+                physics: physics,
+                controller: scrollController,
+                children: <Widget>[
+                  const Text('Drag me!'),
+                  Container(
+                    height: 10000.0,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(const NeverScrollableScrollPhysics()));
+
+    final double initPixels = controller.pixels;
+
+    await tester.drag(find.text('Drag me!'), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
+    //Should not allow user scrolling.
+    expect(controller.pixels, initPixels);
+
+    await tester.pumpWidget(buildFrame(null));
+
+    await tester.drag(find.text('Drag me!'), const Offset(0, -300.0));
+    await tester.pumpAndSettle();
+
+    //Allow user scrolling.
+    expect(controller.pixels, initPixels + 300.0);
+  });
+
   testWidgets('DraggableScrollableSheet should not rebuild every frame while dragging', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/67219
     int buildCount = 0;
