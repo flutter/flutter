@@ -208,9 +208,9 @@ android {
 dependencies {
     testImplementation 'junit:junit:4.12'
 
-    // https://developer.android.com/jetpack/androidx/releases/test/#1.4.0
-    androidTestImplementation 'androidx.test:runner:1.4.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    // https://developer.android.com/jetpack/androidx/releases/test/#1.2.0
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
 ```
 
