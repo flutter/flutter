@@ -350,7 +350,6 @@ void main() {
     testUsingContext(
       'legacy analytics disabled will disable new analytics',
       () async {
-        /// This refers to case 3
 
         io.setExitFunctionForTests((int exitCode) {});
 
