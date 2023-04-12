@@ -429,7 +429,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           (TapAndPanGestureRecognizer instance) {
         instance
           ..onTapDown = _startNewMouseSelectionGesture
-          ..onTapUp = _endNewMouseSelectionGesture
+          ..onTapUp = (TapDragUpDetails details) { _clearSelection(); }
           ..onDragStart = _handleMouseDragStart
           ..onDragUpdate = _handleMouseDragUpdate
           ..onDragEnd = _handleMouseDragEnd
@@ -452,40 +452,17 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _startNewMouseSelectionGesture(TapDragDownDetails details) {
-    switch(_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
-      case 1:
-        widget.focusNode.requestFocus();
-        hideToolbar();
-        _clearSelection();
-      case 2:
-        _selectWordAt(offset: details.globalPosition);
-        _updateSelectedContentIfNeeded();
-    }
-  }
-
-  void _endNewMouseSelectionGesture(TapDragUpDetails details) {
-    switch(_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
-      case 1:
-        _clearSelection();
-    }
+    widget.focusNode.requestFocus();
+    hideToolbar();
+    _clearSelection();
   }
 
   void _handleMouseDragStart(TapDragStartDetails details) {
-    switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
-      case 1:
-        _selectStartTo(offset: details.globalPosition);
-    }
+    _selectStartTo(offset: details.globalPosition);
   }
 
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
-    switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
-      case 1:
-        debugPrint('character');
-        _selectEndTo(offset: details.globalPosition, continuous: true);
-      case 2:
-        debugPrint('word by word');
-        _selectEndTo(offset: details.globalPosition, continuous: true, mode: SelectionMode.word);
-    }
+    _selectEndTo(offset: details.globalPosition, continuous: true);
   }
 
   void _updateSelectedContentIfNeeded() {
@@ -588,7 +565,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// If the selectable subtree returns a [SelectionResult.pending], this method
   /// continues to send [SelectionEdgeUpdateEvent]s every frame until the result
   /// is not pending or users end their gestures.
-  void _triggerSelectionEndEdgeUpdate(SelectionMode? mode) {
+  void _triggerSelectionEndEdgeUpdate() {
     // This method can be called when the drag is not in progress. This can
     // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
@@ -597,14 +574,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       return;
     }
     if (_selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!, mode: mode)) == SelectionResult.pending) {
+        SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!)) == SelectionResult.pending) {
       _scheduledSelectionEndEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         if (!_scheduledSelectionEndEdgeUpdate) {
           return;
         }
         _scheduledSelectionEndEdgeUpdate = false;
-        _triggerSelectionEndEdgeUpdate(mode);
+        _triggerSelectionEndEdgeUpdate();
       });
       return;
     }
@@ -717,7 +694,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     // The value corresponds to the paint origin of the selection handle.
     // Offset it to the center of the line to make it feel more natural.
     _selectionEndPosition = _selectionEndHandleDragPosition - Offset(0, _selectionDelegate.value.endSelectionPoint!.lineHeight / 2);
-    _triggerSelectionEndEdgeUpdate(null);
+    _triggerSelectionEndEdgeUpdate();
 
     _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
@@ -876,14 +853,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
-  void _selectEndTo({required Offset offset, bool continuous = false, SelectionMode? mode}) {
+  void _selectEndTo({required Offset offset, bool continuous = false}) {
     if (!continuous) {
-      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: offset, mode: mode));
+      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: offset));
       return;
     }
     if (_selectionEndPosition != offset) {
       _selectionEndPosition = offset;
-      _triggerSelectionEndEdgeUpdate(mode);
+      _triggerSelectionEndEdgeUpdate();
     }
   }
 
@@ -1250,42 +1227,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     super.dispose();
-  }
-
-  // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
-  // which can grow to be infinitely large, to a value between 1 and 3. The value
-  // that the raw count is converted to is based on the default observed behavior
-  // on the native platforms.
-  //
-  // This method should be used in all instances when details.consecutiveTapCount
-  // would be used.
-  static int _getEffectiveConsecutiveTapCount(int rawCount) {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-        // From observation, these platform's reset their tap count to 0 when
-        // the number of consecutive taps exceeds 3. For example on Debian Linux
-        // with GTK, when going past a triple click, on the fourth click the
-        // selection is moved to the precise click position, on the fifth click
-        // the word at the position is selected, and on the sixth click the
-        // paragraph at the position is selected.
-        return rawCount <= 3 ? rawCount : (rawCount % 3 == 0 ? 3 : rawCount % 3);
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        // From observation, these platform's either hold their tap count at 3.
-        // For example on macOS, when going past a triple click, the selection
-        // should be retained at the paragraph that was first selected on triple
-        // click.
-        return min(rawCount, 3);
-      case TargetPlatform.windows:
-        // From observation, this platform's consecutive tap actions alternate
-        // between double click and triple click actions. For example, after a
-        // triple click has selected a paragraph, on the next click the word at
-        // the clicked position will be selected, and on the next click the
-        // paragraph at the position is selected.
-        return rawCount < 2 ? rawCount : 2 + rawCount % 2;
-    }
   }
 
   @override
