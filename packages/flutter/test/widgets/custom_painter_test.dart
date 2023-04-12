@@ -346,8 +346,7 @@ void _defineTests() {
         ),
       ),
     ));
-    // ignore: deprecated_member_use
-    final Set<SemanticsAction> allActions = SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList.toSet()
+    final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
@@ -445,8 +444,7 @@ void _defineTests() {
         ),
       ),
     ));
-    // ignore: deprecated_member_use
-    List<SemanticsFlag> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.toList();
+    List<SemanticsFlag> flags = SemanticsFlag.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags
@@ -500,8 +498,7 @@ void _defineTests() {
         ),
       ),
     ));
-    // ignore: deprecated_member_use
-    flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.toList();
+    flags = SemanticsFlag.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
     flags

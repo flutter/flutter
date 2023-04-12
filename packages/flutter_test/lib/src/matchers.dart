@@ -2533,7 +2533,11 @@ class _MatchesSemanticsData extends Matcher {
 
   static String _createEnumsSummary<T extends Object>(List<T> enums) {
     assert(T == SemanticsAction || T == SemanticsFlag, 'This method is only intended for lists of SemanticsActions or SemanticsFlags.');
-    return '[${enums.map(describeEnum).join(', ')}]';
+    if (T == SemanticsAction) {
+      return '[${(enums as List<SemanticsAction>).map((SemanticsAction d) => d.name).join(', ')}]';
+    } else {
+      return '[${(enums as List<SemanticsFlag>).map((SemanticsFlag d) => d.name).join(', ')}]';
+    }
   }
 }
 
