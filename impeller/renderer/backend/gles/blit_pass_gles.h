@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/impeller/base/config.h"
 #include "flutter/impeller/renderer/backend/gles/reactor_gles.h"
@@ -12,7 +14,8 @@
 
 namespace impeller {
 
-class BlitPassGLES final : public BlitPass {
+class BlitPassGLES final : public BlitPass,
+                           public std::enable_shared_from_this<BlitPassGLES> {
  public:
   // |BlitPass|
   ~BlitPassGLES() override;
