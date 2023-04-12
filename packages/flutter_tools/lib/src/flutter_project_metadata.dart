@@ -6,7 +6,6 @@ import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/utils.dart';
 import 'project.dart';
 import 'version.dart';
 
@@ -36,7 +35,7 @@ String flutterProjectTypeToString(FlutterProjectType? type) {
   if (type == FlutterProjectType.ffiPlugin) {
     return 'plugin_ffi';
   }
-  return getEnumName(type);
+  return type.name;
 }
 
 FlutterProjectType? stringToProjectType(String value) {

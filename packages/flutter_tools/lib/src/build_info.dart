@@ -214,7 +214,7 @@ class BuildInfo {
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
-  String get modeName => getModeName(mode);
+  String get modeName => mode.name;
   String get friendlyModeName => getFriendlyModeName(mode);
 
   /// the flavor name in the output apk files is lower-cased (see flutter.gradle),
@@ -540,10 +540,8 @@ String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? bui
   return buildName;
 }
 
-String getModeName(BuildMode mode) => getEnumName(mode);
-
 String getFriendlyModeName(BuildMode mode) {
-  return snakeCase(getModeName(mode)).replaceAll('_', ' ');
+  return snakeCase(mode.name).replaceAll('_', ' ');
 }
 
 // Returns true if the selected build mode uses ahead-of-time compilation.

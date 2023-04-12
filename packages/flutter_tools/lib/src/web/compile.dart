@@ -19,6 +19,7 @@ import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../runner/parser_extension.dart';
 import '../version.dart';
 import 'compiler_config.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
@@ -133,7 +134,7 @@ class WebBuilder {
 }
 
 /// Web rendering backend mode.
-enum WebRendererMode {
+enum WebRendererMode implements HasHelpText {
   /// Auto detects which rendering backend to use.
   auto,
 
@@ -146,6 +147,10 @@ enum WebRendererMode {
   /// Always use skwasm.
   skwasm;
 
+  @override
+  String get cliName => name;
+
+  @override
   String get helpText => switch (this) {
         auto =>
           'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',

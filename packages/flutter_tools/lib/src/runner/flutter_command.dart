@@ -30,6 +30,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../web/compile.dart';
 import 'flutter_command_runner.dart';
+import 'parser_extension.dart';
 import 'target_devices.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
@@ -82,18 +83,12 @@ class FlutterCommandResult {
   final DateTime? endTimeOverride;
 
   @override
-  String toString() {
-    switch (exitStatus) {
-      case ExitStatus.success:
-        return 'success';
-      case ExitStatus.warning:
-        return 'warning';
-      case ExitStatus.fail:
-        return 'fail';
-      case ExitStatus.killed:
-        return 'killed';
-    }
-  }
+  String toString() => switch (exitStatus) {
+        ExitStatus.success => 'success',
+        ExitStatus.warning => 'warning',
+        ExitStatus.fail => 'fail',
+        ExitStatus.killed => 'killed'
+      };
 }
 
 /// Common flutter command line options.
@@ -130,7 +125,7 @@ abstract final class FlutterOptions {
 }
 
 /// flutter command categories for usage.
-class FlutterCommandCategory {
+abstract final class FlutterCommandCategory {
   static const String sdk = 'Flutter SDK';
   static const String project = 'Project';
   static const String tools = 'Tools & Devices';
@@ -636,12 +631,11 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebRendererOption() {
-    argParser.addOption(
-      FlutterOptions.kWebRendererFlag,
-      defaultsTo: WebRendererMode.auto.name,
-      allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
+    argParser.addEnumOption(
+      name: FlutterOptions.kWebRendererFlag,
       help: 'The renderer implementation to use when building for the web.',
-      allowedHelp: Map<String, String>.fromEntries(WebRendererMode.values.map((WebRendererMode e) => MapEntry<String, String>(e.name, e.helpText)))
+      values: WebRendererMode.values,
+      defaultsTo: WebRendererMode.auto,
     );
   }
 
@@ -1422,7 +1416,7 @@ abstract class FlutterCommand extends Command<void> {
 
     // Send timing.
     final List<String?> labels = <String?>[
-      getEnumName(commandResult.exitStatus),
+      commandResult.exitStatus.name,
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];

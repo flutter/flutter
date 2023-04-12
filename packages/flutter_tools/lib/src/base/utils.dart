@@ -53,13 +53,6 @@ String snakeCaseToTitleCase(String snakeCaseString) {
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : '${word}s';
 
-/// Return the name of an enum item.
-String getEnumName(dynamic enumItem) {
-  final String name = '$enumItem';
-  final int index = name.indexOf('.');
-  return index == -1 ? name : name.substring(index + 1);
-}
-
 String toPrettyJson(Object jsonable) {
   final String value = const JsonEncoder.withIndent('  ').convert(jsonable);
   return '$value\n';
