@@ -39,6 +39,22 @@ bool Command::BindResource(ShaderStage stage,
                            const ShaderUniformSlot& slot,
                            const ShaderMetadata& metadata,
                            const BufferView& view) {
+  return DoBindResource(stage, slot, &metadata, view);
+}
+
+bool Command::BindResource(
+    ShaderStage stage,
+    const ShaderUniformSlot& slot,
+    const std::shared_ptr<const ShaderMetadata>& metadata,
+    const BufferView& view) {
+  return DoBindResource(stage, slot, metadata, view);
+}
+
+template <class T>
+bool Command::DoBindResource(ShaderStage stage,
+                             const ShaderUniformSlot& slot,
+                             const T metadata,
+                             const BufferView& view) {
   if (!view) {
     return false;
   }
@@ -46,11 +62,12 @@ bool Command::BindResource(ShaderStage stage,
   switch (stage) {
     case ShaderStage::kVertex:
       vertex_bindings.uniforms[slot.ext_res_0] = slot;
-      vertex_bindings.buffers[slot.ext_res_0] = {&metadata, view};
+      vertex_bindings.buffers[slot.ext_res_0] = BufferResource(metadata, view);
       return true;
     case ShaderStage::kFragment:
       fragment_bindings.uniforms[slot.ext_res_0] = slot;
-      fragment_bindings.buffers[slot.ext_res_0] = {&metadata, view};
+      fragment_bindings.buffers[slot.ext_res_0] =
+          BufferResource(metadata, view);
       return true;
     case ShaderStage::kCompute:
       VALIDATION_LOG << "Use ComputeCommands for compute shader stages.";

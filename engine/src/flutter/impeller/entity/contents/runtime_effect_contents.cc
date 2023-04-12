@@ -165,7 +165,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   for (auto uniform : runtime_stage_->GetUniforms()) {
     // TODO(113715): Populate this metadata once GLES is able to handle
     //               non-struct uniform names.
-    ShaderMetadata metadata;
+    std::shared_ptr<ShaderMetadata> metadata =
+        std::make_shared<ShaderMetadata>();
 
     switch (uniform.type) {
       case kSampledImage: {
