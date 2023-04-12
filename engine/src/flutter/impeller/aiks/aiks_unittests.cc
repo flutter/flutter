@@ -1980,5 +1980,121 @@ static Picture BlendModeSaveLayerTest(BlendMode blend_mode) {
   }
 IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
 
+TEST_P(AiksTest, TranslucentSaveLayerDrawsCorrectly) {
+  Canvas canvas;
+
+  canvas.DrawRect(Rect::MakeXYWH(100, 100, 300, 300), {.color = Color::Blue()});
+
+  canvas.SaveLayer({.color = Color::Black().WithAlpha(0.5)});
+  canvas.DrawRect(Rect::MakeXYWH(100, 500, 300, 300), {.color = Color::Blue()});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, TranslucentSaveLayerWithBlendColorFilterDrawsCorrectly) {
+  Canvas canvas;
+
+  canvas.DrawRect(Rect::MakeXYWH(100, 100, 300, 300), {.color = Color::Blue()});
+
+  canvas.SaveLayer({
+      .color = Color::Black().WithAlpha(0.5),
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeBlend(
+                BlendMode::kDestinationOver, {std::move(input)}, Color::Red());
+          },
+  });
+  canvas.DrawRect(Rect::MakeXYWH(100, 500, 300, 300), {.color = Color::Blue()});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterAndDrawsCorrectly) {
+  Canvas canvas;
+
+  canvas.DrawRect(Rect::MakeXYWH(100, 100, 300, 300), {.color = Color::Blue()});
+
+  canvas.SaveLayer({
+      .color = Color::Black().WithAlpha(0.5),
+      .image_filter =
+          [](FilterInput::Ref input, const Matrix& effect_transform,
+             bool is_subpass) {
+            return ColorFilterContents::MakeBlend(
+                BlendMode::kDestinationOver, {std::move(input)}, Color::Red());
+          },
+  });
+
+  canvas.DrawRect(Rect::MakeXYWH(100, 500, 300, 300), {.color = Color::Blue()});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, TranslucentSaveLayerImageDrawsCorrectly) {
+  Canvas canvas;
+
+  auto image = std::make_shared<Image>(CreateTextureForFixture("airplane.jpg"));
+  canvas.DrawImage(image, {100, 100}, {});
+
+  canvas.SaveLayer({.color = Color::Black().WithAlpha(0.5)});
+  canvas.DrawImage(image, {100, 500}, {});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixColorFilterDrawsCorrectly) {
+  Canvas canvas;
+
+  auto image = std::make_shared<Image>(CreateTextureForFixture("airplane.jpg"));
+  canvas.DrawImage(image, {100, 100}, {});
+
+  canvas.SaveLayer({
+      .color = Color::Black().WithAlpha(0.5),
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeColorMatrix({std::move(input)},
+                                                        {.array = {
+                                                             1, 0, 0, 0, 0,  //
+                                                             0, 1, 0, 0, 0,  //
+                                                             0, 0, 1, 0, 0,  //
+                                                             0, 0, 0, 2, 0   //
+                                                         }});
+          },
+  });
+  canvas.DrawImage(image, {100, 500}, {});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixImageFilterDrawsCorrectly) {
+  Canvas canvas;
+
+  auto image = std::make_shared<Image>(CreateTextureForFixture("airplane.jpg"));
+  canvas.DrawImage(image, {100, 100}, {});
+
+  canvas.SaveLayer({
+      .color = Color::Black().WithAlpha(0.5),
+      .image_filter =
+          [](FilterInput::Ref input, const Matrix& effect_transform,
+             bool is_subpass) {
+            return ColorFilterContents::MakeColorMatrix({std::move(input)},
+                                                        {.array = {
+                                                             1, 0, 0, 0, 0,  //
+                                                             0, 1, 0, 0, 0,  //
+                                                             0, 0, 1, 0, 0,  //
+                                                             0, 0, 0, 2, 0   //
+                                                         }});
+          },
+  });
+  canvas.DrawImage(image, {100, 500}, {});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
