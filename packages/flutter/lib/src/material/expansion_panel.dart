@@ -256,7 +256,7 @@ class ExpansionPanelList extends StatefulWidget {
   final Color? expandIconColor;
 
   /// Defines the [MaterialGap.size] of the [MaterialGap] which is placed
-  /// between the [ExpansionPanelList.children] when expanded.
+  /// between the [ExpansionPanelList.children] when they're expanded.
   ///
   /// Defaults to `16.0`.
   final double materialGapSize;
