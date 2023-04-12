@@ -1945,7 +1945,6 @@ void main() {
     expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
 
-
     // layout is a row: [icon text icon]
     expect(tester.getTopLeft(find.byIcon(Icons.pages)).dx, 0.0);
     expect(tester.getTopRight(find.byIcon(Icons.pages)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));

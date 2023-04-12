@@ -956,8 +956,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     );
     boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, containerConstraints);
     boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, containerConstraints);
+    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
+    final EdgeInsets effectiveContentPadding = contentPadding.copyWith(
+      top: math.max(0, contentPadding.top + densityOffset.dy / 2),
+      bottom: math.max(0, contentPadding.bottom + densityOffset.dy / 2),
+    );
     final BoxConstraints contentConstraints = containerConstraints.copyWith(
-      maxWidth: containerConstraints.maxWidth - contentPadding.horizontal,
+      maxWidth: containerConstraints.maxWidth - effectiveContentPadding.horizontal,
     );
     boxToBaseline[prefix] = _layoutLineBox(prefix, contentConstraints);
     boxToBaseline[suffix] = _layoutLineBox(suffix, contentConstraints);
@@ -966,12 +971,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       0.0,
       constraints.maxWidth - (
         _boxSize(icon).width
-        + (prefixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.left : contentPadding.right))
+        + (prefixIcon != null ? 0 : (textDirection == TextDirection.ltr ? effectiveContentPadding.left : effectiveContentPadding.right))
         + _boxSize(prefixIcon).width
         + _boxSize(prefix).width
         + _boxSize(suffix).width
         + _boxSize(suffixIcon).width
-        + (suffixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.right : contentPadding.left))),
+        + (suffixIcon != null ? 0 : (textDirection == TextDirection.ltr ? effectiveContentPadding.right : effectiveContentPadding.left))),
     );
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
@@ -983,10 +988,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       0.0,
       constraints.maxWidth - (
         _boxSize(icon).width
-        + contentPadding.left
+        + effectiveContentPadding.left
         + _boxSize(prefixIcon).width
         + suffixIconWidth
-        + contentPadding.right),
+        + effectiveContentPadding.right),
     );
     boxToBaseline[label] = _layoutLineBox(
       label,
@@ -1027,12 +1032,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       counterHeight,
       helperErrorHeight,
     );
-    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     boxToBaseline[input] = _layoutLineBox(
       input,
       boxConstraints.deflate(EdgeInsets.only(
-        top: contentPadding.top + topHeight + densityOffset.dy / 2,
-        bottom: contentPadding.bottom + bottomHeight + densityOffset.dy / 2,
+        top: effectiveContentPadding.top + topHeight,
+        bottom: effectiveContentPadding.bottom + bottomHeight,
       )).copyWith(
         minWidth: inputWidth,
         maxWidth: inputWidth,
@@ -1074,12 +1078,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double suffixIconHeight = suffixIcon?.size.height ?? 0;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
     final double contentHeightWithoutIcon = topHeight
-      + contentPadding.top
+      + effectiveContentPadding.top
       + fixAboveInput
       + inputHeight
       + fixBelowInput
-      + contentPadding.bottom
-      + densityOffset.dy;
+      + effectiveContentPadding.bottom;
     final double contentHeight = math.max(fixIconHeight, contentHeightWithoutIcon);
     final double minContainerHeight = decoration.isDense! || decoration.isCollapsed || expands
       ? 0.0
@@ -1113,14 +1116,16 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double baselineAdjustment = fixAboveInput - overflow * (1 - textAlignVerticalFactor);
 
     // The baselines that will be used to draw the actual input text content.
-    final double topInputBaseline = contentPadding.top
+    final double topInputBaseline = effectiveContentPadding.top
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
       + interactiveAdjustment
-      + undersizedContentIconAdjustment
-      + densityOffset.dy / 2.0;
-    final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
+      + undersizedContentIconAdjustment;
+    final double maxContentHeight = containerHeight
+        - effectiveContentPadding.top
+        - effectiveContentPadding.bottom
+        - topHeight;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
