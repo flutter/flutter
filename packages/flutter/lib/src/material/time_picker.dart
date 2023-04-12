@@ -330,11 +330,9 @@ class _HourMinuteControl extends StatelessWidget {
       case TimePickerEntryMode.dial:
       case TimePickerEntryMode.dialOnly:
         height = defaultTheme.hourMinuteSize.height;
-        break;
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         height = defaultTheme.hourMinuteInputSize.height;
-        break;
     }
 
     return SizedBox(
@@ -469,11 +467,9 @@ class _StringFragment extends StatelessWidget {
       case TimePickerEntryMode.dial:
       case TimePickerEntryMode.dialOnly:
         height = defaultTheme.hourMinuteSize.height;
-        break;
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         height = defaultTheme.hourMinuteInputSize.height;
-        break;
     }
 
     return ExcludeSemantics(
@@ -561,7 +557,6 @@ class _DayPeriodControl extends StatelessWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -580,7 +575,6 @@ class _DayPeriodControl extends StatelessWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -621,17 +615,13 @@ class _DayPeriodControl extends StatelessWidget {
         switch (orientation) {
           case Orientation.portrait:
             dayPeriodSize = defaultTheme.dayPeriodPortraitSize;
-            break;
           case Orientation.landscape:
             dayPeriodSize = defaultTheme.dayPeriodLandscapeSize;
-            break;
         }
-        break;
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         orientation = Orientation.portrait;
         dayPeriodSize = defaultTheme.dayPeriodInputSize;
-        break;
     }
 
     final Widget result;
@@ -659,7 +649,6 @@ class _DayPeriodControl extends StatelessWidget {
             ),
           ),
         );
-        break;
       case Orientation.landscape:
         result = _DayPeriodInputPadding(
           minSize: dayPeriodSize,
@@ -683,7 +672,6 @@ class _DayPeriodControl extends StatelessWidget {
             ),
           ),
         );
-        break;
     }
     return result;
   }
@@ -861,14 +849,12 @@ class _RenderInputPadding extends RenderShiftedBox {
         } else {
           newPosition += const Offset(0, -1);
         }
-        break;
       case Orientation.landscape:
         if (position.dx > newPosition.dx) {
           newPosition += const Offset(1, 0);
         } else {
           newPosition += const Offset(-1, 0);
         }
-        break;
     }
 
     return result.addWithRawTransform(
@@ -1163,22 +1149,17 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     switch (widget.hourDialType) {
       case _HourDialType.twentyFourHour:
         hoursFactor = TimeOfDay.hoursPerDay;
-        break;
       case _HourDialType.twentyFourHourDoubleRing:
         hoursFactor = TimeOfDay.hoursPerPeriod;
-        break;
       case _HourDialType.twelveHour:
         hoursFactor = TimeOfDay.hoursPerPeriod;
-        break;
     }
     final double fraction;
     switch (widget.hourMinuteMode) {
       case _HourMinuteMode.hour:
         fraction = (time.hour / hoursFactor) % hoursFactor;
-        break;
       case _HourMinuteMode.minute:
         fraction = (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour;
-        break;
     }
     return (math.pi / 2 - fraction * _kTwoPi) % _kTwoPi;
   }
@@ -1191,17 +1172,14 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         switch (widget.hourDialType) {
           case _HourDialType.twentyFourHour:
             newHour = (fraction * TimeOfDay.hoursPerDay).round() % TimeOfDay.hoursPerDay;
-            break;
           case _HourDialType.twentyFourHourDoubleRing:
             newHour = (fraction * TimeOfDay.hoursPerPeriod).round() % TimeOfDay.hoursPerPeriod;
             if (radius < 0.5) {
               newHour = newHour + TimeOfDay.hoursPerPeriod;
             }
-            break;
           case _HourDialType.twelveHour:
             newHour = (fraction * TimeOfDay.hoursPerPeriod).round() % TimeOfDay.hoursPerPeriod;
             newHour = newHour + widget.selectedTime.periodOffset;
-            break;
         }
         return widget.selectedTime.replacing(hour: newHour);
       case _HourMinuteMode.minute:
@@ -1290,10 +1268,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         case _HourDialType.twentyFourHour:
         case _HourDialType.twentyFourHourDoubleRing:
           _announceToAccessibility(context, localizations.formatDecimal(newTime.hour));
-          break;
         case _HourDialType.twelveHour:
           _announceToAccessibility(context, localizations.formatDecimal(newTime.hourOfPeriod));
-          break;
       }
       widget.onHourSelected?.call();
     } else {
@@ -1326,15 +1302,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           case _HourDialType.twentyFourHour:
           case _HourDialType.twentyFourHourDoubleRing:
             time = TimeOfDay(hour: hour, minute: widget.selectedTime.minute);
-            break;
           case _HourDialType.twelveHour:
             time = getAmPmTime();
-            break;
         }
-        break;
       case _HourMinuteMode.minute:
         time = getAmPmTime();
-        break;
     }
     final double angle = _getThetaForTime(time);
     _thetaTween
@@ -1557,7 +1529,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
               selectedValue: selectedDialValue,
             );
             radiusValue = theme.useMaterial3 ? _radius.value : 1;
-            break;
           case _HourDialType.twelveHour:
             selectedDialValue = widget.selectedTime.hourOfPeriod;
             primaryLabels = _build12HourRing(
@@ -1569,9 +1540,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
               selectedValue: selectedDialValue,
             );
             radiusValue = 1;
-            break;
         }
-        break;
       case _HourMinuteMode.minute:
         selectedDialValue = widget.selectedTime.minute;
         primaryLabels = _buildMinutes(
@@ -1583,7 +1552,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           selectedValue: selectedDialValue,
         );
         radiusValue = 1;
-        break;
     }
     painter?.dispose();
     painter = _DialPainter(
@@ -2263,10 +2231,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         switch (_entryMode.value) {
           case TimePickerEntryMode.dial:
             _autovalidateMode.value = AutovalidateMode.disabled;
-            break;
           case TimePickerEntryMode.input:
             _formKey.currentState!.save();
-            break;
           case TimePickerEntryMode.dialOnly:
             break;
           case TimePickerEntryMode.inputOnly:
@@ -2282,14 +2248,11 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     switch (_entryMode.value) {
       case TimePickerEntryMode.dial:
         _handleEntryModeChanged(TimePickerEntryMode.input);
-        break;
       case TimePickerEntryMode.input:
         _handleEntryModeChanged(TimePickerEntryMode.dial);
-        break;
       case TimePickerEntryMode.dialOnly:
       case TimePickerEntryMode.inputOnly:
         FlutterError('Can not change entry mode from $_entryMode');
-        break;
     }
   }
 
@@ -2335,11 +2298,9 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
           case TimeOfDayFormat.H_colon_mm:
             final _TimePickerDefaults defaultTheme = useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
             timePickerWidth = _kTimePickerMinInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
-            break;
           case TimeOfDayFormat.a_space_h_colon_mm:
           case TimeOfDayFormat.h_colon_mm_space_a:
-            timePickerWidth = _kTimePickerMinInputSize.width;
-            break;
+            timePickerWidth = _kTimePickerMinInputSize.width - (useMaterial3 ? 32 : 0);
         }
         return Size(timePickerWidth, _kTimePickerMinInputSize.height);
     }
@@ -2359,15 +2320,12 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         switch (orientation) {
           case Orientation.portrait:
             timePickerSize = _kTimePickerPortraitSize;
-            break;
           case Orientation.landscape:
             timePickerSize = Size(
               _kTimePickerLandscapeSize.width * textScaleFactor,
               useMaterial3 ? _kTimePickerLandscapeSize.height : _kTimePickerLandscapeSizeM2.height
             );
-            break;
         }
-        break;
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -2380,14 +2338,11 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
           case TimeOfDayFormat.H_colon_mm:
             final _TimePickerDefaults defaultTheme = useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
             timePickerWidth = _kTimePickerInputSize.width - defaultTheme.dayPeriodPortraitSize.width - 12;
-            break;
           case TimeOfDayFormat.a_space_h_colon_mm:
           case TimeOfDayFormat.h_colon_mm_space_a:
-            timePickerWidth = _kTimePickerInputSize.width;
-            break;
+            timePickerWidth = _kTimePickerInputSize.width - (useMaterial3 ? 32 : 0);
         }
         timePickerSize = Size(timePickerWidth, _kTimePickerInputSize.height);
-        break;
     }
     return Size(timePickerSize.width, timePickerSize.height * textScaleFactor);
   }
@@ -2451,13 +2406,10 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
     switch (theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         tapTargetSizeOffset = Offset.zero;
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         // _dialogSize returns "padded" sizes.
         tapTargetSizeOffset = const Offset(0, -12);
-        break;
     }
-
     final Size dialogSize = _dialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     final Size minDialogSize = _minDialogSize(context, useMaterial3: theme.useMaterial3) + tapTargetSizeOffset;
     return Dialog(
@@ -2683,7 +2635,6 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
           HapticFeedback.vibrate();
           _vibrateTimer = null;
         });
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -2704,16 +2655,13 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
       switch (widget.entryMode) {
         case TimePickerEntryMode.dial:
           newMode = TimePickerEntryMode.input;
-          break;
         case TimePickerEntryMode.input:
           _autofocusHour.value = false;
           _autofocusMinute.value = false;
           newMode = TimePickerEntryMode.dial;
-          break;
         case TimePickerEntryMode.dialOnly:
         case TimePickerEntryMode.inputOnly:
           FlutterError('Can not change entry mode from ${widget.entryMode}');
-          break;
       }
       _setEntryMode(newMode);
     });
@@ -2728,10 +2676,8 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
     switch (_hourMinuteMode.value) {
       case _HourMinuteMode.hour:
         _announceToAccessibility(context, localizations.timePickerHourModeAnnouncement);
-        break;
       case _HourMinuteMode.minute:
         _announceToAccessibility(context, localizations.timePickerMinuteModeAnnouncement);
-        break;
     }
     _lastModeAnnounced.value = _hourMinuteMode.value;
   }
@@ -2786,10 +2732,8 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
       case HourFormat.HH:
       case HourFormat.H:
         hourMode = theme.useMaterial3 ? _HourDialType.twentyFourHourDoubleRing : _HourDialType.twentyFourHour;
-        break;
       case HourFormat.h:
         hourMode = _HourDialType.twelveHour;
-        break;
     }
 
     final String helpText;
@@ -2805,17 +2749,13 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
         switch (orientation) {
           case Orientation.portrait:
             dialPadding = const EdgeInsets.only(left: 12, right: 12, top: 36);
-            break;
           case Orientation.landscape:
             switch (theme.materialTapTargetSize) {
               case MaterialTapTargetSize.padded:
                 dialPadding = const EdgeInsetsDirectional.only(start: 64);
-                break;
               case MaterialTapTargetSize.shrinkWrap:
                 dialPadding = const EdgeInsetsDirectional.only(start: 64);
-                break;
             }
-            break;
         }
         final Widget dial = Padding(
           padding: dialPadding,
@@ -2862,7 +2802,6 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
                 ),
               ],
             );
-            break;
           case Orientation.landscape:
             picker = Column(
               children: <Widget>[
@@ -2880,9 +2819,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
                 ),
               ],
             );
-            break;
         }
-        break;
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         final String helpText =  widget.helpText ?? (theme.useMaterial3

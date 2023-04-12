@@ -356,7 +356,6 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.create;
-        break;
       case FlutterProjectType.skeleton:
         generatedFileCount += await generateApp(
           <String>['skeleton'],
@@ -367,7 +366,6 @@ class CreateCommand extends CreateBase {
           generateMetadata: false,
         );
         pubContext = PubContext.create;
-        break;
       case FlutterProjectType.module:
         generatedFileCount += await _generateModule(
           relativeDir,
@@ -376,7 +374,6 @@ class CreateCommand extends CreateBase {
           printStatusWhenWriting: !creatingNewProject,
         );
         pubContext = PubContext.create;
-        break;
       case FlutterProjectType.package:
         generatedFileCount += await _generatePackage(
           relativeDir,
@@ -385,7 +382,6 @@ class CreateCommand extends CreateBase {
           printStatusWhenWriting: !creatingNewProject,
         );
         pubContext = PubContext.createPackage;
-        break;
       case FlutterProjectType.plugin:
         generatedFileCount += await _generateMethodChannelPlugin(
           relativeDir,
@@ -395,7 +391,6 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.createPlugin;
-        break;
       case FlutterProjectType.ffiPlugin:
         generatedFileCount += await _generateFfiPlugin(
           relativeDir,
@@ -405,7 +400,6 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.createPlugin;
-        break;
     }
 
     if (boolArg('pub')) {

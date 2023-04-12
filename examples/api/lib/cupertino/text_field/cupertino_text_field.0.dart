@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoTextField].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoTextField].
 
 void main() => runApp(const CupertinoTextFieldApp());
 
@@ -51,7 +51,7 @@ class _CupertinoTextFieldExampleState extends State<CupertinoTextFieldExample> {
       child: Center(
         child: CupertinoTextField(
           controller: _textController,
-        )
+        ),
       ),
     );
   }

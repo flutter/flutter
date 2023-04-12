@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoSliverNavigationBar].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSliverNavigationBar].
 
 void main() => runApp(const SliverNavBarApp());
 
@@ -47,9 +47,14 @@ class SliverNavBarExample extends StatelessWidget {
                 const Text('Drag me up', textAlign: TextAlign.center),
                 CupertinoButton.filled(
                   onPressed: () {
-                    Navigator.push(context, CupertinoPageRoute<Widget>(builder: (BuildContext context) {
-                      return const NextPage();
-                    }));
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute<Widget>(
+                        builder: (BuildContext context) {
+                          return const NextPage();
+                        },
+                      ),
+                    );
                   },
                   child: const Text('Go to Next Page'),
                 ),
@@ -63,21 +68,19 @@ class SliverNavBarExample extends StatelessWidget {
 }
 
 class NextPage extends StatelessWidget {
-  const NextPage({ super.key });
+  const NextPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final Brightness brightness = CupertinoTheme.brightnessOf(context);
-    return  CupertinoPageScaffold(
+    return CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
-                color: brightness == Brightness.light
-                  ? CupertinoColors.black
-                  : CupertinoColors.white,
+                color: brightness == Brightness.light ? CupertinoColors.black : CupertinoColors.white,
               ),
             ),
             // The middle widget is visible in both collapsed and expanded states.

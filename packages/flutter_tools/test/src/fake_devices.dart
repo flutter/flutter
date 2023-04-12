@@ -79,6 +79,33 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
       },
     }
   ),
+  FakeDeviceJsonData(
+    FakeDevice(
+      'wireless ios',
+      'wireless-ios',
+      type:PlatformType.ios,
+      connectionInterface: DeviceConnectionInterface.wireless,
+    )
+      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios)
+      ..sdkNameAndVersion = Future<String>.value('iOS 16'),
+    <String,Object>{
+      'name': 'wireless ios',
+      'id': 'wireless-ios',
+      'isSupported': true,
+      'targetPlatform': 'ios',
+      'emulator': true,
+      'sdk': 'iOS 16',
+      'capabilities': <String, Object>{
+        'hotReload': true,
+        'hotRestart': true,
+        'screenshot': false,
+        'fastStart': false,
+        'flutterExit': true,
+        'hardwareRendering': true,
+        'startPaused': true,
+      },
+    },
+  ),
 ];
 
 /// Fake device to test `devices` command.
@@ -167,7 +194,9 @@ class FakeDeviceJsonData {
 }
 
 class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
-  FakePollingDeviceDiscovery() : super('mock');
+  FakePollingDeviceDiscovery({
+    this.requiresExtendedWirelessDeviceDiscovery = false,
+  })  : super('mock');
 
   final List<Device> _devices = <Device>[];
   final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
@@ -186,6 +215,9 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   bool get canListAnything => true;
+
+  @override
+  bool requiresExtendedWirelessDeviceDiscovery;
 
   void addDevice(Device device) {
     _devices.add(device);

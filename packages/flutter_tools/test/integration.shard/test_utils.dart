@@ -100,10 +100,7 @@ Future<void> pollForServiceExtensionValue<T>({
   );
 }
 
-class AppleTestUtils {
-  // static only
-  AppleTestUtils._();
-
+abstract final class AppleTestUtils {
   static const List<String> requiredSymbols = <String>[
     '_kDartIsolateSnapshotData',
     '_kDartIsolateSnapshotInstructions',

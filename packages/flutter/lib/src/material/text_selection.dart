@@ -308,11 +308,10 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 }
 
+// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
+// deleted, when users should migrate back to materialTextSelectionControls.
+// See https://github.com/flutter/flutter/pull/124262
 /// Text selection handle controls that follow the Material Design specification.
-@Deprecated(
-  'Use `materialTextSelectionControls` instead. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
-)
 final TextSelectionControls materialTextSelectionHandleControls = MaterialTextSelectionHandleControls();
 
 /// Text selection controls that follow the Material Design specification.

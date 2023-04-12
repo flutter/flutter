@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,8 @@ void main() {
     expect(themeData.columnSpacing, null);
     expect(themeData.dividerThickness, null);
     expect(themeData.checkboxHorizontalMargin, null);
+    expect(themeData.headingCellCursor, null);
+    expect(themeData.dataRowCursor, null);
 
     const DataTableTheme theme = DataTableTheme(data: DataTableThemeData(), child: SizedBox());
     expect(theme.data.decoration, null);
@@ -47,6 +50,8 @@ void main() {
     expect(theme.data.columnSpacing, null);
     expect(theme.data.dividerThickness, null);
     expect(theme.data.checkboxHorizontalMargin, null);
+    expect(theme.data.headingCellCursor, null);
+    expect(theme.data.dataRowCursor, null);
   });
 
   testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
@@ -80,6 +85,8 @@ void main() {
       columnSpacing: 4.0,
       dividerThickness: 5.0,
       checkboxHorizontalMargin: 6.0,
+      headingCellCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab),
+      dataRowCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -99,6 +106,8 @@ void main() {
     expect(description[9], 'columnSpacing: 4.0');
     expect(description[10], 'dividerThickness: 5.0');
     expect(description[11], 'checkboxHorizontalMargin: 6.0');
+    expect(description[12], 'headingCellCursor: MaterialStatePropertyAll(SystemMouseCursor(grab))');
+    expect(description[13], 'dataRowCursor: MaterialStatePropertyAll(SystemMouseCursor(forbidden))');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {
@@ -112,6 +121,8 @@ void main() {
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
     const double dividerThickness = 5.0;
+    const MaterialStateProperty<MouseCursor> headingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.grab);
+    const MaterialStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -128,11 +139,14 @@ void main() {
             horizontalMargin: horizontalMargin,
             columnSpacing: columnSpacing,
             dividerThickness: dividerThickness,
+            headingCellCursor: headingCellCursor,
+            dataRowCursor: dataRowCursor,
           ),
         ),
         home: Scaffold(
           body: DataTable(
             sortColumnIndex: 0,
+            showCheckboxColumn: false,
             columns: <DataColumn>[
               DataColumn(
                 label: const Text('A'),
@@ -140,11 +154,14 @@ void main() {
               ),
               const DataColumn(label: Text('B')),
             ],
-            rows: const <DataRow>[
-              DataRow(cells: <DataCell>[
-                DataCell(Text('Data')),
-                DataCell(Text('Data 2')),
-              ]),
+            rows: <DataRow>[
+              DataRow(
+                cells: const <DataCell>[
+                  DataCell(Text('Data')),
+                  DataCell(Text('Data 2')),
+                ],
+                onSelectChanged: (bool? value) { },
+              ),
             ],
           ),
         ),
@@ -167,6 +184,17 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('A')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    await gesture.moveTo(tester.getCenter(find.text('Data')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 
   testWidgets('DataTable is themeable - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
@@ -214,6 +242,8 @@ void main() {
     const double themeHorizontalMargin = 2.0;
     const double themeColumnSpacing = 3.0;
     const double themeDividerThickness = 4.0;
+    const MaterialStateProperty<MouseCursor> themeHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
+    const MaterialStateProperty<MouseCursor> themeDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy);
 
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
@@ -225,6 +255,8 @@ void main() {
     const double horizontalMargin = 3.0;
     const double columnSpacing = 4.0;
     const double dividerThickness = 5.0;
+    const MaterialStateProperty<MouseCursor> headingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
+    const MaterialStateProperty<MouseCursor> dataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -241,10 +273,13 @@ void main() {
             horizontalMargin: themeHorizontalMargin,
             columnSpacing: themeColumnSpacing,
             dividerThickness: themeDividerThickness,
+            headingCellCursor: themeHeadingCellCursor,
+            dataRowCursor: themeDataRowCursor,
           ),
         ),
         home: Scaffold(
           body: DataTable(
+            showCheckboxColumn: false,
             decoration: decoration,
             dataRowColor: dataRowColor,
             dataRowMinHeight: minMaxDataRowHeight,
@@ -260,15 +295,20 @@ void main() {
             columns: <DataColumn>[
               DataColumn(
                 label: const Text('A'),
+                mouseCursor: headingCellCursor,
                 onSort: (int columnIndex, bool ascending) {},
               ),
               const DataColumn(label: Text('B')),
             ],
-            rows: const <DataRow>[
-              DataRow(cells: <DataCell>[
-                DataCell(Text('Data')),
-                DataCell(Text('Data 2')),
-              ]),
+            rows: <DataRow>[
+              DataRow(
+                mouseCursor: dataRowCursor,
+                onSelectChanged: (bool? selected) {},
+                cells: const <DataCell>[
+                  DataCell(Text('Data')),
+                  DataCell(Text('Data 2')),
+                ],
+              ),
             ],
           ),
         ),
@@ -291,6 +331,17 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('A')).height, headingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, horizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, columnSpacing);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('A')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), headingCellCursor.resolve(<MaterialState>{}));
+
+    await gesture.moveTo(tester.getCenter(find.text('Data')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), dataRowCursor.resolve(<MaterialState>{}));
   });
 
   testWidgets('DataTable properties are taken over the theme values - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
@@ -340,6 +391,8 @@ void main() {
     const double globalThemeHorizontalMargin = 2.0;
     const double globalThemeColumnSpacing = 3.0;
     const double globalThemeDividerThickness = 4.0;
+    const MaterialStateProperty<MouseCursor> globalHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
+    const MaterialStateProperty<MouseCursor> globalDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.allScroll);
 
     const BoxDecoration localThemeDecoration = BoxDecoration(color: Color(0xfffffff0));
     const MaterialStateProperty<Color> localThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
@@ -351,6 +404,8 @@ void main() {
     const double localThemeHorizontalMargin = 3.0;
     const double localThemeColumnSpacing = 4.0;
     const double localThemeDividerThickness = 5.0;
+    const MaterialStateProperty<MouseCursor> localHeadingCellCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
+    const MaterialStateProperty<MouseCursor> localDataRowCursor = MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.move);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -367,6 +422,8 @@ void main() {
             horizontalMargin: globalThemeHorizontalMargin,
             columnSpacing: globalThemeColumnSpacing,
             dividerThickness: globalThemeDividerThickness,
+            headingCellCursor: globalHeadingCellCursor,
+            dataRowCursor: globalDataRowCursor,
           ),
         ),
         home: Scaffold(
@@ -383,8 +440,11 @@ void main() {
               horizontalMargin: localThemeHorizontalMargin,
               columnSpacing: localThemeColumnSpacing,
               dividerThickness: localThemeDividerThickness,
+              headingCellCursor: localHeadingCellCursor,
+              dataRowCursor: localDataRowCursor,
             ),
             child: DataTable(
+              showCheckboxColumn: false,
               sortColumnIndex: 0,
               columns: <DataColumn>[
                 DataColumn(
@@ -393,11 +453,14 @@ void main() {
                 ),
                 const DataColumn(label: Text('B')),
               ],
-              rows: const <DataRow>[
-                DataRow(cells: <DataCell>[
-                  DataCell(Text('Data')),
-                  DataCell(Text('Data 2')),
-                ]),
+              rows: <DataRow>[
+                DataRow(
+                  onSelectChanged: (bool? selected) {},
+                  cells: const <DataCell>[
+                    DataCell(Text('Data')),
+                    DataCell(Text('Data 2')),
+                  ],
+                ),
               ],
             ),
           ),
@@ -421,6 +484,17 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('A')).height, localThemeHeadingRowHeight);
     expect(tester.getTopLeft(find.text('A')).dx, localThemeHorizontalMargin);
     expect(tester.getTopLeft(find.text('Data 2')).dx - tester.getTopRight(find.text('Data')).dx, localThemeColumnSpacing);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.text('A')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), localHeadingCellCursor.resolve(<MaterialState>{}));
+
+    await gesture.moveTo(tester.getCenter(find.text('Data')));
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), localDataRowCursor.resolve(<MaterialState>{}));
   });
 
   testWidgets('Local DataTableTheme can override global DataTableTheme - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
@@ -463,7 +537,6 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('Data')).height, localThemeDataRowHeight);
   });
 }
-
 
 BoxDecoration _tableRowBoxDecoration({required WidgetTester tester, required int index}) {
   final Table table = tester.widget(find.byType(Table));
