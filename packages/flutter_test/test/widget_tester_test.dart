@@ -13,8 +13,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:matcher/expect.dart' as matcher;
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),

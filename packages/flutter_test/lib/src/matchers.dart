@@ -10,8 +10,8 @@ import 'package:flutter/material.dart' show Card;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:matcher/expect.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 
 import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';

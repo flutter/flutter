@@ -7,8 +7,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:matcher/expect.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/hooks.dart' show TestFailure;
 
 import 'binding.dart';
 import 'finders.dart';

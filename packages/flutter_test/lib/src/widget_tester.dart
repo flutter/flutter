@@ -29,7 +29,14 @@ import 'test_text_input.dart';
 
 // Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
-
+// We re-export the matcher package minus some features that we reimplement.
+//
+//  - expect is reimplemented below, to catch incorrect async usage.
+//
+//  - isInstanceOf is reimplemented in matchers.dart because we don't want to
+//    mark it as deprecated (ours is just a method, not a class).
+//
+export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // We re-export the test package minus some features that we reimplement.
 //
 // Specifically:
@@ -39,20 +46,14 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 //    setting up a declarer when one is not defined, which can happen when a
 //    test is executed via `flutter run`.
 //
-//  - expect is reimplemented below, to catch incorrect async usage.
-//
-//  - isInstanceOf is reimplemented in matchers.dart because we don't want to
-//    mark it as deprecated (ours is just a method, not a class).
-//
 // The test_api package has a deprecation warning to discourage direct use but
 // that doesn't apply here.
+export 'package:test_api/hooks.dart' show TestFailure;
 // ignore: deprecated_member_use
 export 'package:test_api/scaffolding.dart'
     hide group, setUp, setUpAll, tearDown, tearDownAll, test;
-export 'package:test_api/hooks.dart' show TestFailure;
 // ignore: implementation_imports
 export 'package:test_api/src/scaffolding/utils.dart' show registerException;
-export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);

@@ -8,8 +8,8 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as path;
 import 'package:matcher/expect.dart' show fail;
+import 'package:path/path.dart' as path;
 
 import 'goldens.dart';
 import 'test_async_utils.dart';
