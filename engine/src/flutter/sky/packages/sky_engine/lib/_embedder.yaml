@@ -17,6 +17,7 @@ embedded_libs:
   "dart:math": "../../../../../third_party/dart/sdk/lib/math/math.dart"
   "dart:typed_data": "../../../../../third_party/dart/sdk/lib/typed_data/typed_data.dart"
   "dart:ui": "../../../../lib/ui/ui.dart"
+  "dart:ui_web": "../../../../lib/web_ui/lib/ui_web/src/ui_web.dart"
 
   "dart:_http": "../../../../../third_party/dart/sdk/lib/_http/http.dart"
   "dart:_interceptors": "../../../../../third_party/dart/sdk/lib/_interceptors/interceptors.dart"
