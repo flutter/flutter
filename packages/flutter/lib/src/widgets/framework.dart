@@ -4069,7 +4069,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// The `newSlot` argument specifies the new value for this element's [slot].
   void attachRenderObject(Object? newSlot) {
-    assert(_slot == null);
+    assert(slot == null);
     visitChildren((Element child) {
       child.attachRenderObject(newSlot);
     });
@@ -6150,7 +6150,7 @@ abstract class RenderObjectElement extends Element {
       _debugUpdateRenderObjectOwner();
       return true;
     }());
-    assert(_slot == newSlot);
+    assert(slot == newSlot);
     attachRenderObject(newSlot);
     super.performRebuild(); // clears the "dirty" flag
   }
@@ -6256,7 +6256,7 @@ abstract class RenderObjectElement extends Element {
     assert(oldSlot != newSlot);
     super._updateSlot(newSlot);
     assert(slot == newSlot);
-    _ancestorRenderObjectElement!.moveRenderObjectChild(renderObject, oldSlot, slot);
+    _ancestorRenderObjectElement?.moveRenderObjectChild(renderObject, oldSlot, slot);
   }
 
   @override
