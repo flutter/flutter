@@ -34,7 +34,6 @@ vars = {
   # channels. This variable is being set when CI is checking out the repository.
   'release_candidate': False,
 
-
   # As Dart does, we use Fuchsia's GN and Clang toolchain. These revision
   # should be kept up to date with the revisions pulled by Dart.
   # The list of revisions for these tools comes from Fuchsia, here:
@@ -100,6 +99,8 @@ vars = {
 
   # Setup Git hooks by default.
   "setup_githooks": True,
+
+  'download_impeller_cmake_example': False,
 
   # Upstream URLs for third party dependencies, used in
   # determining common ancestor commit for vulnerability scanning
@@ -825,9 +826,8 @@ deps = {
     'dep_type': 'cipd',
   },
 
-   # Get the SDK from https://chrome-infra-packages.appspot.com/p/fuchsia/sdk/core at the 'latest' tag
-   # Get the toolchain from https://chrome-infra-packages.appspot.com/p/fuchsia/clang at the 'goma' tag
-
+  # Get the SDK from https://chrome-infra-packages.appspot.com/p/fuchsia/sdk/core at the 'latest' tag
+  # Get the toolchain from https://chrome-infra-packages.appspot.com/p/fuchsia/clang at the 'goma' tag
    'src/fuchsia/sdk/mac': {
      'packages': [
        {
@@ -848,6 +848,11 @@ deps = {
      'condition': 'host_os == "linux" and not download_fuchsia_sdk',
      'dep_type': 'cipd',
    },
+
+  'src/third_party/impeller-cmake-example': {
+     'url': Var('github_git') + '/bdero/impeller-cmake-example.git' + '@' + '4d728722ac1559f59db28a3ef061fe929d6be4c6',
+     'condition': 'download_impeller_cmake_example',
+  },
 }
 
 recursedeps = [
@@ -951,6 +956,18 @@ hooks = [
     'action': [
       'python3',
       'src/flutter/tools/githooks/setup.py',
+    ]
+  },
+  {
+    'name': 'impeller-cmake-example submodules',
+    'pattern': '.',
+    'condition': 'download_impeller_cmake_example',
+    'action': [
+      'python3',
+      'src/flutter/ci/impeller_cmake_build_test.py',
+      '--path',
+      'third_party/impeller-cmake-example',
+      '--setup',
     ]
   }
 ]

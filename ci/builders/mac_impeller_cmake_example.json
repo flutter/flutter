@@ -1,0 +1,38 @@
+{
+    "builds": [
+        {
+            "name": "impeller_cmake_build_test",
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=x86"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false,
+                "download_impeller_cmake_example": true
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "cmake",
+                    "script": "flutter/ci/impeller_cmake_build_test.py",
+                    "parameters": [
+                        "--cmake"
+                    ],
+                    "type": "local"
+                },
+                {
+                    "language": "python3",
+                    "name": "build",
+                    "script": "flutter/ci/impeller_cmake_build_test.py",
+                    "parameters": [
+                        "--build"
+                    ],
+                    "type": "local"
+                }
+            ]
+        }
+    ],
+    "tests": []
+}
