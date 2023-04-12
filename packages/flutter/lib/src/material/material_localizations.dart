@@ -426,7 +426,7 @@ abstract class MaterialLocalizations {
   /// list to the start of the list.
   @Deprecated(
     'Use the reorderItemToStart from WidgetsLocalizations instead. '
-    'This feature was deprecated after v3.10.0-2.0.pre-67-gdf48b922ca.'
+    'This feature was deprecated after v3.10.0-2.0.pre.'
   )
   String get reorderItemToStart;
 
@@ -434,7 +434,7 @@ abstract class MaterialLocalizations {
   /// list to the end of the list.
   @Deprecated(
     'Use the reorderItemToEnd from WidgetsLocalizations instead. '
-    'This feature was deprecated after v3.10.0-2.0.pre-67-gdf48b922ca.'
+    'This feature was deprecated after v3.10.0-2.0.pre.'
   )
   String get reorderItemToEnd;
 
@@ -442,7 +442,7 @@ abstract class MaterialLocalizations {
   /// list one space up the list.
   @Deprecated(
     'Use the reorderItemUp from WidgetsLocalizations instead. '
-    'This feature was deprecated after v3.10.0-2.0.pre-67-gdf48b922ca.'
+    'This feature was deprecated after v3.10.0-2.0.pre.'
   )
   String get reorderItemUp;
 
@@ -450,7 +450,7 @@ abstract class MaterialLocalizations {
   /// list one space down the list.
   @Deprecated(
     'Use the reorderItemDown from WidgetsLocalizations instead. '
-    'This feature was deprecated after v3.10.0-2.0.pre-67-gdf48b922ca.'
+    'This feature was deprecated after v3.10.0-2.0.pre.'
   )
   String get reorderItemDown;
 
@@ -458,7 +458,7 @@ abstract class MaterialLocalizations {
   /// list one space left in the list.
   @Deprecated(
     'Use the reorderItemLeft from WidgetsLocalizations instead. '
-    'This feature was deprecated after v3.10.0-2.0.pre-67-gdf48b922ca.'
+    'This feature was deprecated after v3.10.0-2.0.pre.'
   )
   String get reorderItemLeft;
 
@@ -466,7 +466,7 @@ abstract class MaterialLocalizations {
   /// list one space right in the list.
   @Deprecated(
     'Use the reorderItemRight from WidgetsLocalizations instead. '
-    'This feature was deprecated after v3.10.0-2.0.pre-67-gdf48b922ca.'
+    'This feature was deprecated after v3.10.0-2.0.pre.'
   )
   String get reorderItemRight;
 
