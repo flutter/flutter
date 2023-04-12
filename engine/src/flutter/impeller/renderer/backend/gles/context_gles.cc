@@ -72,6 +72,7 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
             .SetDefaultStencilFormat(PixelFormat::kS8UInt)
             .SetSupportsCompute(false, false)
             .SetSupportsReadFromResolve(false)
+            .SetSupportsReadFromOnscreenTexture(false)
             .Build();
   }
 

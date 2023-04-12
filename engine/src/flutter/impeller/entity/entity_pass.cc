@@ -213,7 +213,13 @@ bool EntityPass::Render(ContentContext& renderer,
       .coverage = Rect::MakeSize(render_target.GetRenderTargetSize()),
       .stencil_depth = 0}};
 
-  if (GetTotalPassReads(renderer) > 0) {
+  //
+  bool supports_root_pass_reads =
+      renderer.GetDeviceCapabilities().SupportsReadFromOnscreenTexture() &&
+      // If the backend doesn't have `SupportsReadFromResolve`, we need to flip
+      // between two textures when restoring a previous MSAA pass.
+      renderer.GetDeviceCapabilities().SupportsReadFromResolve();
+  if (!supports_root_pass_reads && GetTotalPassReads(renderer) > 0) {
     auto offscreen_target =
         CreateRenderTarget(renderer, render_target.GetRenderTargetSize(), true,
                            clear_color_.Premultiply());
