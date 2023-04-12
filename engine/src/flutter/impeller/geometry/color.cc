@@ -8,6 +8,7 @@
 #include <cmath>
 #include <sstream>
 
+#include "impeller/geometry/constants.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 
@@ -127,9 +128,63 @@ Color::Color(const ColorHSB& hsbColor) : Color(hsbColor.ToRGBA()) {}
 Color::Color(const Vector4& value)
     : red(value.x), green(value.y), blue(value.z), alpha(value.w) {}
 
-Color Min(Color c, float threshold) {
+static constexpr Color Min(Color c, float threshold) {
   return Color(std::min(c.red, threshold), std::min(c.green, threshold),
                std::min(c.blue, threshold), std::min(c.alpha, threshold));
+}
+
+// The following HSV utilities correspond to the W3C blend definitions
+// implemented in: impeller/compiler/shader_lib/impeller/blending.glsl
+
+static constexpr Scalar Luminosity(Vector3 color) {
+  return color.x * 0.3 + color.y * 0.59 + color.z * 0.11;
+}
+
+static constexpr Vector3 ClipColor(Vector3 color) {
+  Scalar lum = Luminosity(color);
+  Scalar mn = std::min(std::min(color.x, color.y), color.z);
+  Scalar mx = std::max(std::max(color.x, color.y), color.z);
+  if (mn < 0.0) {
+    color = lum + (((color - lum) * lum) / (lum - mn + kEhCloseEnough));
+  }
+  if (mx > 1.0) {
+    color = lum + (((color - lum) * (1.0 - lum)) / (mx - lum + kEhCloseEnough));
+  }
+  return Vector3();
+}
+
+static constexpr Vector3 SetLuminosity(Vector3 color, Scalar luminosity) {
+  Scalar relative_lum = luminosity - Luminosity(color);
+  return ClipColor(color + relative_lum);
+}
+
+static constexpr Scalar Saturation(Vector3 color) {
+  return std::max(std::max(color.x, color.y), color.z) -
+         std::min(std::min(color.x, color.y), color.z);
+}
+
+static constexpr Vector3 SetSaturation(Vector3 color, Scalar saturation) {
+  Scalar mn = std::min(std::min(color.x, color.y), color.z);
+  Scalar mx = std::max(std::max(color.x, color.y), color.z);
+  return (mn < mx) ? ((color - mn) * saturation) / (mx - mn) : Vector3();
+}
+
+static constexpr Vector3 ComponentChoose(Vector3 a,
+                                         Vector3 b,
+                                         Vector3 value,
+                                         Scalar cutoff) {
+  return Vector3(value.x > cutoff ? b.x : a.x,  //
+                 value.y > cutoff ? b.y : a.y,  //
+                 value.z > cutoff ? b.z : a.z   //
+  );
+}
+
+static constexpr Vector3 ToRGB(Color color) {
+  return {color.red, color.green, color.blue};
+}
+
+static constexpr Color FromRGB(Vector3 color, Scalar alpha) {
+  return {color.x, color.y, color.z, alpha};
 }
 
 Color Color::BlendColor(const Color& src,
@@ -237,6 +292,24 @@ Color Color::BlendColor(const Color& src,
         // s.a * d.a - 2 * (d.a - d) * (s.a - s)
         return src.alpha * dst.alpha - 2 * (dst.alpha - d) * (src.alpha - s);
       });
+    case BlendMode::kSoftLight: {
+      Vector3 dst_rgb = ToRGB(dst);
+      Vector3 src_rgb = ToRGB(src);
+      Vector3 d = ComponentChoose(
+          ((16.0 * dst_rgb - 12.0) * dst_rgb + 4.0) * dst_rgb,  //
+          Vector3(std::sqrt(dst_rgb.x), std::sqrt(dst_rgb.y),
+                  std::sqrt(dst_rgb.z)),  //
+          dst_rgb,                        //
+          0.25);
+      Color blended =
+          FromRGB(ComponentChoose(
+                      dst_rgb - (1.0 - 2.0 * src) * dst * (1.0 - dst_rgb),  //
+                      dst_rgb + (2.0 * src_rgb - 1.0) * (d - dst_rgb),      //
+                      src_rgb,                                              //
+                      0.5),
+                  dst.alpha);
+      return blended + dst * (1 - blended.alpha);
+    }
     case BlendMode::kDifference:
       return apply_rgb_srcover_alpha([&](auto s, auto d) {
         // s + d - 2 * min(s * d.a, d * s.a);
@@ -252,13 +325,38 @@ Color Color::BlendColor(const Color& src,
         // s * (1 - d.a) + d * (1 - s.a) + (s * d)
         return s * (1 - dst.alpha) + d * (1 - src.alpha) + (s * d);
       });
-    case BlendMode::kHue:
-    case BlendMode::kSaturation:
-    case BlendMode::kColor:
-    case BlendMode::kLuminosity:
-    case BlendMode::kSoftLight:
-    default:
-      return src + dst * (1 - src.alpha);
+    case BlendMode::kHue: {
+      Vector3 dst_rgb = ToRGB(dst);
+      Vector3 src_rgb = ToRGB(src);
+      Color blended =
+          FromRGB(SetLuminosity(SetSaturation(src_rgb, Saturation(dst_rgb)),
+                                Luminosity(dst_rgb)),
+                  dst.alpha);
+      return blended + dst * (1 - blended.alpha);
+    }
+    case BlendMode::kSaturation: {
+      Vector3 dst_rgb = ToRGB(dst);
+      Vector3 src_rgb = ToRGB(src);
+      Color blended =
+          FromRGB(SetLuminosity(SetSaturation(dst_rgb, Saturation(src_rgb)),
+                                Luminosity(dst_rgb)),
+                  dst.alpha);
+      return blended + dst * (1 - blended.alpha);
+    }
+    case BlendMode::kColor: {
+      Vector3 dst_rgb = ToRGB(dst);
+      Vector3 src_rgb = ToRGB(src);
+      Color blended =
+          FromRGB(SetLuminosity(src_rgb, Luminosity(dst_rgb)), dst.alpha);
+      return blended + dst * (1 - blended.alpha);
+    }
+    case BlendMode::kLuminosity: {
+      Vector3 dst_rgb = ToRGB(dst);
+      Vector3 src_rgb = ToRGB(src);
+      Color blended =
+          FromRGB(SetLuminosity(dst_rgb, Luminosity(src_rgb)), dst.alpha);
+      return blended + dst * (1 - blended.alpha);
+    }
   }
 }
 
