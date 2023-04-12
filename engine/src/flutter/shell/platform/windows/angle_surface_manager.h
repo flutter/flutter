@@ -28,7 +28,7 @@ namespace flutter {
 class AngleSurfaceManager {
  public:
   static std::unique_ptr<AngleSurfaceManager> Create();
-  ~AngleSurfaceManager();
+  virtual ~AngleSurfaceManager();
 
   // Creates an EGLSurface wrapper and backing DirectX 11 SwapChain
   // associated with window, in the appropriate format for display.
@@ -51,7 +51,7 @@ class AngleSurfaceManager {
   void GetSurfaceDimensions(EGLint* width, EGLint* height);
 
   // Releases the pass-in EGLSurface wrapping and backing resources if not null.
-  void DestroySurface();
+  virtual void DestroySurface();
 
   // Binds egl_context_ to the current rendering thread and to the draw and read
   // surfaces returning a boolean result reflecting success.
@@ -79,11 +79,12 @@ class AngleSurfaceManager {
   // Gets the |ID3D11Device| chosen by ANGLE.
   bool GetDevice(ID3D11Device** device);
 
- private:
+ protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
   AngleSurfaceManager();
 
+ private:
   bool Initialize();
   void CleanUp();
 
