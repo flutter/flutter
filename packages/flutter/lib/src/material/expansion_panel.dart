@@ -255,7 +255,10 @@ class ExpansionPanelList extends StatefulWidget {
   /// {@macro flutter.material.ExpandIcon.color}
   final Color? expandIconColor;
 
-  /// size of the MaterialGap widget.
+  /// Defines the [MaterialGap.size] of the [MaterialGap] which is placed
+  /// between the [ExpansionPanelList.children] when expanded.
+  ///
+  /// Defaults to `16.0`.
   final double materialGapSize;
 
   @override
