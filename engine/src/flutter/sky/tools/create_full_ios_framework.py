@@ -104,8 +104,6 @@ def main():
       args, dst, framework, arm64_framework, simulator_framework,
       simulator_x64_framework, simulator_arm64_framework
   )
-  framework_binary = os.path.join(framework, 'Flutter')
-  process_framework(args, dst, framework, framework_binary)
   generate_gen_snapshot(args, dst, x64_out_dir, arm64_out_dir)
   zip_archive(dst)
   return 0
@@ -129,6 +127,7 @@ def create_framework(  # pylint: disable=too-many-arguments
   shutil.rmtree(framework, True)
   shutil.copytree(arm64_framework, framework)
   framework_binary = os.path.join(framework, 'Flutter')
+  process_framework(args, dst, framework, framework_binary)
 
   if args.simulator_arm64_out_dir is not None:
     shutil.rmtree(simulator_framework, True)
@@ -159,6 +158,7 @@ def create_framework(  # pylint: disable=too-many-arguments
       framework_binary
   ])
 
+  process_framework(args, dst, framework, framework_binary)
   return 0
 
 
