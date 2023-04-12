@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart' show CupertinoTextSelectionToolbar;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Vertical position at which to anchor the toolbar for testing.
@@ -85,4 +86,28 @@ void main() {
     final double toolbarY = tester.getTopLeft(findSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
   });
+
+  test('buildButtonItems builds nothing when no suggestions', () {
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState();
+    final List<ContextMenuButtonItem>? buttonItems =
+        SpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
+
+    expect(buttonItems, hasLength(0));
+  });
+}
+
+class _FakeEditableTextState extends EditableTextState {
+  @override
+  TextEditingValue get currentTextEditingValue => TextEditingValue.empty;
+
+  @override
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    return const SuggestionSpan(
+      TextRange(
+        start: 0,
+        end: 0,
+      ),
+      <String>[],
+    );
+  }
 }
