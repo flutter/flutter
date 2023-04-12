@@ -619,6 +619,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['is_clang'] = True
   gn_args['target_os'] = 'wasm'
   gn_args['target_cpu'] = 'wasm'
+  gn_args['wasm_use_dwarf'] = args.wasm_use_dwarf
   gn_args['skia_use_angle'] = False
   gn_args['skia_use_dng_sdk'] = False
   gn_args['skia_use_expat'] = False
@@ -665,8 +666,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_enable_paragraph'] = True
   gn_args['skia_canvaskit_enable_webgl'] = True
   gn_args['skia_canvaskit_enable_webgpu'] = False
-  is_profile_build = args.runtime_mode == 'profile' or args.runtime_mode == 'debug'
-  gn_args['skia_canvaskit_profile_build'] = is_profile_build
+  gn_args['skia_canvaskit_profile_build'] = args.runtime_mode == 'profile'
   gn_args['flutter_prebuilt_dart_sdk'] = True
 
 
@@ -760,6 +760,13 @@ def parse_args(args):
   )
   parser.add_argument(
       '--wasm', dest='target_os', action='store_const', const='wasm'
+  )
+  parser.add_argument(
+      '--wasm-use-dwarf',
+      action='store_true',
+      default=False,
+      help='Embed dwarf debugging info in the output module instead of using '
+      'sourcemap files.'
   )
   parser.add_argument('--web', action='store_true', default=False)
   parser.add_argument(
