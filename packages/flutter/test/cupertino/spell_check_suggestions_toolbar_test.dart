@@ -26,7 +26,7 @@ void main() {
       ),
     );
 
-    final FakeEditableTextState editableTextState = FakeEditableTextState();
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState();
     final List<ContextMenuButtonItem>? buttonItems =
         CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(builderContext, editableTextState);
 
@@ -37,13 +37,7 @@ void main() {
   });
 }
 
-class FakeEditableTextState extends EditableTextState {
-  final GlobalKey _editableKey = GlobalKey();
-  bool showToolbarCalled = false;
-  bool toggleToolbarCalled = false;
-  bool showSpellCheckSuggestionsToolbarCalled = false;
-  bool markCurrentSelectionAsMisspelled = false;
-
+class _FakeEditableTextState extends EditableTextState {
   @override
   TextEditingValue get currentTextEditingValue => TextEditingValue.empty;
 
@@ -56,32 +50,5 @@ class FakeEditableTextState extends EditableTextState {
       ),
       <String>[],
     );
-  }
-
-  @override
-  RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
-
-  @override
-  bool showToolbar() {
-    showToolbarCalled = true;
-    return true;
-  }
-
-  @override
-  void toggleToolbar([bool hideHandles = true]) {
-    toggleToolbarCalled = true;
-    return;
-  }
-
-  @override
-  bool showSpellCheckSuggestionsToolbar() {
-    showSpellCheckSuggestionsToolbarCalled = true;
-    return true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return const SizedBox.shrink();
   }
 }
