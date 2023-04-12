@@ -932,31 +932,28 @@ class RenderListWheelViewport
     final bool isBeforeMagnifierBottomLine = untransformedPaintingCoordinates.dy
         <= magnifierBottomLinePosition;
 
+    final Rect centerRect = Rect.fromLTWH(
+      0.0,
+      magnifierTopLinePosition,
+      size.width,
+      _itemExtent * _magnification,
+    );
+    final Rect topHalfRect = Rect.fromLTWH(
+      0.0,
+      0.0,
+      size.width,
+      magnifierTopLinePosition,
+    );
+    final Rect bottomHalfRect = Rect.fromLTWH(
+      0.0,
+      magnifierBottomLinePosition,
+      size.width,
+      magnifierTopLinePosition,
+    );
     // Some part of the child is in the center magnifier.
-    if (isAfterMagnifierTopLine && isBeforeMagnifierBottomLine) {
-      if (center != null && !center) {
-        return;
-      }
+    final bool inCenter = isAfterMagnifierTopLine && isBeforeMagnifierBottomLine;
 
-      final Rect centerRect = Rect.fromLTWH(
-        0.0,
-        magnifierTopLinePosition,
-        size.width,
-        _itemExtent * _magnification,
-      );
-      final Rect topHalfRect = Rect.fromLTWH(
-        0.0,
-        0.0,
-        size.width,
-        magnifierTopLinePosition,
-      );
-      final Rect bottomHalfRect = Rect.fromLTWH(
-        0.0,
-        magnifierBottomLinePosition,
-        size.width,
-        magnifierTopLinePosition,
-      );
-
+    if ((center == null || center) && inCenter) {
       // Clipping the part in the center.
       context.pushClipRect(
         needsCompositing,
@@ -973,8 +970,10 @@ class RenderListWheelViewport
           );
         },
       );
+    }
 
-      // Clipping the part in either the top-half or bottom-half of the wheel.
+    // Clipping the part in either the top-half or bottom-half of the wheel.
+    if ((center == null || !center) && inCenter) {
       context.pushClipRect(
         needsCompositing,
         offset,
@@ -982,7 +981,6 @@ class RenderListWheelViewport
           ? topHalfRect
           : bottomHalfRect,
         (PaintingContext context, Offset offset) {
-           context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
             _paintChildCylindrically(
               context,
               offset,
@@ -990,13 +988,11 @@ class RenderListWheelViewport
               cylindricalTransform,
               offsetToCenter,
             );
-          });
         },
       );
-    } else {
-      if (center != null && center) {
-        return;
-      }
+    }
+
+    if ((center == null || !center) && !inCenter) {
       _paintChildCylindrically(
         context,
         offset,
