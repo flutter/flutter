@@ -74,13 +74,15 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// customize the context menus now. However, both ways will continue to work
 /// during the deprecation period.
 ///
-/// To use both [EditableText.contextMenuBuilder] and [buildHandle] during this
-/// deprecation period, use [TextSelectionHandleControls]. This class was
-/// created as a stopgap during the deprecation period. After the deprecations
-/// are removed, [TextSelectionControls.buildToolbar] and
-/// [TextSelectionHandleControls] will be gone. The only way to customize
-/// context menus will be [EditableText.contextMenuBuilder], and the only way to
-/// customze handles will be [buildHandle].
+/// To use both [EditableText.contextMenuBuilder] and [buildHandle], a two-step
+/// migration is necessary. First, migrate to [TextSelectionHandleControls],
+/// using its [TextSelectionHandleControls.buildHandle] method and moving
+/// toolbar code to [EditableText.contextMenuBuilder]. Later, the deprecation
+/// period will expire, [buildToolbar] will be removed, and
+/// [TextSelectionHandleControls] will be deprecated. Migrate back to
+/// [TextSelectionControls.buildHandle], so that the final state is to use
+/// [EditableText.contextMenuBuilder] for the toolbar and
+/// [TextSelectionControls] for the handles.
 ///
 /// See also:
 ///
