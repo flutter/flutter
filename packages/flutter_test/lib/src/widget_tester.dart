@@ -9,7 +9,7 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:matcher/expect.dart' as matcher;
+import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 
 // The test_api package is not for general use... it's literally for our use.
@@ -441,7 +441,7 @@ Future<void> benchmarkWidgets(
 
 /// Assert that `actual` matches `matcher`.
 ///
-/// See [matcher.expect] for details. This is a variant of that function
+/// See [matcher_expect.expect] for details. This is a variant of that function
 /// that additionally verifies that there are no asynchronous APIs
 /// that have not yet resolved.
 ///
@@ -455,12 +455,12 @@ void expect(
   dynamic skip, // true or a String
 }) {
   TestAsyncUtils.guardSync();
-  matcher.expect(actual, matcher, reason: reason, skip: skip);
+  matcher_expect.expect(actual, matcher, reason: reason, skip: skip);
 }
 
 /// Assert that `actual` matches `matcher`.
 ///
-/// See [matcher.expect] for details. This variant will _not_ check that
+/// See [matcher_expect.expect] for details. This variant will _not_ check that
 /// there are no outstanding asynchronous API requests. As such, it can be
 /// called from, e.g., callbacks that are run during build or layout, or in the
 /// completion handlers of futures that execute in response to user input.
@@ -472,13 +472,13 @@ void expectSync(
   dynamic matcher, {
   String? reason,
 }) {
-  matcher.expect(actual, matcher, reason: reason);
+  matcher_expect.expect(actual, matcher, reason: reason);
 }
 
 /// Just like [expect], but returns a [Future] that completes when the matcher
 /// has finished matching.
 ///
-/// See [matcher.expectLater] for details.
+/// See [matcher_expect.expectLater] for details.
 ///
 /// If the matcher fails asynchronously, that failure is piped to the returned
 /// future where it can be handled by user code. If it is not handled by user
@@ -492,7 +492,7 @@ Future<void> expectLater(
   // We can't wrap the delegate in a guard, or we'll hit async barriers in
   // [TestWidgetsFlutterBinding] while we're waiting for the matcher to complete
   TestAsyncUtils.guardSync();
-  return matcher.expectLater(actual, matcher, reason: reason, skip: skip)
+  return matcher_expect.expectLater(actual, matcher, reason: reason, skip: skip)
            .then<void>((dynamic value) => null);
 }
 
