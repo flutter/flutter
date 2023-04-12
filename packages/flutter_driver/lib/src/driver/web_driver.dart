@@ -311,7 +311,7 @@ class FlutterWebConnection {
         'If the test uses VM service extensions provided by the Flutter SDK, '
         'then this error is likely caused by a bug in Flutter. Please report it '
         'by filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
         error,
         stackTrace,
       );

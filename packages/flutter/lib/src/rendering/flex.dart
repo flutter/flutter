@@ -758,7 +758,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             ...addendum,
             ErrorDescription(
               "If none of the above helps enough to fix this problem, please don't hesitate to file a bug:\n"
-              '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+              '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
             ),
           ]);
           return true;
