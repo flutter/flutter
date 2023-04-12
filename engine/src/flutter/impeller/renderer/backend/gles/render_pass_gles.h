@@ -4,13 +4,17 @@
 
 #pragma once
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/impeller/renderer/backend/gles/reactor_gles.h"
 #include "flutter/impeller/renderer/render_pass.h"
 
 namespace impeller {
 
-class RenderPassGLES final : public RenderPass {
+class RenderPassGLES final
+    : public RenderPass,
+      public std::enable_shared_from_this<RenderPassGLES> {
  public:
   // |RenderPass|
   ~RenderPassGLES() override;

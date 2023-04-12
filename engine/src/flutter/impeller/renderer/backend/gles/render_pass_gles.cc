@@ -520,11 +520,13 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
         CanDiscardAttachmentWhenDone(stencil0->store_action);
   }
 
+  std::shared_ptr<const RenderPassGLES> shared_this = shared_from_this();
   return reactor_->AddOperation([pass_data,
                                  allocator = context.GetResourceAllocator(),
-                                 commands = commands_](const auto& reactor) {
-    auto result =
-        EncodeCommandsInReactor(*pass_data, allocator, reactor, commands);
+                                 render_pass = std::move(shared_this)](
+                                    const auto& reactor) {
+    auto result = EncodeCommandsInReactor(*pass_data, allocator, reactor,
+                                          render_pass->commands_);
     FML_CHECK(result) << "Must be able to encode GL commands without error.";
   });
 }
