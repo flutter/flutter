@@ -397,13 +397,18 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       }
     }
 
-    if (!subpass_coverage.has_value() || subpass_coverage->size.IsEmpty()) {
+    if (!subpass_coverage.has_value()) {
       // The subpass doesn't contain anything visible, so skip it.
       return EntityPass::EntityResult::Skip();
     }
 
     subpass_coverage =
         subpass_coverage->Intersection(Rect::MakeSize(root_pass_size));
+    if (!subpass_coverage.has_value() ||
+        ISize(subpass_coverage->size).IsEmpty()) {
+      // The subpass doesn't contain anything visible, so skip it.
+      return EntityPass::EntityResult::Skip();
+    }
 
     auto subpass_target =
         CreateRenderTarget(renderer,                                  //
