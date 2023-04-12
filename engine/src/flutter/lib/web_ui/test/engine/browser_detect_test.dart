@@ -196,8 +196,15 @@ void testMain() {
       expect(browserSupportsCanvaskitChromium, isFalse);
     });
   });
-}
 
+  group('OffscreenCanvas', () {
+    test('OffscreenCanvas is detected as unsupported in Safari', () {
+      debugBrowserEngineOverride = BrowserEngine.webkit;
+      expect(OffScreenCanvas.supported, isFalse);
+      debugBrowserEngineOverride = null;
+    });
+  });
+}
 
 @JS('window.Intl.v8BreakIterator')
 external dynamic get v8BreakIterator;

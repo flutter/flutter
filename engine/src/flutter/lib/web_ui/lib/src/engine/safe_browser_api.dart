@@ -1056,5 +1056,8 @@ class OffScreenCanvas {
 
   /// Feature detects OffscreenCanvas.
   static bool get supported => _supported ??=
-      js_util.hasProperty(domWindow, 'OffscreenCanvas');
+      // Safari 16.4 implements OffscreenCanvas, but without WebGL support. So
+      // it's not really supported in a way that is useful to us.
+      !isSafari
+      && js_util.hasProperty(domWindow, 'OffscreenCanvas');
 }
