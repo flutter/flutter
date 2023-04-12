@@ -37,18 +37,6 @@ const CupertinoDynamicColor _kToolbarDividerColor = CupertinoDynamicColor.withBr
   darkColor: Color(0xFF808080),
 );
 
-// These values were eyeballed from a screenshot of iOS 16.3.1, as light mode
-// didn't appear in the Apple design resources assets linked above.
-final BoxDecoration _kToolbarShadow = BoxDecoration(
-  borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
-  boxShadow: <BoxShadow>[
-    BoxShadow(
-      color: CupertinoColors.black.withOpacity(0.2),
-      blurRadius: 15.0,
-    ),
-  ],
-);
-
 /// The type for a Function that builds a toolbar's container with the given
 /// child.
 ///
@@ -159,7 +147,22 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       return outputChild;
     }
     return DecoratedBox(
-      decoration: _kToolbarShadow,
+      // These shadow values were eyeballed from a screenshot of iOS 16.3.1, as
+      // light mode didn't appear in the Apple design resources assets linked at
+      // the top of this file.
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: CupertinoColors.black.withOpacity(0.2),
+            blurRadius: 15.0,
+            offset: Offset(
+              0.0,
+              isAbove ? 0.0 : _kToolbarArrowSize.height,
+            ),
+          ),
+        ],
+      ),
       child: outputChild,
     );
   }
