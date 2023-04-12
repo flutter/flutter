@@ -1279,35 +1279,67 @@ TEST(GeometryTest, CanPerformAlgebraicVector3OpsWithArithmeticTypes) {
   // LHS
   {
     Vector3 p1(1, 2, 3);
+    Vector3 p2 = p1 + 2.0f;
+    ASSERT_EQ(p2.x, 3);
+    ASSERT_EQ(p2.y, 4);
+    ASSERT_EQ(p2.z, 5);
+  }
+
+  {
+    Vector3 p1(1, 2, 3);
+    Vector3 p2 = p1 - 2.0f;
+    ASSERT_EQ(p2.x, -1);
+    ASSERT_EQ(p2.y, 0);
+    ASSERT_EQ(p2.z, 1);
+  }
+
+  {
+    Vector3 p1(1, 2, 3);
     Vector3 p2 = p1 * 2.0f;
-    ASSERT_EQ(p2.x, 2u);
-    ASSERT_EQ(p2.y, 4u);
-    ASSERT_EQ(p2.z, 6u);
+    ASSERT_EQ(p2.x, 2);
+    ASSERT_EQ(p2.y, 4);
+    ASSERT_EQ(p2.z, 6);
   }
 
   {
     Vector3 p1(2, 6, 12);
     Vector3 p2 = p1 / 2.0f;
-    ASSERT_EQ(p2.x, 1u);
-    ASSERT_EQ(p2.y, 3u);
-    ASSERT_EQ(p2.z, 6u);
+    ASSERT_EQ(p2.x, 1);
+    ASSERT_EQ(p2.y, 3);
+    ASSERT_EQ(p2.z, 6);
   }
 
   // RHS
   {
     Vector3 p1(1, 2, 3);
+    Vector3 p2 = 2.0f + p1;
+    ASSERT_EQ(p2.x, 3);
+    ASSERT_EQ(p2.y, 4);
+    ASSERT_EQ(p2.z, 5);
+  }
+
+  {
+    Vector3 p1(1, 2, 3);
+    Vector3 p2 = 2.0f - p1;
+    ASSERT_EQ(p2.x, 1);
+    ASSERT_EQ(p2.y, 0);
+    ASSERT_EQ(p2.z, -1);
+  }
+
+  {
+    Vector3 p1(1, 2, 3);
     Vector3 p2 = 2.0f * p1;
-    ASSERT_EQ(p2.x, 2u);
-    ASSERT_EQ(p2.y, 4u);
-    ASSERT_EQ(p2.z, 6u);
+    ASSERT_EQ(p2.x, 2);
+    ASSERT_EQ(p2.y, 4);
+    ASSERT_EQ(p2.z, 6);
   }
 
   {
     Vector3 p1(2, 6, 12);
     Vector3 p2 = 12.0f / p1;
-    ASSERT_EQ(p2.x, 6u);
-    ASSERT_EQ(p2.y, 2u);
-    ASSERT_EQ(p2.z, 1u);
+    ASSERT_EQ(p2.x, 6);
+    ASSERT_EQ(p2.y, 2);
+    ASSERT_EQ(p2.z, 1);
   }
 }
 
