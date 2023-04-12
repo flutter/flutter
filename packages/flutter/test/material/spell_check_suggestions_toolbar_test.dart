@@ -87,12 +87,13 @@ void main() {
     expect(toolbarY, equals(expectedToolbarY));
   });
 
-  test('buildButtonItems builds nothing when no suggestions', () {
+  test('buildButtonItems builds only a delete button when no suggestions', () {
     final _FakeEditableTextState editableTextState = _FakeEditableTextState();
     final List<ContextMenuButtonItem>? buttonItems =
         SpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
-    expect(buttonItems, hasLength(0));
+    expect(buttonItems, hasLength(1));
+    expect(buttonItems!.first.type, ContextMenuButtonType.delete);
   });
 }
 
