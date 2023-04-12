@@ -1649,12 +1649,20 @@ void main() {
             materialGapSize: materialGapSize,
             children: <ExpansionPanel>[
               ExpansionPanel(
+                isExpanded: true,
                 canTapOnHeader: true,
                 body: const SizedBox.shrink(),
                 headerBuilder: (BuildContext context, bool isExpanded) {
                   return const SizedBox.shrink();
                 },
-              )
+              ),
+              ExpansionPanel(
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
             ],
           ),
         ),
@@ -1662,11 +1670,33 @@ void main() {
     }
 
     await tester.pumpWidget(buildWidgetForTest(materialGapSize: 0));
-    final ExpansionPanelList expansionPanelList = tester.widget(find.byType(ExpansionPanelList));
-    expect(expansionPanelList.materialGapSize, 0);
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial.children.length, 3);
+    for (final MergeableMaterialItem e in mergeableMaterial.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 0);
+      }
+    }
 
     await tester.pumpWidget(buildWidgetForTest(materialGapSize: 20));
-    final ExpansionPanelList expansionPanelList2 = tester.widget(find.byType(ExpansionPanelList));
-    expect(expansionPanelList2.materialGapSize, 20);
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial2 = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial2.children.length, 3);
+    for (final MergeableMaterialItem e in mergeableMaterial2.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 20);
+      }
+    }
+
+    await tester.pumpWidget(buildWidgetForTest());
+    await tester.pumpAndSettle();
+    final MergeableMaterial mergeableMaterial3 = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial3.children.length, 3);
+    for (final MergeableMaterialItem e in mergeableMaterial3.children) {
+      if (e is MaterialGap) {
+        expect(e.size, 16);
+      }
+    }
   });
 }
