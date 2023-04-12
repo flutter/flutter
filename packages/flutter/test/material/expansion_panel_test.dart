@@ -1673,6 +1673,8 @@ void main() {
     await tester.pumpAndSettle();
     final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
     expect(mergeableMaterial.children.length, 3);
+    expect(mergeableMaterial.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial.children.whereType<MaterialSlice>().length, 2);
     for (final MergeableMaterialItem e in mergeableMaterial.children) {
       if (e is MaterialGap) {
         expect(e.size, 0);
@@ -1683,6 +1685,8 @@ void main() {
     await tester.pumpAndSettle();
     final MergeableMaterial mergeableMaterial2 = tester.widget(find.byType(MergeableMaterial));
     expect(mergeableMaterial2.children.length, 3);
+    expect(mergeableMaterial.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial.children.whereType<MaterialSlice>().length, 2);
     for (final MergeableMaterialItem e in mergeableMaterial2.children) {
       if (e is MaterialGap) {
         expect(e.size, 20);
@@ -1693,6 +1697,8 @@ void main() {
     await tester.pumpAndSettle();
     final MergeableMaterial mergeableMaterial3 = tester.widget(find.byType(MergeableMaterial));
     expect(mergeableMaterial3.children.length, 3);
+    expect(mergeableMaterial.children.whereType<MaterialGap>().length, 1);
+    expect(mergeableMaterial.children.whereType<MaterialSlice>().length, 2);
     for (final MergeableMaterialItem e in mergeableMaterial3.children) {
       if (e is MaterialGap) {
         expect(e.size, 16);
