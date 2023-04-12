@@ -187,8 +187,8 @@ void FlatlandPlatformView::OnCreateView(ViewCallback on_view_created,
 
     child_view_watcher.set_error_handler(
         [weak, view_id, content_id](zx_status_t status) {
-          FML_LOG(ERROR) << "Interface error on: ChildViewWatcher status: "
-                         << status;
+          FML_LOG(WARNING) << "Child disconnected. ChildViewWatcher status: "
+                           << status;
 
           if (!weak) {
             FML_LOG(WARNING)
