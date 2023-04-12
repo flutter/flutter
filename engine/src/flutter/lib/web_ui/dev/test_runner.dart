@@ -82,8 +82,11 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       )
       ..addFlag(
         'debug',
-        help:
-            'Use artifacts from the debug build instead of release.'
+        help: 'Use artifacts from the debug build instead of release.'
+      )
+      ..addFlag(
+        'dwarf',
+        help: 'Debug wasm modules using embedded DWARF data.'
       )
       ..addFlag(
         'require-skia-gold',
@@ -387,6 +390,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
             requireSkiaGold: requireSkiaGold,
             overridePathToCanvasKit: overridePathToCanvasKit,
             testFiles: testFiles,
+            useDwarf: boolArg('dwarf'),
           ),
     ]);
 

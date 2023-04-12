@@ -33,8 +33,9 @@ class RunSuiteStep implements PipelineStep {
     required this.isVerbose,
     required this.doUpdateScreenshotGoldens,
     required this.requireSkiaGold,
-    this.testFiles,
     required this.overridePathToCanvasKit,
+    required this.useDwarf,
+    this.testFiles,
   });
 
   final TestSuite suite;
@@ -43,6 +44,7 @@ class RunSuiteStep implements PipelineStep {
   final bool isVerbose;
   final bool doUpdateScreenshotGoldens;
   final String? overridePathToCanvasKit;
+  final bool useDwarf;
 
   /// Require Skia Gold to be available and reachable.
   final bool requireSkiaGold;
@@ -63,7 +65,9 @@ class RunSuiteStep implements PipelineStep {
     _prepareTestResultsDirectory();
     final BrowserEnvironment browserEnvironment = getBrowserEnvironment(
       suite.runConfig.browser,
-      enableWasmGC: isWasm);
+      enableWasmGC: isWasm,
+      useDwarf: useDwarf,
+    );
     await browserEnvironment.prepare();
 
     final SkiaGoldClient? skiaClient = await _createSkiaClient();
@@ -93,7 +97,6 @@ class RunSuiteStep implements PipelineStep {
         doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
         skiaClient: skiaClient,
         overridePathToCanvasKit: overridePathToCanvasKit,
-        isWasm: isWasm,
         isVerbose: isVerbose,
       );
     });

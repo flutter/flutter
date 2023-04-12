@@ -80,21 +80,18 @@ class BrowserPlatform extends PlatformPlugin {
         // Serves files from the out/web_tests/artifacts directory at the root (/) URL path.
         .add(createSimpleDirectoryHandler(env.environment.webTestsArtifactsDir))
 
-        // Serves files from thes test set directory
+        // Serves files from the test set directory
         .add(createSimpleDirectoryHandler(getTestSetDirectory(suite.testBundle.testSet)))
         .add(_testImageListingHandler)
 
         // Serves the initial HTML for the test.
         .add(_testBootstrapHandler)
 
-        // Serves files from the root of web_ui.
-        //
-        // This is needed because sourcemaps refer to local files, i.e. those
-        // that don't come from package dependencies, relative to web_ui/.
-        //
-        // Examples of URLs that this handles:
-        //  * /test/alarm_clock_test.dart
-        //  * /lib/src/engine/alarm_clock.dart
+        // Serves source files from the engine src root for devtools debugging.
+        .add(_createSourceHandler())
+
+        // Serves files from the root of web_ui. Some tests download assets that are embedded
+        // directly in the test folder, such as test/engine/image/sample_image1.png etc
         .add(createStaticHandler(env.environment.webUiRootDir.path))
 
         // Serves absolute package URLs (i.e. not /packages/* but /Users/user/*/hosted/pub.dartlang.org/*).
@@ -123,7 +120,6 @@ class BrowserPlatform extends PlatformPlugin {
     required bool doUpdateScreenshotGoldens,
     required SkiaGoldClient? skiaClient,
     required String? overridePathToCanvasKit,
-    required bool isWasm,
     required bool isVerbose,
   }) async {
     final shelf_io.IOServer server =
@@ -265,6 +261,26 @@ class BrowserPlatform extends PlatformPlugin {
     }
     return shelf.Response.notFound('File not found');
   }
+
+  shelf.Handler _createSourceHandler() => (shelf.Request request) async {
+    final String path = p.fromUri(request.url);
+    final String extension = p.extension(path);
+    final bool isSource =
+      extension == '.dart' ||
+      extension == '.c' ||
+      extension == '.cc' ||
+      extension == '.cpp' ||
+      extension == '.h';
+    if (isSource && p.isRelative(path)) {
+      final String fullPath = p.join(env.environment.engineSrcDir.path, path);
+      final File file = File(fullPath);
+      if (file.existsSync()) {
+        return shelf.Response.ok(file.openRead());
+      }
+    }
+
+    return shelf.Response.notFound('Not found.');
+  };
 
   /// Handles URLs pointing to Dart sources using absolute URI paths.
   ///
@@ -452,6 +468,7 @@ class BrowserPlatform extends PlatformPlugin {
     '.bmp': 'image/bmp',
     '.svg': 'image/svg+xml',
     '.json': 'application/json',
+    '.map': 'application/json',
     '.ttf': 'font/ttf',
     '.woff': 'font/woff',
     '.woff2': 'font/woff2',
@@ -713,8 +730,13 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with the browser over
   /// [webSocket].
-  BrowserManager._(this.packageConfig, this._browser, this._browserEnvironment,
-      this._sourceMapDirectory, WebSocketChannel webSocket) {
+  BrowserManager._(
+    this.packageConfig,
+    this._browser,
+    this._browserEnvironment,
+    this._sourceMapDirectory,
+    WebSocketChannel webSocket,
+  ) {
     // The duration should be short enough that the debugging console is open as
     // soon as the user is done setting breakpoints, but long enough that a test
     // doing a lot of synchronous work doesn't trigger a false positive.
@@ -725,8 +747,7 @@ class BrowserManager {
       for (final RunnerSuiteController controller in _controllers) {
         controller.setDebugging(true);
       }
-    })
-      ..cancel();
+    })..cancel();
 
     // Whenever we get a message, no matter which child channel it's for, we the
     // know browser is still running code which means the user isn't debugging.
@@ -830,16 +851,20 @@ class BrowserManager {
     Directory? sourceMapDirectory,
     bool debug = false,
   }) async {
-    final Browser browser =
-        await _newBrowser(url, browserEnvironment, debug: debug);
+    final Browser browser = await _newBrowser(
+      url,
+      browserEnvironment,
+      debug: debug,
+    );
     return _startBrowserManager(
-        browserEnvironment: browserEnvironment,
-        url: url,
-        future: future,
-        packageConfig: packageConfig,
-        browser: browser,
-        sourceMapDirectory: sourceMapDirectory,
-        debug: debug);
+      browserEnvironment: browserEnvironment,
+      url: url,
+      future: future,
+      packageConfig: packageConfig,
+      browser: browser,
+      sourceMapDirectory: sourceMapDirectory,
+      debug: debug,
+    );
   }
 
   static Future<BrowserManager?> _startBrowserManager({
@@ -870,7 +895,12 @@ class BrowserManager {
         return;
       }
       completer.complete(BrowserManager._(
-          packageConfig, browser, browserEnvironment, sourceMapDirectory, webSocket));
+          packageConfig,
+          browser,
+          browserEnvironment,
+          sourceMapDirectory,
+          webSocket,
+      ));
     }).catchError((Object error, StackTrace stackTrace) {
       browser.close();
       if (completer.isCompleted) {
@@ -886,15 +916,24 @@ class BrowserManager {
   ///
   /// If [debug] is true, starts the browser in debug mode.
   static Future<Browser> _newBrowser(
-      Uri url, BrowserEnvironment browserEnvironment,
-      {bool debug = false}) {
-    return browserEnvironment.launchBrowserInstance(url, debug: debug);
+    Uri url,
+    BrowserEnvironment browserEnvironment, {
+    bool debug = false,
+  }) {
+    return browserEnvironment.launchBrowserInstance(
+      url,
+      debug: debug,
+    );
   }
 
   /// Loads [_BrowserEnvironment].
   Future<_BrowserEnvironment> _loadBrowserEnvironment() async {
-    return _BrowserEnvironment(this, await _browser.vmServiceUrl,
-        await _browser.remoteDebuggerUrl, _onRestartController.stream);
+    return _BrowserEnvironment(
+      this,
+      await _browser.vmServiceUrl,
+      await _browser.remoteDebuggerUrl,
+      _onRestartController.stream
+    );
   }
 
   /// Tells the browser the load a test suite from the URL [url].

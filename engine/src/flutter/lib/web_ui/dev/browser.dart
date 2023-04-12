@@ -42,7 +42,10 @@ abstract class BrowserEnvironment {
   /// browser in debug mode by pausing test execution after the code is loaded
   /// but before calling the `main()` function of the test, giving the
   /// developer a chance to set breakpoints.
-  Future<Browser> launchBrowserInstance(Uri url, {bool debug = false});
+  Future<Browser> launchBrowserInstance(
+    Uri url, {
+    bool debug = false,
+  });
 }
 
 /// An interface for running browser instances.

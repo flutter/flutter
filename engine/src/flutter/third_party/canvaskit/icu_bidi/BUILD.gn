@@ -47,6 +47,7 @@ static_library("icu_bidi") {
     "//third_party/icu/source/common/ustrtrns.cpp",
     "//third_party/icu/source/common/utf_impl.cpp",
     "//third_party/icu/source/common/utrie2.cpp",
+    "//third_party/icu/source/common/utypes.cpp",
   ]
   public_configs = [ ":icu_bidi_public" ]
   cflags = [ "-w" ]

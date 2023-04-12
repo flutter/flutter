@@ -353,7 +353,7 @@ mixin ArgUtils<T> on Command<T> {
 
 io.Directory getBuildDirectoryForRuntimeMode(RuntimeMode runtimeMode) =>
   switch (runtimeMode) {
-    RuntimeMode.debug => environment.wasmDebugOutDir,
+    RuntimeMode.debug => environment.wasmDebugUnoptOutDir,
     RuntimeMode.profile => environment.wasmProfileOutDir,
     RuntimeMode.release => environment.wasmReleaseOutDir,
   };
