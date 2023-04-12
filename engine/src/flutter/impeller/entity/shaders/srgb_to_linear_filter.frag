@@ -16,12 +16,12 @@ uniform FragInfo {
 }
 frag_info;
 
-in highp vec2 texture_coords;
+in highp vec2 v_texture_coords;
 out vec4 frag_color;
 
 void main() {
   vec4 input_color =
-      texture(input_texture, texture_coords) * frag_info.input_alpha;
+      texture(input_texture, v_texture_coords) * frag_info.input_alpha;
 
   vec4 color = IPUnpremultiply(input_color);
   for (int i = 0; i < 3; i++) {
