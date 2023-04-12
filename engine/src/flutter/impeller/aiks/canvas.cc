@@ -167,15 +167,16 @@ void Canvas::DrawPath(const Path& path, const Paint& paint) {
 }
 
 void Canvas::DrawPaint(const Paint& paint) {
-  bool is_clear =
-      paint.blend_mode == BlendMode::kSource ||
-      (paint.blend_mode == BlendMode::kSourceOver && paint.color.alpha == 1);
   if (xformation_stack_.size() == 1 &&  // If we're recording the root pass,
       GetCurrentPass().GetElementCount() == 0 &&  // and this is the first item,
-      is_clear  // and the backdrop is being replaced
+      // TODO(bdero): Fix the advanced blends in Color::BlendColor.
+      //              https://github.com/flutter/flutter/issues/124623
+      paint.blend_mode <= Entity::kLastPipelineBlendMode  //
   ) {
     // Then we can absorb this drawPaint as the clear color of the pass.
-    GetCurrentPass().SetClearColor(paint.color);
+    auto color = Color::BlendColor(
+        paint.color, GetCurrentPass().GetClearColor(), paint.blend_mode);
+    GetCurrentPass().SetClearColor(color);
     return;
   }
 
