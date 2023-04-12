@@ -67,9 +67,6 @@ class Version implements Comparable<Version> {
     return primary;
   }
 
-
-  static Version get unknown => Version(0, 0, 0, text: 'unknown');
-
   /// The major version number: "1" in "1.2.3".
   final int major;
 

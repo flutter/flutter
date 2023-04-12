@@ -39,15 +39,15 @@ final RegExp _dotHomeStudioVersionMatcher =
 // See https://github.com/flutter/flutter/issues/124252.
 String? get javaPath => globals.androidStudio?.javaPath;
 
-class AndroidStudio implements Comparable<AndroidStudio> {
+class AndroidStudio {
   AndroidStudio(
     this.directory, {
     Version? version,
     this.configured,
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
-  }) : version = version ?? Version.unknown {
-    _init(version: version);
+  }) : version = version {
+    _init();
   }
 
   static AndroidStudio? fromMacOSBundle(String bundlePath) {
@@ -147,7 +147,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   final String directory;
   final String studioAppName;
-  final Version version;
+  final Version? version;
   final String? configured;
   final String? presetPluginsPath;
 
@@ -163,8 +163,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (presetPluginsPath != null) {
       return presetPluginsPath!;
     }
-    final int major = version.major;
-    final int minor = version.minor;
+    final int major = version?.major ?? 0;
+    final int minor = version?.minor ?? 0;
     final String? homeDirPath = globals.fsUtils.homeDirPath;
     if (homeDirPath == null) {
       return null;
@@ -217,15 +217,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   List<String> get validationMessages => _validationMessages;
 
-  @override
-  int compareTo(AndroidStudio other) {
-    final int result = version.compareTo(other.version);
-    if (result == 0) {
-      return directory.compareTo(other.directory);
-    }
-    return result;
-  }
-
   /// Locates the newest, valid version of Android Studio.
   static AndroidStudio? latestValid() {
     final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
@@ -245,7 +236,16 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     AndroidStudio? newest;
     for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
-      if (newest == null || studio.compareTo(newest) > 0) {
+      newest ??= studio;
+      if (studio.version == null && newest.version == null &&
+            studio.directory.compareTo(newest.directory)> 0 ) {
+        newest = studio;
+      }
+      if (studio.version != null && newest.version == null) {
+        newest = studio;
+      }
+      if (studio.version != null && newest.version != null &&
+          studio.version!.compareTo(newest.version!) > 0){
         newest = studio;
       }
     }
@@ -337,7 +337,10 @@ class AndroidStudio implements Comparable<AndroidStudio> {
           return false;
         }
         if (newerThan != null) {
-          return studio.version.compareTo(newerThan) >= 0;
+          if (studio.version == null) {
+            return false;
+          }
+          return studio.version!.compareTo(newerThan) >= 0;
         }
         return true;
       });

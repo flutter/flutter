@@ -24,7 +24,6 @@ baz=qux
 
   group('Version', () {
     testWithoutContext('can parse and compare', () {
-      expect(Version.unknown.toString(), equals('unknown'));
       expect(Version(null, null, null).toString(), equals('0'));
       expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
@@ -33,7 +32,7 @@ baz=qux
       expect(v1.minor, equals(0));
       expect(v1.patch, equals(0));
 
-      expect(v1, greaterThan(Version.unknown));
+      expect(v1, greaterThan(Version(0, 0, 0)));
 
       final Version v2 = Version.parse('1.2')!;
       expect(v2.major, equals(1));
