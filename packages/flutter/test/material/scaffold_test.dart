@@ -2698,22 +2698,6 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
-
-  testWidgets('Scaffold.isBodyDescendant checks if given context is descendant of the body', (WidgetTester tester) async {
-    final GlobalKey scaffoldKey = GlobalKey();
-    final GlobalKey bodyChildKey = GlobalKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: scaffoldKey,
-          body: SizedBox(key: bodyChildKey),
-        ),
-      ),
-    );
-
-    expect(Scaffold.isBodyDescendant(scaffoldKey.currentContext!), false);
-    expect(Scaffold.isBodyDescendant(bodyChildKey.currentContext!), true);
-  });
 }
 
 class _GeometryListener extends StatefulWidget {
