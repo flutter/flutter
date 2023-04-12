@@ -1935,6 +1935,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final SelectableRegionState state =
           tester.state<SelectableRegionState>(find.byType(SelectableRegion));
