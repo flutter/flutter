@@ -37,6 +37,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     expect(registrar.selectables.length, 1);
     expect(delegate.selectables.length, 3);
   });
@@ -137,6 +138,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     expect(registrar.selectables.length, 1);
 
     await pumpContainer(
@@ -148,6 +150,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     expect(registrar.selectables.length, 0);
   });
 
@@ -169,6 +172,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     expect(registrar.selectables.length, 1);
   });
 }
