@@ -605,6 +605,11 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return @([self node].value.data());
   }
 
+  // iOS does not announce values of native radio buttons.
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsInMutuallyExclusiveGroup)) {
+    return nil;
+  }
+
   // FlutterSwitchSemanticsObject should supercede these conditionals.
   if ([self node].HasFlag(flutter::SemanticsFlags::kHasToggledState) ||
       [self node].HasFlag(flutter::SemanticsFlags::kHasCheckedState)) {
@@ -794,7 +799,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
       [self node].HasAction(flutter::SemanticsAction::kDecrease)) {
     traits |= UIAccessibilityTraitAdjustable;
   }
-  // FlutterSwitchSemanticsObject should supercede these conditionals.
+  // This should also capture radio buttons.
   if ([self node].HasFlag(flutter::SemanticsFlags::kHasToggledState) ||
       [self node].HasFlag(flutter::SemanticsFlags::kHasCheckedState)) {
     traits |= UIAccessibilityTraitButton;
