@@ -22,6 +22,7 @@ import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
+import 'src/reporting/first_run.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -62,19 +63,6 @@ Future<int> run(
     StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
-        // Ensure that the consent message has been displayed
-        if (globals.analytics.shouldShowMessage) {
-          globals.logger.printStatus(globals.analytics.getConsentMessage);
-
-          // Invoking this will onboard the flutter tool onto
-          // the package on the developer's machine and will
-          // allow for events to be sent to Google Analytics
-          // on subsequent runs of the flutter tool (ie. no events
-          // will be sent on the first run to allow developers to
-          // opt out of collection)
-          globals.analytics.clientShowedMessage();
-        }
-
         // Disable analytics if user passes in the `--disable-telemetry` option
         // `flutter --disable-telemetry`
         //
@@ -98,6 +86,14 @@ Future<int> run(
           //  package as well, the above will be removed once we have
           //  fully transitioned to using the new package
           await globals.analytics.setTelemetry(value);
+        }
+
+        // If the user has opted out of legacy analytics, we will continue
+        // to opt them out of unified analytics and inform them
+        if (!globals.flutterUsage.enabled && globals.analytics.telemetryEnabled) {
+          await globals.analytics.setTelemetry(false);
+          globals.logger.printStatus(
+              'Please note that analytics reporting was already disabled, and will continue to be disabled.\n');
         }
 
         await runner.run(args);
@@ -275,8 +271,43 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
 }
 
 Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
-  // Prints the welcome message if needed.
+  // Need to get the boolean returned from `messenger.shouldDisplayLicenseTerms()`
+  // before invoking the print welcome method because the print welcome method
+  // will set `messenger.shouldDisplayLicenseTerms()` to false
+  final FirstRunMessenger messenger =
+      FirstRunMessenger(persistentToolState: globals.persistentToolState!);
+  final bool legacyAnalyticsMessageShown =
+      messenger.shouldDisplayLicenseTerms();
+
+  // Prints the welcome message if needed for legacy analytics.
   globals.flutterUsage.printWelcome();
+
+  // Ensure that the consent message has been displayed for unified analytics
+  if (globals.analytics.shouldShowMessage) {
+    globals.logger.printStatus(globals.analytics.getConsentMessage);
+
+    // Because the legacy analytics may have also sent a message,
+    // the conditional below will print additional messaging informing
+    // users that the two consent messages they are receiving is not a
+    // bug
+    if (legacyAnalyticsMessageShown) {
+      globals.logger
+          .printStatus('You have received two consent messages because '
+              'the flutter tool is migrating to a new analytics system. '
+              'Disabling analytics collection will disable both the legacy '
+              'and new analytics collection systems. '
+              'You can disable analytics reporting by running either `flutter --disable-telemetry` '
+              'or `flutter config --no-analytics\n');
+    }
+
+    // Invoking this will onboard the flutter tool onto
+    // the package on the developer's machine and will
+    // allow for events to be sent to Google Analytics
+    // on subsequent runs of the flutter tool (ie. no events
+    // will be sent on the first run to allow developers to
+    // opt out of collection)
+    globals.analytics.clientShowedMessage();
+  }
 
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
