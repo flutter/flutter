@@ -160,8 +160,8 @@ class EdgeDraggingAutoScroller {
   EdgeDraggingAutoScroller(
     this.scrollable, {
     this.onScrollViewScrolled,
-    this.velocityScalar = _kDefaultAutoScrollVelocityScalar,
-  });
+    double? velocityScalar,
+  }): velocityScalar = velocityScalar ?? _kDefaultAutoScrollVelocityScalar;
 
   // An eyeballed value for a smooth scrolling experience.
   static const double _kDefaultAutoScrollVelocityScalar = 7;
@@ -176,10 +176,14 @@ class EdgeDraggingAutoScroller {
   /// in between each scroll.
   final VoidCallback? onScrollViewScrolled;
 
+  /// {@template flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
   /// The velocity scalar per pixel over scroll.
   ///
   /// It represents how the velocity scale with the over scroll distance. The
   /// auto-scroll velocity = <distance of overscroll> * velocityScalar.
+  ///
+  /// Defaults to 7 if not set or set to null.
+  /// {@endtemplate}
   final double velocityScalar;
 
   late Rect _dragTargetRelatedToScrollOrigin;
