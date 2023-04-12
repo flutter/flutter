@@ -833,7 +833,7 @@ class RenderListWheelViewport
       while (childToPaint != null) {
         final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
         // center value is ignored if overAndUnderCenterOpacity >= 1.
-        _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: true);
+        _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: null);
         childToPaint = childAfter(childToPaint);
       }
       return;
@@ -865,12 +865,13 @@ class RenderListWheelViewport
   // will be painted. If [center] is false, only children that do not overlap
   // will be painted. Opacity is only applied to the partially overlapping
   // children painted when [center] is true.
+  // If center is `null` this logic is ignored entirely.
   void _paintTransformedChild(
     RenderBox child,
     PaintingContext context,
     Offset offset,
     Offset layoutOffset, {
-    required bool center,
+    required bool? center,
   }) {
     final Offset untransformedPaintingCoordinates = offset
         + Offset(
@@ -919,7 +920,7 @@ class RenderListWheelViewport
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
     Offset untransformedPaintingCoordinates, {
-    required bool center,
+    required bool? center,
   }) {
     final double magnifierTopLinePosition =
         size.height / 2 - _itemExtent * _magnification / 2;
@@ -933,7 +934,7 @@ class RenderListWheelViewport
 
     // Some part of the child is in the center magnifier.
     if (isAfterMagnifierTopLine && isBeforeMagnifierBottomLine) {
-      if (!center) {
+      if (center != null && !center) {
         return;
       }
 
@@ -993,7 +994,7 @@ class RenderListWheelViewport
         },
       );
     } else {
-      if (center) {
+      if (center != null && center) {
         return;
       }
       _paintChildCylindrically(
