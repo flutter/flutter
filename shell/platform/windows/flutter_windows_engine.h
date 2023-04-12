@@ -109,7 +109,7 @@ class FlutterWindowsEngine {
   // Stops the engine. This invalidates the pointer returned by engine().
   //
   // Returns false if stopping the engine fails, or if it was not running.
-  bool Stop();
+  virtual bool Stop();
 
   // Sets the view that is displaying this engine's content.
   void SetView(FlutterWindowsView* view);
