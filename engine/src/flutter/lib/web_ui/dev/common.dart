@@ -262,10 +262,14 @@ const List<String> kAllBrowserNames = <String>[
 /// Creates an environment for a browser.
 ///
 /// The [browserName] matches the browser name passed as the `--browser` option.
-BrowserEnvironment getBrowserEnvironment(BrowserName browserName, { required bool enableWasmGC }) {
+BrowserEnvironment getBrowserEnvironment(
+  BrowserName browserName, {
+  required bool enableWasmGC,
+  required bool useDwarf,
+}) {
   switch (browserName) {
     case BrowserName.chrome:
-      return ChromeEnvironment(enableWasmGC);
+      return ChromeEnvironment(enableWasmGC: enableWasmGC, useDwarf: useDwarf);
     case BrowserName.edge:
       return EdgeEnvironment();
     case BrowserName.firefox:
