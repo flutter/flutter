@@ -16,33 +16,33 @@ class Leaf extends StatefulWidget {
 
 class _LeafState extends State<Leaf> {
   bool _keepAlive = false;
-  KeepAliveHandle? _handle;
+  final KeepAliveHandle _handle = KeepAliveHandle();
 
   @override
   void deactivate() {
-    _handle?.release();
-    _handle = null;
+    _handle.release();
     super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _handle.dispose();
+    super.dispose();
   }
 
   void setKeepAlive(bool value) {
     _keepAlive = value;
     if (_keepAlive) {
-      if (_handle == null) {
-        _handle = KeepAliveHandle();
-        KeepAliveNotification(_handle!).dispatch(context);
-      }
+      KeepAliveNotification(_handle).dispatch(context);
     } else {
-      _handle?.release();
-      _handle = null;
+      _handle.release();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_keepAlive && _handle == null) {
-      _handle = KeepAliveHandle();
-      KeepAliveNotification(_handle!).dispatch(context);
+    if (_keepAlive) {
+      KeepAliveNotification(_handle).dispatch(context);
     }
     return widget.child;
   }

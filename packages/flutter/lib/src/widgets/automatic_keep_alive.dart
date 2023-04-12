@@ -326,10 +326,6 @@ class KeepAliveHandle extends ChangeNotifier {
   ///
   /// This method does not call [dispose]. When the handle is not needed
   /// anymore, it must be [dispose]d regardless of whether notifying listeners.
-  @Deprecated(
-    'Use dispose instead. '
-    'This feature was deprecated after v3.3.0-0.0.pre.',
-  )
   void release() {
     notifyListeners();
   }
@@ -359,19 +355,7 @@ class KeepAliveHandle extends ChangeNotifier {
 ///  * [KeepAliveNotification], the notifications sent by this mixin.
 @optionalTypeArgs
 mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
-  KeepAliveHandle? _keepAliveHandle;
-
-  void _ensureKeepAlive() {
-    assert(_keepAliveHandle == null);
-    _keepAliveHandle = KeepAliveHandle();
-    KeepAliveNotification(_keepAliveHandle!).dispatch(context);
-  }
-
-  void _releaseKeepAlive() {
-    // Dispose and release do not imply each other.
-    _keepAliveHandle!.dispose();
-    _keepAliveHandle = null;
-  }
+  final KeepAliveHandle _keepAliveHandle = KeepAliveHandle();
 
   /// Whether the current instance should be kept alive.
   ///
@@ -385,38 +369,28 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   @protected
   void updateKeepAlive() {
     if (wantKeepAlive) {
-      if (_keepAliveHandle == null) {
-        _ensureKeepAlive();
-      }
+      KeepAliveNotification(_keepAliveHandle).dispatch(context);
     } else {
-      if (_keepAliveHandle != null) {
-        _releaseKeepAlive();
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (wantKeepAlive) {
-      _ensureKeepAlive();
+      _keepAliveHandle.release();
     }
   }
 
   @override
   void deactivate() {
-    if (_keepAliveHandle != null) {
-      _releaseKeepAlive();
-    }
+    _keepAliveHandle.release();
     super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _keepAliveHandle.dispose();
+    super.dispose();
   }
 
   @mustCallSuper
   @override
   Widget build(BuildContext context) {
-    if (wantKeepAlive && _keepAliveHandle == null) {
-      _ensureKeepAlive();
-    }
+    updateKeepAlive();
     return const _NullWidget();
   }
 }
