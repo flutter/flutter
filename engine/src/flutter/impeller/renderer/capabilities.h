@@ -29,6 +29,8 @@ class Capabilities {
 
   virtual bool SupportsComputeSubgroups() const = 0;
 
+  virtual bool SupportsReadFromOnscreenTexture() const = 0;
+
   virtual bool SupportsReadFromResolve() const = 0;
 
   virtual bool SupportsDecalTileMode() const = 0;
@@ -61,6 +63,9 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsCompute(bool compute, bool subgroups);
 
+  CapabilitiesBuilder& SetSupportsReadFromOnscreenTexture(
+      bool read_from_onscreen_texture);
+
   CapabilitiesBuilder& SetSupportsReadFromResolve(bool read_from_resolve);
 
   CapabilitiesBuilder& SetDefaultColorFormat(PixelFormat value);
@@ -79,6 +84,7 @@ class CapabilitiesBuilder {
   bool supports_framebuffer_fetch_ = false;
   bool supports_compute_ = false;
   bool supports_compute_subgroups_ = false;
+  bool supports_read_from_onscreen_texture_ = false;
   bool supports_read_from_resolve_ = false;
   bool supports_decal_tile_mode_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;

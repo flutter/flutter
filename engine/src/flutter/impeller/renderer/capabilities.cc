@@ -47,6 +47,11 @@ class StandardCapabilities final : public Capabilities {
   }
 
   // |Capabilities|
+  bool SupportsReadFromOnscreenTexture() const override {
+    return supports_read_from_onscreen_texture_;
+  }
+
+  // |Capabilities|
   bool SupportsReadFromResolve() const override {
     return supports_read_from_resolve_;
   }
@@ -74,6 +79,7 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_framebuffer_fetch,
                        bool supports_compute,
                        bool supports_compute_subgroups,
+                       bool supports_read_from_onscreen_texture,
                        bool supports_read_from_resolve,
                        bool supports_decal_tile_mode,
                        PixelFormat default_color_format,
@@ -85,6 +91,8 @@ class StandardCapabilities final : public Capabilities {
         supports_framebuffer_fetch_(supports_framebuffer_fetch),
         supports_compute_(supports_compute),
         supports_compute_subgroups_(supports_compute_subgroups),
+        supports_read_from_onscreen_texture_(
+            supports_read_from_onscreen_texture),
         supports_read_from_resolve_(supports_read_from_resolve),
         supports_decal_tile_mode_(supports_decal_tile_mode),
         default_color_format_(default_color_format),
@@ -99,6 +107,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_framebuffer_fetch_ = false;
   bool supports_compute_ = false;
   bool supports_compute_subgroups_ = false;
+  bool supports_read_from_onscreen_texture_ = false;
   bool supports_read_from_resolve_ = false;
   bool supports_decal_tile_mode_ = false;
   PixelFormat default_color_format_ = PixelFormat::kUnknown;
@@ -146,6 +155,12 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsCompute(bool compute,
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsReadFromOnscreenTexture(
+    bool read_from_onscreen_texture) {
+  supports_read_from_resolve_ = read_from_onscreen_texture;
+  return *this;
+}
+
 CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsReadFromResolve(
     bool read_from_resolve) {
   supports_read_from_resolve_ = read_from_resolve;
@@ -178,6 +193,7 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_framebuffer_fetch_,                                        //
       supports_compute_,                                                  //
       supports_compute_subgroups_,                                        //
+      supports_read_from_onscreen_texture_,                               //
       supports_read_from_resolve_,                                        //
       supports_decal_tile_mode_,                                          //
       *default_color_format_,                                             //
