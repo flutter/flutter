@@ -1052,7 +1052,7 @@ void main() {
 
     await webDevFS.create();
 
-    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.autoDetect);
+    expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.auto);
 
     await webDevFS.destroy();
   }));

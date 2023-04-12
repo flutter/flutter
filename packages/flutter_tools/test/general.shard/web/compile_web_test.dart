@@ -39,7 +39,7 @@ void main() {
         TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
       expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
-      expect(webServiceWorker.webRenderer, WebRendererMode.autoDetect);
+      expect(webServiceWorker.webRenderer, WebRendererMode.auto);
 
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
