@@ -1,4 +1,4 @@
-Signature: 18c8e99abe7922af344a20fac0463f4f
+Signature: c7aac3f59e240e69ba988db3931ebb1d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -723,7 +723,7 @@ ORIGIN: ../../../third_party/skia/src/effects/SkEmbossMask.cpp + ../../../third_
 ORIGIN: ../../../third_party/skia/src/effects/SkEmbossMask.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkEmbossMaskFilter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkEmbossMaskFilter.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/encode/SkPngEncoder.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/encode/SkPngEncoderImpl.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/SkDebug_android.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/SkDebug_stdio.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/SkFontHost_FreeType.cpp + ../../../third_party/skia/LICENSE
@@ -872,7 +872,7 @@ FILE: ../../../third_party/skia/src/effects/SkEmbossMask.cpp
 FILE: ../../../third_party/skia/src/effects/SkEmbossMask.h
 FILE: ../../../third_party/skia/src/effects/SkEmbossMaskFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkEmbossMaskFilter.h
-FILE: ../../../third_party/skia/src/encode/SkPngEncoder.cpp
+FILE: ../../../third_party/skia/src/encode/SkPngEncoderImpl.cpp
 FILE: ../../../third_party/skia/src/ports/SkDebug_android.cpp
 FILE: ../../../third_party/skia/src/ports/SkDebug_stdio.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontHost_FreeType.cpp
@@ -977,7 +977,7 @@ ORIGIN: ../../../third_party/skia/include/effects/SkColorMatrixFilter.h + ../../
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkMask.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkPicture.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/encode/SkJpegEncoder.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/encode/SkJpegEncoderImpl.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/core/SkPicture.h
 FILE: ../../../third_party/skia/include/effects/SkColorMatrix.h
@@ -985,7 +985,7 @@ FILE: ../../../third_party/skia/include/effects/SkColorMatrixFilter.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState.h
 FILE: ../../../third_party/skia/src/core/SkMask.cpp
 FILE: ../../../third_party/skia/src/core/SkPicture.cpp
-FILE: ../../../third_party/skia/src/encode/SkJpegEncoder.cpp
+FILE: ../../../third_party/skia/src/encode/SkJpegEncoderImpl.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2007 The Android Open Source Project
 
@@ -1296,7 +1296,7 @@ ORIGIN: ../../../third_party/skia/src/core/SkScalar.cpp + ../../../third_party/s
 ORIGIN: ../../../third_party/skia/src/core/SkTextFormatParams.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkJPEGWriteUtility.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkJPEGWriteUtility.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/encode/SkWebpEncoder.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/encode/SkWebpEncoderImpl.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkDeflate.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkDeflate.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkPDFFormXObject.cpp + ../../../third_party/skia/LICENSE
@@ -1309,7 +1309,7 @@ FILE: ../../../third_party/skia/src/core/SkScalar.cpp
 FILE: ../../../third_party/skia/src/core/SkTextFormatParams.h
 FILE: ../../../third_party/skia/src/encode/SkJPEGWriteUtility.cpp
 FILE: ../../../third_party/skia/src/encode/SkJPEGWriteUtility.h
-FILE: ../../../third_party/skia/src/encode/SkWebpEncoder.cpp
+FILE: ../../../third_party/skia/src/encode/SkWebpEncoderImpl.cpp
 FILE: ../../../third_party/skia/src/pdf/SkDeflate.cpp
 FILE: ../../../third_party/skia/src/pdf/SkDeflate.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFFormXObject.cpp
@@ -4665,6 +4665,7 @@ ORIGIN: ../../../third_party/skia/src/core/SkVertices.cpp + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/core/SkWritePixelsRec.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkDashImpl.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkHighContrastFilter.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/encode/SkJpegEncoderImpl.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrAHardwareBufferImageGenerator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrAHardwareBufferImageGenerator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrBackendSurface.cpp + ../../../third_party/skia/LICENSE
@@ -4893,6 +4894,7 @@ FILE: ../../../third_party/skia/src/core/SkVertices.cpp
 FILE: ../../../third_party/skia/src/core/SkWritePixelsRec.h
 FILE: ../../../third_party/skia/src/effects/SkDashImpl.h
 FILE: ../../../third_party/skia/src/effects/SkHighContrastFilter.cpp
+FILE: ../../../third_party/skia/src/encode/SkJpegEncoderImpl.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrAHardwareBufferImageGenerator.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrAHardwareBufferImageGenerator.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrBackendSurface.cpp
@@ -8886,6 +8888,7 @@ ORIGIN: ../../../third_party/skia/src/codec/SkJpegSourceMgr.cpp + ../../../third
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegSourceMgr.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegXmp.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegXmp.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineContextUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkJpegGainmapEncoder.cpp + ../../../third_party/skia/LICENSE
@@ -8908,6 +8911,7 @@ FILE: ../../../third_party/skia/src/codec/SkJpegSourceMgr.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegSourceMgr.h
 FILE: ../../../third_party/skia/src/codec/SkJpegXmp.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegXmp.h
+FILE: ../../../third_party/skia/src/core/SkRasterPipelineContextUtils.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpContexts.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineOpList.h
 FILE: ../../../third_party/skia/src/encode/SkJpegGainmapEncoder.cpp
@@ -8980,6 +8984,7 @@ ORIGIN: ../../../third_party/skia/src/core/SkWritePixelsRec.cpp + ../../../third
 ORIGIN: ../../../third_party/skia/src/core/SkXfermode_Raster.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkEncoder.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkJpegEncoder_none.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/encode/SkPngEncoderImpl.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkPngEncoder_none.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkWebpEncoder_none.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/DitherUtils.cpp + ../../../third_party/skia/LICENSE
@@ -9056,6 +9061,7 @@ FILE: ../../../third_party/skia/src/core/SkWritePixelsRec.cpp
 FILE: ../../../third_party/skia/src/core/SkXfermode_Raster.cpp
 FILE: ../../../third_party/skia/src/encode/SkEncoder.cpp
 FILE: ../../../third_party/skia/src/encode/SkJpegEncoder_none.cpp
+FILE: ../../../third_party/skia/src/encode/SkPngEncoderImpl.h
 FILE: ../../../third_party/skia/src/encode/SkPngEncoder_none.cpp
 FILE: ../../../third_party/skia/src/encode/SkWebpEncoder_none.cpp
 FILE: ../../../third_party/skia/src/gpu/DitherUtils.cpp
