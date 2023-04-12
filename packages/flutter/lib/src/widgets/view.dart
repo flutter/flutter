@@ -183,7 +183,7 @@ class _ViewRenderObjectWidget extends SingleChildRenderObjectWidget {
   // GlobalKey, so we never need to update the RenderObject with a new view.
 }
 
-class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
+class _ViewRenderObjectWidgetElement extends RootSingleChildRenderObjectElementMixin {
   _ViewRenderObjectWidgetElement(super.widget);
 
   @override
@@ -194,7 +194,7 @@ class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
     // TODO(goderbauer): why do we need this? - Views are only allowed in certain places.
     // assert(newSlot == View.viewSlot);
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    super.mount(parent, newSlot); // calls attachRenderObject().
+    super.mount(parent, newSlot); // calls attachRenderObject(), updates slot memeber.
     renderObject.prepareInitialFrame();
     if (viewWidget.pipelineOwner.semanticsOwner != null) {
       renderObject.scheduleInitialSemantics();
@@ -212,6 +212,7 @@ class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
     viewWidget.pipelineOwner.rootNode = renderObject;
     viewWidget.hooks.renderViewRepository.addRenderView(renderObject);
     _attached = true;
+    super.attachRenderObject(newSlot); // updates slot member
   }
 
   @override
@@ -227,6 +228,7 @@ class _ViewRenderObjectWidgetElement extends SingleChildRenderObjectElement {
     viewWidget.pipelineOwner.rootNode = null;
     viewWidget.hooks.pipelineOwner.dropChild(viewWidget.pipelineOwner);
     _attached = false;
+    super.detachRenderObject(); // updates slot member
   }
 
   @override

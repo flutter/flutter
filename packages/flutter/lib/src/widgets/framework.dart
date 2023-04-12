@@ -6596,6 +6596,31 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 }
 
+/// A [SingleChildRenderObjectElement] used to manage the root of a render tree.
+///
+/// Unlike any other render object element this element does not attempt to
+/// attach its [renderObject] to the closest ancestor [RenderObjectElement].
+/// Instead, subclasses must override [attachRenderObject] and
+/// [detachRenderObject] to attach/detach the [renderObject] to whatever
+/// instance manages the render tree (e.g. by assigning it to
+/// [PipelineOwner.rootNode]).
+abstract class RootSingleChildRenderObjectElementMixin extends SingleChildRenderObjectElement {
+  /// Creates an element that uses the given widget as its configuration.
+  RootSingleChildRenderObjectElementMixin(super.widget);
+
+  @override
+  @mustCallSuper
+  void attachRenderObject(Object? newSlot) {
+    _slot = newSlot;
+  }
+
+  @override
+  @mustCallSuper
+  void detachRenderObject() {
+    _slot = null;
+  }
+}
+
 /// A wrapper class for the [Element] that is the creator of a [RenderObject].
 ///
 /// Setting a [DebugCreator] as [RenderObject.debugCreator] will lead to better
