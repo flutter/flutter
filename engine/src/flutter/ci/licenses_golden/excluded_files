@@ -578,6 +578,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.ui.display.singleton/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/meta.json
