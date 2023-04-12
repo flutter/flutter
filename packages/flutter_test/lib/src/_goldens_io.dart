@@ -9,7 +9,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import 'package:test_api/expect.dart' show fail;
+import 'package:matcher/expect.dart' show fail;
 
 import 'goldens.dart';
 import 'test_async_utils.dart';

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:matcher/expect.dart' as matcher;
 import 'package:meta/meta.dart';
 
 // The test_api package is not for general use... it's literally for our use.
@@ -46,15 +47,12 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 // The test_api package has a deprecation warning to discourage direct use but
 // that doesn't apply here.
 // ignore: deprecated_member_use
-export 'package:test_api/test_api.dart' hide
-  expect,
-  group,
-  isInstanceOf,
-  setUp,
-  setUpAll,
-  tearDown,
-  tearDownAll,
-  test;
+export 'package:test_api/scaffolding.dart'
+    hide group, setUp, setUpAll, tearDown, tearDownAll, test;
+export 'package:test_api/hooks.dart' show TestFailure;
+// ignore: implementation_imports
+export 'package:test_api/src/scaffolding/utils.dart' show registerException;
+export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -442,7 +440,7 @@ Future<void> benchmarkWidgets(
 
 /// Assert that `actual` matches `matcher`.
 ///
-/// See [test_package.expect] for details. This is a variant of that function
+/// See [matcher.expect] for details. This is a variant of that function
 /// that additionally verifies that there are no asynchronous APIs
 /// that have not yet resolved.
 ///
@@ -456,12 +454,12 @@ void expect(
   dynamic skip, // true or a String
 }) {
   TestAsyncUtils.guardSync();
-  test_package.expect(actual, matcher, reason: reason, skip: skip);
+  matcher.expect(actual, matcher, reason: reason, skip: skip);
 }
 
 /// Assert that `actual` matches `matcher`.
 ///
-/// See [test_package.expect] for details. This variant will _not_ check that
+/// See [matcher.expect] for details. This variant will _not_ check that
 /// there are no outstanding asynchronous API requests. As such, it can be
 /// called from, e.g., callbacks that are run during build or layout, or in the
 /// completion handlers of futures that execute in response to user input.
@@ -473,13 +471,13 @@ void expectSync(
   dynamic matcher, {
   String? reason,
 }) {
-  test_package.expect(actual, matcher, reason: reason);
+  matcher.expect(actual, matcher, reason: reason);
 }
 
 /// Just like [expect], but returns a [Future] that completes when the matcher
 /// has finished matching.
 ///
-/// See [test_package.expectLater] for details.
+/// See [matcher.expectLater] for details.
 ///
 /// If the matcher fails asynchronously, that failure is piped to the returned
 /// future where it can be handled by user code. If it is not handled by user
@@ -493,7 +491,7 @@ Future<void> expectLater(
   // We can't wrap the delegate in a guard, or we'll hit async barriers in
   // [TestWidgetsFlutterBinding] while we're waiting for the matcher to complete
   TestAsyncUtils.guardSync();
-  return test_package.expectLater(actual, matcher, reason: reason, skip: skip)
+  return matcher.expectLater(actual, matcher, reason: reason, skip: skip)
            .then<void>((dynamic value) => null);
 }
 
