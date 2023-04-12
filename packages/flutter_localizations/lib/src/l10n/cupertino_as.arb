@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "সকলো বাছনি কৰক",
   "tabSemanticsLabel": "$tabCount টা টেবৰ $tabIndex নম্বৰটো",
   "modalBarrierDismissLabel": "অগ্ৰাহ্য কৰক",
-  "searchTextFieldPlaceholderLabel": "সন্ধান কৰক"
+  "searchTextFieldPlaceholderLabel": "সন্ধান কৰক",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

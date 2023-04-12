@@ -26,5 +26,6 @@
   "selectAllButtonLabel": "Odaberi sve",
   "tabSemanticsLabel": "Kartica $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Odbaci",
-  "searchTextFieldPlaceholderLabel": "Pretraživanje"
+  "searchTextFieldPlaceholderLabel": "Pretraživanje",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

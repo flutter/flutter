@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "انتخاب همه",
   "tabSemanticsLabel": "برگه $tabIndex از $tabCount",
   "modalBarrierDismissLabel": "نپذیرفتن",
-  "searchTextFieldPlaceholderLabel": "جستجو"
+  "searchTextFieldPlaceholderLabel": "جستجو",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

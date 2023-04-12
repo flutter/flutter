@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Teua Zote",
   "tabSemanticsLabel": "Kichupo cha $tabIndex kati ya $tabCount",
   "modalBarrierDismissLabel": "Ondoa",
-  "searchTextFieldPlaceholderLabel": "Tafuta"
+  "searchTextFieldPlaceholderLabel": "Tafuta",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Vælg alle",
   "tabSemanticsLabel": "Fane $tabIndex af $tabCount",
   "modalBarrierDismissLabel": "Afvis",
-  "searchTextFieldPlaceholderLabel": "Søg"
+  "searchTextFieldPlaceholderLabel": "Søg",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

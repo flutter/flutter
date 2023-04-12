@@ -26,5 +26,6 @@
   "selectAllButtonLabel": "Selectați-le pe toate",
   "tabSemanticsLabel": "Fila $tabIndex din $tabCount",
   "modalBarrierDismissLabel": "Închideți",
-  "searchTextFieldPlaceholderLabel": "Căutați"
+  "searchTextFieldPlaceholderLabel": "Căutați",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

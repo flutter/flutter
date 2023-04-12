@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Chọn tất cả",
   "tabSemanticsLabel": "Thẻ $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Bỏ qua",
-  "searchTextFieldPlaceholderLabel": "Tìm kiếm"
+  "searchTextFieldPlaceholderLabel": "Tìm kiếm",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

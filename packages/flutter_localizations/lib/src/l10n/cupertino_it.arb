@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Seleziona tutto",
   "tabSemanticsLabel": "Scheda $tabIndex di $tabCount",
   "modalBarrierDismissLabel": "Ignora",
-  "searchTextFieldPlaceholderLabel": "Cerca"
+  "searchTextFieldPlaceholderLabel": "Cerca",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

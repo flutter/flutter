@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Tout sélect.",
   "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
   "modalBarrierDismissLabel": "Ignorer",
-  "searchTextFieldPlaceholderLabel": "Rechercher"
+  "searchTextFieldPlaceholderLabel": "Rechercher",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

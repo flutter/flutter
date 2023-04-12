@@ -95,6 +95,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Maak toe';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Plak';
 
   @override
@@ -240,6 +243,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'አሰናብት';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'ለጥፍ';
@@ -389,6 +395,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'رفض';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'لصق';
 
   @override
@@ -534,6 +543,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'অগ্ৰাহ্য কৰক';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => "পে'ষ্ট কৰক";
@@ -683,6 +695,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'İmtina edin';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Yerləşdirin';
 
   @override
@@ -828,6 +843,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Адхіліць';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Уставіць';
@@ -977,6 +995,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Отхвърляне';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Поставяне';
 
   @override
@@ -1122,6 +1143,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'খারিজ করুন';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'পেস্ট করুন';
@@ -1271,6 +1295,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Odbaci';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Zalijepi';
 
   @override
@@ -1416,6 +1443,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Ignora';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Enganxa';
@@ -1565,6 +1595,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Zavřít';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Vložit';
 
   @override
@@ -1710,6 +1743,9 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Diystyru';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Gludo';
@@ -1859,6 +1895,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Afvis';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Indsæt';
 
   @override
@@ -2004,6 +2043,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
@@ -2174,6 +2216,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Παράβλεψη';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Επικόλληση';
 
   @override
@@ -2319,6 +2364,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Paste';
@@ -2658,6 +2706,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Cerrar';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Pegar';
@@ -3467,6 +3518,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Loobu';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Kleebi';
 
   @override
@@ -3612,6 +3666,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Baztertu';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Itsatsi';
@@ -3761,6 +3818,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'نپذیرفتن';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'جای‌گذاری';
 
   @override
@@ -3906,6 +3966,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Ohita';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Liitä';
@@ -4055,6 +4118,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'I-dismiss';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'I-paste';
 
   @override
@@ -4200,6 +4266,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Ignorer';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Coller';
@@ -4391,6 +4460,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Ignorar';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Pegar';
 
   @override
@@ -4536,6 +4608,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
@@ -4685,6 +4760,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'છોડી દો';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'પેસ્ટ કરો';
 
   @override
@@ -4830,6 +4908,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'סגירה';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'הדבקה';
@@ -4979,6 +5060,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'खारिज करें';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'चिपकाएं';
 
   @override
@@ -5124,6 +5208,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
@@ -5273,6 +5360,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Elvetés';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Beillesztés';
 
   @override
@@ -5418,6 +5508,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Փակել';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Տեղադրել';
@@ -5567,6 +5660,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Tutup';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Tempel';
 
   @override
@@ -5712,6 +5808,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Hunsa';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Líma';
@@ -5861,6 +5960,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Ignora';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Incolla';
 
   @override
@@ -6006,6 +6108,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => '閉じる';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => '貼り付け';
@@ -6155,6 +6260,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'დახურვა';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'ჩასმა';
 
   @override
@@ -6300,6 +6408,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Жабу';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Қою';
@@ -6449,6 +6560,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'ច្រាន​ចោល';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'ដាក់​ចូល';
 
   @override
@@ -6594,6 +6708,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
@@ -6743,6 +6860,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => '닫기';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => '붙여넣기';
 
   @override
@@ -6888,6 +7008,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Жабуу';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Чаптоо';
@@ -7037,6 +7160,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'ປິດໄວ້';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'ວາງ';
 
   @override
@@ -7182,6 +7308,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Atsisakyti';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Įklijuoti';
@@ -7331,6 +7460,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Nerādīt';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Ielīmēt';
 
   @override
@@ -7476,6 +7608,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Отфрли';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Залепи';
@@ -7625,6 +7760,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'നിരസിക്കുക';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'ഒട്ടിക്കുക';
 
   @override
@@ -7770,6 +7908,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Үл хэрэгсэх';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Буулгах';
@@ -7919,6 +8060,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'डिसमिस करा';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'पेस्ट करा';
 
   @override
@@ -8064,6 +8208,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Tolak';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Tampal';
@@ -8213,6 +8360,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'ပယ်ရန်';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'ကူးထည့်ရန်';
 
   @override
@@ -8358,6 +8508,9 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Avvis';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
@@ -8507,6 +8660,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'खारेज गर्नुहोस्';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'टाँस्नुहोस्';
 
   @override
@@ -8652,6 +8808,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Sluiten';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Plakken';
@@ -8801,6 +8960,9 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Avvis';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Lim inn';
 
   @override
@@ -8946,6 +9108,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'ଖାରଜ କରନ୍ତୁ';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
@@ -9095,6 +9260,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'ਖਾਰਜ ਕਰੋ';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'ਪੇਸਟ ਕਰੋ';
 
   @override
@@ -9242,6 +9410,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Zamknij';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Wklej';
 
   @override
@@ -9387,6 +9558,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Dispensar';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Colar';
@@ -9575,6 +9749,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Închideți';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Inserați';
 
   @override
@@ -9720,6 +9897,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Закрыть';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Вставить';
@@ -9869,6 +10049,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'ඉවත ලන්න';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'අලවන්න';
 
   @override
@@ -10014,6 +10197,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Odmietnuť';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Prilepiť';
@@ -10163,6 +10349,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Opusti';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Prilepi';
 
   @override
@@ -10310,6 +10499,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Hiq';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Ngjit';
 
   @override
@@ -10455,6 +10647,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Одбаци';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Налепи';
@@ -10718,6 +10913,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Stäng';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Klistra in';
 
   @override
@@ -10863,6 +11061,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Ondoa';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Bandika';
@@ -11012,6 +11213,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'நிராகரிக்கும்';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'ஒட்டு';
 
   @override
@@ -11157,6 +11361,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'విస్మరించు';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'పేస్ట్ చేయండి';
@@ -11306,6 +11513,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'ปิด';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'วาง';
 
   @override
@@ -11451,6 +11661,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'I-dismiss';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'I-paste';
@@ -11600,6 +11813,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Kapat';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Yapıştır';
 
   @override
@@ -11745,6 +11961,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Закрити';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Вставити';
@@ -11894,6 +12113,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'برخاست کریں';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'پیسٹ کریں';
 
   @override
@@ -12039,6 +12261,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Yopish';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Joylash';
@@ -12188,6 +12413,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Bỏ qua';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get pasteButtonLabel => 'Dán';
 
   @override
@@ -12333,6 +12561,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => '关闭';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => '粘贴';
@@ -12627,6 +12858,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Cashisa';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Namathisela';

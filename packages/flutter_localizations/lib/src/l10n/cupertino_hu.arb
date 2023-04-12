@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Összes kijelölése",
   "tabSemanticsLabel": "$tabCount/$tabIndex. lap",
   "modalBarrierDismissLabel": "Elvetés",
-  "searchTextFieldPlaceholderLabel": "Keresés"
+  "searchTextFieldPlaceholderLabel": "Keresés",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }
