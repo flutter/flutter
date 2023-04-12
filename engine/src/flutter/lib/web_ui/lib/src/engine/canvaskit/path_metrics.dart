@@ -8,11 +8,10 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import 'canvaskit_api.dart';
+import 'native_memory.dart';
 import 'path.dart';
-import 'skia_object_cache.dart';
 
-class CkPathMetrics extends IterableBase<ui.PathMetric>
-    implements ui.PathMetrics {
+class CkPathMetrics extends IterableBase<ui.PathMetric> implements ui.PathMetrics {
   CkPathMetrics(this._path, this._forceClosed);
 
   final CkPath _path;
@@ -23,18 +22,21 @@ class CkPathMetrics extends IterableBase<ui.PathMetric>
   late final Iterator<ui.PathMetric> iterator = _path.isEmpty
       ? const CkPathMetricIteratorEmpty._()
       : CkContourMeasureIter(this);
-
-  /// A fresh [CkContourMeasureIter] which is only used for resurrecting a
-  /// [CkContourMeasure]. We can't use [iterator] here because [iterator] is
-  /// memoized.
-  CkContourMeasureIter _iteratorForResurrection() => CkContourMeasureIter(this);
 }
 
-class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter>
-    implements Iterator<ui.PathMetric> {
-  CkContourMeasureIter(this._metrics);
+class CkContourMeasureIter implements Iterator<ui.PathMetric> {
+  CkContourMeasureIter(this._metrics) {
+    _ref = UniqueRef<SkContourMeasureIter>(this, SkContourMeasureIter(
+      _metrics._path.skiaObject,
+      _metrics._forceClosed,
+      1.0,
+    ), 'Iterator<PathMetric>');
+  }
 
   final CkPathMetrics _metrics;
+  late final UniqueRef<SkContourMeasureIter> _ref;
+
+  SkContourMeasureIter get skiaObject => _ref.nativeObject;
 
   /// A monotonically increasing counter used to generate [ui.PathMetric.contourIndex].
   ///
@@ -68,44 +70,21 @@ class CkContourMeasureIter extends ManagedSkiaObject<SkContourMeasureIter>
     _contourIndexCounter += 1;
     return true;
   }
-
-  @override
-  SkContourMeasureIter createDefault() {
-    return SkContourMeasureIter(
-      _metrics._path.skiaObject,
-      _metrics._forceClosed,
-      1.0,
-    );
-  }
-
-  @override
-  SkContourMeasureIter resurrect() {
-    final SkContourMeasureIter iterator = createDefault();
-
-    // When resurrecting we must advance the iterator to the last known
-    // position.
-    for (int i = 0; i < _contourIndexCounter; i++) {
-      iterator.next();
-    }
-
-    return iterator;
-  }
-
-  @override
-  void delete() {
-    rawSkiaObject?.delete();
-  }
 }
 
-class CkContourMeasure extends ManagedSkiaObject<SkContourMeasure>
-    implements ui.PathMetric {
-  CkContourMeasure(this._metrics, SkContourMeasure jsObject, this.contourIndex)
-      : super(jsObject);
+class CkContourMeasure implements ui.PathMetric {
+  CkContourMeasure(this._metrics, SkContourMeasure skiaObject, this.contourIndex) {
+    _ref = UniqueRef<SkContourMeasure>(this, skiaObject, 'PathMetric');
+  }
 
   /// The path metrics used to create this measure.
   ///
   /// This is used to resurrect the object if it is deleted prematurely.
   final CkPathMetrics _metrics;
+
+  late final UniqueRef<SkContourMeasure> _ref;
+
+  SkContourMeasure get skiaObject => _ref.nativeObject;
 
   @override
   final int contourIndex;
@@ -133,39 +112,6 @@ class CkContourMeasure extends ManagedSkiaObject<SkContourMeasure>
   @override
   double get length {
     return skiaObject.length();
-  }
-
-  @override
-  SkContourMeasure createDefault() {
-    // This method must never be called. The default instance comes from the
-    // iterator's [SkContourMeasureIter.next] method initialized by the
-    // constructor.
-    throw StateError('Unreachable code');
-  }
-
-  @override
-  SkContourMeasure resurrect() {
-    final CkContourMeasureIter iterator = _metrics._iteratorForResurrection();
-    final SkContourMeasureIter skIterator = iterator.skiaObject;
-
-    // When resurrecting we must advance the iterator to the last known
-    // position.
-    for (int i = 0; i < contourIndex; i++) {
-      skIterator.next();
-    }
-
-    final SkContourMeasure? result = skIterator.next();
-
-    if (result == null) {
-      throw StateError('Failed to resurrect SkContourMeasure');
-    }
-
-    return result;
-  }
-
-  @override
-  void delete() {
-    rawSkiaObject?.delete();
   }
 }
 

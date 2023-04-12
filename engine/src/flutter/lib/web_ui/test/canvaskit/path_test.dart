@@ -94,17 +94,7 @@ void testMain() {
       expect(path.getBounds(), testRect);
     });
 
-    test('CkPath resurrection', () {
-      const ui.Rect rect = ui.Rect.fromLTRB(0, 0, 10, 10);
-      final CkPath path = CkPath();
-      path.addRect(rect);
-      path.delete();
-
-      final SkPath resurrectedCopy = path.resurrect();
-      expect(fromSkRect(resurrectedCopy.getBounds()), rect);
-    });
-
-    test('Resurrect CkContourMeasure in the middle of iteration', () {
+    test('CkContourMeasure iteration', () {
       browserSupportsFinalizationRegistry = false;
       final ui.Path path = ui.Path();
       expect(path, isA<CkPath>());
@@ -119,18 +109,9 @@ void testMain() {
       expect(iterator.current.contourIndex, 0);
       expect(iterator.moveNext(), isTrue);
       expect(iterator.current.contourIndex, 1);
-
-      // Delete iterator in the middle of iteration
-      iterator.delete();
-      iterator.rawSkiaObject = null;
-
-      // Check that the iterator can continue from the last position.
-      expect(iterator.moveNext(), isTrue);
-      expect(iterator.current.contourIndex, 2);
-      expect(iterator.moveNext(), isFalse);
     });
 
-    test('Resurrect CkContourMeasure', () {
+    test('CkContourMeasure index', () {
       browserSupportsFinalizationRegistry = false;
       final ui.Path path = ui.Path();
       expect(path, isA<CkPath>());
@@ -148,20 +129,6 @@ void testMain() {
 
       expect(iterator.moveNext(), isTrue);
       final CkContourMeasure measure1 = iterator.current as CkContourMeasure;
-      expect(measure1.contourIndex, 1);
-      expect(measure1.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(20, 20, 30, 25));
-
-      // Delete iterator and the measure in the middle of iteration
-      iterator.delete();
-      iterator.rawSkiaObject = null;
-      measure0.delete();
-      measure0.rawSkiaObject = null;
-      measure1.delete();
-      measure1.rawSkiaObject = null;
-
-      // Check that the measure is still value after resurrection.
-      expect(measure0.contourIndex, 0);
-      expect(measure0.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(0, 0, 10, 5));
       expect(measure1.contourIndex, 1);
       expect(measure1.extractPath(0, 15).getBounds(), const ui.Rect.fromLTRB(20, 20, 30, 25));
     });
