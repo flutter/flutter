@@ -86,6 +86,12 @@
   "alertDialogLabel": "Rhybudd",
   "searchFieldLabel": "Chwilio",
   "currentDateLabel": "Heddiw",
+  "reorderItemToStart": "Symud i'r dechrau",
+  "reorderItemToEnd": "Symud i'r diwedd",
+  "reorderItemUp": "Symud i fyny",
+  "reorderItemDown": "Symud i lawr",
+  "reorderItemLeft": "Symud i'r chwith",
+  "reorderItemRight": "Symud i'r dde",
   "expandedIconTapHint": "Crebachu",
   "collapsedIconTapHint": "Ehangu",
   "remainingTextFieldCharacterCountZero": "Dim nodau ar ôl",
@@ -138,5 +144,11 @@
   "keyboardKeyScrollLock": "Scroll Lock",
   "keyboardKeySelect": "Select",
   "keyboardKeyShift": "Shift",
-  "keyboardKeySpace": "Space"
+  "keyboardKeySpace": "Space",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

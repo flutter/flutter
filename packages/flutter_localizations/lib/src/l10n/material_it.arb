@@ -42,6 +42,12 @@
   "dialogLabel": "Finestra di dialogo",
   "alertDialogLabel": "Avviso",
   "searchFieldLabel": "Cerca",
+  "reorderItemToStart": "Sposta all'inizio",
+  "reorderItemToEnd": "Sposta alla fine",
+  "reorderItemUp": "Sposta su",
+  "reorderItemDown": "Sposta giù",
+  "reorderItemLeft": "Sposta a sinistra",
+  "reorderItemRight": "Sposta a destra",
   "expandedIconTapHint": "Comprimi",
   "collapsedIconTapHint": "Espandi",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -128,5 +134,11 @@
   "scrimLabel": "Rete",
   "bottomSheetLabel": "Riquadro inferiore",
   "scrimOnTapHint": "Chiudi $modalRouteContentName",
-  "keyboardKeyShift": "Maiusc"
+  "keyboardKeyShift": "Maiusc",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

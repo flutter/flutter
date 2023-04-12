@@ -42,6 +42,12 @@
   "dialogLabel": "Diàleg",
   "alertDialogLabel": "Alerta",
   "searchFieldLabel": "Cerca",
+  "reorderItemToStart": "Mou al principi",
+  "reorderItemToEnd": "Mou al final",
+  "reorderItemUp": "Mou amunt",
+  "reorderItemDown": "Mou avall",
+  "reorderItemLeft": "Mou cap a l'esquerra",
+  "reorderItemRight": "Mou cap a la dreta",
   "expandedIconTapHint": "Replega",
   "collapsedIconTapHint": "Desplega",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -128,5 +134,11 @@
   "scrimLabel": "Fons atenuat",
   "bottomSheetLabel": "Full inferior",
   "scrimOnTapHint": "Tanca $modalRouteContentName",
-  "keyboardKeyShift": "Maj"
+  "keyboardKeyShift": "Maj",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -316,28 +316,65 @@ void main() {
     });
   });
 
-    testUsingContext('runner disable telemetry with flag', () async {
-      io.setExitFunctionForTests((int exitCode) {});
+  group('unified_analytics', () {
+    final Usage legacyAnalytics = TestUsage();
+    setUp(() {
+      legacyAnalytics.enabled = false;
+    });
 
-      expect(globals.analytics.telemetryEnabled, true);
-      expect(globals.analytics.shouldShowMessage, true);
+    testUsingContext(
+      'runner disable telemetry with flag',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
 
-      await runner.run(
-        <String>['--disable-telemetry'],
-        () => <FlutterCommand>[],
-        // This flutterVersion disables crash reporting.
-        flutterVersion: '[user-branch]/',
-        shutdownHooks: ShutdownHooks(),
-      );
+        expect(globals.analytics.telemetryEnabled, true);
+        expect(globals.analytics.shouldShowMessage, true);
 
-      expect(globals.analytics.telemetryEnabled, false);
-    },
-    overrides: <Type, Generator>{
-      Analytics: () => FakeAnalytics(),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+        await runner.run(
+          <String>['--disable-telemetry'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(globals.analytics.telemetryEnabled, false);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => FakeAnalytics(),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'legacy analytics disabled will disable new analytics',
+      () async {
+
+        io.setExitFunctionForTests((int exitCode) {});
+
+        await runner.run(
+          <String>[],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(globals.flutterUsage.enabled, false);
+        expect(globals.analytics.telemetryEnabled, false);
+        expect(testLogger.statusText.contains(
+          'Please note that analytics '
+          'reporting was already disabled'), true);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => FakeAnalytics(),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => legacyAnalytics,
+      },
+    );
+  });
 }
 
 class CrashingFlutterCommand extends FlutterCommand {

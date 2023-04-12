@@ -235,6 +235,33 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
       );
     });
 
+        testWithoutContext('ignores gradle comments', () async {
+      const String expectedVersion = '7.4.2';
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      final Directory wrapperDirectory = androidDirectory
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+        ..createSync(recursive: true);
+      wrapperDirectory
+          .childFile('gradle-wrapper.properties')
+          .writeAsStringSync('''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+# distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0.2-all.zip
+distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVersion-all.zip
+# distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0.2-all.zip
+''');
+
+      expect(
+        await getGradleVersion(
+            androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        expectedVersion,
+      );
+    });
+
     testWithoutContext('returns gradlew version, whitespace, location', () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')

@@ -44,6 +44,12 @@
   "alertDialogLabel": "خبرتیا",
   "searchFieldLabel": "لټون",
   "moreButtonTooltip": "More",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move left",
+  "reorderItemRight": "Move right",
   "expandedIconTapHint": "Collapse",
   "collapsedIconTapHint": "Expand",
   "remainingTextFieldCharacterCountZero": "No characters remaining",
@@ -129,5 +135,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Close $modalRouteName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

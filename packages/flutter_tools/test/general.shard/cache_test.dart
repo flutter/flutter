@@ -880,6 +880,31 @@ void main() {
     ));
   });
 
+  testWithoutContext('LegacyCanvasKitRemover removes old canvaskit artifacts if they exist', () async {
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final File canvasKitWasm = fileSystem.file(fileSystem.path.join(
+      cache.getRoot().path,
+      'canvaskit',
+      'canvaskit.wasm',
+    ));
+    canvasKitWasm.createSync(recursive: true);
+    canvasKitWasm.writeAsStringSync('hello world');
+
+    final LegacyCanvasKitRemover remover = LegacyCanvasKitRemover(cache);
+    expect(await remover.isUpToDate(fileSystem), false);
+    await remover.update(
+      FakeArtifactUpdater(),
+      BufferLogger.test(),
+      fileSystem,
+      FakeOperatingSystemUtils(),
+    );
+    expect(await remover.isUpToDate(fileSystem), true);
+
+    expect(canvasKitWasm.existsSync(), isFalse);
+  });
+
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);

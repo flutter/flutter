@@ -42,6 +42,12 @@
   "dialogLabel": "დიალოგი",
   "alertDialogLabel": "გაფრთხილება",
   "searchFieldLabel": "ძიება",
+  "reorderItemToStart": "დასაწყისში გადატანა",
+  "reorderItemToEnd": "ბოლოში გადატანა",
+  "reorderItemUp": "ზემოთ გადატანა",
+  "reorderItemDown": "ქვემოთ გადატანა",
+  "reorderItemLeft": "მარცხნივ გადატანა",
+  "reorderItemRight": "მარჯვნივ გადატანა",
   "expandedIconTapHint": "ჩაკეცვა",
   "collapsedIconTapHint": "გაშლა",
   "remainingTextFieldCharacterCountOne": "დარჩა 1 სიმბოლო",
@@ -127,5 +133,11 @@
   "scrimLabel": "სკრიმი",
   "bottomSheetLabel": "ქვედა ფურცელი",
   "scrimOnTapHint": "$modalRouteContentName-ის დახურვა",
-  "keyboardKeyShift": "ცვლა"
+  "keyboardKeyShift": "ცვლა",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
