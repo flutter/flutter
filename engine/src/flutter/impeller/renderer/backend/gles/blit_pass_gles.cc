@@ -86,10 +86,12 @@ bool BlitPassGLES::EncodeCommands(
     return true;
   }
 
-  return reactor_->AddOperation([transients_allocator, &commands = commands_,
+  std::shared_ptr<const BlitPassGLES> shared_this = shared_from_this();
+  return reactor_->AddOperation([transients_allocator,
+                                 blit_pass = std::move(shared_this),
                                  label = label_](const auto& reactor) {
-    auto result =
-        EncodeCommandsInReactor(transients_allocator, reactor, commands, label);
+    auto result = EncodeCommandsInReactor(transients_allocator, reactor,
+                                          blit_pass->commands_, label);
     FML_CHECK(result) << "Must be able to encode GL commands without error.";
   });
 }
