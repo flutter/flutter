@@ -433,7 +433,7 @@ void main() {
     expect(layers1, isNot(equals(layers2)));
   });
 
-  testWidgets('CircularProgressIndicator stoke width', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator stroke width', (WidgetTester tester) async {
     await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator()));
 
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
@@ -441,6 +441,28 @@ void main() {
     await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator(strokeWidth: 16.0)));
 
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
+  });
+
+  testWidgets('CircularProgressIndicator with strokeCap', (WidgetTester tester) async {
+    await tester.pumpWidget(const CircularProgressIndicator());
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.square),
+        reason: 'Default indeterminate strokeCap is StrokeCap.square.');
+
+    await tester.pumpWidget(const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CircularProgressIndicator(value: 0.5)));
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.butt),
+        reason: 'Default determinate strokeCap is StrokeCap.butt.');
+
+    await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.butt));
+    expect(find.byType(CircularProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.butt),
+        reason: 'strokeCap can be set to StrokeCap.butt, and will not be overidden.');
+
+    await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.round));
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
@@ -567,6 +589,29 @@ void main() {
     ));
     expect(themeBackgroundMaterial.type, MaterialType.circle);
     expect(themeBackgroundMaterial.color, blue);
+  });
+
+  testWidgets('RefreshProgressIndicator with a round indicator', (WidgetTester tester) async {
+    await tester.pumpWidget(const RefreshProgressIndicator());
+    expect(find.byType(RefreshProgressIndicator),
+        paints..arc(strokeCap: StrokeCap.square),
+        reason: 'Default indeterminate strokeCap is StrokeCap.square');
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 200.0,
+              child: RefreshProgressIndicator(strokeCap: StrokeCap.round),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
   testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
