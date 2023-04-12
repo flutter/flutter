@@ -200,11 +200,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics.
-  // TODO(goderbauer): Deprecate this.
+  @Deprecated('do not use')
   PipelineOwner get pipelineOwner => throw UnimplementedError();
 
   /// The render tree that's attached to the output surface.
-  // TODO(goderbauer): Deprecate this.
+  @Deprecated('do not use')
   RenderView get renderView => throw UnimplementedError();
 
   ///
@@ -670,17 +670,6 @@ void debugDumpSemanticsTree([DebugSemanticsDumpOrder childOrder = DebugSemantics
 /// library, such as the Flutter Widgets library, then you would use
 /// that layer's binding (see [WidgetsFlutterBinding]).
 class RenderingFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding, ServicesBinding, SemanticsBinding, PaintingBinding, RendererBinding {
-  /// Creates a binding for the rendering layer.
-  ///
-  /// The `root` render box is attached directly to the [renderView] and is
-  /// given constraints that require it to fill the window.
-  ///
-  /// This binding does not automatically schedule any frames. Callers are
-  /// responsible for deciding when to first call [scheduleFrame].
-  RenderingFlutterBinding({ RenderBox? root }) {
-    renderView.child = root;
-  }
-
   /// Returns an instance of the binding that implements
   /// [RendererBinding]. If no binding has yet been initialized, the
   /// [RenderingFlutterBinding] class is used to create and initialize

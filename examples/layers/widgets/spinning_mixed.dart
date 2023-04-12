@@ -54,7 +54,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                     ElevatedButton(
                       child: Row(
                         children: <Widget>[
-                          Image.network('https://flutter.dev/images/favicon.png'),
+                          Image.network('https://storage.googleapis.com/cms-storage-bucket/4fd0db61df0567c0f352.png'),
                           const Text('PRESS ME'),
                         ],
                       ),
@@ -100,8 +100,17 @@ void main() {
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
 
   transformBox = RenderTransform(child: flexRoot, transform: Matrix4.identity(), alignment: Alignment.center);
-  final RenderPadding root = RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
+  final RenderPadding padding = RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
 
-  binding.renderView.child = root;
+  // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
+  assert(binding.platformDispatcher.implicitView != null);
+  final RenderView view = RenderView(
+    view: binding.platformDispatcher.implicitView!,
+    child: padding,
+  );
+  binding.rootPipelineOwner.rootNode = view;
+  binding.addRenderView(view);
+  view.prepareInitialFrame();
+
   binding.addPersistentFrameCallback(rotate);
 }
