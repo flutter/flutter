@@ -376,6 +376,7 @@ targets:
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/124691
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
