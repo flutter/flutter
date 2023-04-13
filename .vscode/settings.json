@@ -6,6 +6,10 @@
     // reformatting of code.
     "editor.formatOnSave": false,
     "editor.formatOnType": false,
+    "[dart]":{
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false
+    },
 
     "html.format.enable": false,
     "githubPullRequests.ignoredPullRequestBranches": [
