@@ -460,17 +460,6 @@ class XcodeProjectInfo {
     return sentenceCase(buildInfo?.flavor ?? 'Runner');
   }
 
-  // /// The expected scheme for [buildInfo].
-  // @visibleForTesting
-  // static String expectedSchemeFor2(String flavor) {
-  //   return sentenceCase(flavor ?? 'Runner');
-  // }
-
-  @visibleForTesting
-  String expectedCustomSchemeFor(BuildInfo? buildInfo, String hostAppProjectName) {
-    return sentenceCase(hostAppProjectName);
-  }
-
   /// The expected build configuration for [buildInfo] and [scheme].
   static String expectedBuildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
@@ -497,7 +486,7 @@ class XcodeProjectInfo {
   String? schemeFor({String? flavor, String hostAppProjectName = ''}) {
     if (flavor != null) {
       // if flavor exists, should take precedence over everything else
-      final String expectedScheme = flavor;
+      final String expectedScheme = sentenceCase(flavor);
       if (schemes.contains(expectedScheme)) {
         return expectedScheme;
       }

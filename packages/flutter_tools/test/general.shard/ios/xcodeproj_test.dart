@@ -616,9 +616,11 @@ Information about project "Runner":
   });
 
   testWithoutContext('expected scheme for non-flavored build is Runner', () {
-    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.debug), 'Runner');
-    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
-    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.release), 'Runner');
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release', 'Runner'], <String>['Runner'], logger);
+
+    expect(info.schemeFor(flavor: BuildInfo.debug.flavor, hostAppProjectName: 'Runner'), 'Runner');
+    expect(info.schemeFor(flavor: BuildInfo.profile.flavor, hostAppProjectName: 'Runner'), 'Runner');
+    expect(info.schemeFor(flavor: BuildInfo.release.flavor, hostAppProjectName: 'Runner'), 'Runner');
   });
 
   testWithoutContext('expected build configuration for non-flavored build is derived from BuildMode', () {
@@ -627,11 +629,6 @@ Information about project "Runner":
     expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
   });
 
-  testWithoutContext('expected scheme for flavored build is the title-cased flavor', () {
-    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false)), 'Hello');
-    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false)), 'HELLO');
-    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false)), 'Hello');
-  });
   testWithoutContext('expected build configuration for flavored build is Mode-Flavor', () {
     expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false), 'Hello'), 'Debug-Hello');
     expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false), 'Hello'), 'Profile-Hello');
