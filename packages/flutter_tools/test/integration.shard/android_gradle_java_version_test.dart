@@ -44,7 +44,7 @@ void main() {
 
     final Directory androidApp = tempDir.childDirectory('android');
     result = await processManager.run(<String>[
-      './${getGradlewFileName(platform)}',
+      '.${platform.pathSeparator}${getGradlewFileName(platform)}',
       ...getLocalEngineArguments(),
       '-q', // quiet output.
       'javaVersion',
@@ -52,6 +52,6 @@ void main() {
     // Verify that gradlew has a javaVersion task.
     expect(result.exitCode, 0);
     // Verify the format is a number on its own line.
-    expect(result.stdout.toString(), matches(RegExp(r'\d\n')));
+    expect(result.stdout.toString(), matches(RegExp(r'\d+$', multiLine: true)));
   });
 }
