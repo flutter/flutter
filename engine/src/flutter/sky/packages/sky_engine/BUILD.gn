@@ -175,13 +175,6 @@ copy("copy_dart_ui") {
   outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/ui/{{source_file_part}}" ]
 }
 
-copy("copy_dart_ui_web") {
-  sources = dart_ui_web_files
-
-  outputs =
-      [ "$root_gen_dir/dart-pkg/sky_engine/lib/ui_web/{{source_file_part}}" ]
-}
-
 copy("copy_allowed_experiments") {
   sources = [ "//third_party/dart/sdk/lib/_internal/allowed_experiments.json" ]
 
@@ -237,7 +230,6 @@ generated_file("_embedder_yaml") {
     "  \"dart:math\": \"math/math.dart\"",
     "  \"dart:typed_data\": \"typed_data/typed_data.dart\"",
     "  \"dart:ui\": \"ui/ui.dart\"",
-    "  \"dart:ui_web\": \"ui_web/ui_web.dart\"",
     "",
     "  \"dart:_http\": \"_http/http.dart\"",
     "  \"dart:_interceptors\": \"_interceptors/interceptors.dart\"",
@@ -265,7 +257,6 @@ dart_pkg("sky_engine") {
     ":_embedder_yaml",
     ":copy_dart_sdk",
     ":copy_dart_ui",
-    ":copy_dart_ui_web",
   ]
 
   if (!is_fuchsia) {
