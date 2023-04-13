@@ -5,21 +5,6 @@
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
-if (impeller_enable_compute) {
-  impeller_shaders("shader_subgroup_fixtures") {
-    enable_opengles = false
-    name = "subgroup_fixtures"
-
-    # Only need 2.1 for desktop. Running on iOS would require 2.4
-    metal_version = "2.1"
-
-    shaders = [
-      "cubic_to_quads.comp",
-      "quad_polyline.comp",
-    ]
-  }
-}
-
 impeller_shaders("shader_fixtures") {
   name = "fixtures"
 
@@ -87,12 +72,10 @@ test_fixtures("file_fixtures") {
     "bay_bridge.jpg",
     "blue_noise.png",
     "boston.jpg",
-    "cubic_to_quads.comp",
     "embarcadero.jpg",
     "flutter_logo_baked.glb",
     "kalimba.jpg",
     "multiple_stages.hlsl",
-    "quad_polyline.comp",
     "resources_limit.vert",
     "sample.comp",
     "sample.frag",
@@ -136,8 +119,4 @@ group("fixtures") {
     ":scene_fixtures",
     ":shader_fixtures",
   ]
-
-  if (impeller_enable_compute) {
-    public_deps += [ ":shader_subgroup_fixtures" ]
-  }
 }
