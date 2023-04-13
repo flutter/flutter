@@ -510,6 +510,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// See also [TestFlutterView.physicalSize], which has a similar effect.
   // TODO(pdblasi-google): Deprecate this. https://github.com/flutter/flutter/issues/123881
+  // TODO(goderbauer): Update doc that this only affects [renderView].
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
@@ -522,14 +523,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
-    final FlutterView view = platformDispatcher.implicitView!;
-    final double devicePixelRatio = view.devicePixelRatio;
-    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
-    return ViewConfiguration(
-      size: size,
-      devicePixelRatio: devicePixelRatio,
-    );
+  ViewConfiguration createViewConfigurationFor(RenderView renderView) {
+    // TODO(goderbauer): Remove this override, when the deprecated renderView is removed.
+    if (renderView == this.renderView) { // ignore: deprecated_member_use
+      final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
+      final Size size = _surfaceSize ?? renderView.flutterView.physicalSize / devicePixelRatio;
+      return ViewConfiguration(
+        size: size,
+        devicePixelRatio: devicePixelRatio,
+      );
+    }
+    return super.createViewConfigurationFor(renderView);
   }
 
   /// Acts as if the application went idle.
@@ -1377,16 +1381,18 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       debugBuildingDirtyElements = true;
       buildOwner!.buildScope(rootElement!);
       if (_phase != EnginePhase.build) {
-        pipelineOwner.flushLayout();
+        rootPipelineOwner.flushLayout();
         if (_phase != EnginePhase.layout) {
-          pipelineOwner.flushCompositingBits();
+          rootPipelineOwner.flushCompositingBits();
           if (_phase != EnginePhase.compositingBits) {
-            pipelineOwner.flushPaint();
+            rootPipelineOwner.flushPaint();
             if (_phase != EnginePhase.paint && sendFramesToEngine) {
               _firstFrameSent = true;
-              renderView.compositeFrame(); // this sends the bits to the GPU
+              for (final RenderView renderView in renderViews) {
+                renderView.compositeFrame(); // this sends the bits to the GPU
+              }
               if (_phase != EnginePhase.composite) {
-                pipelineOwner.flushSemantics();
+                rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
                 assert(_phase == EnginePhase.flushSemantics ||
                        _phase == EnginePhase.sendSemanticsUpdate);
               }
@@ -1987,10 +1993,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
+  ViewConfiguration createViewConfigurationFor(RenderView renderView) {
     return TestViewConfiguration.fromView(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      view: platformDispatcher.implicitView!,
+      view: renderView.flutterView,
     );
   }
 

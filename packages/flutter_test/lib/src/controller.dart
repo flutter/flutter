@@ -36,7 +36,7 @@ class SemanticsController {
   /// Creates a [SemanticsController] that uses the given binding. Will be
   /// automatically created as part of instantiating a [WidgetController], but
   /// a custom implementation can be passed via the [WidgetController] constructor.
-  SemanticsController._(WidgetsBinding binding) : _binding = binding;
+  SemanticsController._(this._controller);
 
   static final int _scrollingActions =
     SemanticsAction.scrollUp.index |
@@ -55,7 +55,7 @@ class SemanticsController {
     SemanticsFlag.isSlider.index |
     SemanticsFlag.isInMutuallyExclusiveGroup.index;
 
-  final WidgetsBinding _binding;
+  final WidgetController _controller;
 
   /// Attempts to find the [SemanticsNode] of first result from `finder`.
   ///
@@ -73,7 +73,7 @@ class SemanticsController {
   /// if no semantics are found or are not enabled.
   SemanticsNode find(Finder finder) {
     TestAsyncUtils.guardSync();
-    if (!_binding.semanticsEnabled) {
+    if (!_controller.binding.semanticsEnabled) {
       throw StateError('Semantics are not enabled.');
     }
     final Iterable<Element> candidates = finder.evaluate();
@@ -109,6 +109,13 @@ class SemanticsController {
   /// tree. If `end` finds zero elements or more than one element, a
   /// [StateError] will be thrown.
   ///
+  /// If provided, the nodes for `end` and `start` must be part of the same
+  /// semantics tree, i.e. they must be part of the same view.
+  ///
+  /// If neither `start` or `end` is provided, `view` can be provided to specify
+  /// the semantics tree to traverse. If `view` is left unspecified,
+  /// [WidgetTester.view] is traversed by default.
+  ///
   /// Since the order is simulated, edge cases that differ between platforms
   /// (such as how the last visible item in a scrollable list is handled) may be
   /// inconsistent with platform behavior, but are expected to be sufficient for
@@ -139,10 +146,47 @@ class SemanticsController {
   ///   parts of the traversal.
   /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
   ///   match the order of the traversal.
-  Iterable<SemanticsNode> simulatedAccessibilityTraversal({Finder? start, Finder? end}) {
+  Iterable<SemanticsNode> simulatedAccessibilityTraversal({Finder? start, Finder? end, FlutterView? view}) {
     TestAsyncUtils.guardSync();
+    FlutterView? startView;
+    FlutterView? endView;
+    if (start != null) {
+      startView = _controller.viewOf(start);
+      if (view != null && startView != view) {
+        throw StateError(
+          'The start node is not part of the provided view.\n'
+          'Finder: ${start.description}\n'
+          'View of start node: $startView\n'
+          'Specified view: $view'
+        );
+      }
+    }
+    if (end != null) {
+      endView = _controller.viewOf(end);
+      if (view != null && endView != view) {
+        throw StateError(
+          'The end node is not part of the provided view.\n'
+          'Finder: ${end.description}\n'
+          'View of end node: $endView\n'
+          'Specified view: $view'
+        );
+      }
+    }
+    if (endView != null && startView != null && endView != startView) {
+      throw StateError(
+        'The start and end node are in different views.\n'
+        'Start finder: ${start!.description}\n'
+        'End finder: ${end!.description}\n'
+        'View of start node: $startView\n'
+        'View of end node: $endView'
+      );
+    }
+
+    final FlutterView actualView = view ?? startView ?? endView ?? _controller.view;
+    final RenderView renderView = _controller.binding.renderViews.firstWhere((RenderView r) => r.flutterView == actualView);
+
     final List<SemanticsNode> traversal = <SemanticsNode>[];
-    _traverse(_binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!, traversal);
+    _traverse(renderView.owner!.semanticsOwner!.rootSemanticsNode!, traversal);
 
     int startIndex = 0;
     int endIndex = traversal.length - 1;
@@ -229,8 +273,7 @@ class SemanticsController {
 /// Concrete subclasses must implement the [pump] method.
 abstract class WidgetController {
   /// Creates a widget controller that uses the given binding.
-  WidgetController(this.binding)
-    : _semantics = SemanticsController._(binding);
+  WidgetController(this.binding);
 
   /// A reference to the current instance of the binding.
   final WidgetsBinding binding;
@@ -280,7 +323,7 @@ abstract class WidgetController {
 
     return _semantics;
   }
-  final SemanticsController _semantics;
+  late final SemanticsController _semantics = SemanticsController._(this);
 
   // FINDER API
 
@@ -516,7 +559,12 @@ abstract class WidgetController {
   }
 
   /// Returns a list of all the [Layer] objects in the rendering.
-  List<Layer> get layers => _walkLayers(binding.renderView.debugLayer!).toList();
+  List<Layer> get layers {
+    return <Layer>[
+      for (final RenderView renderView in binding.renderViews)
+        ..._walkLayers(renderView.debugLayer!)
+    ];
+  }
   Iterable<Layer> _walkLayers(Layer layer) sync* {
     TestAsyncUtils.guardSync();
     yield layer;
@@ -1324,15 +1372,17 @@ abstract class WidgetController {
         }
       }
       if (!found) {
+        final FlutterView view = viewOf(finder);
+        final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
         bool outOfBounds = false;
-        outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
+        outOfBounds = !(Offset.zero & renderView.size).contains(location);
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),
             ErrorDescription('A call to $callee() with finder "$finder" derived an Offset ($location) that would not hit test on the specified widget.'),
             ErrorHint('Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.'),
             if (outOfBounds)
-              ErrorHint('Indeed, $location is outside the bounds of the root of the render tree, ${binding.renderView.size}.'),
+              ErrorHint('Indeed, $location is outside the bounds of the root of the render tree, ${renderView.size}.'),
             box.toDiagnosticsNode(name: 'The finder corresponds to this RenderBox', style: DiagnosticsTreeStyle.singleLine),
             ErrorDescription('The hit test result at that offset is: $result'),
             ErrorDescription('If you expected this target not to be able to receive pointer events, pass "warnIfMissed: false" to "$callee()".'),
@@ -1343,7 +1393,7 @@ abstract class WidgetController {
           '\n'
           'Warning: A call to $callee() with finder "$finder" derived an Offset ($location) that would not hit test on the specified widget.\n'
           'Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.\n'
-          '${outOfBounds ? "Indeed, $location is outside the bounds of the root of the render tree, ${binding.renderView.size}.\n" : ""}'
+          '${outOfBounds ? "Indeed, $location is outside the bounds of the root of the render tree, ${renderView.size}.\n" : ""}'
           'The finder corresponds to this RenderBox: $box\n'
           'The hit test result at that offset is: $result\n'
           '${StackTrace.current}'
