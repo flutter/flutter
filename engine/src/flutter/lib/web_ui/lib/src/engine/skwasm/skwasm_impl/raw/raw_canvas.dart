@@ -108,7 +108,7 @@ external void canvasDrawCircle(
     CanvasHandle canvas, double x, double y, double radius, PaintHandle paint);
 
 @Native<Void Function(CanvasHandle, RawRect, Float, Float, Bool, PaintHandle)>(
-    symbol: 'canvas_drawCircle', isLeaf: true)
+    symbol: 'canvas_drawArc', isLeaf: true)
 external void canvasDrawArc(
     CanvasHandle canvas,
     RawRect rect,
