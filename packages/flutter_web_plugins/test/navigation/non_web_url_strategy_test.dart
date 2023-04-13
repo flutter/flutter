@@ -17,7 +17,7 @@ void main() {
     setUp(() {
       location = TestPlatformLocation();
     });
-  
+
     test('Can create and set a $HashUrlStrategy', () {
       final HashUrlStrategy strategy = HashUrlStrategy(location);
       setUrlStrategy(strategy);
@@ -29,4 +29,3 @@ void main() {
     });
   });
 }
-
