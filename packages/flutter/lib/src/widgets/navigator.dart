@@ -2801,6 +2801,9 @@ class Navigator extends StatefulWidget {
     }
     final _RouteEntry currentRouteEntry =
         navigatorState._history.value.firstWhere(_RouteEntry.isPresentPredicate);
+    if (!currentRouteEntry.route.isActive) {
+      return;
+    }
     final bool canPopScopeIsDisablingPop =
         currentRouteEntry.route.popEnabled() == RoutePopDisposition.doNotPop;
     SystemNavigator.updateNavigationStackStatus(canPopScopeIsDisablingPop);
