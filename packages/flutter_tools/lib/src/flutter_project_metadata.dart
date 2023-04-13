@@ -31,7 +31,7 @@ enum FlutterProjectType {
   plugin,
 
   /// This is an FFI native plugin project.
-  ffiPlugin;
+  pluginFffi;
 
   String get cliName => snakeCase(name);
 
@@ -45,7 +45,7 @@ enum FlutterProjectType {
           'Generate a shareable Flutter project containing an API '
           'in Dart code with a platform-specific implementation through method channels for Android, iOS, '
           'Linux, macOS, Windows, web, or any combination of these.',
-        FlutterProjectType.ffiPlugin =>
+        FlutterProjectType.pluginFffi =>
           'Generate a shareable Flutter project containing an API '
           'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
           'Linux, macOS, Windows, or any combination of these.',

@@ -210,7 +210,7 @@ class CreateCommand extends CreateBase {
     final FlutterProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
     final bool generateMethodChannelsPlugin = template == FlutterProjectType.plugin;
-    final bool generateFfiPlugin = template == FlutterProjectType.ffiPlugin;
+    final bool generateFfiPlugin = template == FlutterProjectType.pluginFffi;
     final bool generatePackage = template == FlutterProjectType.package;
 
     final List<String> platforms = stringsArg('platforms');
@@ -380,7 +380,7 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.createPlugin;
-      case FlutterProjectType.ffiPlugin:
+      case FlutterProjectType.pluginFffi:
         generatedFileCount += await _generateFfiPlugin(
           relativeDir,
           templateContext,
