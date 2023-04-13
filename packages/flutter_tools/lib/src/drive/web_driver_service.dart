@@ -14,6 +14,7 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -250,11 +251,7 @@ enum Browser {
         Browser.safari => 'Apple Safari on this computer (macOS only).',
       };
 
-  String get cliName => switch (this) {
-        Browser.androidChrome => 'android-chrome',
-        Browser.iosSafari => 'ios-safari',
-        _ => name,
-      };
+  String get cliName => snakeCase(name, '-');
 
   static Browser fromCliName(String? value) => Browser.values.singleWhere(
         (Browser element) => element.cliName == value,
