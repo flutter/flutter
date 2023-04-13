@@ -22,19 +22,12 @@ import 'widget_tester.dart';
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
   required WidgetTester tester,
-  LeakTrackingFlutterTestConfig? config,
+  LeakTrackingFlutterTestConfig config = const LeakTrackingFlutterTestConfig(),
 }) async {
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
     await callback();
     return;
-  }
-
-  final LeakTrackingFlutterTestConfig theConfig =
-    config ?? LeakTrackingFlutterTestConfig();
-
-  Future<void> asyncCodeRunner(DartAsyncCallback action){
-    return tester.runAsync(action);
   }
 
   void flutterEventToLeakTracker(ObjectEvent event) {
@@ -46,8 +39,8 @@ Future<void> withFlutterLeakTracking(
     try {
       final Leaks leaks = await withLeakTracking(
         callback,
-        asyncCodeRunner: asyncCodeRunner,
-        stackTraceCollectionConfig: theConfig.stackTraceCollectionConfig,
+        asyncCodeRunner: tester.runAsync,
+        stackTraceCollectionConfig: config.stackTraceCollectionConfig,
         shouldThrowOnLeaks: false,
       );
 
@@ -55,9 +48,9 @@ Future<void> withFlutterLeakTracking(
         return;
       }
 
-      theConfig.onLeaks?.call(leaks);
+      config.onLeaks?.call(leaks);
 
-      if (theConfig.failTestOnLeaks) {
+      if (config.failTestOnLeaks) {
         expect(leaks, isLeakFree);
       }
     } finally {

@@ -144,7 +144,7 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   bool trackMemoryLeaks = false,
-  LeakTrackingFlutterTestConfig? leakTrackingFlutterTestConfig,
+  LeakTrackingFlutterTestConfig leakTrackingFlutterTestConfig = const LeakTrackingFlutterTestConfig(),
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();

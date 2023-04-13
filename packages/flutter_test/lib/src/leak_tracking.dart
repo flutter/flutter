@@ -14,9 +14,8 @@ typedef LeaksCallback = void Function(Leaks leaks);
 /// The configuration is needed only for test debugging,
 /// not for regular test run.
 class LeakTrackingFlutterTestConfig {
-
   /// Creates a new instance of [LeakTrackingFlutterTestConfig].
-  LeakTrackingFlutterTestConfig({
+  const LeakTrackingFlutterTestConfig({
     this.stackTraceCollectionConfig = const StackTraceCollectionConfig(),
     this.onLeaks,
     this.failTestOnLeaks = true,

@@ -8,6 +8,9 @@ import 'package:leak_tracker/leak_tracker.dart';
 
 typedef LeaksObtainer = void Function(Leaks foundLeaks);
 
+// TODO(polina-c): remove this file once https://github.com/flutter/flutter/pull/124435
+// is landed.
+
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
 /// The method will fail if wrapped code contains memory leaks.
