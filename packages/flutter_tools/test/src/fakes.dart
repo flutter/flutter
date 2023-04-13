@@ -583,15 +583,7 @@ class FakeIosProject implements IosProject {
 }
 
 class FakeXcodeProjectInfo extends Fake implements XcodeProjectInfo {
-  @override
-  String expectedCustomSchemeFor(BuildInfo? buildInfo) {
-    return 'TestName';
-  }
 
-  @override
-  String? schemeFor(BuildInfo? buildInfo) {
-
-  }
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {

@@ -21,23 +21,25 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform  {
+  static const String defaultHostAppProjectName = 'Runner';
+  String get hostAppProjectName => _hostAppProjectName;
+
   String get _hostAppProjectName {
     List<FileSystemEntity> contents;
     try {
       contents = hostAppRoot.listSync();
     } catch (e) {
-      return globals.hostAppProjectName;
+      return "Runner";
     }
     for (final Directory entity in contents.whereType<Directory>()) {
       // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
       // Find the first non-hidden xcworkspace and return the directory.
       if (globals.fs.path.extension(entity.path) == '.xcworkspace' &&
           !globals.fs.path.basename(entity.path).startsWith('.')) {
-        globals.hostAppProjectName = globals.fs.path.basenameWithoutExtension(entity.path);
-        return globals.hostAppProjectName;
+        return globals.fs.path.basenameWithoutExtension(entity.path);
       }
     }
-    return globals.hostAppProjectName;
+    return "Runner";
   }
 
   /// The parent of this project.
@@ -298,8 +300,11 @@ class IosProject extends XcodeBasedProject {
     }
 
     if (scheme == null) {
-      scheme = info.schemeFor(buildInfo);
+      // scheme = info.schemeFor(buildInfo);
+      scheme = info.schemeFor(flavor: buildInfo?.flavor, hostAppProjectName: FlutterProject.current().ios.hostAppProjectName);
+
       if (scheme == null) {
+        print('i am NULLLLLLLLLL');
         info.reportFlavorNotFoundAndExit();
       }
     }
@@ -405,7 +410,8 @@ class IosProject extends XcodeBasedProject {
       return false;
     }
 
-    final String? defaultScheme = projectInfo.schemeFor(buildInfo);
+    // final String? defaultScheme = projectInfo.schemeFor(buildInfo);
+    final String? defaultScheme = projectInfo.schemeFor(flavor: buildInfo.flavor, hostAppProjectName: hostAppProjectName);
     if (defaultScheme == null) {
       projectInfo.reportFlavorNotFoundAndExit();
     }

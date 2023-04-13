@@ -460,11 +460,15 @@ class XcodeProjectInfo {
     return sentenceCase(buildInfo?.flavor ?? 'Runner');
   }
 
-  @visibleForTesting
-  String expectedCustomSchemeFor(BuildInfo? buildInfo) {
-    final IosProject project = FlutterProject.current().ios;
+  // /// The expected scheme for [buildInfo].
+  // @visibleForTesting
+  // static String expectedSchemeFor2(String flavor) {
+  //   return sentenceCase(flavor ?? 'Runner');
+  // }
 
-    return sentenceCase(project.hostAppProjectName);
+  @visibleForTesting
+  String expectedCustomSchemeFor(BuildInfo? buildInfo, String hostAppProjectName) {
+    return sentenceCase(hostAppProjectName);
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].
@@ -487,31 +491,53 @@ class XcodeProjectInfo {
     }
     return false;
   }
+
+  String? schemeFor({String? flavor, String hostAppProjectName = ''}) {
+    if (flavor != null) {
+      // if flavor exists, should take precedence over everything else
+      final String expectedScheme = flavor;
+      if (schemes.contains(expectedScheme)) {
+        return expectedScheme;
+      }
+      return _uniqueMatch(schemes, (String candidate) {
+        return candidate.toLowerCase() == expectedScheme.toLowerCase();
+      });
+    }
+
+      // if theres no flavour, then we should match the hostAppProj to the workspace name
+      final String expectedScheme = hostAppProjectName;
+      if (schemes.contains(expectedScheme)) {
+        return expectedScheme;
+      }
+      return _uniqueMatch(schemes, (String candidate) {
+        return candidate.toLowerCase() == expectedScheme.toLowerCase();
+      });
+  }
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
-  String? schemeFor(BuildInfo? buildInfo) {
-    String? scheme;
-    // if there is a flavour specified, the one of the schemes MUST match the flavour
-
-    final String expectedScheme = expectedSchemeFor(buildInfo);
-    if (schemes.contains(expectedScheme)) {
-      return expectedScheme;
-    }
-    scheme = _uniqueMatch(schemes, (String candidate) {
-      return candidate.toLowerCase() == expectedScheme.toLowerCase();
-    });
-
-    if (scheme == null && buildInfo?.flavor == null) {
-      // if there isn't a flavour specified, and Runner was not one of schemes, then check for custom.
-      final String expectedCustomScheme = expectedCustomSchemeFor(buildInfo);
-
-      scheme =  _uniqueMatch(schemes, (String candidate) {
-        return candidate.toLowerCase() == expectedCustomScheme.toLowerCase();
-      });
-    } else {
-      return scheme;
-    }
-  }
+  // String? schemeFor(BuildInfo? buildInfo, {String flavor = '', String hostAppProjectName = ''}) {
+  //   String? scheme;
+  //   // if there is a flavour specified, the one of the schemes MUST match the flavour
+  //
+  //   final String expectedScheme = expectedSchemeFor(buildInfo);
+  //   if (schemes.contains(expectedScheme)) {
+  //     return expectedScheme;
+  //   }
+  //   scheme = _uniqueMatch(schemes, (String candidate) {
+  //     return candidate.toLowerCase() == expectedScheme.toLowerCase();
+  //   });
+  //
+  //   if (scheme == null && buildInfo?.flavor == null) {
+  //     // if there isn't a flavour specified, and Runner was not one of schemes, then check for custom.
+  //     final String expectedCustomScheme = expectedCustomSchemeFor(buildInfo);
+  //
+  //     scheme =  _uniqueMatch(schemes, (String candidate) {
+  //       return candidate.toLowerCase() == expectedCustomScheme.toLowerCase();
+  //     });
+  //   } else {
+  //     return scheme;
+  //   }
+  // }
 
   Never reportFlavorNotFoundAndExit() {
     _logger.printError('');

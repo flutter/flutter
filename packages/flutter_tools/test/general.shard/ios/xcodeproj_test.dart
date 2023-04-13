@@ -643,10 +643,10 @@ Information about project "Runner":
   testWithoutContext('scheme for default project is Runner', () {
     final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner'], logger);
 
-    expect(info.schemeFor(BuildInfo.debug), 'Runner');
-    expect(info.schemeFor(BuildInfo.profile), 'Runner');
-    expect(info.schemeFor(BuildInfo.release), 'Runner');
-    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
+    expect(info.schemeFor(flavor: BuildInfo.debug.flavor, hostAppProjectName: 'Runner'), 'Runner');
+    expect(info.schemeFor(flavor: BuildInfo.profile.flavor, hostAppProjectName: 'Runner'), 'Runner');
+    expect(info.schemeFor(flavor: BuildInfo.release.flavor, hostAppProjectName: 'Runner'), 'Runner');
+    expect(info.schemeFor(flavor: BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false).flavor, hostAppProjectName: 'Runner'), isNull);
   });
 
   testWithoutContext('build configuration for default project is matched against BuildMode', () {
@@ -665,11 +665,11 @@ Information about project "Runner":
       logger,
     );
 
-    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false)), 'Free');
-    expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false)), 'Free');
-    expect(info.schemeFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false)), 'Paid');
-    expect(info.schemeFor(BuildInfo.debug), isNull);
-    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
+    expect(info.schemeFor(flavor: 'Free'), 'Free');
+    expect(info.schemeFor(flavor: 'Free'), 'Free');
+    expect(info.schemeFor(flavor: 'Paid'), 'Paid');
+    expect(info.schemeFor(flavor: BuildInfo.debug.flavor), isNull);
+    expect(info.schemeFor(flavor: 'unknown'), isNull);
   });
 
   testWithoutContext('reports default scheme error and exit', () {
@@ -718,6 +718,18 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false), 'Paid'), 'Release-Paid');
   });
 
+  testWithoutContext('Test custom naming', () {
+    final XcodeProjectInfo info = XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['debug (free)', 'Debug paid', 'profile - Free', 'Profile-Paid', 'release - Free', 'Release-Paid'],
+      <String>['CustomName', 'Paid'],
+      logger,
+    );
+
+    expect(info.schemeFor(hostAppProjectName: 'CustomName'), 'CustomName');
+    expect(info.schemeFor(hostAppProjectName: 'WrongName'), isNull);
+  });
+
   testWithoutContext('build configuration for project with inconsistent naming is null', () {
     final XcodeProjectInfo info = XcodeProjectInfo(
       <String>['Runner'],
@@ -728,35 +740,6 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Free', treeShakeIcons: false), 'Free'), null);
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false), 'Free'), null);
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false), 'Paid'), null);
-  });
-
-
-
-  group('Renamed xcodeproj and xcworkspace', () {
-    late FakeIosProject project;
-    late FakeXcodeProjectInfo projectInfo;
-    setUp(() {
-      project = FakeIosProject();
-      projectInfo = FakeXcodeProjectInfo();
-    });
-
-    void testWithMocks(String description, Future<void> Function() testMethod) {
-      testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        FakeIosProject: () => project,
-        FakeXcodeProjectInfo: () => projectInfo,
-      });
-    }
-
-    testWithMocks('custom naming', () async {
-      final XcodeProjectInfo info = XcodeProjectInfo(
-        <String>['TestName'],
-        <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
-        <String>['TestName'],
-        logger,
-      );
-
-      expect(projectInfo.schemeFor(BuildInfo.debug), 'TestName');
-    });
   });
 
  group('environmentVariablesAsXcodeBuildSettings', () {
