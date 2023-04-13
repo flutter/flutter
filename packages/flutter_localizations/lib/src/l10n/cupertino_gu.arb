@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "બધા પસંદ કરો",
   "tabSemanticsLabel": "$tabCountમાંથી $tabIndex ટૅબ",
   "modalBarrierDismissLabel": "છોડી દો",
-  "searchTextFieldPlaceholderLabel": "શોધો"
+  "searchTextFieldPlaceholderLabel": "શોધો",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }
