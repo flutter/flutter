@@ -64,6 +64,22 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// Override text operations such as [handleCut] if needed.
 ///
+/// ## Use with [EditableText.contextMenuBuilder]
+/// [buildToolbar] has been deprecated in favor of
+/// [EditableText.contextMenuBuilder], and that is the preferred way to
+/// customize the context menus now. However, both ways will continue to work
+/// during the deprecation period.
+///
+/// To use both [EditableText.contextMenuBuilder] and [buildHandle], a two-step
+/// migration is necessary. First, migrate to [TextSelectionHandleControls],
+/// using its [TextSelectionHandleControls.buildHandle] method and moving
+/// toolbar code to [EditableText.contextMenuBuilder]. Later, the deprecation
+/// period will expire, [buildToolbar] will be removed, and
+/// [TextSelectionHandleControls] will be deprecated. Migrate back to
+/// [TextSelectionControls.buildHandle], so that the final state is to use
+/// [EditableText.contextMenuBuilder] for the toolbar and
+/// [TextSelectionControls] for the handles.
+///
 /// See also:
 ///
 ///  * [SelectionArea], which selects appropriate text selection controls
