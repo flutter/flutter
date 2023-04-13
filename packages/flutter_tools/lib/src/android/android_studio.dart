@@ -246,7 +246,10 @@ class AndroidStudio {
     }
     AndroidStudio? newest;
     for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
-      newest ??= studio;
+      if (newest == null) {
+        newest = studio;
+        continue;
+      }
 
       if (studio.version != null && newest.version == null) {
         newest = studio;
