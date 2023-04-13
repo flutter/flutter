@@ -39,12 +39,13 @@ void main() {
         TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
       expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
-      expect(webServiceWorker.webRenderer, WebRendererMode.autoDetect);
+      expect(webServiceWorker.webRenderer, WebRendererMode.auto);
 
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': 'serviceWorkerStrategy',
+        'WasmOmitTypeChecks': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -57,6 +58,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,
@@ -67,7 +69,7 @@ void main() {
       'target',
       BuildInfo.debug,
       'serviceWorkerStrategy',
-      compilerConfig: const WasmCompilerConfig(),
+      compilerConfig: const WasmCompilerConfig(omitTypeChecks: false),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -95,6 +97,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,

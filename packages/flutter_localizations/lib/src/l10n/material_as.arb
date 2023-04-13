@@ -133,5 +133,11 @@
   "scrimLabel": "স্ক্ৰিম",
   "bottomSheetLabel": "তলৰ শ্বীট",
   "scrimOnTapHint": "$modalRouteContentName বন্ধ কৰক",
-  "keyboardKeyShift": "শ্বিফ্ট"
+  "keyboardKeyShift": "শ্বিফ্ট",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
