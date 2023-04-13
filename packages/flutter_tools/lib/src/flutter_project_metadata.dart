@@ -10,7 +10,7 @@ import 'base/utils.dart';
 import 'project.dart';
 import 'version.dart';
 
-enum FlutterProjectType {
+enum FlutterProjectType implements CliEnum {
   /// This is the default project with the user-managed host code.
   /// It is different than the "module" template in that it exposes and doesn't
   /// manage the platform code.
@@ -33,8 +33,10 @@ enum FlutterProjectType {
   /// This is an FFI native plugin project.
   pluginFfi;
 
+  @override
   String get cliName => snakeCase(name);
 
+  @override
   String get helpText => switch (this) {
         FlutterProjectType.app => '(default) Generate a Flutter application.',
         FlutterProjectType.skeleton =>

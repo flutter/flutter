@@ -17,6 +17,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/signals.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
@@ -117,11 +118,7 @@ class DriveCommand extends RunCommandBase {
         defaultsTo: Browser.chrome.cliName,
         help: 'Name of the browser where tests will be executed.',
         allowed: Browser.values.map((Browser e) => e.cliName),
-        allowedHelp: Map<String, String>.fromEntries(
-          Browser.values.map(
-            (Browser e) => MapEntry<String, String>(e.cliName, e.helpText),
-          ),
-        ),
+        allowedHelp: CliEnum.allowedHelp(Browser.values),
       )
       ..addOption('browser-dimension',
         defaultsTo: '1600,1024',

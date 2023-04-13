@@ -223,7 +223,7 @@ class WebDriverService extends DriverService {
 }
 
 /// A list of supported browsers.
-enum Browser {
+enum Browser implements CliEnum {
   /// Chrome on Android: https://developer.chrome.com/docs/multidevice/android/
   androidChrome,
 
@@ -242,6 +242,7 @@ enum Browser {
   /// Safari in macOS: https://www.apple.com/safari/
   safari;
 
+  @override
   String get helpText => switch (this) {
         Browser.androidChrome => 'Chrome on Android (see also "--android-emulator").',
         Browser.chrome => 'Google Chrome on this computer (see also "--chrome-binary").',
@@ -251,6 +252,7 @@ enum Browser {
         Browser.safari => 'Apple Safari on this computer (macOS only).',
       };
 
+  @override
   String get cliName => snakeCase(name, '-');
 
   static Browser fromCliName(String? value) => Browser.values.singleWhere(

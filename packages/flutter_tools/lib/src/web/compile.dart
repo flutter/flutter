@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/web.dart';
@@ -134,7 +135,7 @@ class WebBuilder {
 }
 
 /// Web rendering backend mode.
-enum WebRendererMode {
+enum WebRendererMode implements CliEnum {
   /// Auto detects which rendering backend to use.
   auto,
 
@@ -147,6 +148,10 @@ enum WebRendererMode {
   /// Always use skwasm.
   skwasm;
 
+  @override
+  String get cliName => snakeCase(name, '-');
+
+  @override
   String get helpText => switch (this) {
         auto =>
           'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',

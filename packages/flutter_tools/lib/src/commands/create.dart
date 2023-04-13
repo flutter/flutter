@@ -39,11 +39,7 @@ class CreateCommand extends CreateBase {
       allowed: FlutterProjectType.values.map<String>((FlutterProjectType e) => e.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
-      allowedHelp: Map<String, String>.fromEntries(
-        FlutterProjectType.values.map(
-          (FlutterProjectType e) => MapEntry<String, String>(e.cliName, e.helpText),
-        ),
-      ),
+      allowedHelp: CliEnum.allowedHelp(FlutterProjectType.values),
     );
     argParser.addOption(
       'sample',

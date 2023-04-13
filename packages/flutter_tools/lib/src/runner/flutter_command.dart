@@ -635,7 +635,7 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: WebRendererMode.auto.name,
       allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
       help: 'The renderer implementation to use when building for the web.',
-      allowedHelp: Map<String, String>.fromEntries(WebRendererMode.values.map((WebRendererMode e) => MapEntry<String, String>(e.name, e.helpText)))
+      allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
     );
   }
 

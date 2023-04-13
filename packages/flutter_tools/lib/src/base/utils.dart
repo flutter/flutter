@@ -34,6 +34,18 @@ String snakeCase(String str, [ String sep = '_' ]) {
       (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
 }
 
+abstract interface class CliEnum implements Enum {
+  String get cliName;
+  String get helpText;
+
+  static Map<String, String> allowedHelp<T extends CliEnum>(List<T> values) =>
+      Map<String, String>.fromEntries(
+        values.map(
+          (T e) => MapEntry<String, String>(e.cliName, e.helpText),
+        ),
+      );
+}
+
 /// Converts `fooBar` to `FooBar`.
 ///
 /// This uses [toBeginningOfSentenceCase](https://pub.dev/documentation/intl/latest/intl/toBeginningOfSentenceCase.html),

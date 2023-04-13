@@ -4,6 +4,7 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -48,11 +49,7 @@ class BuildWebCommand extends BuildSubCommand {
       defaultsTo: ServiceWorkerStrategy.offlineFirst.cliName,
       help: 'The caching strategy to be used by the PWA service worker.',
       allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
-      allowedHelp: Map<String, String>.fromEntries(
-        ServiceWorkerStrategy.values.map(
-          (ServiceWorkerStrategy e) => MapEntry<String, String>(e.name, e.helpText),
-        ),
-      ),
+      allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );
     usesWebRendererOption();
     usesWebResourcesCdnFlag();

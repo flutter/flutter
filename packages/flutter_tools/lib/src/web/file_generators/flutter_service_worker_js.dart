@@ -6,7 +6,7 @@ import '../../base/utils.dart';
 import '../../globals.dart' as globals;
 
 /// The caching strategy for the generated service worker.
-enum ServiceWorkerStrategy {
+enum ServiceWorkerStrategy implements CliEnum {
   /// Download the app shell eagerly and all other assets lazily.
   /// Prefer the offline cached version.
   offlineFirst,
@@ -14,6 +14,7 @@ enum ServiceWorkerStrategy {
   /// Do not generate a service worker,
   none;
 
+  @override
   String get cliName => snakeCase(name, '-');
 
   static ServiceWorkerStrategy fromCliName(String? value) => value == null
@@ -24,6 +25,7 @@ enum ServiceWorkerStrategy {
               throw ArgumentError.value(value, 'value', 'Not supported.'),
         );
 
+  @override
   String get helpText => switch (this) {
         ServiceWorkerStrategy.offlineFirst =>
           'Attempt to cache the application shell eagerly and then lazily '
