@@ -14,7 +14,7 @@ enum ServiceWorkerStrategy {
   /// Do not generate a service worker,
   none;
 
-  String get cliName => snakeCase(name);
+  String get cliName => snakeCase(name, '-');
 
   static ServiceWorkerStrategy fromCliName(String? value) => value == null
       ? ServiceWorkerStrategy.offlineFirst
