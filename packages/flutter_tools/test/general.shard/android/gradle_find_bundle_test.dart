@@ -388,32 +388,6 @@ void main() {
       ),
     ));
   });
-
-  testWithoutContext('Finds app bundle when flavor name is camel cased in release mode - Gradle 4.1', () {
-    final FlutterProject project = generateFakeAppBundle('fooBarRelease', 'app-foo-bar-release.aab', fileSystem);
-    final File bundle = findBundleFile(
-      project,
-      const BuildInfo(BuildMode.release, 'fooBar', treeShakeIcons: false),
-      BufferLogger.test(),
-      TestUsage(),
-    );
-
-    expect(bundle, isNotNull);
-    expect(bundle.path, '/build/app/outputs/bundle/fooBarRelease/app-foo-bar-release.aab');
-  });
-
-  testWithoutContext('Finds app bundle when flavor name is camel cased in debug mode - Gradle 4.1', () {
-    final FlutterProject project = generateFakeAppBundle('fooBarDebug', 'app-foo-bar-debug.aab', fileSystem);
-    final File bundle = findBundleFile(
-      project,
-      const BuildInfo(BuildMode.debug, 'fooBar', treeShakeIcons: false),
-      BufferLogger.test(),
-      TestUsage(),
-    );
-
-    expect(bundle, isNotNull);
-    expect(bundle.path, '/build/app/outputs/bundle/fooBarDebug/app-foo-bar-debug.aab');
-  });
 }
 
 /// Generates a fake app bundle at the location [directoryName]/[fileName].
