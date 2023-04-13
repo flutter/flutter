@@ -14,11 +14,12 @@ typedef LeaksCallback = void Function(Leaks leaks);
 ///
 /// The configuration is needed only for test debugging,
 /// not for regular test run.
-///
-/// Do not submit usage of this class to the repository,
-/// because backward compatibility of its API is not guaranteed.
 class LeakTrackingFlutterTestConfig {
   /// Creates a new instance of [LeakTrackingFlutterTestConfig].
+  ///
+  /// Do not submit usage of the constructor to the repository,
+  /// because backward compatibility of its API is not guaranteed.
+  @Deprecated('Backward compatibility of the API is not guaranteed.')
   const LeakTrackingFlutterTestConfig({
     this.stackTraceCollectionConfig = const StackTraceCollectionConfig(),
     this.onLeaks,
