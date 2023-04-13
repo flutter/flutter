@@ -171,6 +171,14 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
   return getGradleVersionFor(androidPluginVersion ?? 'unknown');
 }
 
+/// Returns the gradle file from the top level directory.
+/// The returned file is not guaranteed to be present.
+File getGradleFile(Directory directory) {
+  return directory.childDirectory(gradleDirectoryName)
+      .childDirectory(gradleWrapperDirectoryName)
+      .childFile(gradleWrapperPropertiesFilename);
+}
+
 /// Returns either the gradle-wrapper.properties value from the passed in
 /// [directory] or if not present the version available in local path.
 ///
@@ -178,10 +186,7 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
 /// [directory] should be and android directory with a build.gradle file.
 Future<String?> getGradleVersion(
     Directory directory, Logger logger, ProcessManager processManager) async {
-  final File propertiesFile = directory
-      .childDirectory(gradleDirectoryName)
-      .childDirectory(gradleWrapperDirectoryName)
-      .childFile(gradleWrapperPropertiesFilename);
+  final File propertiesFile = getGradleFile(directory);
 
   if (propertiesFile.existsSync()) {
     final String wrapperFileContent = propertiesFile.readAsStringSync();
@@ -190,7 +195,7 @@ Future<String?> getGradleVersion(
     // Version can have 2 or 3 numbers.
     // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
     final RegExp distributionUrlRegex =
-        RegExp(r'distributionUrl\s?=\s?.*\.zip');
+        RegExp(r'distributionUrl\s*=\s*.*\.zip');
 
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);
