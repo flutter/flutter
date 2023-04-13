@@ -229,7 +229,6 @@ class AndroidStudio {
 
   /// Locates the newest, valid version of Android Studio.
   static AndroidStudio? latestValid() {
-
     final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;

@@ -140,7 +140,7 @@ void main() {
 
         testWithoutContext('version checks fail when version is less than minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(9, 0, 0);
+          xcodeProjectInterpreter.version = Version(9, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
@@ -155,7 +155,7 @@ void main() {
 
         testWithoutContext('version checks pass when version meets minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(13, 0, 0);
+          xcodeProjectInterpreter.version = Version(13, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
