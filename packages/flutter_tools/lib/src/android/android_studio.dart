@@ -454,7 +454,7 @@ class AndroidStudio {
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 
-  void _init({Version? version}) {
+  void _init() {
     _isValid = false;
     _validationMessages.clear();
 
@@ -469,15 +469,15 @@ class AndroidStudio {
 
     final String javaPath;
     if (globals.platform.isMacOS) {
-      if (version != null && version.major < 2020) {
+      if (version != null && version!.major < 2020) {
         javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
-      } else if (version != null && version.major == 2022) {
+      } else if (version != null && version!.major == 2022) {
         javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
       } else {
         javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
       }
     } else {
-      if (version != null && version.major == 2022) {
+      if (version != null && version!.major == 2022) {
         javaPath = globals.fs.path.join(directory, 'jbr');
       } else {
         javaPath = globals.fs.path.join(directory, 'jre');
