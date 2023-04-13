@@ -238,9 +238,13 @@ ViewHolderToken _launchGfxChildView() {
   final viewTokens = EventPairPair();
   assert(viewTokens.status == ZX.OK);
   final viewHolderToken = ViewHolderToken(value: viewTokens.first);
-  final viewToken = ViewToken(value: viewTokens.second);
 
-  viewProvider.createView(viewToken.value, null, null);
+  final viewRefs = EventPairPair();
+  assert(viewRefs.status == ZX.OK);
+  final viewRefControl = ViewRefControl(reference: viewRefs.first.duplicate(ZX.DEFAULT_EVENTPAIR_RIGHTS & ~ZX.RIGHT_DUPLICATE));
+  final viewRef = ViewRef(reference: viewRefs.second.duplicate(ZX.RIGHTS_BASIC));
+
+  viewProvider.createViewWithViewRef(viewTokens.second, viewRefControl, viewRef);
   viewProvider.ctrl.close();
 
   return viewHolderToken;

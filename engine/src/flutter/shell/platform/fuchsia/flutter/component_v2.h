@@ -111,12 +111,6 @@ class ComponentV2 final
   void Stop() override;
 
   // |fuchsia::ui::app::ViewProvider|
-  void CreateView(
-      zx::eventpair token,
-      fidl::InterfaceRequest<fuchsia::sys::ServiceProvider> incoming_services,
-      fuchsia::sys::ServiceProviderHandle outgoing_services) override;
-
-  // |fuchsia::ui::app::ViewProvider|
   void CreateViewWithViewRef(zx::eventpair view_token,
                              fuchsia::ui::views::ViewRefControl control_ref,
                              fuchsia::ui::views::ViewRef view_ref) override;
