@@ -83,7 +83,18 @@ mixin ViewportElementMixin  on NotifiableElementMixin {
 /// happens after layout). The [GlowingOverscrollIndicator] and [Scrollbar]
 /// widgets are examples of paint effects that use scroll notifications.
 ///
-/// //TODO: sample for scroll notification
+/// {@tool dartpad}
+/// This sample shows the difference between using a [ScrollController] or a
+/// [NotificationListener] of type [ScrollNotification] to listen to scrolling
+/// activities. Toggling the [Radio] button switches between the two.
+/// Using a [ScrollNotification] will provide details about the scrolling
+/// activity, along with the metrics of the [ScrollPosition], but not the scroll
+/// position object itself. By listening with a [ScrollController], the position
+/// object is directly accessible.
+/// Both of these types of notifications are only triggered by scrolling.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_controller_notification.0.dart **
+/// {@end-tool}
 ///
 /// To drive layout based on the scroll position, consider listening to the
 /// [ScrollPosition] directly (or indirectly via a [ScrollController]). This
