@@ -3,68 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_api_samples/material/choice_chip/choice_chip.0.dart' as example;
+import 'package:flutter_test/flutter_test.dart';
 
-/// Flutter code sample for [ActionChoice].
-
-void main() => runApp(const ChipApp());
-
-class ChipApp extends StatelessWidget {
-  const ChipApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
-      home: const ActionChoiceExample(),
+void main() {
+  testWidgets('Can choose an item using ChoiceChip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.ChipApp(),
     );
-  }
-}
 
-class ActionChoiceExample extends StatefulWidget {
-  const ActionChoiceExample({super.key});
+    ChoiceChip choosenChip = tester.widget(find.byType(ChoiceChip).at(1));
+    expect(choosenChip.selected, true);
 
-  @override
-  State<ActionChoiceExample> createState() => _ActionChoiceExampleState();
-}
+    await tester.tap(find.byType(ChoiceChip).at(0));
+    await tester.pumpAndSettle();
 
-class _ActionChoiceExampleState extends State<ActionChoiceExample> {
-  int? _value = 1;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context).textTheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ActionChoice Sample'),
-      ),
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Choose an item', style: textTheme.labelLarge),
-            const SizedBox(height: 10.0),
-            Wrap(
-              spacing: 5.0,
-              children: List<Widget>.generate(
-                3,
-                (int index) {
-                  return ChoiceChip(
-                    label: Text('Item $index'),
-                    selected: _value == index,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _value = selected ? index : null;
-                      });
-                    },
-                  );
-                },
-              ).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    choosenChip = tester.widget(find.byType(ChoiceChip).at(0));
+    expect(choosenChip.selected, true);
+  });
 }
