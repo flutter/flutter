@@ -831,7 +831,7 @@ class RenderListWheelViewport
     // Note that the magnifier cannot be turned off if the opacity is less than
     // 1.0.
     if (overAndUnderCenterOpacity >= 1) {
-      _paintAllChildren(context, offset, center: null);
+      _paintAllChildren(context, offset);
       return;
     }
 
