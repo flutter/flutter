@@ -131,6 +131,11 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///  * Flip [LeakTrackingFlutterTestConfig.failTestOnLeaks] if you do not want the
 ///    test to fail in case of leaks, but want to process them programmatically.
 ///
+/// The parameter [leakTrackingConfig] should be used for troubleshooting only.
+///
+/// Do not submit customization of [leakTrackingConfig] to your repository,
+/// because backward compatibility of [LeakTrackingFlutterTestConfig] API is not guaranteed.
+///
 /// Learn more about leak detection and types of leaks
 /// at https://github.com/dart-lang/leak_tracker.
 ///
