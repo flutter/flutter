@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/choice_chip/choice_chip.0.dart'
-    as example;
+import 'package:flutter_api_samples/material/choice_chip/choice_chip.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can choose an item using ChoiceChip',
-      (WidgetTester tester) async {
+  testWidgets('Can choose an item using ChoiceChip', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ChipApp(),
     );
