@@ -1500,9 +1500,16 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     final (TextPosition start, TextPosition end) wordBoundary = _getWordBoundaryAtPosition(position);
     if (isEnd) {
       _setSelectionPosition(wordBoundary.$2, isEnd: isEnd);
+      if (wordBoundary.$2.offset == range.end) {
+        return SelectionResult.next;
+      }
     } else {
       _setSelectionPosition(wordBoundary.$1, isEnd: isEnd);
+      if (wordBoundary.$1.offset == range.start) {
+        return SelectionResult.previous;
+      }
     }
+
     return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
   }
 
