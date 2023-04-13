@@ -90,36 +90,30 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilter filter, {
     ui.BlendMode blendMode = ui.BlendMode.srcOver,
     ui.BackdropFilterEngineLayer? oldLayer
-  }) {
-    return pushLayer<BackdropFilterLayer>(
+  }) => pushLayer<BackdropFilterLayer>(
       BackdropFilterLayer(),
       BackdropFilterOperation()
     );
-  }
 
   @override
   ui.ClipPathEngineLayer pushClipPath(
     ui.Path path, {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.ClipPathEngineLayer? oldLayer
-  }) {
-    return pushLayer<ClipPathLayer>(
+  }) => pushLayer<ClipPathLayer>(
       ClipPathLayer(),
       ClipPathOperation(path, clipBehavior),
     );
-  }
 
   @override
   ui.ClipRRectEngineLayer pushClipRRect(
     ui.RRect rrect, {
     required ui.Clip clipBehavior,
     ui.ClipRRectEngineLayer? oldLayer
-  }) {
-    return pushLayer<ClipRRectLayer>(
+  }) => pushLayer<ClipRRectLayer>(
       ClipRRectLayer(),
       ClipRRectOperation(rrect, clipBehavior)
     );
-  }
 
   @override
   ui.ClipRectEngineLayer pushClipRect(
@@ -137,47 +131,39 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
   ui.ColorFilterEngineLayer pushColorFilter(
     ui.ColorFilter filter, {
     ui.ColorFilterEngineLayer? oldLayer
-  }) {
-    return pushLayer<ColorFilterLayer>(
+  }) => pushLayer<ColorFilterLayer>(
       ColorFilterLayer(),
       ColorFilterOperation(),
     );
-  }
 
   @override
   ui.ImageFilterEngineLayer pushImageFilter(
     ui.ImageFilter filter, {
     ui.Offset offset = ui.Offset.zero,
     ui.ImageFilterEngineLayer? oldLayer
-  }) {
-    return pushLayer<ImageFilterLayer>(
+  }) => pushLayer<ImageFilterLayer>(
       ImageFilterLayer(),
       ImageFilterOperation(),
     );
-  }
 
   @override
   ui.OffsetEngineLayer pushOffset(
     double dx,
     double dy, {
     ui.OffsetEngineLayer? oldLayer
-  }) {
-    return pushLayer<OffsetLayer>(
+  }) => pushLayer<OffsetLayer>(
       OffsetLayer(),
       OffsetOperation(dx, dy)
     );
-  }
 
   @override
   ui.OpacityEngineLayer pushOpacity(int alpha, {
     ui.Offset offset = ui.Offset.zero,
     ui.OpacityEngineLayer? oldLayer
-  }) {
-    return pushLayer<OpacityLayer>(
+  }) => pushLayer<OpacityLayer>(
       OpacityLayer(),
       OpacityOperation(alpha, offset),
     );
-  }
 
   @override
   ui.PhysicalShapeEngineLayer pushPhysicalShape({
@@ -199,21 +185,19 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     ui.BlendMode blendMode, {
     ui.ShaderMaskEngineLayer? oldLayer,
     ui.FilterQuality filterQuality = ui.FilterQuality.low
-  }) {
-    // TODO(jacksongardner): implement pushShaderMask
-    throw UnimplementedError();
-  }
+  }) => pushLayer<ShaderMaskLayer>(
+      ShaderMaskLayer(),
+      ShaderMaskOperation(shader, maskRect, blendMode)
+    );
 
   @override
   ui.TransformEngineLayer pushTransform(
     Float64List matrix4, {
     ui.TransformEngineLayer? oldLayer
-  }) {
-    return pushLayer<TransformLayer>(
+  }) => pushLayer<TransformLayer>(
       TransformLayer(),
       TransformOperation(matrix4),
     );
-  }
 
   @override
   void setCheckerboardOffscreenLayers(bool checkerboard) {

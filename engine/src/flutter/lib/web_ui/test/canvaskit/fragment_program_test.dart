@@ -185,9 +185,9 @@ void testMain() {
     await ui.webOnlyInitializePlatform();
   });
 
-  test('FragmentProgram can be created from JSON IPLR bundle', () async {
+  test('FragmentProgram can be created from JSON IPLR bundle', () {
     final Uint8List data = utf8.encode(kJsonIPLR) as Uint8List;
-    final CkFragmentProgram program = await CkFragmentProgram.fromBytes('test', data);
+    final CkFragmentProgram program = CkFragmentProgram.fromBytes('test', data);
 
     expect(program.effect, isNotNull);
     expect(program.floatCount, 32);

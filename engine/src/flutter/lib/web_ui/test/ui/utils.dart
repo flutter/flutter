@@ -4,20 +4,53 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_stub.dart' if (dart.library.ffi) 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart';
 
+class FakeAssetManager implements AssetManager {
+  FakeAssetManager(this._parent);
+
+  @override
+  String get assetsDir => 'assets';
+
+  @override
+  String getAssetUrl(String asset) => asset;
+
+  @override
+  Future<ByteData> load(String assetKey) async {
+    final ByteData? data = _assetMap[assetKey];
+    if (data == null) {
+      return _parent.load(assetKey);
+    }
+    return data;
+  }
+
+  @override
+  Future<HttpFetchResponse> loadAsset(String asset) {
+    return _parent.loadAsset(asset);
+  }
+
+  void setAsset(String assetKey, ByteData assetData) {
+    _assetMap[assetKey] = assetData;
+  }
+
+  final Map<String, ByteData> _assetMap = <String, ByteData>{};
+  final AssetManager _parent;
+}
+
+FakeAssetManager fakeAssetManager = FakeAssetManager(WebOnlyMockAssetManager());
+
 /// Initializes the renderer for this test.
 void setUpUiTest() {
   setUpAll(() async {
     debugEmulateFlutterTesterEnvironment = true;
-    await webOnlyInitializePlatform();
+    await initializeEngine(assetManager: fakeAssetManager);
     await renderer.fontCollection.debugDownloadTestFonts();
     renderer.fontCollection.registerDownloadedFonts();
-
   });
 }
 

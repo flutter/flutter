@@ -6,12 +6,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../../embedder.dart';
-import '../../fonts.dart';
-import '../../html_image_codec.dart';
-import '../../renderer.dart';
 
 class SkwasmRenderer implements Renderer {
   @override
@@ -166,10 +162,17 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  void clearFragmentProgramCache() { }
+  void clearFragmentProgramCache() => _programs.clear();
+
+  static final Map<String, Future<ui.FragmentProgram>> _programs = <String, Future<ui.FragmentProgram>>{};
 
   @override
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey) {
-     throw UnimplementedError('Skwasm not implemented on this platform.');
+    if (_programs.containsKey(assetKey)) {
+      return _programs[assetKey]!;
+    }
+    return _programs[assetKey] = assetManager.load(assetKey).then((ByteData data) {
+      return CkFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
+    });
   }
 }

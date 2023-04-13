@@ -36,7 +36,7 @@ class StackScope {
     return pointer;
   }
 
-  Pointer<Float> convertMatrix4toSkMatrix(Float64List matrix4) {
+  Pointer<Float> convertMatrix4toSkMatrix(List<double> matrix4) {
     final Pointer<Float> pointer = allocFloatArray(9);
     final int matrixLength = matrix4.length;
 
@@ -132,11 +132,27 @@ class StackScope {
     return pointer;
   }
 
+  Pointer<Float> convertDoublesToNative(List<double> values) {
+    final Pointer<Float> pointer = allocFloatArray(values.length);
+    for (int i = 0; i < values.length; i++) {
+      pointer[i] = values[i];
+    }
+    return pointer;
+  }
+
   Pointer<Float> convertPointArrayToNative(List<ui.Offset> points) {
     final Pointer<Float> pointer = allocFloatArray(points.length * 2);
     for (int i = 0; i < points.length; i++) {
       pointer[i * 2] = points[i].dx;
       pointer[i * 2 + 1] = points[i].dy;
+    }
+    return pointer;
+  }
+
+  Pointer<Uint32> convertColorArrayToNative(List<ui.Color> colors) {
+    final Pointer<Uint32> pointer = allocUint32Array(colors.length);
+    for (int i = 0; i < colors.length; i++) {
+      pointer[i] = colors[i].value;
     }
     return pointer;
   }
@@ -151,9 +167,19 @@ class StackScope {
     return stackAlloc(length).cast<Int32>();
   }
 
+  Pointer<Uint32> allocUint32Array(int count) {
+    final int length = count * sizeOf<Uint32>();
+    return stackAlloc(length).cast<Uint32>();
+  }
+
   Pointer<Float> allocFloatArray(int count) {
     final int length = count * sizeOf<Float>();
     return stackAlloc(length).cast<Float>();
+  }
+
+  Pointer<Pointer<Void>> allocPointerArray(int count) {
+    final int length = count * sizeOf<Pointer<Void>>();
+    return stackAlloc(length).cast<Pointer<Void>>();
   }
 }
 

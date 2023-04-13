@@ -272,7 +272,7 @@ abstract class Shader {
   bool get debugDisposed;
 }
 
-abstract class Gradient extends Shader {
+abstract class Gradient implements Shader {
   factory Gradient.linear(
     Offset from,
     Offset to,
@@ -736,7 +736,7 @@ class Shadow {
   String toString() => 'TextShadow($color, $offset, $blurRadius)';
 }
 
-abstract class ImageShader extends Shader {
+abstract class ImageShader implements Shader {
   factory ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4, {
     FilterQuality? filterQuality,
   }) => engine.renderer.createImageShader(image, tmx, tmy, matrix4, filterQuality);

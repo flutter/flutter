@@ -45,9 +45,24 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  ui.Gradient createConicalGradient(ui.Offset focal, double focalRadius, ui.Offset center, double radius, List<ui.Color> colors, [List<double>? colorStops, ui.TileMode tileMode = ui.TileMode.clamp, Float32List? matrix]) {
-    throw UnimplementedError('createConicalGradient not yet implemented');
-  }
+  ui.Gradient createConicalGradient(
+    ui.Offset focal,
+    double focalRadius,
+    ui.Offset center,
+    double radius,
+    List<ui.Color> colors, [
+    List<double>? colorStops,
+    ui.TileMode tileMode = ui.TileMode.clamp,
+    Float32List? matrix]) => SkwasmGradient.conical(
+      focal: focal,
+      focalRadius: focalRadius,
+      center: center,
+      centerRadius: radius,
+      colors: colors,
+      colorStops: colorStops,
+      tileMode: tileMode,
+      matrix4: matrix,
+    );
 
   @override
   ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) {
@@ -65,9 +80,21 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  ui.Gradient createLinearGradient(ui.Offset from, ui.Offset to, List<ui.Color> colors, [List<double>? colorStops, ui.TileMode tileMode = ui.TileMode.clamp, Float32List? matrix4]) {
-    throw UnimplementedError('createLinearGradientn not yet implemented');
-  }
+  ui.Gradient createLinearGradient(
+    ui.Offset from,
+    ui.Offset to,
+    List<ui.Color> colors, [
+    List<double>? colorStops,
+    ui.TileMode tileMode = ui.TileMode.clamp,
+    Float32List? matrix4
+  ]) => SkwasmGradient.linear(
+    from: from,
+    to: to,
+    colors: colors,
+    colorStops: colorStops,
+    tileMode: tileMode,
+    matrix4: matrix4,
+  );
 
   @override
   ui.ImageFilter createMatrixImageFilter(Float64List matrix4, {ui.FilterQuality filterQuality = ui.FilterQuality.low}) {
@@ -102,9 +129,21 @@ class SkwasmRenderer implements Renderer {
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
 
   @override
-  ui.Gradient createRadialGradient(ui.Offset center, double radius, List<ui.Color> colors, [List<double>? colorStops, ui.TileMode tileMode = ui.TileMode.clamp, Float32List? matrix4]) {
-    throw UnimplementedError('createRadialGradient not yet implemented');
-  }
+  ui.Gradient createRadialGradient(
+    ui.Offset center,
+    double radius,
+    List<ui.Color> colors, [
+    List<double>? colorStops,
+    ui.TileMode tileMode = ui.TileMode.clamp,
+    Float32List? matrix4
+  ]) => SkwasmGradient.radial(
+    center: center,
+    radius: radius,
+    colors: colors,
+    colorStops: colorStops,
+    tileMode: tileMode,
+    matrix4: matrix4
+  );
 
   @override
   ui.SceneBuilder createSceneBuilder() => SkwasmSceneBuilder();
@@ -133,9 +172,15 @@ class SkwasmRenderer implements Renderer {
     double startAngle = 0.0,
     double endAngle = math.pi * 2,
     Float32List? matrix4
-  ]) {
-    throw UnimplementedError('createSweepGradient not yet implemented');
-  }
+  ]) => SkwasmGradient.sweep(
+    center: center,
+    colors: colors,
+    colorStops: colorStops,
+    tileMode: tileMode,
+    startAngle: startAngle,
+    endAngle: endAngle,
+    matrix4: matrix4
+  );
 
   @override
   ui.TextStyle createTextStyle({
@@ -251,11 +296,20 @@ class SkwasmRenderer implements Renderer {
     embedder.addSceneToSceneHost(sceneElement);
   }
 
+  static final Map<String, Future<ui.FragmentProgram>> _programs = <String, Future<ui.FragmentProgram>>{};
+
   @override
-  void clearFragmentProgramCache() { }
+  void clearFragmentProgramCache() {
+    _programs.clear();
+  }
 
   @override
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey) {
-    throw UnimplementedError('createFragmentProgram not yet implemented');
+    if (_programs.containsKey(assetKey)) {
+      return _programs[assetKey]!;
+    }
+    return _programs[assetKey] = assetManager.load(assetKey).then((ByteData data) {
+      return SkwasmFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
+    });
   }
 }

@@ -7,6 +7,8 @@ library skwasm_impl;
 
 import 'dart:ffi';
 
+import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
+
 final class RawPaint extends Opaque {}
 
 typedef PaintHandle = Pointer<RawPaint>;
@@ -61,3 +63,6 @@ external void paintSetMiterLimit(PaintHandle paint, double miterLimit);
 
 @Native<Float Function(PaintHandle)>(symbol: 'paint_getMiterLimit', isLeaf: true)
 external double paintGetMiterLimit(PaintHandle paint);
+
+@Native<Void Function(PaintHandle, ShaderHandle)>(symbol: 'paint_setShader', isLeaf: true)
+external void paintSetShader(PaintHandle handle, ShaderHandle shader);
