@@ -13,12 +13,12 @@ void main() {
     Future<void> setAppLifeCycleState(AppLifecycleState state) async {
       final ByteData? message =
           const StringCodec().encodeMessage(state.toString());
-      await ServicesBinding.instance.defaultBinaryMessenger
-          .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/lifecycle', message, (_) {});
     }
 
     await tester.pumpWidget(
-     const example.MyApp(),
+     const example.WidgetBindingObserverExampleApp(),
     );
 
     expect(find.text('There are no AppLifecycleStates to show.'), findsOneWidget);

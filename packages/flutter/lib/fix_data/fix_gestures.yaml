@@ -15,7 +15,7 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are [for CLASS] from the <XXX> library. *
+# * Fixes in this file are from the Gestures library. *
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/28602

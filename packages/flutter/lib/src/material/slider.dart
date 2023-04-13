@@ -648,28 +648,20 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         switch (textDirection) {
           case TextDirection.rtl:
             renderSlider.decreaseAction();
-            break;
           case TextDirection.ltr:
             renderSlider.increaseAction();
-            break;
         }
-        break;
       case _SliderAdjustmentType.left:
         switch (textDirection) {
           case TextDirection.rtl:
             renderSlider.increaseAction();
-            break;
           case TextDirection.ltr:
             renderSlider.decreaseAction();
-            break;
         }
-        break;
       case _SliderAdjustmentType.up:
         renderSlider.increaseAction();
-        break;
       case _SliderAdjustmentType.down:
         renderSlider.decreaseAction();
-        break;
     }
   }
 
@@ -836,17 +828,14 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             focusNode.requestFocus();
           }
         };
-        break;
     }
 
     final Map<ShortcutActivator, Intent> shortcutMap;
     switch (MediaQuery.navigationModeOf(context)) {
       case NavigationMode.directional:
         shortcutMap = _directionalNavShortcutMap;
-        break;
       case NavigationMode.traditional:
         shortcutMap = _traditionalNavShortcutMap;
-        break;
     }
 
     final double textScaleFactor = theme.useMaterial3
@@ -1489,10 +1478,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       switch (textDirection) {
         case TextDirection.rtl:
           _currentDragValue -= valueDelta;
-          break;
         case TextDirection.ltr:
           _currentDragValue += valueDelta;
-          break;
       }
       onChanged!(_discretize(_currentDragValue));
     }
@@ -1566,11 +1553,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case TextDirection.rtl:
         visualPosition = 1.0 - value;
         secondaryVisualPosition = (secondaryValue != null) ? (1.0 - secondaryValue) : null;
-        break;
       case TextDirection.ltr:
         visualPosition = value;
         secondaryVisualPosition = (secondaryValue != null) ? secondaryValue : null;
-        break;
     }
 
     final Rect trackRect = _sliderTheme.trackShape!.getPreferredRect(
@@ -1878,15 +1863,14 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)
-    : _colors = Theme.of(context).colorScheme,
-      super(trackHeight: 4.0);
+    : super(trackHeight: 4.0);
 
   final BuildContext context;
-  final ColorScheme _colors;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   Color? get activeTrackColor => _colors.primary;

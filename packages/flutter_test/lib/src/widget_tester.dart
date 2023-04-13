@@ -155,10 +155,10 @@ void testWidgets(
       () {
         tester._testDescription = combinedDescription;
         SemanticsHandle? semanticsHandle;
+        tester._recordNumberOfSemanticsHandles();
         if (semanticsEnabled == true) {
           semanticsHandle = tester.ensureSemantics();
         }
-        tester._recordNumberOfSemanticsHandles();
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
@@ -499,12 +499,34 @@ Future<void> expectLater(
 
 /// Class that programmatically interacts with widgets and the test environment.
 ///
+/// Typically, a test uses [pumpWidget] to load a widget tree (in a manner very
+/// similar to how [runApp] works in a Flutter application). Then, methods such
+/// as [tap], [drag], [enterText], [fling], [longPress], etc, can be used to
+/// interact with the application. The application runs in a [FakeAsync] zone,
+/// which allows time to be stepped forward deliberately; this is done using the
+/// [pump] method.
+///
+/// The [expect] function can then be used to examine the state of the
+/// application, typically using [Finder]s such as those in the [find]
+/// namespace, and [Matcher]s such as [findsOneWidget].
+///
+/// ```dart
+/// testWidgets('MyWidget', (WidgetTester tester) async {
+///   await tester.pumpWidget(MyWidget());
+///   await tester.tap(find.text('Save'));
+///   await tester.pump(); // allow the application to handle
+///   await tester.pump(const Duration(seconds: 1)); // skip past the animation
+///   expect(find.text('Success'), findsOneWidget);
+/// });
+/// ```
+///
 /// For convenience, instances of this class (such as the one provided by
 /// `testWidgets`) can be used as the `vsync` for `AnimationController` objects.
 ///
 /// When the binding is [LiveTestWidgetsFlutterBinding], events from
 /// [LiveTestWidgetsFlutterBinding.deviceEventDispatcher] will be handled in
-/// [dispatchEvent].
+/// [dispatchEvent]. Thus, using `flutter run` to run a test lets one tap on
+/// the screen to generate [Finder]s relevant to the test.
 class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(super.binding) {
     if (binding is LiveTestWidgetsFlutterBinding) {
@@ -728,7 +750,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'your widget tree in a RootRestorationScope?',
     );
     return TestAsyncUtils.guard<void>(() async {
-      final Widget widget = ((binding.renderViewElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
+      final Widget widget = ((binding.rootElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
       final TestRestorationData restorationData = binding.restorationManager.restorationData;
       runApp(Container(key: UniqueKey()));
       await pump();
@@ -841,7 +863,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         .whereType<RenderObject>()
         .first;
       final Element? innerTargetElement = _lastWhereOrNull(
-        collectAllElementsFrom(binding.renderViewElement!, skipOffstage: true),
+        collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
         (Element element) => element.renderObject == innerTarget,
       );
       if (innerTargetElement == null) {
@@ -1022,17 +1044,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
-    if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles!) {
+    // TODO(goderbauer): Fix known leak in web engine when running integration tests and remove this "correction", https://github.com/flutter/flutter/issues/121640.
+    final int knownWebEngineLeakForLiveTestsCorrection = kIsWeb && binding is LiveTestWidgetsFlutterBinding ? 1 : 0;
+
+    if (_currentSemanticsHandles - knownWebEngineLeakForLiveTestsCorrection > _lastRecordedSemanticsHandles!) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('A SemanticsHandle was active at the end of the test.'),
         ErrorDescription(
           'All SemanticsHandle instances must be disposed by calling dispose() on '
           'the SemanticsHandle.'
-        ),
-        ErrorHint(
-          'If your test uses SemanticsTester, it is '
-          'sufficient to call dispose() on SemanticsTester. Otherwise, the '
-          'existing handle will leak into another test and alter its behavior.'
         ),
       ]);
     }
@@ -1041,8 +1061,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   int? _lastRecordedSemanticsHandles;
 
+  int get _currentSemanticsHandles => binding.debugOutstandingSemanticsHandles + binding.pipelineOwner.debugOutstandingSemanticsHandles;
+
   void _recordNumberOfSemanticsHandles() {
-    _lastRecordedSemanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
+    _lastRecordedSemanticsHandles = _currentSemanticsHandles;
   }
 
   /// Returns the TestTextInput singleton.

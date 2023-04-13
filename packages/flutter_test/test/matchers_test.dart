@@ -613,10 +613,12 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         actions |= index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -737,7 +739,6 @@ void main() {
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -789,13 +790,13 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
+      handle.dispose();
     });
   });
 
   group('containsSemantics', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -889,16 +890,19 @@ void main() {
         )),
         reason: 'onTapHint "scans" should not have matched "scan".',
       );
+      handle.dispose();
     });
 
     testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         actions |= index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         flags |= index;
       }
       final SemanticsData data = SemanticsData(
@@ -1081,10 +1085,12 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
-      for (final int index in SemanticsAction.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
         allActions |= index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
+      // ignore: deprecated_member_use
+      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
         allFlags |= index;
       }
       final SemanticsData emptyData = SemanticsData(
@@ -1233,7 +1239,6 @@ void main() {
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -1283,6 +1288,7 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
+      handle.dispose();
     });
   });
 

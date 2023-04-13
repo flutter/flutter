@@ -69,7 +69,7 @@ abstract class Decoration with Diagnosticable {
   ///
   /// When implementing this method in subclasses, return null if this class
   /// cannot interpolate from `a`. In that case, [lerp] will try `a`'s [lerpTo]
-  /// method instead.
+  /// method instead. Classes should implement both [lerpFrom] and [lerpTo].
   ///
   /// Supporting interpolating from null is recommended as the [Decoration.lerp]
   /// method uses this as a fallback when two classes can't interpolate between
@@ -95,11 +95,11 @@ abstract class Decoration with Diagnosticable {
   /// Linearly interpolates from `this` to another [Decoration] (which may be of
   /// a different class).
   ///
-  /// This is called if `b`'s [lerpTo] did not know how to handle this class.
+  /// This is called if `b`'s [lerpFrom] did not know how to handle this class.
   ///
   /// When implementing this method in subclasses, return null if this class
   /// cannot interpolate from `b`. In that case, [lerp] will apply a default
-  /// behavior instead.
+  /// behavior instead. Classes should implement both [lerpFrom] and [lerpTo].
   ///
   /// Supporting interpolating to null is recommended as the [Decoration.lerp]
   /// method uses this as a fallback when two classes can't interpolate between
@@ -129,8 +129,8 @@ abstract class Decoration with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Decoration? lerp(Decoration? a, Decoration? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.lerpFrom(null, t) ?? b;

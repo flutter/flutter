@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('InputDecorator suffixIcon alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.SuffixIconExampleApp(),
     );
     expect(tester.getCenter(find.byIcon(Icons.remove_red_eye)).dy, 28.0);
   });

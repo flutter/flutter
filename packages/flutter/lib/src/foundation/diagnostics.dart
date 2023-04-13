@@ -42,6 +42,7 @@ import 'object.dart';
 // late Map<Listenable, VoidCallback>? handles;
 // late DiagnosticsTreeStyle style;
 // late IconData icon;
+// late double devicePixelRatio;
 
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
@@ -906,13 +907,11 @@ class _PrefixedStringBuilder {
           }
           lastWordStart = index;
           mode = _WordWrapParseMode.inWord;
-          break;
         case _WordWrapParseMode.inWord: // looking for a good break point. Treat all text
           while ((index < message.length) && (message[index] != ' ' || noWrap(index))) {
             index += 1;
           }
           mode = _WordWrapParseMode.atBreak;
-          break;
         case _WordWrapParseMode.atBreak: // at start of break point
           if ((index - startForLengthCalculations > width) || (index == message.length)) {
             // we are over the width line, so break
@@ -952,7 +951,6 @@ class _PrefixedStringBuilder {
             // skip to the end of this break point
             mode = _WordWrapParseMode.inSpace;
           }
-          break;
       }
     }
   }
@@ -2161,7 +2159,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
     if (value == null || ((value ?? false) && ifTrue == null) || (!(value ?? true) && ifFalse == null)) {
       // We are missing a description for the flag value so we need to show the
       // flag name. The property will have DiagnosticLevel.hidden for this case
-      // so users will not see this the property in this case unless they are
+      // so users will not see this property in this case unless they are
       // displaying hidden properties.
       return true;
     }
@@ -2378,7 +2376,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
     if ((value != null && ifPresent == null) || (value == null && ifNull == null)) {
       // We are missing a description for the flag value so we need to show the
       // flag name. The property will have DiagnosticLevel.hidden for this case
-      // so users will not see this the property in this case unless they are
+      // so users will not see this property in this case unless they are
       // displaying hidden properties.
       return true;
     }
@@ -3218,7 +3216,7 @@ mixin Diagnosticable {
   ///     // without a space.
   ///     properties.add(DoubleProperty(
   ///       'device pixel ratio',
-  ///       ui.window.devicePixelRatio,
+  ///       devicePixelRatio,
   ///       tooltip: 'physical pixels per logical pixel',
   ///     ));
   ///

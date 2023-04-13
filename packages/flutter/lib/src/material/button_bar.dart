@@ -146,15 +146,14 @@ class ButtonBar extends StatelessWidget {
 
   /// The spacing between buttons when the button bar overflows.
   ///
-  /// If the [children] do not fit into a single row, they are
-  /// arranged into a column. This parameter provides additional
-  /// vertical space in between buttons when it does overflow.
+  /// If the [children] do not fit into a single row, they are arranged into a
+  /// column. This parameter provides additional vertical space in between
+  /// buttons when it does overflow.
   ///
-  /// Note that the button spacing may appear to be more than
-  /// the value provided. This is because most buttons adhere to the
-  /// [MaterialTapTargetSize] of 48px. So, even though a button
-  /// might visually be 36px in height, it might still take up to
-  /// 48px vertically.
+  /// The button spacing may appear to be more than the value provided. This is
+  /// because most buttons adhere to the [MaterialTapTargetSize] of 48px. So,
+  /// even though a button might visually be 36px in height, it might still take
+  /// up to 48px vertically.
   ///
   /// If null then no spacing will be added in between buttons in
   /// an overflow state.
@@ -358,10 +357,8 @@ class _RenderButtonBarRow extends RenderFlex {
       switch (verticalDirection) {
         case VerticalDirection.down:
           child = firstChild;
-          break;
         case VerticalDirection.up:
           child = lastChild;
-          break;
       }
 
       while (child != null) {
@@ -381,44 +378,34 @@ class _RenderButtonBarRow extends RenderFlex {
               case MainAxisAlignment.center:
                 final double midpoint = (constraints.maxWidth - child.size.width) / 2.0;
                 childParentData.offset = Offset(midpoint, currentHeight);
-                break;
               case MainAxisAlignment.end:
                 childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
-                break;
               case MainAxisAlignment.spaceAround:
               case MainAxisAlignment.spaceBetween:
               case MainAxisAlignment.spaceEvenly:
               case MainAxisAlignment.start:
                 childParentData.offset = Offset(0, currentHeight);
-                break;
             }
-            break;
           case TextDirection.rtl:
             switch (mainAxisAlignment) {
               case MainAxisAlignment.center:
                 final double midpoint = constraints.maxWidth / 2.0 - child.size.width / 2.0;
                 childParentData.offset = Offset(midpoint, currentHeight);
-                break;
               case MainAxisAlignment.end:
                 childParentData.offset = Offset(0, currentHeight);
-                break;
               case MainAxisAlignment.spaceAround:
               case MainAxisAlignment.spaceBetween:
               case MainAxisAlignment.spaceEvenly:
               case MainAxisAlignment.start:
                 childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
-                break;
             }
-            break;
         }
         currentHeight += child.size.height;
         switch (verticalDirection) {
           case VerticalDirection.down:
             child = childParentData.nextSibling;
-            break;
           case VerticalDirection.up:
             child = childParentData.previousSibling;
-            break;
         }
 
         if (overflowButtonSpacing != null && child != null) {

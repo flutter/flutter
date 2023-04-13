@@ -131,7 +131,7 @@ enum ListTileTitleAlignment {
 /// see the example below to see how to adhere to both Material spec and
 /// accessibility requirements.
 ///
-/// Note that [leading] and [trailing] widgets can expand as far as they wish
+/// The [leading] and [trailing] widgets can expand as far as they wish
 /// horizontally, so ensure that they are properly constrained.
 ///
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
@@ -1561,7 +1561,7 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _LisTileDefaultsM3 extends ListTileThemeData {
   _LisTileDefaultsM3(this.context)

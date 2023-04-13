@@ -26,7 +26,7 @@ class DeviceGestureSettings {
 
   /// Create a new [DeviceGestureSettings] from the provided [view].
   factory DeviceGestureSettings.fromView(ui.FlutterView view) {
-    final double? physicalTouchSlop = view.viewConfiguration.gestureSettings.physicalTouchSlop;
+    final double? physicalTouchSlop = view.gestureSettings.physicalTouchSlop;
     return DeviceGestureSettings(
       touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / view.devicePixelRatio
     );

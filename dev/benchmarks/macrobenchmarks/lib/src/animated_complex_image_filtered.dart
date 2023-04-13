@@ -5,7 +5,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
-// Various tests to verify that Animated image filtered layers do not
+// Various tests to verify that animated image filtered layers do not
 // dirty children even without explicit repaint boundaries. These intentionally use
 // text to ensure we don't measure the opacity peephole case.
 class AnimatedComplexImageFiltered extends StatefulWidget {

@@ -298,10 +298,13 @@ Future<ProcessTestResult> runFlutter(
     }
     process.stdin.write('q');
     return -1; // discarded
-  }).catchError((Object error) {
-    // ignore errors here, they will be reported on the next line
-    return -1; // discarded
-  }));
+  }).then(
+    (int i) => i,
+    onError: (Object error) {
+      // ignore errors here, they will be reported on the next line
+      return -1; // discarded
+    },
+  ));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
     debugPrint('${stamp()} (process terminated with exit code $exitCode)');
@@ -601,6 +604,7 @@ void main() {
       'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
       't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
       'L Dump layer tree to the console.                                               (debugDumpLayerTree)',
+      'f Dump focus tree to the console.                                               (debugDumpFocusTree)',
       'S Dump accessibility tree in traversal order.                                   (debugDumpSemantics)',
       'U Dump accessibility tree in inverse hit test order.                            (debugDumpSemantics)',
       'i Toggle widget inspector.                                  (WidgetsApp.showWidgetInspectorOverride)',

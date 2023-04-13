@@ -120,10 +120,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         inTraditionalMode = false;
-        break;
       case FocusHighlightMode.traditional:
         inTraditionalMode = true;
-        break;
     }
 
     if (focused && inTraditionalMode) {
@@ -377,10 +375,8 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     switch (textDirection!) {
       case TextDirection.rtl:
         left = clampDouble(buttonRect.right, 0.0, size.width) - childSize.width;
-        break;
       case TextDirection.ltr:
         left = clampDouble(buttonRect.left, 0.0, size.width - childSize.width);
-        break;
     }
 
     return Offset(left, menuLimits.top);
@@ -886,6 +882,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.enableFeedback,
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
+    this.padding,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -929,6 +926,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.enableFeedback,
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
+    this.padding,
     required InputDecoration inputDecoration,
     required bool isEmpty,
     required bool isFocused,
@@ -1114,6 +1112,17 @@ class DropdownButton<T> extends StatefulWidget {
   /// If it is not provided, the theme's [ThemeData.canvasColor] will be used
   /// instead.
   final Color? dropdownColor;
+
+  /// Padding around the visible portion of the dropdown widget.
+  ///
+  /// As the padding increases, the size of the [DropdownButton] will also
+  /// increase. The padding is included in the clickable area of the dropdown
+  /// widget, so this can make the widget easier to click.
+  ///
+  /// Padding can be useful when used with a custom border. The clickable
+  /// area will stay flush with the border, as opposed to an external [Padding]
+  /// widget which will leave a non-clickable gap.
+  final EdgeInsetsGeometry? padding;
 
   /// The maximum height of the menu.
   ///
@@ -1394,7 +1403,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       items.add(DefaultTextStyle(
         style: _textStyle!.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
-          ignoringSemantics: false,
           child: _DropdownMenuItemContainer(
             alignment: widget.alignment,
             child: displayedHint,
@@ -1505,7 +1513,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           autofocus: widget.autofocus,
           focusColor: widget.focusColor ?? Theme.of(context).focusColor,
           enableFeedback: false,
-          child: result,
+          child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
         ),
       ),
     );
@@ -1566,6 +1574,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool? enableFeedback,
     AlignmentGeometry alignment = AlignmentDirectional.centerStart,
     BorderRadius? borderRadius,
+    EdgeInsetsGeometry? padding,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -1635,6 +1644,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
                    isEmpty: isEmpty,
                    isFocused: Focus.of(context).hasFocus,
+                   padding: padding,
                  ),
                );
              }),

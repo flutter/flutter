@@ -208,10 +208,11 @@ void main() {
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
-        hapticFeedbackCalls++;
+        hapticFeedbackCalls += 1;
       }
+      return null;
     });
 
     // Long press on the scrollbar thumb and expect a vibration after it resizes.
@@ -251,7 +252,7 @@ void main() {
 
     const double inset = 3;
     const double scaleFactor = 2;
-    final Size screenSize = tester.binding.window.physicalSize / tester.binding.window.devicePixelRatio;
+    final Size screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
 
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -966,10 +967,11 @@ void main() {
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
-        hapticFeedbackCalls++;
+        hapticFeedbackCalls += 1;
       }
+      return null;
     });
 
     // Long press on the scrollbar thumb and expect a vibration after it resizes.

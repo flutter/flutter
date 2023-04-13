@@ -136,7 +136,7 @@ The `stop()` command takes one parameter, `appId`. It returns a `bool` to indica
 
 #### app.start
 
-This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, `deviceId`, and `launchMode`.
+This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, `deviceId`, `launchMode` (`run`/`attach`) and `mode` (`debug`, `profile`, `release`, `jit_release`).
 
 #### app.debugPort
 
@@ -296,7 +296,7 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
-- 0.6.1: Added `coldBoot` option to `emulator.lauch` command.
+- 0.6.1: Added `coldBoot` option to `emulator.launch` command.
 - 0.6.0: Added `debounce` option to `app.restart` command.
 - 0.5.3: Added `emulatorId` field to device.
 - 0.5.2: Added `platformType` and `category` fields to emulator.

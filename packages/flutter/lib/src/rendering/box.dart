@@ -468,8 +468,8 @@ class BoxConstraints extends Constraints {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxConstraints? lerp(BoxConstraints? a, BoxConstraints? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b! * t;
@@ -1390,7 +1390,7 @@ abstract class RenderBox extends RenderObject {
         } else {
           debugTimelineArguments = <String, String>{};
         }
-        debugTimelineArguments!['intrinsics dimension'] = describeEnum(dimension);
+        debugTimelineArguments!['intrinsics dimension'] = dimension.name;
         debugTimelineArguments!['intrinsics argument'] = '$argument';
         return true;
       }());

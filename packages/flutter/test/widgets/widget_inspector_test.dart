@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// no-shuffle:
-//   //TODO(gspencergoog): Remove this tag once this test's state leaks/test
-//   dependencies have been fixed.
-//   https://github.com/flutter/flutter/issues/85160
-//   Fails with "flutter test --test-randomize-ordering-seed=456"
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
@@ -236,6 +231,13 @@ int getChildLayerCount(OffsetLayer layer) {
     child = child.nextSibling;
   }
   return count;
+}
+
+extension TextFromString on String {
+  @widgetFactory
+  Widget text() {
+    return Text(this);
+  }
 }
 
 void main() {
@@ -866,7 +868,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<Object?> chainElements = jsonList! as List<Object?>;
       final List<Element> expectedChain = elementB.debugGetDiagnosticChain().reversed.toList();
       // Sanity check that the chain goes back to the root.
-      expect(expectedChain.first, tester.binding.renderViewElement);
+      expect(expectedChain.first, tester.binding.rootElement);
 
       expect(chainElements.length, equals(expectedChain.length));
       for (int i = 0; i < expectedChain.length; i += 1) {
@@ -944,19 +946,20 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
     testWidgets('WidgetInspectorService creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
             children: <Widget>[
-              Text('a'),
-              Text('b', textDirection: TextDirection.ltr),
-              Text('c', textDirection: TextDirection.ltr),
+              const Text('a'),
+              const Text('b', textDirection: TextDirection.ltr),
+              'c'.text(),
             ],
           ),
         ),
       );
       final Element elementA = find.text('a').evaluate().first;
       final Element elementB = find.text('b').evaluate().first;
+      final Element elementC = find.text('c').evaluate().first;
 
       service.disposeAllGroups();
       service.resetPubRootDirectories();
@@ -979,14 +982,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final int columnB = creationLocationB['column']! as int;
       final String? nameB = creationLocationB['name'] as String?;
       expect(nameB, equals('Text'));
+
+      service.setSelection(elementC, 'my-group');
+      final Map<String, Object?> jsonC = json.decode(service.getSelectedWidget(null, 'my-group')) as Map<String, Object?>;
+      final Map<String, Object?> creationLocationC = jsonC['creationLocation']! as Map<String, Object?>;
+      expect(creationLocationC, isNotNull);
+      final String fileC = creationLocationC['file']! as String;
+      final int lineC = creationLocationC['line']! as int;
+      final int columnC = creationLocationC['column']! as int;
+      final String? nameC = creationLocationC['name'] as String?;
+      expect(nameC, equals('TextFromString|text'));
+
       expect(fileA, endsWith('widget_inspector_test.dart'));
       expect(fileA, equals(fileB));
+      expect(fileA, equals(fileC));
       // We don't hardcode the actual lines the widgets are created on as that
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
+      expect(lineB + 1, equals(lineC));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(15));
+      expect(columnA, equals(21));
       expect(columnA, equals(columnB));
+      expect(columnC, equals(19));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
   testWidgets('WidgetInspectorService setSelection notifiers for an Element',
@@ -1375,7 +1392,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(pubRoots, unorderedEquals(directories));
         });
 
-        test('can add multiple directories seperately', () async {
+        test('can add multiple directories separately', () async {
           service.addPubRootDirectories(<String>[directoryA]);
           service.addPubRootDirectories(<String>[directoryB]);
           service.addPubRootDirectories(<String>[]);
@@ -1417,7 +1434,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(pubRoots, equals(<String>[directoryC]));
         });
 
-        test('removes multiple directories seperately', () async {
+        test('removes multiple directories separately', () async {
           service.removePubRootDirectories(<String>[directoryA]);
           service.removePubRootDirectories(<String>[directoryB]);
           service.removePubRootDirectories(<String>[]);
@@ -1573,7 +1590,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
 
           testWidgets(
-            'does not have createdByLocalProject when thePubRootDirecty has a different suffix',
+            'does not have createdByLocalProject when thePubRootDirectory has a different suffix',
             (WidgetTester tester) async {
               const Widget widget = Directionality(
                 textDirection: TextDirection.ltr,
@@ -2059,7 +2076,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final List<Object?> chainElements = jsonList! as List<Object?>;
       final List<Element> expectedChain = elementB.debugGetDiagnosticChain().reversed.toList();
       // Sanity check that the chain goes back to the root.
-      expect(expectedChain.first, tester.binding.renderViewElement);
+      expect(expectedChain.first, tester.binding.rootElement);
 
       expect(chainElements.length, equals(expectedChain.length));
       for (int i = 0; i < expectedChain.length; i += 1) {
@@ -2305,7 +2322,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // directories so we get an empty tree other than the root that is always
       // included.
       final Object? rootWidget = service.toObject(rootJson['valueId']! as String);
-      expect(rootWidget, equals(WidgetsBinding.instance.renderViewElement));
+      expect(rootWidget, equals(WidgetsBinding.instance.rootElement));
       List<Object?> childrenJson = rootJson['children']! as List<Object?>;
       // There are no summary tree children.
       expect(childrenJson.length, equals(0));
@@ -3728,7 +3745,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(60));
+      expect(location.line, equals(55));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -3738,7 +3755,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(98));
+      expect(location.line, equals(93));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -3765,7 +3782,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(60));
+      expect(location.line, equals(55));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -3775,7 +3792,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(98));
+      expect(location.line, equals(93));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.

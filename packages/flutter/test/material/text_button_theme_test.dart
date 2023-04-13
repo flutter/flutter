@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('TextButtonTheme lerp special cases', () {
+    expect(TextButtonThemeData.lerp(null, null, 0), null);
+    const TextButtonThemeData data = TextButtonThemeData();
+    expect(identical(TextButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no TextButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(

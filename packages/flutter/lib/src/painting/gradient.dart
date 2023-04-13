@@ -307,6 +307,9 @@ abstract class Gradient {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Gradient? lerp(Gradient? a, Gradient? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     Gradient? result;
     if (b != null) {
       result = b.lerpFrom(a, t); // if a is null, this must return non-null
@@ -316,9 +319,6 @@ abstract class Gradient {
     }
     if (result != null) {
       return result;
-    }
-    if (a == null && b == null) {
-      return null;
     }
     assert(a != null && b != null);
     return t < 0.5 ? a!.scale(1.0 - (t * 2.0)) : b!.scale((t - 0.5) * 2.0);
@@ -486,8 +486,8 @@ class LinearGradient extends Gradient {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static LinearGradient? lerp(LinearGradient? a, LinearGradient? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);
@@ -765,8 +765,8 @@ class RadialGradient extends Gradient {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static RadialGradient? lerp(RadialGradient? a, RadialGradient? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);
@@ -1032,8 +1032,8 @@ class SweepGradient extends Gradient {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static SweepGradient? lerp(SweepGradient? a, SweepGradient? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!.scale(t);

@@ -272,15 +272,6 @@ class Dialog extends StatelessWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
-/// If the content is too large to fit on the screen vertically, the dialog will
-/// display the title and the actions and let the content overflow, which is
-/// rarely desired. Consider using a scrolling widget for [content], such as
-/// [SingleChildScrollView], to avoid overflow. (However, be aware that since
-/// [AlertDialog] tries to size itself using the intrinsic dimensions of its
-/// children, widgets such as [ListView], [GridView], and [CustomScrollView],
-/// which use lazy viewports, will not work. If this is a problem, consider
-/// using [Dialog] directly.)
-///
 /// For dialogs that offer the user a choice between several options, consider
 /// using a [SimpleDialog].
 ///
@@ -339,6 +330,24 @@ class Dialog extends StatelessWidget {
 ///
 /// ** See code in examples/api/lib/material/dialog/alert_dialog.1.dart **
 /// {@end-tool}
+///
+/// ## Alert dialogs and scrolling
+///
+/// By default, alert dialogs size themselves to contain their children.
+///
+/// If the content is too large to fit on the screen vertically, the dialog will
+/// display the title and actions, and let the _[content]_ overflow. This is
+/// rarely desired. Consider using a scrolling widget for [content], such as
+/// [SingleChildScrollView], to avoid overflow.
+///
+/// Because the dialog attempts to size itself to the contents, the [content]
+/// must support reporting its intrinsic dimensions. In particular, this means
+/// that lazily-rendered widgets such as [ListView], [GridView], and
+/// [CustomScrollView], will not work in an [AlertDialog] unless they are
+/// wrapped in a widget that forces a particular size (e.g. a [SizedBox]).
+///
+/// For finer-grained control over the sizing of a dialog, consider using
+/// [Dialog] directly.
 ///
 /// See also:
 ///
@@ -441,7 +450,12 @@ class AlertDialog extends StatelessWidget {
   /// Typically this is a [SingleChildScrollView] that contains the dialog's
   /// message. As noted in the [AlertDialog] documentation, it's important
   /// to use a [SingleChildScrollView] if there's any risk that the content
-  /// will not fit.
+  /// will not fit, as the contents will otherwise overflow the dialog.
+  ///
+  /// The [content] must support reporting its intrinsic dimensions. In
+  /// particular, [ListView], [GridView], and [CustomScrollView] cannot be used
+  /// here unless they are first wrapped in a widget that itself can report
+  /// intrinsic dimensions, such as a [SizedBox].
   final Widget? content;
 
   /// Padding around the content.
@@ -482,9 +496,10 @@ class AlertDialog extends StatelessWidget {
   /// Typically used to provide padding to the button bar between the button bar
   /// and the edges of the dialog.
   ///
-  /// If there are no [actions], then no padding will be included. It is also
-  /// important to note that [buttonPadding] may contribute to the padding on
-  /// the edges of [actions] as well.
+  /// The [buttonPadding] may contribute to the padding on the edges of
+  /// [actions] as well.
+  ///
+  /// If there are no [actions], then no padding will be included.
   ///
   /// {@tool snippet}
   /// This is an example of a set of actions aligned with the content widget.
@@ -546,21 +561,20 @@ class AlertDialog extends StatelessWidget {
   /// * [OverflowBar], which [actions] configures to lay itself out.
   final VerticalDirection? actionsOverflowDirection;
 
-  /// The spacing between [actions] when the [OverflowBar] switches
-  /// to a column layout because the actions don't fit horizontally.
+  /// The spacing between [actions] when the [OverflowBar] switches to a column
+  /// layout because the actions don't fit horizontally.
   ///
   /// If the widgets in [actions] do not fit into a single row, they are
-  /// arranged into a column. This parameter provides additional
-  /// vertical space in between buttons when it does overflow.
+  /// arranged into a column. This parameter provides additional vertical space
+  /// between buttons when it does overflow.
   ///
-  /// Note that the button spacing may appear to be more than
-  /// the value provided. This is because most buttons adhere to the
-  /// [MaterialTapTargetSize] of 48px. So, even though a button
-  /// might visually be 36px in height, it might still take up to
-  /// 48px vertically.
+  /// The button spacing may appear to be more than the value provided. This is
+  /// because most buttons adhere to the [MaterialTapTargetSize] of 48px. So,
+  /// even though a button might visually be 36px in height, it might still take
+  /// up to 48px vertically.
   ///
-  /// If null then no spacing will be added in between buttons in
-  /// an overflow state.
+  /// If null then no spacing will be added in between buttons in an overflow
+  /// state.
   final double? actionsOverflowButtonSpacing;
 
   /// The padding that surrounds each button in [actions].
@@ -1433,7 +1447,7 @@ class _DialogDefaultsM2 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _DialogDefaultsM3 extends DialogTheme {
   _DialogDefaultsM3(this.context)
@@ -1478,7 +1492,7 @@ class _DialogDefaultsM3 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _DialogFullscreenDefaultsM3 extends DialogTheme {
   const _DialogFullscreenDefaultsM3(this.context);

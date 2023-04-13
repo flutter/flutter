@@ -129,11 +129,16 @@ class CoverageCollector extends TestWatcher {
 
     final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageCollect);
 
-    final Future<void> processComplete = testDevice.finished.catchError(
-      (Object error) => throw Exception(
-          'Failed to collect coverage, test device terminated prematurely with '
-          'error: ${(error as TestDeviceException).message}.'),
-      test: (Object error) => error is TestDeviceException,
+    final Future<void> processComplete = testDevice.finished.then(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
+        if (error is TestDeviceException) {
+          throw Exception(
+            'Failed to collect coverage, test device terminated prematurely with '
+            'error: ${error.message}.\n$stackTrace');
+        }
+        return Future<Object?>.error(error, stackTrace);
+      }
     );
 
     final Future<void> collectionComplete = testDevice.vmServiceUri

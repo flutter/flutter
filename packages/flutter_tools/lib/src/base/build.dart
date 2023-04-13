@@ -169,7 +169,7 @@ class AOTSnapshotter {
       ]);
     }
 
-    // When buiding for iOS and splitting out debug info, we want to strip
+    // When building for iOS and splitting out debug info, we want to strip
     // manually after the dSYM export, instead of in the `gen_snapshot`.
     final bool stripAfterBuild;
     if (targetingApplePlatform) {
@@ -300,6 +300,7 @@ class AOTSnapshotter {
       '-dynamiclib',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-fapplication-extension',
       '-install_name', '@rpath/App.framework/App',
       '-o', appLib,
       assemblyO,

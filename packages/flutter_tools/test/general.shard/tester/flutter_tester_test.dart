@@ -47,7 +47,7 @@ void main() {
     testWithoutContext('no device', () async {
       final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
@@ -55,7 +55,7 @@ void main() {
       FlutterTesterDevices.showFlutterTesterDevice = true;
       final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, hasLength(1));
 
       final Device device = devices.single;

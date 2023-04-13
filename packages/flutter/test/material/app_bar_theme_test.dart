@@ -9,9 +9,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  ScrollController primaryScrollController(WidgetTester tester) {
+    return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
+  }
+
   test('AppBarTheme copyWith, ==, hashCode basics', () {
     expect(const AppBarTheme(), const AppBarTheme().copyWith());
     expect(const AppBarTheme().hashCode, const AppBarTheme().copyWith().hashCode);
+  });
+
+  test('AppBarTheme lerp special cases', () {
+    const AppBarTheme data = AppBarTheme();
+    expect(identical(AppBarTheme.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
@@ -99,51 +108,6 @@ void main() {
     expect(text.style, appBarTheme.toolbarTextStyle);
     expect(tester.getSize(find.byType(AppBar)).height, appBarTheme.toolbarHeight);
     expect(tester.getSize(find.byType(AppBar)).width, 800);
-  });
-
-  testWidgets('SliverAppBar allows AppBar to determine backwardsCompatibility', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/77016
-    const AppBarTheme appBarTheme = AppBarTheme(
-      backwardsCompatibility: false,
-      backgroundColor: Colors.lightBlue,
-      foregroundColor: Colors.black,
-    );
-
-    Widget buildWithBackwardsCompatibility([bool? enabled]) => MaterialApp(
-      theme: ThemeData(appBarTheme: appBarTheme),
-      home: Scaffold(body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            title: const Text('App Bar Title'),
-            backwardsCompatibility: enabled,
-            actions: <Widget>[
-              IconButton(icon: const Icon(Icons.share), onPressed: () { }),
-            ],
-          ),
-        ],
-      )),
-    );
-
-    // Backwards compatibility enabled, AppBar should be built with true.
-    await tester.pumpWidget(buildWithBackwardsCompatibility(true));
-    AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
-    expect(appBar.backwardsCompatibility, true);
-
-    // Backwards compatibility disabled, AppBar should be built with false.
-    await tester.pumpWidget(buildWithBackwardsCompatibility(false));
-    appBar = tester.widget<AppBar>(find.byType(AppBar));
-    expect(appBar.backwardsCompatibility, false);
-
-    // Backwards compatibility unspecified, AppBar should be built with null.
-    await tester.pumpWidget(buildWithBackwardsCompatibility());
-    appBar = tester.widget<AppBar>(find.byType(AppBar));
-    expect(appBar.backwardsCompatibility, null);
-
-    // AppBar should use the backwardsCompatibility of AppBarTheme.
-    // Since backwardsCompatibility is false, the text color should match the
-    // foreground color of the AppBarTheme.
-    final DefaultTextStyle text = _getAppBarText(tester);
-    expect(text.style.color, appBarTheme.foregroundColor);
   });
 
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
@@ -716,14 +680,28 @@ void main() {
     expect(navToolbar.middleSpacing, 40);
   });
 
-  testWidgets("SliverAppBar.medium's title uses AppBarTheme.foregroundColor", (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium uses AppBarTheme properties', (WidgetTester tester) async {
+    const String title = 'Medium SliverAppBar Title';
     const Color foregroundColor = Color(0xff00ff00);
+    const double titleSpacing = 10.0;
+
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: const AppBarTheme(foregroundColor: foregroundColor)),
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          foregroundColor: foregroundColor,
+          titleSpacing: titleSpacing,
+          centerTitle: false,
+        ),
+      ),
       home: CustomScrollView(
+        primary: true,
         slivers: <Widget>[
           SliverAppBar.medium(
-            title: const Text('Medium Title'),
+            leading: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu),
+            ),
+            title: const Text(title),
           ),
         ],
       ),
@@ -731,35 +709,84 @@ void main() {
 
     final RichText text = tester.firstWidget(find.byType(RichText));
     expect(text.text.style!.color, foregroundColor);
+
+    // Scroll to collapse the SliverAppBar.
+    final ScrollController controller = primaryScrollController(tester);
+    controller.jumpTo(45);
+    await tester.pumpAndSettle();
+
+    final Offset titleOffset = tester.getTopLeft(find.text(title).first);
+    final Offset iconOffset = tester.getTopRight(find.byIcon(Icons.menu));
+    // Title spacing should be 10.0.
+    expect(titleOffset.dx, iconOffset.dx + titleSpacing);
   });
 
-  testWidgets(
-    "SliverAppBar.medium's foregroundColor takes priority over AppBarTheme.foregroundColor", (WidgetTester tester) async {
-      const Color foregroundColor = Color(0xff00ff00);
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(foregroundColor: Color(0xffff0000))),
-        home: CustomScrollView(
-          slivers: <Widget>[
-            SliverAppBar.medium(
-              foregroundColor: foregroundColor,
-              title: const Text('Medium Title'),
-            ),
-          ],
-        ),
-      ));
-
-      final RichText text = tester.firstWidget(find.byType(RichText));
-      expect(text.text.style!.color, foregroundColor);
-  });
-
-  testWidgets("SliverAppBar.large's title uses AppBarTheme.foregroundColor", (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium properties take priority over AppBarTheme properties', (WidgetTester tester) async {
+    const String title = 'Medium SliverAppBar Title';
     const Color foregroundColor = Color(0xff00ff00);
+    const double titleSpacing = 10.0;
+
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(appBarTheme: const AppBarTheme(foregroundColor: foregroundColor)),
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          foregroundColor: Color(0xffff0000),
+          titleSpacing: 14.0,
+          centerTitle: true,
+        ),
+      ),
       home: CustomScrollView(
+        primary: true,
+        slivers: <Widget>[
+          SliverAppBar.medium(
+            centerTitle: false,
+            titleSpacing: titleSpacing,
+            foregroundColor: foregroundColor,
+            leading: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu),
+            ),
+            title: const Text(title),
+          ),
+        ],
+      ),
+    ));
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.text.style!.color, foregroundColor);
+
+    // Scroll to collapse the SliverAppBar.
+    final ScrollController controller = primaryScrollController(tester);
+    controller.jumpTo(45);
+    await tester.pumpAndSettle();
+
+    final Offset titleOffset = tester.getTopLeft(find.text(title).first);
+    final Offset iconOffset = tester.getTopRight(find.byIcon(Icons.menu));
+    // Title spacing should be 10.0.
+    expect(titleOffset.dx, iconOffset.dx + titleSpacing);
+  });
+
+  testWidgets('SliverAppBar.large uses AppBarTheme properties', (WidgetTester tester) async {
+    const String title = 'Large SliverAppBar Title';
+    const Color foregroundColor = Color(0xff00ff00);
+    const double titleSpacing = 10.0;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          foregroundColor: foregroundColor,
+          titleSpacing: titleSpacing,
+          centerTitle: false,
+        ),
+      ),
+      home: CustomScrollView(
+        primary: true,
         slivers: <Widget>[
           SliverAppBar.large(
-            title: const Text('Large Title'),
+            leading: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu),
+            ),
+            title: const Text(title),
           ),
         ],
       ),
@@ -767,25 +794,60 @@ void main() {
 
     final RichText text = tester.firstWidget(find.byType(RichText));
     expect(text.text.style!.color, foregroundColor);
+
+    // Scroll to collapse the SliverAppBar.
+    final ScrollController controller = primaryScrollController(tester);
+    controller.jumpTo(45);
+    await tester.pumpAndSettle();
+
+    final Offset titleOffset = tester.getTopLeft(find.text(title).first);
+    final Offset iconOffset = tester.getTopRight(find.byIcon(Icons.menu));
+    // Title spacing should be 10.0.
+    expect(titleOffset.dx, iconOffset.dx + titleSpacing);
   });
 
-  testWidgets(
-    "SliverAppBar.large's foregroundColor takes priority over AppBarTheme.foregroundColor", (WidgetTester tester) async {
-      const Color foregroundColor = Color(0xff00ff00);
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(appBarTheme: const AppBarTheme(foregroundColor: Color(0xffff0000))),
-        home: CustomScrollView(
-          slivers: <Widget>[
-            SliverAppBar.large(
-              foregroundColor: foregroundColor,
-              title: const Text('Large Title'),
-            ),
-          ],
-        ),
-      ));
+  testWidgets('SliverAppBar.large properties take priority over AppBarTheme properties', (WidgetTester tester) async {
+    const String title = 'Large SliverAppBar Title';
+    const Color foregroundColor = Color(0xff00ff00);
+    const double titleSpacing = 10.0;
 
-      final RichText text = tester.firstWidget(find.byType(RichText));
-      expect(text.text.style!.color, foregroundColor);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          foregroundColor: Color(0xffff0000),
+          titleSpacing: 14.0,
+          centerTitle: true,
+        ),
+      ),
+      home: CustomScrollView(
+        primary: true,
+        slivers: <Widget>[
+          SliverAppBar.large(
+            centerTitle: false,
+            titleSpacing: titleSpacing,
+            foregroundColor: foregroundColor,
+            leading: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu),
+            ),
+            title: const Text(title),
+          ),
+        ],
+      ),
+    ));
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.text.style!.color, foregroundColor);
+
+    // Scroll to collapse the SliverAppBar.
+    final ScrollController controller = primaryScrollController(tester);
+    controller.jumpTo(45);
+    await tester.pumpAndSettle();
+
+    final Offset titleOffset = tester.getTopLeft(find.text(title).first);
+    final Offset iconOffset = tester.getTopRight(find.byIcon(Icons.menu));
+    // Title spacing should be 10.0.
+    expect(titleOffset.dx, iconOffset.dx + titleSpacing);
   });
 
   testWidgets('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {

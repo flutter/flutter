@@ -221,6 +221,26 @@ void main() {
       expect(easingApplied.abs(), greaterThan(tensioningApplied.abs()));
     });
 
+    test('no easing resistance for ScrollDecelerationRate.fast', () {
+      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 3.0,
+      );
+
+      final double easingApplied =
+          desktop.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double tensioningApplied =
+          desktop.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
+
+      expect(tensioningApplied.abs(), lessThan(easingApplied.abs()));
+      expect(easingApplied, -10);
+    });
+
     test('overscroll a small list and a big list works the same way', () {
       final ScrollMetrics smallListOverscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,

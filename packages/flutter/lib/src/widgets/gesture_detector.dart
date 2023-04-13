@@ -941,7 +941,7 @@ class GestureDetector extends StatelessWidget {
   /// force to initiate a force press. The amount of force is at least
   /// [ForcePressGestureRecognizer.startPressure].
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressStartCallback? onForcePressStart;
 
@@ -949,7 +949,7 @@ class GestureDetector extends StatelessWidget {
   /// force. The amount of force is at least
   /// [ForcePressGestureRecognizer.peakPressure].
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressPeakCallback? onForcePressPeak;
 
@@ -958,13 +958,13 @@ class GestureDetector extends StatelessWidget {
   /// plane of the screen, pressing the screen with varying forces or both
   /// simultaneously.
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressUpdateCallback? onForcePressUpdate;
 
-  /// The pointer is no longer in contact with the screen.
+  /// The pointer tracked by [onForcePressStart] is no longer in contact with the screen.
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressEndCallback? onForcePressEnd;
 

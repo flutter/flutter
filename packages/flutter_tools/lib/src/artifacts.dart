@@ -530,9 +530,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterToolsFileGenerators:
-        return _getFileGeneratorsPath();
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
@@ -569,9 +568,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterToolsFileGenerators:
-        return _getFileGeneratorsPath();
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
@@ -620,9 +618,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.windowsCppClientWrapper:
       case Artifact.windowsDesktopPath:
-        return _getHostArtifactPath(artifact, platform, mode);
       case Artifact.flutterToolsFileGenerators:
-        return _getFileGeneratorsPath();
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 

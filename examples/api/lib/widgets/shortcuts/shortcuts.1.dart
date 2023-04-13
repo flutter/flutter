@@ -2,26 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Shortcuts].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Shortcuts].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ShortcutsExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ShortcutsExampleApp extends StatelessWidget {
+  const ShortcutsExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Shortcuts Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: ShortcutsExample(),
         ),
       ),
     );
@@ -75,14 +72,14 @@ class DecrementAction extends Action<DecrementIntent> {
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ShortcutsExample extends StatefulWidget {
+  const ShortcutsExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ShortcutsExample> createState() => _ShortcutsExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ShortcutsExampleState extends State<ShortcutsExample> {
   Model model = Model();
 
   @override
@@ -102,8 +99,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           child: Column(
             children: <Widget>[
               const Text('Add to the counter by pressing the up arrow key'),
-              const Text(
-                  'Subtract from the counter by pressing the down arrow key'),
+              const Text('Subtract from the counter by pressing the down arrow key'),
               AnimatedBuilder(
                 animation: model,
                 builder: (BuildContext context, Widget? child) {

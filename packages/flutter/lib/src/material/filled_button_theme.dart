@@ -49,8 +49,8 @@ class FilledButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two filled button themes.
   static FilledButtonThemeData? lerp(FilledButtonThemeData? a, FilledButtonThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return FilledButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),

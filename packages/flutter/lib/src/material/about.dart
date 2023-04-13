@@ -463,11 +463,11 @@ class _LicensePageState extends State<LicensePage> {
 
   Widget _packagesView(final BuildContext _, final bool isLateral) {
     final Widget about = _AboutProgram(
-        name: widget.applicationName ?? _defaultApplicationName(context),
-        icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
-        version: widget.applicationVersion ?? _defaultApplicationVersion(context),
-        legalese: widget.applicationLegalese,
-      );
+      name: widget.applicationName ?? _defaultApplicationName(context),
+      icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
+      version: widget.applicationVersion ?? _defaultApplicationVersion(context),
+      legalese: widget.applicationLegalese,
+    );
     return _PackagesView(
       about: about,
       isLateral: isLateral,
@@ -870,10 +870,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       page = Scaffold(
         appBar: AppBar(
           title: _PackageLicensePageTitle(
-            title,
-            subtitle,
-            theme.primaryTextTheme,
-            theme.appBarTheme.titleTextStyle,
+            title: title,
+            subtitle: subtitle,
+            theme: theme.useMaterial3 ? theme.textTheme : theme.primaryTextTheme,
+            titleTextStyle: theme.appBarTheme.titleTextStyle,
+            foregroundColor: theme.appBarTheme.foregroundColor,
           ),
         ),
         body: Center(
@@ -889,7 +890,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
                   // A Scrollbar is built-in below.
                   behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                   child: Scrollbar(
-                    child: ListView(padding: padding, children: listWidgets),
+                    child: ListView(
+                      primary: true,
+                      padding: padding,
+                      children: listWidgets,
+                    ),
                   ),
                 ),
               ),
@@ -905,7 +910,12 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             automaticallyImplyLeading: false,
             pinned: true,
             backgroundColor: theme.cardColor,
-            title: _PackageLicensePageTitle(title, subtitle, theme.textTheme, theme.textTheme.titleLarge),
+            title: _PackageLicensePageTitle(
+              title: title,
+              subtitle: subtitle,
+              theme: theme.textTheme,
+              titleTextStyle: theme.textTheme.titleLarge,
+            ),
           ),
           SliverPadding(
             padding: padding,
@@ -931,29 +941,29 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
 }
 
 class _PackageLicensePageTitle extends StatelessWidget {
-  const _PackageLicensePageTitle(
-    this.title,
-    this.subtitle,
-    this.theme,
+  const _PackageLicensePageTitle({
+    required this.title,
+    required this.subtitle,
+    required this.theme,
     this.titleTextStyle,
-  );
+    this.foregroundColor,
+  });
 
   final String title;
   final String subtitle;
   final TextTheme theme;
   final TextStyle? titleTextStyle;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
-    final Color? color = Theme.of(context).appBarTheme.foregroundColor;
     final TextStyle? effectiveTitleTextStyle = titleTextStyle ?? theme.titleLarge;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(title, style: effectiveTitleTextStyle?.copyWith(color: color)),
-        Text(subtitle, style: theme.titleSmall?.copyWith(color: color)),
+        Text(title, style: effectiveTitleTextStyle?.copyWith(color: foregroundColor)),
+        Text(subtitle, style: theme.titleSmall?.copyWith(color: foregroundColor)),
       ],
     );
   }
@@ -1223,16 +1233,18 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
   MaterialPageRoute<void> _masterPageRoute(BuildContext context) {
     return MaterialPageRoute<dynamic>(
-      builder: (BuildContext c) => BlockSemantics(
-        child: _MasterPage(
-                leading: widget.automaticallyImplyLeading && Navigator.of(context).canPop()
-                        ? BackButton(onPressed: () => Navigator.of(context).pop())
-                        : null,
-                title: widget.title,
-                automaticallyImplyLeading: widget.automaticallyImplyLeading,
-                masterViewBuilder: widget.masterViewBuilder,
-              ),
-      ),
+      builder: (BuildContext c) {
+        return BlockSemantics(
+          child: _MasterPage(
+            leading: widget.automaticallyImplyLeading && Navigator.of(context).canPop()
+              ? BackButton(onPressed: () { Navigator.of(context).pop(); })
+              : null,
+            title: widget.title,
+            automaticallyImplyLeading: widget.automaticallyImplyLeading,
+            masterViewBuilder: widget.masterViewBuilder,
+          ),
+        );
+      },
     );
   }
 
@@ -1281,14 +1293,14 @@ class _MasterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: title,
-          leading: leading,
-          actions: const <Widget>[],
-          automaticallyImplyLeading: automaticallyImplyLeading,
-        ),
-        body: masterViewBuilder!(context, false),
-      );
+      appBar: AppBar(
+        title: title,
+        leading: leading,
+        actions: const <Widget>[],
+        automaticallyImplyLeading: automaticallyImplyLeading,
+      ),
+      body: masterViewBuilder!(context, false),
+    );
   }
 
 }
@@ -1396,7 +1408,10 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               ),
             ),
           ),
-          body: _masterPanel(context),
+          body: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _masterPanel(context),
+          ),
         ),
         // Detail view stacked above main scaffold and master view.
         SafeArea(

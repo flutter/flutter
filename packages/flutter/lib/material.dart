@@ -21,7 +21,9 @@
 library material;
 
 export 'src/material/about.dart';
+export 'src/material/action_buttons.dart';
 export 'src/material/action_chip.dart';
+export 'src/material/action_icons_theme.dart';
 export 'src/material/adaptive_text_selection_toolbar.dart';
 export 'src/material/animated_icons.dart';
 export 'src/material/app.dart';
@@ -29,7 +31,6 @@ export 'src/material/app_bar.dart';
 export 'src/material/app_bar_theme.dart';
 export 'src/material/arc.dart';
 export 'src/material/autocomplete.dart';
-export 'src/material/back_button.dart';
 export 'src/material/badge.dart';
 export 'src/material/badge_theme.dart';
 export 'src/material/banner.dart';
@@ -151,6 +152,9 @@ export 'src/material/scaffold.dart';
 export 'src/material/scrollbar.dart';
 export 'src/material/scrollbar_theme.dart';
 export 'src/material/search.dart';
+export 'src/material/search_anchor.dart';
+export 'src/material/search_bar_theme.dart';
+export 'src/material/search_view_theme.dart';
 export 'src/material/segmented_button.dart';
 export 'src/material/segmented_button_theme.dart';
 export 'src/material/selectable_text.dart';
