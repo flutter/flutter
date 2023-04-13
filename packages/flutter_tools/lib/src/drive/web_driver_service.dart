@@ -244,21 +244,21 @@ enum Browser implements CliEnum {
 
   @override
   String get helpText => switch (this) {
-        Browser.androidChrome => 'Chrome on Android (see also "--android-emulator").',
-        Browser.chrome => 'Google Chrome on this computer (see also "--chrome-binary").',
-        Browser.edge => 'Microsoft Edge on this computer (Windows only).',
-        Browser.firefox => 'Mozilla Firefox on this computer.',
-        Browser.iosSafari => 'Apple Safari on an iOS device.',
-        Browser.safari => 'Apple Safari on this computer (macOS only).',
-      };
+    Browser.androidChrome => 'Chrome on Android (see also "--android-emulator").',
+    Browser.chrome => 'Google Chrome on this computer (see also "--chrome-binary").',
+    Browser.edge => 'Microsoft Edge on this computer (Windows only).',
+    Browser.firefox => 'Mozilla Firefox on this computer.',
+    Browser.iosSafari => 'Apple Safari on an iOS device.',
+    Browser.safari => 'Apple Safari on this computer (macOS only).',
+  };
 
   @override
   String get cliName => snakeCase(name, '-');
 
   static Browser fromCliName(String? value) => Browser.values.singleWhere(
-        (Browser element) => element.cliName == value,
-        orElse: () => throw UnsupportedError('Browser $value not supported'),
-      );
+    (Browser element) => element.cliName == value,
+    orElse: () => throw UnsupportedError('Browser $value not supported'),
+  );
 }
 
 /// Returns desired capabilities for given [browser], [headless], [chromeBinary]
