@@ -10,16 +10,19 @@ import 'package:leak_tracker/leak_tracker.dart';
 /// The parameter [leaks] contains details about found leaks.
 typedef LeaksCallback = void Function(Leaks leaks);
 
+const String _nonBackwardCompatibleApiWarning = 'Backward compatibility of this API is not guaranteed.';
+
 /// Configuration for leak trecking in unit tests.
 ///
 /// The configuration is needed only for test debugging,
 /// not for regular test run.
+///
+/// Do not submit usage of the constructor to the repository,
+/// because backward compatibility of its API is not guaranteed.
+@Deprecated(_nonBackwardCompatibleApiWarning)
 class LeakTrackingFlutterTestConfig {
   /// Creates a new instance of [LeakTrackingFlutterTestConfig].
-  ///
-  /// Do not submit usage of the constructor to the repository,
-  /// because backward compatibility of its API is not guaranteed.
-  @Deprecated('Backward compatibility of the API is not guaranteed.')
+  @Deprecated(_nonBackwardCompatibleApiWarning)
   const LeakTrackingFlutterTestConfig({
     this.stackTraceCollectionConfig = const StackTraceCollectionConfig(),
     this.onLeaks,
