@@ -154,8 +154,8 @@ class ChoiceChip extends StatelessWidget
     assert(debugCheckHasMaterial(context));
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-       ? _ChoiceChipDefaultsM3(context, isEnabled, selected)
-       : null;
+      ? _ChoiceChipDefaultsM3(context, isEnabled, selected)
+      : null;
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
