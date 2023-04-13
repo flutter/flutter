@@ -418,6 +418,9 @@ enum BuildMode {
   bool get isPrecompiled => !isJit;
 
   String get cliName => snakeCase(name);
+
+  @override
+  String toString() => cliName;
 }
 
 /// Environment type of the target device.
