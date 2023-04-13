@@ -40,13 +40,14 @@ final RegExp _dotHomeStudioVersionMatcher =
 String? get javaPath => globals.androidStudio?.javaPath;
 
 class AndroidStudio {
+  /// A [version] value of null represents an unknown version.
   AndroidStudio(
     this.directory, {
-    Version? version,
+    this.version,
     this.configured,
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
-  }) : version = version {
+  }) {
     _init();
   }
 
@@ -147,7 +148,12 @@ class AndroidStudio {
 
   final String directory;
   final String studioAppName;
+
+  /// The version of Android Studio.
+  ///
+  /// A null value represents an unknown version.
   final Version? version;
+
   final String? configured;
   final String? presetPluginsPath;
 
@@ -163,6 +169,10 @@ class AndroidStudio {
     if (presetPluginsPath != null) {
       return presetPluginsPath!;
     }
+
+    // TODO(andrewkolos): This is a bug. We shouldn't treat an unknown
+    // version as the same 0.0.
+    // See https://github.com/flutter/flutter/issues/121468.
     final int major = version?.major ?? 0;
     final int minor = version?.minor ?? 0;
     final String? homeDirPath = globals.fsUtils.homeDirPath;
