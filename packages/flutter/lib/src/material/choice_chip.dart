@@ -201,11 +201,11 @@ class ChoiceChip extends StatelessWidget
 
 class _ChoiceChipDefaultsM3 extends ChipThemeData {
   _ChoiceChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
-      : super(
-          elevation: 0.0,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
-          showCheckmark: true,
-        );
+    : super(
+        elevation: 0.0,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
+        showCheckmark: true,
+      );
 
   final BuildContext context;
   final bool isEnabled;
