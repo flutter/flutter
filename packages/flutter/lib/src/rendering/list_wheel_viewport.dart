@@ -828,6 +828,8 @@ class RenderListWheelViewport
 
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
+    // Note that the magnifier cannot be turned off if the opacity is less than
+    // 1.0.
     if (overAndUnderCenterOpacity >= 1) {
       RenderBox? childToPaint = firstChild;
       while (childToPaint != null) {
@@ -861,11 +863,8 @@ class RenderListWheelViewport
   // Takes in a child with a **scrollable layout offset** and paints it in the
   // **transformed cylindrical space viewport painting coordinates**.
   //
-  // If [center] is true, only children that overlap with the center section
-  // will be painted. If [center] is false, only children that do not overlap
-  // will be painted. Opacity is only applied to the partially overlapping
-  // children painted when [center] is true.
-  // If center is `null` this logic is ignored entirely.
+  // The value of `center` is passed through to _paintChildWithMagnifier only
+  // if the magnifier is enabled and/or opacity is < 1.0.
   void _paintTransformedChild(
     RenderBox child,
     PaintingContext context,
@@ -911,8 +910,19 @@ class RenderListWheelViewport
     }
   }
 
-  /// Paint child with the magnifier active - the child will be rendered
-  /// differently if it intersects with the magnifier.
+  // Paint child with the magnifier active - the child will be rendered
+  // differently if it intersects with the magnifier.
+  //
+  // `center` controls how items that partially intersect the center magnifier
+  // are rendered. If `center` is false, items are only painted cynlindrically.
+  // If `center` is true, only the clipped magnifier items are painted.
+  // If `center` is null, partially intersecting items are painted both as the
+  // magnifier and cynlidrical item, while non-intersecting items are painted
+  // only cylindrically.
+  //
+  // This property is used to lift the opacity that would be applied to each
+  // cylindrical item into a single layer, reducing the rendering cost of the
+  // pickers which use this viewport.
   void _paintChildWithMagnifier(
     PaintingContext context,
     Offset offset,
