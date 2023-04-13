@@ -52,6 +52,7 @@ class ChoiceChip extends StatelessWidget
     implements
         ChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
@@ -84,9 +85,11 @@ class ChoiceChip extends StatelessWidget
     this.surfaceTintColor,
     this.iconTheme,
     this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0);
+        assert(elevation == null || elevation >= 0.0);
 
   @override
   final Widget? avatar;
@@ -135,6 +138,10 @@ class ChoiceChip extends StatelessWidget
   @override
   final Color? selectedShadowColor;
   @override
+  final bool? showCheckmark;
+  @override
+  final Color? checkmarkColor;
+  @override
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
@@ -147,8 +154,8 @@ class ChoiceChip extends StatelessWidget
     assert(debugCheckHasMaterial(context));
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _ChoiceChipDefaultsM3(context, isEnabled, selected)
-      : null;
+        ? _ChoiceChipDefaultsM3(context, isEnabled, selected)
+        : null;
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -158,7 +165,8 @@ class ChoiceChip extends StatelessWidget
       onSelected: onSelected,
       pressElevation: pressElevation,
       selected: selected,
-      showCheckmark: Theme.of(context).useMaterial3,
+      showCheckmark: showCheckmark,
+      checkmarkColor: checkmarkColor,
       tooltip: tooltip,
       side: side,
       shape: shape,
@@ -193,11 +201,11 @@ class ChoiceChip extends StatelessWidget
 
 class _ChoiceChipDefaultsM3 extends ChipThemeData {
   _ChoiceChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
-    : super(
-        elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
-        showCheckmark: true,
-      );
+      : super(
+          elevation: 0.0,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          showCheckmark: true,
+        );
 
   final BuildContext context;
   final bool isEnabled;
@@ -219,34 +227,34 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
 
   @override
   Color? get selectedColor => isEnabled
-    ? _colors.secondaryContainer
-    : _colors.onSurface.withOpacity(0.12);
+      ? _colors.secondaryContainer
+      : _colors.onSurface.withOpacity(0.12);
 
   @override
   Color? get checkmarkColor => _colors.onSecondaryContainer;
 
   @override
-  Color? get disabledColor => isSelected
-   ? _colors.onSurface.withOpacity(0.12)
-   : null;
+  Color? get disabledColor => isSelected 
+  ? _colors.onSurface.withOpacity(0.12) 
+  : null;
 
   @override
   Color? get deleteIconColor => _colors.onSecondaryContainer;
 
   @override
   BorderSide? get side => !isSelected
-    ? isEnabled
-      ? BorderSide(color: _colors.outline)
-      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
-    : const BorderSide(color: Colors.transparent);
+      ? isEnabled
+          ? BorderSide(color: _colors.outline)
+          : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+      : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? null
-      : _colors.onSurface,
-    size: 18.0,
-  );
+        color: isEnabled 
+        ? null 
+        : _colors.onSurface,
+        size: 18.0,
+      );
 
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
@@ -257,10 +265,10 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
   /// remains 4px.
   @override
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
-  )!;
+        const EdgeInsets.symmetric(horizontal: 8.0),
+        const EdgeInsets.symmetric(horizontal: 4.0),
+        clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+      )!;
 }
 
 // END GENERATED TOKEN PROPERTIES - ChoiceChip
