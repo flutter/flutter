@@ -48,7 +48,7 @@ class AndroidStudio {
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
   }) {
-    _init();
+    _initAndValidate();
   }
 
   static AndroidStudio? fromMacOSBundle(String bundlePath) {
@@ -171,7 +171,7 @@ class AndroidStudio {
     }
 
     // TODO(andrewkolos): This is a bug. We shouldn't treat an unknown
-    // version as the same 0.0.
+    // version as equivalent to 0.0.
     // See https://github.com/flutter/flutter/issues/121468.
     final int major = version?.major ?? 0;
     final int minor = version?.minor ?? 0;
@@ -253,13 +253,11 @@ class AndroidStudio {
 
       if (studio.version != null && newest.version == null) {
         newest = studio;
-      }
-      else if (studio.version == null && newest.version == null &&
-            studio.directory.compareTo(newest.directory) > 0 ) {
+      } else if (studio.version == null && newest.version == null &&
+            studio.directory.compareTo(newest.directory) > 0) {
         newest = studio;
-      }
-      else if (studio.version != null && newest.version != null &&
-          studio.version!.compareTo(newest.version!) > 0){
+      } else if (studio.version != null && newest.version != null &&
+          studio.version! > newest.version!) {
         newest = studio;
       }
     }
@@ -455,7 +453,7 @@ class AndroidStudio {
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 
-  void _init() {
+  void _initAndValidate() {
     _isValid = false;
     _validationMessages.clear();
 
