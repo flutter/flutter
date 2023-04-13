@@ -82,7 +82,7 @@ class AndroidStudioValidator extends DoctorValidator {
         (String m) => ValidationMessage.error(m),
       ));
       messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
-      if (_studio.configured != null) {
+      if (_studio.configuredPath != null) {
         messages.add(ValidationMessage(userMessages.androidStudioResetDir));
       }
     }

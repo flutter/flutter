@@ -44,7 +44,7 @@ class AndroidStudio {
   AndroidStudio(
     this.directory, {
     this.version,
-    this.configured,
+    this.configuredPath,
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
   }) {
@@ -154,7 +154,7 @@ class AndroidStudio {
   /// A null value represents an unknown version.
   final Version? version;
 
-  final String? configured;
+  final String? configuredPath;
   final String? presetPluginsPath;
 
   String? _javaPath;
@@ -228,15 +228,19 @@ class AndroidStudio {
   List<String> get validationMessages => _validationMessages;
 
   /// Locates the newest, valid version of Android Studio.
+  ///
+  /// In the case that `--android-studio-dir` is configured, the version of
+  /// Android Studio found at that location is always returned, even if it is
+  /// invalid.
   static AndroidStudio? latestValid() {
-    final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudio != null) {
-      String configuredStudioPath = configuredStudio;
-      if (globals.platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
-        configuredStudioPath = globals.fs.path.join(configuredStudioPath, 'Contents');
+    final String? configuredStudioPath = globals.config.getValue('android-studio-dir') as String?;
+    if (configuredStudioPath != null) {
+      String correctedConfiguredStudioPath = configuredStudioPath;
+      if (globals.platform.isMacOS && !correctedConfiguredStudioPath.endsWith('Contents')) {
+        correctedConfiguredStudioPath = globals.fs.path.join(correctedConfiguredStudioPath, 'Contents');
       }
-      return AndroidStudio(configuredStudioPath,
-          configured: configuredStudio);
+      return AndroidStudio(correctedConfiguredStudioPath,
+          configuredPath: configuredStudioPath);
     }
 
     // Find all available Studio installations.
@@ -343,7 +347,7 @@ class AndroidStudio {
   static List<AndroidStudio> _allLinuxOrWindows() {
     final List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool hasStudioAt(String path, { Version? newerThan }) {
+    bool alreadyFoundStudioAt(String path, { Version? newerThan }) {
       return studios.any((AndroidStudio studio) {
         if (studio.directory != path) {
           return false;
@@ -388,7 +392,7 @@ class AndroidStudio {
 
       for (final Directory entity in entities) {
         final AndroidStudio? studio = AndroidStudio.fromHomeDot(entity);
-        if (studio != null && !hasStudioAt(studio.directory, newerThan: studio.version)) {
+        if (studio != null && !alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
           studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
           studios.add(studio);
         }
@@ -419,7 +423,7 @@ class AndroidStudio {
                 version: Version.parse(version),
                 studioAppName: title,
               );
-              if (!hasStudioAt(studio.directory, newerThan: studio.version)) {
+              if (!alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
                 studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
                 studios.add(studio);
               }
@@ -430,14 +434,14 @@ class AndroidStudio {
     }
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudioDir != null && !hasStudioAt(configuredStudioDir)) {
+    if (configuredStudioDir != null && !alreadyFoundStudioAt(configuredStudioDir)) {
       studios.add(AndroidStudio(configuredStudioDir,
-          configured: configuredStudioDir));
+          configuredPath: configuredStudioDir));
     }
 
     if (globals.platform.isLinux) {
       void checkWellKnownPath(String path) {
-        if (globals.fs.isDirectorySync(path) && !hasStudioAt(path)) {
+        if (globals.fs.isDirectorySync(path) && !alreadyFoundStudioAt(path)) {
           studios.add(AndroidStudio(path));
         }
       }
@@ -457,8 +461,8 @@ class AndroidStudio {
     _isValid = false;
     _validationMessages.clear();
 
-    if (configured != null) {
-      _validationMessages.add('android-studio-dir = $configured');
+    if (configuredPath != null) {
+      _validationMessages.add('android-studio-dir = $configuredPath');
     }
 
     if (!globals.fs.isDirectorySync(directory)) {
