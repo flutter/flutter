@@ -15229,6 +15229,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(button.enabled, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+      skip: kIsWeb, // [intended]
     );
 
     testWidgets('cupertino spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
