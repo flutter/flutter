@@ -111,14 +111,28 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
-/// If [trackMemoryLeaks] is `true`, the test will run with memory leak detection
-/// parameterized by [leakTrackingFlutterTestConfig].
-/// See details at https://github.com/dart-lang/leak_tracker.
-///
 /// See also:
 ///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
 ///    timeout and how to manually increase timeouts.
+///
+/// ## Memory leak detection
+///
+/// If [trackMemoryLeaks] is `true`, the test will run with memory leak detection
+/// and fail in case of leaks. The exception will contain the leaks' details.
+/// To troubleshoot the the failure, configure leak tracking by customizing
+/// [leakTrackingConfig]:
+///
+///  * Set [LeakTrackingFlutterTestConfig.onLeaks] to process leaks details
+///    programmatically.
+///  * Use [LeakTrackingFlutterTestConfig.stackTraceCollectionConfig] to
+///    specify cases when stack traces should be collected and provided with
+///    leak details.
+///  * Flip [LeakTrackingFlutterTestConfig.failTestOnLeaks] if you do not want the
+///    test to fail in case of leaks, but want to process them programmatically.
+///
+/// Learn more about leak detection and types of leaks
+/// at https://github.com/dart-lang/leak_tracker.
 ///
 /// ## Sample code
 ///
@@ -144,7 +158,7 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   bool trackMemoryLeaks = false,
-  LeakTrackingFlutterTestConfig leakTrackingFlutterTestConfig = const LeakTrackingFlutterTestConfig(),
+  LeakTrackingFlutterTestConfig leakTrackingConfig = const LeakTrackingFlutterTestConfig(),
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -179,7 +193,7 @@ void testWidgets(
                 await withFlutterLeakTracking(
                   () => callback(tester),
                   tester: tester,
-                  config: leakTrackingFlutterTestConfig,
+                  config: leakTrackingConfig,
                 );
               } else {
                 await callback(tester);

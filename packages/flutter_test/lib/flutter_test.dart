@@ -68,6 +68,7 @@ export 'src/finders.dart';
 export 'src/frame_timing_summarizer.dart';
 export 'src/goldens.dart';
 export 'src/image.dart';
+export 'src/leak_tracking.dart';
 export 'src/matchers.dart';
 export 'src/nonconst.dart';
 export 'src/platform.dart';
