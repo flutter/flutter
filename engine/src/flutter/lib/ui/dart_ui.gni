@@ -25,10 +25,3 @@ dart_ui_files = [
 ]
 
 dart_ui_path = "//flutter/lib/ui/ui.dart"
-
-dart_ui_web_files = [
-  "//flutter/lib/web_ui/lib/ui_web/src/ui_web/url_strategy.dart",
-  "//flutter/lib/web_ui/lib/ui_web/src/ui_web.dart",
-]
-
-dart_ui_web_path = "//flutter/lib/web_ui/lib/ui_web/src/ui_web.dart"
