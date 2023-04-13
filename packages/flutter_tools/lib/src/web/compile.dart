@@ -21,6 +21,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../version.dart';
 import 'compiler_config.dart';
+import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
 export 'compiler_config.dart';
@@ -51,7 +52,7 @@ class WebBuilder {
     FlutterProject flutterProject,
     String target,
     BuildInfo buildInfo,
-    String serviceWorkerStrategy, {
+    ServiceWorkerStrategy serviceWorkerStrategy, {
     required WebCompilerConfig compilerConfig,
     String? baseHref,
     String? outputDirectoryPath,
@@ -93,7 +94,7 @@ class WebBuilder {
               kTargetFile: target,
               kHasWebPlugins: hasWebPlugins.toString(),
               if (baseHref != null) kBaseHref: baseHref,
-              kServiceWorkerStrategy: serviceWorkerStrategy,
+              kServiceWorkerStrategy: serviceWorkerStrategy.cliName,
               ...compilerConfig.toBuildSystemEnvironment(),
               ...buildInfo.toBuildSystemEnvironment(),
             },

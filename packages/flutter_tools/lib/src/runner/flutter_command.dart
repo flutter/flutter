@@ -82,18 +82,12 @@ class FlutterCommandResult {
   final DateTime? endTimeOverride;
 
   @override
-  String toString() {
-    switch (exitStatus) {
-      case ExitStatus.success:
-        return 'success';
-      case ExitStatus.warning:
-        return 'warning';
-      case ExitStatus.fail:
-        return 'fail';
-      case ExitStatus.killed:
-        return 'killed';
-    }
-  }
+  String toString() => switch (exitStatus) {
+        ExitStatus.success => 'success',
+        ExitStatus.warning => 'warning',
+        ExitStatus.fail => 'fail',
+        ExitStatus.killed => 'killed'
+      };
 }
 
 /// Common flutter command line options.
@@ -130,7 +124,7 @@ abstract final class FlutterOptions {
 }
 
 /// flutter command categories for usage.
-class FlutterCommandCategory {
+abstract final class FlutterCommandCategory {
   static const String sdk = 'Flutter SDK';
   static const String project = 'Project';
   static const String tools = 'Tools & Devices';
@@ -1422,7 +1416,7 @@ abstract class FlutterCommand extends Command<void> {
 
     // Send timing.
     final List<String?> labels = <String?>[
-      getEnumName(commandResult.exitStatus),
+      commandResult.exitStatus.name,
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];

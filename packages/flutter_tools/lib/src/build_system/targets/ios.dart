@@ -56,7 +56,7 @@ abstract class AotAssemblyBase extends Target {
     }
 
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final BuildMode buildMode = getBuildModeForName(environmentBuildMode);
+    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
@@ -461,7 +461,7 @@ abstract class IosAssetBundle extends Target {
     if (environmentBuildMode == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(environmentBuildMode);
+    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final String frameworkBinaryPath = frameworkDirectory.childFile('App').path;
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');

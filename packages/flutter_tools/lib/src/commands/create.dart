@@ -36,25 +36,14 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: FlutterProjectType.values.map<String>(flutterProjectTypeToString),
+      allowed: FlutterProjectType.values.map<String>((FlutterProjectType e) => e.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
-      allowedHelp: <String, String>{
-        flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
-        flutterProjectTypeToString(FlutterProjectType.skeleton): 'Generate a List View / Detail View Flutter '
-            'application that follows community best practices.',
-        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
-            'Dart code.',
-        flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
-            'in Dart code with a platform-specific implementation through method channels for Android, iOS, '
-            'Linux, macOS, Windows, web, or any combination of these.',
-        flutterProjectTypeToString(FlutterProjectType.ffiPlugin):
-            'Generate a shareable Flutter project containing an API '
-            'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
-            'Linux, macOS, Windows, or any combination of these.',
-        flutterProjectTypeToString(FlutterProjectType.module): 'Generate a project to add a Flutter module to an '
-            'existing Android or iOS application.',
-      },
+      allowedHelp: Map<String, String>.fromEntries(
+        FlutterProjectType.values.map(
+          (FlutterProjectType e) => MapEntry<String, String>(e.cliName, e.helpText),
+        ),
+      ),
     );
     argParser.addOption(
       'sample',
@@ -164,7 +153,7 @@ class CreateCommand extends CreateBase {
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     final String? templateArgument = stringArg('template');
     if (templateArgument != null) {
-      template = stringToProjectType(templateArgument);
+      template = FlutterProjectType.fromCliName(templateArgument);
     }
     // If the project directory exists and isn't empty, then try to determine the template
     // type from the project directory.
@@ -182,8 +171,8 @@ class CreateCommand extends CreateBase {
     if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
       // We can only be definitive that this is the wrong type if the .metadata file
       // exists and contains a type that doesn't match.
-      throwToolExit("The requested template type '${flutterProjectTypeToString(template)}' doesn't match the "
-          "existing template type of '${flutterProjectTypeToString(detectedProjectType)}'.");
+      throwToolExit("The requested template type '${template.cliName}' doesn't match the "
+          "existing template type of '${detectedProjectType.cliName}'.");
     }
     return template;
   }
@@ -210,9 +199,9 @@ class CreateCommand extends CreateBase {
     final bool emptyArgument = boolArg('empty');
     if (sampleArgument != null) {
       final String? templateArgument = stringArg('template');
-      if (templateArgument != null && stringToProjectType(templateArgument) != FlutterProjectType.app) {
+      if (templateArgument != null && FlutterProjectType.fromCliName(templateArgument) != FlutterProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
-          '"${flutterProjectTypeToString(FlutterProjectType.app)}"');
+          '"${FlutterProjectType.app.cliName}"');
       }
       // Fetch the sample from the server.
       sampleCode = await _fetchSampleFromServer(sampleArgument);
