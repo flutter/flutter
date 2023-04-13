@@ -1906,7 +1906,7 @@ abstract class RenderBox extends RenderObject {
         ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),
         ErrorHint(
           'If you are not writing your own RenderBox subclass, then this is not\n'
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
         ),
       ]),
     ));
@@ -2266,7 +2266,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
           ),
         ]);
       }
@@ -2315,7 +2315,7 @@ abstract class RenderBox extends RenderObject {
             ...failures,
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
             ),
           ]);
         }
@@ -2341,7 +2341,7 @@ abstract class RenderBox extends RenderObject {
             ),
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
             ),
           ]);
         }
