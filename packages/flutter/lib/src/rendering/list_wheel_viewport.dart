@@ -831,31 +831,23 @@ class RenderListWheelViewport
     // Note that the magnifier cannot be turned off if the opacity is less than
     // 1.0.
     if (overAndUnderCenterOpacity >= 1) {
-      RenderBox? childToPaint = firstChild;
-      while (childToPaint != null) {
-        final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
-        // center value is ignored if overAndUnderCenterOpacity >= 1.
-        _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: null);
-        childToPaint = childAfter(childToPaint);
-      }
+      _paintAllChildren(context, offset, center: null);
       return;
     }
 
     // In order to reduce the number of opacity layers, we first paint all
     // partially opaque children, then finally paint the fully opaque children.
     context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
-      RenderBox? childToPaint = firstChild;
-      while (childToPaint != null) {
-        final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
-        _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: false);
-        childToPaint = childAfter(childToPaint);
-      }
+      _paintAllChildren(context, offset, center: false);
     });
+    _paintAllChildren(context, offset, center: true);
+  }
 
+  void _paintAllChildren(PaintingContext context, Offset offset, { bool? center }) {
     RenderBox? childToPaint = firstChild;
     while (childToPaint != null) {
       final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
-      _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: true);
+      _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: center);
       childToPaint = childAfter(childToPaint);
     }
   }
