@@ -8,7 +8,9 @@ import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 abstract final class SystemNavigator {
-  static bool _frameworkHandlesPop = false;
+  // TODO(justinmc): Think about this default, and startup, and what happens in
+  // your example where the first route is a nestednavigator.
+  static bool _frameworkHandlesPop = true;
 
   /// Inform the platform of whether or not the navigation stack is empty.
   ///
