@@ -1397,7 +1397,15 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
         final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
-        result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+        final SelectionMode selectionMode = event.mode;
+        debugPrint(selectionMode.toString());
+
+        switch (selectionMode) {
+          case SelectionMode.character:
+            result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+          case SelectionMode.words:
+            result = _updateSelectionEdgeByWord(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+        }
       case SelectionEventType.clear:
         result = _handleClearSelection();
       case SelectionEventType.selectAll:
@@ -1474,6 +1482,33 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
   }
 
+  SelectionResult _updateSelectionEdgeByWord(Offset globalPosition, {required bool isEnd}) {
+    _setSelectionPosition(null, isEnd: isEnd);
+    final Matrix4 transform = paragraph.getTransformTo(null);
+    transform.invert();
+    final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
+    if (_rect.isEmpty) {
+      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+    }
+    final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
+      _rect,
+      localPosition,
+      direction: paragraph.textDirection,
+    );
+
+    final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(adjustedOffset));
+
+    final (TextPosition start, TextPosition end) wordBoundary = _getWordBoundaryAtPosition(position);
+    if (isEnd) {
+      debugPrint('setting end');
+      _setSelectionPosition(wordBoundary.$2, isEnd: isEnd);
+    } else {
+      debugPrint('setting start');
+      _setSelectionPosition(wordBoundary.$1, isEnd: isEnd);
+    }
+    return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+  }
+
   TextPosition _clampTextPosition(TextPosition position) {
     // Affinity of range.end is upstream.
     if (position.offset > range.end ||
@@ -1511,6 +1546,13 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     if (_positionIsWithinCurrentSelection(position)) {
       return SelectionResult.end;
     }
+    final (TextPosition start, TextPosition end) wordBoundary = _getWordBoundaryAtPosition(position);
+    _textSelectionStart = wordBoundary.$1;
+    _textSelectionEnd = wordBoundary.$2;
+    return SelectionResult.end;
+  }
+
+  (TextPosition start, TextPosition end) _getWordBoundaryAtPosition(TextPosition position) {
     final TextRange word = paragraph.getWordBoundary(position);
     assert(word.isNormalized);
     if (word.start < range.start && word.end < range.start) {
@@ -1529,9 +1571,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       start = TextPosition(offset: word.start);
       end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
     }
-    _textSelectionStart = start;
-    _textSelectionEnd = end;
-    return SelectionResult.end;
+    return (start, end);
   }
 
   SelectionResult _handleDirectionallyExtendSelection(double horizontalBaseline, bool isExtent, SelectionExtendDirection movement) {

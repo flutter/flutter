@@ -423,13 +423,48 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   // gestures.
 
+  // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
+  // which can grow to be infinitely large, to a value between 1 and 3. The value
+  // that the raw count is converted to is based on the default observed behavior
+  // on the native platforms.
+  //
+  // This method should be used in all instances when details.consecutiveTapCount
+  // would be used.
+  static int _getEffectiveConsecutiveTapCount(int rawCount) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+        // From observation, these platform's reset their tap count to 0 when
+        // the number of consecutive taps exceeds 3. For example on Debian Linux
+        // with GTK, when going past a triple click, on the fourth click the
+        // selection is moved to the precise click position, on the fifth click
+        // the word at the position is selected, and on the sixth click the
+        // paragraph at the position is selected.
+        return rawCount <= 3 ? rawCount : (rawCount % 3 == 0 ? 3 : rawCount % 3);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        // From observation, these platform's either hold their tap count at 3.
+        // For example on macOS, when going past a triple click, the selection
+        // should be retained at the paragraph that was first selected on triple
+        // click.
+        return min(rawCount, 3);
+      case TargetPlatform.windows:
+        // From observation, this platform's consecutive tap actions alternate
+        // between double click and triple click actions. For example, after a
+        // triple click has selected a paragraph, on the next click the word at
+        // the clicked position will be selected, and on the next click the
+        // paragraph at the position is selected.
+        return rawCount < 2 ? rawCount : 2 + rawCount % 2;
+    }
+  }
+
   void _initMouseGestureRecognizer() {
     _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
           () => TapAndPanGestureRecognizer(debugOwner:this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
           (TapAndPanGestureRecognizer instance) {
         instance
           ..onTapDown = _startNewMouseSelectionGesture
-          ..onTapUp = (TapDragUpDetails details) { _clearSelection(); }
           ..onDragStart = _handleMouseDragStart
           ..onDragUpdate = _handleMouseDragUpdate
           ..onDragEnd = _handleMouseDragEnd
@@ -452,17 +487,59 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _startNewMouseSelectionGesture(TapDragDownDetails details) {
-    widget.focusNode.requestFocus();
-    hideToolbar();
-    _clearSelection();
+    switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
+      case 1:
+        widget.focusNode.requestFocus();
+        hideToolbar();
+        _clearSelection();
+      case 2:
+        _selectWordAt(offset: details.globalPosition);
+    }
   }
 
   void _handleMouseDragStart(TapDragStartDetails details) {
-    _selectStartTo(offset: details.globalPosition);
+    switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
+      case 1:
+        _selectStartTo(offset: details.globalPosition);
+    }
+  }
+
+  SelectionPoint? _initialStart;
+
+  bool _shouldMoveEndEdge(TapDragUpdateDetails details) {
+    _initialStart = _initialStart ?? _selectionDelegate.value.startSelectionPoint!;
+    final bool isDraggingForwardFromOrigin = details.localOffsetFromOrigin.dx > 0;
+    final bool isPositionAboveStartingBaseLine = details.localPosition.dy > _initialStart!.localPosition.dy - _initialStart!.lineHeight;
+    final bool isPositionBelowStartingBaseLine = details.localPosition.dy > _initialStart!.localPosition.dy;
+
+    if (isDraggingForwardFromOrigin && isPositionAboveStartingBaseLine || isPositionBelowStartingBaseLine) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
-    _selectEndTo(offset: details.globalPosition, continuous: true);
+    switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
+      case 1:
+        _selectEndTo(offset: details.globalPosition, continuous: true);
+      case 2:
+        if (_shouldMoveEndEdge(details)) {
+          // Hold the start edge at the word located at the beginning of the drag.
+          _selectStartTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, mode: SelectionMode.words);
+          _selectEndTo(offset: details.globalPosition, continuous: true, mode: SelectionMode.words);
+        } else {
+          _selectStartTo(offset: details.globalPosition, continuous: true, mode: SelectionMode.words);
+          // Hold the end edge at the word located at the beginning of the drag.
+          _selectEndTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, mode: SelectionMode.words);
+        }
+    }
+  }
+
+  void _handleMouseDragEnd(TapDragEndDetails details) {
+    _finalizeSelection();
+    _updateSelectedContentIfNeeded();
+    _initialStart = null;
   }
 
   void _updateSelectedContentIfNeeded() {
@@ -470,11 +547,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _lastSelectedContent = _selectable?.getSelectedContent();
       widget.onSelectionChanged?.call(_lastSelectedContent);
     }
-  }
-
-  void _handleMouseDragEnd(TapDragEndDetails details) {
-    _finalizeSelection();
-    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressStart(LongPressStartDetails details) {
@@ -565,7 +637,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// If the selectable subtree returns a [SelectionResult.pending], this method
   /// continues to send [SelectionEdgeUpdateEvent]s every frame until the result
   /// is not pending or users end their gestures.
-  void _triggerSelectionEndEdgeUpdate() {
+  void _triggerSelectionEndEdgeUpdate([SelectionMode? mode]) {
     // This method can be called when the drag is not in progress. This can
     // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
@@ -574,14 +646,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       return;
     }
     if (_selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!)) == SelectionResult.pending) {
+        SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!, selectionMode: mode)) == SelectionResult.pending) {
       _scheduledSelectionEndEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         if (!_scheduledSelectionEndEdgeUpdate) {
           return;
         }
         _scheduledSelectionEndEdgeUpdate = false;
-        _triggerSelectionEndEdgeUpdate();
+        _triggerSelectionEndEdgeUpdate(mode);
       });
       return;
     }
@@ -619,7 +691,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// If the selectable subtree returns a [SelectionResult.pending], this method
   /// continues to send [SelectionEdgeUpdateEvent]s every frame until the result
   /// is not pending or users end their gestures.
-  void _triggerSelectionStartEdgeUpdate() {
+  void _triggerSelectionStartEdgeUpdate([SelectionMode? mode]) {
     // This method can be called when the drag is not in progress. This can
     // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
@@ -628,14 +700,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       return;
     }
     if (_selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forStart(globalPosition: _selectionStartPosition!)) == SelectionResult.pending) {
+        SelectionEdgeUpdateEvent.forStart(globalPosition: _selectionStartPosition!, selectionMode: mode)) == SelectionResult.pending) {
       _scheduledSelectionStartEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         if (!_scheduledSelectionStartEdgeUpdate) {
           return;
         }
         _scheduledSelectionStartEdgeUpdate = false;
-        _triggerSelectionStartEdgeUpdate();
+        _triggerSelectionStartEdgeUpdate(mode);
       });
       return;
     }
@@ -853,14 +925,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
-  void _selectEndTo({required Offset offset, bool continuous = false}) {
+  void _selectEndTo({required Offset offset, bool continuous = false, SelectionMode? mode}) {
     if (!continuous) {
-      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: offset));
+      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: offset, selectionMode: mode));
       return;
     }
     if (_selectionEndPosition != offset) {
       _selectionEndPosition = offset;
-      _triggerSelectionEndEdgeUpdate();
+      _triggerSelectionEndEdgeUpdate(mode);
     }
   }
 
@@ -888,14 +960,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
-  void _selectStartTo({required Offset offset, bool continuous = false}) {
+  void _selectStartTo({required Offset offset, bool continuous = false, SelectionMode? mode}) {
     if (!continuous) {
-      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: offset));
+      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: offset, selectionMode: mode));
       return;
     }
     if (_selectionStartPosition != offset) {
       _selectionStartPosition = offset;
-      _triggerSelectionStartEdgeUpdate();
+      _triggerSelectionStartEdgeUpdate(mode);
     }
   }
 

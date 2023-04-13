@@ -55,6 +55,11 @@ enum SelectionResult {
   none,
 }
 
+enum SelectionMode {
+  character,
+  words,
+}
+
 /// The abstract interface to handle [SelectionEvent]s.
 ///
 /// This interface is extended by [Selectable] and [SelectionContainerDelegate]
@@ -383,18 +388,22 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [globalPosition] contains the location of the selection start edge.
   const SelectionEdgeUpdateEvent.forStart({
-    required this.globalPosition
-  }) : super._(SelectionEventType.startEdgeUpdate);
+    required this.globalPosition,
+    SelectionMode? selectionMode
+  }) : mode = selectionMode ?? SelectionMode.character, super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
   /// The [globalPosition] contains the new location of the selection end edge.
   const SelectionEdgeUpdateEvent.forEnd({
-    required this.globalPosition
-  }) : super._(SelectionEventType.endEdgeUpdate);
+    required this.globalPosition,
+    SelectionMode? selectionMode
+  }) : mode = selectionMode ?? SelectionMode.character, super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
+
+  final SelectionMode mode;
 }
 
 /// Extends the start or end of the selection by a given [TextGranularity].
@@ -686,7 +695,7 @@ class SelectionGeometry {
 
 /// The geometry information of a selection point.
 @immutable
-class SelectionPoint {
+class SelectionPoint with Diagnosticable {
   /// Creates a selection point object.
   ///
   /// All properties must not be null.
@@ -729,6 +738,14 @@ class SelectionPoint {
       lineHeight,
       handleType,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(DoubleProperty('lineHeight', lineHeight));
+    properties.add(EnumProperty('handleType', handleType));
   }
 }
 
