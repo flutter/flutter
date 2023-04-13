@@ -467,7 +467,6 @@ class AndroidSdk {
   /// This method considers jdk in the following order:
   /// * the JDK bundled with Android Studio, if one is found;
   /// * the JAVA_HOME in the ambient environment, if set;
-  /// * on macOS, the value provided by the `java_home` command.
   String? get javaHome {
     return findJavaHome(
       androidStudio: globals.androidStudio,
@@ -494,22 +493,6 @@ class AndroidSdk {
       // Trust JAVA_HOME.
       globals.printTrace('Using JAVA_HOME.');
       return javaHomeEnv;
-    }
-
-    // MacOS specific logic to avoid popping up a dialog window.
-    // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
-    if (platform.isMacOS) {
-      try {
-        final String javaHomeOutput = globals.processUtils.runSync(
-          <String>['/usr/libexec/java_home', '-v', '1.8'],
-          throwOnError: true,
-          hideStdout: true,
-        ).stdout.trim();
-        if (javaHomeOutput.isNotEmpty) {
-          final String javaHome = javaHomeOutput.split('\n').last.trim();
-          return javaHome;
-        }
-      } on Exception { /* ignore */ }
     }
     return null;
   }
