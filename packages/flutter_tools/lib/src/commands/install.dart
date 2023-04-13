@@ -19,6 +19,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     requiresPubspecYaml();
     usesApplicationBinaryOption();
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
     usesDeviceUserOption();
     usesFlavorOption();
     argParser.addFlag('uninstall-only',
@@ -34,6 +35,9 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
   @override
   final String category = FlutterCommandCategory.tools;
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   Device? device;
 

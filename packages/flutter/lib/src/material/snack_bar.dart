@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
@@ -88,9 +89,13 @@ class SnackBarAction extends StatefulWidget {
     super.key,
     this.textColor,
     this.disabledTextColor,
+    this.backgroundColor,
+    this.disabledBackgroundColor,
     required this.label,
     required this.onPressed,
-  });
+  }) : assert(backgroundColor is! MaterialStateColor || disabledBackgroundColor == null,
+        'disabledBackgroundColor must not be provided when background color is '
+        'a MaterialStateColor');
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
@@ -101,9 +106,23 @@ class SnackBarAction extends StatefulWidget {
   /// hovered and others.
   final Color? textColor;
 
+  /// The button background fill color. If not provided, defaults to
+  /// [SnackBarThemeData.actionBackgroundColor].
+  ///
+  /// If [backgroundColor] is a [MaterialStateColor], then the text color will
+  /// be resolved against the set of [MaterialState]s that the action text is
+  /// in, thus allowing for different colors for the states.
+  final Color? backgroundColor;
+
   /// The button disabled label color. This color is shown after the
   /// [SnackBarAction] is dismissed.
   final Color? disabledTextColor;
+
+  /// The button diabled background color. This color is shown after the
+  /// [SnackBarAction] is dismissed.
+  ///
+  /// If not provided, defaults to [SnackBarThemeData.disabledActionBackgroundColor].
+  final Color? disabledBackgroundColor;
 
   /// The button label.
   final String label;
@@ -166,9 +185,29 @@ class _SnackBarActionState extends State<SnackBarAction> {
       });
     }
 
+    MaterialStateColor? resolveBackgroundColor() {
+      if (widget.backgroundColor is MaterialStateColor) {
+        return widget.backgroundColor! as MaterialStateColor;
+      }
+      if (snackBarTheme.actionBackgroundColor is MaterialStateColor) {
+        return snackBarTheme.actionBackgroundColor! as MaterialStateColor;
+      }
+      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return widget.disabledBackgroundColor ??
+              snackBarTheme.disabledActionBackgroundColor ??
+              Colors.transparent;
+        }
+        return widget.backgroundColor ??
+            snackBarTheme.actionBackgroundColor ??
+            Colors.transparent;
+      });
+    }
+
     return TextButton(
       style: ButtonStyle(
         foregroundColor: resolveForegroundColor(),
+        backgroundColor: resolveBackgroundColor(),
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),

@@ -186,6 +186,22 @@ targets:
       validation: analyze
       validation_name: Analyze
 
+  - name: Linux analyzer_benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "curl", "version": "version:7.64.0"}
+        ]
+      cores: "32"
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: analyzer_benchmark
+
   - name: Linux coverage
     bringup: true
     recipe: flutter/coverage
@@ -360,6 +376,7 @@ targets:
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/124691
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
@@ -398,6 +415,10 @@ targets:
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
     properties:
       task_name: flutter_packaging
       tags: >
@@ -1424,15 +1445,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux_android analyzer_benchmark
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: analyzer_benchmark
-
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: true
@@ -1464,7 +1476,7 @@ targets:
 
   - name: Linux_android android_semantics_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/114360
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/124636
     presubmit: false
     timeout: 60
     properties:
@@ -2181,7 +2193,7 @@ targets:
       task_name: new_gallery__transition_perf
 
   - name: Linux_android new_gallery_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112577
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/124699
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2191,7 +2203,7 @@ targets:
       task_name: new_gallery_impeller__transition_perf
 
   - name: Linux_samsung_s10 new_gallery_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112573
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/124693
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2430,7 +2442,6 @@ targets:
       task_name: gradient_static_perf__e2e_summary
 
   - name: Linux_android android_choreographer_do_frame_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/119720
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2438,6 +2449,15 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
+
+  - name: Linux_android animated_blur_backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: animated_blur_backdrop_filter_perf__timeline_summary
 
   - name: Staging_build_linux analyze
     presubmit: false
@@ -2725,6 +2745,10 @@ targets:
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2733,6 +2757,10 @@ targets:
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2972,7 +3000,6 @@ targets:
       task_name: platform_view_macos__start_up
 
   - name: Mac platform_channel_sample_test_macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3138,7 +3165,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3164,7 +3190,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3190,7 +3215,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3216,7 +3240,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       add_recipes_cq: "true"
       dependencies: >-
         [
@@ -3309,7 +3332,6 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/120014
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
@@ -3583,7 +3605,6 @@ targets:
       task_name: imagefiltered_transform_animation_perf_impeller_ios__timeline_summary
 
   - name: Mac_ios external_ui_integration_test_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/106806
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3978,7 +3999,6 @@ targets:
       task_name: simple_animation_perf_impeller_ios
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/120808
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4049,6 +4069,15 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_impeller_ios
+
+  - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
@@ -4424,7 +4453,6 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/122200
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4858,7 +4886,6 @@ targets:
 
   - name: Windows_android flavors_test_win
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/107681
     presubmit: false
     timeout: 60
     properties:
@@ -4896,6 +4923,10 @@ targets:
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
     properties:
       task_name: flutter_packaging
       tags: >

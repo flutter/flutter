@@ -20,6 +20,7 @@ import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
+import 'project_validator_result.dart';
 import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
@@ -418,6 +419,20 @@ abstract class FlutterProjectPlatform {
 class AndroidProject extends FlutterProjectPlatform {
   AndroidProject._(this.parent);
 
+  // User facing string when java/gradle/agp versions are compatible.
+  @visibleForTesting
+  static const String validJavaGradleAgpString = 'compatible java/gradle/agp';
+
+  // User facing link that describes compatibility between gradle and
+  // android gradle plugin.
+  static const String gradleAgpCompatUrl =
+    'https://developer.android.com/studio/releases/gradle-plugin#updating-gradle';
+
+  // User facing link that describes compatibility between java and the first
+  // version of gradle to support it.
+  static const String javaGradleCompatUrl =
+    'https://docs.gradle.org/current/userguide/compatibility.html#java';
+
   /// The parent of this project.
   final FlutterProject parent;
 
@@ -510,6 +525,77 @@ class AndroidProject extends FlutterProjectPlatform {
     return parent.isModule || _editableHostAppDirectory.existsSync();
   }
 
+  /// Check if the versions of Java, Gradle and AGP are compatible.
+  ///
+  /// This is expected to be called from
+  /// flutter_tools/lib/src/project_validator.dart.
+  Future<ProjectValidatorResult> validateJavaGradleAgpVersions() async {
+    // Constructing ProjectValidatorResult happens here and not in
+    // flutter_tools/lib/src/project_validator.dart because of the additional
+    // Complexity of variable status values and error string formatting.
+    const String visibleName = 'Java/Gradle/Android Gradle Plugin';
+    final CompatibilityResult validJavaGradleAgpVersions =
+        await hasValidJavaGradleAgpVersions();
+
+
+    return ProjectValidatorResult(
+      name: visibleName,
+      value: validJavaGradleAgpVersions.description,
+      status: validJavaGradleAgpVersions.success
+          ? StatusProjectValidator.success
+          : StatusProjectValidator.error,
+    );
+  }
+
+  /// Ensures Java SDK is compatible with the project's Gradle version and
+  /// the project's Gradle version is compatible with the AGP version used
+  /// in build.gradle.
+  Future<CompatibilityResult> hasValidJavaGradleAgpVersions() async {
+    final String? gradleVersion = await gradle.getGradleVersion(
+        hostAppGradleRoot, globals.logger, globals.processManager);
+    final String? agpVersion =
+        gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
+    final String? javaVersion = globals.androidSdk?.getJavaVersion(
+      androidStudio: globals.androidStudio,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
+      platform: globals.platform,
+      processUtils: globals.processUtils,
+    );
+
+    // Assume valid configuration.
+    String description = validJavaGradleAgpString;
+
+    final bool compatibleGradleAgp = gradle.validateGradleAndAgp(globals.logger,
+        gradleV: gradleVersion, agpV: agpVersion);
+
+    final bool compatibleJavaGradle = gradle.validateJavaGradle(globals.logger,
+        javaV: javaVersion, gradleV: gradleVersion);
+
+    // Begin description formatting.
+    if (!compatibleGradleAgp) {
+      description = '''
+Incompatible Gradle/AGP versions. \n
+Gradle Version: $gradleVersion, AGP Version: $agpVersion
+Update Gradle to at least "${gradle.getGradleVersionFor(agpVersion!)}".\n
+See the link below for more information:
+$gradleAgpCompatUrl
+''';
+    }
+    if (!compatibleJavaGradle) {
+      // Should contain the agp error (if present) but not the valid String.
+      description = '''
+${compatibleGradleAgp ? '' : description}
+Incompatible Java/Gradle versions.
+Java Version: $javaVersion, Gradle Version: $gradleVersion\n
+See the link below for more information:
+$javaGradleCompatUrl
+''';
+    }
+    return CompatibilityResult(
+        compatibleJavaGradle && compatibleGradleAgp, description);
+  }
+
   bool get isUsingGradle {
     return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }
@@ -570,12 +656,17 @@ class AndroidProject extends FlutterProjectPlatform {
 
   Future<void> _regenerateLibrary() async {
     ErrorHandlingFileSystem.deleteIfExists(ephemeralDirectory, recursive: true);
+    await _overwriteFromTemplate(
+        globals.fs.path.join(
+          'module',
+          'android',
+          'library_new_embedding',
+        ),
+        ephemeralDirectory);
     await _overwriteFromTemplate(globals.fs.path.join(
       'module',
       'android',
-      'library_new_embedding',
-    ), ephemeralDirectory);
-    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
+      'gradle'), ephemeralDirectory);
     globals.gradleUtils?.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
@@ -785,4 +876,13 @@ class FuchsiaProject {
   Directory? _meta;
   Directory get meta =>
       _meta ??= editableHostAppDirectory.childDirectory('meta');
+}
+
+// Combines success and a description into one object that can be returned
+// together.
+@visibleForTesting
+class CompatibilityResult {
+  CompatibilityResult(this.success, this.description);
+  final bool success;
+  final String description;
 }

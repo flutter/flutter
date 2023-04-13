@@ -17,7 +17,7 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester t
   const Map<String, dynamic> data = <String, dynamic>{
     'type': 'fontsChange',
   };
-  await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+  await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
     'flutter/system',
     SystemChannels.system.codec.encodeMessage(data),
     (ByteData? data) { },
@@ -59,7 +59,7 @@ void main() {
       const Map<String, dynamic> data = <String, dynamic>{
         'type': 'fontsChange',
       };
-      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/system',
         SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -91,7 +91,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -115,7 +115,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -143,7 +143,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -173,7 +173,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -203,7 +203,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
@@ -262,7 +262,7 @@ void main() {
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
     };
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData? data) { },
