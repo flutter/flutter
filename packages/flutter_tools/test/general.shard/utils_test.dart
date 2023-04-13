@@ -24,7 +24,7 @@ baz=qux
 
   group('Version', () {
     testWithoutContext('can parse and compare', () {
-      expect(Version(null, null, null).toString(), equals('0'));
+      expect(Version(0, null, null).toString(), equals('0'));
       expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
       final Version v1 = Version.parse('1')!;

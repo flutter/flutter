@@ -229,6 +229,7 @@ class AndroidStudio {
 
   /// Locates the newest, valid version of Android Studio.
   static AndroidStudio? latestValid() {
+
     final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;
@@ -247,11 +248,13 @@ class AndroidStudio {
     AndroidStudio? newest;
     for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
       newest ??= studio;
-      if (studio.version == null && newest.version == null &&
-            studio.directory.compareTo(newest.directory)> 0 ) {
+
+      if (studio.version != null && newest.version == null) {
         newest = studio;
       }
-      if (studio.version != null && newest.version == null) {
+
+      if (studio.version == null && newest.version == null &&
+            studio.directory.compareTo(newest.directory)> 0 ) {
         newest = studio;
       }
       if (studio.version != null && newest.version != null &&
