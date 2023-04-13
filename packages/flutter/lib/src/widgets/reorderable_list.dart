@@ -133,6 +133,7 @@ class ReorderableList extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.autoScrollerVelocityScalar,
   }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
@@ -254,6 +255,9 @@ class ReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
+
+  /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  final double? autoScrollerVelocityScalar;
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -400,6 +404,7 @@ class ReorderableListState extends State<ReorderableList> {
             onReorderStart: widget.onReorderStart,
             onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator,
+            autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
           ),
         ),
       ],
@@ -445,6 +450,7 @@ class SliverReorderableList extends StatefulWidget {
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
+    this.autoScrollerVelocityScalar,
   }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
@@ -477,6 +483,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
+
+  /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  final double? autoScrollerVelocityScalar;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
@@ -613,7 +622,8 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       _autoScroller?.stopAutoScroll();
       _autoScroller = EdgeDraggingAutoScroller(
         _scrollable,
-        onScrollViewScrolled: _handleScrollableAutoScrolled
+        onScrollViewScrolled: _handleScrollableAutoScrolled,
+        velocityScalar: widget.autoScrollerVelocityScalar,
       );
     }
   }
@@ -623,6 +633,15 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     super.didUpdateWidget(oldWidget);
     if (widget.itemCount != oldWidget.itemCount) {
       cancelReorder();
+    }
+
+    if (widget.autoScrollerVelocityScalar != oldWidget.autoScrollerVelocityScalar) {
+      _autoScroller?.stopAutoScroll();
+      _autoScroller = EdgeDraggingAutoScroller(
+        _scrollable,
+        onScrollViewScrolled: _handleScrollableAutoScrolled,
+        velocityScalar: widget.autoScrollerVelocityScalar,
+      );
     }
   }
 

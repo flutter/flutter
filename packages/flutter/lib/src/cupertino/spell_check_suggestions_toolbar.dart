@@ -6,6 +6,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show SelectionChangedCause, SuggestionSpan;
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
+import 'localizations.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_button.dart';
 
@@ -56,10 +58,12 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       return null;
     }
     if (spanAtCursorIndex.suggestions.isEmpty) {
+      assert(debugCheckHasCupertinoLocalizations(context));
+      final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
       return <ContextMenuButtonItem>[
         ContextMenuButtonItem(
           onPressed: () {},
-          label: 'No Replacements Found',
+          label: localizations.noSpellCheckReplacementsLabel,
         )
       ];
     }
