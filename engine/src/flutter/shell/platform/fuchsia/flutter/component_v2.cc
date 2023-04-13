@@ -628,16 +628,6 @@ void ComponentV2::OnEngineTerminate(const Engine* shell_holder) {
   }
 }
 
-void ComponentV2::CreateView(
-    zx::eventpair token,
-    fidl::InterfaceRequest<fuchsia::sys::ServiceProvider> /*incoming_services*/,
-    fidl::InterfaceHandle<
-        fuchsia::sys::ServiceProvider> /*outgoing_services*/) {
-  auto view_ref_pair = scenic::ViewRefPair::New();
-  CreateViewWithViewRef(std::move(token), std::move(view_ref_pair.control_ref),
-                        std::move(view_ref_pair.view_ref));
-}
-
 void ComponentV2::CreateViewWithViewRef(
     zx::eventpair view_token,
     fuchsia::ui::views::ViewRefControl control_ref,
