@@ -45,7 +45,6 @@ import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
-import 'xcode_project.dart';
 
 Artifacts? get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>()!;

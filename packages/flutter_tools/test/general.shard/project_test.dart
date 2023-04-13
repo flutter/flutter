@@ -600,47 +600,6 @@ apply plugin: 'kotlin-android'
       });
     });
 
-
-    group('Renamed xcodeproj and xcworkspace', () {
-      // late FakeIosProject project;
-      late MemoryFileSystem fs;
-      late FakePlistParser testPlistUtils;
-      late FakeXcodeProjectInterpreter xcodeProjectInterpreter;
-      late FlutterProjectFactory flutterProjectFactory;
-      setUp(() {
-        fs = MemoryFileSystem.test();
-        testPlistUtils = FakePlistParser();
-        xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
-        flutterProjectFactory = FlutterProjectFactory(
-            fileSystem: fs,
-            logger: logger
-        );
-        // project = FakeIosProject();
-      });
-
-      void testWithMocks(String description, Future<void> Function() testMethod) {
-        testUsingContext(description, testMethod, overrides: <Type, Generator>{
-          // FakeIosProject: () => project,
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          PlistParser: () => testPlistUtils,
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
-        });
-      }
-
-      testWithMocks('custom naming', () async {
-        final XcodeProjectInfo info = XcodeProjectInfo(
-          <String>['TestName'],
-          <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
-          <String>['TestName'],
-          logger,
-        );
-
-        //expect(info.schemeFor(BuildInfo.debug), 'TestName');
-      });
-    });
-
     group('application bundle name', () {
       late MemoryFileSystem fs;
       late FakeXcodeProjectInterpreter mockXcodeProjectInterpreter;

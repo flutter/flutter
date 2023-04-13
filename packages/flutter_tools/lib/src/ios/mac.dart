@@ -148,7 +148,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     globals.printError('Xcode project not found.');
     return XcodeBuildResult(success: false);
   }
-  // final String? scheme = projectInfo.schemeFor(buildInfo);
   final String? scheme = projectInfo.schemeFor(flavor: buildInfo.flavor, hostAppProjectName: app.project.hostAppProjectName);
   if (scheme == null) {
     projectInfo.reportFlavorNotFoundAndExit();
