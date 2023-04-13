@@ -138,8 +138,6 @@ class CanvasKitRenderer implements Renderer {
     List<double>? colorStops,
     ui.TileMode tileMode = ui.TileMode.clamp,
     Float32List? matrix4,
-    ui.Offset? focal,
-    double focalRadius = 0.0,
   ]) => CkGradientRadial(center, radius, colors, colorStops, tileMode, matrix4);
 
   @override

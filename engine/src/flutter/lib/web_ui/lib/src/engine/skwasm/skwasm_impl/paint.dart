@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
+
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -16,6 +18,8 @@ class SkwasmPaint implements ui.Paint {
   PaintHandle get handle => _handle;
 
   ui.BlendMode _cachedBlendMode = ui.BlendMode.srcOver;
+
+  SkwasmShader? _shader;
 
   @override
   ui.BlendMode get blendMode {
@@ -89,5 +93,14 @@ class SkwasmPaint implements ui.Paint {
   ui.MaskFilter? maskFilter;
 
   @override
-  ui.Shader? shader;
+  ui.Shader? get shader => _shader;
+
+  @override
+  set shader(ui.Shader? uiShader) {
+    final SkwasmShader? skwasmShader = uiShader as SkwasmShader?;
+    _shader = skwasmShader;
+    final ShaderHandle shaderHandle =
+      skwasmShader != null ? skwasmShader.handle : nullptr;
+    paintSetShader(_handle, shaderHandle);
+  }
 }
