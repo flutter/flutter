@@ -918,7 +918,16 @@ void main() {
     );
 
     tearDown(() {
-      expect(() => expect(leaks, isLeakFree), throwsException);
+      const String linkToLeakTracker = 'https://github.com/dart-lang/leak_tracker';
+
+      expect(
+        () => expect(leaks, isLeakFree),
+        throwsA(
+          predicate((Object? e) {
+            return e is TestFailure && e.toString().contains(linkToLeakTracker);
+          }),
+        ),
+      );
       expect(leaks.total, 2);
 
       final LeakReport notDisposedLeak = leaks.notDisposed.first;
