@@ -822,6 +822,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.transitionAnimationController,
     this.anchorPoint,
     this.useSafeArea = false,
+    this.useSafeAreaTop = false,
+    this.useSafeAreaBottom = false,
   });
 
   /// A builder for the contents of the sheet.
@@ -955,6 +957,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   ///
   /// The default is false.
   final bool useSafeArea;
+  final bool useSafeAreaTop;
+  final bool useSafeAreaBottom;
 
   /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
   /// The semantic hint text that informs users what will happen if they
@@ -1038,7 +1042,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     );
 
     final Widget bottomSheet = useSafeArea
-      ? SafeArea(bottom: false, child: content)
+      ? SafeArea(bottom: useSafeAreaBottom,top:useSafeAreaTop, child: content)
       : MediaQuery.removePadding(
           context: context,
           removeTop: true,
@@ -1197,6 +1201,8 @@ Future<T?> showModalBottomSheet<T>({
   bool enableDrag = true,
   bool? showDragHandle,
   bool useSafeArea = false,
+  bool useSafeAreaTop = false,
+  bool useSafeAreaBottom = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,
@@ -1225,6 +1231,8 @@ Future<T?> showModalBottomSheet<T>({
     transitionAnimationController: transitionAnimationController,
     anchorPoint: anchorPoint,
     useSafeArea: useSafeArea,
+    useSafeAreaTop: useSafeAreaTop,
+    useSafeAreaBottom: useSafeAreaBottom,
   ));
 }
 
