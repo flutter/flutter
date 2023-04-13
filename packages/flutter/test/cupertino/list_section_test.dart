@@ -192,7 +192,6 @@ void main() {
       ),
     );
 
-
     final Column childrenColumn = tester.widget(find.byType(Column).at(1));
     for (final Widget e in childrenColumn.children) {
       if (e is Container) {
