@@ -13,7 +13,8 @@
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-12",
-                "cpu=x86"
+                "cpu=x86",
+                "mac_model=Macmini8,1"
             ],
             "gclient_custom_vars": {
                 "download_android_deps": false
