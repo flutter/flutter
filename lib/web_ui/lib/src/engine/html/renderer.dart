@@ -91,8 +91,6 @@ class HtmlRenderer implements Renderer {
     List<double>? colorStops,
     ui.TileMode tileMode = ui.TileMode.clamp,
     Float32List? matrix4,
-    ui.Offset? focal,
-    double focalRadius = 0.0,
   ]) => GradientRadial(center, radius, colors, colorStops, tileMode, matrix4);
 
   @override

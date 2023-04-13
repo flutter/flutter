@@ -146,6 +146,7 @@ export 'engine/services/buffers.dart';
 export 'engine/services/message_codec.dart';
 export 'engine/services/message_codecs.dart';
 export 'engine/services/serialization.dart';
+export 'engine/shader_data.dart';
 export 'engine/shadow.dart';
 export 'engine/svg.dart';
 export 'engine/test_embedding.dart';

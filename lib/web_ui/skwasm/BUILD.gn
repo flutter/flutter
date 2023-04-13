@@ -13,6 +13,7 @@ wasm_lib("skwasm") {
     "paint.cpp",
     "path.cpp",
     "picture.cpp",
+    "shaders.cpp",
     "surface.cpp",
     "wrappers.h",
   ]

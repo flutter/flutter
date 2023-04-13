@@ -6,6 +6,7 @@
 #include "export.h"
 #include "helpers.h"
 #include "third_party/skia/include/core/SkPaint.h"
+#include "third_party/skia/include/core/SkShader.h"
 
 using namespace Skwasm;
 
@@ -81,4 +82,13 @@ SKWASM_EXPORT void paint_setMiterLimit(SkPaint* paint, SkScalar miterLimit) {
 
 SKWASM_EXPORT SkScalar paint_getMiterLImit(SkPaint* paint) {
   return paint->getStrokeMiter();
+}
+
+SKWASM_EXPORT void paint_setShader(SkPaint* paint, SkShader* shader) {
+  if (shader == nullptr) {
+    paint->setShader(nullptr);
+    return;
+  }
+  shader->ref();
+  return paint->setShader(sk_sp<SkShader>(shader));
 }
