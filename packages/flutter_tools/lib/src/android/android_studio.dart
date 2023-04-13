@@ -251,12 +251,11 @@ class AndroidStudio {
       if (studio.version != null && newest.version == null) {
         newest = studio;
       }
-
-      if (studio.version == null && newest.version == null &&
-            studio.directory.compareTo(newest.directory)> 0 ) {
+      else if (studio.version == null && newest.version == null &&
+            studio.directory.compareTo(newest.directory) > 0 ) {
         newest = studio;
       }
-      if (studio.version != null && newest.version != null &&
+      else if (studio.version != null && newest.version != null &&
           studio.version!.compareTo(newest.version!) > 0){
         newest = studio;
       }
