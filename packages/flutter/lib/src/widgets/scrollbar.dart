@@ -1087,9 +1087,9 @@ class RawScrollbar extends StatefulWidget {
   ///   * When providing a controller, the same ScrollController must also be
   ///     provided to the associated Scrollable widget.
   ///   * The [PrimaryScrollController] is used by default for a [ScrollView]
-  ///     that has not been provided a [ScrollController] and that has an
-  ///     [Axis.vertical] [ScrollDirection]. This automatic behavior does not
-  ///     apply to those with a ScrollDirection of Axis.horizontal. To explicitly
+  ///     that has not been provided a [ScrollController] and that has a
+  ///     [ScrollView.scrollDirection] of [Axis.vertical]. This automatic
+  ///     behavior does not apply to those with [Axis.horizontal]. To explicitly
   ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
   ///
   /// Defaults to false when null.
@@ -1172,9 +1172,9 @@ class RawScrollbar extends StatefulWidget {
   ///   * When providing a controller, the same ScrollController must also be
   ///     provided to the associated Scrollable widget.
   ///   * The [PrimaryScrollController] is used by default for a [ScrollView]
-  ///     that has not been provided a [ScrollController] and that has an
-  ///     [Axis.vertical] [ScrollDirection]. This automatic behavior does not
-  ///     apply to those with a ScrollDirection of Axis.horizontal. To explicitly
+  ///     that has not been provided a [ScrollController] and that has a
+  ///     [ScrollView.scrollDirection] of [Axis.vertical]. This automatic
+  ///     behavior does not apply to those with Axis.horizontal. To explicitly
   ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
   ///
   /// Defaults to false when null.
@@ -1576,7 +1576,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             'ScrollController should be associated with the ScrollView that '
             'the Scrollbar is being applied to.'
             '${tryPrimary
-              ? 'A ScrollView with an Axis.vertical ScrollDirection on mobile '
+              ? 'When ScrollView.scrollDirection is Axis.vertical on mobile '
                 'platforms will automatically use the '
                 'PrimaryScrollController if the user has not provided a '
                 'ScrollController. To use the PrimaryScrollController '

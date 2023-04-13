@@ -196,9 +196,7 @@ class NestedScrollView extends StatefulWidget {
   /// scroll view is scrolled.
   final ScrollController? controller;
 
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Defaults to [Axis.vertical].
+  /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
 
   /// Whether the scroll view scrolls in the reading direction.
@@ -1441,7 +1439,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   void updateCanDrag(double totalExtent) {
-    context.setCanDrag(totalExtent > (viewportDimension - maxScrollExtent) || minScrollExtent != maxScrollExtent);
+    context.setCanDrag(physics.allowUserScrolling &&
+        (totalExtent > (viewportDimension - maxScrollExtent) || minScrollExtent != maxScrollExtent));
   }
 
   @override
