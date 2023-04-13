@@ -672,10 +672,9 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     final List<String> actionSummary = <String>[
-      // ignore: deprecated_member_use
-      for (final SemanticsAction action in SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList)
+      for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0)
-          describeEnum(action),
+          action.name,
     ];
     final List<String?> customSemanticsActionSummary = customSemanticsActionIds!
       .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
@@ -684,10 +683,9 @@ class SemanticsData with Diagnosticable {
     properties.add(IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[
-      // ignore: deprecated_member_use
-      for (final SemanticsFlag flag in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList)
+      for (final SemanticsFlag flag in SemanticsFlag.values)
         if ((flags & flag.index) != 0)
-          describeEnum(flag),
+          flag.name,
     ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(AttributedStringProperty('label', attributedLabel));
@@ -2785,14 +2783,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     properties.add(IterableProperty<String>('tags', tags?.map((SemanticsTag tag) => tag.name), defaultValue: null));
-    final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => '${describeEnum(action)}${_debugIsActionBlocked(action) ? '🚫️' : ''}').toList()..sort();
+    final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => '${action.name}${_debugIsActionBlocked(action) ? '🚫️' : ''}').toList()..sort();
     final List<String?> customSemanticsActions = _customSemanticsActions.keys
       .map<String?>((CustomSemanticsAction action) => action.label)
       .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null));
-    // ignore: deprecated_member_use
-    final List<String> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
+    final List<String> flags = SemanticsFlag.values.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.name).toList();
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
