@@ -57,8 +57,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       return null;
     }
     if (spanAtCursorIndex.suggestions.isEmpty) {
-      assert(debugCheckHasCupertinoLocalizations(context));
-      final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+      assert(debugCheckHasCupertinoLocalizations(editableTextState.context));
+      final CupertinoLocalizations localizations =
+          CupertinoLocalizations.of(editableTextState.context);
       return <ContextMenuButtonItem>[
         ContextMenuButtonItem(
           onPressed: () {},
