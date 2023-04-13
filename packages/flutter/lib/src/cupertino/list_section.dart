@@ -349,7 +349,7 @@ class CupertinoListSection extends StatelessWidget {
   /// Sets the color for the dividers between rows, and borders on top and
   /// bottom of the rows.
   ///
-  /// If null, separatorColor defaults [CupertinoColors.separator].
+  /// If null, defaults to [CupertinoColors.separator].
   final Color? separatorColor;
 
   @override
