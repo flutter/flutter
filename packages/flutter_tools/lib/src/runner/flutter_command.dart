@@ -82,12 +82,7 @@ class FlutterCommandResult {
   final DateTime? endTimeOverride;
 
   @override
-  String toString() => switch (exitStatus) {
-        ExitStatus.success => 'success',
-        ExitStatus.warning => 'warning',
-        ExitStatus.fail => 'fail',
-        ExitStatus.killed => 'killed'
-      };
+  String toString() => exitStatus.name;
 }
 
 /// Common flutter command line options.
