@@ -113,6 +113,109 @@
                 }
 
             ]
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/host_debug_unopt_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                    ],
+                    "name": "host_debug_unopt_arm64"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=arm64"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+               "--runtime-mode",
+               "debug",
+               "--unoptimized",
+               "--no-lto",
+               "--prebuilt-dart-sdk",
+               "--mac-cpu",
+               "arm64"
+            ],
+            "name": "host_debug_unopt_arm64",
+            "ninja": {
+                "config": "host_debug_unopt_arm64",
+                "targets": [
+                ]
+            },
+            "tests": []
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ios_debug_sim_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                    ],
+                    "name": "ios_debug_sim_arm64"
+                }
+            ],
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "runtime_versions": [ "ios-16-0_14a5294e" ],
+                    "sdk_version": "14a5294e"
+                }
+            },
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=arm64"
+            ],
+            "gclient_custom_vars": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "debug",
+                "--simulator",
+                "--no-lto",
+                "--simulator-cpu",
+                "arm64"
+            ],
+            "name": "ios_debug_sim_arm64",
+            "ninja": {
+                "config": "ios_debug_sim_arm64",
+                "targets": [
+                    "flutter/testing/scenario_app",
+                    "flutter/shell/platform/darwin/ios:ios_test_flutter"
+                ]
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Tests for ios_debug_sim_arm64",
+                    "parameters": [
+                        "--variant",
+                        "ios_debug_sim_arm64",
+                        "--type",
+                        "objc",
+                        "--engine-capture-core-dump",
+                        "--ios-variant",
+                        "ios_debug_sim_arm64"
+                    ],
+                    "script": "flutter/testing/run_tests.py",
+                    "type": "local"
+                },
+                {
+                    "name": "Scenario App Integration Tests",
+                    "parameters": [
+                        "ios_debug_sim_arm64"
+                    ],
+                    "script": "flutter/testing/scenario_app/run_ios_tests.sh",
+                    "type": "local"
+                }
+
+            ]
         }
     ],
     "tests": []
