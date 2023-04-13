@@ -54,10 +54,6 @@ impeller_component("playground") {
     "//third_party/imgui:imgui_glfw",
   ]
 
-  if (impeller_enable_compute) {
-    public_deps += [ "../fixtures:shader_subgroup_fixtures" ]
-  }
-
   if (is_mac) {
     frameworks = [
       "AppKit.framework",
