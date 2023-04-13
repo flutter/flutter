@@ -9,16 +9,22 @@ import 'leak_tracking.dart';
 import 'test_async_utils.dart';
 import 'widget_tester.dart';
 
-/// Unit test friendly wrapper for [withLeakTracking] with Flutter specific functionality.
+bool _webWarningPrinted = false;
+
+/// Runs [callback] and verifies that it does not leak memory.
 ///
 /// The method will fail with test matcher error if wrapped code contains memory leaks.
 ///
-/// See details in documentation for `withLeakTracking` at
-/// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/orchestration.dart#withLeakTracking
+/// The function is a unit test friendly wrapper for [withLeakTracking] with Flutter specific functionality.
+/// See more details at
+/// https://github.com/dart-lang/leak_tracker#flutter-tests
 ///
 /// The Flutter related enhancements are:
 /// 1. Listens to [MemoryAllocations] events.
-/// 2. Uses `asyncCodeRunner` for async call for leak detection.
+/// 2. Uses [tester.runAsync] for async call for leak detection.
+///
+/// Customize [config], if test fails and troubleshooting is needed. See
+/// details at [LeakTrackingFlutterTestConfig].
 Future<void> withFlutterLeakTracking(
   DartAsyncCallback callback, {
   required WidgetTester tester,
@@ -26,6 +32,10 @@ Future<void> withFlutterLeakTracking(
 }) async {
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
+    if (!_webWarningPrinted) {
+      _webWarningPrinted = true;
+      debugPrint('Leak tracking is not supported on web platform.');
+    }
     await callback();
     return;
   }
