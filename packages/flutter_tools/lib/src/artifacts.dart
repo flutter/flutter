@@ -1323,7 +1323,7 @@ class _TestArtifacts implements Artifacts {
       buffer.write('.$platform');
     }
     if (mode != null) {
-      buffer.write('.${mode}');
+      buffer.write('.$mode');
     }
     if (environmentType != null) {
       buffer.write('.$environmentType');
