@@ -851,6 +851,7 @@ void main() {
 
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
+    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
         'bin/cache/dart-sdk/bin/dartaotruntime',
@@ -871,7 +872,7 @@ void main() {
 
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
-      ]));
+      ], onRun: () => outputJsFile..createSync()..writeAsStringSync('foo')));
 
       processManager.addCommand(FakeCommand(
         command: <String>[
@@ -890,6 +891,11 @@ void main() {
         ]));
 
     await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
+
+    expect(outputJsFile.existsSync(), isFalse);
+    final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
+    expect(movedJsFile.existsSync(), isTrue);
+    expect(movedJsFile.readAsStringSync(), 'foo');
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));

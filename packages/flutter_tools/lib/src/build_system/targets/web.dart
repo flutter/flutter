@@ -330,7 +330,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
 
       // Rename the .mjs file not to have the `.unopt` bit
       final File jsRuntimeFile = environment.buildDir.childFile('main.dart.unopt.mjs');
-      await jsRuntimeFile.copy(environment.buildDir.childFile('main.dart.mjs').path);
+      await jsRuntimeFile.rename(environment.buildDir.childFile('main.dart.mjs').path);
     }
   }
 
