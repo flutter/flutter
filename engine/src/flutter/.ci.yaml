@@ -338,6 +338,7 @@ targets:
         {"download_emsdk": true}
       add_recipes_cq: "true"
       build_host: "true"
+      mac_model: "Macmini8,1"
     timeout: 75
 
   - name: Mac mac_android_aot_engine
@@ -377,6 +378,7 @@ targets:
         [
           "ios-16-0_14a5294e"
         ]
+      mac_model: "Macmini8,1"
     timeout: 75
 
   - name: Mac Host clang-tidy
