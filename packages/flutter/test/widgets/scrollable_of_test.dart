@@ -39,7 +39,36 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   void listener() {
     widget.log('listener ${_position?.pixels.toStringAsFixed(1)}');
   }
+}
 
+class TestScrollController extends ScrollController {
+  TestScrollController({ required this.deferLoading });
+
+  final bool deferLoading;
+
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+    return TestScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+      deferLoading: deferLoading,
+    );
+  }
+}
+
+class TestScrollPosition extends ScrollPositionWithSingleContext {
+  TestScrollPosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+    required this.deferLoading,
+  });
+
+  final bool deferLoading;
+
+  @override
+  bool recommendDeferredLoading(BuildContext context) => deferLoading;
 }
 
 void main() {
@@ -101,5 +130,40 @@ void main() {
 
     final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
     expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
+  });
+
+  testWidgets('Static Scrollable methods can target a specific axis', (WidgetTester tester) async {
+    final TestScrollController horizontalController = TestScrollController(deferLoading: true);
+    final TestScrollController verticalController = TestScrollController(deferLoading: false);
+    late final AxisDirection foundAxisDirection;
+    late final bool foundRecommendation;
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: horizontalController,
+        child: SingleChildScrollView(
+          controller: verticalController,
+          child: Builder(
+            builder: (BuildContext context) {
+              foundAxisDirection = Scrollable.of(
+                context,
+                axis: Axis.horizontal,
+              ).axisDirection;
+              foundRecommendation = Scrollable.recommendDeferredLoadingForContext(
+                context,
+                axis: Axis.horizontal,
+              );
+              return const SizedBox(height: 1200.0, width: 1200.0);
+            }
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(foundAxisDirection, AxisDirection.right);
+    expect(foundRecommendation, isTrue);
   });
 }

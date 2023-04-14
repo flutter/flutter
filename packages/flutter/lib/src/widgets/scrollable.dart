@@ -303,13 +303,30 @@ class Scrollable extends StatefulWidget {
   /// Calling this method will create a dependency on the closest [Scrollable]
   /// in the [context], if there is one.
   ///
+  /// The optional [Axis] allows targeting of a specific [Scrollable] of that
+  /// axis, useful when Scrollables are nested. When [axis] is provided, the
+  /// nearest enclosing [ScrollableState] in that [Axis] is returned, or null
+  /// if there is none.
+  ///
   /// See also:
   ///
   /// * [Scrollable.of], which is similar to this method, but asserts
   ///   if no [Scrollable] ancestor is found.
-  static ScrollableState? maybeOf(BuildContext context) {
-    final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
-    return widget?.scrollable;
+  static ScrollableState? maybeOf(BuildContext context, { Axis? axis }) {
+    if (axis == null) {
+      final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
+      return widget?.scrollable;
+    }
+    ScrollableState? scrollable = context.getInheritedWidgetOfExactType<_ScrollableScope>()?.scrollable;
+    while (scrollable != null) {
+      if (axisDirectionToAxis(scrollable.axisDirection) == axis) {
+        scrollable = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>()?.scrollable;
+        return scrollable;
+      }
+      context = scrollable.context;
+      scrollable = context.getInheritedWidgetOfExactType<_ScrollableScope>()?.scrollable;
+    }
+    return null;
   }
 
   /// The state from the closest instance of this class that encloses the given
@@ -327,12 +344,17 @@ class Scrollable extends StatefulWidget {
   /// If no [Scrollable] ancestor is found, then this method will assert in
   /// debug mode, and throw an exception in release mode.
   ///
+  /// The optional [Axis] allows targeting of a specific [Scrollable] of that
+  /// axis, useful when Scrollables are nested or using
+  /// [TwoDimensionalScrollable]. When [axis] is provided, the nearest enclosing
+  /// [ScrollableState] in that [Axis] is returned.
+  ///
   /// See also:
   ///
   /// * [Scrollable.maybeOf], which is similar to this method, but returns null
   ///   if no [Scrollable] ancestor is found.
-  static ScrollableState of(BuildContext context) {
-    final ScrollableState? scrollableState = maybeOf(context);
+  static ScrollableState of(BuildContext context, { Axis? axis }) {
+    final ScrollableState? scrollableState = maybeOf(context, axis: axis);
     assert(() {
       if (scrollableState == null) {
         throw FlutterError(
@@ -362,18 +384,28 @@ class Scrollable extends StatefulWidget {
   /// via [ScrollPhysics.recommendDeferredLoading]. That method is called with
   /// the current [ScrollPosition.activity]'s [ScrollActivity.velocity].
   ///
+  /// The optional [Axis] allows targeting of a specific [Scrollable] of that
+  /// axis, useful when Scrollables are nested or using
+  /// [TwoDimensionalScrollable]. When [axis] is provided, the nearest enclosing
+  /// [ScrollableState] in that [Axis] is returned.
+  ///
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
-  static bool recommendDeferredLoadingForContext(BuildContext context) {
-    final _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
-    if (widget == null) {
-      return false;
+  static bool recommendDeferredLoadingForContext(BuildContext context, { Axis? axis }) {
+    _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
+    while (widget != null) {
+      if (axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
+        return widget.position.recommendDeferredLoading(context);
+      }
+      context = widget.scrollable.context;
+      widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
     }
-    return widget.position.recommendDeferredLoading(context);
+    return false;
   }
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
+  // TODO(Piinks): Come back and implement for 2D
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
@@ -855,6 +887,20 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return false;
   }
 
+  Widget _buildChrome(BuildContext context, Widget child) {
+    final ScrollableDetails details = ScrollableDetails(
+      direction: widget.axisDirection,
+      controller: _effectiveScrollController,
+      decorationClipBehavior: widget.clipBehavior,
+    );
+
+    return _configuration.buildScrollbar(
+      context,
+      _configuration.buildOverscrollIndicator(context, child, details),
+      details,
+    );
+  }
+
   // DESCRIPTION
 
   @override
@@ -904,17 +950,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       );
     }
 
-    final ScrollableDetails details = ScrollableDetails(
-      direction: widget.axisDirection,
-      controller: _effectiveScrollController,
-      decorationClipBehavior: widget.clipBehavior,
-    );
-
-    result = _configuration.buildScrollbar(
-      context,
-      _configuration.buildOverscrollIndicator(context, result, details),
-      details,
-    );
+    result = _buildChrome(context, result);
 
     // Selection is only enabled when there is a parent registrar.
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
