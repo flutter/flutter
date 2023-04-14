@@ -55,6 +55,8 @@ platform_properties:
       cpu: x86
       os: Mac-12
       xcode: 14a5294e # xcode 14.0 beta 5
+    dimensions:
+      mac_model: "Macmini8,1|Macmini9,1"
   windows:
     properties:
       build_host: "false"
