@@ -94,17 +94,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
               WindowInsets.Type.ime() // Deferred, insets that will animate
               );
       imeSyncCallback.install();
-
-      // When the IME is hidden, we need to notify the framework that close connection.
-      imeSyncCallback.setImeVisibleListener(
-          new ImeSyncDeferringInsetsCallback.ImeVisibleListener() {
-            @Override
-            public void onImeVisibleChanged(boolean visible) {
-              if (!visible) {
-                onConnectionClosed();
-              }
-            }
-          });
     }
 
     this.textInputChannel = textInputChannel;
@@ -849,8 +838,4 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     textInputChannel.updateEditingStateWithTag(inputTarget.id, editingValues);
   }
   // -------- End: Autofill -------
-
-  public void onConnectionClosed() {
-    textInputChannel.onConnectionClosed(inputTarget.id);
-  }
 }
