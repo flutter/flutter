@@ -559,14 +559,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override
   void hitTestInView(HitTestResult result, Offset position, int viewId) {
-    // Currently Flutter only supports one view, the implicit view `renderView`.
-    // TODO(dkwingsmt): After Flutter supports multi-view, look up the correct
-    // render view for the ID.
-    // https://github.com/flutter/flutter/issues/121573
-    assert(viewId == _implicitViewId,
-        'Unexpected view ID $viewId (expecting implicit view ID $_implicitViewId)');
-    assert(viewId == renderView.flutterView.viewId);
-    renderView.hitTest(result, position: position);
+    _viewIdToRenderView[viewId]?.hitTest(result, position: position);
     super.hitTestInView(result, position, viewId);
   }
 

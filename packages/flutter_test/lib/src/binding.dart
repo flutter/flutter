@@ -575,7 +575,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset localToGlobal(Offset point, RenderView view) => point;
-
   /// The source of the current pointer event.
   ///
   /// The [pointerEventSource] is set as the `source` parameter of
@@ -1878,6 +1877,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           // The pointer events received with this source has a global position
           // (see [handlePointerEventForSource]). Transform it to the local
           // coordinate space used by the testing widgets.
+          final RenderView renderView = renderViews.firstWhere((RenderView r) => r.flutterView.viewId == viewId);
           final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position, renderView));
           withPointerEventSource(TestBindingEventSource.device,
             () => super.handlePointerEvent(localEvent)

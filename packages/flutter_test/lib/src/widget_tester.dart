@@ -837,9 +837,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   bool get hasRunningAnimations => binding.transientCallbackCount > 0;
 
   @override
-  HitTestResult hitTestOnBinding(Offset location) {
-    location = binding.localToGlobal(location, binding.renderView);
-    return super.hitTestOnBinding(location);
+  HitTestResult hitTestOnBinding(Offset location, {int? viewId}) {
+    viewId ??= view.viewId as int;
+    final RenderView renderView = renderViews.firstWhere((RenderView r) => r.flutterView.viewId == event.viewId);
+    location = binding.localToGlobal(location, renderView);
+    return super.hitTestOnBinding(location, viewId: viewId);
   }
 
   @override

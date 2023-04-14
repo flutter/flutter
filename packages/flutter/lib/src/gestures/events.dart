@@ -271,6 +271,7 @@ abstract class PointerEvent with Diagnosticable {
     this.synthesized = false,
     this.transform,
     this.original,
+    this.viewId = 0,
   });
 
   /// The ID of the [FlutterView] which this event originated from.
@@ -513,6 +514,9 @@ abstract class PointerEvent with Diagnosticable {
   /// transformed events actually originated from the same pointer interaction.
   final PointerEvent? original;
 
+  ///
+  final int viewId;
+
   /// Transforms the event from the global coordinate space into the coordinate
   /// space of an event receiver.
   ///
@@ -562,6 +566,7 @@ abstract class PointerEvent with Diagnosticable {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   });
 
   /// Returns the transformation of `position` into the coordinate system
@@ -792,6 +797,7 @@ mixin _CopyPointerAddedEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerAddedEvent(
       viewId: viewId ?? this.viewId,
@@ -809,6 +815,7 @@ mixin _CopyPointerAddedEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -838,6 +845,7 @@ class PointerAddedEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.orientation,
     super.tilt,
     super.embedderId,
+    super.viewId,
   }) : super(
          pressure: 0.0,
        );
@@ -890,6 +898,7 @@ mixin _CopyPointerRemovedEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerRemovedEvent(
       viewId: viewId ?? this.viewId,
@@ -904,6 +913,7 @@ mixin _CopyPointerRemovedEvent on PointerEvent {
       radiusMin: radiusMin ?? this.radiusMin,
       radiusMax: radiusMax ?? this.radiusMax,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -931,6 +941,7 @@ class PointerRemovedEvent extends PointerEvent with _PointerEventDescription, _C
     super.radiusMax,
     PointerRemovedEvent? super.original,
     super.embedderId,
+    super.viewId,
   }) : super(
          pressure: 0.0,
        );
@@ -983,6 +994,7 @@ mixin _CopyPointerHoverEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerHoverEvent(
       viewId: viewId ?? this.viewId,
@@ -1006,6 +1018,7 @@ mixin _CopyPointerHoverEvent on PointerEvent {
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -1049,6 +1062,7 @@ class PointerHoverEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.tilt,
     super.synthesized,
     super.embedderId,
+    super.viewId,
   }) : super(
          down: false,
          pressure: 0.0,
@@ -1102,6 +1116,7 @@ mixin _CopyPointerEnterEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerEnterEvent(
       viewId: viewId ?? this.viewId,
@@ -1125,6 +1140,7 @@ mixin _CopyPointerEnterEvent on PointerEvent {
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -1169,6 +1185,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.down,
     super.synthesized,
     super.embedderId,
+    super.viewId,
   }) : // Dart doesn't support comparing enums with == in const contexts yet.
        // https://github.com/dart-lang/language/issues/1811
        assert(!identical(kind, PointerDeviceKind.trackpad)),
@@ -1202,6 +1219,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     tilt: event.tilt,
     down: event.down,
     synthesized: event.synthesized,
+    viewId: event.viewId,
   ).transformed(event.transform);
 
   @override
@@ -1252,6 +1270,7 @@ mixin _CopyPointerExitEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerExitEvent(
       viewId: viewId ?? this.viewId,
@@ -1275,6 +1294,7 @@ mixin _CopyPointerExitEvent on PointerEvent {
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -1319,6 +1339,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.down,
     super.synthesized,
     super.embedderId,
+    super.viewId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          pressure: 0.0,
@@ -1350,6 +1371,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
     tilt: event.tilt,
     down: event.down,
     synthesized: event.synthesized,
+    viewId: event.viewId,
   ).transformed(event.transform);
 
   @override
@@ -1401,6 +1423,7 @@ mixin _CopyPointerDownEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerDownEvent(
       viewId: viewId ?? this.viewId,
@@ -1423,6 +1446,7 @@ mixin _CopyPointerDownEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -1458,6 +1482,7 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.orientation,
     super.tilt,
     super.embedderId,
+    super.viewId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: true,
@@ -1512,6 +1537,7 @@ mixin _CopyPointerMoveEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerMoveEvent(
       viewId: viewId ?? this.viewId,
@@ -1536,6 +1562,7 @@ mixin _CopyPointerMoveEvent on PointerEvent {
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -1577,6 +1604,7 @@ class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.platformData,
     super.synthesized,
     super.embedderId,
+    super.viewId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: true,
@@ -1633,6 +1661,7 @@ mixin _CopyPointerUpEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerUpEvent(
       viewId: viewId ?? this.viewId,
@@ -1656,6 +1685,7 @@ mixin _CopyPointerUpEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -1694,6 +1724,7 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
     super.orientation,
     super.tilt,
     super.embedderId,
+    super.viewId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: false,
@@ -1744,6 +1775,7 @@ abstract class PointerSignalEvent extends PointerEvent {
     super.device,
     super.position,
     super.embedderId,
+    super.viewId,
   });
 }
 
@@ -1776,6 +1808,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerScrollEvent(
       viewId: viewId ?? this.viewId,
@@ -1785,6 +1818,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
       position: position ?? this.position,
       scrollDelta: scrollDelta,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -1812,6 +1846,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     super.position,
     this.scrollDelta = Offset.zero,
     super.embedderId,
+    super.viewId,
   });
 
   @override
@@ -1880,6 +1915,7 @@ mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerScrollInertiaCancelEvent(
       viewId: viewId ?? this.viewId,
@@ -1888,6 +1924,7 @@ mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {
       device: device ?? this.device,
       position: position ?? this.position,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -1914,6 +1951,7 @@ class PointerScrollInertiaCancelEvent extends PointerSignalEvent with _PointerEv
     super.device,
     super.position,
     super.embedderId,
+    super.viewId,
   });
 
   @override
@@ -1968,6 +2006,7 @@ mixin _CopyPointerScaleEvent on PointerEvent {
     bool? synthesized,
     int? embedderId,
     double? scale,
+    int? viewId,
   }) {
     return PointerScaleEvent(
       viewId: viewId ?? this.viewId,
@@ -1977,6 +2016,7 @@ mixin _CopyPointerScaleEvent on PointerEvent {
       position: position ?? this.position,
       embedderId: embedderId ?? this.embedderId,
       scale: scale ?? this.scale,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -2004,6 +2044,7 @@ class PointerScaleEvent extends PointerSignalEvent with _PointerEventDescription
     super.position,
     super.embedderId,
     this.scale = 1.0,
+    super.viewId,
   });
 
   @override
@@ -2060,6 +2101,7 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomStartEvent(
@@ -2068,6 +2110,7 @@ mixin _CopyPointerPanZoomStartEvent on PointerEvent {
       device: device ?? this.device,
       position: position ?? this.position,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -2090,6 +2133,7 @@ class PointerPanZoomStartEvent extends PointerEvent with _PointerEventDescriptio
     super.position,
     super.embedderId,
     super.synthesized,
+    super.viewId,
   }) : super(kind: PointerDeviceKind.trackpad);
 
   @override
@@ -2159,6 +2203,7 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
     Offset? localPanDelta,
     double? scale,
     double? rotation,
+    int? viewId,
   }) {
     assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomUpdateEvent(
@@ -2171,6 +2216,7 @@ mixin _CopyPointerPanZoomUpdateEvent on PointerEvent {
       panDelta: panDelta ?? this.panDelta,
       scale: scale ?? this.scale,
       rotation: rotation ?? this.rotation,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -2197,6 +2243,7 @@ class PointerPanZoomUpdateEvent extends PointerEvent with _PointerEventDescripti
     this.scale = 1.0,
     this.rotation = 0.0,
     super.synthesized,
+    super.viewId,
   }) : super(kind: PointerDeviceKind.trackpad);
 
   @override
@@ -2283,6 +2330,7 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomEndEvent(
@@ -2291,6 +2339,7 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
       device: device ?? this.device,
       position: position ?? this.position,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -2313,6 +2362,7 @@ class PointerPanZoomEndEvent extends PointerEvent with _PointerEventDescription,
     super.position,
     super.embedderId,
     super.synthesized,
+    super.viewId,
   }) : super(kind: PointerDeviceKind.trackpad);
 
   @override
@@ -2363,6 +2413,7 @@ mixin _CopyPointerCancelEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    int? viewId,
   }) {
     return PointerCancelEvent(
       viewId: viewId ?? this.viewId,
@@ -2385,6 +2436,7 @@ mixin _CopyPointerCancelEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       embedderId: embedderId ?? this.embedderId,
+      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -2420,6 +2472,7 @@ class PointerCancelEvent extends PointerEvent with _PointerEventDescription, _Co
     super.orientation,
     super.tilt,
     super.embedderId,
+    super.viewId,
   }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
        super(
          down: false,

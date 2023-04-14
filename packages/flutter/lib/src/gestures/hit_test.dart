@@ -23,8 +23,10 @@ abstract interface class HitTestable {
   )
   void hitTest(HitTestResult result, Offset position);
 
-  /// Fills the provided [HitTestResult] with [HitTestEntry]s for objects that
-  /// are hit at the given `position` in the view identified by `viewId`.
+  /// Check whether the given position hits this object.
+  ///
+  /// If this given position hits this object, consider adding a [HitTestEntry]
+  /// to the given hit test result.
   void hitTestInView(HitTestResult result, Offset position, int viewId);
 }
 

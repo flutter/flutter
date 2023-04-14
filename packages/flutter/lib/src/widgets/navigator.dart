@@ -25,6 +25,7 @@ import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
+import 'view.dart';
 
 // Examples can assume:
 // typedef MyAppHome = Placeholder;
@@ -5266,7 +5267,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         // to false on the next frame.
       });
     }
-    _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
+
+    final int viewId = View.of(context).viewId as int;
+    for (final int pointer in _activePointers) {
+      WidgetsBinding.instance.cancelPointer(pointer: pointer, viewId: viewId);
+    }
   }
 
   /// Gets first route entry satisfying the predicate, or null if not found.
