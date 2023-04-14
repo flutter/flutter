@@ -5,8 +5,7 @@
                 {
                     "base_path": "out/host_debug_unopt/zip_archives/",
                     "type": "gcs",
-                    "include_paths": [
-                    ],
+                    "include_paths": [],
                     "name": "host_debug_unopt"
                 }
             ],
@@ -16,21 +15,20 @@
                 "cpu=x86",
                 "mac_model=Macmini8,1"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
-               "--runtime-mode",
-               "debug",
-               "--unoptimized",
-               "--no-lto",
-               "--prebuilt-dart-sdk"
+                "--runtime-mode",
+                "debug",
+                "--unoptimized",
+                "--no-lto",
+                "--prebuilt-dart-sdk"
             ],
             "name": "host_debug_unopt",
             "ninja": {
                 "config": "host_debug_unopt",
-                "targets": [
-                ]
+                "targets": []
             },
             "tests": [
                 {
@@ -53,14 +51,15 @@
                 {
                     "base_path": "out/ios_debug_sim/zip_archives/",
                     "type": "gcs",
-                    "include_paths": [
-                    ],
+                    "include_paths": [],
                     "name": "ios_debug_sim"
                 }
             ],
             "properties": {
                 "$flutter/osx_sdk": {
-                    "runtime_versions": [ "ios-16-0_14a5294e" ],
+                    "runtime_versions": [
+                        "ios-16-0_14a5294e"
+                    ],
                     "sdk_version": "14a5294e"
                 }
             },
@@ -69,7 +68,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -111,7 +110,6 @@
                     "script": "flutter/testing/scenario_app/run_ios_tests.sh",
                     "type": "local"
                 }
-
             ]
         },
         {
@@ -129,7 +127,7 @@
                 "os=Mac-12",
                 "cpu=arm64"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -170,7 +168,7 @@
                 "os=Mac-12",
                 "cpu=arm64"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [

@@ -19,7 +19,7 @@
                 "cpu=x86",
                 "mac_model=Macmini8,1"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -37,7 +37,7 @@
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/build/archives:flutter_embedder_framework",
-		    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:copy_dart_sdk",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/tools/font-subset",
                     "flutter:unittests"
@@ -57,7 +57,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "type": "local"
                 }
-	    ]
+            ]
         },
         {
             "archives": [
@@ -76,7 +76,7 @@
                 "cpu=x86",
                 "mac_model=Macmini8,1"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -90,7 +90,7 @@
             "ninja": {
                 "config": "host_profile",
                 "targets": [
-		    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:copy_dart_sdk",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
@@ -132,9 +132,12 @@
                 "mac_model=Macmini8,1"
             ],
             "dependencies": [
-                {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+                {
+                    "dependency": "goldctl",
+                    "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"
+                }
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -150,7 +153,7 @@
                 "targets": [
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
-		    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:copy_dart_sdk",
                     "flutter/impeller/golden_tests:impeller_golden_tests",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework",
                     "flutter/tools/font-subset",
@@ -189,7 +192,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -205,7 +208,7 @@
             "ninja": {
                 "config": "mac_debug_arm64",
                 "targets": [
-		    "flutter/tools/font-subset",
+                    "flutter/tools/font-subset",
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:dart_sdk_archive",
@@ -221,7 +224,7 @@
                     "type": "gcs",
                     "include_paths": [
                         "out/mac_profile_arm64/zip_archives/darwin-arm64-profile/artifacts.zip"
-		    ],
+                    ],
                     "name": "mac_profile_arm64"
                 }
             ],
@@ -230,7 +233,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -269,7 +272,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
