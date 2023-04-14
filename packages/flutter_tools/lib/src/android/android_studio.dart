@@ -38,18 +38,90 @@ final RegExp _dotHomeStudioVersionMatcher =
 // exist independently of each other.
 //
 // See https://github.com/flutter/flutter/issues/124252.
-String? get javaPath => globals.androidStudio?.javaPath;
+String? get javaPath => globals.androidStudio?.workingJavaPath;
 
 class AndroidStudio {
+
   /// A [version] value of null represents an unknown version.
   AndroidStudio(
     this.directory, {
-    this.version,
-    this.configuredPath,
+    required this.version,
+    required this.configuredPath,
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
+    required this.validationMessages,
+    required this.workingJavaPath,
+  });
+
+  factory AndroidStudio.initFromDir(String directory, {
+    Version? version,
+    String? configuredPath,
+    String? studioAppName,
+    String? presetPluginsPath,
   }) {
-    _initAndValidate();
+
+    final List<String> validationMessages = <String>[];
+    validationMessages.clear();
+
+    if (configuredPath != null) {
+      validationMessages.add('android-studio-dir = $configuredPath');
+    }
+
+    String? workingJavaPath;
+    if (!globals.fs.isDirectorySync(directory)) {
+      validationMessages.add('Android Studio not found at $directory');
+    } else {
+      String? javaPath;
+      if (globals.platform.isMacOS) {
+        if (version != null && version.major < 2020) {
+          javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
+        } else if (version != null && version.major == 2022) {
+          javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
+        } else {
+          javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
+        }
+      } else {
+        if (version != null && version.major == 2022) {
+          javaPath = globals.fs.path.join(directory, 'jbr');
+        } else {
+          javaPath = globals.fs.path.join(directory, 'jre');
+        }
+      }
+      final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
+      if (!globals.processManager.canRun(javaExecutable)) {
+        validationMessages.add('Unable to find bundled Java version.');
+      } else {
+        RunResult? result;
+        try {
+          result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
+        } on ProcessException catch (e) {
+          validationMessages.add('Failed to run Java: $e');
+        }
+        if (result != null && result.exitCode == 0) {
+          final List<String> versionLines = result.stderr.split('\n');
+          final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+          workingJavaPath = javaPath;
+          validationMessages.add('Java version $javaVersion');
+        } else {
+          validationMessages.add('Unable to determine bundled Java version.');
+        }
+      }
+    }
+
+    return studioAppName == null ? AndroidStudio(directory,
+      version: version,
+      configuredPath: configuredPath,
+      presetPluginsPath: presetPluginsPath,
+      workingJavaPath: workingJavaPath,
+      validationMessages: validationMessages,
+    ) : AndroidStudio(directory,
+        version: version,
+        configuredPath: configuredPath,
+        presetPluginsPath: presetPluginsPath,
+        workingJavaPath: workingJavaPath,
+        validationMessages: validationMessages,
+        studioAppName: studioAppName,
+      );
   }
 
   static AndroidStudio? fromMacOSBundle(String bundlePath) {
@@ -99,7 +171,7 @@ class AndroidStudio {
         );
       }
     }
-    return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
+    return AndroidStudio.initFromDir(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
   static AndroidStudio? fromHomeDot(Directory homeDotDir) {
@@ -138,7 +210,7 @@ class AndroidStudio {
     }
 
     if (installPath != null && globals.fs.isDirectorySync(installPath)) {
-      return AndroidStudio(
+      return AndroidStudio.initFromDir(
           installPath,
           version: version,
           studioAppName: studioAppName,
@@ -158,13 +230,7 @@ class AndroidStudio {
   final String? configuredPath;
   final String? presetPluginsPath;
 
-  String? _javaPath;
-  bool _isValid = false;
-  final List<String> _validationMessages = <String>[];
-
-  String? get javaPath => _javaPath;
-
-  bool get isValid => _isValid;
+  final String? workingJavaPath;
 
   String? get pluginsPath {
     if (presetPluginsPath != null) {
@@ -226,7 +292,7 @@ class AndroidStudio {
     }
   }
 
-  List<String> get validationMessages => _validationMessages;
+  final List<String> validationMessages;
 
   /// Locates the newest, valid version of Android Studio.
   ///
@@ -251,8 +317,22 @@ the configured path by running this command: flutter config --android-studio-dir
 ''');
       }
 
-      return AndroidStudio(correctedConfiguredStudioPath,
+      return AndroidStudio.initFromDir(correctedConfiguredStudioPath,
           configuredPath: configuredStudioPath);
+    }
+
+    bool isValid(AndroidStudio s) {
+      return s.workingJavaPath != null;
+    }
+
+    final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
+    if (configuredStudio != null) {
+      String configuredStudioPath = configuredStudio;
+      if (globals.platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
+        configuredStudioPath = globals.fs.path.join(configuredStudioPath, 'Contents');
+      }
+      return AndroidStudio.initFromDir(configuredStudioPath,
+          configuredPath: configuredStudio);
     }
 
     // Find all available Studio installations.
@@ -261,7 +341,7 @@ the configured path by running this command: flutter config --android-studio-dir
       return null;
     }
     AndroidStudio? newest;
-    for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
+    for (final AndroidStudio studio in studios.where(isValid)) {
       if (newest == null) {
         newest = studio;
         continue;
@@ -431,7 +511,7 @@ the configured path by running this command: flutter config --android-studio-dir
               // ignored
             }
             if (installPath != null && globals.fs.isDirectorySync(installPath)) {
-              final AndroidStudio studio = AndroidStudio(
+              final AndroidStudio studio = AndroidStudio.initFromDir(
                 installPath,
                 version: Version.parse(version),
                 studioAppName: title,
@@ -448,14 +528,14 @@ the configured path by running this command: flutter config --android-studio-dir
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null && !alreadyFoundStudioAt(configuredStudioDir)) {
-      studios.add(AndroidStudio(configuredStudioDir,
+      studios.add(AndroidStudio.initFromDir(configuredStudioDir,
           configuredPath: configuredStudioDir));
     }
 
     if (globals.platform.isLinux) {
       void checkWellKnownPath(String path) {
         if (globals.fs.isDirectorySync(path) && !alreadyFoundStudioAt(path)) {
-          studios.add(AndroidStudio(path));
+          studios.add(AndroidStudio.initFromDir(path));
         }
       }
 
@@ -468,57 +548,6 @@ the configured path by running this command: flutter config --android-studio-dir
 
   static String? extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
-  }
-
-  void _initAndValidate() {
-    _isValid = false;
-    _validationMessages.clear();
-
-    if (configuredPath != null) {
-      _validationMessages.add('android-studio-dir = $configuredPath');
-    }
-
-    if (!globals.fs.isDirectorySync(directory)) {
-      _validationMessages.add('Android Studio not found at $directory');
-      return;
-    }
-
-    final String javaPath;
-    if (globals.platform.isMacOS) {
-      if (version != null && version!.major < 2020) {
-        javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
-      } else if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
-      } else {
-        javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
-      }
-    } else {
-      if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr');
-      } else {
-        javaPath = globals.fs.path.join(directory, 'jre');
-      }
-    }
-    final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
-    if (!globals.processManager.canRun(javaExecutable)) {
-      _validationMessages.add('Unable to find bundled Java version.');
-    } else {
-      RunResult? result;
-      try {
-        result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
-      } on ProcessException catch (e) {
-        _validationMessages.add('Failed to run Java: $e');
-      }
-      if (result != null && result.exitCode == 0) {
-        final List<String> versionLines = result.stderr.split('\n');
-        final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-        _validationMessages.add('Java version $javaVersion');
-        _javaPath = javaPath;
-        _isValid = true;
-      } else {
-        _validationMessages.add('Unable to determine bundled Java version.');
-      }
-    }
   }
 
   @override

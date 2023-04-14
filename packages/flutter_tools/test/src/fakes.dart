@@ -600,5 +600,5 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
-  String get javaPath => 'java';
+  String get workingJavaPath => 'java';
 }

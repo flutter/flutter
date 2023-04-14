@@ -69,7 +69,7 @@ class AndroidStudioValidator extends DoctorValidator {
       );
     }
 
-    if (_studio.isValid) {
+    if (_studio.workingJavaPath == null) {
       type = _hasIssues(messages)
         ? ValidationType.partial
         : ValidationType.success;

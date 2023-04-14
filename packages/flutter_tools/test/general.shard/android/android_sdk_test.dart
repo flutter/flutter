@@ -351,7 +351,7 @@ void main() {
 
     group('findJavaBinary', () {
       testUsingContext('returns the path of the JDK bundled with Android Studio, if it exists', () {
-        final String androidStudioBundledJdkHome = globals.androidStudio!.javaPath!;
+        final String androidStudioBundledJdkHome = globals.androidStudio!.workingJavaPath!;
         final String expectedJavaBinaryPath = globals.fs.path.join(androidStudioBundledJdkHome, 'bin', 'java');
 
         final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
@@ -504,7 +504,7 @@ OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
           operatingSystemUtils: FakeOperatingSystemUtils(),
           platform: platform)!;
       // Built from the implementation of findJavaBinary android studio case.
-      final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+      final String expectedJavaPath = '${androidStudio.workingJavaPath}/bin/java';
 
       expect(javaPath, expectedJavaPath);
     }, overrides: <Type, Generator>{
@@ -526,7 +526,7 @@ OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
         final ProcessUtils processUtils = ProcessUtils(
             processManager: processManager, logger: BufferLogger.test());
         // Built from the implementation of findJavaBinary android studio case.
-        final String expectedJavaPath = '${androidStudio.javaPath}/bin/java';
+        final String expectedJavaPath = '${androidStudio.workingJavaPath}/bin/java';
 
         processManager.addCommand(FakeCommand(
           command: <String>[
@@ -639,12 +639,12 @@ ro.build.version.codename=REL
 
 class FakeAndroidStudioWithJdk extends Fake implements AndroidStudio {
   @override
-  String? get javaPath => '/fake/android_studio/java/path/';
+  String? get workingJavaPath => '/fake/android_studio/java/path/';
 }
 
 class FakeAndroidStudioWithoutJdk extends Fake implements AndroidStudio {
   @override
-  String? get javaPath => null;
+  String? get workingJavaPath => null;
 }
 
 class FakeOperatingSystemUtilsWithJava extends Fake implements OperatingSystemUtils {

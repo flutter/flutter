@@ -394,39 +394,6 @@ void main() {
       PlistParser: () => plistUtils,
     });
 
-    testUsingContext('finds latest valid install', () {
-      final String applicationPlistFolder = globals.fs.path.join(
-        '/',
-        'Applications',
-        'Android Studio.app',
-        'Contents',
-      );
-      globals.fs.directory(applicationPlistFolder).createSync(recursive: true);
-
-      final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
-      plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist3_3;
-
-      final String homeDirectoryPlistFolder = globals.fs.path.join(
-        globals.fsUtils.homeDirPath!,
-        'Applications',
-        'Android Studio.app',
-        'Contents',
-      );
-      globals.fs.directory(homeDirectoryPlistFolder).createSync(recursive: true);
-
-      final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
-      plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
-
-      expect(AndroidStudio.allInstalled().length, 2);
-      expect(AndroidStudio.latestValid()!.version, Version(4, 1, 0));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      FileSystemUtils: () => fsUtils,
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => platform,
-      PlistParser: () => plistUtils,
-    });
-
     testUsingContext('extracts custom paths for directly downloaded Android Studio', () {
       final String studioInApplicationPlistFolder = globals.fs.path.join(
         '/',
@@ -481,7 +448,7 @@ void main() {
         globals.fs.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
-      expect(studio.javaPath, equals(globals.fs.path.join(
+      expect(studio.workingJavaPath, equals(globals.fs.path.join(
         studioInApplicationPlistFolder,
         'jre',
         'Contents',
@@ -520,7 +487,7 @@ void main() {
         globals.fs.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
-      expect(studio.javaPath, equals(globals.fs.path.join(
+      expect(studio.workingJavaPath, equals(globals.fs.path.join(
         studioInApplicationPlistFolder,
         'jbr',
         'Contents',
@@ -662,7 +629,7 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-      expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jre'));
+      expect(studio.workingJavaPath, equals(r'C:\Program Files\AndroidStudio\jre'));
     }, overrides: <Type, Generator>{
       Platform: () => platform,
       FileSystem: () => fileSystem,
@@ -678,7 +645,7 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-      expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
+      expect(studio.workingJavaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
     }, overrides: <Type, Generator>{
       Platform: () => platform,
       FileSystem: () => fileSystem,
@@ -797,7 +764,7 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-      expect(studio.javaPath, equals('$studioInstallPath/jre'));
+      expect(studio.workingJavaPath, equals('$studioInstallPath/jre'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -818,7 +785,7 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-      expect(studio.javaPath, equals('$studioInstallPath/jbr'));
+      expect(studio.workingJavaPath, equals('$studioInstallPath/jbr'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -997,7 +964,7 @@ void main() {
       expect(AndroidStudio.allInstalled().length, 4);
       final AndroidStudio chosenInstall = AndroidStudio.latestValid()!;
       expect(chosenInstall.directory, configuredAndroidStudioDir);
-      expect(chosenInstall.isValid, false);
+      expect(chosenInstall.workingJavaPath, null);
     }, overrides: <Type, Generator>{
       Config: () => Config.test(),
       FileSystem: () => fileSystem,

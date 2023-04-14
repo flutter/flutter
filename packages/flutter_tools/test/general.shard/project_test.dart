@@ -439,7 +439,7 @@ dependencies {
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
         fileSystem.currentDirectory
-            .childDirectory(androidStudio.javaPath!)
+            .childDirectory(androidStudio.workingJavaPath!)
             .createSync();
         _testInMemory(
           'flamingo values are compatible',
@@ -469,7 +469,7 @@ dependencies {
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
         fileSystem.currentDirectory
-            .childDirectory(androidStudio.javaPath!)
+            .childDirectory(androidStudio.workingJavaPath!)
             .createSync();
         _testInMemory(
           'java 8 era values are compatible',
@@ -500,7 +500,7 @@ dependencies {
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
         fileSystem.currentDirectory
-            .childDirectory(androidStudio.javaPath!)
+            .childDirectory(androidStudio.workingJavaPath!)
             .createSync();
         _testInMemory(
           'electric eel era values are compatible',
@@ -530,7 +530,7 @@ dependencies {
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
         fileSystem.currentDirectory
-            .childDirectory(androidStudio.javaPath!)
+            .childDirectory(androidStudio.workingJavaPath!)
             .createSync();
         _testInMemory(
           'incompatible everything',
@@ -578,7 +578,7 @@ dependencies {
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
         fileSystem.currentDirectory
-            .childDirectory(androidStudio.javaPath!)
+            .childDirectory(androidStudio.workingJavaPath!)
             .createSync();
         _testInMemory(
           'incompatible java/gradle only',
@@ -621,7 +621,7 @@ dependencies {
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
         fileSystem.currentDirectory
-            .childDirectory(androidStudio.javaPath!)
+            .childDirectory(androidStudio.workingJavaPath!)
             .createSync();
         _testInMemory(
           'incompatible gradle/agp only',
@@ -1548,7 +1548,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
 class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
   FakeAndroidSdkWithDir(this._directory, AndroidStudio _androidStudio) {
-    _javaPath = '${_androidStudio.javaPath}/bin/java';
+    _javaPath = '${_androidStudio.workingJavaPath}/bin/java';
   }
   late String _javaPath;
   String? javaVersion;

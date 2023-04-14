@@ -479,9 +479,9 @@ class AndroidSdk {
     required OperatingSystemUtils operatingSystemUtils,
     required Platform platform,
   }) {
-    if (androidStudio?.javaPath != null) {
+    if (androidStudio?.workingJavaPath != null) {
       globals.printTrace("Using Android Studio's java.");
-      return fileSystem.path.join(androidStudio!.javaPath!, 'bin', 'java');
+      return fileSystem.path.join(androidStudio!.workingJavaPath!, 'bin', 'java');
     }
 
     final String? javaHomeEnv =

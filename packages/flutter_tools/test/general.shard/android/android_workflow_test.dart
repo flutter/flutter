@@ -641,7 +641,7 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
-  String get javaPath => 'java';
+  String get workingJavaPath => 'java';
 }
 
 class ThrowingStdin<T> extends Fake implements IOSink {
