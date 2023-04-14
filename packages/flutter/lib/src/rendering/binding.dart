@@ -366,19 +366,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override
   void performSemanticsAction(SemanticsActionEvent action) {
-    SemanticsOwner? target;
-    void visitor(PipelineOwner owner) {
-      if (target != null) {
-        return;
-      }
-      if (owner.semanticsOwner?.ownsNode(action.nodeId) ?? false) {
-        target = owner.semanticsOwner;
-        return;
-      }
-      owner.visitChildren(visitor);
-    }
-    rootPipelineOwner.visitChildren(visitor);
-    target?.performAction(action.nodeId, action.type, action.arguments);
+    _viewIdToRenderView[action.viewId]?.owner?.semanticsOwner?.performAction(action.nodeId, action.type, action.arguments);
   }
 
   void _handleWebFirstFrame(Duration _) {
