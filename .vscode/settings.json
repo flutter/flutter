@@ -11,5 +11,8 @@
     },
 
     "html.format.enable": false,
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "master"
+    ],
     "files.trimTrailingWhitespace": true
 }
