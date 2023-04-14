@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart'
+    show getGradlewFileName;
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
@@ -42,7 +44,7 @@ void main() {
 
     final Directory androidApp = tempDir.childDirectory('android');
     result = await processManager.run(<String>[
-      './gradlew',
+      '.${platform.pathSeparator}${getGradlewFileName(platform)}',
       ...getLocalEngineArguments(),
       '-q', // quiet output.
       'printBuildVariants',
