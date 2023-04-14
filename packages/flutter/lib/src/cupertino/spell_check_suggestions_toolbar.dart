@@ -18,6 +18,10 @@ const int _maxSuggestions = 3;
 ///
 /// Tries to position itself below the [anchors], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
+///
+/// See also:
+///  * [SpellCheckSuggestionsToolbar], which is similar but for both the
+///    Material and Cupertino libraries.
 class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Constructs a [CupertinoSpellCheckSuggestionsToolbar].
   const CupertinoSpellCheckSuggestionsToolbar({
@@ -25,6 +29,19 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     required this.anchors,
     required this.buttonItems,
   });
+
+  /// Constructs a [CupertinoSpellCheckSuggestionsToolbar] with the default
+  /// children for an [EditableText].
+  ///
+  /// See also:
+  ///  * [SpellCheckSuggestionsToolbar.editableText], which is similar but
+  ///    builds an Android-style toolbar.
+  CupertinoSpellCheckSuggestionsToolbar.editableText({
+    required EditableTextState editableTextState,
+    // TODO(justinmc): Waiting for my PR that removes the context parameter.
+    // https://github.com/flutter/flutter/pull/124254
+  }) : buttonItems = buildButtonItems(editableTextState) ?? <ContextMenuButtonItems>[],
+       anchors = editableTextState.contextMenuAnchors;
 
   /// The location on which to anchor the menu.
   final TextSelectionToolbarAnchors anchors;
@@ -125,6 +142,10 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (buttonItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final List<Widget> children = _buildToolbarButtons(context);
     return CupertinoTextSelectionToolbar(
       anchorAbove: anchors.primaryAnchor,

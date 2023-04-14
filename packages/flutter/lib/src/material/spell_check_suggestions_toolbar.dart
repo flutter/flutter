@@ -22,6 +22,11 @@ const double _kDefaultToolbarHeight = 193.0;
 ///
 /// Tries to position itself below the [anchor], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
+///
+/// See also:
+///
+///  * [CupertinoSpellCheckSuggestionsToolbar], which is similar but builds an
+///    iOS-style spell check toolbar.
 class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Constructs a [SpellCheckSuggestionsToolbar].
   const SpellCheckSuggestionsToolbar({
@@ -29,6 +34,19 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     required this.anchor,
     required this.buttonItems,
   });
+
+  /// Constructs a [SpellCheckSuggestionsToolbar] with the default children for
+  /// an [EditableText].
+  ///
+  /// See also:
+  ///  * [CupertinoSpellCheckSuggestionsToolbar.editableText], which is similar
+  ///    but builds an iOS-style toolbar.
+  SpellCheckSuggestionsToolbar.editableText({
+    required EditableTextState editableTextState,
+    // TODO(justinmc): Waiting for my PR that removes the context parameter.
+    // https://github.com/flutter/flutter/pull/124254
+  }) : buttonItems = buildButtonItems(editableTextState) ?? <ContextMenuButtonItems>[],
+       anchor = getToolbarAnchor(editableTextState.contextMenuAnchors);
 
   /// {@template flutter.material.SpellCheckSuggestionsToolbar.anchor}
   /// The focal point below which the toolbar attempts to position itself.
@@ -164,6 +182,10 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (buttonItems.isEmpty){
+      return const SizedBox.shrink();
+    }
+
     // Adjust toolbar height if needed.
     final double spellCheckSuggestionsToolbarHeight =
         _kDefaultToolbarHeight - (48.0 * (4 - buttonItems.length));

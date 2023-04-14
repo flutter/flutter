@@ -813,19 +813,20 @@ class TextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    final Offset anchor =
-      SpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
-    final List<ContextMenuButtonItem>? buttonItems =
-      SpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
-
-    if (buttonItems == null){
-      return const SizedBox.shrink();
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return CupertinoSpellCheckSuggestionsToolbar.editableText(
+          editableTextState: editableTextState,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return SpellCheckSuggestionsToolbar.editableText(
+          editableTextState: editableTextState,
+        );
     }
-
-    return SpellCheckSuggestionsToolbar(
-      anchor: anchor,
-      buttonItems: buttonItems,
-    );
   }
 
   @override
