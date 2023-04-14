@@ -346,8 +346,13 @@ targets:
     timeout: 60
     properties:
       config_name: mac_android_aot_engine
-      $flutter/osx_sdk : >-
-        { "sdk_version": "14a5294e" }
+
+  - name: Linux mac_android_aot_engine
+    bringup: true
+    recipe: engine_v2/engine_v2
+    timeout: 60
+    properties:
+      config_name: mac_android_aot_engine
 
   - name: Mac mac_host_engine
     recipe: engine_v2/engine_v2
