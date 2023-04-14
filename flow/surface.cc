@@ -26,7 +26,7 @@ bool Surface::EnableRasterCache() const {
   return true;
 }
 
-impeller::AiksContext* Surface::GetAiksContext() const {
+std::shared_ptr<impeller::AiksContext> Surface::GetAiksContext() const {
   return nullptr;
 }
 

@@ -23,6 +23,11 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#if IMPELLER_SUPPORTS_RENDERING
+// GN is having trouble understanding how this works in the Fuchsia builds.
+#include "flutter/impeller/aiks/aiks_context.h"  // nogncheck
+#include "flutter/impeller/renderer/context.h"   // nogncheck
+#endif                                           // IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/pipeline.h"
 #include "flutter/shell/common/snapshot_controller.h"
@@ -32,6 +37,13 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+
+#if !IMPELLER_SUPPORTS_RENDERING
+namespace impeller {
+class Context;
+class AiksContext;
+}  // namespace impeller
+#endif  // !IMPELLER_SUPPORTS_RENDERING
 
 namespace flutter {
 
@@ -139,6 +151,8 @@ class Rasterizer final : public SnapshotDelegate,
   ///             resources can be immediately collected as well.
   ///
   ~Rasterizer();
+
+  void SetImpellerContext(std::weak_ptr<impeller::Context> impeller_context);
 
   //----------------------------------------------------------------------------
   /// @brief      Rasterizers may be created well before an on-screen surface is
@@ -510,6 +524,19 @@ class Rasterizer final : public SnapshotDelegate,
   }
 
   // |SnapshotController::Delegate|
+  std::shared_ptr<impeller::AiksContext> GetAiksContext() const override {
+#if IMPELLER_SUPPORTS_RENDERING
+    if (surface_) {
+      return surface_->GetAiksContext();
+    }
+    if (auto context = impeller_context_.lock()) {
+      return std::make_shared<impeller::AiksContext>(context);
+    }
+#endif
+    return nullptr;
+  }
+
+  // |SnapshotController::Delegate|
   const std::unique_ptr<SnapshotSurfaceProducer>& GetSnapshotSurfaceProducer()
       const override {
     return snapshot_surface_producer_;
@@ -544,6 +571,7 @@ class Rasterizer final : public SnapshotDelegate,
 
   Delegate& delegate_;
   MakeGpuImageBehavior gpu_image_behavior_;
+  std::weak_ptr<impeller::Context> impeller_context_;
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<SnapshotSurfaceProducer> snapshot_surface_producer_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;
