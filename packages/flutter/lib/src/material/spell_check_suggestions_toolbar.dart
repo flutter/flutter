@@ -135,6 +135,8 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// Determines the Offset that the toolbar will be anchored to.
   static Offset getToolbarAnchor(TextSelectionToolbarAnchors anchors) {
+    // Since this will be positioned below the anchor point, use the secondary
+    // anchor by default.
     return anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!;
   }
 
@@ -179,7 +181,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         CupertinoTextSelectionToolbar.kToolbarScreenPadding,
-        kToolbarContentDistanceBelow,
+        paddingAbove,
         CupertinoTextSelectionToolbar.kToolbarScreenPadding,
         CupertinoTextSelectionToolbar.kToolbarScreenPadding + softKeyboardViewInsetsBottom,
       ),
