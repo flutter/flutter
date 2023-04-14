@@ -3705,13 +3705,6 @@ void main() {
   });
 
   group('Slider.allowedInteraction', () {
-    testWidgets('defaults to tapAndSlide', (WidgetTester tester) async {
-      const Slider slider = Slider(onChanged: null, value: 0);
-      expect(slider.allowedInteraction, SliderInteraction.tapAndSlide);
-    });
-
-    // TODO(werainkhatri): add and test theme override too
-
     testWidgets('is tapOnly', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();

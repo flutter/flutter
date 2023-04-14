@@ -63,6 +63,7 @@ void main() {
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
       mouseCursor: MaterialStateMouseCursor.clickable,
+      allowedInteraction: SliderInteraction.tapOnly,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -99,6 +100,7 @@ void main() {
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
       'mouseCursor: MaterialStateMouseCursor(clickable)',
+      'allowedInteraction: tapOnly'
     ]);
   });
 
@@ -1860,6 +1862,86 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(Slider)));
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+
+  testWidgets('The allowed interaction is themeable', (WidgetTester tester) async {
+    double value = 0.0;
+
+    Widget buildApp({
+      bool isAllowedInteractionInThemeNull = false,
+      bool isAllowedInteractionInSliderNull = false,
+    }) => MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SliderTheme(
+              data: ThemeData().sliderTheme.copyWith(
+                  allowedInteraction: isAllowedInteractionInThemeNull
+                      ? null
+                      : SliderInteraction.slideOnly,
+              ),
+              child: StatefulBuilder(
+                  builder: (_, void Function(void Function()) setState) {
+                    return Slider(
+                      value: value,
+                      allowedInteraction: isAllowedInteractionInSliderNull
+                          ? null
+                          : SliderInteraction.tapOnly,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    );
+                  }
+              ),
+            ),
+          ),
+        ),
+      );
+
+    Future<TestGesture> startCenterTap() => tester.startGesture(tester.getCenter(find.byType(Slider)));
+
+    Future<void> expectTap(bool expectYesOrNo, {required String whileTesting}) async {
+      value = 0.0;
+      final TestGesture gesture = await startCenterTap();
+      await tester.pump();
+      await gesture.cancel();
+      expect(value, expectYesOrNo ? equals(0.5) : isNot(equals(0.5)),
+          reason: 'allowedInteraction is $whileTesting');
+    }
+
+    Future<void> expectSlide(bool expectYesOrNo, {required String whileTesting}) async {
+      value = 0.0;
+      final TestGesture gesture = await startCenterTap();
+      await tester.pump();
+      await gesture.moveBy(const Offset(50, 0));
+      await gesture.cancel();
+      expect(value, expectYesOrNo ? greaterThan(0.0) : equals(0.0),
+          reason: 'allowedInteraction is $whileTesting');
+    }
+
+    // tapOnly
+    await tester.pumpWidget(buildApp());
+    await expectTap(true, whileTesting: 'tapOnly');
+    await expectSlide(false, whileTesting: 'tapOnly');
+
+    // tapOnly
+    await tester.pumpWidget(buildApp(isAllowedInteractionInThemeNull: true));
+    await expectTap(true, whileTesting: 'tapOnly');
+    await expectSlide(false, whileTesting: 'tapOnly');
+
+    // slideOnly
+    await tester.pumpWidget(buildApp(isAllowedInteractionInSliderNull: true));
+    await expectTap(false, whileTesting: 'slideOnly');
+    await expectSlide(true, whileTesting: 'slideOnly');
+
+    // tapAndSlide (default)
+    await tester.pumpWidget(buildApp(
+      isAllowedInteractionInSliderNull: true,
+      isAllowedInteractionInThemeNull: true,
+    ));
+    await expectTap(true, whileTesting: 'tapAndSlide');
+    await expectSlide(true, whileTesting: 'tapAndSlide');
   });
 
   testWidgets('Default value indicator color', (WidgetTester tester) async {

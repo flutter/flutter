@@ -185,7 +185,7 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-    this.allowedInteraction = SliderInteraction.tapAndSlide,
+    this.allowedInteraction,
   }) : _sliderType = _SliderType.material,
        assert(min <= max),
        assert(value >= min && value <= max,
@@ -226,7 +226,7 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-    this.allowedInteraction = SliderInteraction.tapAndSlide,
+    this.allowedInteraction,
   }) : _sliderType = _SliderType.adaptive,
        assert(min <= max),
        assert(value >= min && value <= max,
@@ -534,7 +534,7 @@ class Slider extends StatefulWidget {
   /// How can the user interact with the [Slider].
   ///
   /// Defaults to [SliderInteraction.tapAndSlide].
-  final SliderInteraction allowedInteraction;
+  final SliderInteraction? allowedInteraction;
 
   final _SliderType _sliderType ;
 
@@ -787,6 +787,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     const SliderComponentShape defaultThumbShape = RoundSliderThumbShape();
     final SliderComponentShape defaultValueIndicatorShape = defaults.valueIndicatorShape!;
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+    const SliderInteraction defaultAllowedInteraction = SliderInteraction.tapAndSlide;
 
     final Set<MaterialState> states = <MaterialState>{
       if (!_enabled) MaterialState.disabled,
@@ -841,6 +842,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
       ?? sliderTheme.mouseCursor?.resolve(states)
       ?? MaterialStateMouseCursor.clickable.resolve(states);
+    final SliderInteraction effectiveAllowedInteraction = widget.allowedInteraction
+        ?? sliderTheme.allowedInteraction
+        ?? defaultAllowedInteraction;
 
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
@@ -911,7 +915,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             semanticFormatterCallback: widget.semanticFormatterCallback,
             hasFocus: _focused,
             hovering: _hovering,
-            allowedInteraction: widget.allowedInteraction,
+            allowedInteraction: effectiveAllowedInteraction,
           ),
         ),
       ),
