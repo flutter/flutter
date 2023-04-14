@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart' show CupertinoTextSelectionToolbar;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Vertical position at which to anchor the toolbar for testing.
@@ -85,4 +86,80 @@ void main() {
     final double toolbarY = tester.getTopLeft(findSpellCheckSuggestionsToolbar()).dy;
     expect(toolbarY, equals(expectedToolbarY));
   });
+
+  testWidgets('more than three suggestions throws an error', (WidgetTester tester) async {
+    expect(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SpellCheckSuggestionsToolbar(
+              anchor: const Offset(0.0, _kAnchor - _kTestToolbarOverlap),
+              buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell', 'yeller']),
+            ),
+          ),
+        ),
+      );
+    }, throwsAssertionError);
+  });
+
+  testWidgets('buildSuggestionButtons only considers the first three suggestions', (WidgetTester tester) async {
+    late final BuildContext builderContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              builderContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
+      suggestions: <String>[
+        'hello',
+        'yellow',
+        'yell',
+        'yeller',
+      ],
+    );
+    final List<ContextMenuButtonItem>? buttonItems =
+        SpellCheckSuggestionsToolbar.buildButtonItems(
+          builderContext,
+          editableTextState,
+        );
+    expect(buttonItems, isNotNull);
+    final Iterable<String?> labels = buttonItems!.map((ContextMenuButtonItem buttonItem) {
+      return buttonItem.label;
+    });
+    expect(labels, contains('hello'));
+    expect(labels, contains('yellow'));
+    expect(labels, contains('yell'));
+    expect(labels, contains(null)); // For the delete button.
+    expect(labels, isNot(contains('yeller')));
+  });
+}
+
+class _FakeEditableTextState extends EditableTextState {
+  _FakeEditableTextState({
+    this.suggestions,
+  });
+
+  final List<String>? suggestions;
+
+  @override
+  TextEditingValue get currentTextEditingValue => TextEditingValue.empty;
+
+  @override
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    return SuggestionSpan(
+      const TextRange(
+        start: 0,
+        end: 0,
+      ),
+      suggestions ?? <String>[],
+    );
+  }
 }
