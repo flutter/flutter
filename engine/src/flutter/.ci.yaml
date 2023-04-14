@@ -450,12 +450,11 @@ targets:
     timeout: 60
     properties:
       release_build: "true"
-      config_name: impeller_cmake_build_test
+      config_name: mac_impeller_cmake_example
       $flutter/osx_sdk : >-
         { "sdk_version": "14a5294e" }
       dependencies: >-
         [
-          {"dependency": "cmake", "version": "build_id:8784715802296535313"},
           {"dependency": "jazzy", "version": "0.14.1"}
         ]
 
