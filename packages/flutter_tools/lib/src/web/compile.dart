@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/web.dart';
@@ -21,6 +22,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../version.dart';
 import 'compiler_config.dart';
+import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
 export 'compiler_config.dart';
@@ -51,7 +53,7 @@ class WebBuilder {
     FlutterProject flutterProject,
     String target,
     BuildInfo buildInfo,
-    String serviceWorkerStrategy, {
+    ServiceWorkerStrategy serviceWorkerStrategy, {
     required WebCompilerConfig compilerConfig,
     String? baseHref,
     String? outputDirectoryPath,
@@ -93,7 +95,7 @@ class WebBuilder {
               kTargetFile: target,
               kHasWebPlugins: hasWebPlugins.toString(),
               if (baseHref != null) kBaseHref: baseHref,
-              kServiceWorkerStrategy: serviceWorkerStrategy,
+              kServiceWorkerStrategy: serviceWorkerStrategy.cliName,
               ...compilerConfig.toBuildSystemEnvironment(),
               ...buildInfo.toBuildSystemEnvironment(),
             },
@@ -133,7 +135,7 @@ class WebBuilder {
 }
 
 /// Web rendering backend mode.
-enum WebRendererMode {
+enum WebRendererMode implements CliEnum {
   /// Auto detects which rendering backend to use.
   auto,
 
@@ -146,6 +148,10 @@ enum WebRendererMode {
   /// Always use skwasm.
   skwasm;
 
+  @override
+  String get cliName => snakeCase(name, '-');
+
+  @override
   String get helpText => switch (this) {
         auto =>
           'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',

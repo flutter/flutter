@@ -178,7 +178,7 @@ Future<Depfile> copyAssets(
               // If deferred components are disabled, then copy assets to regular location.
               final File file = environment.defines[kDeferredComponents] == 'true'
                 ? environment.fileSystem.file(
-                    environment.fileSystem.path.join(componentOutputDir.path, buildMode.name, 'deferred_assets', 'flutter_assets', entry.key))
+                    environment.fileSystem.path.join(componentOutputDir.path, buildMode.cliName, 'deferred_assets', 'flutter_assets', entry.key))
                 : environment.fileSystem.file(
                     environment.fileSystem.path.join(outputDirectory.path, entry.key));
               outputs.add(file);

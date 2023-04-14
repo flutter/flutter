@@ -214,7 +214,7 @@ class BuildInfo {
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
-  String get modeName => getModeName(mode);
+  String get modeName => mode.cliName;
   String get friendlyModeName => getFriendlyModeName(mode);
 
   /// the flavor name in the output apk files is lower-cased (see flutter.gradle),
@@ -233,7 +233,7 @@ class BuildInfo {
     // packagesPath and performanceMeasurementFile are not passed into
     // the Environment map.
     return <String, String>{
-      kBuildMode: getNameForBuildMode(mode),
+      kBuildMode: mode.cliName,
       if (dartDefines.isNotEmpty)
         kDartDefines: encodeDartDefines(dartDefines),
       kDartObfuscation: dartObfuscation.toString(),
@@ -377,41 +377,25 @@ class AndroidBuildInfo {
 }
 
 /// A summary of the compilation strategy used for Dart.
-class BuildMode {
-  const BuildMode._(this.name);
-
-  factory BuildMode.fromName(String value) {
-    switch (value) {
-      case 'debug':
-        return BuildMode.debug;
-      case 'profile':
-        return BuildMode.profile;
-      case 'release':
-        return BuildMode.release;
-      case 'jit_release':
-        return BuildMode.jitRelease;
-    }
-    throw ArgumentError('$value is not a supported build mode');
-  }
-
+enum BuildMode {
   /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
-  static const BuildMode debug = BuildMode._('debug');
+  debug,
 
   /// Built in AOT mode with some optimizations and a VM service.
-  static const BuildMode profile = BuildMode._('profile');
+  profile,
 
   /// Built in AOT mode with all optimizations and no VM service.
-  static const BuildMode release = BuildMode._('release');
+  release,
 
   /// Built in JIT mode with all optimizations and no VM service.
-  static const BuildMode jitRelease = BuildMode._('jit_release');
+  jitRelease;
 
-  static const List<BuildMode> values = <BuildMode>[
-    debug,
-    profile,
-    release,
-    jitRelease,
-  ];
+  factory BuildMode.fromCliName(String value) => values.singleWhere(
+        (BuildMode element) => element.cliName == value,
+        orElse: () =>
+            throw ArgumentError('$value is not a supported build mode'),
+      );
+
   static const Set<BuildMode> releaseModes = <BuildMode>{
     release,
     jitRelease,
@@ -433,21 +417,10 @@ class BuildMode {
   /// Whether this mode is using the precompiled runtime.
   bool get isPrecompiled => !isJit;
 
-  /// The name for this build mode.
-  final String name;
+  String get cliName => snakeCase(name);
 
   @override
-  String toString() => name;
-}
-
-/// Return the name for the build mode, or "any" if null.
-String getNameForBuildMode(BuildMode buildMode) {
-  return buildMode.name;
-}
-
-/// Returns the [BuildMode] for a particular `name`.
-BuildMode getBuildModeForName(String name) {
-  return BuildMode.fromName(name);
+  String toString() => cliName;
 }
 
 /// Environment type of the target device.
@@ -540,10 +513,8 @@ String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? bui
   return buildName;
 }
 
-String getModeName(BuildMode mode) => getEnumName(mode);
-
 String getFriendlyModeName(BuildMode mode) {
-  return snakeCase(getModeName(mode)).replaceAll('_', ' ');
+  return snakeCase(mode.cliName).replaceAll('_', ' ');
 }
 
 // Returns true if the selected build mode uses ahead-of-time compilation.

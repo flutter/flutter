@@ -22,7 +22,6 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
@@ -37,6 +36,7 @@ import '../run_hot.dart';
 import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
@@ -326,7 +326,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            kNoneWorker,
+            ServiceWorkerStrategy.none,
             compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions)
           );
         }
@@ -404,7 +404,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           flutterProject,
           target,
           debuggingOptions.buildInfo,
-          kNoneWorker,
+          ServiceWorkerStrategy.none,
           compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions),
         );
       } on ToolExit {

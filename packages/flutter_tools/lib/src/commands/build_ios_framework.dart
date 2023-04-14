@@ -239,8 +239,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     displayNullSafetyMode(buildInfos.first);
     for (final BuildInfo buildInfo in buildInfos) {
       final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
-      globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
-      final String xcodeBuildConfiguration = sentenceCase(getNameForBuildMode(buildInfo.mode));
+      globals.printStatus('Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...');
+      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
@@ -332,7 +332,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode = mode == BuildMode.debug ? 'ios' : 'ios-${mode.name}';
+      final String artifactsMode = mode == BuildMode.debug ? 'ios' : 'ios-${mode.cliName}';
 
       final String podspecContents = '''
 Pod::Spec.new do |s|
@@ -510,7 +510,7 @@ end
       }
 
       // Always build debug for simulator.
-      final String simulatorConfiguration = sentenceCase(getNameForBuildMode(BuildMode.debug));
+      final String simulatorConfiguration = sentenceCase(BuildMode.debug.cliName);
       pluginsBuildCommand = <String>[
         ...globals.xcode!.xcrunCommand(),
         'xcodebuild',

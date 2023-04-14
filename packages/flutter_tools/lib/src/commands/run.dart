@@ -774,7 +774,7 @@ class RunCommand extends RunCommandBase {
       ExitStatus.success,
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
-        getModeName(getBuildMode()),
+        getBuildMode().cliName,
         if (devices!.length == 1)
           getNameForTargetPlatform(await devices![0].targetPlatform)
         else

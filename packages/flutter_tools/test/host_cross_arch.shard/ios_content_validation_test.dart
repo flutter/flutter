@@ -76,7 +76,7 @@ void main() {
     });
 
     for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
-      group('build in ${buildMode.name} mode', () {
+      group('build in ${buildMode.cliName} mode', () {
         late Directory outputPath;
         late Directory outputApp;
         late Directory frameworkDirectory;
@@ -98,7 +98,7 @@ void main() {
             'ios',
             '--verbose',
             '--no-codesign',
-            '--${buildMode.name}',
+            '--${buildMode.cliName}',
             '--obfuscate',
             '--split-debug-info=foo debug info/',
           ], workingDirectory: projectRoot);
@@ -125,7 +125,7 @@ void main() {
             projectRoot,
             'build',
             'ios',
-            '${sentenceCase(buildMode.name)}-iphoneos',
+            '${sentenceCase(buildMode.cliName)}-iphoneos',
           ));
 
           buildAppFrameworkDsym = buildPath.childDirectory('App.framework.dSYM');

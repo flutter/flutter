@@ -53,7 +53,7 @@ class UnpackLinux extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.linuxDesktopPath,
@@ -125,7 +125,7 @@ abstract class BundleLinuxAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_linux_assets');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {

@@ -74,11 +74,11 @@ void main() {
       expect(BuildMode.jitRelease.isPrecompiled, false);
       expect(BuildMode.jitRelease.isJit, true);
 
-      expect(BuildMode.fromName('debug'), BuildMode.debug);
-      expect(BuildMode.fromName('profile'), BuildMode.profile);
-      expect(BuildMode.fromName('jit_release'), BuildMode.jitRelease);
-      expect(BuildMode.fromName('release'), BuildMode.release);
-      expect(() => BuildMode.fromName('foo'), throwsArgumentError);
+      expect(BuildMode.fromCliName('debug'), BuildMode.debug);
+      expect(BuildMode.fromCliName('profile'), BuildMode.profile);
+      expect(BuildMode.fromCliName('jit_release'), BuildMode.jitRelease);
+      expect(BuildMode.fromCliName('release'), BuildMode.release);
+      expect(() => BuildMode.fromCliName('foo'), throwsArgumentError);
     });
   });
 
