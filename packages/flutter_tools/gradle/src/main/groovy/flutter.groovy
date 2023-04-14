@@ -13,6 +13,7 @@ import java.util.regex.Pattern
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
@@ -692,6 +693,22 @@ class FlutterPlugin implements Plugin<Project> {
         project.dependencies.add(configuration, dependency, config)
     }
 
+    // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
+    //
+    // Format of the output of this task can be used in debugging what version of Java Gradle is using.
+    // Not recomended for use in time sensitive commands like `flutter run` or `flutter build` as
+    // Gradle is slower than we want. Particularly in light of https://github.com/flutter/flutter/issues/119196.
+    private static void addTaskForJavaVersion(Project project) {
+        // Warning: the name of this task is used by other code. Change with caution.
+        project.tasks.register('javaVersion') {
+            description 'Print the current java version used by gradle. '
+                'see: https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html'
+            doLast {
+                println(JavaVersion.current())
+            }
+        }
+    }
+
     /**
      * Returns a Flutter build mode suitable for the specified Android buildType.
      *
@@ -864,6 +881,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('validate-deferred-components')) {
             validateDeferredComponentsValue = project.property('validate-deferred-components').toBoolean()
         }
+        addTaskForJavaVersion(project)
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
