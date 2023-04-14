@@ -40,9 +40,13 @@ final RegExp _dotHomeStudioVersionMatcher =
 // See https://github.com/flutter/flutter/issues/124252.
 String? get javaPath => globals.androidStudio?.workingJavaPath;
 
+/// Represents a data object containing information about an Android Studio
+/// installation.
 class AndroidStudio {
-
   /// A [version] value of null represents an unknown version.
+  ///
+  /// A non-null [configuredPath] represents an installation manually configured
+  /// by the user using flutter config. This is used for validation messages.
   AndroidStudio(
     this.directory, {
     required this.version,
@@ -53,6 +57,12 @@ class AndroidStudio {
     required this.workingJavaPath,
   });
 
+  /// Given a directory containing an Android Studio installation, scans
+  /// an installation directory for various details such as the location of the java
+  /// binary and creates a [AndroidStudio] object.
+  ///
+  /// [version] is used to determine where to look for a java binary. If
+  /// [version] is null, a set of well-known locations will be scanned.
   factory AndroidStudio.initFromDir(String directory, {
     Version? version,
     String? configuredPath,
