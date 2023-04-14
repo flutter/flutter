@@ -580,8 +580,10 @@ def to_gn_args(args):
   # There is a special case for Android on Windows because there we _only_ build
   # gen_snapshot, but the build defines otherwise make it look like the build is
   # for a host Windows build and make GN think we will be building ANGLE.
-  if is_host_build(args) or (args.target_os == 'android' and
-                             get_host_os() == 'win'):
+  # Angle is not used on Mac hosts as there are no tests for the OpenGL backend.
+  if (is_host_build(args) and
+      gn_args['host_os'] != 'mac') or (args.target_os == 'android' and
+                                       get_host_os() == 'win'):
     # Do not build unnecessary parts of the ANGLE tree.
     gn_args['angle_build_all'] = False
     gn_args['angle_has_astc_encoder'] = False
