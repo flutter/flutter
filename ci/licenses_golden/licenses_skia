@@ -1,4 +1,4 @@
-Signature: d6c8f3e8e8ad3efacc9a787caa179ed0
+Signature: 162d1e4b6a7410b69f3361de02bfb2c9
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8975,6 +8975,8 @@ ORIGIN: ../../../third_party/skia/src/core/SkBlitter_A8.h + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/core/SkCanvas_Raster.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDrawBase.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDrawBase.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkFilterColorProgram.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkFilterColorProgram.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkFontMetricsPriv.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkFontMetricsPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkMipmapBuilder.cpp + ../../../third_party/skia/LICENSE
@@ -9053,6 +9055,8 @@ FILE: ../../../third_party/skia/src/core/SkBlitter_A8.h
 FILE: ../../../third_party/skia/src/core/SkCanvas_Raster.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawBase.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawBase.h
+FILE: ../../../third_party/skia/src/core/SkFilterColorProgram.cpp
+FILE: ../../../third_party/skia/src/core/SkFilterColorProgram.h
 FILE: ../../../third_party/skia/src/core/SkFontMetricsPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkFontMetricsPriv.h
 FILE: ../../../third_party/skia/src/core/SkMipmapBuilder.cpp
