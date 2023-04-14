@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
@@ -239,6 +240,17 @@ class AndroidStudio {
       if (globals.platform.isMacOS && !correctedConfiguredStudioPath.endsWith('Contents')) {
         correctedConfiguredStudioPath = globals.fs.path.join(correctedConfiguredStudioPath, 'Contents');
       }
+
+      if (!globals.fs.directory(correctedConfiguredStudioPath).existsSync()) {
+        throwToolExit('''
+Could not find the Android Studio installation at the manually configured path "$configuredStudioPath".
+Please verify that the path is correct and update it by running this command: flutter config --android-studio-dir '<path>'
+
+To have flutter search for Android Studio installations automatically, remove
+the configured path by running this command: flutter config --android-studio-dir ''
+''');
+      }
+
       return AndroidStudio(correctedConfiguredStudioPath,
           configuredPath: configuredStudioPath);
     }
@@ -255,6 +267,7 @@ class AndroidStudio {
         continue;
       }
 
+      // We prefer installs with known versions.
       if (studio.version != null && newest.version == null) {
         newest = studio;
       } else if (studio.version != null && newest.version != null &&

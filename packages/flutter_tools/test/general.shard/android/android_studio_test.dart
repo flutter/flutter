@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -851,7 +852,7 @@ void main() {
     });
   });
 
-  group('findLatest choses the correct install to use', () {
+  group('latestValid', () {
     late Platform platform;
     late FileSystem fileSystem;
 
@@ -865,7 +866,7 @@ void main() {
       fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     });
 
-    testUsingContext('when all installs have known versions', () {
+    testUsingContext('choses the install with the latest version', () {
       const List<String> versions = <String> [
         '4.0',
         '2022.0',
@@ -888,7 +889,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('when only some installs have known versions', () {
+    testUsingContext('prefers installs with known versions over installs with unknown versions', () {
       const List<String> versions = <String> [
         '3.0',
         'unknown',
@@ -910,7 +911,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('when no installs have known versions, in which case the one with the directory that comes last when lexicographically sorted is chosen', () {
+    testUsingContext('choses install with lexicographically greatest directory if no installs have known versions', () {
       const List<String> versions = <String> [
         'Apple',
         'Zucchini',
@@ -933,7 +934,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('when all installs have equivalent version, in which case the one with the directory that comes last when lexicographically sorted is chosen', () {
+    testUsingContext('choses install with lexicographically greatest directory if all installs have the same version', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudioPreview4.0\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudioPreview4.0');
@@ -954,7 +955,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('when an install is explicitly configured by the user, in which case it is always chosen', () {
+    testUsingContext('always chooses the install configured by --android-studio-dir, even if the install is invalid', () {
       const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
       globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
 
@@ -973,7 +974,26 @@ void main() {
       }
 
       expect(AndroidStudio.allInstalled().length, 4);
-      expect(AndroidStudio.latestValid()!.directory, configuredAndroidStudioDir);
+      final AndroidStudio chosenInstall = AndroidStudio.latestValid()!;
+      expect(chosenInstall.directory, configuredAndroidStudioDir);
+      expect(chosenInstall.isValid, false);
+    }, overrides: <Type, Generator>{
+      Config: () => Config.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('throws a ToolExit if --android-studio-dir is configured but the directory does not exist', () async {
+      const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+      globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
+
+      expect(fileSystem.directory(configuredAndroidStudioDir).existsSync(), false);
+      expect(() => AndroidStudio.latestValid(), throwsA(
+        (dynamic e) => e is ToolExit &&
+          e.message!.startsWith('Could not find the Android Studio installation at the manually configured path')
+        )
+      );
     }, overrides: <Type, Generator>{
       Config: () => Config.test(),
       FileSystem: () => fileSystem,
