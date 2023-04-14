@@ -110,6 +110,12 @@ class BuildWebCommand extends BuildSubCommand {
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
+    argParser.addFlag(
+      'wasm-opt',
+      help: 'Run wasm-opt on the output wasm module.',
+      negatable: false,
+      hide: !featureFlags.isFlutterWebWasmEnabled,
+    );
   }
 
   final FileSystem _fileSystem;
@@ -142,6 +148,7 @@ class BuildWebCommand extends BuildSubCommand {
       }
       compilerConfig = WasmCompilerConfig(
         omitTypeChecks: boolArg('omit-type-checks'),
+        runWasmOpt: boolArg('wasm-opt'),
       );
     } else {
       compilerConfig = JsCompilerConfig(
