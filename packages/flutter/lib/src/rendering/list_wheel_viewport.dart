@@ -828,8 +828,7 @@ class RenderListWheelViewport
 
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
-    // Note that the magnifier cannot be turned off if the opacity is less than
-    // 1.0.
+    // The magnifier cannot be turned off if the opacity is less than 1.0.
     if (overAndUnderCenterOpacity >= 1) {
       _paintAllChildren(context, offset);
       return;
@@ -898,6 +897,7 @@ class RenderListWheelViewport
     if (useMagnifier || shouldApplyOffCenterDim) {
       _paintChildWithMagnifier(context, offset, child, transform, offsetToCenter, untransformedPaintingCoordinates, center: center);
     } else {
+      assert(center == null);
       _paintChildCylindrically(context, offset, child, transform, offsetToCenter);
     }
   }
