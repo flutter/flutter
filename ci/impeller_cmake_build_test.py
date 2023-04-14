@@ -8,6 +8,13 @@ import os
 import subprocess
 import sys
 
+# When passed the --setup flag, this script fetches git submodules and other
+# dependencies for the impeller-cmake-example. When passed the --cmake flag,
+# this script runs cmake on impeller-cmake-example. That will create
+# a build output directory for impeller-cmake-example under
+# out/impeller-cmake-example, so the build can then be performed with
+# e.g. ninja -C out/impeller-cmake-example-out.
+
 SRC_ROOT = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )
@@ -16,13 +23,6 @@ SRC_ROOT = os.path.dirname(
 def parse_args(argv):
   parser = argparse.ArgumentParser(
       description='A script that tests the impeller-cmake-example build.',
-  )
-  parser.add_argument(
-      '--build',
-      '-b',
-      default=False,
-      action='store_true',
-      help='Perform the build for impeller-cmake-example.',
   )
   parser.add_argument(
       '--cmake',
@@ -62,7 +62,7 @@ def parse_args(argv):
       help='Emit verbose output.',
   )
   parser.add_argument(
-      '--xcode-symlink',
+      '--xcode-symlinks',
       default=False,
       action='store_true',
       help='Symlink the Xcode sysroot to help Goma be successful.',
@@ -91,10 +91,7 @@ def create_xcode_symlink():
       os.path.join(SRC_ROOT, 'out', 'impeller-cmake-example-xcode-sysroot'),
   ]
   find_sdk_output = subprocess.check_output(find_sdk_command).decode('utf-8')
-  print(find_sdk_output)
-  sysroot_path = find_sdk_output.split('\n')[0]
-  print('sysroot path = {}'.format(sysroot_path))
-  return sysroot_path
+  return find_sdk_output.split('\n')[0]
 
 
 def main(argv):
@@ -105,7 +102,6 @@ def main(argv):
   impeller_cmake_dir = os.path.join(SRC_ROOT, args.path)
 
   if args.setup:
-    print('git submodule update with {} jobs'.format(str(os.cpu_count())))
     git_command = [
         'git',
         '-C',
@@ -114,7 +110,6 @@ def main(argv):
         'update',
         '--init',
         '--recursive',
-        # '--single-branch',
         '--depth',
         '1',
         '--jobs',
@@ -127,34 +122,29 @@ def main(argv):
     return 0
 
   if args.cmake:
+    cmake_path = os.path.join(
+        SRC_ROOT, 'buildtools', 'mac-x64', 'cmake', 'bin', 'cmake'
+    )
     cmake_command = [
-        'cmake',
+        cmake_path,
         '--preset',
         'flutter-ci-mac-debug-x64',
         '-B',
-        os.path.join(SRC_ROOT, 'out', 'impeller-cmake-example-out'),
+        os.path.join(SRC_ROOT, 'out', 'impeller-cmake-example'),
     ]
     cmake_env = os.environ.copy()
+    ninja_path = os.path.join(SRC_ROOT, 'flutter', 'third_party', 'ninja')
     cmake_env.update({
+        'PATH': os.environ['PATH'] + ':' + ninja_path,
         'FLUTTER_ENGINE_SRC_DIR': SRC_ROOT,
         'FLUTTER_GOMA_DIR': args.goma_dir,
     })
-    if args.xcode_symlink:
+    if args.xcode_symlinks:
       xcode_symlink_path = create_xcode_symlink()
       cmake_env.update({
           'FLUTTER_OSX_SYSROOT': xcode_symlink_path,
       })
     subprocess.check_call(cmake_command, env=cmake_env, cwd=impeller_cmake_dir)
-
-  if args.build:
-    ninja_command = [
-        'ninja',
-        '-C',
-        os.path.join(SRC_ROOT, 'out', 'impeller-cmake-example-out'),
-        '-j',
-        '200',
-    ]
-    subprocess.check_call(ninja_command)
 
   return 0
 

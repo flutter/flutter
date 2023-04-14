@@ -100,6 +100,10 @@ vars = {
   # Setup Git hooks by default.
   "setup_githooks": True,
 
+  # This is not downloaded be default because it increases the
+  # `gclient sync` time by between 1 and 3 minutes. This option is enabled
+  # in flutter/ci/builders/mac_impeller_cmake_example.json, and is likely to
+  # only be useful locally when reproducing issues found by the bot.
   'download_impeller_cmake_example': False,
 
   # Upstream URLs for third party dependencies, used in
@@ -853,6 +857,18 @@ deps = {
      'url': Var('github_git') + '/bdero/impeller-cmake-example.git' + '@' + '4d728722ac1559f59db28a3ef061fe929d6be4c6',
      'condition': 'download_impeller_cmake_example',
   },
+
+  # cmake is only used by impeller-cmake-example.
+  'src/buildtools/mac-x64/cmake': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/cmake/mac-amd64',
+        'version': 'CGpMvZoP962wdEINR9d4OEvEW7ZOv0MPrHNKbBUBS0sC',
+      }
+    ],
+    'condition': 'download_impeller_cmake_example and host_os == "mac"',
+    'dep_type': 'cipd',
+  }
 }
 
 recursedeps = [

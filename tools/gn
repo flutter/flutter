@@ -672,6 +672,35 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['flutter_prebuilt_dart_sdk'] = True
 
 
+def run_impeller_cmake(args):
+  impeller_cmake_dir = os.path.join('third_party', 'impeller-cmake-example')
+  if not os.path.isdir(os.path.join(SRC_ROOT, impeller_cmake_dir)):
+    print(
+        'The Impeller cmake example directory "{}" does not exist'
+        .format(impeller_cmake_dir)
+    )
+    return 1
+  goma_gn_args = setup_goma(args)
+  goma_dir = goma_gn_args['goma_dir']
+  cmake_cmd = [
+      'python3',
+      os.path.join(SRC_ROOT, 'flutter', 'ci', 'impeller_cmake_build_test.py'),
+      '--path',
+      impeller_cmake_dir,
+      '--cmake',
+  ]
+  if goma_dir is not None:
+    cmake_cmd = cmake_cmd + ['--goma-dir', goma_dir]
+  if args.xcode_symlinks:
+    cmake_cmd = cmake_cmd + ['--xcode-symlinks']
+  try:
+    cmake_call_result = subprocess.call(cmake_cmd, cwd=SRC_ROOT)
+  except subprocess.CalledProcessError as exc:
+    print('Failed to generate cmake files: ', exc.returncode, exc.output)
+    return 1
+  return cmake_call_result
+
+
 def parse_args(args):
   args = args[1:]
   parser = argparse.ArgumentParser(description='A script to run `gn gen`.')
@@ -1032,6 +1061,13 @@ def parse_args(args):
       '--malioc-path', type=str, help='The path to the malioc tool.'
   )
 
+  parser.add_argument(
+      '--impeller-cmake-example',
+      default=False,
+      action='store_true',
+      help='Do not run GN. Instead configure the Impeller cmake example build.',
+  )
+
   # Sanitizers.
   parser.add_argument('--asan', default=False, action='store_true')
   parser.add_argument('--lsan', default=False, action='store_true')
@@ -1083,6 +1119,9 @@ def validate_args(args):
 def main(argv):
   args = parse_args(argv)
   validate_args(args)
+
+  if args.impeller_cmake_example:
+    return run_impeller_cmake(args)
 
   exe = '.exe' if sys.platform.startswith(('cygwin', 'win')) else ''
 
