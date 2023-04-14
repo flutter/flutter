@@ -993,6 +993,31 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
   });
+
+  testWidgets('CheckboxListTile has proper semantics', (WidgetTester tester) async {
+    final List<dynamic> log = <dynamic>[];
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(wrap(
+      child: CheckboxListTile(
+        value: true,
+        onChanged: (bool? value) { log.add(value); },
+        title: const Text('Hello'),
+        checkboxSemanticLabel: 'there',
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(CheckboxListTile)), matchesSemantics(
+      hasCheckedState: true,
+      isChecked: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      isFocusable: true,
+      label: 'Hello\nthere',
+    ));
+
+    handle.dispose();
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
