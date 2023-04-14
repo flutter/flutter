@@ -415,6 +415,10 @@ targets:
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2743,6 +2747,10 @@ targets:
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
     properties:
       task_name: flutter_packaging
       tags: >
@@ -2751,6 +2759,10 @@ targets:
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
     properties:
       task_name: flutter_packaging
       tags: >
@@ -4918,6 +4930,10 @@ targets:
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
     timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
     properties:
       task_name: flutter_packaging
       tags: >
