@@ -193,6 +193,28 @@ void main() {
     expect(buttonSize.width, customSmallWidth);
   });
 
+  testWidgets('The width property update test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/120567
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+
+    for (final ShortMenu value in ShortMenu.values) {
+      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
+      shortMenuItems.add(entry);
+    }
+
+    double customWidth = 250.0;
+    await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
+    RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, customWidth);
+
+    // Update width
+    customWidth = 400.0;
+    await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
+    box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, customWidth);
+  });
+
   testWidgets('The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
