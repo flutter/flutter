@@ -55,9 +55,12 @@ class SkiaGoldClient {
   String get _keysPath => path.join(workDirectory.path, 'keys.json');
   String get _failuresPath => path.join(workDirectory.path, 'failures.json');
 
-  /// Indicates whether the `goldctl` tool has been initialized for the current
-  /// test context.
-  bool _isInitialized = false;
+  Future<void>? _initResult;
+  Future<void> _initOnce(Future<void> Function() callback) {
+    // If a call has already been made, return the result of that call.
+    _initResult ??= callback();
+    return _initResult!;
+  }
 
   /// Indicates whether the client has already been authorized to communicate
   /// with the Skia Gold backend.
@@ -121,10 +124,6 @@ class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current test.
   Future<void> _imgtestInit() async {
-    if (_isInitialized) {
-      return;
-    }
-
     final File keys = File(_keysPath);
     final File failures = File(_failuresPath);
 
@@ -165,7 +164,6 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
-    _isInitialized = true;
   }
 
   /// Executes the `imgtest add` command in the `goldctl` tool.
@@ -226,7 +224,7 @@ class SkiaGoldClient {
     int pixelDeltaThreshold,
     double maxDifferentPixelsRate,
   ) async {
-    await _imgtestInit();
+    await _initOnce(_imgtestInit);
 
     final List<String> imgtestCommand = <String>[
       _goldctl,
@@ -253,10 +251,6 @@ class SkiaGoldClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob.
   Future<void> _tryjobInit() async {
-    if (_isInitialized) {
-      return;
-    }
-
     final File keys = File(_keysPath);
     final File failures = File(_failuresPath);
 
@@ -300,7 +294,6 @@ class SkiaGoldClient {
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
-    _isInitialized = true;
   }
 
   /// Executes the `imgtest add` command in the `goldctl` tool for tryjobs.
@@ -319,7 +312,7 @@ class SkiaGoldClient {
     int pixelDeltaThreshold,
     double differentPixelsRate,
   ) async {
-    await _tryjobInit();
+    await _initOnce(_tryjobInit);
 
     final List<String> tryjobCommand = <String>[
       _goldctl,
