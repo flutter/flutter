@@ -933,6 +933,27 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('when all installs have equivalent version, in which case the one with the directory that comes last when lexicographically sorted is chosen', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudioPreview4.0\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudioPreview4.0');
+      fileSystem.directory(r'C:\Program Files\AndroidStudioPreview4.0')
+        .createSync(recursive: true);
+
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.0\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio4.0');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio4.0')
+        .createSync(recursive: true);
+
+      expect(AndroidStudio.allInstalled().length, 2);
+      expect(AndroidStudio.latestValid()!.directory, contains('Preview'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('when an install is explicitly configured by the user, in which case it is always chosen', () {
       const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
       globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
