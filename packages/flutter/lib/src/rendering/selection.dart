@@ -55,8 +55,14 @@ enum SelectionResult {
   none,
 }
 
+/// The mode of a [SelectionEdgeUpdateEvent].
+///
+/// Used by [SelectionEdgeUpdateEvent] to decide how to move the selection.
 enum SelectionMode {
+  /// The selection moves by character.
   character,
+
+  /// The selection moves word-by-word.
   words,
 }
 
@@ -380,13 +386,17 @@ class SelectWordSelectionEvent extends SelectionEvent {
 ///
 /// The [globalPosition] contains the new offset of the edge.
 ///
-/// This event is dispatched when the framework detects [DragStartDetails] in
+/// The [mode] contains the granularity that the selection edge should move by.
+///
+/// This event is dispatched when the framework detects [TapDragStartDetails] in
 /// [SelectionArea]'s gesture recognizers for mouse devices, or the selection
 /// handles have been dragged to new locations.
 class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// Creates a selection start edge update event.
   ///
   /// The [globalPosition] contains the location of the selection start edge.
+  ///
+  /// The [mode] contains the granularity which the selection edge should move by.
   const SelectionEdgeUpdateEvent.forStart({
     required this.globalPosition,
     SelectionMode? selectionMode
@@ -395,6 +405,8 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// Creates a selection end edge update event.
   ///
   /// The [globalPosition] contains the new location of the selection end edge.
+  ///
+  /// The [mode] contains the granularity which the selection edge should move by.
   const SelectionEdgeUpdateEvent.forEnd({
     required this.globalPosition,
     SelectionMode? selectionMode
@@ -403,6 +415,9 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// The new location of the selection edge.
   final Offset globalPosition;
 
+  /// The granularity that the selection edge should move by.
+  ///
+  /// Defaults to [SelectionMode.character].
   final SelectionMode mode;
 }
 
