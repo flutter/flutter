@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/web.dart';
@@ -21,6 +22,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../version.dart';
 import 'compiler_config.dart';
+import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
 
 export 'compiler_config.dart';
@@ -51,7 +53,7 @@ class WebBuilder {
     FlutterProject flutterProject,
     String target,
     BuildInfo buildInfo,
-    String serviceWorkerStrategy, {
+    ServiceWorkerStrategy serviceWorkerStrategy, {
     required WebCompilerConfig compilerConfig,
     String? baseHref,
     String? outputDirectoryPath,
@@ -93,7 +95,7 @@ class WebBuilder {
               kTargetFile: target,
               kHasWebPlugins: hasWebPlugins.toString(),
               if (baseHref != null) kBaseHref: baseHref,
-              kServiceWorkerStrategy: serviceWorkerStrategy,
+              kServiceWorkerStrategy: serviceWorkerStrategy.cliName,
               ...compilerConfig.toBuildSystemEnvironment(),
               ...buildInfo.toBuildSystemEnvironment(),
             },
@@ -133,20 +135,56 @@ class WebBuilder {
 }
 
 /// Web rendering backend mode.
-enum WebRendererMode {
+enum WebRendererMode implements CliEnum {
   /// Auto detects which rendering backend to use.
-  autoDetect,
+  auto,
+
   /// Always uses canvaskit.
   canvaskit,
+
   /// Always uses html.
   html,
+
   /// Always use skwasm.
-  skwasm,
+  skwasm;
+
+  @override
+  String get cliName => snakeCase(name, '-');
+
+  @override
+  String get helpText => switch (this) {
+        auto =>
+          'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
+        canvaskit =>
+          'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.',
+        html =>
+          'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.',
+        skwasm => 'Always use the experimental skwasm renderer.'
+      };
+
+  Iterable<String> get dartDefines => switch (this) {
+        WebRendererMode.auto => <String>[
+            'FLUTTER_WEB_AUTO_DETECT=true',
+          ],
+        WebRendererMode.canvaskit => <String>[
+            'FLUTTER_WEB_AUTO_DETECT=false',
+            'FLUTTER_WEB_USE_SKIA=true',
+          ],
+        WebRendererMode.html => <String>[
+            'FLUTTER_WEB_AUTO_DETECT=false',
+            'FLUTTER_WEB_USE_SKIA=false',
+          ],
+        WebRendererMode.skwasm => <String>[
+            'FLUTTER_WEB_AUTO_DETECT=false',
+            'FLUTTER_WEB_USE_SKIA=false',
+            'FLUTTER_WEB_USE_SKWASM=true',
+          ]
+      };
 }
 
 /// The correct precompiled artifact to use for each build and render mode.
 const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
+  WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdk,
   },
@@ -162,7 +200,7 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifact
 
 /// The correct source map artifact to use for each build and render mode.
 const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
-  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
+  WebRendererMode.auto: <NullSafetyMode, HostArtifact> {
     NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
     NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
   },
