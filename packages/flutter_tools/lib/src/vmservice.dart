@@ -35,6 +35,12 @@ const String kFlutterToolAlias = 'Flutter Tools';
 
 const String kReloadSourcesServiceName = 'reloadSources';
 const String kHotRestartServiceName = 'hotRestart';
+const String kFlutterVersionServiceName = 'flutterVersion';
+const String kCompileExpressionServiceName = 'compileExpression';
+const String kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
+const String kFlutterGetSkSLServiceName = 'flutterGetSkSL';
+const String kFlutterGetIOSBuildOptionsServiceName = 'flutterGetIOSBuildOptions';
+const String kFlutterGetAndroidBuildVariantsServiceName = 'flutterGetAndroidBuildVariants';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -230,7 +236,7 @@ Future<vm_service.VmService> setUpVmService({
     registrationRequests.add(vmService.registerService(kHotRestartServiceName, kFlutterToolAlias));
   }
 
-  vmService.registerServiceCallback('flutterVersion', (Map<String, Object?> params) async {
+  vmService.registerServiceCallback(kFlutterVersionServiceName, (Map<String, Object?> params) async {
     final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
@@ -242,10 +248,10 @@ Future<vm_service.VmService> setUpVmService({
       },
     };
   });
-  registrationRequests.add(vmService.registerService('flutterVersion', 'Flutter Tools'));
+  registrationRequests.add(vmService.registerService(kFlutterVersionServiceName, kFlutterToolAlias));
 
   if (compileExpression != null) {
-    vmService.registerServiceCallback('compileExpression', (Map<String, Object?> params) async {
+    vmService.registerServiceCallback(kCompileExpressionServiceName, (Map<String, Object?> params) async {
       final String isolateId = _validateRpcStringParam('compileExpression', params, 'isolateId');
       final String expression = _validateRpcStringParam('compileExpression', params, 'expression');
       final List<String> definitions = List<String>.from(params['definitions']! as List<Object?>);
@@ -262,10 +268,10 @@ Future<vm_service.VmService> setUpVmService({
         'result': <String, String>{'kernelBytes': kernelBytesBase64},
       };
     });
-    registrationRequests.add(vmService.registerService('compileExpression', 'Flutter Tools'));
+    registrationRequests.add(vmService.registerService(kCompileExpressionServiceName, kFlutterToolAlias));
   }
   if (device != null) {
-    vmService.registerServiceCallback('flutterMemoryInfo', (Map<String, Object?> params) async {
+    vmService.registerServiceCallback(kFlutterMemoryInfoServiceName, (Map<String, Object?> params) async {
       final MemoryInfo result = await device.queryMemoryInfo();
       return <String, Object>{
         'result': <String, Object>{
@@ -274,10 +280,10 @@ Future<vm_service.VmService> setUpVmService({
         },
       };
     });
-    registrationRequests.add(vmService.registerService('flutterMemoryInfo', 'Flutter Tools'));
+    registrationRequests.add(vmService.registerService(kFlutterMemoryInfoServiceName, kFlutterToolAlias));
   }
   if (skSLMethod != null) {
-    vmService.registerServiceCallback('flutterGetSkSL', (Map<String, Object?> params) async {
+    vmService.registerServiceCallback(kFlutterGetSkSLServiceName, (Map<String, Object?> params) async {
       final String? filename = await skSLMethod();
       if (filename == null) {
         return <String, Object>{
@@ -293,11 +299,11 @@ Future<vm_service.VmService> setUpVmService({
         },
       };
     });
-    registrationRequests.add(vmService.registerService('flutterGetSkSL', 'Flutter Tools'));
+    registrationRequests.add(vmService.registerService(kFlutterGetSkSLServiceName, kFlutterToolAlias));
   }
 
   if (flutterProject != null) {
-    vmService.registerServiceCallback('flutterGetIOSBuildOptions', (Map<String, Object?> params) async {
+    vmService.registerServiceCallback(kFlutterGetIOSBuildOptionsServiceName, (Map<String, Object?> params) async {
       final XcodeProjectInfo? info = await flutterProject.ios.projectInfo();
       if (info == null) {
         return <String, Object>{
@@ -316,10 +322,10 @@ Future<vm_service.VmService> setUpVmService({
       };
     });
     registrationRequests.add(
-      vmService.registerService('flutterGetIOSBuildOptions', 'Flutter Tools'),
+      vmService.registerService(kFlutterGetIOSBuildOptionsServiceName, kFlutterToolAlias),
     );
 
-    vmService.registerServiceCallback('flutterGetAndroidBuildVariants', (Map<String, Object?> params) async {
+    vmService.registerServiceCallback(kFlutterGetAndroidBuildVariantsServiceName, (Map<String, Object?> params) async {
       final List<String> options = await flutterProject.android.getBuildVariants();
       return <String, Object>{
         'result': <String, Object>{
@@ -329,7 +335,7 @@ Future<vm_service.VmService> setUpVmService({
       };
     });
     registrationRequests.add(
-      vmService.registerService('flutterGetAndroidBuildVariants', 'Flutter Tools'),
+      vmService.registerService(kFlutterGetAndroidBuildVariantsServiceName, kFlutterToolAlias),
     );
   }
 

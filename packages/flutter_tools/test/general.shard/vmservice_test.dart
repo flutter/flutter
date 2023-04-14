@@ -70,7 +70,7 @@ void main() {
       vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('reloadSources', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kReloadSourcesServiceName, kFlutterToolAlias));
   });
 
   testWithoutContext('VM Service registers flutterMemoryInfo service', () async {
@@ -82,7 +82,7 @@ void main() {
       vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('flutterMemoryInfo', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kFlutterMemoryInfoServiceName, kFlutterToolAlias));
   });
 
   testWithoutContext('VmService registers flutterGetIOSBuildOptions service', () async {
@@ -93,7 +93,7 @@ void main() {
       vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('flutterGetIOSBuildOptions', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kFlutterGetIOSBuildOptionsServiceName, kFlutterToolAlias));
   });
 
   testWithoutContext('VmService registers flutterGetAndroidBuildVariants service', () async {
@@ -104,7 +104,7 @@ void main() {
       vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('flutterGetAndroidBuildVariants', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kFlutterGetAndroidBuildVariantsServiceName, kFlutterToolAlias));
   });
 
   testWithoutContext('VM Service registers flutterGetSkSL service', () async {
@@ -114,7 +114,7 @@ void main() {
       vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('flutterGetSkSL', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kFlutterGetSkSLServiceName, kFlutterToolAlias));
   });
 
   testWithoutContext('VM Service throws tool exit on service registration failure.', () async {
@@ -153,7 +153,7 @@ void main() {
       vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('flutterVersion', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
   });
 
   testUsingContext('VM Service prints messages for connection failures', () {
@@ -303,7 +303,7 @@ void main() {
       flutterProject: mockedFlutterProject,
       vmService: vmService
     );
-    final vm_service.ServiceCallback cb = vmService.serviceCallBacks['flutterGetIOSBuildOptions']!;
+    final vm_service.ServiceCallback cb = vmService.serviceCallBacks[kFlutterGetIOSBuildOptionsServiceName]!;
 
     final Map<String, dynamic> response = await cb(<String, dynamic>{});
     final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
@@ -323,7 +323,7 @@ void main() {
         flutterProject: mockedFlutterProject,
         vmService: vmService
     );
-    final vm_service.ServiceCallback cb = vmService.serviceCallBacks['flutterGetAndroidBuildVariants']!;
+    final vm_service.ServiceCallback cb = vmService.serviceCallBacks[kFlutterGetAndroidBuildVariantsServiceName]!;
 
     final Map<String, dynamic> response = await cb(<String, dynamic>{});
     final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
@@ -340,7 +340,7 @@ void main() {
         flutterProject: mockedFlutterProject,
         vmService: vmService
     );
-    final vm_service.ServiceCallback cb = vmService.serviceCallBacks['flutterGetIOSBuildOptions']!;
+    final vm_service.ServiceCallback cb = vmService.serviceCallBacks[kFlutterGetIOSBuildOptionsServiceName]!;
 
     final Map<String, dynamic> response = await cb(<String, dynamic>{});
     final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
