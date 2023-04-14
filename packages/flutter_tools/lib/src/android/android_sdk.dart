@@ -40,7 +40,7 @@ class AndroidSdk {
     reinitialize();
   }
 
-  static const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
+  static const String javaHomeEnvironmentVariable = 'JAVA_HOME';
   static const String _javaExecutable = 'java';
 
   /// The Android SDK root directory.
@@ -488,10 +488,9 @@ class AndroidSdk {
       return androidStudio!.javaPath!;
     }
 
-    final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
+    final String? javaHomeEnv = platform.environment[javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
-      // Trust JAVA_HOME.
-      globals.printTrace('Using JAVA_HOME.');
+      globals.printTrace('Using JAVA_HOME from environment valuables.');
       return javaHomeEnv;
     }
     return null;
@@ -553,14 +552,14 @@ class AndroidSdk {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
-      final String? path = findJavaBinary(
+      final String? javaBinary = findJavaBinary(
         androidStudio: globals.androidStudio,
         fileSystem: globals.fs,
         operatingSystemUtils: globals.os,
         platform: globals.platform,
       );
-      if (path != null && globals.platform.environment['PATH'] != null) {
-        _sdkManagerEnv!['PATH'] = globals.fs.path.dirname(path) +
+      if (javaBinary != null && globals.platform.environment['PATH'] != null) {
+        _sdkManagerEnv!['PATH'] = globals.fs.path.dirname(javaBinary) +
                                   globals.os.pathVarSeparator +
                                   globals.platform.environment['PATH']!;
       }

@@ -40,5 +40,6 @@ abstract class AndroidBuilder {
     bool configOnly = false,
   });
 
+  /// Returns a list of available build variant from the Android project.
   Future<List<String>> getBuildVariants({required FlutterProject project});
 }

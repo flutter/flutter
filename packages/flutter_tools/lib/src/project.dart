@@ -476,10 +476,10 @@ class AndroidProject extends FlutterProjectPlatform {
   late final bool isSupportedVersion = _computeSupportedVersion();
 
   Future<List<String>> getBuildVariants() async {
-    if (!existsSync()) {
+    if (!existsSync() || androidBuilder == null) {
       return const <String>[];
     }
-    return await androidBuilder?.getBuildVariants(project: parent) ?? const <String>[];
+    return androidBuilder!.getBuildVariants(project: parent);
   }
 
   bool _computeSupportedVersion() {

@@ -52,10 +52,11 @@ void main() {
     // Verify that gradlew has a javaVersion task.
     expect(result.exitCode, 0);
     // Verify the format is a number on its own line.
-    const String expected =
-        'BuildVariant: debug\n'
-        'BuildVariant: release\n'
-        'BuildVariant: profile\n';
+    const String expected = '''
+BuildVariant: debug
+BuildVariant: release
+BuildVariant: profile
+''';
     expect(result.stdout.toString(), expected);
   });
 }

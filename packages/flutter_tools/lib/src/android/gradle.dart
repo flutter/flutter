@@ -30,6 +30,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
+import 'android_sdk.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
@@ -44,7 +45,8 @@ import 'multidex.dart';
 /// BuildVariant: debug
 /// BuildVariant: release
 /// BuildVariant: profile
-final RegExp _kBuildVariantRegex = RegExp(r'^BuildVariant: (.*)$');
+final RegExp _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRegexGroupName>.*)\$');
+const String _kBuildVariantRegexGroupName = 'variant';
 
 /// The directory where the APK artifact is generated.
 Directory getApkDirectory(FlutterProject project) {
@@ -408,13 +410,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     int exitCode = 1;
     try {
+      final String? javaHome = globals.androidSdk?.javaHome;
       exitCode = await _processUtils.stream(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (globals.androidSdk?.javaHome != null)
-            'JAVA_HOME': globals.androidSdk!.javaHome!,
+          if (javaHome != null)
+            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
         },
         mapFunction: consumeLog,
       );
@@ -677,13 +680,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
+      final String? javaHome = globals.androidSdk?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (globals.androidSdk?.javaHome != null)
-            'JAVA_HOME': globals.androidSdk!.javaHome!,
+          if (javaHome != null)
+            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
         },
       );
     } finally {
@@ -729,13 +733,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
+      final String? javaHome = globals.androidSdk?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (globals.androidSdk?.javaHome != null)
-            'JAVA_HOME': globals.androidSdk!.javaHome!,
+          if (javaHome != null)
+            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
         },
       );
     } finally {
@@ -746,16 +751,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
       _logger.printError(result.stderr, wrap: false);
-      throwToolExit(
-        'Gradle task printBuildVariants failed with exit code ${result.exitCode}.',
-        exitCode: result.exitCode,
-      );
+      return const <String>[];
     }
     final List<String> options = <String>[];
-    for (final String line in result.stdout.split('\n')) {
+    for (final String line in LineSplitter.split(result.stdout)) {
       final RegExpMatch? match = _kBuildVariantRegex.firstMatch(line);
       if (match != null) {
-        options.add(match.group(1)!);
+        options.add(match.namedGroup(_kBuildVariantRegexGroupName)!);
       }
     }
     return options;

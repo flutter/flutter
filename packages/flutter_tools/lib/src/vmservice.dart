@@ -31,6 +31,11 @@ const String kScreenshotMethod = '_flutter.screenshot';
 const String kRenderFrameWithRasterStatsMethod = '_flutter.renderFrameWithRasterStats';
 const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
+const String kFlutterToolAlias = 'Flutter Tools';
+
+const String kReloadSourcesServiceName = 'reloadSources';
+const String kHotRestartServiceName = 'hotRestart';
+
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
 
@@ -196,7 +201,7 @@ Future<vm_service.VmService> setUpVmService({
   // all at the end of this method.
   final List<Future<vm_service.Success?>> registrationRequests = <Future<vm_service.Success?>>[];
   if (reloadSources != null) {
-    vmService.registerServiceCallback('reloadSources', (Map<String, Object?> params) async {
+    vmService.registerServiceCallback(kReloadSourcesServiceName, (Map<String, Object?> params) async {
       final String isolateId = _validateRpcStringParam('reloadSources', params, 'isolateId');
       final bool force = _validateRpcBoolParam('reloadSources', params, 'force');
       final bool pause = _validateRpcBoolParam('reloadSources', params, 'pause');
@@ -209,11 +214,11 @@ Future<vm_service.VmService> setUpVmService({
         },
       };
     });
-    registrationRequests.add(vmService.registerService('reloadSources', 'Flutter Tools'));
+    registrationRequests.add(vmService.registerService(kReloadSourcesServiceName, kFlutterToolAlias));
   }
 
   if (restart != null) {
-    vmService.registerServiceCallback('hotRestart', (Map<String, Object?> params) async {
+    vmService.registerServiceCallback(kHotRestartServiceName, (Map<String, Object?> params) async {
       final bool pause = _validateRpcBoolParam('compileExpression', params, 'pause');
       await restart(pause: pause);
       return <String, Object>{
@@ -222,7 +227,7 @@ Future<vm_service.VmService> setUpVmService({
         },
       };
     });
-    registrationRequests.add(vmService.registerService('hotRestart', 'Flutter Tools'));
+    registrationRequests.add(vmService.registerService(kHotRestartServiceName, kFlutterToolAlias));
   }
 
   vmService.registerServiceCallback('flutterVersion', (Map<String, Object?> params) async {
