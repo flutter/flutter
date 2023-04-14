@@ -1,4 +1,4 @@
-Signature: e5a77daee7239e0fdea83ae4236e6528
+Signature: d777e0a04b30fb679310ccc1c9638e43
 
 ====================================================================================================
 LIBRARY: etc1
@@ -7724,8 +7724,6 @@ ORIGIN: ../../../third_party/skia/src/sksl/transform/SkSLReplaceConstVarsWithLit
 ORIGIN: ../../../third_party/skia/src/text/gpu/Slug.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/text/gpu/SubRunAllocator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/text/gpu/SubRunAllocator.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/utils/SkVMVisualizer.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/utils/SkVMVisualizer.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/attributes.cpp
 FILE: ../../../third_party/skia/gm/composecolorfilter.cpp
@@ -7949,8 +7947,6 @@ FILE: ../../../third_party/skia/src/sksl/transform/SkSLReplaceConstVarsWithLiter
 FILE: ../../../third_party/skia/src/text/gpu/Slug.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SubRunAllocator.h
-FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.cpp
-FILE: ../../../third_party/skia/src/utils/SkVMVisualizer.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2021 Google LLC
 
