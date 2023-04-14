@@ -40,20 +40,6 @@ const String kBaseHref = 'baseHref';
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
-const String kOfflineFirst = 'offline-first';
-const String kNoneWorker = 'none';
-
-/// Convert a [value] into a [ServiceWorkerStrategy].
-ServiceWorkerStrategy _serviceWorkerStrategyFromString(String? value) {
-  switch (value) {
-    case kNoneWorker:
-      return ServiceWorkerStrategy.none;
-    // offline-first is the default value for any invalid requests.
-    default:
-      return ServiceWorkerStrategy.offlineFirst;
-  }
-}
-
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
@@ -175,7 +161,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final JsCompilerConfig compilerConfig = JsCompilerConfig.fromBuildSystemEnvironment(environment.defines);
     final Artifacts artifacts = globals.artifacts!;
     final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
@@ -256,7 +242,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = globals.artifacts!;
     final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
@@ -590,9 +576,8 @@ class WebServiceWorker extends Target {
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
-      environment.defines[kServiceWorkerStrategy],
-    );
+    final ServiceWorkerStrategy serviceWorkerStrategy =
+        ServiceWorkerStrategy.fromCliName(environment.defines[kServiceWorkerStrategy]);
     final String fileGeneratorsPath =
         globals.artifacts!.getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String serviceWorker = generateServiceWorker(
