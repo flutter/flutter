@@ -524,10 +524,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
-    // TODO(goderbauer): Remove this override, when the deprecated renderView is removed.
+    // TODO(goderbauer): Remove this override, when soon-to-be deprecated setSurfaceSize is removed.
+    //  See also: https://github.com/flutter/flutter/issues/123881, https://github.com/flutter/flutter/issues/124071
     if (renderView == this.renderView) { // ignore: deprecated_member_use
-      final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
-      final Size size = _surfaceSize ?? renderView.flutterView.physicalSize / devicePixelRatio;
+      final FlutterView view = renderView.flutterView;
+      final double devicePixelRatio = view.devicePixelRatio;
+      final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
       return ViewConfiguration(
         size: size,
         devicePixelRatio: devicePixelRatio,
@@ -1994,10 +1996,20 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
+    // TODO(goderbauer): This implementation is somewhat broken, see https://github.com/flutter/flutter/issues/124071
+    if (renderView == this.renderView) { // ignore: deprecated_member_use
+      return TestViewConfiguration.fromView(
+        size: _surfaceSize ?? _kDefaultTestViewportSize,
+        view: renderView.flutterView,
+      );
+    }
+    final FlutterView view = renderView.flutterView;
+    final double devicePixelRatio = view.devicePixelRatio;
     return TestViewConfiguration.fromView(
-      size: _surfaceSize ?? _kDefaultTestViewportSize,
-      view: renderView.flutterView,
+      size: view.physicalSize / devicePixelRatio,
+      view: view,
     );
+
   }
 
   @override

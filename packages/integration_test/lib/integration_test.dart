@@ -117,10 +117,13 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
-    final FlutterView view = platformDispatcher.implicitView!;
+  ViewConfiguration createViewConfigurationFor(RenderView renderView) {
+    // TODO(goderbauer): Remove "surfaceSize" handling, when soon-to-be deprecated setSurfaceSize is removed.
+    //  See also: https://github.com/flutter/flutter/issues/123881, https://github.com/flutter/flutter/issues/124071
+    final Size? surfaceSize = renderView == this.renderView ? _surfaceSize : null; // ignore: deprecated_member_use
+    final FlutterView view = renderView.flutterView;
     final double devicePixelRatio = view.devicePixelRatio;
-    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
+    final Size size = surfaceSize ?? view.physicalSize / devicePixelRatio;
     return TestViewConfiguration.fromView(
       size: size,
       view: view,
