@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show getGradlewFileName;
@@ -52,11 +55,12 @@ void main() {
     // Verify that gradlew has a javaVersion task.
     expect(result.exitCode, 0);
     // Verify the format is a number on its own line.
-    const String expected = '''
-BuildVariant: debug
-BuildVariant: release
-BuildVariant: profile
-''';
-    expect(result.stdout.toString(), expected);
+    const List<String> expectedLines = <String>[
+      'BuildVariant: debug',
+      'BuildVariant: release',
+      'BuildVariant: profile',
+    ];
+    final List<String> actualLines = LineSplitter.split(result.stdout.toString()).toList();
+    expect(const ListEquality<String>().equals(actualLines, expectedLines), isTrue);
   });
 }

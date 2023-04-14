@@ -89,7 +89,7 @@ Future<void> main() async {
         await exec(
           gradlewExecutable,
           <String>['flutter:assembleDebug'],
-          environment: <String, String>{ AndroidSdk.javaHomeEnvironmentVariable: javaHome },
+          environment: <String, String>{ 'JAVA_HOME': javaHome },
         );
       });
 
@@ -203,7 +203,7 @@ Future<void> main() async {
         await exec(gradlewExecutable,
           <String>['SampleApp:assembleDebug'],
           environment: <String, String>{
-            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
+            'JAVA_HOME': javaHome,
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
           },
         );
@@ -285,7 +285,7 @@ Future<void> main() async {
         await exec(gradlewExecutable,
           <String>['SampleApp:assembleRelease'],
           environment: <String, String>{
-            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
+            'JAVA_HOME': javaHome,
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
           },
         );
