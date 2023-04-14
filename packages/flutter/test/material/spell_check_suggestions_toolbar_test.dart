@@ -88,17 +88,21 @@ void main() {
   });
 
   testWidgets('more than three suggestions throws an error', (WidgetTester tester) async {
-    expect(() async {
+    Future<void> pumpToolbar(List<String> suggestions) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: SpellCheckSuggestionsToolbar(
               anchor: const Offset(0.0, _kAnchor - _kTestToolbarOverlap),
-              buttonItems: buildSuggestionButtons(<String>['hello', 'yellow', 'yell', 'yeller']),
+              buttonItems: buildSuggestionButtons(suggestions),
             ),
           ),
         ),
       );
+    }
+    await pumpToolbar(<String>['hello', 'yellow', 'yell']);
+    expect(() async {
+      await pumpToolbar(<String>['hello', 'yellow', 'yell', 'yeller']);
     }, throwsAssertionError);
   });
 
@@ -134,6 +138,7 @@ void main() {
     final Iterable<String?> labels = buttonItems!.map((ContextMenuButtonItem buttonItem) {
       return buttonItem.label;
     });
+    expect(labels, hasLength(4));
     expect(labels, contains('hello'));
     expect(labels, contains('yellow'));
     expect(labels, contains('yell'));
