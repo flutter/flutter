@@ -371,4 +371,75 @@ void main() {
       }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
     }
   }
+
+  testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
+    late StateSetter setState;
+    const double height = _kToolbarHeight;
+    double anchorAboveY = 0.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.light,
+        ),
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              final MediaQueryData data = MediaQuery.of(context);
+              // Add some custom vertical padding to make this test more strict.
+              // By default in the testing environment, _kToolbarContentDistance
+              // and the built-in padding from CupertinoApp can end up canceling
+              // each other out.
+              return MediaQuery(
+                data: data.copyWith(
+                  padding: data.viewPadding.copyWith(
+                    top: 12.0,
+                  ),
+                ),
+                child: CupertinoTextSelectionToolbar(
+                  anchorAbove: Offset(50.0, anchorAboveY),
+                  anchorBelow: const Offset(50.0, 500.0),
+                  children: <Widget>[
+                    Container(color: const Color(0xffff0000), width: 50.0, height: height),
+                    Container(color: const Color(0xff00ff00), width: 50.0, height: height),
+                    Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // When the toolbar is below the content, the shadow hangs below the entire
+    // toolbar.
+    final Finder finder = find.descendant(
+      of: find.byType(CupertinoTextSelectionToolbar),
+      matching: find.byType(DecoratedBox),
+    );
+    expect(finder, findsNWidgets(2));
+    DecoratedBox decoratedBox = tester.widget(finder.first);
+    BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+    List<BoxShadow>? shadows = boxDecoration.boxShadow;
+    expect(shadows, isNotNull);
+    expect(shadows, hasLength(1));
+    BoxShadow shadow = boxDecoration.boxShadow!.first;
+    expect(shadow.offset.dy, equals(7.0));
+
+    // When the toolbar is above the content, the shadow sits around the arrow
+    // with no offset.
+    setState(() {
+      anchorAboveY = 80.0;
+    });
+    await tester.pump();
+    decoratedBox = tester.widget(finder.first);
+    boxDecoration = decoratedBox.decoration as BoxDecoration;
+    shadows = boxDecoration.boxShadow;
+    expect(shadows, isNotNull);
+    expect(shadows, hasLength(1));
+    shadow = boxDecoration.boxShadow!.first;
+    expect(shadow.offset.dy, equals(0.0));
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
