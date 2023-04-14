@@ -122,8 +122,9 @@ bool GPUSurfaceVulkanImpeller::EnableRasterCache() const {
 }
 
 // |Surface|
-impeller::AiksContext* GPUSurfaceVulkanImpeller::GetAiksContext() const {
-  return aiks_context_.get();
+std::shared_ptr<impeller::AiksContext>
+GPUSurfaceVulkanImpeller::GetAiksContext() const {
+  return aiks_context_;
 }
 
 }  // namespace flutter

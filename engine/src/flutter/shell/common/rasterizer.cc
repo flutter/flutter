@@ -53,6 +53,11 @@ fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> Rasterizer::GetSnapshotDelegate()
   return weak_factory_.GetWeakPtr();
 }
 
+void Rasterizer::SetImpellerContext(
+    std::weak_ptr<impeller::Context> impeller_context) {
+  impeller_context_ = std::move(impeller_context);
+}
+
 void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
   surface_ = std::move(surface);
 
@@ -544,7 +549,7 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
           .supports_readback,                // surface supports pixel reads
       raster_thread_merger_,                 // thread merger
       frame->GetDisplayListBuilder().get(),  // display list builder
-      surface_->GetAiksContext()             // aiks context
+      surface_->GetAiksContext().get()       // aiks context
   );
   if (compositor_frame) {
     compositor_context_->raster_cache().BeginFrame();

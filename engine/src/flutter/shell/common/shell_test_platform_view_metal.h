@@ -49,6 +49,9 @@ class ShellTestPlatformViewMetal final : public ShellTestPlatformView,
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
 
+  // |PlatformView|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
+
   // |GPUSurfaceMetalDelegate|
   GPUCAMetalLayerHandle GetCAMetalLayer(
       const SkISize& frame_info) const override;

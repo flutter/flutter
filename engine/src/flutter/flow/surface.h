@@ -49,7 +49,7 @@ class Surface {
 
   virtual bool EnableRasterCache() const;
 
-  virtual impeller::AiksContext* GetAiksContext() const;
+  virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const;
 
   /// Capture the `SurfaceData` currently present in the surface.
   ///

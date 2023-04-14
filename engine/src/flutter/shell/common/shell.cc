@@ -186,6 +186,12 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                     !settings.skia_deterministic_rendering_on_cpu),
                 is_gpu_disabled));
 
+  // Create the platform view on the platform thread (this thread).
+  auto platform_view = on_create_platform_view(*shell.get());
+  if (!platform_view || !platform_view->GetWeakPtr()) {
+    return nullptr;
+  }
+
   // Create the rasterizer on the raster thread.
   std::promise<std::unique_ptr<Rasterizer>> rasterizer_promise;
   auto rasterizer_future = rasterizer_promise.get_future();
@@ -193,22 +199,19 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       snapshot_delegate_promise;
   auto snapshot_delegate_future = snapshot_delegate_promise.get_future();
   fml::TaskRunner::RunNowOrPostTask(
-      task_runners.GetRasterTaskRunner(), [&rasterizer_promise,  //
-                                           &snapshot_delegate_promise,
-                                           on_create_rasterizer,  //
-                                           shell = shell.get()    //
+      task_runners.GetRasterTaskRunner(),
+      [&rasterizer_promise,  //
+       &snapshot_delegate_promise,
+       on_create_rasterizer,                                   //
+       shell = shell.get(),                                    //
+       impeller_context = platform_view->GetImpellerContext()  //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
         std::unique_ptr<Rasterizer> rasterizer(on_create_rasterizer(*shell));
+        rasterizer->SetImpellerContext(impeller_context);
         snapshot_delegate_promise.set_value(rasterizer->GetSnapshotDelegate());
         rasterizer_promise.set_value(std::move(rasterizer));
       });
-
-  // Create the platform view on the platform thread (this thread).
-  auto platform_view = on_create_platform_view(*shell.get());
-  if (!platform_view || !platform_view->GetWeakPtr()) {
-    return nullptr;
-  }
 
   // Ask the platform view for the vsync waiter. This will be used by the engine
   // to create the animator.
