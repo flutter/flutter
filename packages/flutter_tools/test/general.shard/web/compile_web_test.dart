@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -44,7 +45,7 @@ void main() {
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
-        'ServiceWorkerStrategy': 'serviceWorkerStrategy',
+        'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
         'WasmOmitTypeChecks': 'false',
         'RunWasmOpt': 'false',
         'BuildMode': 'debug',
@@ -69,7 +70,7 @@ void main() {
       flutterProject,
       'target',
       BuildInfo.debug,
-      'serviceWorkerStrategy',
+      ServiceWorkerStrategy.offlineFirst,
       compilerConfig: const WasmCompilerConfig(
         omitTypeChecks: false,
         runWasmOpt: false
@@ -112,7 +113,7 @@ void main() {
               flutterProject,
               'target',
               BuildInfo.debug,
-              'serviceWorkerStrategy',
+              ServiceWorkerStrategy.offlineFirst,
               compilerConfig: const JsCompilerConfig.run(nativeNullAssertions: true),
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
