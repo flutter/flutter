@@ -202,20 +202,20 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @Deprecated('do not use')
   late final PipelineOwner pipelineOwner = PipelineOwner(
     onSemanticsOwnerCreated: () {
-      renderView.scheduleInitialSemantics();
+      (pipelineOwner.rootNode as RenderView?)?.scheduleInitialSemantics();
     },
     onSemanticsUpdate: (ui.SemanticsUpdate update) {
-      renderView.updateSemantics(update);
+      (pipelineOwner.rootNode as RenderView?)?.updateSemantics(update);
     },
     onSemanticsOwnerDisposed: () {
-      renderView.clearSemantics();
+      (pipelineOwner.rootNode as RenderView?)?.clearSemantics();
     }
   );
 
   /// The render tree that's attached to the output surface.
   @Deprecated('do not use')
   late final RenderView renderView = RenderView(
-      view: platformDispatcher.implicitView!,
+    view: platformDispatcher.implicitView!,
   );
 
   ///
