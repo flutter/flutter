@@ -441,7 +441,8 @@ class AndroidProject extends FlutterProjectPlatform {
 
   static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace[\\s]+[\'"](.+)[\'"]');
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
-  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
@@ -500,7 +501,9 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
     final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _kotlinPluginPattern) != null;
+    final bool imperativeMatch = firstMatchInFile(gradleFile, _imperativeKotlinPluginPattern) != null;
+    final bool declarativeMatch = firstMatchInFile(gradleFile, _declarativeKotlinPluginPattern) != null;
+    return imperativeMatch || declarativeMatch;
   }
 
   File get appManifestFile {
