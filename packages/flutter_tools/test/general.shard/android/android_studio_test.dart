@@ -959,18 +959,39 @@ void main() {
       const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
       globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
 
-      const List<String> versions = <String> [
+      // The directory exists, but nothing is inside.
+      fileSystem.directory(configuredAndroidStudioDir).createSync(recursive: true);
+      (globals.processManager as FakeProcessManager).excludedExecutables.add(
+        fileSystem.path.join(configuredAndroidStudioDir, 'jre', 'bin', 'java'),
+      );
+
+      const List<String> validVersions = <String> [
         '4.0',
         '2.0',
         '3.1',
       ];
 
-      for (final String version in versions) {
+      for (final String version in validVersions) {
         fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
           ..createSync(recursive: true)
           ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
         fileSystem.directory('C:\\Program Files\\AndroidStudio$version')
           .createSync(recursive: true);
+      }
+
+      const List<String> validJavaPaths = <String>[
+        r'C:\Program Files\AndroidStudio4.0\jre\bin\java',
+        r'C:\Program Files\AndroidStudio2.0\jre\bin\java',
+        r'C:\Program Files\AndroidStudio3.1\jre\bin\java',
+      ];
+
+      for (final String javaPath in validJavaPaths) {
+        (globals.processManager as FakeProcessManager).addCommand(FakeCommand(
+          command: <String>[
+            globals.fs.path.join(javaPath),
+            '-version',
+          ],
+        ));
       }
 
       expect(AndroidStudio.allInstalled().length, 4);
@@ -981,7 +1002,7 @@ void main() {
       Config: () => Config.test(),
       FileSystem: () => fileSystem,
       Platform: () => platform,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager.empty(),
     });
 
     testUsingContext('throws a ToolExit if --android-studio-dir is configured but the directory does not exist', () async {
