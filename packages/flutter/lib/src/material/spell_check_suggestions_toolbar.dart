@@ -18,20 +18,23 @@ import 'text_selection_toolbar_text_button.dart';
 // Size eyeballed on Pixel 4 emulator running Android API 31.
 const double _kDefaultToolbarHeight = 193.0;
 
+/// The maximum number of suggestions in the toolbar is 3, plus a delete button.
+const int _kMaxSuggestions = 3;
+
 /// The default spell check suggestions toolbar for Android.
 ///
 /// Tries to position itself below the [anchor], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
-///
-/// [buttonItems] must not contain more than four items, generally three
-/// suggestions and one delete button.
 class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Constructs a [SpellCheckSuggestionsToolbar].
+  ///
+  /// [buttonItems] must not contain more than four items, generally three
+  /// suggestions and one delete button.
   const SpellCheckSuggestionsToolbar({
     super.key,
     required this.anchor,
     required this.buttonItems,
-  }) : assert(buttonItems.length <= 4);
+  }) : assert(buttonItems.length <= _kMaxSuggestions + 1);
 
   /// {@template flutter.material.SpellCheckSuggestionsToolbar.anchor}
   /// The focal point below which the toolbar attempts to position itself.
@@ -40,6 +43,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// The [ContextMenuButtonItem]s that will be turned into the correct button
   /// widgets and displayed in the spell check suggestions toolbar.
+  ///
+  /// Must not contain more than four items, typically three suggestions and a
+  /// delete button.
   ///
   /// See also:
   ///
@@ -73,8 +79,8 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
-    // Build a maximum of 3 suggestion buttons.
-    for (final String suggestion in spanAtCursorIndex.suggestions.take(3)) {
+    // Build suggestion buttons.
+    for (final String suggestion in spanAtCursorIndex.suggestions.take(_kMaxSuggestions)) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
           if (!editableTextState.mounted) {
