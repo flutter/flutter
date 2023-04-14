@@ -40,7 +40,7 @@ void main() {
 
   testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123378
-    await tester.pumpWidget( 
+    await tester.pumpWidget(
       const MaterialApp(
         color: Color(0xFF2196F3),
         title: 'Demo',
