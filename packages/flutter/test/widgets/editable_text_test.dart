@@ -15218,13 +15218,12 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
       await tester.pumpAndSettle();
       // Toolbar will only show on non-web platforms.
-      expect(state.showSpellCheckSuggestionsToolbar(), !kIsWeb);
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
       await tester.pumpAndSettle();
 
-      const Matcher matcher = kIsWeb ? findsNothing : findsOneWidget;
-      expect(find.byType(CupertinoTextSelectionToolbarButton), matcher);
-      expect(find.byType(CupertinoButton), matcher);
-      expect(find.text('No Replacements Found'), matcher);
+      expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
+      expect(find.byType(CupertinoButton), findsOneWidget);
+      expect(find.text('No Replacements Found'), findsOneWidget);
       final CupertinoButton button = tester.widget(find.byType(CupertinoButton));
       expect(button.enabled, isFalse);
     },
