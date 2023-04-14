@@ -130,6 +130,7 @@ class JsCompilerConfig extends WebCompilerConfig {
 class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     required this.omitTypeChecks,
+    required this.runWasmOpt,
   });
 
   /// Creates a new [WasmCompilerConfig] from build system environment values.
@@ -139,13 +140,18 @@ class WasmCompilerConfig extends WebCompilerConfig {
           Map<String, String> defines) =>
       WasmCompilerConfig(
         omitTypeChecks: defines[kOmitTypeChecks] == 'true',
+        runWasmOpt: defines[kRunWasmOpt] == 'true',
       );
 
   /// Build environment for [omitTypeChecks];
   static const String kOmitTypeChecks = 'WasmOmitTypeChecks';
+  static const String kRunWasmOpt = 'RunWasmOpt';
 
   /// If `omit-type-checks` should be passed to `dart2wasm`.
   final bool omitTypeChecks;
+
+  // Run wasm-opt on the resulting module.
+  final bool runWasmOpt;
 
   @override
   bool get isWasm => true;
@@ -153,6 +159,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   @override
   Map<String, String> toBuildSystemEnvironment() => <String, String>{
     kOmitTypeChecks: omitTypeChecks.toString(),
+    kRunWasmOpt: runWasmOpt.toString(),
   };
 
   List<String> toCommandOptions() => <String>[

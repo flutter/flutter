@@ -845,6 +845,62 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2WasmTarget invokes dart2wasm and wasm-opt when RunWasmOpt is enabled', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    environment.defines[WasmCompilerConfig.kRunWasmOpt] = 'true';
+
+    final File depFile = environment.buildDir.childFile('dart2wasm.d');
+
+    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        'bin/cache/dart-sdk/bin/dartaotruntime',
+        '--disable-dart-dev',
+        'bin/cache/dart-sdk/bin/snapshots/dart2wasm_product.snapshot',
+        '-Ddart.vm.product=true',
+        '--packages=.dart_tool/package_config.json',
+        '--dart-sdk=bin/cache/dart-sdk',
+        '--multi-root-scheme',
+        'org-dartlang-sdk',
+        '--multi-root',
+        'bin/cache/flutter_web_sdk',
+        '--multi-root',
+        'bin/cache',
+        '--libraries-spec',
+        'bin/cache/flutter_web_sdk/libraries.json',
+        '--depfile=${depFile.absolute.path}',
+
+        environment.buildDir.childFile('main.dart').absolute.path,
+        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+      ], onRun: () => outputJsFile..createSync()..writeAsStringSync('foo')));
+
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/utils/wasm-opt',
+          '-all',
+          '--closed-world',
+          '-tnh',
+          '-O3',
+          '--type-ssa',
+          '--gufa',
+          '-O3',
+          '--type-merging',
+          environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+          '-o',
+          environment.buildDir.childFile('main.dart.wasm').absolute.path,
+        ]));
+
+    await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
+
+    expect(outputJsFile.existsSync(), isFalse);
+    final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
+    expect(movedJsFile.existsSync(), isTrue);
+    expect(movedJsFile.readAsStringSync(), 'foo');
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
+
   test('Dart2WasmTarget with skwasm renderer adds extra flags', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
