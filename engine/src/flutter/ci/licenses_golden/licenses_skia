@@ -1,4 +1,4 @@
-Signature: 162d1e4b6a7410b69f3361de02bfb2c9
+Signature: 02f97cf1bfa41fa8ceed2b814c63be55
 
 ====================================================================================================
 LIBRARY: etc1
@@ -3827,12 +3827,6 @@ ORIGIN: ../../../third_party/skia/include/ports/SkImageGeneratorCG.h + ../../../
 ORIGIN: ../../../third_party/skia/include/ports/SkImageGeneratorWIC.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkBitmaskEnum.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkEncodedInfo.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSLIRNode.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSLLayout.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSLModifiers.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSLProgramElement.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSLStatement.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSLSymbol.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SingleOwner.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/sksg/slides/SVGPongSlide.cpp + ../../../third_party/skia/LICENSE
@@ -4050,18 +4044,24 @@ ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionCall.h + ../../../thir
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDefinition.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionReference.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLIRNode.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLIfStatement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLIndexExpression.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLInterfaceBlock.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLLayout.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLLiteral.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLModifiers.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLNop.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLPostfixExpression.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLPrefixExpression.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLProgram.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLProgramElement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLReturnStatement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLSetting.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLStatement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLSymbol.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLSymbolTable.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLSymbolTable.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLTernaryExpression.h + ../../../third_party/skia/LICENSE
@@ -4141,12 +4141,6 @@ FILE: ../../../third_party/skia/include/ports/SkImageGeneratorCG.h
 FILE: ../../../third_party/skia/include/ports/SkImageGeneratorWIC.h
 FILE: ../../../third_party/skia/include/private/SkBitmaskEnum.h
 FILE: ../../../third_party/skia/include/private/SkEncodedInfo.h
-FILE: ../../../third_party/skia/include/private/SkSLIRNode.h
-FILE: ../../../third_party/skia/include/private/SkSLLayout.h
-FILE: ../../../third_party/skia/include/private/SkSLModifiers.h
-FILE: ../../../third_party/skia/include/private/SkSLProgramElement.h
-FILE: ../../../third_party/skia/include/private/SkSLStatement.h
-FILE: ../../../third_party/skia/include/private/SkSLSymbol.h
 FILE: ../../../third_party/skia/include/private/base/SingleOwner.h
 FILE: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h
 FILE: ../../../third_party/skia/modules/sksg/slides/SVGPongSlide.cpp
@@ -4364,18 +4358,24 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionCall.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDefinition.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionReference.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLIRNode.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIfStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIndexExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLInterfaceBlock.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLLayout.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLLiteral.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLModifiers.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLNop.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPostfixExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPrefixExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLProgram.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLProgramElement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLReturnStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSetting.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwizzle.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLSymbol.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSymbolTable.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSymbolTable.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLTernaryExpression.h
@@ -4591,7 +4591,6 @@ ORIGIN: ../../../third_party/skia/include/gpu/GrBackendSurface.h + ../../../thir
 ORIGIN: ../../../third_party/skia/include/gpu/mock/GrMockTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/mtl/GrMtlTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkFontMgr_mac_ct.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSLString.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkShadowFlags.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkMalloc.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/utils/SkShadowUtils.h + ../../../third_party/skia/LICENSE
@@ -4738,6 +4737,7 @@ ORIGIN: ../../../third_party/skia/src/sksl/SkSLLexer.cpp + ../../../third_party/
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLLexer.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLOutputStream.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLString.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/SkSLString.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLStringStream.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLSetting.cpp + ../../../third_party/skia/LICENSE
@@ -4820,7 +4820,6 @@ FILE: ../../../third_party/skia/include/gpu/GrBackendSurface.h
 FILE: ../../../third_party/skia/include/gpu/mock/GrMockTypes.h
 FILE: ../../../third_party/skia/include/gpu/mtl/GrMtlTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_mac_ct.h
-FILE: ../../../third_party/skia/include/private/SkSLString.h
 FILE: ../../../third_party/skia/include/private/SkShadowFlags.h
 FILE: ../../../third_party/skia/include/private/base/SkMalloc.h
 FILE: ../../../third_party/skia/include/utils/SkShadowUtils.h
@@ -4967,6 +4966,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLLexer.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLLexer.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.h
 FILE: ../../../third_party/skia/src/sksl/SkSLString.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLString.h
 FILE: ../../../third_party/skia/src/sksl/SkSLStringStream.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSetting.cpp
@@ -6859,12 +6859,6 @@ ORIGIN: ../../../third_party/skia/include/ports/SkImageGeneratorNDK.h + ../../..
 ORIGIN: ../../../third_party/skia/include/private/SkIDChangeListener.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkSLSampleUsage.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrD3DTypesMinimal.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSL.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLCore.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLExpression.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLModifiers.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLType.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLVar.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/utils/SkCustomTypeface.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/canvaskit/gm_bindings.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp + ../../../third_party/skia/LICENSE
@@ -6977,10 +6971,16 @@ ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.cpp + ../../.
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSL.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLCore.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLCore.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLExpression.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLExpression.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLModifiers.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLType.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLType.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLVar.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLVar.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/priv/DSLWriter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/priv/DSLWriter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionPrototype.h + ../../../third_party/skia/LICENSE
@@ -7008,12 +7008,6 @@ FILE: ../../../third_party/skia/include/ports/SkImageGeneratorNDK.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
 FILE: ../../../third_party/skia/include/private/SkSLSampleUsage.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrD3DTypesMinimal.h
-FILE: ../../../third_party/skia/include/sksl/DSL.h
-FILE: ../../../third_party/skia/include/sksl/DSLCore.h
-FILE: ../../../third_party/skia/include/sksl/DSLExpression.h
-FILE: ../../../third_party/skia/include/sksl/DSLModifiers.h
-FILE: ../../../third_party/skia/include/sksl/DSLType.h
-FILE: ../../../third_party/skia/include/sksl/DSLVar.h
 FILE: ../../../third_party/skia/include/utils/SkCustomTypeface.h
 FILE: ../../../third_party/skia/modules/canvaskit/gm_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp
@@ -7126,10 +7120,16 @@ FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSL.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLCore.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLCore.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLExpression.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLExpression.h
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLModifiers.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLType.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLType.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLVar.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLVar.h
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLWriter.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLWriter.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionPrototype.h
@@ -7534,7 +7534,6 @@ ORIGIN: ../../../third_party/skia/include/private/chromium/GrSlug.h + ../../../t
 ORIGIN: ../../../third_party/skia/include/private/chromium/Slug.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrDawnTypesPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrMockTypesPriv.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/SkSLOperator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBlendModeBlender.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBlendModeBlender.h + ../../../third_party/skia/LICENSE
@@ -7665,6 +7664,7 @@ ORIGIN: ../../../third_party/skia/src/sksl/SkSLContext.cpp + ../../../third_part
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLMangler.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLOperator.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/SkSLOperator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLThreadContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLCanExitWithoutReturningValue.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/analysis/SkSLCheckProgramStructure.cpp + ../../../third_party/skia/LICENSE
@@ -7757,7 +7757,6 @@ FILE: ../../../third_party/skia/include/private/chromium/GrSlug.h
 FILE: ../../../third_party/skia/include/private/chromium/Slug.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrDawnTypesPriv.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrMockTypesPriv.h
-FILE: ../../../third_party/skia/include/sksl/SkSLOperator.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings_gen.cpp
 FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.cpp
 FILE: ../../../third_party/skia/src/core/SkBlendModeBlender.h
@@ -7888,6 +7887,7 @@ FILE: ../../../third_party/skia/src/sksl/SkSLContext.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.h
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOperator.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLOperator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLThreadContext.h
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLCanExitWithoutReturningValue.cpp
 FILE: ../../../third_party/skia/src/sksl/analysis/SkSLCheckProgramStructure.cpp
@@ -7983,16 +7983,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/batchedconvexpaths.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/destcolor.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/SkSLProgramKind.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLBlock.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLCase.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLFunction.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLLayout.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/DSLStatement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/sksl/SkSLDebugTrace.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/SkSLErrorReporter.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/sksl/SkSLPosition.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkStringView.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrVertexChunkArray.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrVertexChunkArray.h + ../../../third_party/skia/LICENSE
@@ -8008,15 +8000,23 @@ ORIGIN: ../../../third_party/skia/src/gpu/tessellate/AffineMatrix.h + ../../../t
 ORIGIN: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/tessellate/Tessellation.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLErrorReporter.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/SkSLErrorReporter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLMangler.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLParser.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLParser.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/SkSLPosition.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/SkSLProgramKind.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLCase.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLLayout.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLLayout.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLStatement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/priv/DSL_priv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLModifiers.cpp + ../../../third_party/skia/LICENSE
@@ -8027,16 +8027,8 @@ ORIGIN: ../../../third_party/skia/src/sksl/transform/SkSLTransform.h + ../../../
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/batchedconvexpaths.cpp
 FILE: ../../../third_party/skia/gm/destcolor.cpp
-FILE: ../../../third_party/skia/include/private/SkSLProgramKind.h
 FILE: ../../../third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h
-FILE: ../../../third_party/skia/include/sksl/DSLBlock.h
-FILE: ../../../third_party/skia/include/sksl/DSLCase.h
-FILE: ../../../third_party/skia/include/sksl/DSLFunction.h
-FILE: ../../../third_party/skia/include/sksl/DSLLayout.h
-FILE: ../../../third_party/skia/include/sksl/DSLStatement.h
 FILE: ../../../third_party/skia/include/sksl/SkSLDebugTrace.h
-FILE: ../../../third_party/skia/include/sksl/SkSLErrorReporter.h
-FILE: ../../../third_party/skia/include/sksl/SkSLPosition.h
 FILE: ../../../third_party/skia/src/base/SkStringView.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrVertexChunkArray.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrVertexChunkArray.h
@@ -8052,15 +8044,23 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/AffineMatrix.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/PatchWriter.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/Tessellation.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLErrorReporter.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLErrorReporter.h
 FILE: ../../../third_party/skia/src/sksl/SkSLIntrinsicList.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLMangler.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLParser.h
+FILE: ../../../third_party/skia/src/sksl/SkSLPosition.h
+FILE: ../../../third_party/skia/src/sksl/SkSLProgramKind.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLLayout.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLLayout.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.cpp
+FILE: ../../../third_party/skia/src/sksl/dsl/DSLStatement.h
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSL_priv.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLModifiers.cpp
