@@ -30,13 +30,26 @@ import 'media_query.dart';
 /// its identity from the [view] provided to this widget.
 class View extends StatefulWidget {
   /// Injects the provided [view] into the widget tree.
-  View({required this.view, required this.child}) : super(key: GlobalObjectKey(view));
+  View({
+    required this.view,
+    @Deprecated('Do not use')
+    PipelineOwner? deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
+    @Deprecated('Do not use')
+    RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
+    required this.child,
+  }) : _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
+       _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
+       assert(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null || deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view),
+       super(key: GlobalObjectKey(view));
 
   /// The [FlutterView] to be injected into the tree.
   final FlutterView view;
 
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
+
+  final PipelineOwner? _deprecatedPipelineOwner;
+  final RenderView? _deprecatedRenderView;
 
   @override
   State<View> createState() => _ViewState();
@@ -125,6 +138,15 @@ class _ViewState extends State<View> {
     widget.view.updateSemantics(update);
   }
 
+  PipelineOwner get _effectivePipelineOwner => widget._deprecatedPipelineOwner ?? _pipelineOwner;
+
+  @override
+  void didUpdateWidget(View oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(oldWidget._deprecatedPipelineOwner == widget._deprecatedPipelineOwner);
+    assert(oldWidget._deprecatedRenderView == widget._deprecatedRenderView);
+  }
+
   // Hooks provided by an ancestor for this view.
   late ViewHooks _ancestorHooks;
   // Hooks provided by this view for descendant views.
@@ -134,7 +156,7 @@ class _ViewState extends State<View> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _ancestorHooks = ViewHooks.of(context);
-    _descendantHooks = _ancestorHooks.copyWith(pipelineOwner: _pipelineOwner);
+    _descendantHooks = _ancestorHooks.copyWith(pipelineOwner: _effectivePipelineOwner);
   }
 
   @override
@@ -142,7 +164,8 @@ class _ViewState extends State<View> {
     return _ViewRenderObjectWidget(
       view: widget.view,
       hooks: _ancestorHooks,
-      pipelineOwner: _pipelineOwner,
+      pipelineOwner: _effectivePipelineOwner,
+      deprecatedRenderView: widget._deprecatedRenderView,
       child: _ViewScope(
         view: widget.view,
         child: ViewHooksScope(
@@ -158,23 +181,25 @@ class _ViewState extends State<View> {
 }
 
 class _ViewRenderObjectWidget extends SingleChildRenderObjectWidget {
-  const _ViewRenderObjectWidget({
+  _ViewRenderObjectWidget({
     required this.view,
     required this.hooks,
     required this.pipelineOwner,
+    this.deprecatedRenderView,
     required super.child,
-  });
+  }) : assert(deprecatedRenderView == null || deprecatedRenderView.flutterView == view);
 
   final FlutterView view;
   final ViewHooks hooks;
   final PipelineOwner pipelineOwner;
+  final RenderView? deprecatedRenderView;
 
   @override
   SingleChildRenderObjectElement createElement() => _ViewRenderObjectWidgetElement(this);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderView(
+    return deprecatedRenderView ?? RenderView(
       view: view,
     );
   }
@@ -235,6 +260,7 @@ class _ViewRenderObjectWidgetElement extends RootSingleChildRenderObjectElementM
   void update(_ViewRenderObjectWidget oldWidget) {
     super.update(oldWidget);
     final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
+    assert(oldWidget.deprecatedRenderView == viewWidget.deprecatedRenderView);
     assert(oldWidget.pipelineOwner == viewWidget.pipelineOwner);
     final ViewHooks oldHooks = oldWidget.hooks;
     final ViewHooks newHooks = viewWidget.hooks;

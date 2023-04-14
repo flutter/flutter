@@ -967,6 +967,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Widget wrapWithDefaultView(Widget rootWidget) {
     return View(
       view: platformDispatcher.implicitView!,
+      deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: pipelineOwner,
+      deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: renderView,
       child: rootWidget,
     );
   }

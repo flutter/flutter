@@ -200,11 +200,23 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// The render tree's owner, which maintains dirty state for layout,
   /// composite, paint, and accessibility semantics.
   @Deprecated('do not use')
-  PipelineOwner get pipelineOwner => throw UnimplementedError();
+  late final PipelineOwner pipelineOwner = PipelineOwner(
+    onSemanticsOwnerCreated: () {
+      renderView.scheduleInitialSemantics();
+    },
+    onSemanticsUpdate: (ui.SemanticsUpdate update) {
+      renderView.updateSemantics(update);
+    },
+    onSemanticsOwnerDisposed: () {
+      renderView.clearSemantics();
+    }
+  );
 
   /// The render tree that's attached to the output surface.
   @Deprecated('do not use')
-  RenderView get renderView => throw UnimplementedError();
+  late final RenderView renderView = RenderView(
+      view: platformDispatcher.implicitView!,
+  );
 
   ///
   PipelineOwner createRootPipelineOwner() {
@@ -377,7 +389,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
     drawFrame();
-    // _scheduleMouseTrackerUpdate();
+    _scheduleMouseTrackerUpdate();
   }
 
   bool _debugMouseTrackerUpdateScheduled = false;

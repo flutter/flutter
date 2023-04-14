@@ -3314,11 +3314,6 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Whether this [SemanticsOwner] owns a [SemanticsNode] with the provided `id`.
-  bool ownsNode(int id) {
-    return _nodes.containsKey(id);
-  }
-
   SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
     SemanticsNode? result = _nodes[id];
     if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
