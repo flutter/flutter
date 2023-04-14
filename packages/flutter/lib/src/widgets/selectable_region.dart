@@ -431,7 +431,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   // This method should be used in all instances when details.consecutiveTapCount
   // would be used.
   static int _getEffectiveConsecutiveTapCount(int rawCount) {
-    final int maxConsecutiveTap = 2;
+    const int maxConsecutiveTap = 2;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
