@@ -967,8 +967,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Widget wrapWithDefaultView(Widget rootWidget) {
     return View(
       view: platformDispatcher.implicitView!,
-      deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: pipelineOwner,
-      deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: renderView,
+      // deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: pipelineOwner,
+      // deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: renderView,
       child: rootWidget,
     );
   }
@@ -1189,6 +1189,7 @@ class RootElement extends Element with RootElementMixin {
     super.mount(parent, newSlot);
     _rebuild();
     assert(_child != null);
+    super.performRebuild(); // clears the "dirty" flag
   }
 
   @override
