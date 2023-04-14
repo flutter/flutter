@@ -59,7 +59,7 @@ const RenderTarget& EntityPassTarget::GetRenderTarget() const {
 }
 
 bool EntityPassTarget::IsValid() const {
-  return !target_.GetColorAttachments().empty();
+  return target_.IsValid();
 }
 
 }  // namespace impeller

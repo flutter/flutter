@@ -55,10 +55,14 @@ bool InlinePassContext::EndPass() {
   }
 
   if (!pass_->EncodeCommands()) {
+    VALIDATION_LOG
+        << "Failed to encode commands while ending the current render pass.";
     return false;
   }
 
   if (!command_buffer_->SubmitCommands()) {
+    VALIDATION_LOG
+        << "Failed to submit command buffer while ending render pass.";
     return false;
   }
 
