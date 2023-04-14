@@ -195,17 +195,57 @@ void testMain() {
     expect(program.uniforms, hasLength(17));
     expect(program.name, 'test');
 
-    final ui.FragmentShader shader = program.fragmentShader();
+    {
+      final CkFragmentShader shader = program.fragmentShader() as CkFragmentShader;
 
-    shader.setFloat(0, 4);
-    shader.dispose();
+      shader.setFloat(0, 4);
+      expect(
+        reason: 'SkShaders are created lazily',
+        shader.ref,
+        isNull,
+      );
 
-    expect(shader.debugDisposed, true);
+      final SkShader skShader = shader.getSkShader(ui.FilterQuality.none);
+      final UniqueRef<SkShader> ref = shader.ref!;
+      expect(skShader, same(ref.nativeObject));
+      expect(ref.isDisposed, false);
 
-    final ui.FragmentShader shader2 = program.fragmentShader();
+      shader.dispose();
+      expect(ref.isDisposed, true);
+      expect(shader.ref, isNull);
+      expect(shader.debugDisposed, true);
+    }
 
-    shader.setFloat(0, 5);
-    shader2.dispose();
-    expect(shader2.debugDisposed, true);
+    {
+      final CkFragmentShader shader = program.fragmentShader() as CkFragmentShader;
+      shader.setFloat(0, 5);
+
+      final SkShader skShader1 = shader.getSkShader(ui.FilterQuality.none);
+      final UniqueRef<SkShader> ref1 = shader.ref!;
+
+      final SkShader skShader2 = shader.getSkShader(ui.FilterQuality.none);
+      final UniqueRef<SkShader> ref2 = shader.ref!;
+      expect(ref1, isNot(same(ref2)));
+      expect(
+        reason: 'getSkShader creates a new shader every time. Old references should be disposed of.',
+        ref1.isDisposed,
+        true,
+      );
+      expect(ref2.isDisposed, false);
+
+      expect(
+        reason: 'Fragment shaders are mutable, so a new instance is created with every application.',
+        skShader1,
+        isNot(same(skShader2)),
+      );
+
+      shader.dispose();
+      expect(shader.debugDisposed, true);
+      expect(
+        reason: 'The last remaining SkShader reference should be disposed of when the FragmentShader itself is disposed of.',
+        ref2.isDisposed,
+        true,
+      );
+    }
   });
 }
