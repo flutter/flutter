@@ -457,6 +457,7 @@ targets:
     timeout: 60
     properties:
       release_build: "true"
+      cpu: arm64
       config_name: mac_impeller_cmake_example
       $flutter/osx_sdk : >-
         { "sdk_version": "14a5294e" }
