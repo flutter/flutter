@@ -20,7 +20,7 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -71,7 +71,7 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -105,7 +105,7 @@
                 "device_type=none",
                 "os=Windows-10"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "generators": {},
