@@ -608,6 +608,9 @@ void debugDumpLayerTree() {
 }
 
 String _debugCollectSemanticsTrees(DebugSemanticsDumpOrder childOrder) {
+  const String explanation = 'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+      'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
+      'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.';
   final List<String> trees = <String>[];
   bool printedExplanation = false;
   for (final RenderView renderView in RendererBinding.instance.renderViews) {
@@ -618,15 +621,15 @@ String _debugCollectSemanticsTrees(DebugSemanticsDumpOrder childOrder) {
       String message = 'Semantics not generated for $renderView.';
       if (!printedExplanation) {
         printedExplanation = true;
-        message = '$message\n'
-          'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-          'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-          'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.';
+        message = '$message\n$explanation';
       }
       trees.add(message);
     }
   }
-  return trees.join('\n\n');
+  if (trees.isNotEmpty) {
+    return trees.join('\n\n');
+  }
+  return 'Semantics not generated.\n$explanation';
 }
 
 /// Prints a textual representation of the semantics trees.

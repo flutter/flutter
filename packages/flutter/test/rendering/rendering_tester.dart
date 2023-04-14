@@ -53,6 +53,9 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   RenderView get renderView => _renderView;
   late RenderView _renderView;
 
+  @override
+  PipelineOwner get pipelineOwner => rootPipelineOwner;
+
   /// Creates a [RenderView] object to be the root of the
   /// [RenderObject] rendering tree, and initializes it so that it
   /// will be rendered when the next frame is requested.
