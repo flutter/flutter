@@ -14,8 +14,6 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import java.util.List;
 
 // Loosely based off of
@@ -56,7 +54,6 @@ class ImeSyncDeferringInsetsCallback {
   private WindowInsets lastWindowInsets;
   private AnimationCallback animationCallback;
   private InsetsListener insetsListener;
-  private ImeVisibleListener imeVisibleListener;
 
   // True when an animation that matches deferredInsetTypes is active.
   //
@@ -91,11 +88,6 @@ class ImeSyncDeferringInsetsCallback {
     view.setOnApplyWindowInsetsListener(null);
   }
 
-  // Set a listener to be notified when the IME visibility changes.
-  void setImeVisibleListener(ImeVisibleListener imeVisibleListener) {
-    this.imeVisibleListener = imeVisibleListener;
-  }
-
   @VisibleForTesting
   View.OnApplyWindowInsetsListener getInsetsListener() {
     return insetsListener;
@@ -104,11 +96,6 @@ class ImeSyncDeferringInsetsCallback {
   @VisibleForTesting
   WindowInsetsAnimation.Callback getAnimationCallback() {
     return animationCallback;
-  }
-
-  @VisibleForTesting
-  ImeVisibleListener getImeVisibleListener() {
-    return imeVisibleListener;
   }
 
   // WindowInsetsAnimation.Callback was introduced in API level 30.  The callback
@@ -126,20 +113,6 @@ class ImeSyncDeferringInsetsCallback {
         animating = true;
         needsSave = true;
       }
-    }
-
-    @NonNull
-    @Override
-    public WindowInsetsAnimation.Bounds onStart(
-        @NonNull WindowInsetsAnimation animation, @NonNull WindowInsetsAnimation.Bounds bounds) {
-      // Observe changes to software keyboard visibility and notify listener when animation start.
-      // See https://developer.android.com/develop/ui/views/layout/sw-keyboard.
-      WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
-      if (insets != null && imeVisibleListener != null) {
-        boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
-        imeVisibleListener.onImeVisibleChanged(imeVisible);
-      }
-      return super.onStart(animation, bounds);
     }
 
     @Override
@@ -225,10 +198,5 @@ class ImeSyncDeferringInsetsCallback {
       // inset handling.
       return view.onApplyWindowInsets(windowInsets);
     }
-  }
-
-  // Listener for IME visibility changes.
-  public interface ImeVisibleListener {
-    void onImeVisibleChanged(boolean visible);
   }
 }

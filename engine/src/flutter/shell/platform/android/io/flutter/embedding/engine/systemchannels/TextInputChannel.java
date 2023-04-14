@@ -367,14 +367,6 @@ public class TextInputChannel {
         "TextInputClient.performPrivateCommand", Arrays.asList(inputClientId, json));
   }
 
-  /** Instructs Flutter to execute a "onConnectionClosed" action. */
-  public void onConnectionClosed(int inputClientId) {
-    Log.v(TAG, "Sending 'onConnectionClosed' message.");
-    channel.invokeMethod(
-        "TextInputClient.onConnectionClosed",
-        Arrays.asList(inputClientId, "TextInputClient.onConnectionClosed"));
-  }
-
   /**
    * Sets the {@link TextInputMethodHandler} which receives all events and requests that are parsed
    * from the underlying platform channel.
