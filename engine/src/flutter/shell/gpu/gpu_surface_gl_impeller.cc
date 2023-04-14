@@ -160,8 +160,9 @@ bool GPUSurfaceGLImpeller::EnableRasterCache() const {
 }
 
 // |Surface|
-impeller::AiksContext* GPUSurfaceGLImpeller::GetAiksContext() const {
-  return aiks_context_.get();
+std::shared_ptr<impeller::AiksContext> GPUSurfaceGLImpeller::GetAiksContext()
+    const {
+  return aiks_context_;
 }
 
 }  // namespace flutter

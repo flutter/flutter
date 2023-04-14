@@ -47,7 +47,7 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   bool EnableRasterCache() const override;
 
   // |Surface|
-  impeller::AiksContext* GetAiksContext() const override;
+  std::shared_ptr<impeller::AiksContext> GetAiksContext() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceVulkanImpeller);
 };
