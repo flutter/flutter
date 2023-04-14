@@ -11,6 +11,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
@@ -233,6 +234,8 @@ bool EntityPass::Render(ContentContext& renderer,
                   0,                           // pass_depth
                   stencil_coverage_stack       // stencil_coverage_stack
                   )) {
+      // Validation error messages are triggered for all `OnRender()` failure
+      // cases.
       return false;
     }
 
@@ -250,6 +253,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
       if (!blit_pass->EncodeCommands(
               renderer.GetContext()->GetResourceAllocator())) {
+        VALIDATION_LOG << "Failed to encode root pass blit command.";
         return false;
       }
     } else {
@@ -272,10 +276,12 @@ bool EntityPass::Render(ContentContext& renderer,
       }
 
       if (!render_pass->EncodeCommands()) {
+        VALIDATION_LOG << "Failed to encode root pass command buffer.";
         return false;
       }
     }
     if (!command_buffer->SubmitCommands()) {
+      VALIDATION_LOG << "Failed to submit root pass command buffer.";
       return false;
     }
 
@@ -357,6 +363,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
               nullptr,                       // backdrop_filter_contents
               pass_context.GetRenderPass(pass_depth)  // collapsed_parent_pass
               )) {
+        // Validation error messages are triggered for all `OnRender()` failure
+        // cases.
         return EntityPass::EntityResult::Failure();
       }
       return EntityPass::EntityResult::Skip();
@@ -416,7 +424,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
                            subpass->GetTotalPassReads(renderer) > 0,  //
                            clear_color_.Premultiply());
 
-    if (!subpass_target.GetRenderTarget().GetRenderTargetTexture()) {
+    if (!subpass_target.IsValid()) {
+      VALIDATION_LOG << "Subpass render target is invalid.";
       return EntityPass::EntityResult::Failure();
     }
 
@@ -433,6 +442,8 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
                            subpass->stencil_depth_,   // stencil_depth_floor
                            backdrop_filter_contents  // backdrop_filter_contents
                            )) {
+      // Validation error messages are triggered for all `OnRender()` failure
+      // cases.
       return EntityPass::EntityResult::Failure();
     }
 
@@ -488,6 +499,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
                                  GetTotalPassReads(renderer),
                                  std::move(collapsed_parent_pass));
   if (!pass_context.IsValid()) {
+    VALIDATION_LOG << SPrintF("Pass context invalid (Depth=%d)", pass_depth);
     return false;
   }
 
@@ -506,6 +518,9 @@ bool EntityPass::OnRender(ContentContext& renderer,
     auto result = pass_context.GetRenderPass(pass_depth);
 
     if (!result.pass) {
+      // Failure to produce a render pass should be explained by specific errors
+      // in `InlinePassContext::GetRenderPass()`, so avoid log spam and don't
+      // append a validation log here.
       return false;
     }
 
@@ -526,6 +541,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
       msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
       msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
       if (!msaa_backdrop_entity.Render(renderer, *result.pass)) {
+        VALIDATION_LOG << "Failed to render MSAA backdrop filter entity.";
         return false;
       }
     }
@@ -601,6 +617,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
     element_entity.SetStencilDepth(element_entity.GetStencilDepth() -
                                    stencil_depth_floor);
     if (!element_entity.Render(renderer, *result.pass)) {
+      VALIDATION_LOG << "Failed to render entity.";
       return false;
     }
     return true;
@@ -608,6 +625,11 @@ bool EntityPass::OnRender(ContentContext& renderer,
 
   if (backdrop_filter_proc_.has_value()) {
     if (!backdrop_filter_contents) {
+      VALIDATION_LOG
+          << "EntityPass contains a backdrop filter, but no backdrop filter "
+             "contents was supplied by the parent pass at render time. This is "
+             "a bug in EntityPass. Parent passes are responsible for setting "
+             "up backdrop filters for their children.";
       return false;
     }
 
@@ -635,6 +657,8 @@ bool EntityPass::OnRender(ContentContext& renderer,
       case EntityResult::kSuccess:
         break;
       case EntityResult::kFailure:
+        // All failure cases should be covered by specific validation messages
+        // in `GetEntityForElement()`.
         return false;
       case EntityResult::kSkip:
         continue;
@@ -664,6 +688,9 @@ bool EntityPass::OnRender(ContentContext& renderer,
         // all the previous commands in the active pass).
 
         if (!pass_context.EndPass()) {
+          VALIDATION_LOG
+              << "Failed to end the current render pass in order to read from "
+                 "the backdrop texture and apply an advanced blend.";
           return false;
         }
 
@@ -671,6 +698,8 @@ bool EntityPass::OnRender(ContentContext& renderer,
         // texture.
         auto texture = pass_context.GetTexture();
         if (!texture) {
+          VALIDATION_LOG << "Failed to fetch the color texture in order to "
+                            "apply an advanced blend.";
           return false;
         }
 
@@ -691,6 +720,7 @@ bool EntityPass::OnRender(ContentContext& renderer,
     ///
 
     if (!render_element(result.entity)) {
+      // Specific validation logs are handled in `render_element()`.
       return false;
     }
   }
