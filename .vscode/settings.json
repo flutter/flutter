@@ -7,8 +7,9 @@
     "[dart]": {
         "editor.formatOnSave": false,
         "editor.formatOnType": false,
-	"editor.formatOnPaste": false,
+        "editor.formatOnPaste": false,
     },
-    
-    "html.format.enable": false
+
+    "html.format.enable": false,
+    "files.trimTrailingWhitespace": true
 }
