@@ -592,9 +592,11 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     if (status != AnimationStatus.dismissed) {
       return;
     }
-    setState(() {
-      _childHidden = false;
-    });
+    if (mounted) {
+      setState(() {
+        _childHidden = false;
+      });
+    }
     _route!.animation!.removeStatusListener(_routeAnimationStatusListener);
     _route = null;
   }
