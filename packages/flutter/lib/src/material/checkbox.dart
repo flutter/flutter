@@ -392,6 +392,7 @@ class Checkbox extends StatefulWidget {
   /// The semantic label for the checkobox that will be announced by screen readers.
   ///
   /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// 
   /// This label does not show in the UI.
   /// {@endtemplate}
   final String? semanticLabel;
