@@ -454,12 +454,6 @@ class XcodeProjectInfo {
 
   bool get definesCustomSchemes => !(schemes.contains('Runner') && schemes.length == 1);
 
-  /// The expected scheme for [buildInfo].
-  @visibleForTesting
-  static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return sentenceCase(buildInfo?.flavor ?? 'Runner');
-  }
-
   /// The expected build configuration for [buildInfo] and [scheme].
   static String expectedBuildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
@@ -483,7 +477,7 @@ class XcodeProjectInfo {
 
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
-  String? schemeFor({String? flavor, String hostAppProjectName = ''}) {
+  String? schemeFor(String hostAppProjectName, {String? flavor}) {
     if (flavor != null) {
       // if flavor exists, should take precedence over everything else
       final String expectedScheme = sentenceCase(flavor);
@@ -494,15 +488,15 @@ class XcodeProjectInfo {
         return candidate.toLowerCase() == expectedScheme.toLowerCase();
       });
     }
-
-      // if theres no flavour, then we should match the hostAppProj to the workspace name
-      final String expectedScheme = hostAppProjectName;
-      if (schemes.contains(expectedScheme)) {
-        return expectedScheme;
-      }
-      return _uniqueMatch(schemes, (String candidate) {
-        return candidate.toLowerCase() == expectedScheme.toLowerCase();
-      });
+    // if theres no flavor, then regardless if the project
+    // is renamed or the default 'Runner', it should match one of the schemes
+    final String expectedScheme = hostAppProjectName;
+    if (schemes.contains(expectedScheme)) {
+      return expectedScheme;
+    }
+    return _uniqueMatch(schemes, (String candidate) {
+      return candidate.toLowerCase() == expectedScheme.toLowerCase();
+    });
   }
 
   Never reportFlavorNotFoundAndExit() {

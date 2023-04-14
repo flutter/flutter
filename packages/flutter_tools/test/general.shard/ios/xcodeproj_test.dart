@@ -618,9 +618,9 @@ Information about project "Runner":
   testWithoutContext('expected scheme for non-flavored build is Runner', () {
     final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release', 'Runner'], <String>['Runner'], logger);
 
-    expect(info.schemeFor(flavor: BuildInfo.debug.flavor, hostAppProjectName: 'Runner'), 'Runner');
-    expect(info.schemeFor(flavor: BuildInfo.profile.flavor, hostAppProjectName: 'Runner'), 'Runner');
-    expect(info.schemeFor(flavor: BuildInfo.release.flavor, hostAppProjectName: 'Runner'), 'Runner');
+    expect(info.schemeFor('Runner', flavor: BuildInfo.debug.flavor), 'Runner');
+    expect(info.schemeFor('Runner', flavor: BuildInfo.profile.flavor), 'Runner');
+    expect(info.schemeFor('Runner', flavor: BuildInfo.release.flavor), 'Runner');
   });
 
   testWithoutContext('expected build configuration for non-flavored build is derived from BuildMode', () {
@@ -638,10 +638,16 @@ Information about project "Runner":
   testWithoutContext('scheme for default project is Runner', () {
     final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner'], logger);
 
-    expect(info.schemeFor(flavor: BuildInfo.debug.flavor, hostAppProjectName: 'Runner'), 'Runner');
-    expect(info.schemeFor(flavor: BuildInfo.profile.flavor, hostAppProjectName: 'Runner'), 'Runner');
-    expect(info.schemeFor(flavor: BuildInfo.release.flavor, hostAppProjectName: 'Runner'), 'Runner');
-    expect(info.schemeFor(flavor: BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false).flavor, hostAppProjectName: 'Runner'), isNull);
+    expect(info.schemeFor('Runner', flavor: BuildInfo.debug.flavor), 'Runner');
+    expect(info.schemeFor('Runner', flavor: BuildInfo.profile.flavor), 'Runner');
+    expect(info.schemeFor('Runner', flavor: BuildInfo.release.flavor), 'Runner');
+    expect(info.schemeFor('Runner', flavor: const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false).flavor), isNull);
+  });
+
+  testWithoutContext('scheme for a custom project with flavor is still flavor', () {
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['TestFlavor', 'Runner'], logger);
+
+    expect(info.schemeFor('CustomName', flavor: 'TestFlavor'), 'TestFlavor');
   });
 
   testWithoutContext('build configuration for default project is matched against BuildMode', () {
@@ -660,11 +666,11 @@ Information about project "Runner":
       logger,
     );
 
-    expect(info.schemeFor(flavor: 'Free'), 'Free');
-    expect(info.schemeFor(flavor: 'Free'), 'Free');
-    expect(info.schemeFor(flavor: 'Paid'), 'Paid');
-    expect(info.schemeFor(flavor: BuildInfo.debug.flavor), isNull);
-    expect(info.schemeFor(flavor: 'unknown'), isNull);
+    expect(info.schemeFor('Runner', flavor: 'Free'), 'Free');
+    expect(info.schemeFor('Runner', flavor: 'Free'), 'Free');
+    expect(info.schemeFor('Runner', flavor: 'Paid'), 'Paid');
+    expect(info.schemeFor('Runner', flavor: BuildInfo.debug.flavor), isNull);
+    expect(info.schemeFor('Runner', flavor: 'unknown'), isNull);
   });
 
   testWithoutContext('reports default scheme error and exit', () {
@@ -721,8 +727,8 @@ Information about project "Runner":
       logger,
     );
 
-    expect(info.schemeFor(hostAppProjectName: 'CustomName'), 'CustomName');
-    expect(info.schemeFor(hostAppProjectName: 'WrongName'), isNull);
+    expect(info.schemeFor('CustomName'), 'CustomName');
+    expect(info.schemeFor('WrongName'), isNull);
   });
 
   testWithoutContext('build configuration for project with inconsistent naming is null', () {
