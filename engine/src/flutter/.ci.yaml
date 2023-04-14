@@ -390,7 +390,8 @@ targets:
     recipe: engine/engine_lint
     properties:
       add_recipes_cq: "true"
-      cores: "12"
+      cores: "8"
+      cpu: arm64
       lint_host: "true"
       lint_ios: "false"
     timeout: 75
@@ -412,6 +413,7 @@ targets:
     recipe: engine/engine_lint
     properties:
       add_recipes_cq: "true"
+      cpu: arm64
       lint_host: "false"
       lint_ios: "true"
     timeout: 75
