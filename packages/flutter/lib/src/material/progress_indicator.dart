@@ -334,6 +334,17 @@ class LinearProgressIndicator extends ProgressIndicator {
 
   /// The border radius of the indicator.
   ///
+  /// When TextDirection is set to [TextDirection.ltr], [BorderRadius.topLeft]
+  /// and [BorderRadius.leftBottom] are overriten to be [Radius.zero], so that
+  /// the indicator always fill the starting position. Therefore, setting
+  /// [indicatorBorderRadius] to [BorderRadius.circular(10)] will produce a
+  /// rounded indicator with radius 10 at the end with a sharp edge at the
+  /// start.
+  ///
+  /// When TextDirection is set to [TextDirection.rtl], [BorderRadius.topRight]
+  /// and [BorderRadius.rightBottom] are overriten to be [Radius.zero], as that becomes
+  /// the starting position.
+  ///
   /// By default it is [BorderRadius.zero], which produces a rectangular indicator.
   final BorderRadiusGeometry indicatorBorderRadius;
 
