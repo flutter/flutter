@@ -378,8 +378,9 @@ class _ShapeDecorationPainter extends BoxPainter {
   void _paintInterior(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_interiorPaint != null) {
       if (_decoration.shape.preferPaintInterior) {
-        // When border is filled, the rect is reduced to avoid
-        // visual glitches leaking the color due to clipping.
+        // When border is filled, the rect is reduced to avoid antialiasing
+        // rounding error leaking the background color around the clipped
+        // shape.
         // https://github.com/flutter/flutter/issues/13675
         final Rect adjustedRect = _adjustRectOnOutlinedBorder(rect);
         _decoration.shape.paintInterior(canvas, adjustedRect, _interiorPaint!, textDirection: textDirection);

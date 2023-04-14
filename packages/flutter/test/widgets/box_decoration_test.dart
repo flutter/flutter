@@ -567,8 +567,8 @@ Future<void> main() async {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/13675
   testWidgets('Border avoids clipping edges when possible', (WidgetTester tester) async {
-    // Fix https://github.com/flutter/flutter/issues/13675
     final Key key = UniqueKey();
     Widget buildWidget(Color color) {
       final List<Widget> circles = <Widget>[];

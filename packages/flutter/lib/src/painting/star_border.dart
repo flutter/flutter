@@ -670,6 +670,7 @@ class _StarGenerator {
     if (dot < 0) {
       angle += math.pi;
     }
+
     return angle;
   }
 }
