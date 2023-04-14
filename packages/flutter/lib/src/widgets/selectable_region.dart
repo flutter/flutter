@@ -502,6 +502,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   SelectionPoint? _initialDragStartSelectionPoint;
 
   bool _shouldMoveEndEdge(TapDragUpdateDetails details) {
+    assert(_selectionDelegate.value.startSelectionPoint != null);
     _initialDragStartSelectionPoint = _initialDragStartSelectionPoint ?? _selectionDelegate.value.startSelectionPoint!;
     final bool isDraggingForwardFromOrigin = details.localOffsetFromOrigin.dx > 0;
     final bool isPositionAboveStartingBaseLine = details.localPosition.dy > _initialDragStartSelectionPoint!.localPosition.dy - _initialDragStartSelectionPoint!.lineHeight;
@@ -951,7 +952,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// The `continuous` argument defaults to false.
   ///
   /// The `offset` is in global coordinates.
-  /// 
+  ///
   /// Provide the `selectionMode` if the selection should not move the default
   /// character by character.
   ///
