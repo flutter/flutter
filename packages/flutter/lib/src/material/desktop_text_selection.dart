@@ -95,12 +95,11 @@ class DesktopTextSelectionControls extends TextSelectionControls {
   }
 }
 
+// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
+// deleted, when users should migrate back to desktopTextSelectionControls.
+// See https://github.com/flutter/flutter/pull/124262
 /// Desktop text selection handle controls that loosely follow Material design
 /// conventions.
-@Deprecated(
-  'Use `desktopTextSelectionControls` instead. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
-)
 final TextSelectionControls desktopTextSelectionHandleControls =
     _DesktopTextSelectionHandleControls();
 
