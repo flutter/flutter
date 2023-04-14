@@ -56,7 +56,7 @@
                 ]
             }
         },
-	{
+        {
             "drone_dimensions": [
                 "device_type=none",
                 "mac_model=Macmini8,1",
@@ -76,7 +76,7 @@
                 ]
             }
         },
-	{
+        {
             "drone_dimensions": [
                 "device_type=none",
                 "mac_model=Macmini8,1",
@@ -114,7 +114,7 @@
                 "script": "flutter/sky/tools/create_full_ios_framework.py",
                 "language": "python3"
             },
-	    {
+            {
                 "name": "Profile-ios-Flutter.xcframework",
                 "parameters": [
                     "--dst",
@@ -136,7 +136,7 @@
                 ],
                 "script": "flutter/tools/gen_objcdoc.sh"
             },
-	    {
+            {
                 "name": "Release-ios-Flutter.xcframework",
                 "parameters": [
                     "--dst",
@@ -170,27 +170,27 @@
         {
             "source": "out/debug/artifacts.zip",
             "destination": "ios/artifacts.zip",
-	    "realm": "production"
+            "realm": "production"
         },
-	{
+        {
             "source": "out/profile/artifacts.zip",
             "destination": "ios-profile/artifacts.zip",
-	    "realm": "production"
+            "realm": "production"
         },
         {
             "source": "out/debug/ios-objcdoc.zip",
             "destination": "ios-objcdoc.zip",
-	    "realm": "production"
+            "realm": "production"
         },
-	{
+        {
             "source": "out/release/artifacts.zip",
             "destination": "ios-release/artifacts.zip",
-	    "realm": "production"
+            "realm": "production"
         },
         {
             "source": "out/release/Flutter.dSYM.zip",
             "destination": "ios-release/Flutter.dSYM.zip",
-	    "realm": "production"
+            "realm": "production"
         }
     ]
 }

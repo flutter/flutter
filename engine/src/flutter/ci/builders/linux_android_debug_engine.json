@@ -119,9 +119,6 @@
                 "device_type=none",
                 "os=Linux"
             ],
-            "gclient_custom_vars": {
-                "download_android_deps": false
-            },
             "gn": [
                 "--android",
                 "--android-cpu=arm64",
@@ -154,9 +151,6 @@
                 "device_type=none",
                 "os=Linux"
             ],
-            "gclient_custom_vars": {
-                "download_android_deps": false
-            },
             "gn": [
                 "--android",
                 "--android-cpu=x86",
@@ -189,9 +183,6 @@
                 "device_type=none",
                 "os=Linux"
             ],
-            "gclient_custom_vars": {
-                "download_android_deps": false
-            },
             "gn": [
                 "--android",
                 "--android-cpu=x64",

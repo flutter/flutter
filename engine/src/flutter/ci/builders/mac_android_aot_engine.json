@@ -16,7 +16,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -50,7 +50,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -85,7 +85,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -120,7 +120,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -154,7 +154,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
@@ -189,7 +189,7 @@
                 "os=Mac-12",
                 "cpu=x86"
             ],
-            "gclient_custom_vars": {
+            "gclient_variables": {
                 "download_android_deps": false
             },
             "gn": [
