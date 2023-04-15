@@ -35,6 +35,7 @@
 #include "impeller/entity/linear_to_srgb_filter.vert.h"
 #include "impeller/entity/morphology_filter.frag.h"
 #include "impeller/entity/morphology_filter.vert.h"
+#include "impeller/entity/porter_duff_blend.frag.h"
 #include "impeller/entity/radial_gradient_fill.frag.h"
 #include "impeller/entity/rrect_blur.frag.h"
 #include "impeller/entity/rrect_blur.vert.h"
@@ -125,7 +126,6 @@ using RadialGradientSSBOFillPipeline =
 using SweepGradientSSBOFillPipeline =
     RenderPipelineT<GradientFillVertexShader,
                     SweepGradientSsboFillFragmentShader>;
-using BlendPipeline = RenderPipelineT<BlendVertexShader, BlendFragmentShader>;
 using RRectBlurPipeline =
     RenderPipelineT<RrectBlurVertexShader, RrectBlurFragmentShader>;
 using BlendPipeline = RenderPipelineT<BlendVertexShader, BlendFragmentShader>;
@@ -165,6 +165,8 @@ using GlyphAtlasPipeline =
     RenderPipelineT<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
 using GlyphAtlasSdfPipeline =
     RenderPipelineT<GlyphAtlasSdfVertexShader, GlyphAtlasSdfFragmentShader>;
+using PorterDuffBlendPipeline =
+    RenderPipelineT<BlendVertexShader, PorterDuffBlendFragmentShader>;
 // Instead of requiring new shaders for clips, the solid fill stages are used
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline =
@@ -469,6 +471,11 @@ class ContentContext {
     return GetPipeline(yuv_to_rgb_filter_pipelines_, opts);
   }
 
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetPorterDuffBlendPipeline(
+      ContentContextOptions opts) const {
+    return GetPipeline(porter_duff_blend_pipelines_, opts);
+  }
+
   // Advanced blends.
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetBlendColorPipeline(
@@ -705,6 +712,7 @@ class ContentContext {
   mutable Variants<GlyphAtlasSdfPipeline> glyph_atlas_sdf_pipelines_;
   mutable Variants<GeometryColorPipeline> geometry_color_pipelines_;
   mutable Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> porter_duff_blend_pipelines_;
   // Advanced blends.
   mutable Variants<BlendColorPipeline> blend_color_pipelines_;
   mutable Variants<BlendColorBurnPipeline> blend_colorburn_pipelines_;
