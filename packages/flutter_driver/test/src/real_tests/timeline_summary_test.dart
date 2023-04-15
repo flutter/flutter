@@ -479,10 +479,10 @@ void main() {
             pipelineItemStep(1500, 'a'), pipelineItemEnd(4000, 'a'),
             // #2
             frameBegin(2500), frameEnd(3500),
-            begin(4500), end(8500),
-            pipelineItemStep(3000, 'b'), pipelineItemEnd(5000, 'b'),
+            begin(6000), end(9000),
+            pipelineItemStep(3000, 'b'), pipelineItemEnd(7000, 'b'),
           ]).computeWorstFrameOverallTimeMillis(),
-          6.0,
+          6.5,
         );
       });
 
@@ -523,6 +523,9 @@ void main() {
             frameBegin(1000), frameEnd(18000),
             frameBegin(19000), frameEnd(28000),
             frameBegin(29000), frameEnd(48000),
+            pipelineItemStep(2000, 'a'), pipelineItemEnd(3000, 'a'),
+            pipelineItemStep(20000, 'b'), pipelineItemEnd(21000, 'b'),
+            pipelineItemStep(30000, 'c'), pipelineItemEnd(31000, 'c'),
           ]).summaryJson,
           <String, dynamic>{
             'average_frame_build_time_millis': 15.0,
@@ -535,6 +538,10 @@ void main() {
             '99th_percentile_frame_rasterizer_time_millis': 20.0,
             'worst_frame_rasterizer_time_millis': 20.0,
             'missed_frame_rasterizer_budget_count': 2,
+            'average_frame_overall_time_millis': 16.0,
+            '90th_percentile_frame_overall_time_millis': 20.0,
+            '99th_percentile_frame_overall_time_millis': 20.0,
+            'worst_frame_overall_time_millis': 20.0,
             'frame_count': 3,
             'frame_rasterizer_count': 3,
             'new_gen_gc_count': 4,
@@ -543,6 +550,7 @@ void main() {
             'frame_rasterizer_times': <int>[18000, 10000, 20000],
             'frame_begin_times': <int>[0, 18000, 28000],
             'frame_rasterizer_begin_times': <int>[0, 18000, 28000],
+            'frame_overall_times': <int>[18000, 10000, 20000],
             'average_vsync_transitions_missed': 0.0,
             '90th_percentile_vsync_transitions_missed': 0.0,
             '99th_percentile_vsync_transitions_missed': 0.0,
@@ -604,6 +612,7 @@ void main() {
           <String, String>{'foo': 'bar'},
           begin(1000), end(19000),
           frameBegin(1000), frameEnd(18000),
+          pipelineItemStep(2000, 'a'), pipelineItemEnd(3000, 'a'),
         ]).writeTimelineToFile(
           'test',
           destinationDirectory: tempDir.path,
@@ -616,15 +625,17 @@ void main() {
           '{"name":"GPURasterizer::Draw","ph":"B","ts":1000},'
           '{"name":"GPURasterizer::Draw","ph":"E","ts":19000},'
           '{"name":"Frame","ph":"B","ts":1000},'
-          '{"name":"Frame","ph":"E","ts":18000}]}',
+          '{"name":"Frame","ph":"E","ts":18000},'
+          '{"id":"a","name":"PipelineItem","ph":"t","ts":2000},'
+          '{"id":"a","name":"PipelineItem","ph":"f","ts":3000}]}',
         );
       });
 
       test('writes summary to JSON file', () async {
         await summarize(<Map<String, dynamic>>[
           begin(1000), end(19000),
-          begin(19000), end(29000),
-          begin(29000), end(49000),
+          begin(20000), end(29000),
+          begin(30000), end(49000),
           frameBegin(1000), frameEnd(18000),
           frameBegin(19000), frameEnd(28000),
           frameBegin(29000), frameEnd(48000),
@@ -636,6 +647,9 @@ void main() {
           cpuUsage(5000, 20), cpuUsage(5010, 60),
           memoryUsage(6000, 20, 40), memoryUsage(6100, 30, 45),
           platformVsync(7000), vsyncCallback(7500),
+          pipelineItemStep(2000, 'a'), pipelineItemEnd(3000, 'a'),
+          pipelineItemStep(20000, 'b'), pipelineItemEnd(21000, 'b'),
+          pipelineItemStep(30000, 'c'), pipelineItemEnd(31000, 'c'),
         ]).writeTimelineToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
@@ -645,19 +659,24 @@ void main() {
           '90th_percentile_frame_build_time_millis': 19.0,
           '99th_percentile_frame_build_time_millis': 19.0,
           'missed_frame_build_budget_count': 2,
-          'average_frame_rasterizer_time_millis': 16.0,
-          '90th_percentile_frame_rasterizer_time_millis': 20.0,
-          '99th_percentile_frame_rasterizer_time_millis': 20.0,
-          'worst_frame_rasterizer_time_millis': 20.0,
+          'average_frame_rasterizer_time_millis': 15.333333333333334,
+          '90th_percentile_frame_rasterizer_time_millis': 19.0,
+          '99th_percentile_frame_rasterizer_time_millis': 19.0,
+          'worst_frame_rasterizer_time_millis': 19.0,
           'missed_frame_rasterizer_budget_count': 2,
+          'average_frame_overall_time_millis': 16.0,
+          '90th_percentile_frame_overall_time_millis': 20.0,
+          '99th_percentile_frame_overall_time_millis': 20.0,
+          'worst_frame_overall_time_millis': 20.0,
           'frame_count': 3,
           'frame_rasterizer_count': 3,
           'new_gen_gc_count': 4,
           'old_gen_gc_count': 5,
           'frame_build_times': <int>[17000, 9000, 19000],
-          'frame_rasterizer_times': <int>[18000, 10000, 20000],
+          'frame_rasterizer_times': <int>[18000, 9000, 19000],
+          'frame_overall_times': <int>[18000, 10000, 20000],
           'frame_begin_times': <int>[0, 18000, 28000],
-          'frame_rasterizer_begin_times': <int>[0, 18000, 28000],
+          'frame_rasterizer_begin_times': <int>[0, 19000, 29000],
           'average_vsync_transitions_missed': 8.0,
           '90th_percentile_vsync_transitions_missed': 12.0,
           '99th_percentile_vsync_transitions_missed': 12.0,
