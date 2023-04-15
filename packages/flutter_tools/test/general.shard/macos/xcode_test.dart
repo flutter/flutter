@@ -1064,7 +1064,7 @@ void main() {
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
-  Version version = Version.unknown;
+  Version version = Version(0, 0, 0);
 
   @override
   bool isInstalled = false;
