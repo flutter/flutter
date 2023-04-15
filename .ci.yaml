@@ -332,7 +332,6 @@ targets:
     timeout: 60
 
   - name: Mac Host Engine
-    bringup: true
     recipe: engine/engine
     properties:
       gclient_variables: >-
