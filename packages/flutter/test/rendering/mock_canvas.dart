@@ -193,7 +193,7 @@ abstract class PaintPattern {
   /// painting has completed, not at the time of the call. If the same [Paint]
   /// object is reused multiple times, then this may not match the actual
   /// arguments as they were seen by the method.
-  void rect({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, Matcher? shader });
+  void rect({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style });
 
   /// Indicates that a rounded rectangle clip is expected next.
   ///
@@ -734,8 +734,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void rect({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, Matcher? shader }) {
-    _predicates.add(_RectPaintPredicate(rect: rect, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style, shader: shader));
+  void rect({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style }) {
+    _predicates.add(_RectPaintPredicate(rect: rect, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -891,7 +891,6 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     this.strokeWidth,
     this.hasMaskFilter,
     this.style,
-    this.shader,
     this.strokeCap,
   });
 
@@ -903,7 +902,6 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   final double? strokeWidth;
   final bool? hasMaskFilter;
   final PaintingStyle? style;
-  final Matcher? shader;
   final StrokeCap? strokeCap;
 
   String get methodName => _symbolName(symbol);
@@ -938,9 +936,6 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     }
     if (style != null && paintArgument.style != style) {
       throw 'It called $methodName with a paint whose style, ${paintArgument.style}, was not exactly the expected style ($style).';
-    }
-    if (shader != null && !shader!.matches(paintArgument.shader, <dynamic, dynamic>{})) {
-      throw 'It called $methodName with a paint whose shader, ${paintArgument.shader}, was not exactly the expected shader ($shader).';
     }
     if (strokeCap != null && paintArgument.strokeCap != strokeCap) {
       throw 'It called $methodName with a paint whose strokeCap, ${paintArgument.strokeCap}, was not exactly the expected strokeCap ($strokeCap).';
@@ -985,7 +980,6 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
     required double? strokeWidth,
     required bool? hasMaskFilter,
     required PaintingStyle? style,
-    Matcher? shader,
   })  : super(
           symbol,
           name,
@@ -995,7 +989,6 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
           strokeWidth: strokeWidth,
           hasMaskFilter: hasMaskFilter,
           style: style,
-          shader: shader,
         );
 
   final T? expected;
@@ -1081,7 +1074,7 @@ class _TwoParameterPaintPredicate<T1, T2> extends _DrawCommandPaintPredicate {
 }
 
 class _RectPaintPredicate extends _OneParameterPaintPredicate<Rect> {
-  _RectPaintPredicate({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, Matcher? shader }) : super(
+  _RectPaintPredicate({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style }) : super(
     #drawRect,
     'a rectangle',
     expected: rect,
@@ -1089,7 +1082,6 @@ class _RectPaintPredicate extends _OneParameterPaintPredicate<Rect> {
     strokeWidth: strokeWidth,
     hasMaskFilter: hasMaskFilter,
     style: style,
-    shader: shader,
   );
 }
 
