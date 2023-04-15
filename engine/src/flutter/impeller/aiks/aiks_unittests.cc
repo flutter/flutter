@@ -2035,6 +2035,26 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterAndDrawsCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, TranslucentSaveLayerWithColorImageFilterAndDrawsCorrectly) {
+  Canvas canvas;
+
+  canvas.DrawRect(Rect::MakeXYWH(100, 100, 300, 300), {.color = Color::Blue()});
+
+  canvas.SaveLayer({
+      .color = Color::Black().WithAlpha(0.5),
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeBlend(
+                BlendMode::kDestinationOver, {std::move(input)}, Color::Red());
+          },
+  });
+
+  canvas.DrawRect(Rect::MakeXYWH(100, 500, 300, 300), {.color = Color::Blue()});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, TranslucentSaveLayerImageDrawsCorrectly) {
   Canvas canvas;
 
