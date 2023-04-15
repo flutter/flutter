@@ -47,6 +47,7 @@ void main() {
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
         'WasmOmitTypeChecks': 'false',
+        'RunWasmOpt': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -70,7 +71,10 @@ void main() {
       'target',
       BuildInfo.debug,
       ServiceWorkerStrategy.offlineFirst,
-      compilerConfig: const WasmCompilerConfig(omitTypeChecks: false),
+      compilerConfig: const WasmCompilerConfig(
+        omitTypeChecks: false,
+        runWasmOpt: false
+      ),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
