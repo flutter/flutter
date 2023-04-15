@@ -88,8 +88,8 @@ SamplerDescriptor TiledTextureContents::CreateDescriptor(
 
 bool TiledTextureContents::UsesEmulatedTileMode(
     const Capabilities& capabilities) const {
-  return TileModeToAddressMode(x_tile_mode_, capabilities).has_value() &&
-         TileModeToAddressMode(y_tile_mode_, capabilities).has_value();
+  return !TileModeToAddressMode(x_tile_mode_, capabilities).has_value() ||
+         !TileModeToAddressMode(y_tile_mode_, capabilities).has_value();
 }
 
 bool TiledTextureContents::Render(const ContentContext& renderer,
@@ -121,7 +121,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
 
   Command cmd;
-  cmd.label = "TiledTextureFill";
+  cmd.label = uses_emulated_tile_mode ? "TiledTextureFill" : "TextureFill";
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto options = OptionsFromPassAndEntity(pass, entity);

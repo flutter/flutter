@@ -70,6 +70,7 @@ impeller_shaders("entity_shaders") {
     "shaders/vertices.frag",
     "shaders/yuv_to_rgb_filter.frag",
     "shaders/yuv_to_rgb_filter.vert",
+    "shaders/blending/porter_duff_blend.frag",
   ]
 }
 
