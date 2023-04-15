@@ -5,6 +5,7 @@
 import 'dart:convert' show JsonEncoder, json;
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
@@ -102,6 +103,27 @@ class TimelineSummary {
       .where((Duration duration) => duration > kBuildBudget)
       .length;
 
+  /// Average amount of time spent per frame in the engine overall.
+  ///
+  /// Throws a [StateError] if this summary contains no timeline events.
+  double computeAverageFrameOverallTimeMillis() {
+    return _averageInMillis(_extractOverallDurations());
+  }
+
+  /// The longest frame rasterization time in milliseconds.
+  ///
+  /// Throws a [StateError] if this summary contains no timeline events.
+  double computeWorstFrameOverallTimeMillis() {
+    return _maxInMillis(_extractOverallDurations());
+  }
+
+  /// The [p]-th percentile frame rasterization time in milliseconds.
+  ///
+  /// Throws a [StateError] if this summary contains no timeline events.
+  double computePercentileFrameOverallTimeMillis(double p) {
+    return _percentileInMillis(_extractOverallDurations(), p);
+  }
+
   /// The total number of frames recorded in the timeline.
   int countFrames() => _extractFrameDurations().length;
 
@@ -157,6 +179,16 @@ class TimelineSummary {
   ///   the [kBuildBudget] on the raster thread and therefore are in the danger
   ///   of missing frames.
   ///   See [computeMissedFrameRasterizerBudgetCount].
+  /// * "average_frame_overall_time_millis": Average amount of time spent
+  ///   per frame in the engine overall.
+  ///   See [computeAverageFrameOverallTimeMillis].
+  /// * "90th_percentile_frame_overall_time_millis" and
+  ///   "99th_percentile_frame_overall_time_millis": The 90/99-th percentile
+  ///   frame rasterization time in milliseconds.
+  ///   See [computePercentileFrameOverallTimeMillis].
+  /// * "worst_frame_overall_time_millis": The longest frame rasterization
+  ///   time.
+  ///   See [computeWorstFrameOverallTimeMillis].
   /// * "frame_count": The total number of frames recorded in the timeline. This
   ///   is also the length of the "frame_build_times" and the "frame_begin_times"
   ///   lists.
@@ -244,6 +276,10 @@ class TimelineSummary {
       '99th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(99.0),
       'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
+      'average_frame_overall_time_millis': computeAverageFrameOverallTimeMillis(),
+      '90th_percentile_frame_overall_time_millis': computePercentileFrameOverallTimeMillis(90.0),
+      '99th_percentile_frame_overall_time_millis': computePercentileFrameOverallTimeMillis(99.0),
+      'worst_frame_overall_time_millis': computeWorstFrameOverallTimeMillis(),
       'frame_count': countFrames(),
       'frame_rasterizer_count': countRasterizations(),
       'new_gen_gc_count': newGenerationGarbageCollections(),
@@ -252,6 +288,9 @@ class TimelineSummary {
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
+      'frame_overall_times': _extractOverallDurations()
           .map<int>((Duration duration) => duration.inMicroseconds)
           .toList(),
       'frame_begin_times': _extractBeginTimestamps(kBuildFrameEventName)
@@ -364,9 +403,15 @@ class TimelineSummary {
 
   List<Duration> _extractDurations(
     String name,
-    Duration Function(TimelineEvent beginEvent, TimelineEvent endEvent) extractor,
+    Duration Function(TimelineEvent beginEvent, TimelineEvent endEvent)extractor,
+  ) =>
+      _extractEventPairs(name, extractor);
+
+  List<T> _extractEventPairs<T>(
+    String name,
+    T Function(TimelineEvent beginEvent, TimelineEvent endEvent) extractor,
   ) {
-    final List<Duration> result = <Duration>[];
+    final List<T> result = <T>[];
     final List<TimelineEvent> events = _extractNamedEvents(name);
 
     // Timeline does not guarantee that the first event is the "begin" event.
@@ -458,4 +503,73 @@ class TimelineSummary {
   RasterCacheSummarizer _rasterCacheSummarizer() => RasterCacheSummarizer(_extractNamedEvents(kRasterCacheEvent));
 
   GCSummarizer _gcSummarizer() => GCSummarizer.fromEvents(_extractEventsWithNames(kGCRootEvents));
+
+  List<Duration> _extractOverallDurations() {
+    final List<_DurationTuple> buildDurationTuples =
+        _extractEventPairs(kBuildFrameEventName, _DurationTuple.from);
+    final List<_DurationTuple> rasterDurationTuples =
+        _extractEventPairs(kRasterizeFrameEventName, _DurationTuple.from);
+    buildDurationTuples.checkSortedByFirst();
+    rasterDurationTuples.checkSortedByFirst();
+
+    final List<_DurationTuple> pipelineItemTuples =
+        _extractNamedEvents('PipelineItem')
+            .groupListsBy((TimelineEvent e) => e.json['id'] as String)
+            .values
+            .map((List<TimelineEvent> events) => _DurationTuple.maybeFrom(
+                events.firstWhereOrNull((TimelineEvent e) => e.phase == 't'),
+                events.firstWhereOrNull((TimelineEvent e) => e.phase == 'f')))
+            .whereNotNull()
+            .sortedBy((_DurationTuple tuple) => tuple.first);
+
+    final List<Duration> ans = <Duration>[];
+    for (final _DurationTuple pipelineItemTuple in pipelineItemTuples) {
+      final _DurationTuple? buildDurationTuple =
+          buildDurationTuples.findItemThatContains(pipelineItemTuple.first);
+      final _DurationTuple? rasterDurationTuple =
+          rasterDurationTuples.findItemThatContains(pipelineItemTuple.second);
+      if (buildDurationTuple == null || rasterDurationTuple == null) {
+        continue;
+      }
+      ans.add(rasterDurationTuple.second - buildDurationTuple.first);
+    }
+
+    return ans;
+  }
+}
+
+class _DurationTuple {
+
+  const _DurationTuple(this.first, this.second);
+
+  factory _DurationTuple.from(TimelineEvent first, TimelineEvent second) =>
+      _DurationTuple(Duration(microseconds: first.timestampMicros!), Duration(microseconds: second.timestampMicros!));
+
+  final Duration first, second;
+
+  static _DurationTuple? maybeFrom(TimelineEvent? first, TimelineEvent? second) =>
+      (first == null || second == null) ? null : _DurationTuple.from(first, second);
+
+  bool contains(Duration d) => first <= d && d <= second;
+
+  @override
+  String toString() => 'DurationTuple($first, $second)';
+}
+
+extension on List<_DurationTuple> {
+  _DurationTuple? findItemThatContains(Duration d) {
+    final int index = lowerBoundBy(_DurationTuple(d, Duration.zero), (_DurationTuple e) => e.first);
+    if (index == 0) {
+      return null;
+    }
+    final _DurationTuple item = this[index - 1];
+    if (!item.contains(d)) {
+      return null;
+    }
+    return item;
+  }
+
+  void checkSortedByFirst() {
+    assert(isSortedBy((_DurationTuple e) => e.first));
+  }
 }
