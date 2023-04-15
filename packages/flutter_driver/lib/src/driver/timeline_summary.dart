@@ -41,6 +41,8 @@ const String kBuildFrameEventName = 'Frame';
 /// The name of the engine frame rasterization events we need to filter or extract.
 const String kRasterizeFrameEventName = 'GPURasterizer::Draw';
 
+const String _kPipelineItemFrameEventName = 'PipelineItem';
+
 /// Extracts statistics from a [Timeline].
 class TimelineSummary {
   /// Creates a timeline summary given a full timeline object.
@@ -513,7 +515,7 @@ class TimelineSummary {
     rasterDurationTuples.checkSortedByFirst();
 
     final List<_DurationTuple> pipelineItemTuples =
-        _extractNamedEvents('PipelineItem')
+        _extractNamedEvents(_kPipelineItemFrameEventName)
             .groupListsBy((TimelineEvent e) => e.json['id'] as String)
             .values
             .map((List<TimelineEvent> events) => _DurationTuple.maybeFrom(

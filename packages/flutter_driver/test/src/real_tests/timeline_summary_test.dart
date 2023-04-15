@@ -48,6 +48,20 @@ void main() {
       'ts': timeStamp,
     };
 
+    Map<String, dynamic> pipelineItemStep(int timeStamp, String id) => <String, dynamic>{
+      'id': id,
+      'name': 'PipelineItem',
+      'ph': 't',
+      'ts': timeStamp,
+    };
+
+    Map<String, dynamic> pipelineItemEnd(int timeStamp, String id) => <String, dynamic>{
+      'id': id,
+      'name': 'PipelineItem',
+      'ph': 'f',
+      'ts': timeStamp,
+    };
+
     Map<String, dynamic> lagBegin(int timeStamp, int vsyncsMissed) => <String, dynamic>{
       'name': 'SceneDisplayLag',
       'ph': 'b',
@@ -440,6 +454,60 @@ void main() {
         ]);
 
         expect(summary.computeMissedFrameRasterizerBudgetCount(), 2);
+      });
+    });
+
+    group('worst_frame_overall_time_millis', () {
+      test('throws when there is no data', () {
+        expect(
+              () => summarize(<Map<String, dynamic>>[]).computeWorstFrameOverallTimeMillis(),
+          throwsA(
+              isA<StateError>()
+                  .having((StateError e) => e.message,
+                'message',
+                contains('The TimelineSummary had no events to summarize.'),
+              )),
+        );
+      });
+
+      test('computes worst frame overall time in milliseconds', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            // #1
+            frameBegin(1000), frameEnd(2000),
+            begin(3000), end(5000),
+            pipelineItemStep(1500, 'a'), pipelineItemEnd(4000, 'a'),
+            // #2
+            frameBegin(2500), frameEnd(3500),
+            begin(4500), end(8500),
+            pipelineItemStep(3000, 'b'), pipelineItemEnd(5000, 'b'),
+          ]).computeWorstFrameOverallTimeMillis(),
+          6.0,
+        );
+      });
+
+      test('skips leading "end" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            pipelineItemEnd(500, 'a'), // this should be skipped
+            frameBegin(1000), frameEnd(2000),
+            begin(3000), end(5000),
+            pipelineItemStep(1500, 'b'), pipelineItemEnd(4000, 'b'),
+          ]).computeWorstFrameOverallTimeMillis(),
+          4.0,
+        );
+      });
+
+      test('skips trailing "begin" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameBegin(1000), frameEnd(2000),
+            begin(3000), end(5000),
+            pipelineItemStep(1500, 'b'), pipelineItemEnd(4000, 'b'),
+            pipelineItemEnd(5000, 'c'), // this should be skipped
+          ]).computeWorstFrameOverallTimeMillis(),
+          4.0,
+        );
       });
     });
 
