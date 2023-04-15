@@ -206,7 +206,6 @@ targets:
   - name: Linux Host clang-tidy
     recipe: engine/engine_lint
     properties:
-      add_recipes_cq: "true"
       cores: "32"
       lint_android: "false"
       lint_host: "true"
@@ -226,7 +225,6 @@ targets:
   - name: Linux Android clang-tidy
     recipe: engine/engine_lint
     properties:
-      add_recipes_cq: "true"
       cores: "32"
       lint_android: "true"
       lint_host: "false"
@@ -394,7 +392,6 @@ targets:
   - name: Mac Host clang-tidy
     recipe: engine/engine_lint
     properties:
-      add_recipes_cq: "true"
       cpu: arm64
       lint_host: "true"
       lint_ios: "false"
@@ -416,7 +413,6 @@ targets:
   - name: Mac iOS clang-tidy
     recipe: engine/engine_lint
     properties:
-      add_recipes_cq: "true"
       cpu: arm64
       lint_host: "false"
       lint_ios: "true"
