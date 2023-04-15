@@ -39,6 +39,34 @@ void ApplyFlutterLayer(FlutterMutatorView* view,
 
   [view applyFlutterLayer:&layer];
 }
+
+// Expect that each element within two CATransform3Ds is within an error bound.
+//
+// In order to avoid architecture-specific floating point differences we don't check for exact
+// equality using, for example, CATransform3DEqualToTransform.
+void ExpectTransform3DEqual(const CATransform3D& t, const CATransform3D& u) {
+  constexpr float kMaxErr = 1e-10;
+
+  EXPECT_NEAR(t.m11, u.m11, kMaxErr);
+  EXPECT_NEAR(t.m12, u.m12, kMaxErr);
+  EXPECT_NEAR(t.m13, u.m13, kMaxErr);
+  EXPECT_NEAR(t.m14, u.m14, kMaxErr);
+
+  EXPECT_NEAR(t.m21, u.m21, kMaxErr);
+  EXPECT_NEAR(t.m22, u.m22, kMaxErr);
+  EXPECT_NEAR(t.m23, u.m23, kMaxErr);
+  EXPECT_NEAR(t.m24, u.m24, kMaxErr);
+
+  EXPECT_NEAR(t.m31, u.m31, kMaxErr);
+  EXPECT_NEAR(t.m32, u.m32, kMaxErr);
+  EXPECT_NEAR(t.m33, u.m33, kMaxErr);
+  EXPECT_NEAR(t.m34, u.m34, kMaxErr);
+
+  EXPECT_NEAR(t.m41, u.m41, kMaxErr);
+  EXPECT_NEAR(t.m42, u.m42, kMaxErr);
+  EXPECT_NEAR(t.m43, u.m43, kMaxErr);
+  EXPECT_NEAR(t.m44, u.m44, kMaxErr);
+}
 }  // namespace
 
 TEST(FlutterMutatorViewTest, BasicFrameIsCorrect) {
@@ -111,9 +139,9 @@ TEST(FlutterMutatorViewTest, TransformedFrameIsCorrect) {
   ApplyFlutterLayer(mutatorView, FlutterSize{30 * 2, 20 * 2}, mutations);
   EXPECT_TRUE(CGRectEqualToRect(mutatorView.frame, CGRectMake(92.5, 45, 45, 30)));
   EXPECT_TRUE(CGRectEqualToRect(platformView.frame, CGRectMake(0, 0, 30, 20)));
-  EXPECT_TRUE(
-      CATransform3DEqualToTransform(mutatorView.platformViewContainer.layer.sublayerTransform,
-                                    CATransform3DMakeScale(1.5, 1.5, 1)));
+
+  ExpectTransform3DEqual(mutatorView.platformViewContainer.layer.sublayerTransform,
+                         CATransform3DMakeScale(1.5, 1.5, 1));
 }
 
 TEST(FlutterMutatorViewTest, FrameWithLooseClipIsCorrect) {
@@ -308,9 +336,8 @@ TEST(FlutterMutatorViewTest, RoundRectClipsToPath) {
       CGRectEqualToRect(mutatorView.subviews.firstObject.frame, CGRectMake(-10, -10, 30, 20)));
   EXPECT_TRUE(CGRectEqualToRect(platformView.frame, CGRectMake(0, 0, 30, 20)));
   EXPECT_EQ(mutatorView.pathClipViews.count, 1ul);
-  EXPECT_TRUE(
-      CATransform3DEqualToTransform(mutatorView.pathClipViews.firstObject.layer.mask.transform,
-                                    CATransform3DMakeTranslation(-100, -50, 0)));
+  ExpectTransform3DEqual(mutatorView.pathClipViews.firstObject.layer.mask.transform,
+                         CATransform3DMakeTranslation(-100, -50, 0));
 }
 
 TEST(FlutterMutatorViewTest, PathClipViewsAreAddedAndRemoved) {
