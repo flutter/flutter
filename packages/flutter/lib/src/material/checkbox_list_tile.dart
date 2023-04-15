@@ -194,6 +194,7 @@ class CheckboxListTile extends StatelessWidget {
     this.selectedTileColor,
     this.onFocusChange,
     this.enableFeedback,
+    this.checkboxSemanticLabel,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -237,6 +238,7 @@ class CheckboxListTile extends StatelessWidget {
     this.selectedTileColor,
     this.onFocusChange,
     this.enableFeedback,
+    this.checkboxSemanticLabel,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -452,6 +454,9 @@ class CheckboxListTile extends StatelessWidget {
   /// inoperative.
   final bool? enabled;
 
+  /// {@macro flutter.material.checkbox.semanticLabel}
+  final String? checkboxSemanticLabel;
+
   final _CheckboxType _checkboxType;
 
   void _handleValueChange() {
@@ -488,6 +493,7 @@ class CheckboxListTile extends StatelessWidget {
           shape: checkboxShape,
           side: side,
           isError: isError,
+          semanticLabel: checkboxSemanticLabel,
         );
       case _CheckboxType.adaptive:
         control = Checkbox.adaptive(
@@ -506,6 +512,7 @@ class CheckboxListTile extends StatelessWidget {
           shape: checkboxShape,
           side: side,
           isError: isError,
+          semanticLabel: checkboxSemanticLabel,
         );
     }
 
