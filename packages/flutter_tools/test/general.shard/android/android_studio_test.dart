@@ -929,7 +929,7 @@ void main() {
     testUsingContext('pluginsPath extracts custom paths from home dir', () {
       const String installPath = '/opt/android-studio-with-cheese-5.0';
       const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
-      const String homeFile = '$studioHome/system/.home';
+      const String homeFile = '$studioHome/.home';
       globals.fs.directory(installPath).createSync(recursive: true);
       globals.fs.file(homeFile).createSync(recursive: true);
       globals.fs.file(homeFile).writeAsStringSync(installPath);
@@ -938,7 +938,7 @@ void main() {
         AndroidStudio.fromHomeDot(globals.fs.directory(studioHome))!;
       expect(studio, isNotNull);
       expect(studio.pluginsPath,
-          equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
+          equals('/home/me/.local/share/Google/AndroidStudioWithCheese5.0'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),

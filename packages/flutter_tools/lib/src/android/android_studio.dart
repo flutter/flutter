@@ -146,26 +146,22 @@ class AndroidStudio {
   }
 
   static AndroidStudio? fromHomeDot(Directory homeDotDir) {
-    final Match? versionMatch =
-        _dotHomeStudioVersionMatcher.firstMatch(homeDotDir.basename);
-    if (versionMatch?.groupCount != 2) {
+    final _AndroidStudioHomeParseResult? parseResult = _parseNameAndVersion(homeDotDir.basename);
+    if (parseResult == null) {
       return null;
     }
-    final Version? version = Version.parse(versionMatch![2]);
-    final String? studioAppName = versionMatch[1];
+    final Version? version = parseResult.version;
+    final String? studioAppName = parseResult.appName;
     if (studioAppName == null || version == null) {
       return null;
     }
-
-    final int major = version.major;
-    final int minor = version.minor;
 
     // The install path is written in a .home text file,
     // it location is in <base dir>/.home for Android Studio >= 4.1
     // and <base dir>/system/.home for Android Studio < 4.1
     String dotHomeFilePath;
 
-    if (major >= 4 && minor >= 1) {
+    if (version >= Version(4, 1, null)) {
       dotHomeFilePath = globals.fs.path.join(homeDotDir.path, '.home');
     } else {
       dotHomeFilePath =
@@ -177,16 +173,17 @@ class AndroidStudio {
     try {
       installPath = globals.fs.file(dotHomeFilePath).readAsStringSync();
     } on Exception {
-      // ignored, installPath will be null, which is handled below
+      return null;
     }
 
-    if (installPath != null && globals.fs.isDirectorySync(installPath)) {
+    if (globals.fs.isDirectorySync(installPath)) {
       return AndroidStudio.initFromDir(
           installPath,
           version: version,
           studioAppName: studioAppName,
       );
     }
+
     return null;
   }
 
@@ -204,35 +201,37 @@ class AndroidStudio {
   final String? workingJavaPath;
 
   String? get pluginsPath {
+
     if (presetPluginsPath != null) {
       return presetPluginsPath!;
     }
 
-    // TODO(andrewkolos): This is a bug. We shouldn't treat an unknown
-    // version as equivalent to 0.0.
-    // See https://github.com/flutter/flutter/issues/121468.
-    final int major = version?.major ?? 0;
-    final int minor = version?.minor ?? 0;
+    if (version == null) {
+      return null;
+    }
+
     final String? homeDirPath = globals.fsUtils.homeDirPath;
+    final String versionString = '${version!.major}.${version!.minor}';
+
     if (homeDirPath == null) {
       return null;
     }
     if (globals.platform.isMacOS) {
       /// plugin path of Android Studio has been changed after version 4.1.
-      if (major >= 4 && minor >= 1) {
+      if (version == null || version! > Version(4, 0, null)) {
         return globals.fs.path.join(
           homeDirPath,
           'Library',
           'Application Support',
           'Google',
-          'AndroidStudio$major.$minor',
+          'AndroidStudio$versionString',
         );
       } else {
         return globals.fs.path.join(
           homeDirPath,
           'Library',
           'Application Support',
-          'AndroidStudio$major.$minor',
+          'AndroidStudio$versionString',
         );
       }
     } else {
@@ -243,20 +242,21 @@ class AndroidStudio {
         return toolboxPluginsPath;
       }
 
-      if (major >= 4 && minor >= 1 &&
-          globals.platform.isLinux) {
+      if (globals.platform.isLinux &&
+        (version == null || version! >= Version(4, 1, null))
+      ) {
         return globals.fs.path.join(
           homeDirPath,
           '.local',
           'share',
           'Google',
-          '$studioAppName$major.$minor',
+          '$studioAppName$versionString',
         );
       }
 
       return globals.fs.path.join(
         homeDirPath,
-        '.$studioAppName$major.$minor',
+        '.$studioAppName$versionString',
         'config',
         'plugins',
       );
@@ -572,4 +572,23 @@ String? _findWorkingJava(String directory, List<String> validationMessages) {
     }
   }
   return workingJavaPath;
+}
+
+class _AndroidStudioHomeParseResult {
+  _AndroidStudioHomeParseResult(this.appName, this.version);
+
+  final String? appName;
+  final Version? version;
+}
+
+_AndroidStudioHomeParseResult? _parseNameAndVersion(String baseName) {
+  final Match? versionMatch =
+      _dotHomeStudioVersionMatcher.firstMatch(baseName);
+  if (versionMatch?.groupCount != 2) {
+    return null;
+  }
+  final Version? version = Version.parse(versionMatch![2]);
+  final String? studioAppName = versionMatch[1];
+
+  return _AndroidStudioHomeParseResult(studioAppName, version);
 }
