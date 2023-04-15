@@ -1608,4 +1608,19 @@ void main() {
       expect(pageController.page, 1.0);
     });
   });
+
+  testWidgets('ListWheelScrollView creates only one opacity layer for all children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ListWheelScrollView(
+        overAndUnderCenterOpacity: 0.5,
+        itemExtent: 20.0,
+        children: <Widget>[
+          for (int i = 0; i < 20; i++)
+            Container(),
+        ],
+      ),
+    );
+
+    expect(tester.layers.whereType<OpacityLayer>(), hasLength(1));
+  });
 }
