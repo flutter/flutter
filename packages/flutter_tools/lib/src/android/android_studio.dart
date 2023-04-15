@@ -60,62 +60,23 @@ class AndroidStudio {
   /// Given a directory containing an Android Studio installation, scans
   /// an installation directory for various details such as the location of the java
   /// binary and creates a [AndroidStudio] object.
-  ///
-  /// [version] is used to determine where to look for a java binary. If
-  /// [version] is null, a set of well-known locations will be scanned.
   factory AndroidStudio.initFromDir(String directory, {
     Version? version,
     String? configuredPath,
     String? studioAppName,
     String? presetPluginsPath,
   }) {
-
+    String? workingJavaPath;
     final List<String> validationMessages = <String>[];
-    validationMessages.clear();
 
     if (configuredPath != null) {
       validationMessages.add('android-studio-dir = $configuredPath');
     }
 
-    String? workingJavaPath;
     if (!globals.fs.isDirectorySync(directory)) {
       validationMessages.add('Android Studio not found at $directory');
     } else {
-      String? javaPath;
-      if (globals.platform.isMacOS) {
-        if (version != null && version.major < 2020) {
-          javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
-        } else if (version != null && version.major == 2022) {
-          javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
-        } else {
-          javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
-        }
-      } else {
-        if (version != null && version.major == 2022) {
-          javaPath = globals.fs.path.join(directory, 'jbr');
-        } else {
-          javaPath = globals.fs.path.join(directory, 'jre');
-        }
-      }
-      final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
-      if (!globals.processManager.canRun(javaExecutable)) {
-        validationMessages.add('Unable to find bundled Java version.');
-      } else {
-        RunResult? result;
-        try {
-          result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
-        } on ProcessException catch (e) {
-          validationMessages.add('Failed to run Java: $e');
-        }
-        if (result != null && result.exitCode == 0) {
-          final List<String> versionLines = result.stderr.split('\n');
-          final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-          workingJavaPath = javaPath;
-          validationMessages.add('Java version $javaVersion');
-        } else {
-          validationMessages.add('Unable to determine bundled Java version.');
-        }
-      }
+      workingJavaPath = _findWorkingJava(directory, validationMessages);
     }
 
     return studioAppName == null ? AndroidStudio(directory,
@@ -562,4 +523,53 @@ the configured path by running this command: flutter config --android-studio-dir
 
   @override
   String toString() => 'Android Studio ($version)';
+}
+
+String? _findWorkingJava(String directory, List<String> validationMessages) {
+  final String macOsPre2020 = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
+  final String macOs2022 = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
+  final String macOsDefault = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
+  final String linuxWinDefault = globals.fs.path.join(directory, 'jre');
+  final String linuxWin2022 = globals.fs.path.join(directory, 'jbr');
+
+  final List<String> candidateJavaHomePaths = <String>[
+    if (globals.platform.isMacOS)
+      ...<String>[macOsPre2020, macOs2022, macOsDefault]
+    else
+      ...<String>[linuxWin2022, linuxWinDefault],
+  ];
+
+  final List<String> foundJavaPaths = candidateJavaHomePaths
+    .where((String path) => globals.fs.directory(path).existsSync())
+    .toList();
+
+  String? workingJavaPath;
+  if (foundJavaPaths.isEmpty) {
+    validationMessages.add('Unable to find bundled Java version.');
+  } else {
+    for (final String candidateJavaPath in foundJavaPaths) {
+      final String javaExecutable = globals.fs.path.join(candidateJavaPath, 'bin', 'java');
+      if (!globals.processManager.canRun(javaExecutable)) {
+        validationMessages.add('Unable to run java binary found at $candidateJavaPath');
+        continue;
+      }
+
+      RunResult? javaVersionResult;
+      try {
+        javaVersionResult = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
+      } on ProcessException catch (e) {
+        validationMessages.add('Failed to run Java: $e');
+      }
+      if (javaVersionResult != null && javaVersionResult.exitCode == 0) {
+        final List<String> versionLines = javaVersionResult.stderr.split('\n');
+        final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+        workingJavaPath = globals.fs.file(candidateJavaPath).path;
+        validationMessages.add('Java version $javaVersion');
+        break;
+      } else {
+        validationMessages.add('Unable to determine bundled Java version for binary found at $candidateJavaPath');
+      }
+    }
+  }
+  return workingJavaPath;
 }
