@@ -72,6 +72,13 @@ impeller_shaders("entity_shaders") {
     "shaders/yuv_to_rgb_filter.vert",
     "shaders/blending/porter_duff_blend.frag",
   ]
+
+  if (impeller_debug) {
+    shaders += [
+      "shaders/debug/checkerboard.frag",
+      "shaders/debug/checkerboard.vert",
+    ]
+  }
 }
 
 impeller_shaders("modern_entity_shaders") {
@@ -220,6 +227,13 @@ impeller_component("entity") {
     "inline_pass_context.cc",
     "inline_pass_context.h",
   ]
+
+  if (impeller_debug) {
+    sources += [
+      "contents/checkerboard_contents.cc",
+      "contents/checkerboard_contents.h",
+    ]
+  }
 
   public_deps = [
     ":entity_shaders",

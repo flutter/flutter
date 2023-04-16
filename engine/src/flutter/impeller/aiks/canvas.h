@@ -5,6 +5,7 @@
 #pragma once
 
 #include <deque>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -29,6 +30,14 @@ class Entity;
 
 class Canvas {
  public:
+  struct DebugOptions {
+    /// When enabled, layers that are rendered to an offscreen texture
+    /// internally get a translucent checkerboard pattern painted over them.
+    ///
+    /// Requires the `IMPELLER_DEBUG` preprocessor flag.
+    bool offscreen_texture_checkerboard = false;
+  } debug_options;
+
   Canvas();
 
   ~Canvas();

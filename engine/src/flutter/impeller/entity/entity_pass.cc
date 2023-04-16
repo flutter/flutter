@@ -24,10 +24,15 @@
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/inline_pass_context.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
+
+#ifdef IMPELLER_DEBUG
+#include "impeller/entity/contents/checkerboard_contents.h"
+#endif  // IMPELLER_DEBUG
 
 namespace impeller {
 
@@ -481,23 +486,23 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
   return EntityPass::EntityResult::Success(element_entity);
 }
 
-bool EntityPass::OnRender(ContentContext& renderer,
-                          ISize root_pass_size,
-                          EntityPassTarget& pass_target,
-                          Point global_pass_position,
-                          Point local_pass_position,
-                          uint32_t pass_depth,
-                          StencilCoverageStack& stencil_coverage_stack,
-                          size_t stencil_depth_floor,
-                          std::shared_ptr<Contents> backdrop_filter_contents,
-                          std::optional<InlinePassContext::RenderPassResult>
-                              collapsed_parent_pass) const {
+bool EntityPass::OnRender(
+    ContentContext& renderer,
+    ISize root_pass_size,
+    EntityPassTarget& pass_target,
+    Point global_pass_position,
+    Point local_pass_position,
+    uint32_t pass_depth,
+    StencilCoverageStack& stencil_coverage_stack,
+    size_t stencil_depth_floor,
+    std::shared_ptr<Contents> backdrop_filter_contents,
+    const std::optional<InlinePassContext::RenderPassResult>&
+        collapsed_parent_pass) const {
   TRACE_EVENT0("impeller", "EntityPass::OnRender");
 
   auto context = renderer.GetContext();
-  InlinePassContext pass_context(context, pass_target,
-                                 GetTotalPassReads(renderer),
-                                 std::move(collapsed_parent_pass));
+  InlinePassContext pass_context(
+      context, pass_target, GetTotalPassReads(renderer), collapsed_parent_pass);
   if (!pass_context.IsValid()) {
     VALIDATION_LOG << SPrintF("Pass context invalid (Depth=%d)", pass_depth);
     return false;
@@ -725,6 +730,31 @@ bool EntityPass::OnRender(ContentContext& renderer,
     }
   }
 
+#ifdef IMPELLER_DEBUG
+  //--------------------------------------------------------------------------
+  /// Draw debug checkerboard over offscreen textures.
+  ///
+
+  // When the pass depth is > 0, this EntityPass is being rendered to an
+  // offscreen texture.
+  if (enable_offscreen_debug_checkerboard_ &&
+      !collapsed_parent_pass.has_value() && pass_depth > 0) {
+    auto result = pass_context.GetRenderPass(pass_depth);
+    if (!result.pass) {
+      // Failure to produce a render pass should be explained by specific errors
+      // in `InlinePassContext::GetRenderPass()`.
+      return false;
+    }
+    auto checkerboard = CheckerboardContents();
+    auto color = ColorHSB(0,                                    // hue
+                          1,                                    // saturation
+                          std::max(0.0, 0.6 - pass_depth / 5),  // brightness
+                          0.25);                                // alpha
+    checkerboard.SetColor(Color(color));
+    checkerboard.Render(renderer, {}, *result.pass);
+  }
+#endif
+
   return true;
 }
 
@@ -820,6 +850,10 @@ void EntityPass::SetBackdropFilter(std::optional<BackdropFilterProc> proc) {
   }
 
   backdrop_filter_proc_ = std::move(proc);
+}
+
+void EntityPass::SetEnableOffscreenCheckerboard(bool enabled) {
+  enable_offscreen_debug_checkerboard_ = enabled;
 }
 
 }  // namespace impeller

@@ -118,6 +118,18 @@ struct TSize {
   }
 };
 
+// RHS algebraic operations with arithmetic types.
+
+template <class T, class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+constexpr TSize<T> operator*(U s, const TSize<T>& p) {
+  return p * s;
+}
+
+template <class T, class U, class = std::enable_if_t<std::is_arithmetic_v<U>>>
+constexpr TSize<T> operator/(U s, const TSize<T>& p) {
+  return {static_cast<T>(s) / p.x, static_cast<T>(s) / p.y};
+}
+
 using Size = TSize<Scalar>;
 using ISize = TSize<int64_t>;
 

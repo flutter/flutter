@@ -1578,6 +1578,137 @@
       }
     }
   },
+  "flutter/impeller/entity/checkerboard.frag.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/checkerboard.frag.vkspv",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 0,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "longest_path_cycles": [
+              0.171875,
+              0.171875,
+              0.140625,
+              0.0625,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              0.171875,
+              0.171875,
+              0.140625,
+              0.0625,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              0.171875,
+              0.171875,
+              0.140625,
+              0.0625,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 8,
+          "work_registers_used": 7
+        }
+      }
+    }
+  },
+  "flutter/impeller/entity/checkerboard.vert.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/checkerboard.vert.vkspv",
+      "has_uniform_computation": false,
+      "type": "Vertex",
+      "variants": {
+        "Position": {
+          "fp16_arithmetic": null,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "longest_path_cycles": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.0,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.0,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 8,
+          "work_registers_used": 32
+        }
+      }
+    }
+  },
   "flutter/impeller/entity/color_matrix_color_filter.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",
@@ -6030,6 +6161,227 @@
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 4,
+          "work_registers_used": 2
+        }
+      }
+    }
+  },
+  "flutter/impeller/entity/gles/checkerboard.frag.gles": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/gles/checkerboard.frag.gles",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 0,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "longest_path_cycles": [
+              0.265625,
+              0.265625,
+              0.171875,
+              0.0625,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              0.265625,
+              0.265625,
+              0.140625,
+              0.0625,
+              1.0,
+              0.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              0.265625,
+              0.265625,
+              0.171875,
+              0.0625,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 14,
+          "work_registers_used": 20
+        }
+      }
+    },
+    "Mali-T880": {
+      "core": "Mali-T880",
+      "filename": "flutter/impeller/entity/gles/checkerboard.frag.gles",
+      "has_uniform_computation": false,
+      "type": "Fragment",
+      "variants": {
+        "Main": {
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arithmetic"
+            ],
+            "longest_path_cycles": [
+              1.9800000190734863,
+              1.0,
+              0.0
+            ],
+            "pipelines": [
+              "arithmetic",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arithmetic"
+            ],
+            "shortest_path_cycles": [
+              1.9800000190734863,
+              1.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arithmetic"
+            ],
+            "total_cycles": [
+              2.3333332538604736,
+              1.0,
+              0.0
+            ]
+          },
+          "thread_occupancy": 100,
+          "uniform_registers_used": 2,
+          "work_registers_used": 2
+        }
+      }
+    }
+  },
+  "flutter/impeller/entity/gles/checkerboard.vert.gles": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/gles/checkerboard.vert.gles",
+      "has_uniform_computation": false,
+      "type": "Vertex",
+      "variants": {
+        "Position": {
+          "fp16_arithmetic": null,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "longest_path_cycles": [
+              0.015625,
+              0.0,
+              0.015625,
+              0.0,
+              2.0,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              0.015625,
+              0.0,
+              0.015625,
+              0.0,
+              2.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              0.015625,
+              0.0,
+              0.015625,
+              0.0,
+              2.0,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 8,
+          "work_registers_used": 32
+        }
+      }
+    },
+    "Mali-T880": {
+      "core": "Mali-T880",
+      "filename": "flutter/impeller/entity/gles/checkerboard.vert.gles",
+      "has_uniform_computation": false,
+      "type": "Vertex",
+      "variants": {
+        "Main": {
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "longest_path_cycles": [
+              1.3200000524520874,
+              3.0,
+              0.0
+            ],
+            "pipelines": [
+              "arithmetic",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              1.3200000524520874,
+              3.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              1.3333333730697632,
+              3.0,
+              0.0
+            ]
+          },
+          "thread_occupancy": 100,
+          "uniform_registers_used": 2,
           "work_registers_used": 2
         }
       }

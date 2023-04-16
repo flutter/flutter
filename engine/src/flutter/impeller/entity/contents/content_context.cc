@@ -170,6 +170,11 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
     return;
   }
 
+#ifdef IMPELLER_DEBUG
+  checkerboard_pipelines_[{}] =
+      CreateDefaultPipeline<CheckerboardPipeline>(*context_);
+#endif  // IMPELLER_DEBUG
+
   solid_fill_pipelines_[{}] =
       CreateDefaultPipeline<SolidFillPipeline>(*context_);
   linear_gradient_fill_pipelines_[{}] =
