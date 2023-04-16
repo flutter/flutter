@@ -60,6 +60,10 @@ class AndroidStudio {
   /// Given a directory containing an Android Studio installation, scans
   /// an installation directory for various details such as the location of the java
   /// binary and creates a [AndroidStudio] object.
+  ///
+  /// Set [version] if the version was already determined by something outside
+  /// of the installation directory. If left unset, the directory will be
+  /// scanned for a file that contains the version.
   factory AndroidStudio.initFromDir(String directory, {
     Version? version,
     String? configuredPath,
