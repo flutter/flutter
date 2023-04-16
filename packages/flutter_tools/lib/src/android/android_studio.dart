@@ -80,13 +80,13 @@ class AndroidStudio {
     }
 
     return studioAppName == null ? AndroidStudio(directory,
-      version: version,
+      version: version ?? _findVersion(directory),
       configuredPath: configuredPath,
       presetPluginsPath: presetPluginsPath,
       workingJavaPath: workingJavaPath,
       validationMessages: validationMessages,
     ) : AndroidStudio(directory,
-        version: version,
+        version: version ?? _findVersion(directory),
         configuredPath: configuredPath,
         presetPluginsPath: presetPluginsPath,
         workingJavaPath: workingJavaPath,
@@ -104,12 +104,7 @@ class AndroidStudio {
       return null;
     }
 
-    final String? versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String?;
-
-    Version? version;
-    if (versionString != null) {
-      version = Version.parse(versionString);
-    }
+    final Version? version = _findVersion(studioPath);
 
     String? pathsSelectorValue;
     final Map<String, dynamic>? jvmOptions = castStringKeyedMap(plistValues['JVMOptions']);
@@ -470,7 +465,7 @@ the configured path by running this command: flutter config --android-studio-dir
         return studios;
       }
       for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
-        final String name  = globals.fs.path.basename(dir.path);
+        final String name = globals.fs.path.basename(dir.path);
         AndroidStudioValidator.idToTitle.forEach((String id, String title) {
           if (name.startsWith(id)) {
             final String version = name.substring(id.length);
@@ -500,6 +495,7 @@ the configured path by running this command: flutter config --android-studio-dir
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null && !alreadyFoundStudioAt(configuredStudioDir)) {
       studios.add(AndroidStudio.initFromDir(configuredStudioDir,
+          version: _findVersion(configuredStudioDir),
           configuredPath: configuredStudioDir));
     }
 
@@ -572,6 +568,31 @@ String? _findWorkingJava(String directory, List<String> validationMessages) {
     }
   }
   return workingJavaPath;
+}
+
+Version? _findVersion(String directory) {
+  if (globals.platform.isMacOS) {
+    final String plistFile = globals.fs.path.join(directory, 'Info.plist');
+    final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
+    // If we've found a JetBrainsToolbox wrapper, ignore it.
+    if (plistValues.containsKey('JetBrainsToolboxApp')) {
+      return null;
+    }
+
+    final String? versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String?;
+    return versionString == null ? null : Version.parse(versionString);
+  } else {
+    final File productInfo = globals.fs.file(globals.fs.path.join(directory, 'product-info.json'));
+    if (!productInfo.existsSync()) {
+      return null;
+    }
+    final Map<String, dynamic> parsedJson = json.decode(productInfo.readAsStringSync()) as Map<String, dynamic>;
+    final dynamic versionString = parsedJson['version'];
+    if (versionString == null || versionString is! String) {
+      return null;
+    }
+    return Version.parse(versionString);
+  }
 }
 
 class _AndroidStudioHomeParseResult {

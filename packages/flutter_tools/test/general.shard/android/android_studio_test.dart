@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -546,8 +548,8 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1)
-        ..remove('CFBundleShortVersionString');
+      final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
+      plistWithoutVersion['CFBundleShortVersionString'] = '';
       plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
 
       final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
@@ -949,6 +951,37 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
       ),
+    });
+
+    testUsingContext('can determine the version using only product-info.json', () {
+      const Map<String, Object> productInfo2022_1_1_RC_1 = <String, Object>{
+        'buildNumber' : '221.6008.13.2211.__BUILD_NUMBER__',
+        'customProperties' : <Object>[ ],
+        'dataDirectoryName' : 'AndroidStudio2022.1',
+        'launch' : <Object>[ <String, Object> {
+          'launcherPath' : 'bin/studio64.exe',
+          'os' : 'Windows',
+          'vmOptionsFilePath' : 'bin/studio64.exe.vmoptions'
+        } ],
+        'name' : 'Android Studio',
+        'productCode' : 'AI',
+        'svgIconPath' : 'bin/studio.svg',
+        'version' : '2022.1.1 RC 1'
+      };
+      final String asJson = json.encode(productInfo2022_1_1_RC_1);
+
+      const String configuredAndroidStudioDir = '$homeLinux/AndroidStudio';
+      globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
+      fileSystem.directory(configuredAndroidStudioDir).createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join(configuredAndroidStudioDir, 'product-info.json'))
+        ..createSync()..writeAsStringSync(asJson);
+
+      expect(AndroidStudio.latestValid()!.version, equals(Version(2022, 1, 1)));
+    }, overrides: <Type, Generator>{
+      Config: () => Config.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
