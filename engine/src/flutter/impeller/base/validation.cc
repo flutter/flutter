@@ -39,7 +39,7 @@ std::ostream& ValidationLog::GetStream() {
 
 void ImpellerValidationBreak(const char* message) {
 // Nothing to do. Exists for the debugger.
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+#ifdef IMPELLER_DEBUG
   std::stringstream stream;
   stream << "Break on '" << __FUNCTION__
          << "' to inspect point of failure: " << message;
@@ -48,7 +48,7 @@ void ImpellerValidationBreak(const char* message) {
   } else {
     FML_LOG(INFO) << stream.str();
   }
-#endif  // FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+#endif  // IMPELLER_DEBUG
 }
 
 }  // namespace impeller

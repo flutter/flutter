@@ -29,12 +29,7 @@ ContentContextOptions OptionsFromPass(const RenderPass& pass) {
 
 ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
                                                const Entity& entity) {
-  ContentContextOptions opts;
-  opts.sample_count = pass.GetRenderTarget().GetSampleCount();
-  opts.color_attachment_pixel_format =
-      pass.GetRenderTarget().GetRenderTargetPixelFormat();
-  opts.has_stencil_attachment =
-      pass.GetRenderTarget().GetStencilAttachment().has_value();
+  ContentContextOptions opts = OptionsFromPass(pass);
   opts.blend_mode = entity.GetBlendMode();
   return opts;
 }

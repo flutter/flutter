@@ -8,6 +8,9 @@ import("//flutter/impeller/tools/malioc.gni")
 import("//flutter/testing/testing.gni")
 
 declare_args() {
+  impeller_debug =
+      flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile"
+
   # Whether the Metal backend is enabled.
   impeller_enable_metal = is_mac || is_ios
 
