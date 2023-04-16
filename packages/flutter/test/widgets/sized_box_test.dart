@@ -35,6 +35,14 @@ void main() {
     const SizedBox g = SizedBox.shrink();
     expect(g.width, 0.0);
     expect(g.height, 0.0);
+
+    const SizedBox h = SizedBox.width(10.0);
+    expect(h.width, 10.0);
+    expect(h.height, isNull);
+
+    const SizedBox h = SizedBox.height(10.0);
+    expect(h.width, isNull);
+    expect(h.height, 10.0);
   });
 
   testWidgets('SizedBox - no child', (WidgetTester tester) async {

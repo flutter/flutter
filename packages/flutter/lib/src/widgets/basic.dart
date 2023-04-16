@@ -2418,6 +2418,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
     : width = dimension,
       height = dimension;
 
+  /// Creates a box with width only (usually used as a horizontal space).
+  SizedBox.width( this.width, { super.key });
+
+  /// Creates a box with height only (usually used as a vertical space).
+  SizedBox.height( this.height, { super.key });
+
   /// If non-null, requires the child to have exactly this width.
   final double? width;
 
