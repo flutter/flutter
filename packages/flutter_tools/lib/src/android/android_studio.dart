@@ -53,9 +53,9 @@ class AndroidStudio {
     required this.configuredPath,
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
-    required this.validationMessages,
+    required List<String> validationMessages,
     required this.workingJavaPath,
-  });
+  }) : _validationMessages = validationMessages;
 
   /// Given a directory containing an Android Studio installation, scans
   /// an installation directory for various details such as the location of the java
@@ -262,7 +262,9 @@ class AndroidStudio {
     }
   }
 
-  final List<String> validationMessages;
+  List<String> get validationMessages => List<String>.from(_validationMessages);
+
+  final List<String> _validationMessages;
 
   /// Locates the newest, valid version of Android Studio.
   ///
