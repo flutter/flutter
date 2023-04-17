@@ -362,15 +362,7 @@ targets:
       $flutter/osx_sdk : >-
         { "sdk_version": "14a5294e" }
 
-  - name: Mac mac_unopt
-    recipe: engine_v2/engine_v2
-    properties:
-      config_name: mac_unopt
-      add_recipes_cq: "true"
-    timeout: 60
-
   - name: Linux mac_unopt
-    bringup: true
     recipe: engine_v2/engine_v2
     properties:
       config_name: mac_unopt
