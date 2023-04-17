@@ -797,6 +797,8 @@ struct Color {
   constexpr bool IsOpaque() const { return alpha == 1.0f; }
 };
 
+std::string ColorToString(const Color& color);
+
 /**
  *  Represents a color by its constituent hue, saturation, brightness and alpha
  */
