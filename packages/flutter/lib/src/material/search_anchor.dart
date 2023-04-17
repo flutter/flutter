@@ -983,6 +983,20 @@ class SearchController extends TextEditingController {
 /// the search bar. Typically only one or two action icons are included.
 /// These actions can represent additional modes of searching (like voice search),
 /// a separate high-level action (such as current location) or an overflow menu.
+///
+/// {@tool dartpad}
+/// This example shows how to use a [SearchBar] as the builder of the [SearchAnchor].
+/// The [SearchBar] example also shows a leading icon and a trailing action.
+///
+/// ** See code in examples/api/lib/material/search_anchor/search_anchor.3.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// * [SearchAnchor], a widget that typically uses an [IconButton] or a [SearchBar]
+/// to manage a "search view" route.
+/// * [SearchBarTheme], a widget that overrides the default configuration of a search bar.
+/// * [SearchViewTheme], a widget that overrides the default configuration of a search view.
 class SearchBar extends StatefulWidget {
   /// Creates a Material Design search bar.
   const SearchBar({
