@@ -43,16 +43,18 @@ void main() {
   });
 
   testUsingContext('AndroidStudioValidator gives doctor error on java crash', () async {
+    const String javaBinPath = '/opt/android-studio-with-cheese-5.0/jre/bin/java';
+    globals.fs.file(javaBinPath).createSync(recursive: true);
     fakeProcessManager.addCommand(const FakeCommand(
       command: <String>[
-        '/opt/android-studio-with-cheese-5.0/jre/bin/java',
+        javaBinPath,
         '-version',
       ],
       exception: ProcessException('java', <String>['-version']),
     ));
     const String installPath = '/opt/android-studio-with-cheese-5.0';
     const String studioHome = '$home/.AndroidStudioWithCheese5.0';
-    const String homeFile = '$studioHome/system/.home';
+    const String homeFile = '$studioHome/.home';
     globals.fs.directory(installPath).createSync(recursive: true);
     globals.fs.file(homeFile).createSync(recursive: true);
     globals.fs.file(homeFile).writeAsStringSync(installPath);
@@ -62,9 +64,12 @@ void main() {
     // message list.
     for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
       final ValidationResult result = await validator.validate();
-      expect(result.messages.where((ValidationMessage message) {
-        return message.isError && message.message.contains('ProcessException');
-      }).isNotEmpty, true);
+      final List<ValidationMessage> proc = result.messages
+        .where((ValidationMessage message) =>
+          message.isError && message.message.contains('ProcessException')
+        )
+        .toList();
+      expect(proc.isNotEmpty, true);
     }
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
