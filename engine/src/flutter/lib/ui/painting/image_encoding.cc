@@ -17,8 +17,9 @@
 #include "flutter/lib/ui/painting/image_encoding_impeller.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/image_encoding_skia.h"
-#include "third_party/skia/include/core/SkEncodedImageFormat.h"
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/typed_data/typed_list.h"
@@ -116,8 +117,7 @@ sk_sp<SkData> EncodeImage(const sk_sp<SkImage>& raster_image,
 
   switch (format) {
     case kPNG: {
-      auto png_image =
-          raster_image->encodeToData(SkEncodedImageFormat::kPNG, 0);
+      auto png_image = SkPngEncoder::Encode(nullptr, raster_image.get(), {});
 
       if (png_image == nullptr) {
         FML_LOG(ERROR) << "Could not convert raster image to PNG.";

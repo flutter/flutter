@@ -6,7 +6,9 @@
 
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/encode/SkPngEncoder.h"
 
 #ifdef ENABLE_SOFTWARE_BENCHMARKS
 #include "flutter/display_list/testing/dl_test_surface_software.h"
@@ -55,7 +57,7 @@ bool DlSurfaceProvider::Snapshot(std::string& filename) const {
   if (!raster) {
     return false;
   }
-  auto data = raster->encodeToData();
+  auto data = SkPngEncoder::Encode(nullptr, raster.get(), {});
   if (!data) {
     return false;
   }
