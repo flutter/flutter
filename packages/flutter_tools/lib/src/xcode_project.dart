@@ -21,29 +21,24 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform  {
-  static const String defaultHostAppProjectName = 'Runner';
-  String? _hostAppProjectName;
-
-  String get hostAppProjectName {
-    if (_hostAppProjectName != null) {
-      return _hostAppProjectName!;
-    }
+  late final String hostAppProjectName = () {
+    const String defaultHostAppProjectName = 'Runner';
     List<FileSystemEntity> contents;
-      if (!hostAppRoot.existsSync()) {
-        return defaultHostAppProjectName;
-      }
-      contents = hostAppRoot.listSync();
-      for (final Directory entity in contents.whereType<Directory>()) {
-        // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
-        // Find the first non-hidden xcworkspace and return the directory.
-        if (globals.fs.path.extension(entity.path) == '.xcworkspace' &&
-            !globals.fs.path.basename(entity.path).startsWith('.')) {
-          _hostAppProjectName = globals.fs.path.basenameWithoutExtension(entity.path);
-          return _hostAppProjectName!;
-        }
-      }
+    if (!hostAppRoot.existsSync()) {
       return defaultHostAppProjectName;
-  }
+    }
+    contents = hostAppRoot.listSync();
+    final FileSystem fileSystem = hostAppRoot.fileSystem;
+    for (final Directory entity in contents.whereType<Directory>()) {
+      // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
+      // Find the first non-hidden xcworkspace and return the directory.
+      if (fileSystem.path.extension(entity.path) == '.xcworkspace' &&
+          !fileSystem.path.basename(entity.path).startsWith('.')) {
+        return fileSystem.path.basenameWithoutExtension(entity.path);
+      }
+    }
+    return defaultHostAppProjectName;
+  }();
 
   /// The parent of this project.
   FlutterProject get parent;

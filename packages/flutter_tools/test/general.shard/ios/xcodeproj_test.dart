@@ -615,12 +615,12 @@ Information about project "Runner":
     expect(info.buildConfigurations, <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)']);
   });
 
-  testWithoutContext('expected scheme for non-flavored build is Runner', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release', 'Runner'], <String>['Runner'], logger);
+  testWithoutContext('expected scheme for non-flavored build is sentence case project name', () {
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release', 'Runner'], <String>['CustomName'], logger);
 
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: BuildInfo.debug.flavor), 'Runner');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: BuildInfo.profile.flavor), 'Runner');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: BuildInfo.release.flavor), 'Runner');
+    expect(info.schemeFor(hostAppProjectName: 'CustomName'), 'CustomName');
+    expect(info.schemeFor(hostAppProjectName: 'customname'), 'CustomName');
+    expect(info.schemeFor(hostAppProjectName: 'CUSTOMNAME'), 'CustomName');
   });
 
   testWithoutContext('expected build configuration for non-flavored build is derived from BuildMode', () {
@@ -646,10 +646,7 @@ Information about project "Runner":
   testWithoutContext('scheme for default project is Runner', () {
     final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner'], logger);
 
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: BuildInfo.debug.flavor), 'Runner');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: BuildInfo.profile.flavor), 'Runner');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: BuildInfo.release.flavor), 'Runner');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false).flavor), isNull);
+    expect(info.schemeFor(hostAppProjectName: 'Runner'), 'Runner');
   });
 
   testWithoutContext('scheme for a custom project with flavor is still flavor', () {
@@ -680,9 +677,8 @@ Information about project "Runner":
     );
 
     expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'Free'), 'Free');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'Free'), 'Free');
     expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'Paid'), 'Paid');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: BuildInfo.debug.flavor), isNull);
+    expect(info.schemeFor(hostAppProjectName: 'Runner'), isNull);
     expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'unknown'), isNull);
   });
 
