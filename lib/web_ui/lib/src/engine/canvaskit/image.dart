@@ -137,12 +137,14 @@ CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
     final CkPictureRecorder recorder = CkPictureRecorder();
     final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
 
+    final CkPaint paint = CkPaint();
     canvas.drawImageRect(
       CkImage(image),
       ui.Rect.fromLTWH(0, 0, image.width(), image.height()),
       ui.Rect.fromLTWH(0, 0, targetWidth!.toDouble(), targetHeight!.toDouble()),
-      CkPaint()
+      paint,
     );
+    paint.dispose();
 
     final CkPicture picture = recorder.endRecording();
     final ui.Image finalImage = picture.toImageSync(
