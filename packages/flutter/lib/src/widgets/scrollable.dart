@@ -426,7 +426,6 @@ class Scrollable extends StatefulWidget {
 
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
-  // TODO(Piinks): Come back and implement for 2D
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
