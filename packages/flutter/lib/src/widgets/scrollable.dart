@@ -300,8 +300,10 @@ class Scrollable extends StatefulWidget {
   /// ScrollableState? scrollable = Scrollable.maybeOf(context);
   /// ```
   ///
-  /// Calling this method will create a dependency on the closest [Scrollable]
-  /// in the [context], if there is one.
+  /// Calling this method will create a dependency on the [ScrollableState]
+  /// that is returned, if there is one. This is typically the closest
+  /// [Scrollable], but may be a more distant ancestor if `axis` is used to
+  /// target a specific [Scrollable].
   ///
   /// The optional [Axis] allows targeting of a specific [Scrollable] of that
   /// axis, useful when Scrollables are nested. When [axis] is provided, the
@@ -317,9 +319,18 @@ class Scrollable extends StatefulWidget {
       final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
       return widget?.scrollable;
     }
+    // This is the context that will need to establish the dependency.
+    final BuildContext originalContext = context;
     ScrollableState? scrollable = context.getInheritedWidgetOfExactType<_ScrollableScope>()?.scrollable;
     while (scrollable != null) {
       if (axisDirectionToAxis(scrollable.axisDirection) == axis) {
+        if (context != originalContext) {
+          // Establish the dependency on the correct context.
+          // Get the element.
+          final InheritedElement element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()!;
+          originalContext.dependOnInheritedElement(element);
+          return scrollable;
+        }
         scrollable = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>()?.scrollable;
         return scrollable;
       }
@@ -338,16 +349,17 @@ class Scrollable extends StatefulWidget {
   /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
   ///
-  /// Calling this method will create a dependency on the closest [Scrollable]
-  /// in the [context].
+  /// Calling this method will create a dependency on the [ScrollableState]
+  /// that is returned, if there is one. This is typically the closest
+  /// [Scrollable], but may be a more distant ancestor if `axis` is used to
+  /// target a specific [Scrollable].
   ///
   /// If no [Scrollable] ancestor is found, then this method will assert in
   /// debug mode, and throw an exception in release mode.
   ///
   /// The optional [Axis] allows targeting of a specific [Scrollable] of that
-  /// axis, useful when Scrollables are nested or using
-  /// [TwoDimensionalScrollable]. When [axis] is provided, the nearest enclosing
-  /// [ScrollableState] in that [Axis] is returned.
+  /// axis, useful when Scrollables are nested. When [axis] is provided, the
+  /// nearest enclosing [ScrollableState] in that [Axis] is returned.
   ///
   /// See also:
   ///
@@ -357,16 +369,25 @@ class Scrollable extends StatefulWidget {
     final ScrollableState? scrollableState = maybeOf(context, axis: axis);
     assert(() {
       if (scrollableState == null) {
-        throw FlutterError(
-          'Scrollable.of() was called with a context that does not contain a '
-          'Scrollable widget.\n'
-          'No Scrollable widget ancestor could be found starting from the '
-          'context that was passed to Scrollable.of(). This can happen '
-          'because you are using a widget that looks for a Scrollable '
-          'ancestor, but no such ancestor exists.\n'
-          'The context used was:\n'
-          '  $context',
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'Scrollable.of() was called with a context that does not contain a '
+            'Scrollable widget.',
+          ),
+          ErrorDescription(
+            'No Scrollable widget ancestor could be found '
+            '${axis == null ? '' : 'for the provided Axis: $axis '}'
+            'starting from the context that was passed to Scrollable.of(). This '
+            'can happen because you are using a widget that looks for a Scrollable '
+            'ancestor, but no such ancestor exists.\n'
+            'The context used was:\n'
+            '  $context',
+          ),
+          if (axis != null) ErrorHint(
+            'When specifying an axis, this method will only look for a Scrollable '
+            'that matches the given Axis.',
+          ),
+        ]);
       }
       return true;
     }());
@@ -385,16 +406,16 @@ class Scrollable extends StatefulWidget {
   /// the current [ScrollPosition.activity]'s [ScrollActivity.velocity].
   ///
   /// The optional [Axis] allows targeting of a specific [Scrollable] of that
-  /// axis, useful when Scrollables are nested or using
-  /// [TwoDimensionalScrollable]. When [axis] is provided, the nearest enclosing
-  /// [ScrollableState] in that [Axis] is returned.
+  /// axis, useful when Scrollables are nested. When [axis] is provided,
+  /// [ScrollPosition.recommendDeferredLoading] is called for the nearest
+  /// [Scrollable] in that [Axis].
   ///
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
   static bool recommendDeferredLoadingForContext(BuildContext context, { Axis? axis }) {
     _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
     while (widget != null) {
-      if (axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
+      if (axis == null || axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
         return widget.position.recommendDeferredLoading(context);
       }
       context = widget.scrollable.context;

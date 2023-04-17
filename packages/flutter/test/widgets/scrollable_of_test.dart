@@ -71,6 +71,57 @@ class TestScrollPosition extends ScrollPositionWithSingleContext {
   bool recommendDeferredLoading(BuildContext context) => deferLoading;
 }
 
+class TestScrollable extends StatefulWidget {
+  const TestScrollable({ super.key, required this.child });
+
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => TestScrollableState();
+}
+
+class TestScrollableState extends State<TestScrollable> {
+  int dependenciesChanged = 0;
+
+  @override
+  void didChangeDependencies() {
+    dependenciesChanged += 1;
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+class TestChild extends StatefulWidget {
+  const TestChild({ super.key });
+
+  @override
+  State<TestChild> createState() => TestChildState();
+}
+
+class TestChildState extends State<TestChild> {
+  int dependenciesChanged = 0;
+  late ScrollableState scrollable;
+
+  @override
+  void didChangeDependencies() {
+    dependenciesChanged += 1;
+    scrollable = Scrollable.of(context, axis: Axis.horizontal);
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: 1000,
+      child: Text(scrollable.axisDirection.toString()),
+    );
+  }
+}
+
 void main() {
   testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
     late String logValue;
@@ -165,5 +216,41 @@ void main() {
 
     expect(foundAxisDirection, AxisDirection.right);
     expect(foundRecommendation, isTrue);
+  });
+
+  testWidgets('Axis targeting scrollables establishes the correct dependencies', (WidgetTester tester) async {
+    final GlobalKey<TestScrollableState> verticalKey = GlobalKey<TestScrollableState>();
+    final GlobalKey<TestChildState> childKey = GlobalKey<TestChildState>();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: TestScrollable(
+          key: verticalKey,
+          child: TestChild(key: childKey),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(verticalKey.currentState!.dependenciesChanged, 1);
+    expect(childKey.currentState!.dependenciesChanged, 1);
+
+    // Change the horizontal ScrollView, adding a controller
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: ScrollController(),
+        child: TestScrollable(
+          key: verticalKey,
+          child: TestChild(key: childKey),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(verticalKey.currentState!.dependenciesChanged, 1);
+    expect(childKey.currentState!.dependenciesChanged, 2);
   });
 }
