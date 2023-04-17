@@ -48,6 +48,7 @@ void main() {
             ),
           )
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
@@ -121,6 +122,8 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
+
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(spy)));
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
@@ -241,6 +244,7 @@ void main() {
             ),
           )
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
@@ -260,6 +264,7 @@ void main() {
             ),
           )
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       renderSelectionSpy.events.clear();
@@ -284,6 +289,7 @@ void main() {
             ),
           )
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       renderSelectionSpy.events.clear();
@@ -315,6 +321,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       renderSelectionSpy.events.clear();
@@ -348,6 +355,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
@@ -708,6 +716,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       focusNode.requestFocus();
 
       // keyboard select all.
@@ -897,6 +906,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
       addTearDown(gesture.removePointer);
@@ -928,6 +938,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
@@ -964,6 +975,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
       addTearDown(gesture.removePointer);
@@ -998,6 +1010,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1039,6 +1052,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1075,6 +1089,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1111,6 +1126,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1146,6 +1162,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1621,6 +1638,7 @@ void main() {
             ),
           ),
         );
+        await tester.pumpAndSettle();
 
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
             find.descendant(
@@ -1676,6 +1694,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
@@ -1723,6 +1742,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
@@ -1776,6 +1796,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
@@ -1830,6 +1851,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
@@ -1913,6 +1935,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final SelectableRegionState state =
           tester.state<SelectableRegionState>(find.byType(SelectableRegion));
