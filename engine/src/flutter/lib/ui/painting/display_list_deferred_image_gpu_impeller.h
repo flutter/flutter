@@ -45,6 +45,9 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   bool isTextureBacked() const override;
 
   // |DlImage|
+  bool isUIThreadSafe() const override;
+
+  // |DlImage|
   SkISize dimensions() const override;
 
   // |DlImage|

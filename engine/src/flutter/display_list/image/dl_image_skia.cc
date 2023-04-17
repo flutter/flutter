@@ -32,6 +32,17 @@ bool DlImageSkia::isTextureBacked() const {
 }
 
 // |DlImage|
+bool DlImageSkia::isUIThreadSafe() const {
+  // Technically if the image is null then we are thread-safe, and possibly
+  // if the image is constructed from a heap raster as well, but there
+  // should never be a leak of an instance of this class into any data that
+  // is shared with the UI thread, regardless of value.
+  // All images intended to be shared with the UI thread should be constructed
+  // via one of the DlImage subclasses designed for that purpose.
+  return false;
+}
+
+// |DlImage|
 SkISize DlImageSkia::dimensions() const {
   return image_ ? image_->dimensions() : SkISize::MakeEmpty();
 }

@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "flutter/fml/make_copyable.h"
+#include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "flutter/lib/ui/painting/image.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"

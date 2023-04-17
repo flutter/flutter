@@ -50,6 +50,8 @@ void CanvasGradient::initLinear(const tonic::Float32List& end_points,
   dl_shader_ = DlColorSource::MakeLinear(
       p0, p1, colors.num_elements(), colors_array, color_stops.data(),
       tile_mode, has_matrix ? &sk_matrix : nullptr);
+  // Just a sanity check, all gradient shaders should be thread-safe
+  FML_DCHECK(dl_shader_->isUIThreadSafe());
 }
 
 void CanvasGradient::initRadial(double center_x,
@@ -77,6 +79,8 @@ void CanvasGradient::initRadial(double center_x,
       SkPoint::Make(SafeNarrow(center_x), SafeNarrow(center_y)),
       SafeNarrow(radius), colors.num_elements(), colors_array,
       color_stops.data(), tile_mode, has_matrix ? &sk_matrix : nullptr);
+  // Just a sanity check, all gradient shaders should be thread-safe
+  FML_DCHECK(dl_shader_->isUIThreadSafe());
 }
 
 void CanvasGradient::initSweep(double center_x,
@@ -107,6 +111,8 @@ void CanvasGradient::initSweep(double center_x,
       SafeNarrow(end_angle) * 180.0f / static_cast<float>(M_PI),
       colors.num_elements(), colors_array, color_stops.data(), tile_mode,
       has_matrix ? &sk_matrix : nullptr);
+  // Just a sanity check, all gradient shaders should be thread-safe
+  FML_DCHECK(dl_shader_->isUIThreadSafe());
 }
 
 void CanvasGradient::initTwoPointConical(double start_x,
@@ -139,6 +145,8 @@ void CanvasGradient::initTwoPointConical(double start_x,
       SkPoint::Make(SafeNarrow(end_x), SafeNarrow(end_y)),
       SafeNarrow(end_radius), colors.num_elements(), colors_array,
       color_stops.data(), tile_mode, has_matrix ? &sk_matrix : nullptr);
+  // Just a sanity check, all gradient shaders should be thread-safe
+  FML_DCHECK(dl_shader_->isUIThreadSafe());
 }
 
 CanvasGradient::CanvasGradient() = default;

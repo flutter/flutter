@@ -76,6 +76,11 @@ bool DlDeferredImageGPUSkia::isTextureBacked() const {
 }
 
 // |DlImage|
+bool DlDeferredImageGPUSkia::isUIThreadSafe() const {
+  return true;
+}
+
+// |DlImage|
 SkISize DlDeferredImageGPUSkia::dimensions() const {
   return image_wrapper_ ? image_wrapper_->image_info().dimensions()
                         : SkISize::MakeEmpty();

@@ -123,8 +123,6 @@ if (enable_unittests) {
       "testing/mock_raster_cache.h",
       "testing/mock_texture.cc",
       "testing/mock_texture.h",
-      "testing/skia_gpu_object_layer_test.cc",
-      "testing/skia_gpu_object_layer_test.h",
     ]
 
     public_deps = [

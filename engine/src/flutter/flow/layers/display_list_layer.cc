@@ -16,15 +16,14 @@
 namespace flutter {
 
 DisplayListLayer::DisplayListLayer(const SkPoint& offset,
-                                   SkiaGPUObject<DisplayList> display_list,
+                                   sk_sp<DisplayList> display_list,
                                    bool is_complex,
                                    bool will_change)
     : offset_(offset), display_list_(std::move(display_list)) {
-  if (display_list_.skia_object() != nullptr) {
-    bounds_ = display_list_.skia_object()->bounds().makeOffset(offset_.x(),
-                                                               offset_.y());
+  if (display_list_) {
+    bounds_ = display_list_->bounds().makeOffset(offset_.x(), offset_.y());
     display_list_raster_cache_item_ = DisplayListRasterCacheItem::Make(
-        display_list_.skia_object(), offset_, is_complex, will_change);
+        display_list_, offset_, is_complex, will_change);
   }
 }
 
@@ -61,8 +60,8 @@ void DisplayListLayer::Diff(DiffContext* context, const Layer* old_layer) {
 bool DisplayListLayer::Compare(DiffContext::Statistics& statistics,
                                const DisplayListLayer* l1,
                                const DisplayListLayer* l2) {
-  const auto& dl1 = l1->display_list_.skia_object();
-  const auto& dl2 = l2->display_list_.skia_object();
+  const auto& dl1 = l1->display_list_;
+  const auto& dl2 = l2->display_list_;
   if (dl1.get() == dl2.get()) {
     statistics.AddSameInstancePicture();
     return true;
@@ -105,7 +104,7 @@ void DisplayListLayer::Preroll(PrerollContext* context) {
 }
 
 void DisplayListLayer::Paint(PaintContext& context) const {
-  FML_DCHECK(display_list_.skia_object());
+  FML_DCHECK(display_list_);
   FML_DCHECK(needs_painting(context));
 
   auto mutator = context.state_stack.save();
@@ -143,7 +142,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
         DlAutoCanvasRestore save(canvas, true);
         canvas->Clear(DlColor::kTransparent());
         canvas->SetTransform(ctm);
-        canvas->DrawDisplayList(display_list_.skia_object(), opacity);
+        canvas->DrawDisplayList(display_list_, opacity);
       }
       canvas->Flush();
     }
@@ -158,8 +157,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
     context.layer_snapshot_store->Add(snapshot_data);
   }
 
-  auto display_list = display_list_.skia_object();
-  context.canvas->DrawDisplayList(display_list, opacity);
+  context.canvas->DrawDisplayList(display_list_, opacity);
 }
 
 }  // namespace flutter

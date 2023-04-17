@@ -59,6 +59,9 @@ bool ReusableFragmentShader::ValidateSamplers() {
     if (samplers_[i] == nullptr) {
       return false;
     }
+    // The samplers should have been checked as they were added, this
+    // is a double-sanity-check.
+    FML_DCHECK(samplers_[i]->isUIThreadSafe());
   }
   return true;
 }
@@ -71,12 +74,18 @@ void ReusableFragmentShader::SetImageSampler(Dart_Handle index_handle,
   if (index >= samplers_.size()) {
     Dart_ThrowException(tonic::ToDart("Sampler index out of bounds"));
   }
+  if (!image->image()->isUIThreadSafe()) {
+    Dart_ThrowException(tonic::ToDart("Image is not thread-safe"));
+  }
 
   // TODO(115794): Once the DlImageSampling enum is replaced, expose the
   //               sampling options as a new default parameter for users.
   samplers_[index] = std::make_shared<DlImageColorSource>(
       image->image(), DlTileMode::kClamp, DlTileMode::kClamp,
       DlImageSampling::kNearestNeighbor, nullptr);
+  // This should be true since we already checked the image above, but
+  // we check again for sanity.
+  FML_DCHECK(samplers_[index]->isUIThreadSafe());
 
   auto* uniform_floats =
       reinterpret_cast<float*>(uniform_data_->writable_data());
@@ -95,7 +104,11 @@ std::shared_ptr<DlColorSource> ReusableFragmentShader::shader(
   uniform_data->resize(uniform_data_->size());
   memcpy(uniform_data->data(), uniform_data_->bytes(), uniform_data->size());
 
-  return program_->MakeDlColorSource(std::move(uniform_data), samplers_);
+  auto source = program_->MakeDlColorSource(std::move(uniform_data), samplers_);
+  // The samplers should have been checked as they were added, this
+  // is a double-sanity-check.
+  FML_DCHECK(source->isUIThreadSafe());
+  return source;
 }
 
 void ReusableFragmentShader::Dispose() {

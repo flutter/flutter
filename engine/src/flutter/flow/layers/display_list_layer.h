@@ -11,7 +11,6 @@
 #include "flutter/flow/layers/display_list_raster_cache_item.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache_item.h"
-#include "flutter/flow/skia_gpu_object.h"
 
 namespace flutter {
 
@@ -20,13 +19,11 @@ class DisplayListLayer : public Layer {
   static constexpr size_t kMaxBytesToCompare = 10000;
 
   DisplayListLayer(const SkPoint& offset,
-                   SkiaGPUObject<DisplayList> display_list,
+                   sk_sp<DisplayList> display_list,
                    bool is_complex,
                    bool will_change);
 
-  DisplayList* display_list() const {
-    return display_list_.skia_object().get();
-  }
+  DisplayList* display_list() const { return display_list_.get(); }
 
   bool IsReplacing(DiffContext* context, const Layer* layer) const override;
 
@@ -55,7 +52,7 @@ class DisplayListLayer : public Layer {
   SkPoint offset_;
   SkRect bounds_;
 
-  flutter::SkiaGPUObject<DisplayList> display_list_;
+  sk_sp<DisplayList> display_list_;
 
   static bool Compare(DiffContext::Statistics& statistics,
                       const DisplayListLayer* l1,

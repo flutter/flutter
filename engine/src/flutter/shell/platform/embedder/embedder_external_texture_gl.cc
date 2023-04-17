@@ -101,6 +101,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
     return nullptr;
   }
 
+  // This image should not escape local use by EmbedderExternalTextureGL
   return DlImage::Make(std::move(image));
 }
 

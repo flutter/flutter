@@ -43,7 +43,7 @@ class ImageShader : public Shader {
   sk_sp<const DlImage> image_;
   bool sampling_is_locked_;
 
-  flutter::SkiaGPUObject<DlImageColorSource> cached_shader_;
+  std::shared_ptr<DlImageColorSource> cached_shader_;
 };
 
 }  // namespace flutter

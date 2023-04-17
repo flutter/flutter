@@ -13,8 +13,8 @@
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/raster_cache_item.h"
+#include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_raster_cache.h"
-#include "flutter/flow/testing/skia_gpu_object_layer_test.h"
 #include "flutter/testing/assertions_skia.h"
 #include "gtest/gtest.h"
 #include "include/core/SkMatrix.h"
@@ -858,7 +858,7 @@ TEST(RasterCache, RasterCacheKeyIDHashCode) {
   ASSERT_EQ(fourth_hash, fourth.GetHash());
 }
 
-using RasterCacheTest = SkiaGPUObjectLayerTest;
+using RasterCacheTest = LayerTest;
 
 TEST_F(RasterCacheTest, RasterCacheKeyIDLayerChildrenIds) {
   auto layer = std::make_shared<ContainerLayer>();
@@ -869,8 +869,7 @@ TEST_F(RasterCacheTest, RasterCacheKeyIDLayerChildrenIds) {
 
   auto display_list = GetSampleDisplayList();
   auto display_list_layer = std::make_shared<DisplayListLayer>(
-      SkPoint::Make(0.0f, 0.0f),
-      SkiaGPUObject<DisplayList>(display_list, unref_queue()), false, false);
+      SkPoint::Make(0.0f, 0.0f), display_list, false, false);
   layer->Add(display_list_layer);
 
   auto ids = RasterCacheKeyID::LayerChildrenIds(layer.get()).value();

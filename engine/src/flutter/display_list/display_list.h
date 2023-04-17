@@ -262,6 +262,7 @@ class DisplayList : public SkRefCnt {
   }
 
   bool can_apply_group_opacity() const { return can_apply_group_opacity_; }
+  bool isUIThreadSafe() const { return is_ui_thread_safe_; }
 
   static void DisposeOps(uint8_t* ptr, uint8_t* end);
 
@@ -273,6 +274,7 @@ class DisplayList : public SkRefCnt {
               unsigned int nested_op_count,
               const SkRect& bounds,
               bool can_apply_group_opacity,
+              bool is_ui_thread_safe,
               sk_sp<const DlRTree> rtree);
 
   static uint32_t next_unique_id();
@@ -288,6 +290,7 @@ class DisplayList : public SkRefCnt {
   const SkRect bounds_;
 
   const bool can_apply_group_opacity_;
+  const bool is_ui_thread_safe_;
   const sk_sp<const DlRTree> rtree_;
 
   void Dispatch(DlOpReceiver& ctx,

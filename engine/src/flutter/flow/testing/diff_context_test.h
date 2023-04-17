@@ -5,7 +5,7 @@
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/layers/opacity_layer.h"
-#include "flutter/flow/testing/skia_gpu_object_layer_test.h"
+#include "flutter/flow/testing/layer_test.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -31,7 +31,7 @@ class MockLayerTree {
   SkISize size_;
 };
 
-class DiffContextTest : public ThreadTest {
+class DiffContextTest : public LayerTest {
  public:
   DiffContextTest();
 
@@ -47,7 +47,7 @@ class DiffContextTest : public ThreadTest {
   sk_sp<DisplayList> CreateDisplayList(const SkRect& bounds, uint32_t color);
 
   std::shared_ptr<DisplayListLayer> CreateDisplayListLayer(
-      sk_sp<DisplayList> display_list,
+      const sk_sp<DisplayList>& display_list,
       const SkPoint& offset = SkPoint::Make(0, 0));
 
   std::shared_ptr<ContainerLayer> CreateContainerLayer(
@@ -62,11 +62,6 @@ class DiffContextTest : public ThreadTest {
       std::initializer_list<std::shared_ptr<Layer>> layers,
       SkAlpha alpha,
       const SkPoint& offset = SkPoint::Make(0, 0));
-
-  fml::RefPtr<SkiaUnrefQueue> unref_queue() { return unref_queue_; }
-
- private:
-  fml::RefPtr<SkiaUnrefQueue> unref_queue_;
 };
 
 }  // namespace testing

@@ -227,6 +227,7 @@ FLUTTER_ASSERT_ARC
     return nullptr;
   }
 
+  // This image should not escape local use by this flutter::Texture implementation
   return flutter::DlImage::Make(skImage);
 }
 
@@ -272,6 +273,8 @@ FLUTTER_ASSERT_ARC
   if (!skImage) {
     return nullptr;
   }
+
+  // This image should not escape local use by this flutter::Texture implementation
   return flutter::DlImage::Make(skImage);
 }
 

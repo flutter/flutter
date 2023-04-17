@@ -64,6 +64,11 @@ bool DlDeferredImageGPUImpeller::isTextureBacked() const {
 }
 
 // |DlImage|
+bool DlDeferredImageGPUImpeller::isUIThreadSafe() const {
+  return true;
+}
+
+// |DlImage|
 SkISize DlDeferredImageGPUImpeller::dimensions() const {
   if (!wrapper_) {
     return SkISize::MakeEmpty();
