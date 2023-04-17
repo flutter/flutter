@@ -27,6 +27,14 @@ import 'restoration_properties.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
+class NavigationNotification extends Notification {
+  const NavigationNotification({
+    required this.canPop,
+  });
+
+  final bool canPop;
+}
+
 // Examples can assume:
 // typedef MyAppHome = Placeholder;
 // typedef MyHomePage = Placeholder;
@@ -2787,11 +2795,21 @@ class Navigator extends StatefulWidget {
   ///
   /// The default value of [Navigator.onHistoryChanged].
   static void defaultOnHistoryChanged(NavigatorState navigatorState) {
+    if (navigatorState._isRoot) {
+      SystemNavigator.updateNavigationStackStatus(navigatorState.canPop());
+      return;
+    }
+    final NavigationNotification notification = NavigationNotification(
+      canPop: navigatorState.canPop(),
+    );
+    notification.dispatch(navigatorState.context);
+    return;
+
     // TODO(justinmc): Also should probably set this on app start, because it
     // will otherwise carry over during shift+r restart.
     // If this is the root NavigatorState, then update the SystemNavigator with
     // its status.
-    if (navigatorState.context.findAncestorStateOfType<NavigatorState>() != null) {
+    if (!navigatorState._isRoot) {
       return;
     }
     // If canPop is true then CanPopScopes aren't going to have any effect.
@@ -5360,6 +5378,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
+  bool get _isRoot => context.findAncestorStateOfType<NavigatorState>() == null;
+
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);
@@ -5369,25 +5389,47 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // nested navigator underneath will not pick up the hero controller above
     // this level.
     return HeroControllerScope.none(
-      child: Listener(
-        onPointerDown: _handlePointerDown,
-        onPointerUp: _handlePointerUpOrCancel,
-        onPointerCancel: _handlePointerUpOrCancel,
-        child: AbsorbPointer(
-          absorbing: false, // it's mutated directly by _cancelActivePointers above
-          child: FocusTraversalGroup(
-            policy: FocusTraversalGroup.maybeOf(context),
-            child: Focus(
-              focusNode: focusNode,
-              autofocus: true,
-              skipTraversal: true,
-              includeSemantics: false,
-              child: UnmanagedRestorationScope(
-                bucket: bucket,
-                child: Overlay(
-                  key: _overlayKey,
-                  clipBehavior: widget.clipBehavior,
-                  initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+      child: NotificationListener<NavigationNotification>(
+        onNotification: (NavigationNotification notification) {
+          print('justin notified! canPop? ${canPop()}/${notification.canPop}. isRoot? $_isRoot.');
+          if (_isRoot) {
+            // TODO(justinmc): Make this overridable for complex cases of mixed Navigator and GoRouter etc.?
+            SystemNavigator.updateNavigationStackStatus(notification.canPop || canPop());
+            return true;
+          }
+          // If the state of this Navigator does not change whether or not the
+          // whole framework can pop, propagate the Notification.
+          if (notification.canPop || !canPop()) {
+            return false;
+          }
+          // Otherwise, dispatch a new Notification with the correct canPop and
+          // stop the propagation of the old Notification.
+          const NavigationNotification nextNotification = NavigationNotification(
+            canPop: true,
+          );
+          nextNotification.dispatch(context);
+          return true;
+        },
+        child: Listener(
+          onPointerDown: _handlePointerDown,
+          onPointerUp: _handlePointerUpOrCancel,
+          onPointerCancel: _handlePointerUpOrCancel,
+          child: AbsorbPointer(
+            absorbing: false, // it's mutated directly by _cancelActivePointers above
+            child: FocusTraversalGroup(
+              policy: FocusTraversalGroup.maybeOf(context),
+              child: Focus(
+                focusNode: focusNode,
+                autofocus: true,
+                skipTraversal: true,
+                includeSemantics: false,
+                child: UnmanagedRestorationScope(
+                  bucket: bucket,
+                  child: Overlay(
+                    key: _overlayKey,
+                    clipBehavior: widget.clipBehavior,
+                    initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+                  ),
                 ),
               ),
             ),
