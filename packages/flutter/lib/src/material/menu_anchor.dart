@@ -1818,7 +1818,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       }
       _buttonFocusNode.addListener(_handleFocusChange);
     }
-    _internalMenuController = (widget.controller != oldWidget.controller) ? null : MenuController();
+    if (widget.controller != oldWidget.controller) {
+      _internalMenuController = (oldWidget.controller == null) ? null : MenuController();
+    }
   }
 
   @override

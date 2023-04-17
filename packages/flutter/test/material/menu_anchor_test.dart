@@ -2100,10 +2100,34 @@ void main() {
 
       submenuController.open();
       await tester.pump();
-
       expect(find.text(TestMenu.subMenu00.label), findsOneWidget);
 
       submenuController.close();
+      await tester.pump();
+      expect(find.text(TestMenu.subMenu00.label), findsNothing);
+
+      // Now remove the controller and try to control it.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: <Widget>[
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      child: Text(TestMenu.subMenu00.label),
+                    ),
+                  ],
+                  child: Text(TestMenu.mainMenu0.label),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(() => submenuController.open(), throwsAssertionError);
       await tester.pump();
       expect(find.text(TestMenu.subMenu00.label), findsNothing);
     });
