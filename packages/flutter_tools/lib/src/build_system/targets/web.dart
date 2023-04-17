@@ -40,20 +40,6 @@ const String kBaseHref = 'baseHref';
 /// The caching strategy to use for service worker generation.
 const String kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
-const String kOfflineFirst = 'offline-first';
-const String kNoneWorker = 'none';
-
-/// Convert a [value] into a [ServiceWorkerStrategy].
-ServiceWorkerStrategy _serviceWorkerStrategyFromString(String? value) {
-  switch (value) {
-    case kNoneWorker:
-      return ServiceWorkerStrategy.none;
-    // offline-first is the default value for any invalid requests.
-    default:
-      return ServiceWorkerStrategy.offlineFirst;
-  }
-}
-
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
@@ -175,7 +161,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final JsCompilerConfig compilerConfig = JsCompilerConfig.fromBuildSystemEnvironment(environment.defines);
     final Artifacts artifacts = globals.artifacts!;
     final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
@@ -256,9 +242,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final WasmCompilerConfig compilerConfig = WasmCompilerConfig.fromBuildSystemEnvironment(environment.defines);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = globals.artifacts!;
-    final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
+    final File outputWasmFile = environment.buildDir.childFile(
+      compilerConfig.runWasmOpt ? 'main.dart.unopt.wasm' : 'main.dart.wasm'
+    );
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
     final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.path;
@@ -274,7 +263,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
         '-D$dartDefine',
-      ...WasmCompilerConfig.fromBuildSystemEnvironment(environment.defines).toCommandOptions(),
+      ...compilerConfig.toCommandOptions(),
       '--packages=.dart_tool/package_config.json',
       '--dart-sdk=$dartSdkPath',
       '--multi-root-scheme',
@@ -299,6 +288,35 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final ProcessResult compileResult = await globals.processManager.run(compilationArgs);
     if (compileResult.exitCode != 0) {
       throw Exception(_collectOutput(compileResult));
+    }
+    if (compilerConfig.runWasmOpt) {
+      final String wasmOptBinary = artifacts.getArtifactPath(
+        Artifact.wasmOptBinary,
+        platform: TargetPlatform.web_javascript
+      );
+      final File optimizedOutput = environment.buildDir.childFile('main.dart.wasm');
+      final List<String> optimizeArgs = <String>[
+        wasmOptBinary,
+        '-all',
+        '--closed-world',
+        '-tnh',
+        '-O3',
+        '--type-ssa',
+        '--gufa',
+        '-O3',
+        '--type-merging',
+        outputWasmFile.path,
+        '-o',
+        optimizedOutput.path,
+      ];
+      final ProcessResult optimizeResult = await globals.processManager.run(optimizeArgs);
+      if (optimizeResult.exitCode != 0) {
+        throw Exception(_collectOutput(optimizeResult));
+      }
+
+      // Rename the .mjs file not to have the `.unopt` bit
+      final File jsRuntimeFile = environment.buildDir.childFile('main.dart.unopt.mjs');
+      await jsRuntimeFile.rename(environment.buildDir.childFile('main.dart.mjs').path);
     }
   }
 
@@ -590,9 +608,8 @@ class WebServiceWorker extends Target {
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final ServiceWorkerStrategy serviceWorkerStrategy = _serviceWorkerStrategyFromString(
-      environment.defines[kServiceWorkerStrategy],
-    );
+    final ServiceWorkerStrategy serviceWorkerStrategy =
+        ServiceWorkerStrategy.fromCliName(environment.defines[kServiceWorkerStrategy]);
     final String fileGeneratorsPath =
         globals.artifacts!.getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String serviceWorker = generateServiceWorker(
