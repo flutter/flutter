@@ -322,7 +322,6 @@ class Scrollable extends StatefulWidget {
       final ScrollableState scrollable = (element.widget as _ScrollableScope).scrollable;
       if (axis == null || axisDirectionToAxis(scrollable.axisDirection) == axis) {
         // Establish the dependency on the correct context.
-        // Get the element.
         originalContext.dependOnInheritedElement(element);
         return scrollable;
       }
