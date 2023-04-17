@@ -30,6 +30,11 @@
                 "config": "host_debug_unopt",
                 "targets": []
             },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14a5294e"
+                }
+            },
             "tests": [
                 {
                     "language": "python3",
@@ -144,6 +149,11 @@
                 "config": "host_debug_unopt_arm64",
                 "targets": [
                 ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14a5294e"
+                }
             },
             "tests": []
         },
