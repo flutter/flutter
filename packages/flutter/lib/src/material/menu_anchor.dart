@@ -1548,6 +1548,7 @@ class SubmenuButton extends StatefulWidget {
     this.onFocusChange,
     this.onOpen,
     this.onClose,
+    this.controller,
     this.style,
     this.menuStyle,
     this.alignmentOffset,
@@ -1577,6 +1578,9 @@ class SubmenuButton extends StatefulWidget {
 
   /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
+
+  /// An optional [MenuController] for this submenu.
+  final MenuController? controller;
 
   /// Customizes this button's appearance.
   ///
@@ -1760,7 +1764,8 @@ class SubmenuButton extends StatefulWidget {
 class _SubmenuButtonState extends State<SubmenuButton> {
   FocusNode? _internalFocusNode;
   bool _waitingToFocusMenu = false;
-  final MenuController _menuController = MenuController();
+  MenuController? _internalMenuController;
+  MenuController get _menuController => widget.controller ?? _internalMenuController!;
   _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
   FocusNode get _buttonFocusNode => widget.focusNode ?? _internalFocusNode!;
   bool get _enabled => widget.menuChildren.isNotEmpty;
@@ -1776,6 +1781,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         }
         return true;
       }());
+    }
+    if (widget.controller == null) {
+      _internalMenuController = MenuController();
     }
     _buttonFocusNode.addListener(_handleFocusChange);
   }
@@ -1810,6 +1818,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       }
       _buttonFocusNode.addListener(_handleFocusChange);
     }
+    _internalMenuController = (widget.controller != oldWidget.controller) ? null : MenuController();
   }
 
   @override
