@@ -179,6 +179,7 @@ class BackdropFilterEngineLayer extends ContainerLayer
     final CkPaint paint = CkPaint()..blendMode = _blendMode;
     paintContext.internalNodesCanvas
         .saveLayerWithFilter(paintBounds, _filter, paint);
+    paint.dispose();
     paintChildren(paintContext);
     paintContext.internalNodesCanvas.restore();
   }
@@ -340,6 +341,7 @@ class OpacityEngineLayer extends ContainerLayer
     final ui.Rect saveLayerBounds = paintBounds.shift(-_offset);
 
     paintContext.internalNodesCanvas.saveLayer(saveLayerBounds, paint);
+    paint.dispose();
     paintChildren(paintContext);
     // Restore twice: once for the translate and once for the saveLayer.
     paintContext.internalNodesCanvas.restore();
@@ -403,6 +405,7 @@ class ImageFilterEngineLayer extends ContainerLayer
     final CkPaint paint = CkPaint();
     paint.imageFilter = _filter;
     paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
+    paint.dispose();
     paintChildren(paintContext);
     paintContext.internalNodesCanvas.restore();
     paintContext.internalNodesCanvas.restore();
@@ -439,6 +442,7 @@ class ShaderMaskEngineLayer extends ContainerLayer
 
     paintContext.leafNodesCanvas!.drawRect(
         ui.Rect.fromLTWH(0, 0, maskRect.width, maskRect.height), paint);
+    paint.dispose();
     paintContext.leafNodesCanvas!.restore();
 
     paintContext.internalNodesCanvas.restore();
@@ -539,6 +543,7 @@ class PhysicalShapeEngineLayer extends ContainerLayer
       // anti-aliased drawPath will always have such artifacts.
       paintContext.leafNodesCanvas!.drawPaint(paint);
     }
+    paint.dispose();
 
     paintChildren(paintContext);
 
@@ -570,6 +575,7 @@ class ColorFilterEngineLayer extends ContainerLayer
     paint.colorFilter = filter;
 
     paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
+    paint.dispose();
     paintChildren(paintContext);
     paintContext.internalNodesCanvas.restore();
   }
