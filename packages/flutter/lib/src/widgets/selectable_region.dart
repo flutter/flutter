@@ -1307,7 +1307,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
           Offset(0, - start.value.startSelectionPoint!.lineHeight / 2);
       _lastStartEdgeUpdateGlobalPosition = MatrixUtils.transformPoint(start.getTransformTo(null), localStartEdge);
     }
-    if (currentSelectionEndIndex != -1 && selectables[currentSelectionEndIndex].value.status != SelectionStatus.none) {
+    if (currentSelectionEndIndex != -1 && selectables[currentSelectionEndIndex].value.hasSelection) {
       final Selectable end = selectables[currentSelectionEndIndex];
       final Offset localEndEdge = end.value.endSelectionPoint!.localPosition +
           Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
