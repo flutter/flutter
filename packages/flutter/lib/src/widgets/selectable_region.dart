@@ -506,7 +506,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _initialDragStartSelectionPoint = _initialDragStartSelectionPoint ?? _selectionDelegate.value.startSelectionPoint!;
     final bool isDraggingForwardFromOrigin = details.localOffsetFromOrigin.dx > 0;
     final bool isPositionAboveStartingBaseline = details.localPosition.dy < _initialDragStartSelectionPoint!.localPosition.dy;
-    final bool isPositionClampedToStartingLine = isPositionAboveStartingBaseline && details.localPosition.dy > _initialDragStartSelectionPoint!.localPosition.dy - startGlyphHeight;
+    final bool isPositionClampedToStartingLine = isPositionAboveStartingBaseline && details.localPosition.dy >= _initialDragStartSelectionPoint!.localPosition.dy - startGlyphHeight;
     final bool isPositionBelowStartingBaseline = details.localPosition.dy > _initialDragStartSelectionPoint!.localPosition.dy;
     // print(isDraggingForwardFromOrigin);
     // print(isPositionAboveStartingBaseLine);
