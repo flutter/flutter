@@ -986,9 +986,10 @@ class SearchController extends TextEditingController {
 ///
 /// {@tool dartpad}
 /// This example shows how to use a [SearchBar] as the builder of the [SearchAnchor].
-/// The [SearchBar] example also shows a leading icon and a trailing action.
+/// The [SearchBar] example also shows a leading search icon and a trailing action
+/// to toggle the brightness.
 ///
-/// ** See code in examples/api/lib/material/search_anchor/search_anchor.3.dart **
+/// ** See code in examples/api/lib/material/search_anchor/search_bar.0.dart **
 /// {@end-tool}
 ///
 /// See also:
