@@ -577,6 +577,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 }
 
 String _debugCollectRenderTrees() {
+  if (RendererBinding.instance.renderViews.isEmpty) {
+    return 'No render tree root was added to the binding.';
+  }
   return <String>[
     for (final RenderView renderView in RendererBinding.instance.renderViews)
       renderView.toStringDeep(),
@@ -594,6 +597,9 @@ void debugDumpRenderTree({RenderView? renderView, FlutterView? flutterView, Obje
 }
 
 String _debugCollectLayerTrees() {
+  if (RendererBinding.instance.renderViews.isEmpty) {
+    return 'No render tree root was added to the binding.';
+  }
   return <String>[
     for (final RenderView renderView in RendererBinding.instance.renderViews)
       renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable for $renderView.',
@@ -608,6 +614,9 @@ void debugDumpLayerTree() {
 }
 
 String _debugCollectSemanticsTrees(DebugSemanticsDumpOrder childOrder) {
+  if (RendererBinding.instance.renderViews.isEmpty) {
+    return 'No render tree root was added to the binding.';
+  }
   const String explanation = 'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
       'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
       'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.';
@@ -626,10 +635,7 @@ String _debugCollectSemanticsTrees(DebugSemanticsDumpOrder childOrder) {
       trees.add(message);
     }
   }
-  if (trees.isNotEmpty) {
-    return trees.join('\n\n');
-  }
-  return 'Semantics not generated.\n$explanation';
+  return trees.join('\n\n');
 }
 
 /// Prints a textual representation of the semantics trees.

@@ -119,7 +119,12 @@ void main() {
   final List<String?> console = <String?>[];
 
   setUpAll(() async {
-    binding = TestServiceExtensionsBinding()..scheduleFrame();
+    binding = TestServiceExtensionsBinding();
+    final RenderView view = RenderView(view: binding.platformDispatcher.views.single);
+    binding.rootPipelineOwner.rootNode = view;
+    binding.addRenderView(view);
+    view.prepareInitialFrame();
+    binding.scheduleFrame();
     expect(binding.frameScheduled, isTrue);
 
     // We need to test this service extension here because the result is true
@@ -268,11 +273,13 @@ void main() {
     await binding.doFrame();
     final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name, <String, String>{});
 
-    expect(result, <String, String>{
-      'data': 'Semantics not generated.\n'
-        'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-        'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
+    expect(result, <String, Object>{
+      'data': matches(
+        r'Semantics not generated for RenderView#[0-9a-f]{5}\.\n'
+        r'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+        r'Usually, platforms only ask for semantics when assistive technologies \(like screen readers\) are running.\n'
+        r'To generate semantics, try turning on an assistive technology \(like VoiceOver or TalkBack\) on your device.'
+      )
     });
   });
 
@@ -280,11 +287,13 @@ void main() {
     await binding.doFrame();
     final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name, <String, String>{});
 
-    expect(result, <String, String>{
-      'data': 'Semantics not generated.\n'
-        'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-        'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
+    expect(result, <String, Object>{
+      'data': matches(
+        r'Semantics not generated for RenderView#[0-9a-f]{5}\.\n'
+        r'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+        r'Usually, platforms only ask for semantics when assistive technologies \(like screen readers\) are running.\n'
+        r'To generate semantics, try turning on an assistive technology \(like VoiceOver or TalkBack\) on your device.'
+      )
     });
   });
 

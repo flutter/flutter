@@ -994,9 +994,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
   ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
-    final bool isBootstrapFrame = rootElement == null;
-    _readyToProduceFrames = true;
-    _rootElement = RootWidget(
+    attachToBuildOwner(RootWidget(
       debugShortDescription: '[root]',
       child: ViewHooksScope(
         hooks: ViewHooks(
@@ -1005,7 +1003,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         ),
         child: rootWidget,
       ),
-    ).attach(buildOwner!, rootElement as RootElement?);
+    ));
+  }
+
+  ///
+  void attachToBuildOwner(RootWidget widget) {
+    final bool isBootstrapFrame = rootElement == null;
+    _readyToProduceFrames = true;
+    _rootElement = widget.attach(buildOwner!, rootElement as RootElement?);
     if (isBootstrapFrame) {
       SchedulerBinding.instance.ensureVisualUpdate();
     }

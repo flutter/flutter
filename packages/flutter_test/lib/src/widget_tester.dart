@@ -569,22 +569,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() {
-      return _pumpWidget(
-        binding.wrapWithDefaultView(widget),
-        duration,
-        phase,
-      );
+      binding.attachRootWidget(binding.wrapWithDefaultView(widget));
+      binding.scheduleFrame();
+      return binding.pump(duration, phase);
     });
-  }
-
-  Future<void> _pumpWidget(
-    Widget widget, [
-    Duration? duration,
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-  ]) {
-    binding.attachRootWidget(widget);
-    binding.scheduleFrame();
-    return binding.pump(duration, phase);
   }
 
   @override
@@ -745,12 +733,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'your widget tree in a RootRestorationScope?',
     );
     return TestAsyncUtils.guard<void>(() async {
-      final Widget widget = ((binding.rootElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
+      final RootWidget widget = (binding.rootElement! as RootElement).widget as RootWidget;
       final TestRestorationData restorationData = binding.restorationManager.restorationData;
       runApp(Container(key: UniqueKey()));
       await pump();
       binding.restorationManager.restoreFrom(restorationData);
-      return _pumpWidget(widget);
+      binding.attachToBuildOwner(widget);
+      binding.scheduleFrame();
+      return binding.pump();
     });
   }
 
