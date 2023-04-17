@@ -4,9 +4,8 @@
 
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
+import("//flutter/web_sdk/web_sdk.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
-
-dart_sdk_package_config = "//third_party/dart/.dart_tool/package_config.json"
 
 web_ui_sources = exec_script("//third_party/dart/tools/list_dart_files.py",
                              [
@@ -34,73 +33,6 @@ group("web_sdk") {
   ]
 }
 
-template("sdk_rewriter") {
-  ui = defined(invoker.ui) && invoker.ui
-  if (!ui) {
-    assert(defined(invoker.library_name), "Must pass 'library_name'")
-    assert(defined(invoker.api_file), "Must pass 'api_file'")
-  }
-  assert(defined(invoker.input_dir), "Must pass 'input_dir'")
-  assert(defined(invoker.output_dir), "Must pass 'output_dir'")
-
-  source_dart_files = exec_script("//third_party/dart/tools/list_dart_files.py",
-                                  [
-                                    "absolute",
-                                    rebase_path(invoker.input_dir),
-                                  ],
-                                  "list lines")
-
-  if (defined(invoker.exclude_patterns)) {
-    filtered_files = filter_exclude(source_dart_files, invoker.exclude_patterns)
-    source_dart_files = []
-    source_dart_files = filtered_files
-  }
-
-  prebuilt_dart_action(target_name) {
-    packages = dart_sdk_package_config
-    pool = "//flutter/build/dart:dart_pool"
-
-    script = "sdk_rewriter.dart"
-    inputs = source_dart_files + [ "sdk_rewriter.dart" ]
-
-    stamp_location = "$target_gen_dir/$target_name.stamp"
-    outputs = [
-      stamp_location,
-      invoker.output_dir,
-    ]
-
-    input_dir = rebase_path(invoker.input_dir)
-    output_dir = rebase_path(invoker.output_dir)
-
-    args = [
-      "--output-dir=$output_dir",
-      "--input-dir=$input_dir",
-      "--stamp",
-      rebase_path(stamp_location, root_build_dir),
-    ]
-
-    if (defined(invoker.is_public) && invoker.is_public) {
-      args += [ "--public" ]
-    }
-
-    if (ui) {
-      args += [ "--ui" ]
-    } else {
-      library_name = invoker.library_name
-      api_file = rebase_path(invoker.api_file)
-      args += [
-        "--library-name=$library_name",
-        "--api-file=$api_file",
-      ]
-    }
-
-    foreach(source_file, source_dart_files) {
-      path = rebase_path(source_file)
-      args += [ "--source-file=$path" ]
-    }
-  }
-}
-
 sdk_rewriter("web_ui_library_sources") {
   ui = true
   input_dir = "//flutter/lib/web_ui/lib/"
@@ -110,11 +42,7 @@ sdk_rewriter("web_ui_library_sources") {
   exclude_patterns = [ rebase_path("//flutter/lib/web_ui/lib/src/*") ]
 }
 
-sdk_rewriter("web_ui_ui_web") {
-  library_name = "ui_web"
-  is_public = true
-  api_file = "//flutter/lib/web_ui/lib/ui_web/src/ui_web.dart"
-  input_dir = "//flutter/lib/web_ui/lib/ui_web/src/ui_web/"
+web_ui_ui_web_with_output("web_ui_ui_web") {
   output_dir = "$root_out_dir/flutter_web_sdk/lib/ui_web/"
 }
 
