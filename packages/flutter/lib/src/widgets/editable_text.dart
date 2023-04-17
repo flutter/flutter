@@ -2662,7 +2662,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_currentCaretRect == null || !_scrollController.hasClients) {
         return;
       }
-
+      // if cursor is inactive, e.g. while selecting text, do not jump away
+      if (!_cursorActive) {
+        return;
+      }
       final double lineHeight = renderEditable.preferredLineHeight;
 
       // Enlarge the target rect by scrollPadding to ensure that caret is not
