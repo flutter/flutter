@@ -42,7 +42,10 @@ impeller_component("geometry") {
     "vector.h",
   ]
 
-  deps = [ "//flutter/fml" ]
+  deps = [
+    "../base",
+    "//flutter/fml",
+  ]
 }
 
 impeller_component("geometry_asserts") {

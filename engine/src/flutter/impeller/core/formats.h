@@ -110,6 +110,42 @@ enum class PixelFormat {
   kD32FloatS8UInt,
 };
 
+constexpr const char* PixelFormatToString(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kUnknown:
+      return "Unknown";
+    case PixelFormat::kA8UNormInt:
+      return "A8UNormInt";
+    case PixelFormat::kR8UNormInt:
+      return "R8UNormInt";
+    case PixelFormat::kR8G8UNormInt:
+      return "R8G8UNormInt";
+    case PixelFormat::kR8G8B8A8UNormInt:
+      return "R8G8B8A8UNormInt";
+    case PixelFormat::kR8G8B8A8UNormIntSRGB:
+      return "R8G8B8A8UNormIntSRGB";
+    case PixelFormat::kB8G8R8A8UNormInt:
+      return "B8G8R8A8UNormInt";
+    case PixelFormat::kB8G8R8A8UNormIntSRGB:
+      return "B8G8R8A8UNormIntSRGB";
+    case PixelFormat::kR32G32B32A32Float:
+      return "R32G32B32A32Float";
+    case PixelFormat::kR16G16B16A16Float:
+      return "R16G16B16A16Float";
+    case PixelFormat::kB10G10R10XR:
+      return "B10G10R10XR";
+    case PixelFormat::kB10G10R10XRSRGB:
+      return "B10G10R10XRSRGB";
+    case PixelFormat::kB10G10R10A10XR:
+      return "B10G10R10A10XR";
+    case PixelFormat::kS8UInt:
+      return "S8UInt";
+    case PixelFormat::kD32FloatS8UInt:
+      return "D32FloatS8UInt";
+  }
+  FML_UNREACHABLE();
+}
+
 enum class BlendFactor {
   kZero,
   kOne,
@@ -146,6 +182,30 @@ enum class StoreAction {
   kMultisampleResolve,
   kStoreAndMultisampleResolve,
 };
+
+constexpr const char* LoadActionToString(LoadAction action) {
+  switch (action) {
+    case LoadAction::kDontCare:
+      return "DontCare";
+    case LoadAction::kLoad:
+      return "Load";
+    case LoadAction::kClear:
+      return "Clear";
+  }
+}
+
+constexpr const char* StoreActionToString(StoreAction action) {
+  switch (action) {
+    case StoreAction::kDontCare:
+      return "DontCare";
+    case StoreAction::kStore:
+      return "Store";
+    case StoreAction::kMultisampleResolve:
+      return "MultisampleResolve";
+    case StoreAction::kStoreAndMultisampleResolve:
+      return "StoreAndMultisampleResolve";
+  }
+}
 
 constexpr bool CanClearAttachment(LoadAction action) {
   switch (action) {
@@ -529,6 +589,14 @@ struct DepthAttachment : public Attachment {
 struct StencilAttachment : public Attachment {
   uint32_t clear_stencil = 0;
 };
+
+std::string AttachmentToString(const Attachment& attachment);
+
+std::string ColorAttachmentToString(const ColorAttachment& color);
+
+std::string DepthAttachmentToString(const DepthAttachment& depth);
+
+std::string StencilAttachmentToString(const StencilAttachment& stencil);
 
 }  // namespace impeller
 

@@ -101,4 +101,44 @@ std::string TextureUsageMaskToString(TextureUsageMask mask) {
   return stream.str();
 }
 
+std::string AttachmentToString(const Attachment& attachment) {
+  std::stringstream stream;
+  if (attachment.texture) {
+    stream << "Texture=("
+           << TextureDescriptorToString(
+                  attachment.texture->GetTextureDescriptor())
+           << "),";
+  }
+  if (attachment.resolve_texture) {
+    stream << "ResolveTexture=("
+           << TextureDescriptorToString(
+                  attachment.resolve_texture->GetTextureDescriptor())
+           << "),";
+  }
+  stream << "LoadAction=" << LoadActionToString(attachment.load_action) << ",";
+  stream << "StoreAction=" << StoreActionToString(attachment.store_action);
+  return stream.str();
+}
+
+std::string ColorAttachmentToString(const ColorAttachment& color) {
+  std::stringstream stream;
+  stream << AttachmentToString(color) << ",";
+  stream << "ClearColor=(" << ColorToString(color.clear_color) << ")";
+  return stream.str();
+}
+
+std::string DepthAttachmentToString(const DepthAttachment& depth) {
+  std::stringstream stream;
+  stream << AttachmentToString(depth) << ",";
+  stream << "ClearDepth=" << SPrintF("%.2f", depth.clear_depth);
+  return stream.str();
+}
+
+std::string StencilAttachmentToString(const StencilAttachment& stencil) {
+  std::stringstream stream;
+  stream << AttachmentToString(stencil) << ",";
+  stream << "ClearStencil=" << stencil.clear_stencil;
+  return stream.str();
+}
+
 }  // namespace impeller

@@ -10,12 +10,21 @@ namespace impeller {
 
 IMPELLER_PRINTF_FORMAT(1, 2)
 std::string SPrintF(const char* format, ...) {
+  std::string ret_val;
   va_list list;
+  va_list list2;
   va_start(list, format);
-  char buffer[64] = {0};
-  ::vsnprintf(buffer, sizeof(buffer), format, list);
+  va_copy(list2, list);
+  if (auto string_length = ::vsnprintf(nullptr, 0, format, list);
+      string_length >= 0) {
+    auto buffer = reinterpret_cast<char*>(::malloc(string_length + 1));
+    ::vsnprintf(buffer, string_length + 1, format, list2);
+    ret_val = std::string{buffer, static_cast<size_t>(string_length)};
+    ::free(buffer);
+  }
+  va_end(list2);
   va_end(list);
-  return buffer;
+  return ret_val;
 }
 
 bool HasPrefix(const std::string& string, const std::string& prefix) {

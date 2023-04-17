@@ -21,6 +21,17 @@ enum class CompressionType {
   kLossless,
   kLossy,
 };
+
+constexpr const char* CompressionTypeToString(CompressionType type) {
+  switch (type) {
+    case CompressionType::kLossless:
+      return "Lossless";
+    case CompressionType::kLossy:
+      return "Lossy";
+  }
+  FML_UNREACHABLE();
+}
+
 //------------------------------------------------------------------------------
 /// @brief      A lightweight object that describes the attributes of a texture
 ///             that can then used an allocator to create that texture.
@@ -62,5 +73,7 @@ struct TextureDescriptor {
            SamplingOptionsAreValid();
   }
 };
+
+std::string TextureDescriptorToString(const TextureDescriptor& desc);
 
 }  // namespace impeller
