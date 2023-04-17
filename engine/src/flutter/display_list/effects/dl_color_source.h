@@ -109,6 +109,16 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
 
   virtual bool is_opaque() const = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      If the underlying platform data held by this object is
+  ///             held in a way that it can be stored and potentially
+  ///             released from the UI thread, this method returns true.
+  ///
+  /// @return     True if the class has no GPU related resources or if any
+  ///             that it holds are held in a thread-safe manner.
+  ///
+  virtual bool isUIThreadSafe() const = 0;
+
   // Return a DlColorColorSource pointer to this object iff it is an Color
   // type of ColorSource, otherwise return nullptr.
   virtual const DlColorColorSource* asColor() const { return nullptr; }
@@ -159,6 +169,8 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
 class DlColorColorSource final : public DlColorSource {
  public:
   DlColorColorSource(DlColor color) : color_(color) {}
+
+  bool isUIThreadSafe() const override { return true; }
 
   std::shared_ptr<DlColorSource> shared() const override {
     return std::make_shared<DlColorColorSource>(color_);
@@ -214,6 +226,10 @@ class DlImageColorSource final : public SkRefCnt,
         horizontal_tile_mode_(horizontal_tile_mode),
         vertical_tile_mode_(vertical_tile_mode),
         sampling_(sampling) {}
+
+  bool isUIThreadSafe() const override {
+    return image_ ? image_->isUIThreadSafe() : true;
+  }
 
   const DlImageColorSource* asImage() const override { return this; }
 
@@ -338,6 +354,8 @@ class DlLinearGradientColorSource final : public DlGradientColorSourceBase {
     return this;
   }
 
+  bool isUIThreadSafe() const override { return true; }
+
   DlColorSourceType type() const override {
     return DlColorSourceType::kLinearGradient;
   }
@@ -399,6 +417,8 @@ class DlRadialGradientColorSource final : public DlGradientColorSourceBase {
     return this;
   }
 
+  bool isUIThreadSafe() const override { return true; }
+
   std::shared_ptr<DlColorSource> shared() const override {
     return MakeRadial(center_, radius_, stop_count(), colors(), stops(),
                       tile_mode(), matrix_ptr());
@@ -459,6 +479,8 @@ class DlConicalGradientColorSource final : public DlGradientColorSourceBase {
   const DlConicalGradientColorSource* asConicalGradient() const override {
     return this;
   }
+
+  bool isUIThreadSafe() const override { return true; }
 
   std::shared_ptr<DlColorSource> shared() const override {
     return MakeConical(start_center_, start_radius_, end_center_, end_radius_,
@@ -534,6 +556,8 @@ class DlSweepGradientColorSource final : public DlGradientColorSourceBase {
     return this;
   }
 
+  bool isUIThreadSafe() const override { return true; }
+
   std::shared_ptr<DlColorSource> shared() const override {
     return MakeSweep(center_, start_, end_, stop_count(), colors(), stops(),
                      tile_mode(), matrix_ptr());
@@ -604,6 +628,15 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
         samplers_(std::move(samplers)),
         uniform_data_(std::move(uniform_data)) {}
 
+  bool isUIThreadSafe() const override {
+    for (auto sampler : samplers_) {
+      if (!sampler->isUIThreadSafe()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   const DlRuntimeEffectColorSource* asRuntimeEffect() const override {
     return this;
   }
@@ -665,6 +698,8 @@ class DlSceneColorSource final : public DlColorSource {
   DlSceneColorSource(std::shared_ptr<impeller::scene::Node> node,
                      impeller::Matrix camera_matrix)
       : node_(std::move(node)), camera_matrix_(camera_matrix) {}
+
+  bool isUIThreadSafe() const override { return true; }
 
   const DlSceneColorSource* asScene() const override { return this; }
 

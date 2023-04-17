@@ -4,7 +4,7 @@
 
 #include "flutter/flow/testing/mock_texture.h"
 #include "flutter/flow/layers/layer.h"
-#include "flutter/flow/testing/skia_gpu_object_layer_test.h"
+#include "flutter/testing/display_list_testing.h"
 
 namespace flutter {
 namespace testing {

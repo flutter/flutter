@@ -9,23 +9,21 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/testing/diff_context_test.h"
-#include "flutter/flow/testing/skia_gpu_object_layer_test.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
 
 namespace flutter {
 namespace testing {
 
-using DisplayListLayerTest = SkiaGPUObjectLayerTest;
+using DisplayListLayerTest = LayerTest;
 
 #ifndef NDEBUG
 TEST_F(DisplayListLayerTest, PaintBeforePrerollInvalidDisplayListDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject<DisplayList>(), false, false);
+      layer_offset, sk_sp<DisplayList>(), false, false);
 
-  EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
-                            "display_list_\\.skia_object\\(\\)");
+  EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()), "display_list_");
 }
 
 TEST_F(DisplayListLayerTest, PaintBeforePrerollDies) {
@@ -34,9 +32,8 @@ TEST_F(DisplayListLayerTest, PaintBeforePrerollDies) {
   DisplayListBuilder builder;
   builder.DrawRect(picture_bounds, DlPaint());
   auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject<DisplayList>(display_list, unref_queue()),
-      false, false);
+  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
+                                                  false, false);
 
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -49,9 +46,8 @@ TEST_F(DisplayListLayerTest, PaintingEmptyLayerDies) {
   DisplayListBuilder builder;
   builder.DrawRect(picture_bounds, DlPaint());
   auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject<DisplayList>(display_list, unref_queue()),
-      false, false);
+  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
+                                                  false, false);
 
   layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
@@ -64,7 +60,7 @@ TEST_F(DisplayListLayerTest, PaintingEmptyLayerDies) {
 TEST_F(DisplayListLayerTest, InvalidDisplayListDies) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject<DisplayList>(), false, false);
+      layer_offset, sk_sp<DisplayList>(), false, false);
 
   // Crashes reading a nullptr.
   EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context()), "");
@@ -79,8 +75,8 @@ TEST_F(DisplayListLayerTest, SimpleDisplayList) {
   DisplayListBuilder builder;
   builder.DrawRect(picture_bounds, DlPaint());
   auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject(display_list, unref_queue()), false, false);
+  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
+                                                  false, false);
 
   layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(),
@@ -104,8 +100,8 @@ TEST_F(DisplayListLayerTest, CachingDoesNotChangeCullRect) {
   DisplayListBuilder builder;
   builder.DrawRect({10, 10, 20, 20}, DlPaint());
   auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject(display_list, unref_queue()), true, false);
+  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
+                                                  true, false);
 
   SkRect original_cull_rect = preroll_context()->state_stack.device_cull_rect();
   use_mock_raster_cache();
@@ -121,7 +117,7 @@ TEST_F(DisplayListLayerTest, SimpleDisplayListOpacityInheritance) {
   builder.DrawRect(picture_bounds, DlPaint());
   auto display_list = builder.Build();
   auto display_list_layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject(display_list, unref_queue()), false, false);
+      layer_offset, display_list, false, false);
   EXPECT_TRUE(display_list->can_apply_group_opacity());
 
   auto context = preroll_context();
@@ -173,7 +169,7 @@ TEST_F(DisplayListLayerTest, IncompatibleDisplayListOpacityInheritance) {
   builder.DrawRect(picture2_bounds, DlPaint());
   auto display_list = builder.Build();
   auto display_list_layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject(display_list, unref_queue()), false, false);
+      layer_offset, display_list, false, false);
   EXPECT_FALSE(display_list->can_apply_group_opacity());
 
   auto context = preroll_context();
@@ -233,7 +229,7 @@ TEST_F(DisplayListLayerTest, CachedIncompatibleDisplayListOpacityInheritance) {
   builder.DrawRect(picture2_bounds, DlPaint());
   auto display_list = builder.Build();
   auto display_list_layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject(display_list, unref_queue()), true, false);
+      layer_offset, display_list, true, false);
   EXPECT_FALSE(display_list->can_apply_group_opacity());
 
   use_skia_raster_cache();
@@ -383,8 +379,8 @@ TEST_F(DisplayListLayerTest, LayerTreeSnapshotsWhenEnabled) {
   DisplayListBuilder builder;
   builder.DrawRect(picture_bounds, DlPaint());
   auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject(display_list, unref_queue()), false, false);
+  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
+                                                  false, false);
 
   layer->Preroll(preroll_context());
 
@@ -402,8 +398,8 @@ TEST_F(DisplayListLayerTest, NoLayerTreeSnapshotsWhenDisabledByDefault) {
   DisplayListBuilder builder;
   builder.DrawRect(picture_bounds, DlPaint());
   auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject(display_list, unref_queue()), false, false);
+  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
+                                                  false, false);
 
   layer->Preroll(preroll_context());
   layer->Paint(paint_context());
@@ -420,8 +416,8 @@ TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   DisplayListBuilder builder;
   builder.DrawRect(picture_bounds, DlPaint());
   auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(
-      layer_offset, SkiaGPUObject(display_list, unref_queue()), true, false);
+  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
+                                                  true, false);
 
   auto raster_cache_item = layer->raster_cache_item();
   use_mock_raster_cache();
@@ -525,8 +521,8 @@ TEST_F(DisplayListLayerTest, OverflowCachedDisplayListOpacityInheritance) {
     ASSERT_FALSE(display_list->can_apply_group_opacity());
     SkPoint offset = {i * 200.0f, 0};
 
-    layers[i] = std::make_shared<DisplayListLayer>(
-        offset, SkiaGPUObject(display_list, unref_queue()), true, false);
+    layers[i] =
+        std::make_shared<DisplayListLayer>(offset, display_list, true, false);
     opacity_layer->Add(layers[i]);
   }
   for (size_t j = 0; j < context->raster_cache->access_threshold(); j++) {

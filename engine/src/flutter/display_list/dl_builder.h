@@ -480,6 +480,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
   size_t nested_bytes_ = 0;
   int nested_op_count_ = 0;
 
+  bool is_ui_thread_safe_ = true;
+
   template <typename T, typename... Args>
   void* Push(size_t extra, int op_inc, Args&&... args);
 

@@ -120,6 +120,8 @@ sk_sp<DlImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
             }));
   }
 
+  // It is up to the caller to create a DlImageGPU version of this image
+  // if the result will interact with the UI thread.
   return DlImage::Make(result);
 }
 

@@ -14,6 +14,7 @@
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING
+#include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
@@ -25,16 +26,16 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
-fml::RefPtr<Picture> Picture::Create(
-    Dart_Handle dart_handle,
-    flutter::SkiaGPUObject<DisplayList> display_list) {
+fml::RefPtr<Picture> Picture::Create(Dart_Handle dart_handle,
+                                     sk_sp<DisplayList> display_list) {
+  FML_DCHECK(display_list->isUIThreadSafe());
   auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(display_list));
 
   canvas_picture->AssociateWithDartWrapper(dart_handle);
   return canvas_picture;
 }
 
-Picture::Picture(flutter::SkiaGPUObject<DisplayList> display_list)
+Picture::Picture(sk_sp<DisplayList> display_list)
     : display_list_(std::move(display_list)) {}
 
 Picture::~Picture() = default;
@@ -42,19 +43,17 @@ Picture::~Picture() = default;
 Dart_Handle Picture::toImage(uint32_t width,
                              uint32_t height,
                              Dart_Handle raw_image_callback) {
-  if (!display_list_.skia_object()) {
+  if (!display_list_) {
     return tonic::ToDart("Picture is null");
   }
-  return RasterizeToImage(display_list_.skia_object(), width, height,
-                          raw_image_callback);
+  return RasterizeToImage(display_list_, width, height, raw_image_callback);
 }
 
 void Picture::toImageSync(uint32_t width,
                           uint32_t height,
                           Dart_Handle raw_image_handle) {
-  FML_DCHECK(display_list_.skia_object());
-  RasterizeToImageSync(display_list_.skia_object(), width, height,
-                       raw_image_handle);
+  FML_DCHECK(display_list_);
+  RasterizeToImageSync(display_list_, width, height, raw_image_handle);
 }
 
 static sk_sp<DlImage> CreateDeferredImage(
@@ -108,8 +107,8 @@ void Picture::dispose() {
 }
 
 size_t Picture::GetAllocationSize() const {
-  if (auto display_list = display_list_.skia_object()) {
-    return display_list->bytes() + sizeof(Picture);
+  if (display_list_) {
+    return display_list_->bytes() + sizeof(Picture);
   } else {
     return sizeof(Picture);
   }
@@ -177,7 +176,9 @@ Dart_Handle Picture::RasterizeToImage(const sk_sp<DisplayList>& display_list,
           return;
         }
 
-        if (image->skia_image()) {
+        if (!image->isUIThreadSafe()) {
+          // All images with impeller textures should already be safe.
+          FML_DCHECK(image->impeller_texture() == nullptr);
           image =
               DlImageGPU::Make({image->skia_image(), std::move(unref_queue)});
         }

@@ -100,6 +100,7 @@ sk_sp<DlImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
     FML_LOG(ERROR) << "Could not create external texture: " << texture_id;
   }
 
+  // This image should not escape local use by EmbedderExternalTextureMetal
   return DlImage::Make(std::move(image));
 }
 

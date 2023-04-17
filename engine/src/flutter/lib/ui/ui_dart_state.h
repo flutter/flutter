@@ -11,7 +11,6 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
-#include "flutter/flow/skia_gpu_object.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -152,17 +151,6 @@ class UIDartState : public tonic::DartState {
   //                      application.
   // @param[in]  message  The message to be logged.
   void LogMessage(const std::string& tag, const std::string& message) const;
-
-  template <class T>
-  static flutter::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
-    if (!object) {
-      return {};
-    }
-    auto* state = UIDartState::Current();
-    FML_DCHECK(state);
-    auto queue = state->GetSkiaUnrefQueue();
-    return {std::move(object), std::move(queue)};
-  };
 
   UnhandledExceptionCallback unhandled_exception_callback() const {
     return unhandled_exception_callback_;

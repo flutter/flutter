@@ -46,6 +46,11 @@ bool DlImageGPU::isTextureBacked() const {
 }
 
 // |DlImage|
+bool DlImageGPU::isUIThreadSafe() const {
+  return true;
+}
+
+// |DlImage|
 SkISize DlImageGPU::dimensions() const {
   const auto image = skia_image();
   return image ? image->dimensions() : SkISize::MakeEmpty();
