@@ -124,12 +124,13 @@ abstract class FlutterVersion {
 
   String? get repositoryUrl;
 
+  GitTagVersion get gitTagVersion;
+
   /// The channel is the upstream branch.
   ///
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel;
 
-  GitTagVersion get gitTagVersion;
   String get frameworkRevision;
   String get frameworkRevisionShort => _shortGitRevision(frameworkRevision);
 
@@ -289,7 +290,13 @@ abstract class FlutterVersion {
   }
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
-  String getVersionString({ bool redactUnknownBranches = false });
+  // TODO does this need to be public?
+  String getVersionString({ bool redactUnknownBranches = false }) {
+    if (frameworkVersion != _unknownFrameworkVersion) {
+      return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
+    }
+    return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
+  }
 
   /// The name of the local branch.
   ///
@@ -337,8 +344,6 @@ abstract class FlutterVersion {
   static List<String> gitLog(List<String> args) {
     return <String>['git', '-c', 'log.showSignature=false', 'log'] + args;
   }
-
-
 }
 
 // The date of the given commit hash as [gitRef]. If no hash is specified,
@@ -385,6 +390,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required this.engineRevision,
     required this.dartSdkVersion,
     required this.devToolsVersion,
+    required this.gitTagVersion,
     super.workingDirectory,
   }) : super._();
 
@@ -403,6 +409,9 @@ class _FlutterVersionFromFile extends FlutterVersion {
       return null;
     }
   }
+
+  @override
+  final GitTagVersion gitTagVersion;
 
   @override
   final String frameworkVersion;
@@ -449,6 +458,7 @@ class _FlutterVersionGit extends FlutterVersion {
        super._();
 
   late GitTagVersion _gitTagVersion;
+
   @override
   GitTagVersion get gitTagVersion => _gitTagVersion;
 
@@ -457,14 +467,6 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   String get frameworkCommitDate => _gitCommitDate(lenient: true);
-
-  @override
-  String getVersionString({ bool redactUnknownBranches = false }) {
-    if (frameworkVersion != _unknownFrameworkVersion) {
-      return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
-    }
-    return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
-  }
 
   String? _repositoryUrl;
   @override
