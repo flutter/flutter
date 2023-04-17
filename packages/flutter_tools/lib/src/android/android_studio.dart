@@ -197,6 +197,9 @@ class AndroidStudio {
   final String? configuredPath;
   final String? presetPluginsPath;
 
+  /// The path of JDK bundled with Android Studio.
+  ///
+  /// This will be null if the bundled JDK could not be found.
   final String? workingJavaPath;
 
   String? get pluginsPath {
