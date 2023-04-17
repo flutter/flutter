@@ -302,13 +302,13 @@ class Scrollable extends StatefulWidget {
   ///
   /// Calling this method will create a dependency on the [ScrollableState]
   /// that is returned, if there is one. This is typically the closest
-  /// [Scrollable], but may be a more distant ancestor if `axis` is used to
+  /// [Scrollable], but may be a more distant ancestor if [axis] is used to
   /// target a specific [Scrollable].
   ///
-  /// The optional [Axis] allows targeting of a specific [Scrollable] of that
-  /// axis, useful when Scrollables are nested. When [axis] is provided, the
-  /// nearest enclosing [ScrollableState] in that [Axis] is returned, or null
-  /// if there is none.
+  /// Using the optional [Axis] is useful when Scrollables are nested and the
+  /// target [Scrollable] is not the closest instance. When [axis] is provided,
+  /// the nearest enclosing [ScrollableState] in that [Axis] is returned, or
+  /// null if there is none.
   ///
   /// See also:
   ///
@@ -351,15 +351,15 @@ class Scrollable extends StatefulWidget {
   ///
   /// Calling this method will create a dependency on the [ScrollableState]
   /// that is returned, if there is one. This is typically the closest
-  /// [Scrollable], but may be a more distant ancestor if `axis` is used to
+  /// [Scrollable], but may be a more distant ancestor if [axis] is used to
   /// target a specific [Scrollable].
+  ///
+  /// Using the optional [Axis] is useful when Scrollables are nested and the
+  /// target [Scrollable] is not the closest instance. When [axis] is provided,
+  /// the nearest enclosing [ScrollableState] in that [Axis] is returned.
   ///
   /// If no [Scrollable] ancestor is found, then this method will assert in
   /// debug mode, and throw an exception in release mode.
-  ///
-  /// The optional [Axis] allows targeting of a specific [Scrollable] of that
-  /// axis, useful when Scrollables are nested. When [axis] is provided, the
-  /// nearest enclosing [ScrollableState] in that [Axis] is returned.
   ///
   /// See also:
   ///
