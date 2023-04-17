@@ -671,7 +671,7 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
   });
 
-  testUsingContext('scheme for project with custom schemes is matched against flavor', () {
+  testWithoutContext('scheme for project with custom schemes is matched against flavor', () {
     final XcodeProjectInfo info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
@@ -755,7 +755,6 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false), 'Free'), null);
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid', treeShakeIcons: false), 'Paid'), null);
   });
-
  group('environmentVariablesAsXcodeBuildSettings', () {
     late FakePlatform platform;
 
