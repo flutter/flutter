@@ -315,27 +315,19 @@ class Scrollable extends StatefulWidget {
   /// * [Scrollable.of], which is similar to this method, but asserts
   ///   if no [Scrollable] ancestor is found.
   static ScrollableState? maybeOf(BuildContext context, { Axis? axis }) {
-    if (axis == null) {
-      final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
-      return widget?.scrollable;
-    }
     // This is the context that will need to establish the dependency.
     final BuildContext originalContext = context;
-    ScrollableState? scrollable = context.getInheritedWidgetOfExactType<_ScrollableScope>()?.scrollable;
-    while (scrollable != null) {
-      if (axisDirectionToAxis(scrollable.axisDirection) == axis) {
-        if (context != originalContext) {
-          // Establish the dependency on the correct context.
-          // Get the element.
-          final InheritedElement element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()!;
-          originalContext.dependOnInheritedElement(element);
-          return scrollable;
-        }
-        scrollable = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>()?.scrollable;
+    InheritedElement? element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
+    while (element != null) {
+      final ScrollableState scrollable = (element.widget as _ScrollableScope).scrollable;
+      if (axis == null || axisDirectionToAxis(scrollable.axisDirection) == axis) {
+        // Establish the dependency on the correct context.
+        // Get the element.
+        originalContext.dependOnInheritedElement(element);
         return scrollable;
       }
       context = scrollable.context;
-      scrollable = context.getInheritedWidgetOfExactType<_ScrollableScope>()?.scrollable;
+      element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
     }
     return null;
   }
