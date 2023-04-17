@@ -288,7 +288,7 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
               'the flutter tool is migrating to a new analytics system. '
               'Disabling analytics collection will disable both the legacy '
               'and new analytics collection systems. '
-              'You can disable analytics reporting by running either `flutter --disable-telemetry`\n');
+              'You can disable analytics reporting by running `flutter --disable-telemetry`\n');
     }
 
     // Invoking this will onboard the flutter tool onto
