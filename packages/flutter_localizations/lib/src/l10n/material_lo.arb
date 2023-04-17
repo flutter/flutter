@@ -133,5 +133,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "ຊີດລຸ່ມສຸດ",
   "scrimOnTapHint": "ປິດ $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
