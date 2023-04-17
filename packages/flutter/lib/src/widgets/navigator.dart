@@ -2794,7 +2794,6 @@ class Navigator extends StatefulWidget {
     if (navigatorState.context.findAncestorStateOfType<NavigatorState>() != null) {
       return;
     }
-    print('justin defaultOnHistoryChanged for root nav. CanPop? ${navigatorState.canPop()}');
     // If canPop is true then CanPopScopes aren't going to have any effect.
     if (navigatorState.canPop()) {
       SystemNavigator.updateNavigationStackStatus(true);
@@ -2802,14 +2801,14 @@ class Navigator extends StatefulWidget {
     }
     final _RouteEntry currentRouteEntry =
         navigatorState._history.value.firstWhere(_RouteEntry.isPresentPredicate);
-    print('justin defaultOnHistoryChanged for root nav. isActive? ${currentRouteEntry.route.isActive}');
+    // If the currentRouteEntry isn't active, such as for the first route on app
+    // start, then the framework can't handle back.
     if (!currentRouteEntry.route.isActive) {
       SystemNavigator.updateNavigationStackStatus(false);
       return;
     }
     final bool canPopScopeIsDisablingPop =
         currentRouteEntry.route.popEnabled() == RoutePopDisposition.doNotPop;
-    print('justin defaultOnHistoryChanged for root nav update platform with $canPopScopeIsDisablingPop');
     SystemNavigator.updateNavigationStackStatus(canPopScopeIsDisablingPop);
   }
 
@@ -4664,7 +4663,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _afterNavigation(Route<dynamic>? route) {
-    print('justin Navigator._afterNavigation');
     if (!kReleaseMode) {
       // Among other uses, performance tools use this event to ensure that perf
       // stats reflect the time interval since the last navigation event
