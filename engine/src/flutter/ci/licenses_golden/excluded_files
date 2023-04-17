@@ -224,6 +224,7 @@
 ../../../flutter/shell/platform/android/.gitignore
 ../../../flutter/shell/platform/android/android_context_gl_unittests.cc
 ../../../flutter/shell/platform/android/android_shell_holder_unittests.cc
+../../../flutter/shell/platform/android/android_surface_gl_impeller_unittests.cc
 ../../../flutter/shell/platform/android/apk_asset_provider_unittests.cc
 ../../../flutter/shell/platform/android/external_view_embedder/external_view_embedder_unittests.cc
 ../../../flutter/shell/platform/android/external_view_embedder/surface_pool_unittests.cc
