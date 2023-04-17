@@ -1301,7 +1301,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   }
 
   void _updateLastEdgeEventsFromGeometries() {
-    if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.status != SelectionStatus.none) {
+    if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.hasSelection) {
       final Selectable start = selectables[currentSelectionStartIndex];
       final Offset localStartEdge = start.value.startSelectionPoint!.localPosition +
           Offset(0, - start.value.startSelectionPoint!.lineHeight / 2);
