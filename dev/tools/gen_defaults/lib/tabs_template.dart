@@ -75,6 +75,8 @@ class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
+
+  static const double indicatorWeight = ${tokens['md.comp.primary-navigation-tab.active-indicator.height']};
 }
 
 class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {

@@ -817,8 +817,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The thickness of the line that appears below the selected tab.
   ///
-  /// The value of this parameter must be greater than zero and its default
-  /// value is 2.0.
+  /// The value of this parameter must be greater than zero.
+  ///
+  /// If [ThemeData.useMaterial3] is true and [TabBar] is a primary type,
+  /// the default value is 3.0. If the value is less than 3.0, the
+  /// default value is used.
+  ///
+  /// If [TabBar] is a secondary type or [ThemeData.useMaterial3] is false,
+  /// the default value is 2.0.
   ///
   /// If [indicator] is specified or provided from [TabBarTheme],
   /// this property is ignored.
@@ -885,7 +891,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The height of the divider.
   ///
   /// If null and [ThemeData.useMaterial3] is true, [TabBarTheme.dividerHeight]
-  /// is used. If that is null and [ThemeData.useMaterial3] is true, 1.0 will be used.
+  /// is used. If that is also null and [ThemeData.useMaterial3] is true, 1.0 will be used.
   /// Otherwise divider will not be drawn.
   final double? dividerHeight;
 
@@ -1183,23 +1189,25 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
     }
 
+    final double indicatorWeight = theme.useMaterial3 && widget._isPrimary
+      ? math.max(_TabsPrimaryDefaultsM3.indicatorWeight, widget.indicatorWeight)
+      : widget.indicatorWeight;
     if (theme.useMaterial3 && widget._isPrimary && indicatorSize == TabBarIndicatorSize.label) {
       return UnderlineTabIndicator(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(3.0),
-          topRight: Radius.circular(3.0),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(indicatorWeight),
+          topRight: Radius.circular(indicatorWeight),
         ),
         borderSide: BorderSide(
-        // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
-        // when `preferredSize`and `indicatorWeight` are updated to support Material 3
-        // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
-        // https://github.com/flutter/flutter/issues/116136
-          width: widget.indicatorWeight,
+          // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
+          // when `preferredSize`and `indicatorWeight` are updated to support Material 3
+          // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
+          // https://github.com/flutter/flutter/issues/116136
+          width: indicatorWeight,
           color: color,
         ),
       );
     }
-
     return UnderlineTabIndicator(
       borderSide: BorderSide(
         width: widget.indicatorWeight,
@@ -2217,6 +2225,8 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
+
+  static const double indicatorWeight = 3.0;
 }
 
 class _TabsSecondaryDefaultsM3 extends TabBarTheme {
