@@ -15,8 +15,6 @@ permissions: read-all
 
 jobs:
   build:
-    permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
     name: coverage
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
