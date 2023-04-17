@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Offstage].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Offstage].
 
 void main() => runApp(const OffstageApp());
 
@@ -36,8 +36,7 @@ class _OffstageExampleState extends State<OffstageExample> {
   bool _offstage = true;
 
   Size _getFlutterLogoSize() {
-    final RenderBox renderLogo =
-        _key.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
     return renderLogo.size;
   }
 
@@ -68,8 +67,7 @@ class _OffstageExampleState extends State<OffstageExample> {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content:
-                        Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
+                    content: Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
                   ),
                 );
               }),

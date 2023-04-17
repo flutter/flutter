@@ -34,7 +34,7 @@ class GenL10nProject extends Project {
   final String pubspec = '''
 name: test_l10n_project
 environment:
-  sdk: ">=2.12.0-0 <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   flutter:

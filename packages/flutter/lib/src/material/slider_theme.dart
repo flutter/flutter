@@ -1585,11 +1585,9 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       case TextDirection.ltr:
         leftTrackPaint = activePaint;
         rightTrackPaint = inactivePaint;
-        break;
       case TextDirection.rtl:
         leftTrackPaint = inactivePaint;
         rightTrackPaint = activePaint;
-        break;
     }
 
     final Rect trackRect = getPreferredRect(
@@ -1698,11 +1696,9 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       case TextDirection.ltr:
         leftTrackPaint = activePaint;
         rightTrackPaint = inactivePaint;
-        break;
       case TextDirection.rtl:
         leftTrackPaint = inactivePaint;
         rightTrackPaint = activePaint;
-        break;
     }
 
     final Rect trackRect = getPreferredRect(
@@ -1863,11 +1859,9 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
       case TextDirection.ltr:
         leftThumbOffset = startThumbCenter;
         rightThumbOffset = endThumbCenter;
-        break;
       case TextDirection.rtl:
         leftThumbOffset = endThumbCenter;
         rightThumbOffset = startThumbCenter;
-        break;
     }
 
     final Rect trackRect = getPreferredRect(
@@ -1994,11 +1988,9 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
       case TextDirection.ltr:
         leftThumbOffset = startThumbCenter;
         rightThumbOffset = endThumbCenter;
-        break;
       case TextDirection.rtl:
         leftThumbOffset = endThumbCenter;
         rightThumbOffset = startThumbCenter;
-        break;
     }
     final Size thumbSize = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
     final double thumbRadius = thumbSize.width / 2;
@@ -2116,12 +2108,10 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
         final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
         begin = isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
         end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-        break;
       case TextDirection.rtl:
         final bool isTickMarkLeftOfThumb = center.dx < thumbCenter.dx;
         begin = isTickMarkLeftOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
         end = isTickMarkLeftOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-        break;
     }
     final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
@@ -2198,10 +2188,8 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     switch (textDirection) {
       case TextDirection.ltr:
         isBetweenThumbs = startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx;
-        break;
       case TextDirection.rtl:
         isBetweenThumbs = endThumbCenter.dx < center.dx && center.dx < startThumbCenter.dx;
-        break;
     }
     final Color? begin = isBetweenThumbs ? sliderTheme.disabledActiveTickMarkColor : sliderTheme.disabledInactiveTickMarkColor;
     final Color? end = isBetweenThumbs ? sliderTheme.activeTickMarkColor : sliderTheme.inactiveTickMarkColor;

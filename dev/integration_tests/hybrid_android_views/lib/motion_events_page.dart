@@ -208,7 +208,6 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
           flutterViewEvents.removeLast();
         }
         setState(() {});
-        break;
     }
     return Future<dynamic>.value();
   }
@@ -222,7 +221,6 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
           embeddedViewEvents.removeLast();
         }
         setState(() {});
-        break;
     }
     return Future<dynamic>.value();
   }

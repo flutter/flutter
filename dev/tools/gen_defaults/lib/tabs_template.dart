@@ -12,8 +12,8 @@ class TabsTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-class _${blockName}DefaultsM3 extends TabBarTheme {
-  _${blockName}DefaultsM3(this.context)
+class _${blockName}PrimaryDefaultsM3 extends TabBarTheme {
+  _${blockName}PrimaryDefaultsM3(this.context)
     : super(indicatorSize: TabBarIndicatorSize.label);
 
   final BuildContext context;
@@ -69,5 +69,64 @@ class _${blockName}DefaultsM3 extends TabBarTheme {
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
+
+class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
+  _${blockName}SecondaryDefaultsM3(this.context)
+    : super(indicatorSize: TabBarIndicatorSize.tab);
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override
+  Color? get dividerColor => ${componentColor("md.comp.secondary-navigation-tab.divider")};
+
+  @override
+  Color? get indicatorColor => ${componentColor("md.comp.primary-navigation-tab.active-indicator")};
+
+  @override
+  Color? get labelColor => ${componentColor("md.comp.secondary-navigation-tab.active.label-text")};
+
+  @override
+  TextStyle? get labelStyle => ${textStyle("md.comp.secondary-navigation-tab.label-text")};
+
+  @override
+  Color? get unselectedLabelColor => ${componentColor("md.comp.secondary-navigation-tab.inactive.label-text")};
+
+  @override
+  TextStyle? get unselectedLabelStyle => ${textStyle("md.comp.secondary-navigation-tab.label-text")};
+
+  @override
+  MaterialStateProperty<Color?> get overlayColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.hovered)) {
+          return ${componentColor('md.comp.secondary-navigation-tab.hover.state-layer')};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor('md.comp.secondary-navigation-tab.focus.state-layer')};
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return ${componentColor('md.comp.secondary-navigation-tab.pressed.state-layer')};
+        }
+        return null;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return ${componentColor('md.comp.secondary-navigation-tab.hover.state-layer')};
+      }
+      if (states.contains(MaterialState.focused)) {
+        return ${componentColor('md.comp.secondary-navigation-tab.focus.state-layer')};
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return ${componentColor('md.comp.secondary-navigation-tab.pressed.state-layer')};
+      }
+      return null;
+    });
+  }
+
+  @override
+  InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+}
 ''';
+
 }

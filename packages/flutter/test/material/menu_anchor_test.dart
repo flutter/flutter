@@ -945,6 +945,67 @@ void main() {
       expect(material.color, equals(Colors.red));
     });
 
+    testWidgets('MenuAnchor clip behavior', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          MaterialApp(
+              home: Material(
+                  child: Center(
+                    child: MenuAnchor(
+                      menuChildren: const <Widget> [
+                        MenuItemButton(
+                          child: Text('Button 1'),
+                        ),
+                      ],
+                      builder: (BuildContext context, MenuController controller, Widget? child) {
+                        return FilledButton(
+                          onPressed: () {
+                            controller.open();
+                          },
+                          child: const Text('Tap me'),
+                        );
+                      },
+                    ),
+                  )
+              )
+          )
+      );
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      // Test default clip behavior.
+      expect(getMenuBarMaterial(tester).clipBehavior, equals(Clip.hardEdge));
+      // Close the menu.
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(
+          MaterialApp(
+              home: Material(
+                  child: Center(
+                    child: MenuAnchor(
+                      clipBehavior: Clip.antiAlias,
+                      menuChildren: const <Widget> [
+                        MenuItemButton(
+                          child: Text('Button 1'),
+                        ),
+                      ],
+                      builder: (BuildContext context, MenuController controller, Widget? child) {
+                        return FilledButton(
+                          onPressed: () {
+                            controller.open();
+                          },
+                          child: const Text('Tap me'),
+                        );
+                      },
+                    ),
+                  )
+              )
+          )
+      );
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      // Test custom clip behavior.
+      expect(getMenuBarMaterial(tester).clipBehavior, equals(Clip.antiAlias));
+    });
+
     testWidgets('open and close works', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -1870,7 +1931,6 @@ void main() {
           expect(mnemonic2.data, equals('Alt+C'));
           mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('Meta+D'));
-          break;
         case TargetPlatform.windows:
           mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
           expect(mnemonic0.data, equals('Ctrl+A'));
@@ -1880,7 +1940,6 @@ void main() {
           expect(mnemonic2.data, equals('Alt+C'));
           mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('Win+D'));
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           mnemonic0 = tester.widget(findMnemonic(TestMenu.subSubMenu110.label));
@@ -1891,7 +1950,6 @@ void main() {
           expect(mnemonic2.data, equals('⌥ C'));
           mnemonic3 = tester.widget(findMnemonic(TestMenu.subSubMenu113.label));
           expect(mnemonic3.data, equals('⌘ D'));
-          break;
       }
 
       await tester.pumpWidget(
@@ -2060,7 +2118,7 @@ void main() {
             'focusNode: null',
             'menuStyle: MenuStyle#00000(backgroundColor: MaterialStatePropertyAll(MaterialColor(primary value: Color(0xff4caf50))), elevation: MaterialStatePropertyAll(20.0), shape: MaterialStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)))',
             'alignmentOffset: null',
-            'clipBehavior: none',
+            'clipBehavior: hardEdge',
           ],
         ),
       );
@@ -2269,6 +2327,259 @@ void main() {
       );
     });
 
+    testWidgets('constrained menus show up in the right place with offset in LTR', (WidgetTester tester) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: MenuAnchor(
+                    menuChildren: const <Widget> [
+                      SubmenuButton(
+                        alignmentOffset: Offset(10, 0),
+                        menuChildren: <Widget> [
+                          SubmenuButton(
+                            menuChildren: <Widget> [
+                              SubmenuButton(
+                                alignmentOffset: Offset(10, 0),
+                                menuChildren: <Widget> [
+                                  SubmenuButton(
+                                    menuChildren: <Widget> [
+                                    ],
+                                    child: Text('SubMenuButton4'),
+                                  ),
+                                ],
+                                child: Text('SubMenuButton3'),
+                              ),
+                            ],
+                            child: Text('SubMenuButton2'),
+                          ),
+                        ],
+                        child: Text('SubMenuButton1'),
+                      ),
+                    ],
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return FilledButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: const Text('Tap me'),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton1'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton2'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton3'));
+      await tester.pump();
+
+      expect(find.byType(SubmenuButton), findsNWidgets(4));
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(0.0, 48.0, 256.0, 112.0),
+          Rect.fromLTRB(266.0, 48.0, 522.0, 112.0),
+          Rect.fromLTRB(522.0, 48.0, 778.0, 112.0),
+          Rect.fromLTRB(256.0, 48.0, 512.0, 112.0),
+        ]),
+      );
+    });
+
+    testWidgets('constrained menus show up in the right place with offset in RTL', (WidgetTester tester) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Directionality(
+                textDirection: TextDirection.rtl,
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: MenuAnchor(
+                    menuChildren: const <Widget> [
+                      SubmenuButton(
+                        alignmentOffset: Offset(10, 0),
+                        menuChildren: <Widget> [
+                          SubmenuButton(
+                            menuChildren: <Widget> [
+                              SubmenuButton(
+                                alignmentOffset: Offset(10, 0),
+                                menuChildren: <Widget> [
+                                  SubmenuButton(
+                                    menuChildren: <Widget> [
+                                    ],
+                                    child: Text('SubMenuButton4'),
+                                  ),
+                                ],
+                                child: Text('SubMenuButton3'),
+                              ),
+                            ],
+                            child: Text('SubMenuButton2'),
+                          ),
+                        ],
+                        child: Text('SubMenuButton1'),
+                      ),
+                    ],
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return FilledButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: const Text('Tap me'),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton1'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton2'));
+      await tester.pump();
+      await tester.tap(find.text('SubMenuButton3'));
+      await tester.pump();
+
+      expect(find.byType(SubmenuButton), findsNWidgets(4));
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(544.0, 48.0, 800.0, 112.0),
+          Rect.fromLTRB(278.0, 48.0, 534.0, 112.0),
+          Rect.fromLTRB(22.0, 48.0, 278.0, 112.0),
+          Rect.fromLTRB(288.0, 48.0, 544.0, 112.0),
+        ]),
+      );
+    });
+
+    testWidgets('vertically constrained menus are positioned above the anchor by default', (WidgetTester tester) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: MenuAnchor(
+                    menuChildren: const <Widget> [
+                      MenuItemButton(child: Text('Button1'),
+                      ),
+                    ],
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return FilledButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: const Text('Tap me'),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+
+      expect(find.byType(MenuItemButton), findsNWidgets(1));
+      // Test the default offset (0, 0) vertical position.
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(0.0, 488.0, 122.0, 552.0),
+        ]),
+      );
+    });
+
+    testWidgets('vertically constrained menus are positioned above the anchor with the provided offset', (WidgetTester tester) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: MenuAnchor(
+                    alignmentOffset: const Offset(0, 50),
+                    menuChildren: const <Widget> [
+                      MenuItemButton(child: Text('Button1'),
+                      ),
+                    ],
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return FilledButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: const Text('Tap me'),
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+
+      expect(find.byType(MenuItemButton), findsNWidgets(1));
+      // Test the offset (0, 50) vertical position.
+      expect(
+        collectSubmenuRects(),
+        equals(const <Rect>[
+          Rect.fromLTRB(0.0, 438.0, 122.0, 502.0),
+        ]),
+      );
+    });
+
     Future<void> buildDensityPaddingApp(WidgetTester tester, {
       required TextDirection textDirection,
       VisualDensity visualDensity = VisualDensity.standard,
@@ -2414,7 +2725,6 @@ void main() {
           expectedAlt = 'Alt';
           expectedShift = 'Shift';
           expectedSeparator = '+';
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           expectedCtrl = '⌃';
@@ -2422,7 +2732,6 @@ void main() {
           expectedAlt = '⌥';
           expectedShift = '⇧';
           expectedSeparator = ' ';
-          break;
       }
 
       const SingleActivator allModifiers = SingleActivator(
@@ -2588,6 +2897,82 @@ void main() {
       await tester.pumpAndSettle();
       expect(radioValue, 1);
     });
+  });
+
+  testWidgets('MenuItemButton respects closeOnActivate property', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MenuAnchor(
+              controller: controller,
+              menuChildren: <Widget> [
+                MenuItemButton(
+                  onPressed: () {},
+                  child: const Text('Button 1'),
+                ),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return FilledButton(
+                  onPressed: () {
+                    controller.open();
+                  },
+                  child: const Text('Tap me'),
+                );
+              },
+            ),
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.text('Tap me'));
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsNWidgets(1));
+
+    // Taps the MenuItemButton which should close the menu
+    await tester.tap(find.text('Button 1'));
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsNWidgets(0));
+
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                controller: controller,
+                menuChildren: <Widget> [
+                  MenuItemButton(
+                    closeOnActivate: false,
+                    onPressed: () {},
+                    child: const Text('Button 1'),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () {
+                      controller.open();
+                    },
+                    child: const Text('Tap me'),
+                  );
+                },
+              ),
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.text('Tap me'));
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsNWidgets(1));
+
+    // Taps the MenuItemButton which shouldn't close the menu
+    await tester.tap(find.text('Button 1'));
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsNWidgets(1));
   });
 }
 

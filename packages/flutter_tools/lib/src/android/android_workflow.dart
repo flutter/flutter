@@ -316,7 +316,6 @@ class AndroidLicenseValidator extends DoctorValidator {
     switch (await licensesAccepted) {
       case LicensesAccepted.all:
         messages.add(ValidationMessage(_userMessages.androidLicensesAll));
-        break;
       case LicensesAccepted.some:
         messages.add(ValidationMessage.hint(_userMessages.androidLicensesSome));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);

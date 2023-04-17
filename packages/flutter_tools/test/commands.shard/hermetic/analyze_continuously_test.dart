@@ -60,7 +60,7 @@ void main() {
     pubspecFile.writeAsStringSync('''
   name: foo_project
   environment:
-    sdk: '>=2.12.0 <4.0.0'
+    sdk: '>=3.0.0-0 <4.0.0'
   ''');
 
     final File dartFile = fileSystem.file(fileSystem.path.join(directory.path, 'lib', 'main.dart'));
@@ -99,6 +99,7 @@ void main() {
         processManager: processManager,
         logger: logger,
         terminal: terminal,
+        suppressAnalytics: true,
       );
 
       int errorCount = 0;
@@ -139,6 +140,7 @@ void main() {
       processManager: processManager,
       logger: logger,
       terminal: terminal,
+      suppressAnalytics: true,
     );
 
     int errorCount = 0;
@@ -166,6 +168,7 @@ void main() {
       processManager: processManager,
       logger: logger,
       terminal: terminal,
+      suppressAnalytics: true,
     );
 
     int errorCount = 0;
@@ -179,7 +182,7 @@ void main() {
     await server.dispose();
   });
 
-  testUsingContext('Can run AnalysisService with customized cache location', () async {
+  testUsingContext('Can run AnalysisService without suppressing analytics', () async {
     final StreamController<List<int>> stdin = StreamController<List<int>>();
     final FakeProcessManager processManager = FakeProcessManager.list(
       <FakeCommand>[
@@ -206,6 +209,46 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: false,
+    );
+
+    final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await stdin.stream.first;
+
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testUsingContext('Can run AnalysisService with customized cache location', () async {
+    final StreamController<List<int>> stdin = StreamController<List<int>>();
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            '--disable-dart-dev',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
+          ],
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
+
+    final Artifacts artifacts = Artifacts.test();
+    final AnalyzeCommand command = AnalyzeCommand(
+      terminal: Terminal.test(),
+      artifacts: artifacts,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: processManager,
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
     );
 
     final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
@@ -235,6 +278,7 @@ void main() {
             '--disable-server-feature-search',
             '--sdk',
             'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
           ],
           stdin: IOSink(stdin.sink),
           stdout: '''
@@ -254,6 +298,7 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
     );
 
     await FakeAsync().run((FakeAsync time) async {
@@ -288,6 +333,7 @@ void main() {
                 '--disable-server-feature-search',
                 '--sdk',
                 'Artifact.engineDartSdkPath',
+                '--suppress-analytics',
               ],
               stdin: IOSink(stdin.sink),
               stdout: '''
@@ -307,6 +353,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
     );
 
     await FakeAsync().run((FakeAsync time) async {
