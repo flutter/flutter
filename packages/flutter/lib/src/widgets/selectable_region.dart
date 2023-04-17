@@ -505,10 +505,23 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     assert(_selectionDelegate.value.startSelectionPoint != null);
     _initialDragStartSelectionPoint = _initialDragStartSelectionPoint ?? _selectionDelegate.value.startSelectionPoint!;
     final bool isDraggingForwardFromOrigin = details.localOffsetFromOrigin.dx > 0;
-    final bool isPositionAboveStartingBaseLine = details.localPosition.dy > _initialDragStartSelectionPoint!.localPosition.dy - _initialDragStartSelectionPoint!.lineHeight;
-    final bool isPositionBelowStartingBaseLine = details.localPosition.dy > _initialDragStartSelectionPoint!.localPosition.dy;
+    final bool isPositionAboveStartingBaseline = details.localPosition.dy < _initialDragStartSelectionPoint!.localPosition.dy;
+    final bool isPositionClampedToStartingLine = isPositionAboveStartingBaseline && details.localPosition.dy > _initialDragStartSelectionPoint!.localPosition.dy - startGlyphHeight;
+    final bool isPositionBelowStartingBaseline = details.localPosition.dy > _initialDragStartSelectionPoint!.localPosition.dy;
+    // print(isDraggingForwardFromOrigin);
+    // print(isPositionAboveStartingBaseLine);
+    // print(isPositionBelowStartingBaseLine);
+    print(isPositionClampedToStartingLine);
+    print(details);
+    print(_initialDragStartSelectionPoint);
 
-    if (isDraggingForwardFromOrigin && isPositionAboveStartingBaseLine || isPositionBelowStartingBaseLine) {
+    if (isDraggingForwardFromOrigin && isPositionClampedToStartingLine) {
+      return true;
+    } else if (!isDraggingForwardFromOrigin && isPositionClampedToStartingLine) {
+      return false;
+    }
+
+    if (isPositionBelowStartingBaseline) {
       return true;
     } else {
       return false;
@@ -521,10 +534,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         _selectEndTo(offset: details.globalPosition, continuous: true);
       case 2:
         if (_shouldMoveEndEdge(details)) {
+          debugPrint('move end edge');
           // Hold the start edge at the word located at the beginning of the drag.
           _selectStartTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, selectionMode: SelectionMode.words);
           _selectEndTo(offset: details.globalPosition, continuous: true, selectionMode: SelectionMode.words);
         } else {
+          debugPrint('move start edge');
           _selectStartTo(offset: details.globalPosition, continuous: true, selectionMode: SelectionMode.words);
           // Hold the end edge at the word located at the beginning of the drag.
           _selectEndTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, selectionMode: SelectionMode.words);

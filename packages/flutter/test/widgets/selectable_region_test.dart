@@ -37,7 +37,7 @@ void main() {
   });
 
   group('SelectableRegion', () {
-    testWidgets('mouse selection sends correct events', (WidgetTester tester) async {
+    testWidgets('mouse selection single click sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -74,6 +74,34 @@ void main() {
 
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
+
+    testWidgets('mouse double click sends select-word event', (WidgetTester tester) async {
+      final UniqueKey spy = UniqueKey();
+      await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionControls,
+              child: SelectionSpy(key: spy),
+            ),
+          )
+      );
+
+      final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+      final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      renderSelectionSpy.events.clear();
+      await gesture.down(const Offset(200.0, 200.0));
+      await tester.pump();
+      await gesture.up();
+      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
+      final SelectWordSelectionEvent selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
+    });
 
     testWidgets('Does not crash when using Navigator pages', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/119776
@@ -516,6 +544,75 @@ void main() {
       await tester.pump();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 5, extentOffset: 11));
 
+      await gesture.up();
+    });
+
+    testWidgets('mouse can select word-by-word on double click drag', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text('How are you'),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 3));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 4));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 7));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 8));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 8));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      // Check backward selection.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      // Start a new double-click drag.
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 5));
+      await tester.pump();
+      await gesture.up();
+      expect(paragraph.selections.isEmpty, isTrue);
+      await tester.pump(kDoubleTapTimeout);
+
+      // Double-click.
+      await gesture.down(textOffsetToPosition(paragraph, 5));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 5));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+      // Selecting across line should select to the end.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 5) + const Offset(0.0, 200.0));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 11));
       await gesture.up();
     });
 
