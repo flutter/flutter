@@ -12,11 +12,6 @@
 
 namespace impeller {
 
-ContentContextOptions OptionsFromPass(const RenderPass& pass);
-
-ContentContextOptions OptionsFromPassAndEntity(const RenderPass& pass,
-                                               const Entity& entity);
-
 class AnonymousContents final : public Contents {
  public:
   static std::shared_ptr<Contents> Make(RenderProc render_proc,
