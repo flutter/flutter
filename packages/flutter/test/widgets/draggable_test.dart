@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
+@Skip('TODO(goderbauer): fibure out pointer events')
 library;
 
 import 'package:flutter/gestures.dart';

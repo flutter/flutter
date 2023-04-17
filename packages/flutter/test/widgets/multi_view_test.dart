@@ -9,7 +9,6 @@ void main() {
   testWidgets('gets local coordinates', (WidgetTester tester) async {
     const Key redContainer = Key('Hello');
     await tester.pumpWidget(Container(key: redContainer));
-    debugDumpRenderTree();
     expect(find.byKey(redContainer), findsOneWidget);
   });
 }
