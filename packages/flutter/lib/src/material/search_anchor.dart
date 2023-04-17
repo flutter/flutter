@@ -970,10 +970,13 @@ class SearchController extends TextEditingController {
 
 /// A Material Design search bar.
 ///
-/// Search bars typically consist of a [leading] search icon, a text input field
-/// and optional [trailing] icons. When assigned to the [SearchAnchor.builder] property,
-/// search bars can be used to open a search view route. They are the default
-/// builder for the [SearchAnchor.bar] constructor method.
+/// A [SearchBar] looks like a [TextField]. Tapping a SearchBar typically shows a
+/// "search view" route: a route with the search bar at the top and a list of
+/// suggested completions for the search bar's text below. [SearchBar]s are
+/// usually created by a [SearchAnchor.builder]. The builder provides a
+/// [SearchController] that's used by the search bar's [SearchBar.onTap] or
+/// [SearchBar.onChanged] callbacks to show the search view and to hide it
+/// when the user selects a suggestion.
 ///
 /// For [TextDirection.ltr], the [leading] widget is on the left side of the bar.
 /// It should contain either a navigational action (such as a menu or up-arrow)
@@ -985,9 +988,9 @@ class SearchController extends TextEditingController {
 /// a separate high-level action (such as current location) or an overflow menu.
 ///
 /// {@tool dartpad}
-/// This example shows how to use a [SearchBar] as the builder of the [SearchAnchor].
-/// The [SearchBar] example also shows a leading search icon and a trailing action
-/// to toggle the brightness.
+/// This example demonstrates how to use a [SearchBar] as the return value of the
+/// [SearchAnchor.builder] property. The [SearchBar] also includes a leading search
+/// icon and a trailing action to toggle the brightness.
 ///
 /// ** See code in examples/api/lib/material/search_anchor/search_bar.0.dart **
 /// {@end-tool}
