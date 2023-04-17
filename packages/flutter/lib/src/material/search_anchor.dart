@@ -970,7 +970,7 @@ class SearchController extends TextEditingController {
 
 /// A Material Design search bar.
 ///
-/// Search bars typically consist of a [leading] Search icon, a text input field
+/// Search bars typically consist of a [leading] search icon, a text input field
 /// and optional [trailing] icons. When assigned to the [SearchAnchor.builder] property,
 /// search bars can be used to open a search view route. They are the default
 /// builder for the [SearchAnchor.bar] constructor method.
