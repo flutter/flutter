@@ -211,6 +211,7 @@ class CupertinoListSection extends StatelessWidget {
     double? additionalDividerMargin,
     this.topMargin = _kMarginTop,
     bool hasLeading = true,
+    this.separatorColor,
   }) : assert((children != null && children.length > 0) || header != null),
        type = CupertinoListSectionType.base,
        additionalDividerMargin = additionalDividerMargin ??
@@ -274,6 +275,7 @@ class CupertinoListSection extends StatelessWidget {
     double? additionalDividerMargin,
     this.topMargin,
     bool hasLeading = true,
+    this.separatorColor,
   }) : assert((children != null && children.length > 0) || header != null),
        type = CupertinoListSectionType.insetGrouped,
        additionalDividerMargin = additionalDividerMargin ??
@@ -344,9 +346,15 @@ class CupertinoListSection extends StatelessWidget {
   /// matches iOS style by default.
   final double? topMargin;
 
+  /// Sets the color for the dividers between rows, and borders on top and
+  /// bottom of the rows.
+  ///
+  /// If null, defaults to [CupertinoColors.separator].
+  final Color? separatorColor;
+
   @override
   Widget build(BuildContext context) {
-    final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
+    final Color dividerColor = separatorColor ?? CupertinoColors.separator.resolveFrom(context);
     final double dividerHeight = 1.0 / MediaQuery.devicePixelRatioOf(context);
 
     // Long divider is used for wrapping the top and bottom of rows.
