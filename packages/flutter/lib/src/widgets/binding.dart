@@ -1239,12 +1239,12 @@ class RootElement extends Element with RootElementMixin {
     }
   }
 
-  @override
-  RenderObject? get renderObject {
-    // TODO(goderbauer): ??
-    assert(false);
-    return null;
-  }
+  // @override
+  // RenderObject? get renderObject {
+  //   // TODO(goderbauer): ??
+  //   // assert(false);
+  //   return null;
+  // }
 
   @override
   bool get debugDoingBuild => false; // This element doesn't have a build phase.

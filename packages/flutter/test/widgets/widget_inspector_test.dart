@@ -4509,7 +4509,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(result['parentData'], isNull);
       });
 
-
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderView',(WidgetTester tester) async {
         await pumpWidgetForLayoutExplorer(tester);
 
