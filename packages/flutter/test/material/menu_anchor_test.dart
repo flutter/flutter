@@ -2075,6 +2075,39 @@ void main() {
       expect(find.text('trailingIcon'), findsOneWidget);
     });
 
+    testWidgets('SubmenuButton uses supplied controller', (WidgetTester tester) async {
+      final MenuController submenuController = MenuController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: <Widget>[
+                SubmenuButton(
+                  controller: submenuController,
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      child: Text(TestMenu.subMenu00.label),
+                    ),
+                  ],
+                  child: Text(TestMenu.mainMenu0.label),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      submenuController.open();
+      await tester.pump();
+
+      expect(find.text(TestMenu.subMenu00.label), findsOneWidget);
+
+      submenuController.close();
+      await tester.pump();
+      expect(find.text(TestMenu.subMenu00.label), findsNothing);
+    });
+
     testWidgets('diagnostics', (WidgetTester tester) async {
       final ButtonStyle style = ButtonStyle(
         shape: MaterialStateProperty.all<OutlinedBorder?>(const StadiumBorder()),
