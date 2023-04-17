@@ -16,7 +16,6 @@ class SearchBarApp extends StatefulWidget {
 }
 
 class _SearchBarAppState extends State<SearchBarApp> {
-  // final SearchController controller = SearchController();
   bool isDark = false;
 
   @override
