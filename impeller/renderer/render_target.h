@@ -109,6 +109,8 @@ class RenderTarget final {
   void IterateAllAttachments(
       const std::function<bool(const Attachment& attachment)>& iterator) const;
 
+  std::string ToString() const;
+
  private:
   std::map<size_t, ColorAttachment> colors_;
   std::optional<DepthAttachment> depth_;
