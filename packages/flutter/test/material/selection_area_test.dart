@@ -38,6 +38,37 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123378
+    await tester.pumpWidget(
+      const MaterialApp(
+        color: Color(0xFF2196F3),
+        title: 'Demo',
+        home: Scaffold(
+          body: SelectionArea(
+            child: Padding(
+              padding: EdgeInsets.all(100.0),
+              child: Text('Hello World'),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture dragging = await tester.startGesture(const Offset(10, 10));
+    addTearDown(dragging.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await dragging.moveTo(const Offset(90, 90));
+    await dragging.up();
+
+    final TestGesture longpress = await tester.startGesture(const Offset(20,20));
+    addTearDown(longpress.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await longpress.up();
+
+    expect(tester.takeException(), isNull);
+  });
+
+
   testWidgets('builds the default context menu by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
