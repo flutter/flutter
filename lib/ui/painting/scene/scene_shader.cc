@@ -78,10 +78,13 @@ std::shared_ptr<DlColorSource> SceneShader::shader(DlImageSampling sampling) {
   // TODO(bdero): Gather the mutation log and include it in the scene color
   // source.
 
-  return std::make_shared<DlSceneColorSource>(scene_node_->node_,
-                                              camera_transform_.IsIdentity()
-                                                  ? DefaultCameraTransform()
-                                                  : camera_transform_);
+  auto source = std::make_shared<DlSceneColorSource>(
+      scene_node_->node_, camera_transform_.IsIdentity()
+                              ? DefaultCameraTransform()
+                              : camera_transform_);
+  // Just a sanity check, all scene shaders should be thread-safe
+  FML_DCHECK(source->isUIThreadSafe());
+  return source;
 }
 
 void SceneShader::Dispose() {

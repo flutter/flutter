@@ -10,10 +10,7 @@
 namespace flutter {
 namespace testing {
 
-DiffContextTest::DiffContextTest()
-    : unref_queue_(fml::MakeRefCounted<SkiaUnrefQueue>(
-          GetCurrentTaskRunner(),
-          fml::TimeDelta::FromSeconds(0))) {}
+DiffContextTest::DiffContextTest() {}
 
 Damage DiffContextTest::DiffLayerTree(MockLayerTree& layer_tree,
                                       const MockLayerTree& old_layer_tree,
@@ -40,11 +37,9 @@ sk_sp<DisplayList> DiffContextTest::CreateDisplayList(const SkRect& bounds,
 }
 
 std::shared_ptr<DisplayListLayer> DiffContextTest::CreateDisplayListLayer(
-    sk_sp<DisplayList> display_list,
+    const sk_sp<DisplayList>& display_list,
     const SkPoint& offset) {
-  return std::make_shared<DisplayListLayer>(
-      offset, SkiaGPUObject(std::move(display_list), unref_queue()), false,
-      false);
+  return std::make_shared<DisplayListLayer>(offset, display_list, false, false);
 }
 
 std::shared_ptr<ContainerLayer> DiffContextTest::CreateContainerLayer(

@@ -35,6 +35,7 @@ class MockDlImage : public DlImage {
   MOCK_CONST_METHOD0(impeller_texture, std::shared_ptr<impeller::Texture>());
   MOCK_CONST_METHOD0(isOpaque, bool());
   MOCK_CONST_METHOD0(isTextureBacked, bool());
+  MOCK_CONST_METHOD0(isUIThreadSafe, bool());
   MOCK_CONST_METHOD0(dimensions, SkISize());
   MOCK_CONST_METHOD0(GetApproximateByteSize, size_t());
 };

@@ -243,9 +243,8 @@ void SceneBuilder::addPicture(double dx,
   // been disposed but not collected yet, but the display list is null.
   if (picture->display_list()) {
     auto layer = std::make_unique<flutter::DisplayListLayer>(
-        SkPoint::Make(SafeNarrow(dx), SafeNarrow(dy)),
-        UIDartState::CreateGPUObject(picture->display_list()), !!(hints & 1),
-        !!(hints & 2));
+        SkPoint::Make(SafeNarrow(dx), SafeNarrow(dy)), picture->display_list(),
+        !!(hints & 1), !!(hints & 2));
     AddLayer(std::move(layer));
   }
 }

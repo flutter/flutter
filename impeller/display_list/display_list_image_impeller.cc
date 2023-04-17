@@ -65,6 +65,12 @@ bool DlImageImpeller::isTextureBacked() const {
 }
 
 // |DlImage|
+bool DlImageImpeller::isUIThreadSafe() const {
+  // Impeller textures are always thread-safe
+  return true;
+}
+
+// |DlImage|
 SkISize DlImageImpeller::dimensions() const {
   const auto size = texture_ ? texture_->GetSize() : ISize{};
   return SkISize::Make(size.width, size.height);

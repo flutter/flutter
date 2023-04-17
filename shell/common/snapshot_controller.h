@@ -36,6 +36,9 @@ class SnapshotController {
 
   virtual ~SnapshotController() = default;
 
+  // Note that this image is not guaranteed to be UIThreadSafe and must
+  // be converted to a DlImageGPU if it is to be handed back to the UI
+  // thread.
   virtual sk_sp<DlImage> MakeRasterSnapshot(sk_sp<DisplayList> display_list,
                                             SkISize size) = 0;
 

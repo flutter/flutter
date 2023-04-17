@@ -38,8 +38,7 @@ fml::RefPtr<Picture> PictureRecorder::endRecording(Dart_Handle dart_picture) {
 
   fml::RefPtr<Picture> picture;
 
-  picture = Picture::Create(dart_picture, UIDartState::CreateGPUObject(
-                                              display_list_builder_->Build()));
+  picture = Picture::Create(dart_picture, display_list_builder_->Build());
   display_list_builder_ = nullptr;
 
   canvas_->Invalidate();
