@@ -10,20 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  /// Builds test button items for each of the suggestions provided.
-  List<ContextMenuButtonItem> buildSuggestionButtons(List<String> suggestions) {
-    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
-
-    for (final String suggestion in suggestions) {
-      buttonItems.add(ContextMenuButtonItem(
-        onPressed: () {},
-        label: suggestion,
-      ));
-    }
-
-    return buttonItems;
-  }
-
   testWidgets('more than three suggestions throws an error', (WidgetTester tester) async {
     Future<void> pumpToolbar(List<String> suggestions) async {
       await tester.pumpWidget(
