@@ -300,16 +300,6 @@ the configured path by running this command: flutter config --android-studio-dir
       return s.workingJavaPath != null;
     }
 
-    final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudio != null) {
-      String configuredStudioPath = configuredStudio;
-      if (globals.platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
-        configuredStudioPath = globals.fs.path.join(configuredStudioPath, 'Contents');
-      }
-      return AndroidStudio.initFromDir(configuredStudioPath,
-          configuredPath: configuredStudio);
-    }
-
     // Find all available Studio installations.
     final List<AndroidStudio> studios = allInstalled();
     if (studios.isEmpty) {
