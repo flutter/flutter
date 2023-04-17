@@ -135,7 +135,7 @@ class InputDatePickerFormField extends StatefulWidget {
   ///
   /// Defaults to false.
   ///
-  /// If true, [errorFormatText] is not shown when entered date is empty.
+  /// If true, [errorFormatText] is not shown when the date input field is empty.
   final bool acceptEmptyDate;
 
   @override
