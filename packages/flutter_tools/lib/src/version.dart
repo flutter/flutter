@@ -78,10 +78,10 @@ abstract class FlutterVersion {
     final Stopwatch stopwatch = Stopwatch()..start();
     final File versionFile = getVersionFile(globals.fs);
     if (versionFile.existsSync()) {
-      final FlutterVersion? version = _FlutterVersionFromFile.tryParseFromFile(versionFile, workingDirectory: workingDirectory);
+      final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(versionFile, workingDirectory: workingDirectory);
       if (version != null) {
+        stopwatch.stop();
         print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
-        exit(42);
         return version;
       }
     }
@@ -98,6 +98,7 @@ abstract class FlutterVersion {
     );
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
     stopwatch.stop();
+    print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
     return _FlutterVersionGit._(
       clock: clock,
       workingDirectory: workingDirectory,
@@ -186,6 +187,7 @@ abstract class FlutterVersion {
     'engineRevision': engineRevision,
     'dartSdkVersion': dartSdkVersion,
     'devToolsVersion': devToolsVersion,
+    'flutterVersion': frameworkVersion, // TODO what about unknown?
   };
 
   /// A date String describing the last framework commit.
@@ -397,14 +399,28 @@ class _FlutterVersionFromFile extends FlutterVersion {
   static _FlutterVersionFromFile? tryParseFromFile(
     File jsonFile, {
     String? workingDirectory,
+    SystemClock clock = const SystemClock(),
   }) {
     try {
       final String jsonContents = jsonFile.readAsStringSync();
       final Map<String, Object?> manifest = jsonDecode(jsonContents) as Map<String, Object?>;
 
-      throw UnimplementedError('TODO'); // TODO
+      return _FlutterVersionFromFile._(
+        clock: clock,
+        frameworkVersion: manifest['frameworkVersion']! as String,
+        channel: manifest['channel']! as String,
+        repositoryUrl: manifest['repositoryUrl']! as String,
+        frameworkRevision: manifest['frameworkRevision']! as String,
+        frameworkCommitDate: manifest['frameworkCommitDate']! as String,
+        engineRevision: manifest['engineRevision']! as String,
+        dartSdkVersion: manifest['dartSdkVersion']! as String,
+        devToolsVersion: manifest['devToolsVersion']! as String,
+        gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String),
+        workingDirectory: workingDirectory,
+      );
     } catch (err) {
       globals.printTrace('Failed to parse ${jsonFile.path} with $err');
+      rethrow;
       // Returning null means fallback to git implementation.
       return null;
     }
