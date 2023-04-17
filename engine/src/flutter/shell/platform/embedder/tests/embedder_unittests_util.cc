@@ -12,6 +12,7 @@
 
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/encode/SkPngEncoder.h"
 
 namespace flutter {
 namespace testing {
@@ -136,7 +137,7 @@ bool WriteImageToDisk(const fml::UniqueFD& directory,
     return false;
   }
 
-  auto data = image->encodeToData();
+  auto data = SkPngEncoder::Encode(nullptr, image.get(), {});
 
   if (!data) {
     return false;
