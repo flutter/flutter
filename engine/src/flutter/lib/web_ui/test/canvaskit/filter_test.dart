@@ -52,8 +52,11 @@ void testMain() {
     test('can be constructed', () {
       final CkImageFilter imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
       expect(imageFilter, isA<CkImageFilter>());
-      expect(imageFilter.createDefault(), isNotNull);
-      expect(imageFilter.resurrect(), isNotNull);
+      SkImageFilter? skFilter;
+      imageFilter.imageFilter((SkImageFilter value) {
+        skFilter = value;
+      });
+      expect(skFilter, isNotNull);
     });
 
 
@@ -82,11 +85,12 @@ void testMain() {
       final CkPaint paint = CkPaint();
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
 
-      final ManagedSkiaObject<Object> managedFilter = paint.imageFilter! as ManagedSkiaObject<Object>;
-      final Object skiaFilter = managedFilter.skiaObject;
+      final CkManagedSkImageFilterConvertible managedFilter1 = paint.imageFilter! as CkManagedSkImageFilterConvertible;
 
       paint.imageFilter = CkImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp);
-      expect((paint.imageFilter! as ManagedSkiaObject<Object>).skiaObject, same(skiaFilter));
+      final CkManagedSkImageFilterConvertible managedFilter2 = paint.imageFilter! as CkManagedSkImageFilterConvertible;
+
+      expect(managedFilter1, same(managedFilter2));
     });
 
     test('does not throw for both sigmaX and sigmaY set to 0', () async {

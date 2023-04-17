@@ -13,7 +13,6 @@ import 'font_fallbacks.dart';
 import 'native_memory.dart';
 import 'painting.dart';
 import 'renderer.dart';
-import 'skia_object_cache.dart';
 import 'text_fragmenter.dart';
 import 'util.dart';
 
@@ -552,16 +551,6 @@ SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
 }
 
 /// The CanvasKit implementation of [ui.Paragraph].
-///
-/// This class does not use [ManagedSkiaObject] because it requires that its
-/// memory is reclaimed synchronously. This protects our memory usage from
-/// blowing up if within a single frame the framework needs to layout a lot of
-/// paragraphs. One common use-case is `ListView.builder`, which needs to layout
-/// more of its content than it actually renders to compute the scroll position.
-/// More generally, this protects from the pattern of laying out a lot of text
-/// while painting a small subset of it. To achieve this a
-/// [SynchronousSkiaObjectCache] is used that limits the number of live laid out
-/// paragraphs at any point in time within or outside the frame.
 class CkParagraph implements ui.Paragraph {
   CkParagraph(SkParagraph skParagraph, this._paragraphStyle) {
     _ref = UniqueRef<SkParagraph>(this, skParagraph, 'Paragraph');

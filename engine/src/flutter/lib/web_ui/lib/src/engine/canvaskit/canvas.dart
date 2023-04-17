@@ -291,18 +291,20 @@ class CkCanvas {
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter,
       [CkPaint? paint]) {
-      final CkManagedSkImageFilterConvertible convertible;
-      if (filter is ui.ColorFilter) {
-        convertible = createCkColorFilter(filter as EngineColorFilter)!;
-      } else {
-        convertible = filter as CkManagedSkImageFilterConvertible;
-      }
-    return skCanvas.saveLayer(
-      paint?.skiaObject,
-      toSkRect(bounds),
-      convertible.imageFilter.skiaObject,
-      0,
-    );
+    final CkManagedSkImageFilterConvertible convertible;
+    if (filter is ui.ColorFilter) {
+      convertible = createCkColorFilter(filter as EngineColorFilter)!;
+    } else {
+      convertible = filter as CkManagedSkImageFilterConvertible;
+    }
+    convertible.imageFilter((SkImageFilter filter) {
+      skCanvas.saveLayer(
+        paint?.skiaObject,
+        toSkRect(bounds),
+        filter,
+        0,
+      );
+    });
   }
 
   void scale(double sx, double sy) {
@@ -1173,11 +1175,13 @@ class CkSaveLayerWithFilterCommand extends CkPaintCommand {
     } else {
       convertible = filter as CkManagedSkImageFilterConvertible;
     }
-    return canvas.saveLayer(
-      paint?.skiaObject,
-      toSkRect(bounds),
-      convertible.imageFilter.skiaObject,
-      0,
-    );
+    convertible.imageFilter((SkImageFilter filter) {
+      canvas.saveLayer(
+        paint?.skiaObject,
+        toSkRect(bounds),
+        filter,
+        0,
+      );
+    });
   }
 }
