@@ -477,7 +477,7 @@ class XcodeProjectInfo {
 
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
-  String? schemeFor(String hostAppProjectName, {String? flavor}) {
+  String? schemeFor({required String hostAppProjectName, String? flavor}) {
     if (flavor != null) {
       // if flavor exists, should take precedence over everything else
       final String expectedScheme = sentenceCase(flavor);
@@ -490,7 +490,7 @@ class XcodeProjectInfo {
     }
     // if theres no flavor, then regardless if the project
     // is renamed or the default 'Runner', it should match one of the schemes
-    final String expectedScheme = hostAppProjectName;
+    final String expectedScheme = sentenceCase(hostAppProjectName);
     if (schemes.contains(expectedScheme)) {
       return expectedScheme;
     }

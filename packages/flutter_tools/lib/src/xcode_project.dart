@@ -29,6 +29,9 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
       return _hostAppProjectName!;
     }
     List<FileSystemEntity> contents;
+      if (!hostAppRoot.existsSync()) {
+        return defaultHostAppProjectName;
+      }
       contents = hostAppRoot.listSync();
       for (final Directory entity in contents.whereType<Directory>()) {
         // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
@@ -307,7 +310,7 @@ class IosProject extends XcodeBasedProject {
     }
 
     if (scheme == null) {
-      scheme = info.schemeFor(hostAppProjectName, flavor: buildInfo?.flavor);
+      scheme = info.schemeFor(hostAppProjectName: hostAppProjectName, flavor: buildInfo?.flavor);
       if (scheme == null) {
         info.reportFlavorNotFoundAndExit();
       }
@@ -414,8 +417,7 @@ class IosProject extends XcodeBasedProject {
       return false;
     }
 
-    // final String? defaultScheme = projectInfo.schemeFor(buildInfo);
-    final String? defaultScheme = projectInfo.schemeFor(hostAppProjectName, flavor: buildInfo.flavor);
+    final String? defaultScheme = projectInfo.schemeFor(hostAppProjectName: hostAppProjectName, flavor: buildInfo.flavor);
     if (defaultScheme == null) {
       projectInfo.reportFlavorNotFoundAndExit();
     }

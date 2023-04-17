@@ -60,13 +60,7 @@ void main() {
 
   FlutterProject setupProjectUnderTest() {
     // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
-    final Directory directory = fileSystem.directory('project');
-    directory.childDirectory('ios')
-        .createSync(recursive: true);
-    directory.childDirectory('macos')
-        .createSync(recursive: true);
-
-    final FlutterProject projectUnderTest = FlutterProject.fromDirectory(directory);
+    final FlutterProject projectUnderTest = FlutterProject.fromDirectory(fileSystem.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     projectUnderTest.macos.xcodeProject.createSync(recursive: true);
     return projectUnderTest;
