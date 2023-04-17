@@ -41,12 +41,14 @@ executable("flutter_shell_native_unittests") {
   sources = [
     "android_context_gl_unittests.cc",
     "android_shell_holder_unittests.cc",
+    "android_surface_gl_impeller_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
   ]
   public_configs = [ "//flutter:config" ]
   deps = [
     ":flutter_shell_native_src",
+    "//flutter/shell/platform/android/jni:jni_mock",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest",
   ]

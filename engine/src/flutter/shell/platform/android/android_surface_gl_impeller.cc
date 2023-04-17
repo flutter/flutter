@@ -81,12 +81,13 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
 
 AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
     const std::shared_ptr<AndroidContext>& android_context,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+    std::unique_ptr<impeller::egl::Display> display)
     : AndroidSurface(android_context),
-      reactor_worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())) {
-  auto display = std::make_unique<impeller::egl::Display>();
-  if (!display->IsValid()) {
-    FML_DLOG(ERROR) << "Could not create EGL display.";
+      reactor_worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())),
+      display_(std::move(display)) {
+  if (!display_->IsValid()) {
+    FML_DLOG(ERROR) << "Could not create surface with invalid Display.";
     return;
   }
 
@@ -99,11 +100,11 @@ AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
 
   desc.surface_type = impeller::egl::SurfaceType::kWindow;
   std::unique_ptr<impeller::egl::Config> onscreen_config =
-      display->ChooseConfig(desc);
+      display_->ChooseConfig(desc);
   if (!onscreen_config) {
     // Fallback for Android emulator.
     desc.samples = impeller::egl::Samples::kOne;
-    onscreen_config = display->ChooseConfig(desc);
+    onscreen_config = display_->ChooseConfig(desc);
     if (onscreen_config) {
       FML_LOG(INFO) << "Warning: This device doesn't support MSAA for onscreen "
                        "framebuffers. Falling back to a single sample.";
@@ -114,27 +115,27 @@ AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
   }
 
   desc.surface_type = impeller::egl::SurfaceType::kPBuffer;
-  auto offscreen_config = display->ChooseConfig(desc);
+  auto offscreen_config = display_->ChooseConfig(desc);
   if (!offscreen_config) {
     FML_DLOG(ERROR) << "Could not choose offscreen config.";
     return;
   }
 
-  auto onscreen_context = display->CreateContext(*onscreen_config, nullptr);
+  auto onscreen_context = display_->CreateContext(*onscreen_config, nullptr);
   if (!onscreen_context) {
     FML_DLOG(ERROR) << "Could not create onscreen context.";
     return;
   }
 
   auto offscreen_context =
-      display->CreateContext(*offscreen_config, onscreen_context.get());
+      display_->CreateContext(*offscreen_config, onscreen_context.get());
   if (!offscreen_context) {
     FML_DLOG(ERROR) << "Could not create offscreen context.";
     return;
   }
 
   auto offscreen_surface =
-      display->CreatePixelBufferSurface(*offscreen_config, 1u, 1u);
+      display_->CreatePixelBufferSurface(*offscreen_config, 1u, 1u);
   if (!offscreen_surface) {
     FML_DLOG(ERROR) << "Could not create offscreen surface.";
     return;
@@ -175,7 +176,6 @@ AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
     FML_DLOG(ERROR) << "Could not add lifecycle listeners";
   }
 
-  display_ = std::move(display);
   onscreen_config_ = std::move(onscreen_config);
   offscreen_config_ = std::move(offscreen_config);
   offscreen_surface_ = std::move(offscreen_surface);

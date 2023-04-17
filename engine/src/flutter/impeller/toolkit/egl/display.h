@@ -21,21 +21,21 @@ class Display {
  public:
   Display();
 
-  ~Display();
+  virtual ~Display();
 
-  bool IsValid() const;
+  virtual bool IsValid() const;
 
-  std::unique_ptr<Config> ChooseConfig(ConfigDescriptor config) const;
+  virtual std::unique_ptr<Config> ChooseConfig(ConfigDescriptor config) const;
 
-  std::unique_ptr<Context> CreateContext(const Config& config,
-                                         const Context* share_context);
+  virtual std::unique_ptr<Context> CreateContext(const Config& config,
+                                                 const Context* share_context);
 
-  std::unique_ptr<Surface> CreateWindowSurface(const Config& config,
-                                               EGLNativeWindowType window);
+  virtual std::unique_ptr<Surface> CreateWindowSurface(
+      const Config& config,
+      EGLNativeWindowType window);
 
-  std::unique_ptr<Surface> CreatePixelBufferSurface(const Config& config,
-                                                    size_t width,
-                                                    size_t height);
+  virtual std::unique_ptr<Surface>
+  CreatePixelBufferSurface(const Config& config, size_t width, size_t height);
 
  private:
   EGLDisplay display_ = EGL_NO_DISPLAY;
