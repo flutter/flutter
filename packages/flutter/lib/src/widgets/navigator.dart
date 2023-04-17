@@ -3462,9 +3462,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   String? get restorationId => widget.restorationScopeId;
 
+  // Needed to cancel pointers in _cancelActivePointers which may be called
+  // while the widget is about to be disposed, so it cannot be looked up
+  // on-demand.
+  int _viewId = -1;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _viewId = View.of(context).viewId as int;
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
       entry.route.changedExternalState();
@@ -5268,9 +5274,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       });
     }
 
-    final int viewId = View.of(context).viewId as int;
     for (final int pointer in _activePointers) {
-      WidgetsBinding.instance.cancelPointer(pointer: pointer, viewId: viewId);
+      WidgetsBinding.instance.cancelPointer(pointer: pointer, viewId: _viewId);
     }
   }
 
