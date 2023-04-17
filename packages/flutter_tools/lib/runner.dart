@@ -277,6 +277,11 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
   // Ensure that the consent message has been displayed for unified analytics
   if (globals.analytics.shouldShowMessage) {
     globals.logger.printStatus(globals.analytics.getConsentMessage);
+    if (!globals.flutterUsage.enabled) {
+      globals.printStatus(
+          'Please note that analytics reporting was already disabled, '
+          'and will continue to be disabled.\n');
+    }
 
     // Because the legacy analytics may have also sent a message,
     // the conditional below will print additional messaging informing
