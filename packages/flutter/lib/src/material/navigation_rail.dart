@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -417,64 +418,75 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       : unselectedIconTheme.copyWith(opacity: unselectedIconTheme.opacity ?? defaults.unselectedIconTheme!.opacity);
 
     final bool isRTLDirection = Directionality.of(context) == TextDirection.rtl;
+    // TODO(tahatesser): This is an eye-balled value.
+    // This needs to be updated when accessibility guidelines are available on the material specs page
+    // https://m3.material.io/components/navigation-rail/accessibility.
+    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), 1.3);
 
-    return _ExtendedNavigationRailAnimation(
-      animation: _extendedAnimation,
-      child: Semantics(
-        explicitChildNodes: true,
-        child: Material(
-          elevation: elevation,
-          color: backgroundColor,
-          child: SafeArea(
-            right: isRTLDirection,
-            left: !isRTLDirection,
-            child: Column(
-              children: <Widget>[
-                _verticalSpacer,
-                if (widget.leading != null)
-                  ...<Widget>[
-                    widget.leading!,
-                    _verticalSpacer,
-                  ],
-                Expanded(
-                  child: Align(
-                    alignment: Alignment(0, groupAlignment),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        for (int i = 0; i < widget.destinations.length; i += 1)
-                          _RailDestination(
-                            minWidth: minWidth,
-                            minExtendedWidth: minExtendedWidth,
-                            extendedTransitionAnimation: _extendedAnimation,
-                            selected: widget.selectedIndex == i,
-                            icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
-                            label: widget.destinations[i].label,
-                            destinationAnimation: _destinationAnimations[i],
-                            labelType: labelType,
-                            iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
-                            labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
-                            padding: widget.destinations[i].padding,
-                            useIndicator: useIndicator,
-                            indicatorColor: useIndicator ? indicatorColor : null,
-                            indicatorShape: useIndicator ? indicatorShape : null,
-                            onTap: () {
-                              if (widget.onDestinationSelected != null) {
-                                widget.onDestinationSelected!(i);
-                              }
-                            },
-                            indexLabel: localizations.tabLabel(
-                              tabIndex: i + 1,
-                              tabCount: widget.destinations.length,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        // Limit the text scale factor so that the text doesn't become too large to
+        // exceed the max width of the rail.
+        textScaleFactor: textScaleFactor,
+      ),
+      child: _ExtendedNavigationRailAnimation(
+        animation: _extendedAnimation,
+        child: Semantics(
+          explicitChildNodes: true,
+          child: Material(
+            elevation: elevation,
+            color: backgroundColor,
+            child: SafeArea(
+              right: isRTLDirection,
+              left: !isRTLDirection,
+              child: Column(
+                children: <Widget>[
+                  _verticalSpacer,
+                  if (widget.leading != null)
+                    ...<Widget>[
+                      widget.leading!,
+                      _verticalSpacer,
+                    ],
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment(0, groupAlignment),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          for (int i = 0; i < widget.destinations.length; i += 1)
+                            _RailDestination(
+                              minWidth: minWidth,
+                              minExtendedWidth: minExtendedWidth,
+                              extendedTransitionAnimation: _extendedAnimation,
+                              selected: widget.selectedIndex == i,
+                              icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
+                              label: widget.destinations[i].label,
+                              destinationAnimation: _destinationAnimations[i],
+                              labelType: labelType,
+                              iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
+                              labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+                              padding: widget.destinations[i].padding,
+                              useIndicator: useIndicator,
+                              indicatorColor: useIndicator ? indicatorColor : null,
+                              indicatorShape: useIndicator ? indicatorShape : null,
+                              onTap: () {
+                                if (widget.onDestinationSelected != null) {
+                                  widget.onDestinationSelected!(i);
+                                }
+                              },
+                              indexLabel: localizations.tabLabel(
+                                tabIndex: i + 1,
+                                tabCount: widget.destinations.length,
+                              ),
                             ),
-                          ),
-                        if (widget.trailing != null)
-                          widget.trailing!,
-                      ],
+                          if (widget.trailing != null)
+                            widget.trailing!,
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

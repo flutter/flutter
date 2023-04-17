@@ -583,15 +583,15 @@ void main() {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = 80.0;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
     const double destinationLabelSpacing = 4.0;
     // Height of the label.
-    const double labelHeight = 16.0 * 3.0;
+    const double labelHeight = 16.0 * 1.3;
     // Height of a destination with both icon and label.
-    const double destinationHeightWithLabel = destinationHeight + destinationLabelSpacing + labelHeight;
+    final double destinationHeightWithLabel = destinationHeight + destinationLabelSpacing + labelHeight.round();
     // Space between destinations.
     const double destinationSpacing = 12.0;
 
@@ -858,15 +858,15 @@ void main() {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = 80.0;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
     const double destinationLabelSpacing = 4.0;
     // Height of the label.
-    const double labelHeight = 16.0 * 3.0;
+    const double labelHeight = 16.0 * 1.3;
     // Height of a destination with both icon and label.
-    const double destinationHeightWithLabel = destinationHeight + destinationLabelSpacing + labelHeight;
+    final double destinationHeightWithLabel = destinationHeight + destinationLabelSpacing + labelHeight.round();
     // Space between destinations.
     const double destinationSpacing = 12.0;
 
@@ -1852,7 +1852,7 @@ void main() {
       ),
     );
 
-    final RenderBox rail = tester.firstRenderObject<RenderBox>(find.byType(NavigationRail));
+    RenderBox rail = tester.firstRenderObject<RenderBox>(find.byType(NavigationRail));
 
     expect(rail.size.width, equals(80.0));
 
@@ -1862,10 +1862,12 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(rail.size.width, equals(303.0));
+    expect(rail.size.width, equals(181.0));
 
     await tester.pumpAndSettle();
-    expect(rail.size.width, equals(526.0));
+    rail = tester.firstRenderObject<RenderBox>(find.byType(NavigationRail));
+
+    expect(rail.size.width, equals(282.0));
   });
 
   testWidgets('Extended rail final width can be changed', (WidgetTester tester) async {
@@ -3468,6 +3470,7 @@ void main() {
     });
 
     testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
+      const double destinationWidth = 72.0;
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3481,7 +3484,7 @@ void main() {
 
       // The rail and destinations sizes grow to fit the larger text labels.
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-      expect(renderBox.size.width, 142.0);
+      expect(renderBox.size.width, 72.0);
 
       // The first destination is 8 from the top because of the default vertical
       // padding at the to of the rail.
@@ -3491,7 +3494,7 @@ void main() {
         firstIconRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - firstIconRenderBox.size.width) / 2.0,
+            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0,
           ),
         ),
@@ -3503,7 +3506,7 @@ void main() {
         firstLabelRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - firstLabelRenderBox.size.width) / 2.0,
+            (destinationWidth - firstLabelRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0 + firstIconRenderBox.size.height,
           ),
         ),
@@ -3515,7 +3518,7 @@ void main() {
         secondIconRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - secondIconRenderBox.size.width) / 2.0,
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
             nextDestinationY + 24.0,
           ),
         ),
@@ -3527,7 +3530,7 @@ void main() {
         thirdIconRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - thirdIconRenderBox.size.width) / 2.0,
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
             nextDestinationY + 24.0,
           ),
         ),
@@ -3539,7 +3542,7 @@ void main() {
         fourthIconRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - fourthIconRenderBox.size.width) / 2.0,
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
             nextDestinationY + 24.0,
           ),
         ),
@@ -3734,6 +3737,7 @@ void main() {
     });
 
     testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
+      const double destinationWidth = 72.0;
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3747,7 +3751,7 @@ void main() {
 
       // The rail and destinations sizes grow to fit the larger text labels.
       final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-      expect(renderBox.size.width, 142.0);
+      expect(renderBox.size.width, destinationWidth);
 
       // The first destination is 8 from the top because of the default vertical
       // padding at the to of the rail.
@@ -3758,7 +3762,7 @@ void main() {
         firstIconRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - firstIconRenderBox.size.width) / 2.0,
+            (destinationWidth - firstIconRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0,
           ),
         ),
@@ -3767,7 +3771,7 @@ void main() {
         firstLabelRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - firstLabelRenderBox.size.width) / 2.0,
+            (destinationWidth - firstLabelRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0 + firstIconRenderBox.size.height,
           ),
         ),
@@ -3780,7 +3784,7 @@ void main() {
         secondIconRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - secondIconRenderBox.size.width) / 2.0,
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0,
           ),
         ),
@@ -3789,7 +3793,7 @@ void main() {
         secondLabelRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - secondLabelRenderBox.size.width) / 2.0,
+            (destinationWidth - secondLabelRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0 + secondIconRenderBox.size.height,
           ),
         ),
@@ -3802,7 +3806,7 @@ void main() {
         thirdIconRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - thirdIconRenderBox.size.width) / 2.0,
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0,
           ),
         ),
@@ -3811,7 +3815,7 @@ void main() {
         thirdLabelRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - thirdLabelRenderBox.size.width) / 2.0,
+            (destinationWidth - thirdLabelRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0 + thirdIconRenderBox.size.height,
           ),
         ),
@@ -3824,7 +3828,7 @@ void main() {
         fourthIconRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - fourthIconRenderBox.size.width) / 2.0,
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0,
           ),
         ),
@@ -3833,7 +3837,7 @@ void main() {
         fourthLabelRenderBox.localToGlobal(Offset.zero),
         equals(
           Offset(
-            (142.0 - fourthLabelRenderBox.size.width) / 2.0,
+            (destinationWidth - fourthLabelRenderBox.size.width) / 2.0,
             nextDestinationY + 16.0 + fourthIconRenderBox.size.height,
           ),
         ),
@@ -4704,10 +4708,10 @@ void main() {
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(rail.size.width, equals(328.0));
+      expect(rail.size.width, equals(185.5));
 
       await tester.pumpAndSettle();
-      expect(rail.size.width, equals(584.0));
+      expect(rail.size.width, equals(299.0));
     });
 
     testWidgets('Extended rail final width can be changed', (WidgetTester tester) async {
