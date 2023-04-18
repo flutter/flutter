@@ -29,6 +29,7 @@ void testWidgetsWithLeakTracking(
   testWidgets(description, callback,
       skip: skip,
       timeout: timeout,
+      // ignore: deprecated_member_use, keeping for backwards compatibility
       initialTimeout: initialTimeout,
       semanticsEnabled: semanticsEnabled,
       variant: variant,
