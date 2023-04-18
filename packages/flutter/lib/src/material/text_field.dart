@@ -816,7 +816,7 @@ class TextField extends StatefulWidget {
     final Offset anchor =
       SpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
     final List<ContextMenuButtonItem>? buttonItems =
-      SpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+      SpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
     if (buttonItems == null){
       return const SizedBox.shrink();

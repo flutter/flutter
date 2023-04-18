@@ -45,7 +45,6 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-    BuildContext context,
     EditableTextState editableTextState,
   ) {
     // Determine if composing region is misspelled.
@@ -58,8 +57,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       return null;
     }
     if (spanAtCursorIndex.suggestions.isEmpty) {
-      assert(debugCheckHasCupertinoLocalizations(context));
-      final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+      assert(debugCheckHasCupertinoLocalizations(editableTextState.context));
+      final CupertinoLocalizations localizations =
+          CupertinoLocalizations.of(editableTextState.context);
       return <ContextMenuButtonItem>[
         ContextMenuButtonItem(
           onPressed: () {},
