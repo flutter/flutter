@@ -40,7 +40,8 @@ void testWidgetsWithLeakTracking(
   Future<void> wrappedCallback(WidgetTester tester) async {
     await _withFlutterLeakTracking(
       () async => callback(tester),
-      tester: tester,
+      tester,
+      leakTrackingConfig,
     );
   }
 
@@ -54,6 +55,8 @@ void testWidgetsWithLeakTracking(
     tags: tags,
   );
 }
+
+bool _webWarningPrinted = false;
 
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
@@ -69,16 +72,13 @@ void testWidgetsWithLeakTracking(
 /// If you use [testWidgets], pass [tester] to avoid async issues in leak processing.
 /// Pass null otherwise.
 ///
-/// Pass [leaksObtainer] if you want to get leak information before
+/// Pass [onLeaks] if you want to get leak information before
 /// the method failure.
 Future<void> _withFlutterLeakTracking(
-  DartAsyncCallback callback, {
-  required WidgetTester? tester,
-  StackTraceCollectionConfig stackTraceCollectionConfig =
-      const StackTraceCollectionConfig(),
-  Duration? timeoutForFinalGarbageCollection,
-  LeaksCallback? leaksObtainer,
-}) async {
+  DartAsyncCallback callback,
+  WidgetTester tester,
+  LeakTrackingTestConfig config,
+) async {
   // The method is copied (with improvements) from
   // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
 
@@ -87,6 +87,10 @@ Future<void> _withFlutterLeakTracking(
 
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
+    if (!_webWarningPrinted) {
+      _webWarningPrinted = true;
+      debugPrint('Leak tracking is not supported on web platform.');
+    }
     await callback();
     return;
   }
@@ -97,21 +101,22 @@ Future<void> _withFlutterLeakTracking(
 
   return TestAsyncUtils.guard<void>(() async {
     MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
-    final AsyncCodeRunner asyncCodeRunner = tester == null
-        ? (DartAsyncCallback action) async => action()
-        : (DartAsyncCallback action) async => tester.runAsync(action);
+    Future<void> asyncCodeRunner(DartAsyncCallback action) async => tester.runAsync(action);
+
     try {
       final Leaks leaks = await withLeakTracking(
         callback,
         asyncCodeRunner: asyncCodeRunner,
-        stackTraceCollectionConfig: stackTraceCollectionConfig,
+        stackTraceCollectionConfig: config.stackTraceCollectionConfig,
         shouldThrowOnLeaks: false,
-        timeoutForFinalGarbageCollection: timeoutForFinalGarbageCollection,
       );
-      if (leaksObtainer != null) {
-        leaksObtainer(leaks);
+
+      if (leaks.total > 0) {
+        config.onLeaks?.call(leaks);
+        if (config.failTestOnLeaks) {
+          expect(leaks, isLeakFree);
+        }
       }
-      expect(leaks, isLeakFree);
     } finally {
       MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
     }
