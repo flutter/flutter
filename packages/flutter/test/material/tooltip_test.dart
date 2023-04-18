@@ -413,7 +413,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
@@ -467,7 +467,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
-  testWidgets('Tooltip should be fully visible when MediaQuery.viewInsets > 0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip should be fully visible when MediaQuery.viewInsets > 0', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/23666
     Widget materialAppWithViewInsets(double viewInsetsHeight) {
       final Widget scaffold = Scaffold(
@@ -520,7 +520,7 @@ void main() {
     expect(tooltipTopRight.dy < fabTopRight.dy, true);
   });
 
-  testWidgets('Custom tooltip margin', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom tooltip margin', (WidgetTester tester) async {
     const double customMarginValue = 10.0;
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
@@ -575,7 +575,7 @@ void main() {
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - customMarginValue);
   });
 
-  testWidgets('Default tooltip message textStyle - light', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default tooltip message textStyle - light', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       home: Tooltip(
@@ -598,7 +598,7 @@ void main() {
     expect(textStyle.debugLabel, '((englishLike bodyMedium 2014).merge(blackMountainView bodyMedium)).copyWith');
   });
 
-  testWidgets('Default tooltip message textStyle - dark', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default tooltip message textStyle - dark', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -685,7 +685,7 @@ void main() {
     expect(textAlign, TextAlign.end);
   });
 
-  testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/40702.
     Widget buildApp(String text, TextDirection textDirection) {
       return MaterialApp(
@@ -718,7 +718,7 @@ void main() {
     expect(tooltipRenderParagraph.textDirection, TextDirection.ltr);
   });
 
-  testWidgets('Tooltip overlay wrapped with a non-fallback DefaultTextStyle widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip overlay wrapped with a non-fallback DefaultTextStyle widget', (WidgetTester tester) async {
     // A Material widget is needed as an ancestor of the Text widget.
     // It is invalid to have text in a Material application that
     // does not have a Material ancestor.
@@ -751,7 +751,7 @@ void main() {
     expect(textStyle.decorationStyle, isNot(TextDecorationStyle.double));
   });
 
-  testWidgets('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
@@ -786,7 +786,7 @@ void main() {
     expect(tooltipContainer.padding, const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0));
   });
 
-  testWidgets('Tooltip default size, shape, and color test for Desktop', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip default size, shape, and color test for Desktop', (WidgetTester tester) async {
     // Regressing test for https://github.com/flutter/flutter/issues/68601
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
@@ -815,7 +815,7 @@ void main() {
     expect(tooltipContainer.padding, const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
 
-  testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can tooltip decoration be customized', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
@@ -851,7 +851,7 @@ void main() {
     expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
-  testWidgets('Tooltip stays after long press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip stays after long press', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -898,7 +898,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Tooltip is dismissed after a long press and showDuration expired', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip is dismissed after a long press and showDuration expired', (WidgetTester tester) async {
     const Duration showDuration = Duration(seconds: 3);
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);
 
@@ -917,7 +917,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip is dismissed after a tap and showDuration expired', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip is dismissed after a tap and showDuration expired', (WidgetTester tester) async {
     const Duration showDuration = Duration(seconds: 3);
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, showDuration: showDuration);
 
@@ -933,7 +933,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip is dismissed after a tap and showDuration expired when competing with a GestureDetector', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip is dismissed after a tap and showDuration expired when competing with a GestureDetector', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/98854
     const Duration showDuration = Duration(seconds: 3);
     await tester.pumpWidget(
@@ -964,7 +964,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96890
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1021,7 +1021,12 @@ void main() {
     gesture = null;
   });
 
+
   testWidgets('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
+    // Using [testWidgets] instead of [testWidgetsWithLeakTracking] because
+    // [tooltipState] is hold after disposal by the test itself
+    // and thus is not garbage collected.
+
     // Regression test for https://github.com/flutter/flutter/issues/95851
     await tester.pumpWidget(
       const MaterialApp(
@@ -1052,7 +1057,7 @@ void main() {
     expect(tooltipState.ensureTooltipVisible(), false);
   });
 
-  testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
@@ -1105,7 +1110,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
@@ -1159,7 +1164,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip should not show more than one tooltip when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip should not show more than one tooltip when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration(milliseconds: 500);
     final UniqueKey innerKey = UniqueKey();
     final UniqueKey outerKey = UniqueKey();
@@ -1223,7 +1228,7 @@ void main() {
     expect(find.text('Inner'), findsNothing);
   });
 
-  testWidgets('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
@@ -1268,7 +1273,7 @@ void main() {
     gesture = null;
   });
 
-  testWidgets('Multiple Tooltips are dismissed by escape key', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Multiple Tooltips are dismissed by escape key', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
@@ -1335,7 +1340,7 @@ void main() {
     gesture = null;
   });
 
-  testWidgets('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/54096.
     const Duration waitDuration = Duration(seconds: 1);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1381,7 +1386,7 @@ void main() {
     await tester.pump(waitDuration);
   });
 
-  testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
 
@@ -1434,7 +1439,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Tooltip overlay does not update', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip overlay does not update', (WidgetTester tester) async {
     Widget buildApp(String text) {
       return MaterialApp(
         home: Center(
@@ -1463,7 +1468,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
     Widget buildApp(String text, { required double textScaleFactor }) {
       return MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
@@ -1510,7 +1515,7 @@ void main() {
     expect(tip.size.height, equals(64.0));
   });
 
-  testWidgets('Tooltip text displays with richMessage', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip text displays with richMessage', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     const String textSpan1Text = 'I am a rich tooltip message. ';
     const String textSpan2Text = 'I am another span of a rich tooltip message';
@@ -1541,7 +1546,7 @@ void main() {
     expect(richText.text.toPlainText(), equals('$textSpan1Text$textSpan2Text'));
   });
 
-  testWidgets('Tooltip throws assertion error when both message and richMessage are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip throws assertion error when both message and richMessage are specified', (WidgetTester tester) async {
     expect(
       () {
         MaterialApp(
@@ -1567,7 +1572,7 @@ void main() {
     );
   });
 
-  testWidgets('Haptic feedback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Haptic feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     await tester.pumpWidget(
       MaterialApp(
@@ -1591,7 +1596,7 @@ void main() {
     feedback.dispose();
   });
 
-  testWidgets('Semantics included', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics included', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1631,7 +1636,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics excluded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics excluded', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1671,7 +1676,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('has semantic events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has semantic events', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
       semanticEvents.add(message);
@@ -1712,7 +1717,7 @@ void main() {
     semantics.dispose();
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
-  testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('default Tooltip debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Tooltip(message: 'message').debugFillProperties(builder);
@@ -1725,7 +1730,7 @@ void main() {
       '"message"',
     ]);
   });
-  testWidgets('default Tooltip debugFillProperties with richMessage', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('default Tooltip debugFillProperties with richMessage', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Tooltip(
@@ -1747,7 +1752,7 @@ void main() {
       '"This is a richMessage"',
     ]);
   });
-  testWidgets('Tooltip implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     // Not checking controller, inputFormatters, focusNode
@@ -1786,7 +1791,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Tooltip triggers on tap when trigger mode is tap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip triggers on tap when trigger mode is tap', (WidgetTester tester) async {
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap);
 
     final Finder tooltip = find.byType(Tooltip);
@@ -1796,7 +1801,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget);
   });
 
-  testWidgets('Tooltip triggers on long press when mode is long press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip triggers on long press when mode is long press', (WidgetTester tester) async {
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress);
 
     final Finder tooltip = find.byType(Tooltip);
@@ -1809,7 +1814,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget);
   });
 
-  testWidgets('Tooltip does not trigger on tap when trigger mode is longPress', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip does not trigger on tap when trigger mode is longPress', (WidgetTester tester) async {
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress);
 
     final Finder tooltip = find.byType(Tooltip);
@@ -1819,7 +1824,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip does not trigger when trigger mode is manual', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip does not trigger when trigger mode is manual', (WidgetTester tester) async {
     await setWidgetForTooltipMode(tester, TooltipTriggerMode.manual);
 
     final Finder tooltip = find.byType(Tooltip);
@@ -1832,7 +1837,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip onTriggered is called when Tooltip triggers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip onTriggered is called when Tooltip triggers', (WidgetTester tester) async {
     bool onTriggeredCalled = false;
     void onTriggered() => onTriggeredCalled = true;
 
@@ -1848,7 +1853,7 @@ void main() {
     expect(onTriggeredCalled, true);
   });
 
-  testWidgets('Tooltip onTriggered is not called when Tooltip is hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip onTriggered is not called when Tooltip is hovered', (WidgetTester tester) async {
     bool onTriggeredCalled = false;
     void onTriggered() => onTriggeredCalled = true;
 
@@ -1881,7 +1886,7 @@ void main() {
     expect(onTriggeredCalled, false);
   });
 
-  testWidgets('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Tooltip(
@@ -1893,7 +1898,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget);
   });
 
-  testWidgets('Tooltip should not be shown with empty message (without child)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip should not be shown with empty message (without child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Tooltip(
