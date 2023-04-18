@@ -16,17 +16,17 @@ FLUTTER_DARWIN_EXPORT
 @interface FlutterPluginAppLifeCycleDelegate : NSObject <UNUserNotificationCenterDelegate>
 
 /**
- * Registers `delegate` to receive life cycle callbacks via this FlutterPluginAppLifecycleDelegate
+ * Registers `delegate` to receive life cycle callbacks via this FlutterPluginAppLifeCycleDelegate
  * as long as it is alive.
  *
- * `delegate` will only referenced weakly.
+ * `delegate` will only be referenced weakly.
  */
 - (void)addDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
  *
- * @return `NO` if any plugin vetoes application launch.
+ * @return `NO` if any plugin vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
@@ -34,7 +34,7 @@ FLUTTER_DARWIN_EXPORT
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
  *
- * @return `NO` if any plugin vetoes application launch.
+ * @return `NO` if any plugin vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
