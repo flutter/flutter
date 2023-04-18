@@ -13,12 +13,12 @@ import 'package:test_api/test_api.dart' as test_package;
 
 /// Wrapper for [testWidgets] with leak tracking.
 ///
-/// This is temporarty method with the plan:
+/// This method is temporarty with the plan:
 ///
-/// 1. For each widget test in flutter framework, do one of three:
+/// 1. For each occurence of [testWidgets] in flutter framework, do one of three:
 /// * replace [testWidgets] with [testWidgetsWithLeakTracking]
 /// * comment why leak tracking is not needed
-/// * comment with bug that prescribes to fix memory leak
+/// * link bug about memory leak
 ///
 /// 2. Enable [testWidgets] to track leaks, disabled by default for users,
 /// and enabled by default for flutter framework.
@@ -35,6 +35,7 @@ void testWidgetsWithLeakTracking(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
+  LeakTrackingTestConfig leakTrackingConfig = const LeakTrackingTestConfig(),
 }) {
   Future<void> wrappedCallback(WidgetTester tester) async {
     await _withFlutterLeakTracking(
