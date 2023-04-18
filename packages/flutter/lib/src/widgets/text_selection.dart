@@ -477,6 +477,7 @@ class TextSelectionOverlay {
         context: context,
         builder: spellCheckSuggestionsToolbarBuilder,
     );
+    hideHandles();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}
@@ -2167,12 +2168,12 @@ class TextSelectionGestureDetectorBuilder {
           // On desktop platforms the selection is set on tap down.
         case TargetPlatform.android:
           editableText.hideToolbar();
-          editableText.showSpellCheckSuggestionsToolbar();
           if (isShiftPressedValid) {
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
             return;
           }
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          editableText.showSpellCheckSuggestionsToolbar();
         case TargetPlatform.fuchsia:
           editableText.hideToolbar();
           if (isShiftPressedValid) {
@@ -2233,8 +2234,7 @@ class TextSelectionGestureDetectorBuilder {
                 } else {
                   editableText.toggleToolbar(false);
                 }
-              }
-              else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed) || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame)) && renderEditable.hasFocus) {
+              } else if (((_positionWasOnSelectionExclusive(textPosition) && !previousSelection.isCollapsed) || (_positionWasOnSelectionInclusive(textPosition) && previousSelection.isCollapsed && isAffinityTheSame)) && renderEditable.hasFocus) {
                 editableText.toggleToolbar(false);
               } else {
                 renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
