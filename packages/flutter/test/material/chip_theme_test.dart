@@ -216,7 +216,7 @@ void main() {
     expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
     expect(getMaterial(tester).shape, chipTheme.shape);
-    expect(getLabelStyle(tester).style.fontSize,14);
+    expect(getLabelStyle(tester).style.fontSize, 14);
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.ac_unit).first).data.color, customIconTheme.color);
     expect(getIconTheme(tester).color, customIconTheme.color);
   });
@@ -272,7 +272,7 @@ void main() {
   });
 
   testWidgets('Chip with Avatar Icon custom iconTheme and uses ChipTheme', (WidgetTester tester) async {
-    const IconThemeData shadowedClipThemeIconTheme = IconThemeData(color: Color(0xffbbeeff));
+    const IconThemeData shadowedChipThemeIconTheme = IconThemeData(color: Color(0xffbbeeff));
     const ChipThemeData chipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
@@ -327,7 +327,7 @@ void main() {
     expect(getMaterial(tester).shape, chipTheme.shape);
     expect(getLabelStyle(tester).style.fontSize, 32);
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.ac_unit).first).data.color, customIconTheme.color);
-    expect(getIconTheme(tester).color, customIconTheme.color,reason:'Chip Icon Theme does not reflect custom iconTheme color.');
+    expect(getIconTheme(tester).color, customIconTheme.color, reason:'Chip Icon Theme does not reflect custom iconTheme color.');
   });
 
   testWidgets('Chip uses constructor parameters', (WidgetTester tester) async {
@@ -382,7 +382,7 @@ void main() {
     expect(getMaterial(tester).shape, shape);
     expect(getLabelStyle(tester).style.fontSize, 32);
     expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.cabin).first).data.color, customIconTheme.color);
-    expect(getIconTheme(tester).color, customIconTheme.color,reason:'Chip Icon Theme does not reflect custom iconTheme color.');
+    expect(getIconTheme(tester).color, customIconTheme.color, reason:'Chip Icon Theme does not reflect custom iconTheme color.');
   });
 
   testWidgets('ChipTheme.fromDefaults', (WidgetTester tester) async {
