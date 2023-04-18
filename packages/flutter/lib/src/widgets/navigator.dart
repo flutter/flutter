@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -21,6 +20,7 @@ import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 import 'heroes.dart';
+import 'notification_listener.dart';
 import 'overlay.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
@@ -2795,16 +2795,6 @@ class Navigator extends StatefulWidget {
   ///
   /// The default value of [Navigator.onHistoryChanged].
   static void defaultOnHistoryChanged(NavigatorState navigatorState) {
-    if (navigatorState._isRoot) {
-      SystemNavigator.updateNavigationStackStatus(navigatorState.canPop());
-      return;
-    }
-    final NavigationNotification notification = NavigationNotification(
-      canPop: navigatorState.canPop(),
-    );
-    notification.dispatch(navigatorState.context);
-    return;
-
     // TODO(justinmc): Also should probably set this on app start, because it
     // will otherwise carry over during shift+r restart.
     // If this is the root NavigatorState, then update the SystemNavigator with
@@ -2817,6 +2807,7 @@ class Navigator extends StatefulWidget {
       SystemNavigator.updateNavigationStackStatus(true);
       return;
     }
+
     final _RouteEntry currentRouteEntry =
         navigatorState._history.value.firstWhere(_RouteEntry.isPresentPredicate);
     // If the currentRouteEntry isn't active, such as for the first route on app
@@ -3412,6 +3403,23 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   void _onHistoryChanged() {
     if (widget.onHistoryChanged == null) {
+      // TODO(justinmc): I'm adding the notification logic here in the case that
+      // onHistoryChanged is explicitly passed null. We'll have to decide
+      // whether we want ether the onHistoryChanged approach or the Notification
+      // approach.
+      //return;
+
+      // TODO(justinmc): I'm skeptical that this might be incorrect in complex
+      // situations. Maybe only updateNavigationStackStatus in notification handler.
+      if (_isRoot) {
+        SystemNavigator.updateNavigationStackStatus(canPop());
+        return;
+      }
+
+      final NavigationNotification notification = NavigationNotification(
+        canPop: canPop(),
+      );
+      notification.dispatch(context);
       return;
     }
     widget.onHistoryChanged!(this);
