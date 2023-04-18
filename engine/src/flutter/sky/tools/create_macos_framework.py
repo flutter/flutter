@@ -172,6 +172,19 @@ def process_framework(dst, args, fat_framework, fat_framework_binary):
         'without_entitlements.txt',
     ],
                           cwd=dst)
+    # Double zip to make it consistent with legacy artifacts.
+    # TODO(fujino): remove this once https://github.com/flutter/flutter/issues/125067 is resolved
+    subprocess.check_call([
+        'zip',
+        '-y',
+        'FlutterMacOS.framework_.zip',
+        'FlutterMacOS.framework.zip',
+    ],
+                          cwd=dst)
+    # Use doubled zipped file.
+    final_src_path = os.path.join(dst, 'FlutterMacOS.framework_.zip')
+    final_dst_path = os.path.join(dst, 'FlutterMacOS.framework.zip')
+    shutil.move(final_src_path, final_dst_path)
 
 
 if __name__ == '__main__':
