@@ -347,5 +347,8 @@ untranslated-messages-file: lib/l10n/untranslated.json
       outputDirectory.childFile('app_localizations.dart').readAsStringSync(),
       contains('static AppLocalizations? of(BuildContext context)'),
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
