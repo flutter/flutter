@@ -3,12 +3,63 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('more than three suggestions throws an error', (WidgetTester tester) async {
+    Future<void> pumpToolbar(List<String> suggestions) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoSpellCheckSuggestionsToolbar(
+              anchors: const TextSelectionToolbarAnchors(
+                primaryAnchor: Offset.zero,
+              ),
+              buttonItems: suggestions.map((String string) {
+                return ContextMenuButtonItem(
+                  onPressed: () {},
+                  label: string,
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+    }
+    await pumpToolbar(<String>['hello', 'yellow', 'yell']);
+    expect(() async {
+      await pumpToolbar(<String>['hello', 'yellow', 'yell', 'yeller']);
+    }, throwsAssertionError);
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  test('buildSuggestionButtons only considers the first three suggestions', () {
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
+      suggestions: <String>[
+        'hello',
+        'yellow',
+        'yell',
+        'yeller',
+      ],
+    );
+    final List<ContextMenuButtonItem>? buttonItems =
+        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
+    expect(buttonItems, isNotNull);
+    final Iterable<String?> labels = buttonItems!.map((ContextMenuButtonItem buttonItem) {
+      return buttonItem.label;
+    });
+    expect(labels, hasLength(3));
+    expect(labels, contains('hello'));
+    expect(labels, contains('yellow'));
+    expect(labels, contains('yell'));
+    expect(labels, isNot(contains('yeller')));
+  });
 
   testWidgets('buildButtonItems builds a "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -41,17 +92,22 @@ class _FakeEditableText extends EditableText {
 }
 
 class _FakeEditableTextState extends EditableTextState {
+  _FakeEditableTextState({
+    this.suggestions,
+  });
+
+  final List<String>? suggestions;
   @override
   TextEditingValue get currentTextEditingValue => TextEditingValue.empty;
 
   @override
   SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
-    return const SuggestionSpan(
-      TextRange(
+    return SuggestionSpan(
+      const TextRange(
         start: 0,
         end: 0,
       ),
-      <String>[],
+      suggestions ?? <String>[],
     );
   }
 }
