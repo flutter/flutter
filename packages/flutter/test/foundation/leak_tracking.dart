@@ -11,29 +11,47 @@ import 'package:meta/meta.dart';
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
+/// Wrapper for [testWidgets] with leak tracking.
+///
+/// This is temporarty method with the plan:
+///
+/// 1. For each widget test in flutter framework, do one of three:
+/// * replace [testWidgets] with [testWidgetsWithLeakTracking]
+/// * comment why leak tracking is not needed
+/// * comment with bug that prescribes to fix memory leak
+///
+/// 2. Enable [testWidgets] to track leaks, disabled by default for users,
+/// and enabled by default for flutter framework.
+///
+/// 3. Replace [testWidgetsWithLeakTracking] with [testWidgets]
+///
+/// See https://github.com/flutter/devtools/issues/3951 for details.
 @isTest
 void testWidgetsWithLeakTracking(
   String description,
   WidgetTesterCallback callback, {
   bool? skip,
   test_package.Timeout? timeout,
-  @Deprecated(
-    'This parameter has no effect. Use `timeout` instead. '
-    'This feature was deprecated after v2.6.0-1.0.pre.'
-  )
-  Duration? initialTimeout,
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
 }) {
-  testWidgets(description, callback,
-      skip: skip,
-      timeout: timeout,
-      // ignore: deprecated_member_use, keeping for backwards compatibility
-      initialTimeout: initialTimeout,
-      semanticsEnabled: semanticsEnabled,
-      variant: variant,
-      tags: tags);
+  Future<void> wrappedCallback(WidgetTester tester) async {
+    await _withFlutterLeakTracking(
+      () async => callback(tester),
+      tester: tester,
+    );
+  }
+
+  testWidgets(
+    description,
+    wrappedCallback,
+    skip: skip,
+    timeout: timeout,
+    semanticsEnabled: semanticsEnabled,
+    variant: variant,
+    tags: tags,
+  );
 }
 
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
@@ -52,7 +70,7 @@ void testWidgetsWithLeakTracking(
 ///
 /// Pass [leaksObtainer] if you want to get leak information before
 /// the method failure.
-Future<void> withFlutterLeakTracking(
+Future<void> _withFlutterLeakTracking(
   DartAsyncCallback callback, {
   required WidgetTester? tester,
   StackTraceCollectionConfig stackTraceCollectionConfig =
