@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'url_strategy.dart';
+
 /// Function type that handles pop state events.
 typedef EventListener = dynamic Function(Object event);
 
@@ -18,43 +20,51 @@ abstract class PlatformLocation {
   /// Registers an event listener for the `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void addPopStateListener(EventListener fn);
+  void addPopStateListener(EventListener fn) {
+    // No-op.
+  }
 
   /// Unregisters the given listener (added by [addPopStateListener]) from the
   /// `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void removePopStateListener(EventListener fn);
+  void removePopStateListener(EventListener fn) {
+    // No-op.
+  }
 
   /// The `pathname` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/pathname
-  String get pathname;
+  String get pathname => '';
 
   /// The `query` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/search
-  String get search;
+  String get search => '';
 
   /// The `hash` part of the URL in the browser address bar.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Location/hash
-  String get hash;
+  String get hash => '';
 
   /// The `state` in the current history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
-  Object? get state;
+  Object? get state => null;
 
   /// Adds a new entry to the browser history stack.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  void pushState(Object? state, String title, String url);
+  void pushState(Object? state, String title, String url) {
+    // No-op.
+  }
 
   /// Replaces the current entry in the browser history stack.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  void replaceState(Object? state, String title, String url);
+  void replaceState(Object? state, String title, String url) {
+    // No-op.
+  }
 
   /// Moves forwards or backwards through the history stack.
   ///
@@ -67,10 +77,15 @@ abstract class PlatformLocation {
   /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  void go(int count);
+  void go(int count) {
+    // No-op.
+  }
 
   /// The base href where the Flutter app is being served.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-  String? getBaseHref();
+  String? getBaseHref() => null;
 }
+
+/// Delegates to real browser APIs to provide platform location functionality.
+class BrowserPlatformLocation extends PlatformLocation {}
