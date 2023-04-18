@@ -45,7 +45,21 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
       context->CreateGlyphAtlas(GlyphAtlas::Type::kAlphaBitmap, atlas_context,
                                 TextFrameFromTextBlob(blob));
   ASSERT_NE(atlas, nullptr);
-  OpenPlaygroundHere([](RenderTarget&) { return true; });
+  ASSERT_NE(atlas->GetTexture(), nullptr);
+  ASSERT_EQ(atlas->GetType(), GlyphAtlas::Type::kAlphaBitmap);
+  ASSERT_EQ(atlas->GetGlyphCount(), 4llu);
+
+  std::optional<FontGlyphPair> first_pair;
+  Rect first_rect;
+  atlas->IterateGlyphs(
+      [&](const FontGlyphPair& pair, const Rect& rect) -> bool {
+        first_pair = pair;
+        first_rect = rect;
+        return false;
+      });
+
+  ASSERT_TRUE(first_pair.has_value());
+  ASSERT_TRUE(atlas->FindFontGlyphBounds(first_pair.value()).has_value());
 }
 
 static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {

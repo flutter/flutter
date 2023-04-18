@@ -72,7 +72,7 @@ void GlyphAtlas::AddTypefaceGlyphPosition(const FontGlyphPair& pair,
 
 std::optional<Rect> GlyphAtlas::FindFontGlyphBounds(
     const FontGlyphPair& pair) const {
-  auto found = positions_.find(pair);
+  const auto& found = positions_.find(pair);
   if (found == positions_.end()) {
     return std::nullopt;
   }
@@ -98,17 +98,6 @@ size_t GlyphAtlas::IterateGlyphs(
     }
   }
   return count;
-}
-
-FontGlyphPair::Vector GlyphAtlas::HasSamePairs(
-    const FontGlyphPair::Vector& new_glyphs) {
-  std::vector<FontGlyphPair> new_pairs;
-  for (auto pair : new_glyphs) {
-    if (positions_.find(pair) == positions_.end()) {
-      new_pairs.push_back(pair);
-    }
-  }
-  return new_pairs;
 }
 
 }  // namespace impeller
