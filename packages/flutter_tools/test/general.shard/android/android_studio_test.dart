@@ -107,18 +107,18 @@ void main() {
     });
 
     testUsingContext('discovers Android Studio >=4.1 location', () {
-      final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String javaBinaryPath =  globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
-      globals.fs.file(javaBinaryPath).createSync(recursive: true);
+      final String javaBinaryPath =  fileSystem.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
+      fileSystem.file(javaBinaryPath).createSync(recursive: true);
 
-      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
       processManager.addCommand(FakeCommand(
           command: <String>[
@@ -129,11 +129,11 @@ void main() {
         )
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
       expect(studio, isNotNull);
-      expect(studio.pluginsPath, equals(globals.fs.path.join(
+      expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
         'Library',
         'Application Support',
@@ -152,18 +152,18 @@ void main() {
     });
 
     testUsingContext('discovers Android Studio >=2020.3 location', () {
-      final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String javaBinaryPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
-      globals.fs.file(javaBinaryPath).createSync(recursive: true);
+      final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
+      fileSystem.file(javaBinaryPath).createSync(recursive: true);
 
-      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
       processManager.addCommand(FakeCommand(
           command: <String>[
@@ -174,11 +174,11 @@ void main() {
         )
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
       expect(studio, isNotNull);
-      expect(studio.pluginsPath, equals(globals.fs.path.join(
+      expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
         'Library',
         'Application Support',
@@ -197,18 +197,18 @@ void main() {
     });
 
     testUsingContext('discovers Android Studio <4.1 location', () {
-      final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String javaBinaryPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
-      globals.fs.file(javaBinaryPath).createSync(recursive: true);
+      final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
+      fileSystem.file(javaBinaryPath).createSync(recursive: true);
 
-      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
       processManager.addCommand(FakeCommand(
           command: <String>[
@@ -219,11 +219,11 @@ void main() {
         )
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
       expect(studio, isNotNull);
-      expect(studio.pluginsPath, equals(globals.fs.path.join(
+      expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
         'Library',
         'Application Support',
@@ -241,18 +241,18 @@ void main() {
     });
 
     testUsingContext('discovers Android Studio EAP location', () {
-      final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio with suffix.app',
         'Contents',
       );
-      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String javaBinPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java');
-      globals.fs.file(javaBinPath).createSync(recursive: true);
+      final String javaBinPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java');
+      fileSystem.file(javaBinPath).createSync(recursive: true);
 
-      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEAP;
       processManager.addCommand(FakeCommand(
           command: <String>[
@@ -263,11 +263,11 @@ void main() {
         )
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
       expect(studio, isNotNull);
-      expect(studio.pluginsPath, equals(globals.fs.path.join(
+      expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
         'Library',
         'Application Support',
@@ -285,29 +285,29 @@ void main() {
     });
 
     testUsingContext('does not discover Android Studio with JetBrainsToolboxApp wrapper', () {
-      final String applicationPlistFolder = globals.fs.path.join(
+      final String applicationPlistFolder = fileSystem.path.join(
         '/',
         'Applications',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(applicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(applicationPlistFolder).createSync(recursive: true);
 
-      final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
+      final String applicationsPlistFilePath = fileSystem.path.join(applicationPlistFolder, 'Info.plist');
       const Map<String, Object> jetbrainsInfoPlist = <String, Object>{
         'JetBrainsToolboxApp': 'ignored',
       };
       plistUtils.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
 
-      final String homeDirectoryPlistFolder = globals.fs.path.join(
-        globals.fsUtils.homeDirPath!,
+      final String homeDirectoryPlistFolder = fileSystem.path.join(
+        fsUtils.homeDirPath!,
         'Applications',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(homeDirectoryPlistFolder).createSync(recursive: true);
+      fileSystem.directory(homeDirectoryPlistFolder).createSync(recursive: true);
 
-      final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
+      final String homeDirectoryPlistFilePath = fileSystem.path.join(homeDirectoryPlistFolder, 'Info.plist');
       plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist2020_3;
 
       expect(AndroidStudio.allInstalled().length, 1);
@@ -424,29 +424,29 @@ void main() {
     });
 
     testUsingContext('finds latest valid install', () {
-      final String applicationPlistFolder = globals.fs.path.join(
+      final String applicationPlistFolder = fileSystem.path.join(
         '/',
         'Applications',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(applicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(applicationPlistFolder).createSync(recursive: true);
 
-      final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
+      final String applicationsPlistFilePath = fileSystem.path.join(applicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist3_3;
 
      fileSystem.file(fileSystem.path.join(applicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'))
       .createSync(recursive: true);
 
-      final String homeDirectoryPlistFolder = globals.fs.path.join(
-        globals.fsUtils.homeDirPath!,
+      final String homeDirectoryPlistFolder = fileSystem.path.join(
+        fsUtils.homeDirPath!,
         'Applications',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(homeDirectoryPlistFolder).createSync(recursive: true);
+      fileSystem.directory(homeDirectoryPlistFolder).createSync(recursive: true);
 
-      final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
+      final String homeDirectoryPlistFilePath = fileSystem.path.join(homeDirectoryPlistFolder, 'Info.plist');
       plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
 
       fileSystem.file(fileSystem.path.join(homeDirectoryPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'))
@@ -463,21 +463,21 @@ void main() {
     });
 
     testUsingContext('extracts custom paths for directly downloaded Android Studio', () {
-      final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
       expect(studio, isNotNull);
-      expect(studio.pluginsPath, equals(globals.fs.path.join(
+      expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
         'Library',
         'Application Support',
@@ -494,18 +494,18 @@ void main() {
     });
 
     testUsingContext('finds Android Studio 2020.3 bundled Java version', () {
-      final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String javaBinPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java');
-      globals.fs.file(javaBinPath).createSync(recursive: true);
+      final String javaBinPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java');
+      fileSystem.file(javaBinPath).createSync(recursive: true);
 
-      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
       processManager.addCommand(FakeCommand(
         command: <String>[
@@ -516,10 +516,10 @@ void main() {
       )
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
-      expect(studio.javaPath, equals(globals.fs.path.join(
+      expect(studio.javaPath, equals(fileSystem.path.join(
         studioInApplicationPlistFolder,
         'jre',
         'Contents',
@@ -536,18 +536,18 @@ void main() {
     });
 
     testUsingContext('finds Android Studio 2022.1 bundled Java version', () {
-      final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String javaBinPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
-      globals.fs.file(javaBinPath).createSync(recursive: true);
+      final String javaBinPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
+      fileSystem.file(javaBinPath).createSync(recursive: true);
 
-      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
       processManager.addCommand(FakeCommand(
         command: <String>[
@@ -558,10 +558,10 @@ void main() {
       )
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
-      expect(studio.javaPath, equals(globals.fs.path.join(
+      expect(studio.javaPath, equals(fileSystem.path.join(
         studioInApplicationPlistFolder,
         'jbr',
         'Contents',
@@ -578,15 +578,15 @@ void main() {
     });
 
     testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
-      final String studioInApplicationPlistFolder = globals.fs.path.join(
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
         'Application',
         'Android Studio.app',
         'Contents',
       );
-      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
       plistWithoutVersion['CFBundleShortVersionString'] = '';
       plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
@@ -603,11 +603,11 @@ void main() {
       )
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
       expect(studio.version, null);
-      expect(studio.javaPath, equals(globals.fs.path.join(
+      expect(studio.javaPath, equals(fileSystem.path.join(
         studioInApplicationPlistFolder,
         'jbr',
         'Contents',
