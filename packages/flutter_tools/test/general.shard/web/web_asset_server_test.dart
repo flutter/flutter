@@ -76,7 +76,7 @@ void main() {
       .handle(Request('GET', Uri.parse('http://localhost:8080/assets/foo.js')));
 
     expect(response.headers, <String, String>{
-      'Content-Type': 'application/javascript',
+      'Content-Type': 'text/javascript',
       'content-length': '18',
     });
   });

@@ -505,7 +505,7 @@ void main() {
 
     resampler.sample(const Duration(microseconds: 2500), Duration.zero, result.add);
 
-    // Addeds and down pointer events should have been returned.
+    // Added and down pointer events should have been returned.
     expect(result.length, 2);
     expect(result[0].timeStamp, const Duration(microseconds: 2500));
     expect(result[0] is PointerAddedEvent, true);

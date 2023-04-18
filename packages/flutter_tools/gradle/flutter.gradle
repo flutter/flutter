@@ -279,9 +279,8 @@ class FlutterPlugin implements Plugin<Project> {
                     // Enables code shrinking, obfuscation, and optimization for only
                     // your project's release build type.
                     minifyEnabled true
-                    // Enables resource shrinking, which is performed by the
-                    // Android Gradle plugin.
-                    // NOTE: The resource shrinker can't be used for libraries.
+                    // Enables resource shrinking, which is performed by the Android Gradle plugin.
+                    // The resource shrinker can't be used for libraries.
                     shrinkResources isBuiltAsApp(project)
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
@@ -618,10 +617,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Boolean shouldSplitPerAbi() {
-        if (project.hasProperty('split-per-abi')) {
-            return project.property('split-per-abi').toBoolean()
-        }
-        return false;
+        return project.findProperty('split-per-abi')?.toBoolean() ?: false;
     }
 
     private Boolean useLocalEngine() {
@@ -629,18 +625,12 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Boolean isVerbose() {
-        if (project.hasProperty('verbose')) {
-            return project.property('verbose').toBoolean()
-        }
-        return false
+        return project.findProperty('verbose')?.toBoolean() ?: false;
     }
 
     /** Whether to build the debug app in "fast-start" mode. */
     private Boolean isFastStart() {
-        if (project.hasProperty("fast-start")) {
-            return project.property("fast-start").toBoolean()
-        }
-        return false
+        return project.findProperty("fast-start")?.toBoolean() ?: false;
     }
 
     private static Boolean isBuiltAsApp(Project project) {
@@ -688,10 +678,49 @@ class FlutterPlugin implements Plugin<Project> {
         project.dependencies.add(configuration, dependency, config)
     }
 
+    // Add a task that can be called on flutter projects that prints the java version used in gradle.
+    //
+    // Format of the output of this task can be used in debugging what version of java gradle is using.
+    // Not recomended for use in time sensitive commands like `flutter run` or `flutter build` as
+    // gradle is slower than we want. Particularly in light of https://github.com/flutter/flutter/issues/119196.
+    //
+    private static void addTaskForJavaVersion(Project project) {
+        // Warning: the name of this task is used by other code. Change with caution.
+        project.tasks.register('javaVersion') {
+            description 'Print the current java version used by gradle. '
+                'see: https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html'
+            doLast {
+                println(JavaVersion.current())
+            }
+        }
+    }
+
+    // Add a task that can be called on flutter projects that prints the available build variants
+    // in gradle.
+    //
+    // This task prints variants in this format:
+    //
+    // BuildVariant: debug
+    // BuildVariant: release
+    // BuildVariant: profile
+    //
+    // Format of the output of this task is used by `AndroidProject.getBuildVariants`.
+    private static void addTaskForPrintBuildVariants(Project project) {
+        // Warning: The name of this task is used by `AndroidProject.getBuildVariants`.
+        project.tasks.register("printBuildVariants") {
+            description "Prints out all build variants for this Android project"
+            doLast {
+                project.android.applicationVariants.all { variant ->
+                    println "BuildVariant: ${variant.name}";
+                }
+            }
+        }
+    }
+
     /**
      * Returns a Flutter build mode suitable for the specified Android buildType.
      *
-     * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
+     * The BuildType DSL type is not public, and is therefore omitted from the signature.
      *
      * @return "debug", "profile", or "release" (fall-back).
      */
@@ -860,6 +889,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('validate-deferred-components')) {
             validateDeferredComponentsValue = project.property('validate-deferred-components').toBoolean()
         }
+
+        addTaskForJavaVersion(project)
+        addTaskForPrintBuildVariants(project)
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -877,6 +909,12 @@ class FlutterPlugin implements Plugin<Project> {
             }
             String variantBuildMode = buildModeFor(variant.buildType)
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
+            // Be careful when configuring task below, Groovy has bizarre
+            // scoping rules: writing `verbose isVerbose()` means calling
+            // `isVerbose` on the task itself - which would return `verbose`
+            // original value. You either need to hoist the value
+            // into a separate variable `verbose verboseValue` or prefix with
+            // `this` (`verbose this.isVerbose()`).
             FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
@@ -884,8 +922,8 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath getFlutterTarget()
-                verbose isVerbose()
-                fastStart isFastStart()
+                verbose this.isVerbose()
+                fastStart this.isFastStart()
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
@@ -915,8 +953,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
-                destinationDir libJar.parentFile
-                archiveName libJar.name
+                destinationDirectory = libJar.parentFile
+                archiveFileName = libJar.name
                 dependsOn compileTask
                 targetPlatforms.each { targetPlatform ->
                     String abi = PLATFORM_ARCH_MAP[targetPlatform]
@@ -964,6 +1002,12 @@ class FlutterPlugin implements Plugin<Project> {
                 def processResources = variantOutput.hasProperty("processResourcesProvider") ?
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
+            }
+            // Task compressAssets uses the output of copyFlutterAssetsTask,
+            // so it's necessary to declare it as an dependency.
+            def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
+            if (compressAssetsTask) {
+                compressAssetsTask.dependsOn copyFlutterAssetsTask
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
@@ -1089,7 +1133,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean fastStart
     @Input
     String targetPath
-    @Optional @Internal
+    @Optional @Input
     Boolean verbose
     @Optional @Input
     String[] fileSystemRoots

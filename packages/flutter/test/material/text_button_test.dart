@@ -568,12 +568,8 @@ void main() {
       ),
     );
 
-    // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[70.0, 71.0]));
-    expect(tester.getSize(find.byType(TextButton)).height, isIn(<double>[47.0, 48.0]));
-    expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
-    expect(tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
+    expect(tester.getSize(find.byType(TextButton)), const Size(71.0, 48.0));
+    expect(tester.getSize(find.byType(Text)), const Size(55.0, 18.0));
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
@@ -595,13 +591,9 @@ void main() {
       ),
     );
 
-    // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[133.0, 134.0]));
-    expect(tester.getSize(find.byType(TextButton)).height, equals(48.0));
-    expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
-    expect(tester.getSize(find.byType(Text)).height, equals(42.0));
-  });
+    expect(tester.getSize(find.byType(TextButton)), const Size(134.0, 48.0));
+    expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/61016
 
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
@@ -1193,6 +1185,59 @@ void main() {
       ),
     );
     expect(paddingWidget.padding, const EdgeInsets.all(22));
+  });
+
+  testWidgets('M3 TextButton has correct default padding', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home:  Scaffold(
+                body: Center(
+                  child: TextButton(
+                    key: key,
+                    onPressed: () {},
+                    child: const Text('TextButton'),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 12,vertical: 8));
+  });
+
+  testWidgets('M3 TextButton.icon has correct default padding', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        home: Scaffold(
+                body: Center(
+                  child: TextButton.icon(
+                    key: key,
+                    onPressed: () {},
+                    icon: const Icon(Icons.add),
+                    label: const Text('TextButton'),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(Padding),
+      ),
+    );
+   expect(paddingWidget.padding, const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8));
   });
 
   testWidgets('Fixed size TextButtons', (WidgetTester tester) async {

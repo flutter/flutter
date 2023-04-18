@@ -1,5 +1,5 @@
 {
-  "version": "v0_143",
+  "version": "v0_162",
 
   "md.comp.suggestion-chip.container.height": 32.0,
   "md.comp.suggestion-chip.container.shape": "md.sys.shape.corner.small",
@@ -38,10 +38,10 @@
   "md.comp.suggestion-chip.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
   "md.comp.suggestion-chip.with-leading-icon.disabled.leading-icon.color": "onSurface",
   "md.comp.suggestion-chip.with-leading-icon.disabled.leading-icon.opacity": 0.38,
-  "md.comp.suggestion-chip.with-leading-icon.dragged.leading-icon.color": "onSurfaceVariant",
-  "md.comp.suggestion-chip.with-leading-icon.focus.leading-icon.color": "onSurfaceVariant",
-  "md.comp.suggestion-chip.with-leading-icon.hover.leading-icon.color": "onSurfaceVariant",
-  "md.comp.suggestion-chip.with-leading-icon.leading-icon.color": "onSurfaceVariant",
+  "md.comp.suggestion-chip.with-leading-icon.dragged.leading-icon.color": "primary",
+  "md.comp.suggestion-chip.with-leading-icon.focus.leading-icon.color": "primary",
+  "md.comp.suggestion-chip.with-leading-icon.hover.leading-icon.color": "primary",
+  "md.comp.suggestion-chip.with-leading-icon.leading-icon.color": "primary",
   "md.comp.suggestion-chip.with-leading-icon.leading-icon.size": 18.0,
-  "md.comp.suggestion-chip.with-leading-icon.pressed.leading-icon.color": "onSurfaceVariant"
+  "md.comp.suggestion-chip.with-leading-icon.pressed.leading-icon.color": "primary"
 }

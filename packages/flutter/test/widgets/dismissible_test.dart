@@ -98,23 +98,19 @@ Future<void> dismissElement(WidgetTester tester, Finder finder, { required AxisD
       // edge and outside the Dismissible event listener's bounds.
       downLocation = tester.getTopRight(finder) + const Offset(-0.1, 0.0);
       upLocation = tester.getTopLeft(finder) + const Offset(-0.1, 0.0);
-      break;
     case AxisDirection.right:
       // we do the same thing here to keep the test symmetric
       downLocation = tester.getTopLeft(finder) + const Offset(0.1, 0.0);
       upLocation = tester.getTopRight(finder) + const Offset(0.1, 0.0);
-      break;
     case AxisDirection.up:
       // getBottomLeft() returns a point that's just below itemWidget's bottom
       // edge and outside the Dismissible event listener's bounds.
       downLocation = tester.getBottomLeft(finder) + const Offset(0.0, -0.1);
       upLocation = tester.getTopLeft(finder) + const Offset(0.0, -0.1);
-      break;
     case AxisDirection.down:
       // again with doing the same here for symmetry
       downLocation = tester.getTopLeft(finder) + const Offset(0.1, 0.0);
       upLocation = tester.getBottomLeft(finder) + const Offset(0.1, 0.0);
-      break;
   }
 
   final TestGesture gesture = await tester.startGesture(downLocation);
@@ -127,16 +123,12 @@ Future<void> dragElement(WidgetTester tester, Finder finder, { required AxisDire
   switch (gestureDirection) {
     case AxisDirection.left:
       delta = Offset(-amount, 0.0);
-      break;
     case AxisDirection.right:
       delta = Offset(amount, 0.0);
-      break;
     case AxisDirection.up:
       delta = Offset(0.0, -amount);
-      break;
     case AxisDirection.down:
       delta = Offset(0.0, amount);
-      break;
   }
   await tester.drag(finder, delta);
 }
@@ -146,16 +138,12 @@ Future<void> flingElement(WidgetTester tester, Finder finder, { required AxisDir
   switch (gestureDirection) {
     case AxisDirection.left:
       delta = const Offset(-300.0, 0.0);
-      break;
     case AxisDirection.right:
       delta = const Offset(300.0, 0.0);
-      break;
     case AxisDirection.up:
       delta = const Offset(0.0, -300.0);
-      break;
     case AxisDirection.down:
       delta = const Offset(0.0, 300.0);
-      break;
   }
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
@@ -174,7 +162,6 @@ Future<void> dismissItem(
   required AxisDirection gestureDirection,
   DismissMethod mechanism = dismissElement,
 }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -188,7 +175,6 @@ Future<void> dragItem(
       required AxisDirection gestureDirection,
       required double amount,
     }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -202,7 +188,6 @@ Future<void> checkFlingItemBeforeMovementEnd(
   required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement,
 }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -218,7 +203,6 @@ Future<void> checkFlingItemAfterMovement(
   required AxisDirection gestureDirection,
   DismissMethod mechanism = rollbackElement,
 }) async {
-  assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
@@ -233,16 +217,12 @@ Future<void> rollbackElement(WidgetTester tester, Finder finder, { required Axis
   switch (gestureDirection) {
     case AxisDirection.left:
       delta = const Offset(-30.0, 0.0);
-      break;
     case AxisDirection.right:
       delta = const Offset(30.0, 0.0);
-      break;
     case AxisDirection.up:
       delta = const Offset(0.0, -30.0);
-      break;
     case AxisDirection.down:
       delta = const Offset(0.0, 30.0);
-      break;
   }
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
@@ -644,14 +624,14 @@ void main() {
   // Dismissible contract. This is not an example of good practice.
   testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox(
             width: 100.0,
             height: 1000.0,
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 Test1215DismissibleWidget('1'),
                 Test1215DismissibleWidget('2'),
               ],

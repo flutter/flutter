@@ -50,7 +50,7 @@ abstract class UnpackMacOS extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
 
     final ProcessResult result = environment.processManager.runSync(<String>[
@@ -206,6 +206,7 @@ static const int Moo = 88;
       '-dynamiclib',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-fapplication-extension',
       '-install_name', '@rpath/App.framework/App',
       '-o', outputFile.path,
     ]);
@@ -244,7 +245,7 @@ class CompileMacOSFramework extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
@@ -371,7 +372,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment
         .outputDir
         .childDirectory('App.framework');

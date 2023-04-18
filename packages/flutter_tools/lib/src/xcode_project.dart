@@ -89,6 +89,13 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
 
   /// The CocoaPods 'Manifest.lock'.
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
+
+  /// The CocoaPods generated 'Pods-Runner-frameworks.sh'.
+  File get podRunnerFrameworksScript => hostAppRoot
+      .childDirectory('Pods')
+      .childDirectory('Target Support Files')
+      .childDirectory('Pods-Runner')
+      .childFile('Pods-Runner-frameworks.sh');
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -329,7 +336,7 @@ class IosProject extends XcodeBasedProject {
       xcodeProject.path,
       buildContext: buildContext,
     );
-    if (buildSettings != null && buildSettings.isNotEmpty) {
+    if (buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.
       return buildSettings;
     }

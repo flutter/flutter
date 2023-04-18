@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -50,7 +51,6 @@ void main() {
           '--spirv=$outputSpirvPath',
           '--input=$fragPath',
           '--input-type=frag',
-          '--remap-samplers',
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
@@ -91,7 +91,6 @@ void main() {
           '--spirv=$outputPath.spirv',
           '--input=$fragPath',
           '--input-type=frag',
-          '--remap-samplers',
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
@@ -130,7 +129,6 @@ void main() {
           '--spirv=$outputPath.spirv',
           '--input=$fragPath',
           '--input-type=frag',
-          '--remap-samplers',
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
@@ -169,7 +167,6 @@ void main() {
           '--spirv=$outputSpirvPath',
           '--input=$notFragPath',
           '--input-type=frag',
-          '--remap-samplers',
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
@@ -210,7 +207,6 @@ void main() {
           '--spirv=$outputSpirvPath',
           '--input=$notFragPath',
           '--input-type=frag',
-          '--remap-samplers',
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
@@ -253,7 +249,6 @@ void main() {
           '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
           '--input=$fragPath',
           '--input-type=frag',
-          '--remap-samplers',
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
@@ -278,7 +273,10 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android, enableImpeller: false);
+    developmentShaderCompiler.configureCompiler(
+      TargetPlatform.android,
+      impellerStatus: ImpellerStatus.disabled,
+    );
 
     final DevFSContent? content = await developmentShaderCompiler
       .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));
@@ -299,7 +297,6 @@ void main() {
           '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
           '--input=$fragPath',
           '--input-type=frag',
-          '--remap-samplers',
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
@@ -324,7 +321,10 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.android, enableImpeller: true);
+    developmentShaderCompiler.configureCompiler(
+      TargetPlatform.android,
+      impellerStatus: ImpellerStatus.enabled,
+    );
 
     final DevFSContent? content = await developmentShaderCompiler
       .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));
@@ -334,7 +334,7 @@ void main() {
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
   });
 
-  testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targts', () async {
+  testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targets', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -346,7 +346,6 @@ void main() {
           '--spirv=/.tmp_rand0/0.8255140718871702.temp.spirv',
           '--input=$fragPath',
           '--input-type=frag',
-          '--remap-samplers',
           '--include=$fragDir',
           '--include=$shaderLibDir',
         ],
@@ -371,7 +370,10 @@ void main() {
       random: math.Random(0),
     );
 
-    developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript, enableImpeller: false);
+    developmentShaderCompiler.configureCompiler(
+      TargetPlatform.web_javascript,
+      impellerStatus: ImpellerStatus.disabled,
+    );
 
     final DevFSContent? content = await developmentShaderCompiler
       .recompileShader(DevFSFileContent(fileSystem.file(fragPath)));

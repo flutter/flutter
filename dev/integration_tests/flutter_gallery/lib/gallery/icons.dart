@@ -4,11 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class GalleryIcons {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  GalleryIcons._();
-
+abstract final class GalleryIcons {
   static const IconData tooltip = IconData(0xe900, fontFamily: 'GalleryIcons');
   static const IconData text_fields_alt = IconData(0xe901, fontFamily: 'GalleryIcons');
   static const IconData tabs = IconData(0xe902, fontFamily: 'GalleryIcons');

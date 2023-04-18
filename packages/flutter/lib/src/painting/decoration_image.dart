@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:developer' as developer;
-import 'dart:ui' as ui show Image;
+import 'dart:math' as math;
+import 'dart:ui' as ui show FlutterView, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -56,11 +57,7 @@ class DecorationImage {
     this.filterQuality = FilterQuality.low,
     this.invertColors = false,
     this.isAntiAlias = false,
-  }) : assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       assert(scale != null);
+  });
 
   /// The image to be painted into the decoration.
   ///
@@ -180,7 +177,6 @@ class DecorationImage {
   /// image needs to be repainted, e.g. because it is loading incrementally or
   /// because it is animated.
   DecorationImagePainter createPainter(VoidCallback onChanged) {
-    assert(onChanged != null);
     return DecorationImagePainter._(this, onChanged);
   }
 
@@ -264,7 +260,7 @@ class DecorationImage {
 /// This object should be disposed using the [dispose] method when it is no
 /// longer needed.
 class DecorationImagePainter {
-  DecorationImagePainter._(this._details, this._onChanged) : assert(_details != null);
+  DecorationImagePainter._(this._details, this._onChanged);
 
   final DecorationImage _details;
   final VoidCallback _onChanged;
@@ -287,9 +283,6 @@ class DecorationImagePainter {
   /// then the `onChanged` callback passed to [DecorationImage.createPainter]
   /// will be called.
   void paint(Canvas canvas, Rect rect, Path? clipPath, ImageConfiguration configuration) {
-    assert(canvas != null);
-    assert(rect != null);
-    assert(configuration != null);
 
     bool flipHorizontally = false;
     if (_details.matchTextDirection) {
@@ -366,7 +359,6 @@ class DecorationImagePainter {
     }
     _image?.dispose();
     _image = value;
-    assert(_onChanged != null);
     if (!synchronousCall) {
       _onChanged();
     }
@@ -499,12 +491,6 @@ void paintImage({
   FilterQuality filterQuality = FilterQuality.low,
   bool isAntiAlias = false,
 }) {
-  assert(canvas != null);
-  assert(image != null);
-  assert(alignment != null);
-  assert(repeat != null);
-  assert(flipHorizontally != null);
-  assert(isAntiAlias != null);
   assert(
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'
@@ -558,13 +544,22 @@ void paintImage({
   bool invertedCanvas = false;
   // Output size and destination rect are fully calculated.
   if (!kReleaseMode) {
+    // We can use the devicePixelRatio of the views directly here (instead of
+    // going through a MediaQuery) because if it changes, whatever is aware of
+    // the MediaQuery will be repainting the image anyways.
+    // Furthermore, for the memory check below we just assume that all images
+    // are decoded for the view with the highest device pixel ratio and use that
+    // as an upper bound for the display size of the image.
+    final double maxDevicePixelRatio = PaintingBinding.instance.platformDispatcher.views.fold(
+      0.0,
+      (double previousValue, ui.FlutterView view) => math.max(previousValue, view.devicePixelRatio),
+    );
+
     final ImageSizeInfo sizeInfo = ImageSizeInfo(
       // Some ImageProvider implementations may not have given this.
       source: debugImageLabel ?? '<Unknown Image(${image.width}×${image.height})>',
       imageSize: Size(image.width.toDouble(), image.height.toDouble()),
-      // It's ok to use this instead of a MediaQuery because if this changes,
-      // whatever is aware of the MediaQuery will be repainting the image anyway.
-      displaySize: outputSize * PaintingBinding.instance.window.devicePixelRatio,
+      displaySize: outputSize * maxDevicePixelRatio,
     );
     assert(() {
       if (debugInvertOversizedImages &&
@@ -576,7 +571,8 @@ void paintImage({
           exception: 'Image $debugImageLabel has a display size of '
             '$outputWidth×$outputHeight but a decode size of '
             '${image.width}×${image.height}, which uses an additional '
-            '${overheadInKilobytes}KB.\n\n'
+            '${overheadInKilobytes}KB (assuming a device pixel ratio of '
+            '$maxDevicePixelRatio).\n\n'
             'Consider resizing the asset ahead of time, supplying a cacheWidth '
             'parameter of $outputWidth, a cacheHeight parameter of '
             '$outputHeight, or using a ResizeImage.',
@@ -603,7 +599,7 @@ void paintImage({
       return true;
     }());
     // Avoid emitting events that are the same as those emitted in the last frame.
-    if (!_lastFrameImageSizeInfo.contains(sizeInfo)) {
+    if (!kReleaseMode && !_lastFrameImageSizeInfo.contains(sizeInfo)) {
       final ImageSizeInfo? existingSizeInfo = _pendingImageSizeInfo[sizeInfo.source];
       if (existingSizeInfo == null || existingSizeInfo.displaySizeInBytes < sizeInfo.displaySizeInBytes) {
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;

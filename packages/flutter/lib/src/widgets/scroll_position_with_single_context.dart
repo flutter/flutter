@@ -162,7 +162,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @protected
   @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
-    assert(value != null);
     if (userScrollDirection == value) {
       return;
     }
@@ -176,7 +175,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     required Duration duration,
     required Curve curve,
   }) {
-    if (nearEqual(to, pixels, physics.tolerance.distance)) {
+    if (nearEqual(to, pixels, physics.toleranceFor(this).distance)) {
       // Skip the animation, go straight to the position as we are already close.
       jumpTo(to);
       return Future<void>.value();

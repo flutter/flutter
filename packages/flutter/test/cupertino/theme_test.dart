@@ -212,15 +212,25 @@ void main() {
     );
   });
 
+  testWidgets('CupertinoThemeData equality', (WidgetTester tester) async {
+    const CupertinoThemeData a = CupertinoThemeData(brightness: Brightness.dark);
+    final CupertinoThemeData b = a.copyWith();
+    final CupertinoThemeData c = a.copyWith(brightness: Brightness.light);
+    expect(a, equals(b));
+    expect(b, equals(a));
+    expect(a, isNot(equals(c)));
+    expect(c, isNot(equals(a)));
+    expect(b, isNot(equals(c)));
+    expect(c, isNot(equals(b)));
+  });
+
   late Brightness currentBrightness;
   void colorMatches(Color? componentColor, CupertinoDynamicColor expectedDynamicColor) {
     switch (currentBrightness) {
       case Brightness.light:
         expect(componentColor, isSameColorAs(expectedDynamicColor.color));
-        break;
       case Brightness.dark:
         expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
-        break;
     }
   }
 

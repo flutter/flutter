@@ -6,7 +6,6 @@ import 'package:package_config/package_config_types.dart';
 
 import 'artifacts.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
@@ -36,7 +35,7 @@ class BuildInfo {
     List<String>? dartDefines,
     this.bundleSkSLPath,
     List<String>? dartExperiments,
-    this.webRenderer = WebRendererMode.autoDetect,
+    this.webRenderer = WebRendererMode.auto,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     this.dartDefineConfigJsonMap,
@@ -215,7 +214,7 @@ class BuildInfo {
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
-  String get modeName => getModeName(mode);
+  String get modeName => mode.cliName;
   String get friendlyModeName => getFriendlyModeName(mode);
 
   /// the flavor name in the output apk files is lower-cased (see flutter.gradle),
@@ -234,21 +233,18 @@ class BuildInfo {
     // packagesPath and performanceMeasurementFile are not passed into
     // the Environment map.
     return <String, String>{
-      kBuildMode: getNameForBuildMode(mode),
+      kBuildMode: mode.cliName,
       if (dartDefines.isNotEmpty)
         kDartDefines: encodeDartDefines(dartDefines),
-      if (dartObfuscation != null)
-        kDartObfuscation: dartObfuscation.toString(),
+      kDartObfuscation: dartObfuscation.toString(),
       if (extraFrontEndOptions.isNotEmpty)
         kExtraFrontEndOptions: extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
       if (splitDebugInfoPath != null)
         kSplitDebugInfo: splitDebugInfoPath!,
-      if (trackWidgetCreation != null)
-        kTrackWidgetCreation: trackWidgetCreation.toString(),
-      if (treeShakeIcons != null)
-        kIconTreeShakerFlag: treeShakeIcons.toString(),
+      kTrackWidgetCreation: trackWidgetCreation.toString(),
+      kIconTreeShakerFlag: treeShakeIcons.toString(),
       if (bundleSkSLPath != null)
         kBundleSkSLPath: bundleSkSLPath!,
       if (codeSizeDirectory != null)
@@ -277,24 +273,20 @@ class BuildInfo {
     final Map<String, String> environmentMap = <String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
-      if (dartObfuscation != null)
-        'DART_OBFUSCATION': dartObfuscation.toString(),
+      'DART_OBFUSCATION': dartObfuscation.toString(),
       if (extraFrontEndOptions.isNotEmpty)
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
       if (splitDebugInfoPath != null)
         'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
-      if (trackWidgetCreation != null)
-        'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
-      if (treeShakeIcons != null)
-        'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
+      'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
+      'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
       if (bundleSkSLPath != null)
         'BUNDLE_SKSL_PATH': bundleSkSLPath!,
-      if (packagesPath != null)
-        'PACKAGE_CONFIG': packagesPath,
+      'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
@@ -317,18 +309,15 @@ class BuildInfo {
     final List<String> result = <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
-      if (dartObfuscation != null)
-        '-Pdart-obfuscation=$dartObfuscation',
+      '-Pdart-obfuscation=$dartObfuscation',
       if (extraFrontEndOptions.isNotEmpty)
         '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
       if (extraGenSnapshotOptions.isNotEmpty)
         '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
       if (splitDebugInfoPath != null)
         '-Psplit-debug-info=$splitDebugInfoPath',
-      if (trackWidgetCreation != null)
-        '-Ptrack-widget-creation=$trackWidgetCreation',
-      if (treeShakeIcons != null)
-        '-Ptree-shake-icons=$treeShakeIcons',
+      '-Ptrack-widget-creation=$trackWidgetCreation',
+      '-Ptree-shake-icons=$treeShakeIcons',
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (bundleSkSLPath != null)
@@ -388,41 +377,25 @@ class AndroidBuildInfo {
 }
 
 /// A summary of the compilation strategy used for Dart.
-class BuildMode {
-  const BuildMode._(this.name);
+enum BuildMode {
+  /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
+  debug,
 
-  factory BuildMode.fromName(String value) {
-    switch (value) {
-      case 'debug':
-        return BuildMode.debug;
-      case 'profile':
-        return BuildMode.profile;
-      case 'release':
-        return BuildMode.release;
-      case 'jit_release':
-        return BuildMode.jitRelease;
-    }
-    throw ArgumentError('$value is not a supported build mode');
-  }
+  /// Built in AOT mode with some optimizations and a VM service.
+  profile,
 
-  /// Built in JIT mode with no optimizations, enabled asserts, and an observatory.
-  static const BuildMode debug = BuildMode._('debug');
+  /// Built in AOT mode with all optimizations and no VM service.
+  release,
 
-  /// Built in AOT mode with some optimizations and an observatory.
-  static const BuildMode profile = BuildMode._('profile');
+  /// Built in JIT mode with all optimizations and no VM service.
+  jitRelease;
 
-  /// Built in AOT mode with all optimizations and no observatory.
-  static const BuildMode release = BuildMode._('release');
+  factory BuildMode.fromCliName(String value) => values.singleWhere(
+        (BuildMode element) => element.cliName == value,
+        orElse: () =>
+            throw ArgumentError('$value is not a supported build mode'),
+      );
 
-  /// Built in JIT mode with all optimizations and no observatory.
-  static const BuildMode jitRelease = BuildMode._('jit_release');
-
-  static const List<BuildMode> values = <BuildMode>[
-    debug,
-    profile,
-    release,
-    jitRelease,
-  ];
   static const Set<BuildMode> releaseModes = <BuildMode>{
     release,
     jitRelease,
@@ -444,21 +417,10 @@ class BuildMode {
   /// Whether this mode is using the precompiled runtime.
   bool get isPrecompiled => !isJit;
 
-  /// The name for this build mode.
-  final String name;
+  String get cliName => snakeCase(name);
 
   @override
-  String toString() => name;
-}
-
-/// Return the name for the build mode, or "any" if null.
-String getNameForBuildMode(BuildMode buildMode) {
-  return buildMode.name;
-}
-
-/// Returns the [BuildMode] for a particular `name`.
-BuildMode getBuildModeForName(String name) {
-  return BuildMode.fromName(name);
+  String toString() => cliName;
 }
 
 /// Environment type of the target device.
@@ -551,10 +513,8 @@ String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? bui
   return buildName;
 }
 
-String getModeName(BuildMode mode) => getEnumName(mode);
-
 String getFriendlyModeName(BuildMode mode) {
-  return snakeCase(getModeName(mode)).replaceAll('_', ' ');
+  return snakeCase(mode.cliName).replaceAll('_', ' ');
 }
 
 // Returns true if the selected build mode uses ahead-of-time compilation.
@@ -870,14 +830,8 @@ FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendere
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null) {
-    return 'build';
-  }
   final Config localConfig = config ?? globals.config;
   final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  if (localConfig == null) {
-    return 'build';
-  }
 
   final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
   if (localFilesystem.path.isAbsolute(buildDir)) {

@@ -7,11 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'material_localizations.dart';
 
 /// Utility functions for working with dates.
-class DateUtils {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  DateUtils._();
-
+abstract final class DateUtils {
   /// Returns a [DateTime] with the date of the original, but time set to
   /// midnight.
   static DateTime dateOnly(DateTime date) {
@@ -212,9 +208,7 @@ class DateTimeRange {
   DateTimeRange({
     required this.start,
     required this.end,
-  }) : assert(start != null),
-       assert(end != null),
-       assert(!start.isAfter(end));
+  }) : assert(!start.isAfter(end));
 
   /// The start of the range of dates.
   final DateTime start;

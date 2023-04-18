@@ -1,5 +1,5 @@
 {
-  "version": "v0_143",
+  "version": "v0_162",
 
   "md.comp.filled-text-field.active-indicator.color": "onSurfaceVariant",
   "md.comp.filled-text-field.active-indicator.height": 1.0,
@@ -66,7 +66,7 @@
   "md.comp.filled-text-field.label-text.color": "onSurfaceVariant",
   "md.comp.filled-text-field.label-text.text-style": "bodyLarge",
   "md.comp.filled-text-field.leading-icon.color": "onSurfaceVariant",
-  "md.comp.filled-text-field.leading-icon.size": 20.0,
+  "md.comp.filled-text-field.leading-icon.size": 24.0,
   "md.comp.filled-text-field.supporting-text.color": "onSurfaceVariant",
   "md.comp.filled-text-field.supporting-text.text-style": "bodySmall",
   "md.comp.filled-text-field.trailing-icon.color": "onSurfaceVariant",

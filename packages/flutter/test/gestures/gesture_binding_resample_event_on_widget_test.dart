@@ -101,7 +101,7 @@ void main() {
     expect(events.length, 1);
     expect(events[0], isA<PointerDownEvent>());
     expect(events[0].timeStamp, currentTestFrameTime() + kSamplingOffset);
-    expect(events[0].position, Offset(7.5 / GestureBinding.instance.window.devicePixelRatio, 0.0));
+    expect(events[0].position, Offset(7.5 / tester.view.devicePixelRatio, 0.0));
 
     // Now the system time is epoch + 20ms
     requestFrame();
@@ -109,8 +109,8 @@ void main() {
     expect(events.length, 2);
     expect(events[1].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[1], isA<PointerMoveEvent>());
-    expect(events[1].position, Offset(22.5 / GestureBinding.instance.window.devicePixelRatio, 0.0));
-    expect(events[1].delta, Offset(15.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
+    expect(events[1].position, Offset(22.5 / tester.view.devicePixelRatio, 0.0));
+    expect(events[1].delta, Offset(15.0 / tester.view.devicePixelRatio, 0.0));
 
     // Now the system time is epoch + 30ms
     requestFrame();
@@ -118,8 +118,8 @@ void main() {
     expect(events.length, 4);
     expect(events[2].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[2], isA<PointerMoveEvent>());
-    expect(events[2].position, Offset(37.5 / GestureBinding.instance.window.devicePixelRatio, 0.0));
-    expect(events[2].delta, Offset(15.0 / GestureBinding.instance.window.devicePixelRatio, 0.0));
+    expect(events[2].position, Offset(37.5 / tester.view.devicePixelRatio, 0.0));
+    expect(events[2].delta, Offset(15.0 / tester.view.devicePixelRatio, 0.0));
     expect(events[3].timeStamp, currentTestFrameTime() + kSamplingOffset);
     expect(events[3], isA<PointerUpEvent>());
   });

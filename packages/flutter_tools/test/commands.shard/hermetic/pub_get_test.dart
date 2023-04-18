@@ -35,7 +35,7 @@ void main() {
     fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
 
-    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     await commandRunner.run(<String>['get']);
@@ -60,7 +60,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[0]);
 
-    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     await commandRunner.run(<String>['get']);
@@ -81,7 +81,7 @@ void main() {
     final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
     targetDirectory.childFile('pubspec.yaml').createSync();
 
-    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     await commandRunner.run(<String>['get', targetDirectory.path]);
@@ -94,11 +94,37 @@ void main() {
     FileSystem: () => fileSystem,
   });
 
+  testUsingContext("pub get doesn't treat unknown flag as directory", () async {
+    fileSystem.currentDirectory.childDirectory('target').createSync();
+    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    pub.expectedArguments = <String>['get', '--unknown-flag', '--example', '--directory', '.'];
+    await commandRunner.run(<String>['get', '--unknown-flag']);
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
+    testUsingContext("pub get doesn't treat -v as directory", () async {
+    fileSystem.currentDirectory.childDirectory('target').createSync();
+    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    pub.expectedArguments = <String>['get', '-v', '--example', '--directory', '.'];
+    await commandRunner.run(<String>['get', '-v']);
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
   testUsingContext("pub get skips example directory if it doesn't contain a pubspec.yaml", () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
 
-    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     await commandRunner.run(<String>['get']);
@@ -115,7 +141,7 @@ void main() {
   });
 
   testUsingContext('pub get throws error on missing directory', () async {
-    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     try {
@@ -159,7 +185,7 @@ void main() {
       '''
     );
 
-    final PackagesGetCommand command = PackagesGetCommand('get', false);
+    final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     await commandRunner.run(<String>['get']);
@@ -181,25 +207,27 @@ class FakePub extends Fake implements Pub {
   FakePub(this.fileSystem);
 
   final FileSystem fileSystem;
+  List<String>? expectedArguments;
 
   @override
-  Future<void> get({
+  Future<void> interactively(
+    List<String> arguments, {
+    FlutterProject? project,
     required PubContext context,
-    required FlutterProject project,
-    bool skipIfAbsent = false,
-    bool upgrade = false,
-    bool offline = false,
+    required String command,
+    bool touchesPackageConfig = false,
     bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
-    String? flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    fileSystem.directory(project.directory)
-      .childDirectory('.dart_tool')
-      .childFile('package_config.json')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+    if (expectedArguments != null) {
+      expect(arguments, expectedArguments);
+    }
+    if (project != null) {
+      fileSystem.directory(project.directory)
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+      }
   }
 }

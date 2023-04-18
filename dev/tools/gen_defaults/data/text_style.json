@@ -1,5 +1,5 @@
 {
-  "version": "v0_143",
+  "version": "v0_162",
 
   "md.sys.typescale.body-large.font": "md.ref.typeface.plain",
   "md.sys.typescale.body-large.line-height": 24.0,
@@ -51,11 +51,13 @@
   "md.sys.typescale.label-large.size": 14.0,
   "md.sys.typescale.label-large.tracking": 0.1,
   "md.sys.typescale.label-large.weight": "md.ref.typeface.weight-medium",
+  "md.sys.typescale.label-large.weight.prominent": "md.ref.typeface.weight-bold",
   "md.sys.typescale.label-medium.font": "md.ref.typeface.plain",
   "md.sys.typescale.label-medium.line-height": 16.0,
   "md.sys.typescale.label-medium.size": 12.0,
   "md.sys.typescale.label-medium.tracking": 0.5,
   "md.sys.typescale.label-medium.weight": "md.ref.typeface.weight-medium",
+  "md.sys.typescale.label-medium.weight.prominent": "md.ref.typeface.weight-bold",
   "md.sys.typescale.label-small.font": "md.ref.typeface.plain",
   "md.sys.typescale.label-small.line-height": 16.0,
   "md.sys.typescale.label-small.size": 11.0,

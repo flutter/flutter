@@ -198,10 +198,8 @@ class OverscrollNotification extends ScrollNotification {
     this.dragDetails,
     required this.overscroll,
     this.velocity = 0.0,
-  }) : assert(overscroll != null),
-       assert(overscroll.isFinite),
-       assert(overscroll != 0.0),
-       assert(velocity != null);
+  }) : assert(overscroll.isFinite),
+       assert(overscroll != 0.0);
 
   /// If the [Scrollable] overscrolled because of a drag, the details about that
   /// drag update.
@@ -270,8 +268,13 @@ class ScrollEndNotification extends ScrollNotification {
   }
 }
 
-/// A notification that the user has changed the direction in which they are
-/// scrolling.
+/// A notification that the user has changed the [ScrollDirection] in which they
+/// are scrolling, or have stopped scrolling.
+///
+/// For the direction that the [ScrollView] is oriented to, and the direction
+/// contents are being laid out in, see [AxisDirection] & [GrowthDirection].
+///
+/// {@macro flutter.rendering.ScrollDirection.sample}
 ///
 /// See also:
 ///
@@ -286,6 +289,13 @@ class UserScrollNotification extends ScrollNotification {
   });
 
   /// The direction in which the user is scrolling.
+  ///
+  /// This does not represent the current [AxisDirection] or [GrowthDirection]
+  /// of the [Viewport], which respectively represent the direction that the
+  /// scroll offset is increasing in, and the direction that contents are being
+  /// laid out in.
+  ///
+  /// {@macro flutter.rendering.ScrollDirection.sample}
   final ScrollDirection direction;
 
   @override

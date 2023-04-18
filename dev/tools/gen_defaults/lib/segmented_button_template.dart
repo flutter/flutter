@@ -5,9 +5,11 @@
 import 'template.dart';
 
 class SegmentedButtonTemplate extends TokenTemplate {
-  const SegmentedButtonTemplate(super.blockName, super.fileName, super.tokens, {
+  const SegmentedButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
+
+  final String tokenGroup;
 
   String _layerOpacity(String layerToken) {
     if (tokens.containsKey(layerToken)) {
@@ -33,90 +35,88 @@ class SegmentedButtonTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
-  _SegmentedButtonDefaultsM3(this.context);
-
+class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
+  _${blockName}DefaultsM3(this.context);
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
   late final ColorScheme _colors = _theme.colorScheme;
-
   @override ButtonStyle? get style {
     return ButtonStyle(
-      textStyle: MaterialStatePropertyAll<TextStyle?>(${textStyle('md.comp.outlined-segmented-button.label-text')}),
+      textStyle: MaterialStatePropertyAll<TextStyle?>(${textStyle('$tokenGroup.label-text')}),
       backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
-          return ${componentColor('md.comp.outlined-segmented-button.disabled')};
+          return ${componentColor('$tokenGroup.disabled')};
         }
         if (states.contains(MaterialState.selected)) {
-          return ${componentColor('md.comp.outlined-segmented-button.selected.container')};
+          return ${componentColor('$tokenGroup.selected.container')};
         }
-        return ${componentColor('md.comp.outlined-segmented-button.unselected.container')};
+        return ${componentColor('$tokenGroup.unselected.container')};
       }),
       foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
-          return ${componentColor('md.comp.outlined-segmented-button.disabled.label-text')};
+          return ${componentColor('$tokenGroup.disabled.label-text')};
         }
         if (states.contains(MaterialState.selected)) {
           if (states.contains(MaterialState.pressed)) {
-            return ${componentColor('md.comp.outlined-segmented-button.selected.pressed.label-text')};
+            return ${componentColor('$tokenGroup.selected.pressed.label-text')};
           }
           if (states.contains(MaterialState.hovered)) {
-            return ${componentColor('md.comp.outlined-segmented-button.selected.hover.label-text')};
+            return ${componentColor('$tokenGroup.selected.hover.label-text')};
           }
           if (states.contains(MaterialState.focused)) {
-            return ${componentColor('md.comp.outlined-segmented-button.selected.focus.label-text')};
+            return ${componentColor('$tokenGroup.selected.focus.label-text')};
           }
-          return ${componentColor('md.comp.outlined-segmented-button.selected.label-text')};
+          return ${componentColor('$tokenGroup.selected.label-text')};
         } else {
           if (states.contains(MaterialState.pressed)) {
-            return ${componentColor('md.comp.outlined-segmented-button.unselected.pressed.label-text')};
+            return ${componentColor('$tokenGroup.unselected.pressed.label-text')};
           }
           if (states.contains(MaterialState.hovered)) {
-            return ${componentColor('md.comp.outlined-segmented-button.unselected.hover.label-text')};
+            return ${componentColor('$tokenGroup.unselected.hover.label-text')};
           }
           if (states.contains(MaterialState.focused)) {
-            return ${componentColor('md.comp.outlined-segmented-button.unselected.focus.label-text')};
+            return ${componentColor('$tokenGroup.unselected.focus.label-text')};
           }
-          return ${componentColor('md.comp.outlined-segmented-button.unselected.container')};
+          return ${componentColor('$tokenGroup.unselected.label-text')};
         }
       }),
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           if (states.contains(MaterialState.hovered)) {
-            return ${_stateColor('md.comp.outlined-segmented-button', 'selected', 'hover')};
+            return ${_stateColor(tokenGroup, 'selected', 'hover')};
           }
           if (states.contains(MaterialState.focused)) {
-            return ${_stateColor('md.comp.outlined-segmented-button', 'selected', 'focus')};
+            return ${_stateColor(tokenGroup, 'selected', 'focus')};
           }
           if (states.contains(MaterialState.pressed)) {
-            return ${_stateColor('md.comp.outlined-segmented-button', 'selected', 'pressed')};
+            return ${_stateColor(tokenGroup, 'selected', 'pressed')};
           }
         } else {
           if (states.contains(MaterialState.hovered)) {
-            return ${_stateColor('md.comp.outlined-segmented-button', 'unselected', 'hover')};
+            return ${_stateColor(tokenGroup, 'unselected', 'hover')};
           }
           if (states.contains(MaterialState.focused)) {
-            return ${_stateColor('md.comp.outlined-segmented-button', 'unselected', 'focus')};
+            return ${_stateColor(tokenGroup, 'unselected', 'focus')};
           }
           if (states.contains(MaterialState.pressed)) {
-            return ${_stateColor('md.comp.outlined-segmented-button', 'unselected', 'pressed')};
+            return ${_stateColor(tokenGroup, 'unselected', 'pressed')};
           }
         }
         return null;
       }),
       surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
       elevation: const MaterialStatePropertyAll<double>(0),
-      iconSize: const MaterialStatePropertyAll<double?>(${tokens['md.comp.outlined-segmented-button.with-icon.icon.size']}),
+      iconSize: const MaterialStatePropertyAll<double?>(${tokens['$tokenGroup.with-icon.icon.size']}),
       side: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
-          return ${border("md.comp.outlined-segmented-button.disabled.outline")};
+          return ${border("$tokenGroup.disabled.outline")};
         }
-        return ${border("md.comp.outlined-segmented-button.outline")};
+        return ${border("$tokenGroup.outline")};
       }),
-      shape: const MaterialStatePropertyAll<OutlinedBorder>(${shape("md.comp.outlined-segmented-button", '')}),
+      shape: const MaterialStatePropertyAll<OutlinedBorder>(${shape(tokenGroup, '')}),
+      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(${tokens['$tokenGroup.container.height']})),
     );
   }
-
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 }

@@ -17,11 +17,7 @@ typedef ChildLayouter = Size Function(RenderBox child, BoxConstraints constraint
 /// given set of [BoxConstraints].
 ///
 /// All of the functions adhere to the [ChildLayouter] signature.
-class ChildLayoutHelper {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  const ChildLayoutHelper._();
-
+abstract final class ChildLayoutHelper {
   /// Returns the [Size] that the [RenderBox] would have if it were to
   /// be laid out with the given [BoxConstraints].
   ///

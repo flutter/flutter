@@ -20,7 +20,7 @@ void main() {
       testConfig = Config.test();
       platform = FakePlatform(environment: <String, String>{});
 
-      for (final Feature feature in allFeatures) {
+      for (final Feature feature in allConfigurableFeatures) {
         testConfig.setValue(feature.configSetting!, false);
       }
 
@@ -79,6 +79,12 @@ void main() {
       platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
 
       expect(featureFlags.isWebEnabled, true);
+    });
+
+    testWithoutContext('Flutter web wasm only enable on master', () {
+      expect(flutterWebWasm.getSettingForChannel('master').enabledByDefault, isTrue);
+      expect(flutterWebWasm.getSettingForChannel('beta').enabledByDefault, isFalse);
+      expect(flutterWebWasm.getSettingForChannel('stable').enabledByDefault, isFalse);
     });
 
     testWithoutContext('Flutter web help string', () {

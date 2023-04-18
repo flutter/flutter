@@ -151,7 +151,7 @@ class FakeAndroidViewController implements AndroidViewController {
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeAndroidPlatformView> get views => _views.values;
@@ -183,7 +183,7 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
@@ -370,7 +370,7 @@ class FakeAndroidPlatformViewsController {
 
 class FakeIosPlatformViewsController {
   FakeIosPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeUiKitView> get views => _views.values;
@@ -395,7 +395,7 @@ class FakeIosPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
@@ -473,7 +473,7 @@ class FakeIosPlatformViewsController {
 
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeHtmlPlatformView> get views => _views.values;

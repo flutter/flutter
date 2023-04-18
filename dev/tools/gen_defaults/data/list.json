@@ -1,11 +1,11 @@
 {
-  "version": "v0_143",
+  "version": "v0_162",
 
   "md.comp.list.list-item.container.color": "surface",
   "md.comp.list.list-item.container.elevation": "md.sys.elevation.level0",
   "md.comp.list.list-item.container.shape": "md.sys.shape.corner.none",
   "md.comp.list.list-item.disabled.label-text.color": "onSurface",
-  "md.comp.list.list-item.disabled.label-text.opacity": 0.3,
+  "md.comp.list.list-item.disabled.label-text.opacity": 0.38,
   "md.comp.list.list-item.disabled.leading-icon.color": "onSurface",
   "md.comp.list.list-item.disabled.leading-icon.opacity": 0.38,
   "md.comp.list.list-item.disabled.state-layer.color": "onSurface",
