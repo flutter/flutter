@@ -49,8 +49,8 @@ class PluginRegistrar {
   // Takes ownership of |plugin|.
   //
   // Plugins are not required to call this method if they have other lifetime
-  // management, but this is a convient place for plugins to be owned to ensure
-  // that they stay valid for any registered callbacks.
+  // management, but this is a convenient place for plugins to be owned to
+  // ensure that they stay valid for any registered callbacks.
   void AddPlugin(std::unique_ptr<Plugin> plugin);
 
  protected:

@@ -330,7 +330,8 @@ class ChannelBuffers {
         'framework has had an opportunity to register a listener. See the ChannelBuffers '
         'API documentation for details on how to configure the channel to expect more '
         'messages, or to expect messages to get discarded:\n'
-        '  https://api.flutter.dev/flutter/dart-ui/ChannelBuffers-class.html'
+        '  https://api.flutter.dev/flutter/dart-ui/ChannelBuffers-class.html\n'
+        'The capacity of the $name channel is ${channel._capacity} message${channel._capacity != 1 ? 's' : ''}.',
       );
     }
   }
