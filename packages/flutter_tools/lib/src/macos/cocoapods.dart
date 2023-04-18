@@ -13,10 +13,12 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/project_migrator.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
+import '../migrations/cocoapods_script_symlink.dart';
 import '../reporting/reporting.dart';
 import '../xcode_project.dart';
 
@@ -166,6 +168,13 @@ class CocoaPods {
         throwToolExit('CocoaPods not installed or not in valid state.');
       }
       await _runPodInstall(xcodeProject, buildMode);
+
+      // This migrator works around a CocoaPods bug, and should be run after `pod install` is run.
+      final ProjectMigration postPodMigration = ProjectMigration(<ProjectMigrator>[
+        CocoaPodsScriptReadlink(xcodeProject, _xcodeProjectInterpreter, _logger),
+      ]);
+      postPodMigration.run();
+
       podsProcessed = true;
     }
     return podsProcessed;
