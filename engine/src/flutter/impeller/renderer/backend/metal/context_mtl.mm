@@ -226,6 +226,11 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 ContextMTL::~ContextMTL() = default;
 
 // |Context|
+std::string ContextMTL::DescribeGpuModel() const {
+  return std::string([[device_ name] UTF8String]);
+}
+
+// |Context|
 bool ContextMTL::IsValid() const {
   return is_valid_;
 }

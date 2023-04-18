@@ -23,6 +23,8 @@ class Context : public std::enable_shared_from_this<Context> {
  public:
   virtual ~Context();
 
+  virtual std::string DescribeGpuModel() const = 0;
+
   virtual bool IsValid() const = 0;
 
   virtual const std::shared_ptr<const Capabilities>& GetCapabilities()

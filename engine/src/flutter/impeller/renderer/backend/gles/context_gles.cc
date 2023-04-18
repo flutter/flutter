@@ -105,6 +105,11 @@ bool ContextGLES::IsValid() const {
 }
 
 // |Context|
+std::string ContextGLES::DescribeGpuModel() const {
+  return reactor_->GetProcTable().GetDescription()->GetString();
+}
+
+// |Context|
 std::shared_ptr<Allocator> ContextGLES::GetResourceAllocator() const {
   return resource_allocator_;
 }
