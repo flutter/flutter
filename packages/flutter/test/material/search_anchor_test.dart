@@ -1561,7 +1561,7 @@ void main() {
     expect(searchViewRectRTL, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
   });
 
-  testWidgets('Docked search view route is closed if the window size changes', (WidgetTester tester) async {
+  testWidgets('Docked search view route is popped if the window size changes', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(500.0, 600.0);
     tester.view.devicePixelRatio = 1.0;

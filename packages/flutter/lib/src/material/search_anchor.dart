@@ -67,7 +67,7 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 /// If [builder] returns an Icon, or any un-tappable widgets, we don't have
 /// to explicitly call [SearchController.openView].
 ///
-/// The search view route will be closed if the window size is changed and the
+/// The search view route will be popped if the window size is changed and the
 /// search view route is not in full-screen mode. However, if the search view route
 /// is in full-screen mode, changing the window size, such as rotating a mobile
 /// device from portrait mode to landscape mode, will not close the search view.
