@@ -51,13 +51,12 @@
 // This test exercises the touch input dispatch path from Input Pipeline to a
 // Scenic client. It is a multi-component test, and carefully avoids sleeping or
 // polling for component coordination.
-// - It runs real Root Presenter, Input Pipeline, and Scenic components.
+// - It runs real Scene Manager and Scenic components.
 // - It uses a fake display controller; the physical device is unused.
 //
 // Components involved
 // - This test program
-// - Input Pipeline
-// - Root Presenter
+// - Scene Manager
 // - Scenic
 // - Child view, a Scenic client
 //
@@ -66,7 +65,7 @@
 //
 // Setup sequence
 // - The test sets up this view hierarchy:
-//   - Top level scene, owned by Root Presenter.
+//   - Top level scene, owned by Scene Manager.
 //   - Child view, owned by the ui client.
 // - The test waits for a Scenic event that verifies the child has UI content in
 // the scene graph.
@@ -128,8 +127,11 @@ using RealmBuilder = component_testing::RealmBuilder;
 // Set this as low as you can that still works across all test platforms.
 constexpr zx::duration kTimeout = zx::min(1);
 
+constexpr auto kGfxTestUIStackUrl =
+    "fuchsia-pkg://fuchsia.com/gfx-scene-manager-test-ui-stack#meta/"
+    "test-ui-stack.cm";
 constexpr auto kTestUIStackUrl =
-    "fuchsia-pkg://fuchsia.com/gfx-root-presenter-test-ui-stack#meta/"
+    "fuchsia-pkg://fuchsia.com/flatland-scene-manager-test-ui-stack#meta/"
     "test-ui-stack.cm";
 
 constexpr auto kMockTouchInputListener = "touch_input_listener";
@@ -424,11 +426,12 @@ class FlutterEmbedTapTest : public FlutterTapTestBase {
 
 // Makes use of gtest's parameterized testing, allowing us
 // to test different combinations of test-ui-stack + runners. Currently, there
-// is just one combination. Documentation:
+// are both GFX and Flatland variants. Documentation:
 // http://go/gunitadvanced#value-parameterized-tests
 INSTANTIATE_TEST_SUITE_P(FlutterTapTestParameterized,
                          FlutterTapTest,
-                         ::testing::Values(kTestUIStackUrl));
+                         ::testing::Values(kGfxTestUIStackUrl,
+                                           kTestUIStackUrl));
 
 TEST_P(FlutterTapTest, FlutterTap) {
   // Launch client view, and wait until it's rendering to proceed with the test.
@@ -454,9 +457,11 @@ TEST_P(FlutterTapTest, FlutterTap) {
   ASSERT_EQ(touch_injection_request_count(), 1);
 }
 
+// TODO(fxbug.dev/125514): Embedded Child View needs to support Flatland.
+// Only test GFX Test UI stack for embedded test cases for now.
 INSTANTIATE_TEST_SUITE_P(FlutterEmbedTapTestParameterized,
                          FlutterEmbedTapTest,
-                         ::testing::Values(kTestUIStackUrl));
+                         ::testing::Values(kGfxTestUIStackUrl));
 
 TEST_P(FlutterEmbedTapTest, FlutterEmbedTap) {
   // Launch view
