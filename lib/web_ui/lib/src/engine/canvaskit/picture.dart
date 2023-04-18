@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../profiler.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
@@ -77,9 +76,6 @@ class CkPicture implements ui.Picture {
       return true;
     }());
     ui.Picture.onDispose?.call(this);
-    if (Instrumentation.enabled) {
-      Instrumentation.instance.incrementCounter('Picture disposed');
-    }
     _isDisposed = true;
     _ref.dispose();
   }
