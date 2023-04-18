@@ -95,7 +95,6 @@ void testMain() {
     });
 
     test('CkContourMeasure iteration', () {
-      browserSupportsFinalizationRegistry = false;
       final ui.Path path = ui.Path();
       expect(path, isA<CkPath>());
       path.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
@@ -112,7 +111,6 @@ void testMain() {
     });
 
     test('CkContourMeasure index', () {
-      browserSupportsFinalizationRegistry = false;
       final ui.Path path = ui.Path();
       expect(path, isA<CkPath>());
       path.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));

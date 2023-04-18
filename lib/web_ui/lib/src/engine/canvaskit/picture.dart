@@ -11,25 +11,20 @@ import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
-import 'skia_object_cache.dart';
+import 'native_memory.dart';
 import 'surface.dart';
 import 'surface_factory.dart';
 
 /// Implements [ui.Picture] on top of [SkPicture].
-///
-/// Unlike most other [ManagedSkiaObject] implementations, instances of this
-/// class may have their Skia counterparts deleted before finalization registry
-/// or [SkiaObjectCache] decide to delete it.
-class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
-  CkPicture(SkPicture super.picture, this.cullRect, this._snapshot) :
-    assert(
-      browserSupportsFinalizationRegistry && _snapshot == null ||
-          _snapshot != null,
-      'If the browser does not support FinalizationRegistry (WeakRef), then we must have a picture snapshot to be able to resurrect it.',
-    );
+class CkPicture implements ui.Picture {
+  CkPicture(SkPicture skPicture, this.cullRect) {
+    _ref = UniqueRef<SkPicture>(this, skPicture, 'Picture');
+  }
 
+  late final UniqueRef<SkPicture> _ref;
   final ui.Rect? cullRect;
-  final CkPictureSnapshot? _snapshot;
+
+  SkPicture get skiaObject => _ref.nativeObject;
 
   @override
   int get approximateBytesUsed => 0;
@@ -86,11 +81,7 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
       Instrumentation.instance.incrementCounter('Picture disposed');
     }
     _isDisposed = true;
-    _snapshot?.dispose();
-
-    // Emulate what SkiaObjectCache does.
-    rawSkiaObject?.delete();
-    rawSkiaObject = null;
+    _ref.dispose();
   }
 
   @override
@@ -122,32 +113,5 @@ class CkPicture extends ManagedSkiaObject<SkPicture> implements ui.Picture {
       throw StateError('Unable to convert image pixels into SkImage.');
     }
     return CkImage(rasterImage);
-  }
-
-  @override
-  bool get isResurrectionExpensive => true;
-
-  @override
-  SkPicture createDefault() {
-    // The default object is supplied in the constructor.
-    throw StateError('Unreachable code');
-  }
-
-  @override
-  SkPicture resurrect() {
-    // If a picture has been explicitly disposed of, it can no longer be
-    // resurrected. An attempt to resurrect after the framework told the
-    // engine to dispose of the picture likely indicates a bug in the engine.
-    assert(debugCheckNotDisposed('Cannot resurrect picture.'));
-    return _snapshot!.toPicture();
-  }
-
-  @override
-  void delete() {
-    // This method may be called after [dispose], in which case there's nothing
-    // left to do. The Skia object is deleted permanently.
-    if (!_isDisposed) {
-      rawSkiaObject?.delete();
-    }
   }
 }

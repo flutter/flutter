@@ -16,7 +16,6 @@ import 'image_filter.dart';
 import 'mask_filter.dart';
 import 'native_memory.dart';
 import 'shader.dart';
-import 'skia_object_cache.dart';
 
 /// The implementation of [ui.Paint] used by the CanvasKit backend.
 ///
