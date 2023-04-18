@@ -23,7 +23,6 @@ import 'package:ui/ui.dart' as ui;
 import '../browser_detection.dart';
 import '../configuration.dart';
 import '../dom.dart';
-import '../profiler.dart';
 import 'renderer.dart';
 
 /// Entrypoint into the CanvasKit API.
@@ -3350,172 +3349,6 @@ extension SkTypefaceFactoryExtension on SkTypefaceFactory {
       _MakeFreeTypeFaceFromData(fontData.toJS);
 }
 
-/// Collects Skia objects that are no longer necessary.
-abstract class Collector {
-  /// The production collector implementation.
-  static final Collector _productionInstance = ProductionCollector();
-
-  /// The collector implementation currently in use.
-  static Collector get instance => _instance;
-  static Collector _instance = _productionInstance;
-
-  /// In tests overrides the collector implementation.
-  static void debugOverrideCollector(Collector override) {
-    _instance = override;
-  }
-
-  /// In tests restores the collector to the production implementation.
-  static void debugRestoreCollector() {
-    _instance = _productionInstance;
-  }
-
-  /// Registers a [deletable] for collection when the [wrapper] object is
-  /// garbage collected.
-  ///
-  /// The [debugLabel] is used to track the origin of the deletable.
-  void register(Object wrapper, SkDeletable deletable);
-
-  /// Deletes the [deletable].
-  ///
-  /// The exact timing of the deletion is implementation-specific. For example,
-  /// a production implementation may want to batch deletables and schedule a
-  /// timer to collect them instead of deleting right away.
-  ///
-  /// A test implementation may want a collection strategy that's less efficient
-  /// but more predictable.
-  void collect(SkDeletable deletable);
-}
-
-/// Uses the browser's real `FinalizationRegistry` to collect objects.
-///
-/// Uses timers to delete objects in batches and outside the animation frame.
-class ProductionCollector implements Collector {
-  ProductionCollector() {
-    _skObjectFinalizationRegistry =
-        createSkObjectFinalizationRegistry((SkDeletable deletable) {
-      // This is called when GC decides to collect the wrapper object and
-      // notify us, which may happen after the object is already deleted
-      // explicitly, e.g. when its ref count drops to zero. When that happens
-      // skip collection of this object.
-      if (!deletable.isDeleted()) {
-        collect(deletable);
-      }
-    }.toJS);
-  }
-
-  late final SkObjectFinalizationRegistry _skObjectFinalizationRegistry;
-  List<SkDeletable> _skiaObjectCollectionQueue = <SkDeletable>[];
-  Timer? _skiaObjectCollectionTimer;
-
-  @override
-  void register(Object wrapper, SkDeletable deletable) {
-    if (Instrumentation.enabled) {
-      Instrumentation.instance.incrementCounter(
-        '${deletable.constructor.name} registered',
-      );
-    }
-    _skObjectFinalizationRegistry.register(wrapper, deletable);
-  }
-
-  /// Schedules a Skia object for deletion in an asap timer.
-  ///
-  /// A timer is used for the following reasons:
-  ///
-  ///  - Deleting the object immediately may lead to dangling pointer as the Skia
-  ///    object may still be used by a function in the current frame. For example,
-  ///    a `CkPaint` + `SkPaint` pair may be created by the framework, passed to
-  ///    the engine, and the `CkPaint` dropped immediately. Because GC can kick in
-  ///    any time, including in the middle of the event, we may delete `SkPaint`
-  ///    prematurely.
-  ///  - A microtask, while solves the problem above, would prevent the event from
-  ///    yielding to the graphics system to render the frame on the screen if there
-  ///    is a large number of objects to delete, causing jank.
-  ///
-  /// Because scheduling a timer is expensive, the timer is shared by all objects
-  /// deleted this frame. No timer is created if no objects were scheduled for
-  /// deletion.
-  @override
-  void collect(SkDeletable deletable) {
-    assert(
-      !deletable.isDeleted(),
-      'Attempted to delete an already deleted Skia object.',
-    );
-    _skiaObjectCollectionQueue.add(deletable);
-
-    _skiaObjectCollectionTimer ??= Timer(Duration.zero, () {
-      // Null out the timer so we can schedule a new one next time objects are
-      // scheduled for deletion.
-      _skiaObjectCollectionTimer = null;
-      collectSkiaObjectsNow();
-    });
-  }
-
-  /// Deletes all Skia objects pending deletion synchronously.
-  ///
-  /// After calling this method [_skiaObjectCollectionQueue] is empty.
-  ///
-  /// Throws a [SkiaObjectCollectionError] if CanvasKit fails to delete at least
-  /// one object. The error is populated with information about the first failed
-  /// object. Upon an error the collection continues and the collection queue is
-  /// emptied out to prevent memory leaks. This may happen, for example, when the
-  /// same object is deleted more than once.
-  void collectSkiaObjectsNow() {
-    domWindow.performance.mark('SkObject collection-start');
-    final int length = _skiaObjectCollectionQueue.length;
-    dynamic firstError;
-    StackTrace? firstStackTrace;
-    for (int i = 0; i < length; i++) {
-      final SkDeletable deletable = _skiaObjectCollectionQueue[i];
-      if (deletable.isDeleted()) {
-        // Some Skia objects are ref counted and are deleted before GC and/or
-        // the collection timer begins collecting them. So we have to check
-        // again if the objects is worth collecting.
-        continue;
-      }
-      if (Instrumentation.enabled) {
-        Instrumentation.instance.incrementCounter(
-          '${deletable.constructor.name} deleted',
-        );
-      }
-      try {
-        deletable.delete();
-      } catch (error, stackTrace) {
-        // Remember the error, but keep going. If for some reason CanvasKit fails
-        // to delete an object we still want to delete other objects and empty
-        // out the queue. Otherwise, the queue will never be flushed and keep
-        // accumulating objects, a.k.a. memory leak.
-        if (firstError == null) {
-          firstError = error;
-          firstStackTrace = stackTrace;
-        }
-      }
-    }
-    _skiaObjectCollectionQueue = <SkDeletable>[];
-
-    domWindow.performance.mark('SkObject collection-end');
-    domWindow.performance.measure('SkObject collection',
-        'SkObject collection-start', 'SkObject collection-end');
-
-    // It's safe to throw the error here, now that we've processed the queue.
-    if (firstError != null) {
-      throw SkiaObjectCollectionError(firstError, firstStackTrace);
-    }
-  }
-}
-
-/// Thrown by [ProductionCollector] when Skia object collection fails.
-class SkiaObjectCollectionError implements Error {
-  SkiaObjectCollectionError(this.error, this.stackTrace);
-
-  final dynamic error;
-
-  @override
-  final StackTrace? stackTrace;
-
-  @override
-  String toString() => 'SkiaObjectCollectionError: $error\n$stackTrace';
-}
-
 /// Any Skia object that has a `delete` method.
 @JS()
 @anonymous
@@ -3590,12 +3423,6 @@ external JSAny? get _finalizationRegistryConstructor;
 /// Whether the current browser supports `FinalizationRegistry`.
 bool browserSupportsFinalizationRegistry =
     _finalizationRegistryConstructor != null;
-
-/// Sets the value of [browserSupportsFinalizationRegistry] to its true value.
-void debugResetBrowserSupportsFinalizationRegistry() {
-  browserSupportsFinalizationRegistry =
-      _finalizationRegistryConstructor != null;
-}
 
 @JS()
 @staticInterop
