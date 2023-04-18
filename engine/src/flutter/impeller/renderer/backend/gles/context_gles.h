@@ -48,6 +48,9 @@ class ContextGLES final : public Context,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries);
 
   // |Context|
+  std::string DescribeGpuModel() const override;
+
+  // |Context|
   bool IsValid() const override;
 
   // |Context|

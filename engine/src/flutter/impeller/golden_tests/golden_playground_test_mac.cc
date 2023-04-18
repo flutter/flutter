@@ -78,6 +78,9 @@ void GoldenPlaygroundTest::SetUp() {
         "GoldenPlaygroundTest doesn't support interactive playground tests "
         "yet.");
   }
+
+  testing::GoldenDigest::Instance()->AddDimension(
+      "gpu_string", GetContext()->DescribeGpuModel());
 }
 
 PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {

@@ -113,6 +113,8 @@ class TestImpellerContext : public impeller::Context {
  public:
   TestImpellerContext() = default;
 
+  std::string DescribeGpuModel() const override { return "TestGpu"; }
+
   bool IsValid() const override { return true; }
 
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override {

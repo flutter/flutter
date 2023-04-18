@@ -52,6 +52,12 @@ class GoldenTests : public ::testing::Test {
 
   MetalScreenshoter& Screenshoter() { return *screenshoter_; }
 
+  void SetUp() override {
+    testing::GoldenDigest::Instance()->AddDimension(
+        "gpu_string",
+        Screenshoter().GetContext().GetContext()->DescribeGpuModel());
+  }
+
  private:
   std::unique_ptr<MetalScreenshoter> screenshoter_;
 };
