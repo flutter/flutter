@@ -1566,31 +1566,27 @@ void main() {
     tester.view.physicalSize = const Size(500.0, 600.0);
     tester.view.devicePixelRatio = 1.0;
 
-    Widget buildSearchAnchor() {
-      return MaterialApp(
-        home: Material(
-          child: SearchAnchor(
-            isFullScreen: false,
-            builder: (BuildContext context, SearchController controller) {
-              return Align(
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    controller.openView();
-                  },
-                ),
-              );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
-          ),
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: false,
+          builder: (BuildContext context, SearchController controller) {
+            return Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              ),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
         ),
-      );
-    }
-
-    await tester.pumpWidget(buildSearchAnchor());
+      ),
+    ));
 
     // Open the search view
     await tester.tap(find.byIcon(Icons.search));
@@ -1609,31 +1605,27 @@ void main() {
     tester.view.physicalSize = const Size(500.0, 600.0);
     tester.view.devicePixelRatio = 1.0;
 
-    Widget buildSearchAnchor() {
-      return MaterialApp(
-        home: Material(
-          child: SearchAnchor(
-            isFullScreen: true,
-            builder: (BuildContext context, SearchController controller) {
-              return Align(
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    controller.openView();
-                  },
-                ),
-              );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
-          ),
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: true,
+          builder: (BuildContext context, SearchController controller) {
+            return Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              ),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
         ),
-      );
-    }
-
-    await tester.pumpWidget(buildSearchAnchor());
+      ),
+    ));
 
     // Open a full-screen search view
     await tester.tap(find.byIcon(Icons.search));
