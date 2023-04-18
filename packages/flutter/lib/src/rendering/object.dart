@@ -3743,6 +3743,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     properties.add(DiagnosticsProperty<Constraints>('constraints', _constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
     properties.add(DiagnosticsProperty<ContainerLayer>('layer', _layerHandle.layer, defaultValue: null));
+    properties.add(DiagnosticsProperty<int>('layer engine id', _layerHandle.layer?.engineLayerId, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
     properties.add(FlagProperty(
       'isBlockingSemanticsOfPreviouslyPaintedNodes',

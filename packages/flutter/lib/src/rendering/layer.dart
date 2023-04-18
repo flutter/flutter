@@ -689,9 +689,15 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty<Object?>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
     if (_engineLayer != null) {
       properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
+      properties.add(DiagnosticsProperty<int>('engine layer id', _engineLayer?.uniqueId));
     }
     properties.add(DiagnosticsProperty<int>('handles', debugHandleCount));
   }
+
+  /// The unique ID for this layer within the engine.
+  ///
+  /// This can be useful in investigating performance issues.
+  int? get engineLayerId => engineLayer?.uniqueId;
 }
 
 /// A handle to prevent a [Layer]'s platform graphics resources from being
@@ -775,6 +781,9 @@ class PictureLayer extends Layer {
   /// commands are being culled.
   final Rect canvasBounds;
 
+  /// The unique ID of the picture returned when adding to the scene.
+  int? _pictureId;
+
   /// The picture recorded for this layer.
   ///
   /// The picture's coordinate system matches this layer's coordinate system.
@@ -834,7 +843,7 @@ class PictureLayer extends Layer {
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(picture != null);
-    builder.addPicture(Offset.zero, picture!, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
+    _pictureId = builder.addPicture(Offset.zero, picture!, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
   }
 
   @override
@@ -846,12 +855,16 @@ class PictureLayer extends Layer {
       'raster cache hints',
       'isComplex = $isComplexHint, willChange = $willChangeHint',
     ));
+    properties.add(DiagnosticsProperty<int>('engine picture id', _pictureId));
   }
 
   @override
   bool findAnnotations<S extends Object>(AnnotationResult<S> result, Offset localPosition, { required bool onlyFirst }) {
     return false;
   }
+
+  @override
+  int? get engineLayerId => _pictureId;
 }
 
 /// A composited layer that maps a backend texture to a rectangle.

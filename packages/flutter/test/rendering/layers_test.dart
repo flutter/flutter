@@ -1027,6 +1027,26 @@ void main() {
 
     expect(platformViewLayer.supportsRasterization(), false);
   });
+
+  test('Layer unique IDs', () {
+    final SceneBuilder builder = SceneBuilder();
+    final PictureLayer pictureLayer = PictureLayer(Rect.zero);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint());
+    final Picture picture = recorder.endRecording();
+    pictureLayer.picture = picture;
+    pictureLayer.addToScene(builder);
+    final ClipRectLayer clipRectLayer = ClipRectLayer(clipRect: Rect.zero);
+    clipRectLayer.addToScene(builder);
+    final Scene scene = builder.build();
+    expect(pictureLayer.engineLayerId, greaterThan(0));
+    expect(clipRectLayer.engineLayerId, greaterThan(0));
+    expect(pictureLayer.engineLayerId, isNot(clipRectLayer.engineLayerId));
+    scene.dispose();
+    pictureLayer.dispose();
+    clipRectLayer.dispose();
+  });
 }
 
 class FakeEngineLayer extends Fake implements EngineLayer {
@@ -1037,6 +1057,9 @@ class FakeEngineLayer extends Fake implements EngineLayer {
     assert(!disposed);
     disposed = true;
   }
+
+  @override
+  int get uniqueId => 0;
 }
 
 class FakePicture extends Fake implements Picture {
@@ -1083,7 +1106,7 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
         return FakeOffsetEngineLayer();
       case #addPicture:
         addedPicture = true;
-        return;
+        return 0;
       case #pop:
         return;
     }
