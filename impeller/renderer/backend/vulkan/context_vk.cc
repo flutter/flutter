@@ -344,6 +344,10 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
+  VkPhysicalDeviceProperties physical_device_properties;
+  dispatcher.vkGetPhysicalDeviceProperties(physical_device.value(),
+                                           &physical_device_properties);
+
   //----------------------------------------------------------------------------
   /// All done!
   ///
@@ -358,6 +362,7 @@ void ContextVK::Setup(Settings settings) {
   queues_ = std::move(queues);
   device_capabilities_ = std::move(caps);
   fence_waiter_ = std::move(fence_waiter);
+  device_name_ = std::string(physical_device_properties.deviceName);
   is_valid_ = true;
 
   //----------------------------------------------------------------------------
@@ -365,6 +370,11 @@ void ContextVK::Setup(Settings settings) {
   /// messengers have had a chance to be setup.
   ///
   SetDebugName(device_.get(), device_.get(), "ImpellerDevice");
+}
+
+// |Context|
+std::string ContextVK::DescribeGpuModel() const {
+  return device_name_;
 }
 
 bool ContextVK::IsValid() const {

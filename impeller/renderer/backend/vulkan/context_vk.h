@@ -50,6 +50,9 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   ~ContextVK() override;
 
   // |Context|
+  std::string DescribeGpuModel() const override;
+
+  // |Context|
   bool IsValid() const override;
 
   // |Context|
@@ -130,6 +133,7 @@ class ContextVK final : public Context, public BackendCast<ContextVK, Context> {
   std::shared_ptr<SwapchainVK> swapchain_;
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<FenceWaiterVK> fence_waiter_;
+  std::string device_name_;
 
   bool is_valid_ = false;
 

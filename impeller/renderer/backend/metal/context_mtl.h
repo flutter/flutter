@@ -37,6 +37,9 @@ class ContextMTL final : public Context,
   id<MTLDevice> GetMTLDevice() const;
 
   // |Context|
+  std::string DescribeGpuModel() const override;
+
+  // |Context|
   bool IsValid() const override;
 
   // |Context|

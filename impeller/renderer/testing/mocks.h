@@ -85,6 +85,8 @@ class MockCommandBuffer : public CommandBuffer {
 
 class MockImpellerContext : public Context {
  public:
+  MOCK_CONST_METHOD0(DescribeGpuModel, std::string());
+
   MOCK_CONST_METHOD0(IsValid, bool());
 
   MOCK_CONST_METHOD0(GetResourceAllocator, std::shared_ptr<Allocator>());
