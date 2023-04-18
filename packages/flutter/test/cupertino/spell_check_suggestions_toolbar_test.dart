@@ -10,30 +10,35 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('buildButtonItems builds a "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
-    late final BuildContext builderContext;
+  testWidgets('buildButtonItems builds a disabled "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        home: Center(
-          child: Builder(
-            builder: (BuildContext context) {
-              builderContext = context;
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
+        home: _FakeEditableText(),
       ),
     );
-
-    final _FakeEditableTextState editableTextState = _FakeEditableTextState();
+    final _FakeEditableTextState editableTextState =
+        tester.state(find.byType(_FakeEditableText));
     final List<ContextMenuButtonItem>? buttonItems =
-        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(builderContext, editableTextState);
+        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
     expect(buttonItems, isNotNull);
-    expect(buttonItems!.length, 1);
-    expect(buttonItems.first.label, 'No Replacements Found');
+    expect(buttonItems, hasLength(1));
+    expect(buttonItems!.first.label, 'No Replacements Found');
     expect(buttonItems.first.onPressed, isNull);
   });
+}
+
+class _FakeEditableText extends EditableText {
+  _FakeEditableText() : super(
+    controller: TextEditingController(),
+    focusNode: FocusNode(),
+    backgroundCursorColor: CupertinoColors.white,
+    cursorColor: CupertinoColors.white,
+    style: const TextStyle(),
+  );
+
+  @override
+  _FakeEditableTextState createState() => _FakeEditableTextState();
 }
 
 class _FakeEditableTextState extends EditableTextState {
