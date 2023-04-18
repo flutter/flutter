@@ -818,7 +818,7 @@ class TextField extends StatefulWidget {
     final List<ContextMenuButtonItem>? buttonItems =
       SpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
-    if (buttonItems == null){
+    if (buttonItems == null) {
       return const SizedBox.shrink();
     }
 
