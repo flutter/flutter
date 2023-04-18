@@ -55,7 +55,8 @@
         "fuchsia.test": {
             "deprecated-allowed-packages": [
                 "embedding-flutter-view",
-                "gfx-root-presenter-test-ui-stack",
+                "gfx-scene-manager-test-ui-stack",
+                "flatland-scene-manager-test-ui-stack",
                 "oot_flutter_aot_runner",
                 "oot_flutter_jit_runner",
                 "oot_flutter_jit_product_runner",

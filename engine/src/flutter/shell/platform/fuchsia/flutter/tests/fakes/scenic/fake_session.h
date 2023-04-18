@@ -59,7 +59,6 @@ namespace flutter_runner::testing {
 //   +Error handling / session disconnection is still WIP.  FakeSession will
 //   likely generate a CHECK in any place where the real scenic would disconnect
 //   the session or send a ScenicError.
-//   +root_presenter-only commands e.g. CreateLayer are not handled.
 //   +Deprecated / obsolete commands are not handled.
 //   +Input is not handled.
 //   +Rendering is not handled.
