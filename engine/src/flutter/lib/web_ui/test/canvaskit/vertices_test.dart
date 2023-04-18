@@ -10,6 +10,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../common/matchers.dart';
 import 'common.dart';
 
 void main() {
@@ -20,11 +21,11 @@ void testMain() {
   group('Vertices', () {
     setUpCanvasKitTest();
 
-    test('can be constructed, drawn, and deleted', () {
+    test('can be constructed, drawn, and disposed of', () {
       final CkVertices vertices = _testVertices();
       expect(vertices, isA<CkVertices>());
-      expect(vertices.createDefault(), isNotNull);
-      expect(vertices.resurrect(), isNotNull);
+      expect(vertices.skiaObject, isNotNull);
+      expect(vertices.debugDisposed, isFalse);
 
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas =
@@ -34,7 +35,9 @@ void testMain() {
         ui.BlendMode.srcOver,
         CkPaint(),
       );
-      vertices.delete();
+      vertices.dispose();
+      expect(vertices.debugDisposed, isTrue);
+      expect(() => vertices.skiaObject, throwsA(isAssertionError));
     });
   });
 

@@ -17,29 +17,28 @@ import 'package:ui/ui.dart' as ui;
 import '../util.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
-import 'skia_object_cache.dart';
+import 'native_memory.dart';
 
 /// The CanvasKit implementation of [ui.Codec].
 ///
 /// Wraps `SkAnimatedImage`.
-class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
-    implements ui.Codec {
+class CkAnimatedImage implements ui.Codec {
   /// Decodes an image from a list of encoded bytes.
-  CkAnimatedImage.decodeFromBytes(this._bytes, this.src, {this.targetWidth, this.targetHeight});
+  CkAnimatedImage.decodeFromBytes(this._bytes, this.src, {this.targetWidth, this.targetHeight}) {
+    final SkAnimatedImage skAnimatedImage = createSkAnimatedImage();
+    _ref = UniqueRef<SkAnimatedImage>(this, skAnimatedImage, 'Codec');
+  }
 
+  late final UniqueRef<SkAnimatedImage> _ref;
   final String src;
   final Uint8List _bytes;
   int _frameCount = 0;
   int _repetitionCount = -1;
 
-  /// Current frame index.
-  int _currentFrameIndex = 0;
-
   final int? targetWidth;
   final int? targetHeight;
 
-  @override
-  SkAnimatedImage createDefault() {
+  SkAnimatedImage createSkAnimatedImage() {
     SkAnimatedImage? animatedImage =
         canvasKit.MakeAnimatedImageFromEncoded(_bytes);
     if (animatedImage == null) {
@@ -66,16 +65,6 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
     _frameCount = animatedImage.getFrameCount().toInt();
     _repetitionCount = animatedImage.getRepetitionCount().toInt();
 
-    // Normally CanvasKit initializes `SkAnimatedImage` to point to the first
-    // frame in the animation. However, if the Skia object has been deleted then
-    // resurrected, the framework/app may already have advanced to one of the
-    // subsequent frames. When that happens the value of _currentFrameIndex will
-    // be something other than zero, and we need to tell the decoder to skip
-    // over the previous frames to point to the current one.
-    for (int i = 0; i < _currentFrameIndex; i++) {
-      animatedImage.decodeNextFrame();
-    }
-
     return animatedImage;
   }
 
@@ -90,17 +79,6 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
 
     final SkAnimatedImage? resizedAnimatedImage = canvasKit.MakeAnimatedImageFromEncoded(resizedBytes);
     return resizedAnimatedImage;
-  }
-
-  @override
-  SkAnimatedImage resurrect() => createDefault();
-
-  @override
-  bool get isResurrectionExpensive => true;
-
-  @override
-  void delete() {
-    rawSkiaObject?.delete();
   }
 
   bool _disposed = false;
@@ -118,7 +96,7 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
       'Cannot dispose a codec that has already been disposed.',
     );
     _disposed = true;
-    delete();
+    _ref.dispose();
   }
 
   @override
@@ -136,7 +114,7 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
   @override
   Future<ui.FrameInfo> getNextFrame() {
     assert(_debugCheckIsNotDisposed());
-    final SkAnimatedImage animatedImage = skiaObject;
+    final SkAnimatedImage animatedImage = _ref.nativeObject;
 
     // SkAnimatedImage comes pre-initialized to point to the current frame (by
     // default the first frame, and, with some special resurrection logic in
@@ -152,7 +130,6 @@ class CkAnimatedImage extends ManagedSkiaObject<SkAnimatedImage>
     );
 
     animatedImage.decodeNextFrame();
-    _currentFrameIndex = (_currentFrameIndex + 1) % _frameCount;
     return Future<ui.FrameInfo>.value(currentFrame);
   }
 }

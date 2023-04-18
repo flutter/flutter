@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../common/matchers.dart';
 import 'common.dart';
 
 void main() {
@@ -20,19 +21,17 @@ void testMain() {
   group('CkPicture', () {
     setUpCanvasKitTest();
 
-    group('in browsers that do not support FinalizationRegistry', () {
+    group('lifecycle', () {
       test('can be disposed of manually', () {
-        browserSupportsFinalizationRegistry = false;
-
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final ui.Canvas canvas = ui.Canvas(recorder);
         canvas.drawPaint(ui.Paint());
         final CkPicture picture = recorder.endRecording() as CkPicture;
-        expect(picture.rawSkiaObject, isNotNull);
+        expect(picture.skiaObject, isNotNull);
         expect(picture.debugDisposed, isFalse);
         picture.debugCheckNotDisposed('Test.'); // must not throw
         picture.dispose();
-        expect(picture.rawSkiaObject, isNull);
+        expect(() => picture.skiaObject, throwsA(isAssertionError));
         expect(picture.debugDisposed, isTrue);
 
         StateError? actualError;
@@ -50,36 +49,6 @@ void testMain() {
             'The picture has been disposed. '
             'When the picture was disposed the stack trace was:\n'
         ));
-
-        // Emulate SkiaObjectCache deleting the picture
-        picture.delete();
-        picture.didDelete();
-        expect(picture.rawSkiaObject, isNull);
-
-        // A Picture that's been disposed of can no longer be resurrected
-        expect(() => picture.resurrect(), throwsStateError);
-        expect(() => picture.toImage(10, 10), throwsStateError);
-        expect(() => picture.dispose(), throwsStateError);
-      });
-
-      test('can be deleted by SkiaObjectCache', () {
-        browserSupportsFinalizationRegistry = false;
-
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final ui.Canvas canvas = ui.Canvas(recorder);
-        canvas.drawPaint(ui.Paint());
-        final CkPicture picture = recorder.endRecording() as CkPicture;
-        expect(picture.rawSkiaObject, isNotNull);
-
-        // Emulate SkiaObjectCache deleting the picture
-        picture.delete();
-        picture.didDelete();
-        expect(picture.rawSkiaObject, isNull);
-
-        // Deletion is softer than disposal. An object may still be resurrected
-        // if it was deleted prematurely.
-        expect(picture.debugDisposed, isFalse);
-        expect(picture.resurrect(), isNotNull);
       });
     });
 

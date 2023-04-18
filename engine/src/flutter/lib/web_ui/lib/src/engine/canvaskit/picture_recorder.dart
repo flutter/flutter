@@ -20,9 +20,7 @@ class CkPictureRecorder implements ui.PictureRecorder {
     final SkPictureRecorder recorder = _skRecorder = SkPictureRecorder();
     final Float32List skRect = toSkRect(bounds);
     final SkCanvas skCanvas = recorder.beginRecording(skRect);
-    return _recordingCanvas = browserSupportsFinalizationRegistry
-        ? CkCanvas(skCanvas)
-        : RecordingCkCanvas(skCanvas, bounds);
+    return _recordingCanvas = CkCanvas(skCanvas);
   }
 
   CkCanvas? get recordingCanvas => _recordingCanvas;
@@ -38,8 +36,7 @@ class CkPictureRecorder implements ui.PictureRecorder {
     final SkPicture skPicture = recorder.finishRecordingAsPicture();
     recorder.delete();
     _skRecorder = null;
-    final CkPicture result =
-      CkPicture(skPicture, _cullRect, _recordingCanvas!.pictureSnapshot);
+    final CkPicture result = CkPicture(skPicture, _cullRect);
     // We invoke the handler here, not in the picture constructor, because we want
     // [result.approximateBytesUsed] to be available for the handler.
     ui.Picture.onCreate?.call(result);

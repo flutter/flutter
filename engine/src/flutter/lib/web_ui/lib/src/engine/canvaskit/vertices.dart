@@ -6,11 +6,10 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../util.dart';
 import 'canvaskit_api.dart';
-import 'skia_object_cache.dart';
+import 'native_memory.dart';
 
-class CkVertices extends ManagedSkiaObject<SkVertices> implements ui.Vertices {
+class CkVertices implements ui.Vertices {
   factory CkVertices(
     ui.VertexMode mode,
     List<ui.Offset> positions, {
@@ -82,48 +81,31 @@ class CkVertices extends ManagedSkiaObject<SkVertices> implements ui.Vertices {
     this._textureCoordinates,
     this._colors,
     this._indices,
-  );
-
-  final SkVertexMode _mode;
-  final Float32List _positions;
-  final Float32List? _textureCoordinates;
-  final Uint32List? _colors;
-  final Uint16List? _indices;
-
-  @override
-  SkVertices createDefault() {
-    return canvasKit.MakeVertices(
+  ) {
+    final SkVertices skVertices = canvasKit.MakeVertices(
       _mode,
       _positions,
       _textureCoordinates,
       _colors,
       _indices,
     );
+    _ref = UniqueRef<SkVertices>(this, skVertices, 'Vertices');
   }
 
-  @override
-  SkVertices resurrect() {
-    return createDefault();
-  }
+  final SkVertexMode _mode;
+  final Float32List _positions;
+  final Float32List? _textureCoordinates;
+  final Uint32List? _colors;
+  final Uint16List? _indices;
+  late final UniqueRef<SkVertices> _ref;
 
-  @override
-  void delete() {
-    rawSkiaObject?.delete();
-  }
-
-  bool _disposed = false;
+  SkVertices get skiaObject => _ref.nativeObject;
 
   @override
   void dispose() {
-    delete();
-    _disposed = true;
+    _ref.dispose();
   }
 
   @override
-  bool get debugDisposed {
-    if (assertionsEnabled) {
-      return _disposed;
-    }
-    throw StateError('Vertices.debugDisposed is only avialalbe when asserts are enabled.');
-  }
+  bool get debugDisposed => _ref.isDisposed;
 }

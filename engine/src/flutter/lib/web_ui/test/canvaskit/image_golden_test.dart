@@ -95,12 +95,9 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
       // Disallow double-dispose.
       expect(() => image.dispose(), throwsAssertionError);
-      testCollector.collectNow();
     });
 
-    test('CkAnimatedImage remembers last animation position after resurrection', () async {
-      browserSupportsFinalizationRegistry = false;
-
+    test('CkAnimatedImage iterates frames correctly', () async {
       final CkAnimatedImage image = CkAnimatedImage.decodeFromBytes(kAnimatedGif, 'test');
       expect(image.frameCount, 3);
       expect(image.repetitionCount, -1);
@@ -109,16 +106,8 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       await expectFrameData(frame1, <int>[255, 0, 0, 255]);
       final ui.FrameInfo frame2 = await image.getNextFrame();
       await expectFrameData(frame2, <int>[0, 255, 0, 255]);
-
-      // Pretend that the image is temporarily deleted.
-      image.delete();
-      image.didDelete();
-
-      // Check that we got the 3rd frame after resurrection.
       final ui.FrameInfo frame3 = await image.getNextFrame();
       await expectFrameData(frame3, <int>[0, 0, 255, 255]);
-
-      testCollector.collectNow();
     });
 
     test('CkImage toString', () {
@@ -128,7 +117,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       final CkImage image = CkImage(skImage);
       expect(image.toString(), '[1×1]');
       image.dispose();
-      testCollector.collectNow();
     });
 
     test('CkImage can be explicitly disposed of', () {
@@ -144,7 +132,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
 
       // Disallow double-dispose.
       expect(() => image.dispose(), throwsAssertionError);
-      testCollector.collectNow();
     });
 
     test('CkImage can be explicitly disposed of when cloned', () async {
@@ -163,22 +150,18 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       expect(image.isCloneOf(clone), isTrue);
       expect(box.isDisposed, isFalse);
 
-      testCollector.collectNow();
       expect(skImage.isDeleted(), isFalse);
       image.dispose();
       expect(box.refCount, 1);
       expect(box.isDisposed, isFalse);
 
-      testCollector.collectNow();
       expect(skImage.isDeleted(), isFalse);
       clone.dispose();
       expect(box.refCount, 0);
       expect(box.isDisposed, isTrue);
 
-      testCollector.collectNow();
       expect(skImage.isDeleted(), isTrue);
       expect(box.debugGetStackTraces().length, 0);
-      testCollector.collectNow();
     });
 
     test('CkImage toByteData', () async {
@@ -188,7 +171,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       final CkImage image = CkImage(skImage);
       expect((await image.toByteData()).lengthInBytes, greaterThan(0));
       expect((await image.toByteData(format: ui.ImageByteFormat.png)).lengthInBytes, greaterThan(0));
-      testCollector.collectNow();
     });
 
     test('toByteData with decodeImageFromPixels on videoFrame formats', () async {
@@ -262,7 +244,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       // The precise PNG encoding is browser-specific, but we can check the file
       // signature.
       expect(detectContentType(png.buffer.asUint8List()), 'image/png');
-      testCollector.collectNow();
     // TODO(hterkelsen): Firefox and Safari do not currently support ImageDecoder.
     }, skip: isFirefox || isSafari);
 
@@ -282,7 +263,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
       final ui.Image image = (await codec.getNextFrame()).image;
       expect(image.height, 1);
       expect(image.width, 1);
-      testCollector.collectNow();
     });
 
     test('instantiateImageCodec respects target image size',
@@ -312,8 +292,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
         image.dispose();
         codec.dispose();
       }
-
-      testCollector.collectNow();
     });
 
     test('instantiateImageCodec with multi-frame image does not support targetWidth/targetHeight',
@@ -339,8 +317,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
         expect(image.height, 1);
         image.dispose();
         codec.dispose();
-
-        testCollector.collectNow();
     });
 
     test('skiaInstantiateWebImageCodec throws exception on request error',
@@ -361,7 +337,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
           'https://flutter.dev/docs/development/platform-integration/web-images',
         );
       }
-      testCollector.collectNow();
     });
 
     test('skiaInstantiateWebImageCodec throws exception on HTTP error',
@@ -377,7 +352,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
           'Server response code: 404',
         );
       }
-      testCollector.collectNow();
     });
 
     test('skiaInstantiateWebImageCodec includes URL in the error for malformed image',
@@ -409,7 +383,6 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
           );
         }
       }
-      testCollector.collectNow();
     });
 
     test('Reports error when failing to decode empty image data', () async {
@@ -831,7 +804,6 @@ void _testCkAnimatedImage() {
     // The precise PNG encoding is browser-specific, but we can check the file
     // signature.
     expect(detectContentType(png!.buffer.asUint8List()), 'image/png');
-    testCollector.collectNow();
   });
 
   test('CkAnimatedImage toByteData(RGBA)', () async {
@@ -847,7 +819,6 @@ void _testCkAnimatedImage() {
       expect(rgba, isNotNull);
       expect(rgba!.buffer.asUint8List(), expectedColors[i]);
     }
-    testCollector.collectNow();
   });
 }
 
@@ -867,7 +838,6 @@ void _testCkBrowserImageDecoder() {
     // The precise PNG encoding is browser-specific, but we can check the file
     // signature.
     expect(detectContentType(png!.buffer.asUint8List()), 'image/png');
-    testCollector.collectNow();
   });
 
   test('ImageDecoder toByteData(RGBA)', () async {
@@ -886,7 +856,6 @@ void _testCkBrowserImageDecoder() {
       expect(rgba, isNotNull);
       expect(rgba!.buffer.asUint8List(), expectedColors[i]);
     }
-    testCollector.collectNow();
   });
 
   test('ImageDecoder expires after inactivity', () async {
@@ -930,7 +899,6 @@ void _testCkBrowserImageDecoder() {
     final ui.FrameInfo frame3 = await image.getNextFrame();
     await expectFrameData(frame3, <int>[0, 0, 255, 255]);
 
-    testCollector.collectNow();
     debugRestoreWebDecoderExpireDuration();
   });
 }
