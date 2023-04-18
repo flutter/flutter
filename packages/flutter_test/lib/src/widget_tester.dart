@@ -120,7 +120,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///
 /// If [trackMemoryLeaks] is `true`, the test will run with memory leak detection
 /// and fail in case of leaks. The exception will contain the leaks' details.
-/// To troubleshoot the the failure, configure leak tracking by customizing
+/// To troubleshoot the failure, configure leak tracking by customizing
 /// [leakTrackingConfig]:
 ///
 ///  * Set [LeakTrackingFlutterTestConfig.onLeaks] to process leaks details
